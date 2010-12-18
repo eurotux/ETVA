@@ -1,0 +1,71 @@
+<html>
+<head>
+<title>File Source for EtvaVolumePhysicalPeer.php</title>
+<link rel="stylesheet" type="text/css" href="../media/style.css">
+</head>
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" height="48" width="100%">
+  <tr>
+    <td class="header_top">propel</td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+  <tr>
+    <td class="header_menu">
+        
+                                    
+                                                                                                                                  		  [ <a href="../classtrees_propel.html" class="menu">class tree: propel</a> ]
+		  [ <a href="../elementindex_propel.html" class="menu">index: propel</a> ]
+		  	    [ <a href="../elementindex.html" class="menu">all elements</a> ]
+    </td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="200" class="menu">
+      <b>Packages:</b><br />
+              <a href="../li_propel.html">propel</a><br />
+              <a href="../li_centralM.html">centralM</a><br />
+              <a href="../li_lib-model-map.html">lib-model-map</a><br />
+              <a href="../li_lib-model-om.html">lib-model-om</a><br />
+              <a href="../li_sfGuardPlugin.html">sfGuardPlugin</a><br />
+              <a href="../li_symfony.html">symfony</a><br />
+            <br /><br />
+                  
+      
+                </td>
+    <td>
+      <table cellpadding="10" cellspacing="0" width="100%" border="0"><tr><td valign="top">
+
+<h1 align="center">Source for file EtvaVolumePhysicalPeer.php</h1>
+<p>Documentation is available at <a href="../propel/_lib---model---EtvaVolumePhysicalPeer.php.html">EtvaVolumePhysicalPeer.php</a></p>
+<div class="src-code">
+<ol><li><div class="src-line"><a name="a1"></a><span class="src-php">&lt;?php</span></div></li>
+<li><div class="src-line"><a name="a2"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a3"></a><span class="src-key">class&nbsp;</span><a href="../lib-model-om/EtvaVolumePhysicalPeer.html">EtvaVolumePhysicalPeer</a>&nbsp;<span class="src-key">extends&nbsp;</span><a href="../lib-model-om/BaseEtvaVolumePhysicalPeer.html">BaseEtvaVolumePhysicalPeer</a></div></li>
+<li><div class="src-line"><a name="a4"></a><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a5"></a>&nbsp;&nbsp;<span class="src-key">public&nbsp;</span><span class="src-key">static&nbsp;</span><span class="src-key">function&nbsp;</span><a href="../lib-model-om/EtvaVolumePhysicalPeer.html#methodretrieveByVGPV">retrieveByVGPV</a><span class="src-sym">(</span><span class="src-var">$vg</span><span class="src-sym">,</span><span class="src-var">$pv</span><span class="src-sym">)</span></div></li>
+<li><div class="src-line"><a name="a6"></a>&nbsp;&nbsp;<span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a7"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$criteria&nbsp;</span>=&nbsp;<span class="src-key">new&nbsp;</span><span class="src-id">Criteria</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a8"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a9"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$criteria</span><span class="src-sym">-&gt;</span><span class="src-id">add</span><span class="src-sym">(</span><span class="src-id">self</span><span class="src-sym">::</span><span class="src-id">PHYSICALVOLUME_ID</span><span class="src-sym">,&nbsp;</span><span class="src-var">$pv</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a10"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$criteria</span><span class="src-sym">-&gt;</span><span class="src-id">add</span><span class="src-sym">(</span><span class="src-id">self</span><span class="src-sym">::</span><span class="src-id">VOLUMEGROUP_ID</span><span class="src-sym">,&nbsp;</span><span class="src-var">$vg</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a11"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a12"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-id">self</span><span class="src-sym">::</span><span class="src-id">doSelectOne</span><span class="src-sym">(</span><span class="src-var">$criteria</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a13"></a>&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a14"></a><span class="src-sym">}</span></div></li>
+</ol>
+</div>
+        <div class="credit">
+		    <hr />
+		    Documentation generated on Fri, 19 Jun 2009 10:49:27 +0100 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.2</a>
+	      </div>
+      </td></tr></table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,589 @@
+= sfExtjs2Plugin =
+
+= sfExtjs2Plugin =
+
+Write ExtJS2.1 code in PHP
+
+== Installation ==
+
+Installation is only available via SVN, due to the size of the ExtJS libraries.
+
+=== Single Checkout ===
+Move into your project directory and issue the following command:
+
+{{{
+svn export http://svn.symfony-project.com/plugins/sfExtjs2Plugin/trunk/ ./plugins/sfExtjs2Plugin
+}}}
+
+=== Automatic Checkout ===
+
+If you are already using subversion for your project, and want to automatically include the latest version of this plugin on each svn update, the correct way to include the sfExtjs2Plugin repository is to define svn:externals.
+Go to your symfony project
+
+svn propedit svn:externals plugins
+
+in this file add
+
+
+{{{
+sfExtjs2Plugin http://svn.symfony-project.com/plugins/sfExtjs2Plugin/trunk/
+}}}
+
+This way, every time you use svn update, it will get the latest version of sfExtjs2Plugin from the symfony repository
+
+=== Create the link ===
+
+Go to your webdir symfonyproject/web
+
+{{{
+ln -s ../plugins/sfExtjs2Plugin/web/ sfExtjs2Plugin
+}}}
+
+== Usage - A short Tutorial ==
+=== Preparation ===
+
+Include The Helper and create a new instance of the sfExtjs2Plugin:
+
+{{{
+#!php
+<?php
+  use_helper('sfExtjs2'); //(Probably OBSOLETE, I don't think this is necessary anymore)
+  $sfExtjs2Plugin = new sfExtjs2Plugin(array('theme'=>'gray'), array('css' => '/sfExtjsThemePlugin/css/symfony-extjs.css'));
+?>
+}}}
+
+To add the sources for css and js to the html head. and writing an opening Tag for javascript add the following OUTSIDE your head (so inside the body) of your HTML document.
+
+{{{
+#!php
+<?php
+  $sfExtjs2Plugin->load();
+  $sfExtjs2Plugin->begin();
+?>
+}}}
+
+=== Accessing Ext2 ===
+sfExtjs2Plugin has a magic method __call to render calls to Extjs classes automagically. At the moment the following classes are supported:
+|| '''Method''' || '''Ext Class''' ||
+||!JsonReader    || [http://extjs.com/deploy/dev/docs/?class=Ext.data.JsonReader Ext.data.JsonReader] ||
+||Store         || [http://extjs.com/deploy/dev/docs/?class=Ext.data.Store Ext.data.Store] ||
+||SimpleStore   || [http://extjs.com/deploy/dev/docs/?class=Ext.data.SimpleStore Ext.data.SimpleStore] ||
+||!GroupingStore || [http://extjs.com/deploy/dev/docs/?class=Ext.data.GroupingStore Ext.data.GroupingStore] ||
+||!HttpProxy     || [http://extjs.com/deploy/dev/docs/?class=Ext.data.HttpProxy Ext.data.HttpProxy] ||
+||Template      || [http://extjs.com/deploy/dev/docs/?class=Ext.Template Ext.Template] ||
+||XTemplate     || [http://extjs.com/deploy/dev/docs/?class=Ext.XTemplate Ext.XTemplate] ||
+|| '''Widgets''' || ||
+||!BoxComponent      || [http://extjs.com/deploy/dev/docs/?class=Ext.BoxComponent Ext.BoxComponent] ||
+||Button            || [http://extjs.com/deploy/dev/docs/?class=Ext.Button Ext.Button] ||
+||!GridPanel         || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.GridPanel Ext.grid.GridPanel] ||
+||!ColumnModel       || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.ColumnModel Ext.grid.ColumnModel] ||
+||!GridView          || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.GridView Ext.grid.GridView] ||
+||!GroupingView      || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.GroupingView Ext.grid.GroupingView] ||
+||!EditorGridPanel   || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.EditorGridPanel Ext.grid.EditorGridPanel] ||
+||!RowSelectionModel || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.RowSelectionModel Ext.grid.RowSelectionModel] ||
+||Panel             || [http://extjs.com/deploy/dev/docs/?class=Ext.Panel Ext.Panel] ||
+||!TabPanel          || [http://extjs.com/deploy/dev/docs/?class=Ext.TabPanel Ext.TabPanel] ||
+||!FormPanel         || [http://extjs.com/deploy/dev/docs/?class=Ext.FormPanel Ext.FormPanel] ||
+||Viewport          || [http://extjs.com/deploy/dev/docs/?class=Ext.Viewport Ext.Viewport] ||
+||Window            || [http://extjs.com/deploy/dev/docs/?class=Ext.Window Ext.Window] ||
+||!DateField         || [http://extjs.com/deploy/dev/docs/?class=Ext.form.DateField Ext.form.DateField] ||
+||!TextField         || [http://extjs.com/deploy/dev/docs/?class=Ext.form.TextField Ext.form.TextField] ||
+||!TimeField         || [http://extjs.com/deploy/dev/docs/?class=Ext.form.TimeField Ext.form.TimeField] ||
+||!HtmlEditor        || [http://extjs.com/deploy/dev/docs/?class=Ext.form.HtmlEditor Ext.form.HtmlEditor] ||
+||!ComboBox        || [http://extjs.com/deploy/dev/docs/?class=Ext.form.ComboBox Ext.form.ComboBox] ||
+||Menu              || [http://extjs.com/deploy/dev/docs/?class=Ext.menu.Menu Ext.menu.Menu] ||
+||Item              || [http://extjs.com/deploy/dev/docs/?class=Ext.menu.Item Ext.menu.Item] ||
+||!CheckItem         || [http://extjs.com/deploy/dev/docs/?class=Ext.menu.CheckItem Ext.menu.CheckItem] ||
+||Toolbar           || [http://extjs.com/deploy/dev/docs/?class=Ext.Toolbar Ext.Toolbar] ||
+||!MenuButton       || [http://coldfusion.shigeru-nakagaki.com/CFIDE/scripts/ajax/ext/docs/output/Ext.Toolbar.MenuButton.html Ext.Toolbar.MenuButton] ||
+||Fill              || [http://extjs.com/deploy/dev/docs/?class=Ext.Toolbar.Fill Ext.Toolbar.Fill] ||
+||!PagingToolbar     || [http://extjs.com/deploy/dev/docs/?class=Ext.PagingToolbar Ext.PagingToolbar] ||
+||!MessageBox        || [http://extjs.com/deploy/dev/docs/?class=Ext.MessageBox Ext.MessageBox] ||
+||!KeyMap            || [http://extjs.com/deploy/dev/docs/?class=Ext.KeyMap Ext.KeyMap] ||
+
+An example on how to access the methods, the parameter is a simple array with the config options:
+
+{{{
+#!php
+<?php
+$source = $sfExtjs2Plugin->TabPanel(
+  array(
+    'id' => 'tabPanel',
+    'title' => 'A title',
+    'deferredRender' => false,
+    'resizeTabs' => true,
+    'activeTab'  => 0,
+    'border'     => false,
+    'plain'      => false,
+    'tabWidth'   => 200,
+    'items'      => array
+    (
+      $sfExtjs2Plugin->asVar($item1source), $sfExtjs2Plugin->asVar($item2source)
+    )
+  )
+);
+?>
+}}}
+
+=== JavaScript output through sfExtjs2Plugin ===
+
+The plugin knows two ways to return the code
+
+Simple source in a String, parses evaled PHP:
+
+{{{
+#!php
+<?php
+  $sfExtjs2Plugin->asVar($source)
+?>
+}}}
+
+Packs the source in a method. Also parses evaled PHP:
+
+{{{
+#!php
+<?php
+  $sfExtjs2Plugin->asMethod($source)
+?>
+}}}
+
+=== Create the Application ===
+After you initiated all widgets you might want to create the application:
+
+{{{
+#!php
+<?php
+$sfExtjs2Plugin->beginApplication(
+  array(
+    'name'   => 'App',
+    'private' => array
+    (
+      'test' => 'ok'
+    ),
+    'public' => array
+    (
+      // public attributes
+      'counter' => '0',
+      // public methods
+      'init'    =>  $sfExtjs2Plugin->asMethod("Ext.QuickTips.init(); $source"),
+      'getTest' => $sfExtjs2Plugin->asMethod('return test;')
+    )
+  )
+);
+?>
+}}}
+
+Now you can enter your own javascript-code. When you're finished, write the closing tag for the application:
+
+{{{
+#!php
+<?php
+  $sfExtjs2Plugin->endApplication();
+?>
+}}}
+
+As the Last thing you have to call the init method of the Ext Application class:
+{{{
+#!php
+<?php
+  $sfExtjs2Plugin->initApplication('App');
+?>
+}}}
+
+=== Write the closing Tag ===
+At the end of the code you should close the script-tag you openend in "Preparations" above:
+
+{{{
+#!php
+<?php
+  $sfExtjs2Plugin->end();
+?>
+}}}
+
+== Create a custom class ==
+To create a custom class you'll need the usual stuff: Variables, methods, a constructor etc. To create one with sfExtjs2Plugin you first need an array in PHP:
+
+{{{
+  $myclass = array();
+}}}
+
+=== Variables ===
+This is how you can add a variable to your class:
+
+{{{
+  $myclass['myVar1'] = $sfExtjs2Plugin->asVar('this.variable');
+  $myclass['nullVar'] = $sfExtjs2Plugin->asVar('null');
+
+  $myclass['copiedMyVar1'] = $sfExtjs2Plugin->asVar('this.myVar1');
+}}}
+
+This will bring you two public variables myVar1 and myVar2 and the array myArrayVar.
+
+If you want to initialize a variable with a value from PHP you can do this with a normal string in PHP:
+{{{
+  $myclass['myVar2'] = 'A value';
+  $myclass['myVar3'] = $myvalue;
+}}}
+
+=== Methods ===
+This is how you can add a method to your class:
+
+{{{
+  $myclass['myFnc'] = $sfExtjs2Plugin->asMethod(array(
+     'parameters' => 'para1, para2, para3',
+     'source' => "
+       if( this.nullVar != null )
+         alert('this.nullvar is set to ' + this.nullVar + 'and para2 is' + para2);
+     "
+  ));
+}}}
+
+Of course there is a shorthand for methods without parameters:
+
+{{{
+  $myclass['myNoParaFnc'] = $sfExtjs2Plugin->asMethod( "
+       if( this.myVar2 == '$myvalue' ) {
+          alert('this.myVar2 was not touched!');
+          return true;
+        }
+        else
+        {
+          alert('this.myVar2 has changed!');
+          return false;
+        }
+ ");
+}}}
+
+=== The Constructor ===
+=== Anonymous Classes ===
+=== Normal Classes ===
+=== Singletons ===
+== Using XTemplate ==
+
+== Examples ==
+
+=== A complete grid example ===
+{{{
+#!php
+<div id="grid-example"></div>
+
+<?php
+
+use_helper('sfExtjs2');
+
+$private = array();
+$public = array();
+
+$sfExtjs2Plugin = new sfExtjs2Plugin(array('theme'=>'blue'), array('css' => '/sfExtjsThemePlugin/css/symfony-extjs.css'));
+$sfExtjs2Plugin->load();
+$sfExtjs2Plugin->begin();
+
+// **************************************
+// Application
+// **************************************
+
+//data
+$private['data'] = $sfExtjs2Plugin->asVar("[
+  ['Rotterdam', 'the Netherlands'],
+  ['Amsterdam', 'the Netherlands'],
+  ['Paris', 'France'],
+]");
+
+// create the data store
+$private['ds'] = $sfExtjs2Plugin->SimpleStore(array(
+  'fields' => array (
+     array('name' => 'city'),
+     array('name' => 'country'),
+  )
+));
+
+// create the columnModel
+$private['cm'] = $sfExtjs2Plugin->ColumnModel(array
+(
+  'parameters' => array
+  (
+    $sfExtjs2Plugin->asAnonymousClass(array('header' => 'City', 'width' => 200,  'sortable' => true, 'dataIndex' => 'city')),
+    $sfExtjs2Plugin->asAnonymousClass(array('header' => 'Country', 'width' => 120, 'sortable' => true, 'dataIndex' => 'country')),
+  )
+));
+
+//create the gridPanel
+$private['gridPanel'] = $sfExtjs2Plugin->GridPanel(
+  array(
+    'id'      => 'GridPanel',
+    'title'   => 'GridPanel Title',
+    'width'   => 600,
+    'heigth'  => 400,
+    'frame'   => true,
+    'iconCls' => 'icon-grid',
+    'cm'      => $sfExtjs2Plugin->asVar('cm'),
+    'ds'      => $sfExtjs2Plugin->asVar('ds'),
+  )
+);
+
+$public['init'] = $sfExtjs2Plugin->asMethod("
+  Ext.QuickTips.init();
+
+  ds.loadData(data);
+
+  gridPanel.render('grid-example');
+");
+
+$sfExtjs2Plugin->beginApplication(
+  array(
+    'name'    => 'App',
+
+    'private' => $private,
+    'public'  => $public
+  )
+);
+$sfExtjs2Plugin->endApplication();
+
+$sfExtjs2Plugin->initApplication('App');
+$sfExtjs2Plugin->end();
+
+?>
+}}}
+
+=== A complete data grid with paging ===
+{{{
+<div id="grid-details"></div>
+
+<?php
+  use_helper ( 'sfExtjs2' );
+
+  $private = array ( );
+  $public = array ( );
+
+  $sfExtjs2Plugin = new sfExtjs2Plugin( array ('theme' => 'blue' ), array ('css' => '/sfExtjsThemePlugin/css/symfony-extjs.css' ) );
+  $sfExtjs2Plugin->load();
+  $sfExtjs2Plugin->begin();
+
+  // **************************************
+  // Application
+  // **************************************
+
+  /*
+   * Create the data store
+   */
+  $private ['ds'] = $sfExtjs2Plugin->JsonStore (
+    array (
+      'url'     => 'http://localhost/test/json.php',
+      'id'      =>  'id',
+      'totalProperty' => 'total',
+      'root'      => 'data',
+      'fields'    => array(
+        array(
+          'name'  => 'date'
+        ),
+        array(
+          'name'  => 'label'
+        ),
+        array(
+          'name'  => 'amount'
+        ),
+        array(
+          'name'  => 'extra'
+        ),
+      ),
+      'sortInfo'  => array(
+        'field'   => 'label',
+        'direction' => 'ASC'
+      ),
+      'remoteSort'=> true
+    )
+  );
+
+  /*
+   * Create the column model
+   */
+  $private ['cm'] = $sfExtjs2Plugin->ColumnModel (
+    array (
+      'parameters' => array (
+        $sfExtjs2Plugin->asAnonymousClass (
+          array (
+            'id'=>'date',
+            'header' => 'Date',
+            'width' => 120,
+            'sortable' => true,
+            'dataIndex' => 'date'
+          )
+        ),
+        $sfExtjs2Plugin->asAnonymousClass (
+          array (
+            'id'=>'label',
+            'header' => 'Libellé',
+            'width' => 170,
+            'sortable' => true,
+            'dataIndex' => 'label'
+          )
+        ),
+        $sfExtjs2Plugin->asAnonymousClass (
+          array (
+            'id'=>'amount',
+            'header' => 'Montant ( '.sfConfig::get('app_money_symbol').' )',
+            'width' => 120,
+            'sortable' => true,
+            'dataIndex' => 'amount'
+          )
+        ),
+        $sfExtjs2Plugin->asAnonymousClass (
+          array (
+            'id'=>'extra',
+            'header' => 'Extra',
+            'width' => 120,
+            'sortable' => true,
+            'dataIndex' => 'extra'
+          )
+        )
+      )
+    )
+  );
+
+  /*
+   * Create the paging toolbar
+   */
+  $private ['pt'] = $sfExtjs2Plugin->PagingToolbar (
+    array(
+      'store'       => $sfExtjs2Plugin->asVar ( 'ds' ),
+      'pageSize'      => 15,
+      'plugins'     => $sfExtjs2Plugin->asVar ( 'fi' ),
+    )
+  );
+
+  /*
+   * Create the Grid
+   */
+  $private ['gridPanel'] = $sfExtjs2Plugin->GridPanel (
+    array (
+      'id'        => 'GridPanel',
+      'title'       => 'Data grid example',
+      'cm'        => $sfExtjs2Plugin->asVar ( 'cm' ),
+      'ds'        => $sfExtjs2Plugin->asVar ( 'ds' ),
+      'enableColLock'   => false,
+      'loadMask'      => true,
+      'width'       => 550,
+      'height'      => 350,
+      'frame'       => true,
+      'iconCls'       => 'grid-details',
+      'autoExpandColumn'  => 'extra',
+      'plugins'     => $sfExtjs2Plugin->asVar ( 'fi' ),
+      'bbar'        => $sfExtjs2Plugin->asVar ( 'pt' ),
+    )
+  );
+
+  $public ['init'] = $sfExtjs2Plugin->asMethod ( "
+    Ext.QuickTips.init();
+    gridPanel.render('grid-details');
+    ds.load({params:{start: 0, limit: 15}});
+    " );
+
+  $sfExtjs2Plugin->beginApplication ( array ('name' => 'App', 'private' => $private, 'public' => $public ) );
+  $sfExtjs2Plugin->endApplication ();
+
+  $sfExtjs2Plugin->initApplication ( 'App' );
+  $sfExtjs2Plugin->end ();
+}}}
+
+Generate Json-output from an executeJson method in your action.class.php
+{{{
+<?php
+  function executeJson() {
+
+    $data = array(
+      array("id" => 1, "date" => "2008-12-12 16:00:50", "label" => "large", "amount" => 1, "extra" => "nothing"),
+      array("id" => 2, "date" => "2008-12-12 16:00:50", "label" => "large", "amount" => 1, "extra" => "nothing")
+    );
+
+    $result = array(
+      'total' => count($data),
+      'data'  => $data
+    );
+
+
+    $result = json_encode($result);
+
+    $this->getResponse()->setHttpHeader("X-JSON", '()'); // set a header, (although it is empty, it is nicer than without a correct header. Filling the header with the result will not be parsed by extjs as far as I have seen).
+//    sfConfig::set('sf_web_debug', false); // set to false for speed-up (done automatically for production-environment)
+    return $this->renderText($result);  // so return the result in the content, but without using symfony-templates.
+  }
+
+}}}
+
+
+You can also generate Json-output from a pager (with the help of the sfExtjsThemePlugin)
+{{{
+
+  public function executeJsonList()
+  {
+    $limit = $this->getRequestParameter('limit', 20);
+    $page = floor($this->getRequestParameter('start', 0) / $limit)+1;
+
+    $this->processSort(strtolower($this->getRequestParameter('dir')));
+    $this->processFilters();
+    $this->filters = $this->getUser()->getAttributeHolder()->getAll('sf_admin/__class__/filters');
+
+    // pager
+    $this->pager = new sfPropelPager('__Class__', $limit);
+    $c = new Criteria();
+
+
+    $this->addSortCriteria($c);
+    $this->addFiltersCriteria($c);
+    $this->pager->setCriteria($c);
+    $this->pager->setPage($page);
+
+    $this->pager->setPeerMethod('doSelectJoinAll');
+    $this->pager->setPeerCountMethod('doCountJoinAll');
+
+    $this->pager->init();
+
+    $result = $this->json_encode_list_pager_results($this->pager);   // USE THE sfExtjsThemePlugin TO GET THIS METHOD!
+
+    $this->getResponse()->setHttpHeader("X-JSON", '()'); // set a header, (although it is empty, it is nicer than without a correct header. Filling the header with the result will not be parsed by extjs as far as I have seen).
+//    sfConfig::set('sf_web_debug', false); // set to false for speed-up (done automatically for production-environment)
+    return $this->renderText($result); // so return the result in the content, but without using symfony-templates.
+  }
+
+
+}}}
+
+
+Please take a look at:
+http://www.symfony-project.org/forum/index.php/t/12399/
+
+and see:
+http://backoffice.kaffill.de/ext2/ext2
+Please note the 'source'-tab
+
+
+== Notes ==
+
+This plugin is bundled with the final ExtJS 2.1 '''Use only with PHP 5.2.x and above!
+
+== Bugs ==
+
+When creating a new Ext object using an array there was no check for the interpretation of this array as hash or not.
+(reusults (for example using a ColumnModel) in creation of a '{'-bracket instead of a '['-bracket, ergo this won't work)
+
+=== Bugfix ===
+
+~~see the attached file~~
+Hi swagner, I think this bugfix is obsolete, but if not please contact me! (lvanderree: http://www.symfony-project.org/forum/index.php/mv/msg/5650/0/1040/ )
+I would like to merge your patch with the current svn version, but it is a little hard to do it with the latest svn version, which has been changed too much.
+
+It was only up till now that I saw your patch.
+'''Bugfix updated''' : See attached diff file
+
+=== Learning Extjs2 ===
+Here are some links to Extjs2 Tutorials in various languages:
+ * [http://extjs.com/learn/Tutorial:Introduction_to_Ext_2.0 The official introduction to Ext 2.0] (en)
+ * [http://dynamicinternet.eu/blog/2007-03-18/tutorial-einfuehrung-in-die-ext-ajax-library/ Einführung in die Ext Ajax library] (de and v1.0)
+ * [http://www.codesalat.de/2007/11/05/extjs-20-tutorials/ Ext JS 2.0 Tutorials] (de)
+
+=== !ToDo in this tutorial ===
+ * Explain the Listener Methods
+ * Explain the Custom class methods
+ * Explain the anonymous class methods
+ * Some Tutorials in other language
+ * Tutorial o Tips for Symfony 1.1 ??

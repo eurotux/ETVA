@@ -1,0 +1,21 @@
+EtvaAgent:
+  agent1:
+    name:  webagent
+    description:  |
+                 This agent runs only web agents related
+    service: apache, bind
+    ip:  192.168.100.100
+    state:  1
+    server_id: server2
+
+<?php for ($i = 2; $i <= 7; $i++): ?>
+  agent<?php echo $i ?>:
+    name:  agent_<?php echo $i."\n" ?>
+    description:  |
+                 Agent #ID <?php echo $i."\n" ?>
+    service: bind,clamav,mysql
+    ip:  192.168.100.200
+    state:  1
+    server_id: server1 
+
+<?php endfor; ?>

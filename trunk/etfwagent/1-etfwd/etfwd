@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+# Copywrite Eurotux 2009
+# 
+# CMAR 2009/06/30 (cmar@eurotux.com)
+
+use strict;
+
+use Agent::SOAP;
+use Client::SOAP::HTTP;
+use ETFW;
+use ETFW::Network;
+use Utils;
+use Data::Dumper;
+
+my %CONF = ( "CFG_FILE"=>"/etc/sysconfig/etva-etfw/etfwd.conf" );
+
+sub main {
+    $CONF{"CFG_FILE"} = $ENV{'CFG_FILE'} if( $ENV{'CFG_FILE'} );
+    loadfunc();
+    launch_agent();
+}
+
+sub loadfunc {
+    %CONF = Utils::get_conf(1,$CONF{"CFG_FILE"});
+}
+sub launch_agent {
+
+    # get default network interface to initialize agent with macaddress
+    my %If = ETFW::Network->default_interface();
+    my $macaddr = $CONF{'macaddr'} = lc $If{'macaddress'};
+
+    # register func handlers
+    $CONF{'_register_handler'} = \&register_handler;
+
+    require ETFWDispatcher;
+
+    my $dispatcher = $CONF{'_dispatcher'} = "ETFWDispatcher";
+
+    my $Agent = Agent::SOAP->new( %CONF );
+
+    $Agent->mainLoop();
+}
+sub register_handler {
+    my ($agent) = @_;
+
+    # initialized on CentralManagement 
+    if( $agent->{'cm_uri'} ){
+
+        # get ETFW active modules
+        my %Mod = ETFW->get_activemodules();
+        my @services = ();
+        for my $m (keys %Mod){
+            my $pmod = $Mod{"$m"};
+            eval "require $pmod";
+            if( !$@ ){
+                my %params = ( "dispatcher"=>$pmod );
+                eval { 
+                    # trie run load config of module
+                    my %C = $pmod->get_config();
+                    if( %C ){
+                        # send parameters from config of module
+                        %params = (%params,%C);
+                    }
+                };
+                push(@services, { name=>$m, description=>"$m ($pmod)",
+                                    params=>\%params } );
+            } else{
+                plog "etfw - Perl module '$pmod' required!";
+            }
+        }
+	my $now = now();
+	plog("$now - init Agent with macaddr=",$agent->{'macaddr'});
+	plog(" services = ",Dumper(\@services));
+
+        my $R = new Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                    -> call( $agent->{'cm_namespace'},
+                             "initAgentServices",
+                                name=>'ETFW',
+                                ip=>$agent->{'LocalIP'},
+                                port=>$agent->{'LocalPort'},
+                                macaddr=>$agent->{'macaddr'},
+                                services=>\@services
+                            );
+        if( !$R || $R->{'_error_'} ){
+            plog("Cant connect to CentralManagement.\nInitialization Agent 'etfw' aborted!");
+        } else {
+            if( ref($R->{'return'}) && $R->{'return'}{'success'} eq 'true' ){
+                plog("$now - ETFW Agent register with success on CentralManagement");
+            }
+        }
+    }
+}
+main();
+1;

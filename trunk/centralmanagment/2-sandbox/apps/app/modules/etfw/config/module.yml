@@ -1,0 +1,11 @@
+# default values
+all:  
+   interface:
+         wan : eth0
+         lan : eth1
+         dmz : eth2
+    
+  
+
+
+ 

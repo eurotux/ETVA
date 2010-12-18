@@ -1,0 +1,743 @@
+#!/usr/bin/perl
+# Copywrite Eurotux 2009
+# 
+# CMAR 2009/04/03 (cmar@eurotux.com)
+
+=pod
+
+=head1 NAME
+
+virtd - virtualization daemon
+
+=head1 SYNOPSIS
+
+    ./virtd
+
+=head1 DESCRIPTION
+
+    main
+
+        load configuration
+
+        start agent
+
+            create new agent Agent::SOAP using VirtAgentInterface as dispatcher
+
+            $Agent->mainLoop()
+
+                create Socket to Listen
+
+                register on Central Management
+
+                register alarm at T_ALARM seconds to send keep alive alert to Central Management
+
+                accept connections from clients
+
+=head1 METHODS
+
+=over 4
+
+=cut
+
+use strict;
+
+use Utils;
+
+use Agent;
+use Agent::SOAP;
+use Agent::JSON;
+
+use VirtAgent;
+use VirtAgentInterface;
+use PoolStats;
+
+use Client::SOAP::HTTP;
+
+use POSIX;
+use Data::Dumper;
+
+# Config load from config file
+my $CONF = { "CFG_FILE"=>"/etc/sysconfig/etva-vdaemon/virtd.conf" };
+
+my $debug = 1;
+
+my $run_pool = 0;
+my $RUNNING;
+my @childs;
+
+# all stats data
+my %StatsData = ();
+
+=item launch_agent
+start agent
+
+    create Agent::SOAP instance with VirtAgentInterface dispatcher module
+
+=cut
+
+sub launch_agent {
+    # default active SOAP 
+    my $class = 'Agent::SOAP';
+
+    # TODO JSON requests not implemented 
+    # can answer to JSON request
+    #$class = 'Agent::JSON' if( $CONF->{'JSON'} );
+
+    my $dispatcher = 'VirtAgentInterface';
+
+    eval "require $dispatcher;";
+    if( $@ ){
+        die "virtd: Cant launch agent with this dispatcher: $dispatcher\n";
+    }
+
+    my %C = %$CONF;
+    $C{'_dispatcher'} = $dispatcher;
+    my %SI = VirtAgentInterface->getsysinfo();
+    %C = (%SI,%C);
+
+    $C{'LocalIP'} = $C{'LocalAddr'} if( !$C{'LocalIP'} );
+
+    # register and keepalive func handlers
+    $C{'_register_handler'} = \&register_handler;
+    $C{'_alarmhandler_'} = $C{'_keepalive_handler'} = \&keepalive_handler;
+
+    # initialization agent
+	my $agent = $class->new( %C );
+	
+	if( $agent ){
+        # start loop
+		$agent->mainLoop();
+	}
+}
+
+# load function
+sub loadfunc {
+    
+    $CONF->{"CFG_FILE"} = $ENV->{'CFG_FILE'} if( $ENV{'CFG_FILE'} );
+    $CONF = Utils::get_conf(1,$CONF->{"CFG_FILE"});
+
+print STDERR "CONF=",Dumper($CONF),"\n";
+    VirtAgentInterface->loadsysinfo();
+}
+
+my %tStamps = ();
+
+# pooling domain stats
+sub pool_stats {
+
+    my $self = shift;
+    my (%p) = @_;
+    
+    my %pooldisks = PoolStats->pool_disks();
+    my %netstats = PoolStats->pool_netstats();
+
+    my %PathDisks = ();
+    for my $D (values %pooldisks){
+        my $p = $D->{"path"};
+        $PathDisks{"$p"} = $D;
+    }
+
+    my @stats = VirtAgent->domainStats();
+
+    my %VMUpdated = ();
+
+    for my $ds (@stats){
+        my $id = $ds->{'id'};
+        if( $id > 0 ){
+            my $dn = $ds->{'name'};
+
+            my $nts = $ds->{"timestamp"} || now();
+
+            my $mmem = $ds->{'node_maxmem'};
+            my $cmem = $ds->{'mem'};
+
+            my $gctime = $ds->{'cputime'};
+            my $ncpus = $ds->{'ncpus'};
+            my $tcpus = $ds->{'node_maxcpus'};
+
+            if( $tStamps{$dn} ){
+
+                my $lts = $tStamps{$dn}{'lasttimestamp'} || 0;
+                my $pmem = ($mmem<1024) ? 0 : ( $cmem * 100 / $mmem );   # percentage of memory
+                my $s_pmem = sprintf('%0.2f',$pmem);
+
+                my $lctime = $tStamps{$dn}{'lastcputime'};
+                my $sctime = $gctime - $lctime;
+                my $pcpu = $sctime * 100 / ( ($nts - $lts) * 1000 * 1000 * 1000 * $tcpus );
+                my $s_pcpu = sprintf('%0.2f',$pcpu);
+
+                plog "domain $dn cpu = $s_pcpu% ($sctime [$gctime] $ncpus) mem = $s_pmem% ($cmem $mmem)" if( $debug );
+
+                $tStamps{$dn}{'cpu'}{'cpu_t'} = $sctime;
+                $tStamps{$dn}{'cpu'}{'cpu_n'} = $ncpus;
+                $tStamps{$dn}{'cpu'}{'cpu_per'} = $s_pcpu;
+                $tStamps{$dn}{'cpu'}{'timestamp'} = $nts;
+                $tStamps{$dn}{'memory'}{'mem_v'} = $cmem;
+                $tStamps{$dn}{'memory'}{'mem_m'} = $mmem;
+                $tStamps{$dn}{'memory'}{'mem_per'} = $s_pmem;
+                $tStamps{$dn}{'memory'}{'timestamp'} = $nts;
+
+                my $VM = VirtAgentInterface->updateStateVM( name=>$dn );
+                if( $VM && !isError($VM) ){
+                    # network interfaces
+                    for(my $i=0; my $VI = $VM->get_network( i=>$i ); $i++){
+                        if( my $vif = $VI->get_target() ){
+                            for my $k ( keys %{$netstats{"$vif"}} ){
+                                my $vk = $k;
+                                $vk =~ s/tx_/rx_/ or $vk =~ s/rx_/tx_/;
+
+                                $tStamps{$dn}{'network'}{"$vif"}{"$vk"} = $netstats{"$vif"}{"$k"};
+                            }
+                            $tStamps{$dn}{'network'}{"$vif"}{"i"} = $i;
+                            $tStamps{$dn}{'network'}{"$vif"}{"macaddr"} = $VI->get_macaddr();
+                        }
+                    }
+                    # disk devices
+                    for(my $i=0; my $VD = $VM->get_disk( i=>$i ); $i++){
+                        if( my $path = $VD->get_path() ){
+                            my $target = $VD->get_target();
+                            $tStamps{$dn}{'disk'}{"$target"} = $PathDisks{"$path"};
+                        }
+                    }
+                }
+            }
+
+            $VMUpdated{"$dn"} = $tStamps{$dn}{'lasttimestamp'} = $tStamps{$dn}{'timestamp'} = $nts;  # update time stamp
+            $tStamps{$dn}{'lastcputime'} = $gctime; # cpu time
+        }
+
+    }
+    
+    for my $vm (keys %tStamps){
+        if( !$VMUpdated{"$vm"} ){
+            # VM doenst exist any more
+            #  delete from statistics
+            delete $tStamps{"$vm"};
+        }
+    } 
+
+    return wantarray() ? %tStamps: \%tStamps;
+}
+
+# initialize stats func
+sub init_statsdraw {
+
+    my $start = now(-1*60*60*4);
+    my $end   = now(+1*60*60*4);
+
+    my $step = $CONF->{"T_ALARM"} || 300;
+
+    # rrdtool create for load graph
+    # TODO register start with rrdtool??
+#    cmd_exec("/usr/bin/rrdtool create /var/tmp/load.rrd --step $step DS:load_1min:GAUGE:600:0:500 DS:load_5min:GAUGE:600:0:500 DS:load_15min:GAUGE:600:0:500 RRA:AVERAGE:0.5:1:500 RRA:AVERAGE:0.5:6:50 RRA:AVERAGE:0.5:288:50 RRA:MAX:0.5:1:500 RRA:MAX:0.5:6:500 RRA:MAX:0.5:288:500");
+}
+
+# stats data register
+sub graphdataregister {
+    my $data = shift;
+    $data = [] if( !$data );
+    my $c=0;
+    for my $v ( @_ ){
+        $data->[$c] = [] if( !$data->[$c] );
+        $v = 0 if( not defined $v );
+        push(@{$data->[$c]},$v);
+        $c++;
+    }
+    return $data;
+}
+# draw GD Graph chart
+sub drawgraph {
+    my ($data,$conf) = (shift,shift);
+    return if( !$data );
+    my $file = delete $conf->{"file"};
+
+#    print STDERR "file=/var/tmp/${file}.png\n";
+#    print STDERR Dumper($data),"\n";
+
+    require GD::Graph::area;
+    my $graph1 = GD::Graph::area->new(400, 300);
+    $graph1->set( %$conf );
+    my $gd1 = $graph1->plot($data);
+
+    # write PNG image
+    open(IMG, ">/var/tmp/${file}.png");
+    binmode IMG;
+    print IMG $gd1->png;
+    close(IMG);
+}
+# register and draw stats
+sub stats_draw {
+    
+    my $now = now();        # now unix time stamp
+    my $now_s = nowStr();   # now string
+
+    # load stats
+    my %load_stats = PoolStats::pool_loadstats();
+    
+print STDERR "load_stats ",Dumper(\%load_stats),"\n";
+    $StatsData{"load"} = graphdataregister($StatsData{"load"},
+                        $now_s,
+                        $load_stats{'fifteenmin'},$load_stats{'fivemin'},$load_stats{'onemin'});
+
+=pod
+
+=begin comment 
+    drawgraph($StatsData{"load"},
+                { file=>"load",
+                  x_label           => 'Time line',
+                  y_label           => 'Load',
+                  title             => 'Load average',
+                  x_tick_offset     => 5,
+                  x_labels_vertical => 1,
+                  transparent       => 0,
+                  bgclr             => '#ffffff',
+                  dclrs => [ 'lred','lorange','lyellow' ]
+                 });
+
+=end comment
+
+=cut
+ 
+    # cpu stats
+    my %cpu_stats = PoolStats::pool_cpustats();
+
+print STDERR "cpu_stats ",Dumper(\%cpu_stats),"\n";
+    $StatsData{"cpu"} = graphdataregister($StatsData{"cpu"},
+                        $now_s,
+                        $cpu_stats{'cpu'}{'total_per'},$cpu_stats{'cpu'}{'si_per'},$cpu_stats{'cpu'}{'us_per'});
+=comment
+    drawgraph($StatsData{"cpu"},
+                { file=>"cpu",
+                  x_label           => 'Time line',
+                  y_label           => 'Percentage',
+                  title             => 'CPU',
+                  x_tick_offset     => 5,
+                  transparent       => 0,
+                  bgclr             => '#ffffff',
+                  dclrs => [ 'lblue','marine','cyan' ]
+                 });
+=cut
+
+    # memory stats
+    my %mem_stats = PoolStats::pool_memstats(); 
+
+print STDERR "mem_stats ",Dumper(\%mem_stats),"\n";
+    $StatsData{"mem"} = graphdataregister($StatsData{"mem"},
+                        $now_s,
+                        $mem_stats{"SwapTotal"},$mem_stats{"MemFree"});
+=comment
+    drawgraph($StatsData{"mem"},
+                { file=>"mem",
+                  x_label           => 'Time line',
+                  y_label           => 'KBytes',
+                  title             => 'Memory Usage',
+                  x_tick_offset     => 5,
+                  transparent       => 0,
+                  bgclr             => '#ffffff',
+                  dclrs => [ 'lorange','lred' ]
+                 });
+=cut
+    # network interfaces stats
+    my %net_stats = PoolStats::pool_netstats();
+
+print STDERR "net_stats ",Dumper(\%net_stats),"\n";
+    for my $if ( keys %net_stats ){
+        $StatsData{"net_$if"} = graphdataregister($StatsData{"net_$if"},
+                            $now_s,
+                            $net_stats{"$if"}{"rx_br"},$net_stats{"$if"}{"tx_br"});
+    }
+    # disks stats
+    my %disk_stats = PoolStats::pool_disks();
+
+print STDERR "disk_stats ",Dumper(\%disk_stats),"\n";
+    for my $d ( keys %disk_stats ){
+        $StatsData{"disk_$d"} = graphdataregister($StatsData{"disk_$d"},
+                            $now_s,
+                            $disk_stats{"$d"}{"size"},$disk_stats{"$d"}{"freesize"});
+    }
+
+    # stats for virtual machines
+    my %st = pool_stats();
+
+print STDERR "vm_stats ",Dumper(\%st),"\n";
+    for my $vm ( keys %st ){
+        # memory
+        $StatsData{"vm_${vm}_mem"} = graphdataregister($StatsData{"vm_${vm}_mem"},
+                            $now_s,
+                            $st{"$vm"}{'memory'}{"mem_per"});
+        # cpu
+        $StatsData{"vm_${vm}_cpu"} = graphdataregister($StatsData{"vm_${vm}_cpu"},
+                            $now_s,
+                            $st{"$vm"}{'cpu'}{"cpu_per"});
+
+        # disks
+        if( my $ld = $st{"$vm"}{"disk"} ){
+            for my $t (keys %$ld ){ 
+                $StatsData{"vm_${vm}_disk_${t}"} = graphdataregister($StatsData{"vm_${vm}_disk_${t}"},
+                                    $now_s,
+                                    $ld->{"$t"}{"size"},$ld->{"$t"}{"freesize"});
+            }
+        }
+        # network
+        if( my $ln = $st{"$vm"}{"network"} ){
+            for my $i (keys %$ln){
+                $StatsData{"vm_${vm}_net_${i}"} = graphdataregister($StatsData{"vm_${vm}_net_${i}"},
+                                    $now_s,
+                                    $ln->{"$i"}{"rx_br"},$ln->{"$i"}{"tx_br"});
+            }
+        }
+    }
+
+    # draw graph chart for all stats
+    for my $ks ( keys %StatsData ){
+#print STDERR "StatsData for $ks ",Dumper($StatsData{"$ks"}),"\n";
+        drawgraph($StatsData{"$ks"},
+                    { file=>"$ks",
+                      x_label           => 'Time line',
+                      y_label           => "$ks",
+                      title             => "$ks",
+                      x_tick_offset     => 5,
+                      x_labels_vertical => 1,
+                      transparent       => 0,
+                      bgclr             => '#ffffff',
+                      dclrs => [ 'lred','lorange','lyellow' ]
+                     });
+    }
+}
+sub send_stats {
+    
+    my $now = now();        # now unix time stamp
+    my $now_s = nowStr();   # now string
+
+    my %stats = ( );
+    $stats{"time_s"} = $now_s;
+    $stats{"time"} = $stats{"timestamp"} = $now_s;
+
+    # load stats
+    my %load_stats = $stats{"load"} = PoolStats::pool_loadstats();
+
+    # cpu stats
+    my %cpu_stats = $stats{"cpu"} = PoolStats::pool_cpustats();
+
+    # memory stats
+    my %mem_stats = $stats{"memory"} = PoolStats::pool_memstats(); 
+
+    # network interfaces stats
+    my %net_stats = $stats{"network"} = PoolStats::pool_netstats();
+
+    # disks stats
+    my %disk_stats = $stats{"disk"} = PoolStats::pool_disks();
+
+    # stats for virtual machines
+    my %st = my %st_vm = pool_stats();
+    for my $vm (keys %st_vm){
+        # ignore if no cpu and no memory statistics
+        if( !$st_vm{"$vm"}{"cpu"} &&
+            !$st_vm{"$vm"}{"memory"} ){
+            delete $st_vm{"$vm"};
+        }
+    }
+    $stats{"virtualmachines"} = \%st_vm;
+
+    print STDERR Dumper(\%stats),"\n";
+
+    return wantarray() ? %stats : \%stats;
+}
+
+=item main
+
+simple startup
+
+=over
+
+=item *
+
+load configuration stuff
+
+=item *
+
+launch agent
+
+=back
+
+=cut
+
+# simple startup
+sub main {
+
+    # load stuff
+    loadfunc();
+
+    # init stats
+    pool_stats();
+    init_statsdraw();
+
+    # call soap process
+    launch_agent();
+}
+
+sub term_handler {
+	$RUNNING = 0;
+	plog("deamon terminate!");
+}
+
+
+sub register_handler {
+    my ($agent) = @_;
+
+    # TODO change this for Generic Agent
+    my $laddr = $agent->{'LocalAddr'} || "*";
+    my $port = $agent->{'LocalPort'};
+    my $proto = $agent->{'Proto'};
+
+    plog("agent initialized listen in addr=$laddr ip=$agent->{'LocalIP'} memtotal=>$agent->{'maxmem'} cputotal=>$agent->{'maxncpu'} port=$port proto=$proto uuid=$agent->{'uuid'}");
+    plog("CM info cm_uri=> $agent->{'cm_uri'}, cm_namespace=$agent->{'cm_namespace'}\n");
+
+#    return;
+    # initialized on CentralManagement
+    # using HTTP request
+    # TODO change this to make possible others protocols
+    # CM testing...
+    if( $agent->{'cm_uri'} ){
+
+        my $R = new Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                -> call( $agent->{'cm_namespace'},
+                            'initializeVirtAgent',
+                            name=>$agent->{'name'},
+                            memtotal=>$agent->{'maxmem'},
+                            memfree=>$agent->{'meminfo'}{'MemFree'},
+                            cputotal=>$agent->{'maxncpu'},
+                            ip=>$agent->{'LocalIP'},
+                            port=>$agent->{'LocalPort'},
+                            uid=>$agent->{'uuid'},
+                            state=>1,
+                        );
+
+        if( !$R || $R->{'_error_'} ){
+            plog("Cant connect to CentralManagement.\nInitialization Agent aborted!");
+        } else {
+            #if( ref($R->{'return'}) && $R->{'return'}{'success'} eq 'true' ){
+            if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
+                $agent->{'_cm_insert_id'} = $R->{'return'}{'insert_id'};
+
+                my $now = nowStr();
+
+                # update uuid from Central Management
+                if( $R->{'return'}{'uuid'} && 
+                    ( $R->{'return'}{'uuid'} ne $agent->{'uuid'} ) ){
+                    plog("$now - Agent uuid changed! Old uuid=",$agent->{'uuid'}," new uuid=",$R->{'return'}{'uuid'});
+                    $agent->{'uuid'} = $R->{'return'}{'uuid'};
+                    VirtAgentInterface->setuid($agent->{'uuid'});
+                }
+
+                plog("$now - Agent initialized with success on CentralManagement: id=$agent->{'_cm_insert_id'}");
+
+                # try send list of networks
+                my $networks = VirtAgentInterface->list_networks();
+                plog "networks=",Dumper($networks);
+
+                my $RN = new Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                        -> call( $agent->{'cm_namespace'},
+                                    'updateVirtAgentVlans',
+                                    uid=>$agent->{'uuid'},
+                                    vlans => $networks
+                                );
+                plog "RN=",Dumper($RN);
+                # waiting for networks to create
+                if( $RN && $RN->{'return'} ){
+                    my $networks = $RN->{'return'};
+                    plog "lnets=",Dumper($networks);
+                    # create them
+                    VirtAgentInterface->create_networks( networks=> $networks );
+                }
+
+                # try send list for disk devices
+                my $devs = VirtAgentInterface->hash_phydisks();
+                plog "devs=",Dumper($devs);
+
+                my $RD = new Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                        -> call( $agent->{'cm_namespace'},
+                                    'updateVirtAgentDevices',
+                                    uid=>$agent->{'uuid'},
+                                    devs => $devs
+                                );
+=pod
+
+=begin comment    # not in use
+
+                # try send list for physical volumes
+                my $pvs = VirtAgentInterface->getpvs();
+                plog "pvs=",Dumper($pvs);
+
+                my $RP = new Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                        -> call( $agent->{'cm_namespace'},
+                                    'updateVirtAgentPvs',
+                                    uid=>$agent->{'uuid'},
+                                    pvs => $pvs
+                                );
+                plog "PHYSICAL VOLUMES=",Dumper($RP);
+
+=end comment
+
+=cut
+
+                # try send list for volumes groups
+                my $vgs = VirtAgentInterface->getvgpvs();
+                plog "vgs=",Dumper($vgs);
+
+                my $RG = new Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                        -> call( $agent->{'cm_namespace'},
+                                    'updateVirtAgentVgs',
+                                    uid=>$agent->{'uuid'},
+                                    vgs => $vgs
+                                );
+                plog "VOLUME GROUPS=",Dumper($RG);
+
+                # try send list for logical volumes
+                my $lvs = VirtAgentInterface->getlvs();
+                plog "lvs=",Dumper($lvs);
+
+                my $RL = new Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                        -> call( $agent->{'cm_namespace'},
+                                    'updateVirtAgentLvs',
+                                    uid=>$agent->{'uuid'},
+                                    lvs => $lvs
+                                );
+                plog "LOGICAL VOLUMES=",Dumper($RL);
+
+                # try send list for VMs
+                my $vms = VirtAgentInterface->hash_vms();
+
+                plog "vms=",Dumper($vms);
+
+                my $RV = new Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                        -> call( $agent->{'cm_namespace'},
+                                    'updateVirtAgentServers',
+                                    uid=>$agent->{'uuid'},
+                                    vms => $vms
+                                );
+                plog "RV=",Dumper($RV);
+                # waiting for virtual machines to create
+                if( $RV && $RV->{'return'} ){
+                    my $vmachines = $RV->{'return'};
+                    plog "lvms=",Dumper($vmachines);
+                    # create them
+                    if( ref($vmachines) eq 'HASH' ){
+                        for my $vm (values %$vmachines){
+                            my $state = $vm->{"state"};
+                            my $name = $vm->{"name"};
+                            my $E;
+                            if( !$vms->{"$name"} ){
+                                plog "creating name=$name","\n";
+                                $E = VirtAgentInterface->create_vm( %$vm ); 
+                            }
+
+                            if( !$E || isError($E) ){
+                                # trying to reload vm info
+                                plog "try to reload name=$name","\n";
+                                $E = VirtAgentInterface->reload_vm( %$vm );
+                                if( isError($E) ){
+                                    # TODO think more about it
+                                    # ignore this one
+                                    plog "Something goes wrong with server '$name'. I will ignore it.";
+                                    next;
+                                }
+                            }
+
+                            # previous state is runnig: start it
+                            if( $state eq "running" ){
+                                plog "starting name=",$vm->{"name"},"\n";
+                                VirtAgentInterface->start_vm( name=>$vm->{"name"} );
+                            } 
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+sub keepalive_handler {
+
+    plog( nowStr(), " ", "Keepalive...\n");
+
+    # TODO change this for Generic Agent
+    # CM testing...
+    if( $CONF->{'cm_uri'} ){
+        # update state
+        my $R = new Client::SOAP::HTTP( uri => $CONF->{'cm_uri'} )
+                -> call( $CONF->{'cm_namespace'},
+                            'updateVirtAgent',
+                            uid=>$CONF->{'uuid'},
+                            field=>'state',value=>1
+                        );
+        if( !$R || $R->{'_error_'} ){
+            plog("Error CentralManagement connection problem.\n");
+        } else {
+            my $now = nowStr();
+            #if( ref($R->{'return'}) && $R->{'return'}{'success'} eq 'true' ){
+            if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
+                plog("$now - Agent keepalive state update successful.");
+            }
+        }
+    }
+
+    # Draw stats
+    # TODO this stay disable
+    #stats_draw();
+
+    my $stats = send_stats();
+
+    if( $CONF->{'cm_uri'} ){
+        # update state
+        my $R = new Client::SOAP::HTTP( uri => $CONF->{'cm_uri'} )
+                -> call( $CONF->{'cm_namespace'},
+                            'updateVirtAgentLogs',
+                            uid=>$CONF->{'uuid'},
+                            info=>$stats
+                        );
+        if( !$R || $R->{'_error_'} ){
+            plog("Error CentralManagement connection problem.\n");
+        } else {
+            my $now = nowStr();
+            #if( ref($R->{'return'}) && $R->{'return'}{'success'} eq 'true' ){
+            if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
+                plog("$now - Agent keepalive logs send successful.");
+            }
+        }
+    }
+#=cut
+
+}
+main();
+1;
+
+=back
+
+=pod
+
+=head1 BUGS
+
+...
+
+=head1 AUTHORS
+
+...
+
+=head1 COPYRIGHT
+
+...
+
+=head1 LICENSE
+
+...
+
+=head1 SEE ALSO
+
+L<VirtAgentInterface>, L<VirtAgent::Disk>, L<VirtAgent::Network>,
+L<VirtMachine>
+C<http://libvirt.org>
+L<Agent>, L<Agent::SOAP>, L<Agent::JSON>
+L<Client>, L<Client::SOAP>, L<Client::SOAP::HTTP>
+
+=cut

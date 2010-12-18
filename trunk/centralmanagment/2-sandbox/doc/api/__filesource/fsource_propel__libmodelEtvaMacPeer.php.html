@@ -1,0 +1,75 @@
+<html>
+<head>
+<title>File Source for EtvaMacPeer.php</title>
+<link rel="stylesheet" type="text/css" href="../media/style.css">
+</head>
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" height="48" width="100%">
+  <tr>
+    <td class="header_top">propel</td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+  <tr>
+    <td class="header_menu">
+        
+                                    
+                                                                                                                                  		  [ <a href="../classtrees_propel.html" class="menu">class tree: propel</a> ]
+		  [ <a href="../elementindex_propel.html" class="menu">index: propel</a> ]
+		  	    [ <a href="../elementindex.html" class="menu">all elements</a> ]
+    </td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="200" class="menu">
+      <b>Packages:</b><br />
+              <a href="../li_propel.html">propel</a><br />
+              <a href="../li_centralM.html">centralM</a><br />
+              <a href="../li_lib-model-map.html">lib-model-map</a><br />
+              <a href="../li_lib-model-om.html">lib-model-om</a><br />
+              <a href="../li_sfGuardPlugin.html">sfGuardPlugin</a><br />
+              <a href="../li_symfony.html">symfony</a><br />
+            <br /><br />
+                  
+      
+                </td>
+    <td>
+      <table cellpadding="10" cellspacing="0" width="100%" border="0"><tr><td valign="top">
+
+<h1 align="center">Source for file EtvaMacPeer.php</h1>
+<p>Documentation is available at <a href="../propel/_lib---model---EtvaMacPeer.php.html">EtvaMacPeer.php</a></p>
+<div class="src-code">
+<ol><li><div class="src-line"><a name="a1"></a><span class="src-php">&lt;?php</span></div></li>
+<li><div class="src-line"><a name="a2"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a3"></a><span class="src-key">class&nbsp;</span><a href="../lib-model-om/EtvaMacPeer.html">EtvaMacPeer</a>&nbsp;<span class="src-key">extends&nbsp;</span><a href="../lib-model-om/BaseEtvaMacPeer.html">BaseEtvaMacPeer</a></div></li>
+<li><div class="src-line"><a name="a4"></a><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a5"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a6"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">public&nbsp;</span><span class="src-key">static&nbsp;</span><span class="src-key">function&nbsp;</span><a href="../lib-model-om/EtvaMacPeer.html#methodretrieveByMac">retrieveByMac</a><span class="src-sym">(</span><span class="src-var">$mac</span><span class="src-sym">)</span></div></li>
+<li><div class="src-line"><a name="a7"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a8"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a9"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a10"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a11"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$criteria&nbsp;</span>=&nbsp;<span class="src-key">new&nbsp;</span><span class="src-id">Criteria</span><span class="src-sym">(</span><span class="src-id"><a href="../lib-model-om/EtvaMacPeer.html">EtvaMacPeer</a></span><span class="src-sym">::</span><span class="src-id">DATABASE_NAME</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a12"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$criteria</span><span class="src-sym">-&gt;</span><span class="src-id">add</span><span class="src-sym">(</span><span class="src-id"><a href="../lib-model-om/EtvaMacPeer.html">EtvaMacPeer</a></span><span class="src-sym">::</span><span class="src-id">MAC</span><span class="src-sym">,&nbsp;</span><span class="src-var">$mac</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a13"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a14"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$v&nbsp;</span>=&nbsp;<span class="src-id"><a href="../lib-model-om/EtvaMacPeer.html">EtvaMacPeer</a></span><span class="src-sym">::</span><span class="src-id">doSelect</span><span class="src-sym">(</span><span class="src-var">$criteria</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a15"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a16"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">return&nbsp;</span><span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(</span><span class="src-var">$v</span><span class="src-sym">)&nbsp;</span>&gt;&nbsp;<span class="src-num">0&nbsp;</span>?&nbsp;<span class="src-var">$v</span><span class="src-sym">[</span><span class="src-num">0</span><span class="src-sym">]&nbsp;</span>:&nbsp;<span class="src-id">null</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a17"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a18"></a><span class="src-sym">}</span></div></li>
+</ol>
+</div>
+        <div class="credit">
+		    <hr />
+		    Documentation generated on Fri, 19 Jun 2009 10:49:10 +0100 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.2</a>
+	      </div>
+      </td></tr></table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

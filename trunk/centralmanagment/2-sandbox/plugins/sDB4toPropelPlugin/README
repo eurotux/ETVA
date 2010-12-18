@@ -1,0 +1,31 @@
+# sDB4toPropel for symfony 1.2.x #
+
+`sDB4toPropelPlugin` is a plugin that adds to symfony a new task: propel:db4-to-propel 
+that allows you to convert a DB4 schema (a DBDesigner 4 schema) into a valid propel schema.yml file.
+
+## Installation ##
+
+  * Install the plugin
+  
+  ``
+    symfony plugin-install http://plugins.symfony-project.com/sDB4toPropelPlugin
+  ``
+  
+  or check out from the svn repository: [http://svn.symfony-project.com/plugins/sfDB4toPropelPlugin/branches/1.2](http://svn.symfony-project.com/plugins/sfDB4toPropelPlugin/branches/1.2)
+  
+  * Clear you cache
+  
+  ``
+    symfony cc
+  ``
+
+## Tutorial / FAQ ##
+
+Until i can convert to the Markdown synthax please follow the [full tutorial on my blog, click here](http://www.strangebuzz.com/index.php/2008/09/08/36-new-symfony-11-plugin-tutorial-sfdb4topropelplugin). 
+
+You can also find another tutorial i have made for the [Jobeet Day 3 tutorial](http://www.symfony-project.org/blog/2008/12/03/jobeet-day-3-the-data-model) on [my blog, click here](http://www.strangebuzz.com/index.php/2008/12/07/38-jobeet-an-alternative-tutorial-for-day-3).
+ 
+
+  * That's all, have fun, [COil](http://www.strangebuzz.com)  ;)
+
+## TODO ##

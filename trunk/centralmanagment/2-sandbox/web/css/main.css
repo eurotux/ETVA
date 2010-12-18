@@ -1,0 +1,1071 @@
+
+
+html, body {
+	font: normal 12px tahoma, arial, verdana, sans-serif;
+	margin: 0;
+	padding: 0;
+	border: 0 none;
+	overflow: hidden;
+	height: 100%;
+}
+
+#header h1{
+    font-size:14px;
+    padding:5px;
+}
+
+
+/*
+* Icons
+*/
+
+
+.icon-window{
+/* .x-tree-node-icon { */
+background-image:url(../images/icons/window.png) !important;
+}
+
+/*
+* System popup
+*
+*/
+.icon-info {
+    background-image:url(../images/icons/warning.gif) !important;
+}
+
+
+.icon-add{
+     background-image:url(../images/table_add.png) !important;
+     /* background-position: center center; */
+}
+
+.icon-remove{
+     background-image:url(../images/table_delete.png) !important;
+     /* background-position: center center; */
+}
+
+.icon-user {
+    background-image:url(../images/icons/user.gif) !important;
+}
+
+.icon-user-add {
+    background-image:url(../images/icons/user_add.gif) !important;
+}
+
+.icon-user-delete {
+    background-image:url(../images/icons/user_delete.gif) !important;
+}
+
+
+.add{
+     background-image:url(../images/icons/add.gif) !important;
+     /* background-position: center center; */
+}
+
+.remove{
+     background-image:url(../images/icons/delete.gif) !important;
+     /* background-position: center center; */
+}
+
+.tree-node-leaf{
+/* .x-tree-node-icon { */
+background-image:url(../images/icons/leaf.gif) !important;
+}
+
+
+
+/*
+* TreeColumn
+*/
+
+.x-column-tree .x-tree-node {
+    zoom:1;
+}
+.x-column-tree .x-tree-node-el {
+    /*border-bottom:1px solid #eee; borders? */
+    zoom:1;
+}
+.x-column-tree .x-tree-selected {
+    background: #d9e8fb;
+}
+.x-column-tree  .x-tree-node a {
+    line-height:18px;
+    vertical-align:middle;
+
+}
+.x-column-tree  .x-tree-node a span{
+
+}
+.x-column-tree  .x-tree-node .x-tree-selected a span{
+	background:transparent;
+	/* color:#FFFFFF; */
+}
+.x-tree-col {
+    float:left;
+    overflow:hidden;
+    padding:0 1px;
+    zoom:1;
+
+}
+
+.x-tree-col-text, .x-tree-hd-text {
+    overflow:hidden;
+    -o-text-overflow: ellipsis;
+	text-overflow: ellipsis;
+    padding:3px 3px 3px 5px;
+    white-space: nowrap;
+    font:normal 11px arial, tahoma, helvetica, sans-serif;
+
+}
+
+.x-tree-headers {
+    background: #f9f9f9 url(../images/grid3-hrow.gif) repeat-x 0 bottom;
+	cursor:default;
+    zoom:1;
+
+}
+
+.x-tree-hd {
+    float:left;
+    overflow:hidden;
+    border-left:1px solid #eee;
+    border-right:1px solid #d0d0d0;
+
+}
+
+
+/*
+*  Storage context-menu
+*
+*/
+
+.go-action {
+    background-image:url(../images/icons/go-action.png) !important;
+}
+
+/*
+* Physical disk tree
+*/
+
+.task {
+    background-image:url(../images/icons/device.gif) !important;
+}
+.devices-folder {
+    background-image:url(../images/icons/folder_go.png) !important;
+}
+
+.dev-pd a span{ /* not pv */
+    color:red;
+
+}
+
+.dev-pv a span{ /* is pv */
+    color:green;
+}
+
+/*
+* Column layout (used in storages panel)
+*/
+
+ .x-panel-body p {
+        margin:5px;
+    }
+    .x-column-layout-ct .x-panel {
+        margin-bottom:5px;
+    }
+    .x-column-layout-ct .x-panel-dd-spacer {
+        margin-bottom:5px;
+    }
+
+
+/*
+* Log panel
+*/
+.x-log-entry { }
+.x-log-entry .x-log-level {
+	float:left;
+	width:4em;
+	text-align:center;
+	margin-right: 3px
+}
+.x-log-entry .x-log-time {
+	margin-right: 3px
+}
+.x-log-entry .x-log-message {
+	margin-right: 3px
+}
+.x-log-debug { background-color: #46c }
+.x-log-info { background-color: green }
+.x-log-warning { background-color: yellow }
+.x-log-error { background-color: red }
+
+
+
+
+
+
+
+/*
+*
+* itemselector css
+*/
+/*
+ * Ext JS Library 2.2.1
+ * Copyright(c) 2006-2009, Ext JS, LLC.
+ * licensing@extjs.com
+ *
+ * http://extjs.com/license
+ */
+
+.wiz-itemselector .x-panel-body{
+    background:rgb(246,246,246);
+}
+
+.ux-mselect{
+    overflow:auto;
+    background:white;
+    position:relative; 
+    zoom:1;
+    overflow:auto;   
+}
+
+/*
+.ux-mselect{
+
+    overflow:auto;
+
+    background:white;
+
+    position:relative; 
+
+    zoom:1;
+
+    overflow:auto !important;
+
+}
+*/
+
+
+
+.ux-mselect-item{
+    font:normal 11px tahoma, arial, helvetica, sans-serif;
+    padding:2px;
+    border:1px solid #fff;
+    white-space: nowrap;
+    cursor:pointer;
+}
+.ux-mselect-selected{
+	border:1px dotted #a3bae9 !important;
+    background:#DFE8F6;
+    cursor:pointer;
+}
+
+.x-view-drag-insert-above {
+    border-top:1px dotted #3366cc;
+}
+.x-view-drag-insert-below {
+    border-bottom:1px dotted #3366cc;
+}
+
+
+
+
+
+
+
+
+/*
+*
+* Ext.ux.Wiz
+*
+*/
+
+
+.ext-ux-wiz-Header {
+	background-color:white;
+	border-bottom:2px solid #99BBE8;
+}
+
+.ext-ux-wiz-Header-title {
+	font-weight: bold;
+	padding: 4px 0px 0px 4px;
+}
+
+.ext-ux-wiz-Header-step {
+	color:#767676;
+	text-align:right;
+	padding:2px 4px 0px 0px;
+}
+
+.ext-ux-wiz-Header-stepIndicator-container {
+	float:right;
+	margin-right:6px;
+	margin-top:8px;
+}
+
+.ext-ux-wiz-Header-stepIndicator {
+	margin-left:28px;
+	float:left;
+	background-image:url(../images/icons/ext-ux-wiz-stepIndicator.png) !important;
+	background-position:6px 0px;
+    background-repeat: repeat-x;
+	height:6px;
+	width:6px;
+}
+
+.ext-ux-wiz-Header-stepIndicator-active {
+	background-position:0px 0px !important;
+}
+
+.ext-ux-wiz-West {
+	background-color:#ECF1EF;
+}
+
+.ext-ux-wiz-West-title {
+	font-weight: bold;
+	padding: 4px 0px 10px 4px;
+}
+
+.ext-ux-wiz-West-step {
+	color:#767676;
+	text-align:left;
+	padding:2px 4px 0px 0px;
+    float:left;
+    
+}
+
+.ext-ux-wiz-West-step .ext-ux-wiz-West-stepText {
+    padding-top:10px;
+
+}
+
+.ext-ux-wiz-West-stepText{
+    
+    margin-left:3px;
+	margin-top:0px;
+}
+
+.ext-ux-wiz-West-stepText-active{
+    font-weight:bold;
+}
+
+
+
+.wizard-network-grid{
+    padding-left:0px;
+    border:none;
+}
+
+
+/* css form box labels form */
+
+.fieldset-top-sp{
+    margin-top:20px;
+}
+
+.x-form-cb-label{
+    font-size:11px;
+}
+
+.x-form-field, .x-form-item-label, .x-combo-list-item{
+    font-size:11px;
+}
+
+.x-form-item .x-form-element .nopad-border{
+       /* width:21px ; */
+        
+    border:0px;
+    background:none;    
+}
+
+
+
+
+
+
+
+
+
+.buttonAsLink{
+    color:red;
+    font-size:16px;
+}
+.buttonAsLink .x-btn-text{
+    padding-top:0px;
+    color:red;
+}
+
+.buttonAsLink .x-btn-left{
+    border:none;
+    background:none;
+}
+
+.buttonAsLink .x-btn-right{
+    border:none;
+    background:none;
+}
+
+.buttonAsLink .x-btn-center{
+    border:none;
+    background:none;
+    padding:0px;
+    vertical-align:top;
+}
+
+/*
+*
+* formgroup
+*/
+/* add some padding so it spaces nice and relative elements dn't get clipped */
+.form-group {
+	padding-bottom:5px;
+	overflow:hidden;
+}
+
+/* Simple blue border */
+.form-group .form-group-header {
+	padding:0;
+	border-bottom:1px solid #c3daf9;
+}
+
+/* Position the text element so it appears over the border added above */
+.form-group .form-group-header-text {
+	font-size:11px;
+	font-family:tahoma,arial,sans-serif;
+	line-height:13px;
+	text-transform:uppercase;
+	position:relative;
+	left:5px;
+	top:5px;
+	padding:1px 5px 1px 20px;
+	color:#4e79b2;
+	background:#fff url(../images/form-collapse-icon.gif) no-repeat 2px 0;
+}
+
+/* Copied from x-plain (for IE + layouts to work) */
+.form-group-body {
+    overflow:hidden;
+}
+
+/* Copied from x-plain (for IE + layouts to work) */
+.form-group-bwrap {
+    overflow:hidden;
+    zoom:1;
+}
+
+/* Change the toggle icon when collapsed */
+.x-panel-collapsed .form-group-header-text {
+	background-position: 2px -15px;
+}
+
+
+
+
+
+
+/*
+*
+*
+* LEFT MENU
+*/
+
+.no-active a span{
+    color: red;
+}
+
+
+.active a span{
+    color: green;
+}
+
+
+
+
+
+
+    /*!
+ * Ext JS Library 3.0+
+ * Copyright(c) 2006-2009 Ext JS, LLC
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ *
+ * GRID rowEditor
+ *
+ */
+.ext-ie .x-row-editor .x-form-text {
+    margin:0 !important;
+}
+.x-row-editor-header {
+    height:2px;
+    overflow:hidden;
+    background: transparent url(../images/row-editor-bg.gif) repeat-x 0 0;
+}
+.x-row-editor-footer {
+    height:2px;
+    overflow:hidden;
+    background: transparent url(../images/row-editor-bg.gif) repeat-x 0 -2px;
+}
+.ext-ie .x-row-editor-footer {
+    margin-top:-1px;
+}
+
+.x-row-editor-body {
+    overflow:hidden;
+    zoom:1;
+    background: #ebf2fb;
+    padding-top:2px;
+}
+.x-row-editor .x-btns {
+    position:absolute;
+    top:28px;
+    left:20px;
+    padding-left:5px;
+    background: transparent url(../images/row-editor-btns.gif) no-repeat 0 0;
+}
+.x-row-editor .x-btns .x-plain-bwrap {
+    padding-right:5px;
+    background: transparent url(../images/row-editor-btns.gif) no-repeat right -31px;
+}
+.x-row-editor .x-btns .x-plain-body {
+    background: transparent url(../images/row-editor-btns.gif) repeat-x 0 -62px;
+    height:31px;
+}
+.x-row-editor .x-btns .x-table-layout-cell {
+    padding:3px;
+}
+
+.errorTip .x-tip-body ul{
+    list-style-type:disc;
+    margin-left:15px;
+}
+
+
+/*
+* provides line breaks in rows
+*/
+.gridWrap .x-grid3-cell-inner {
+  white-space : normal;
+}
+
+
+
+
+
+
+
+
+/*
+*
+* rowaction css
+*/
+
+/** vim: ts=4:sw=4:nu:fdc=4:nospell
+ *
+ * Ext.ux.grid.RowActions.css
+ *
+ * Style sheets for Grid RowActions Plugin
+ *
+ * @author   Ing. Jozef SakÃ¡loÅ¡
+ * @date     27. March 2008
+ * @verson   $Id: Ext.ux.grid.RowActions.css 140 2008-04-06 01:24:10Z jozo $
+ *
+ * @license Ext.ux.grid.RowActions.css is licensed under the terms of
+ * the Open Source LGPL 3.0 license.  Commercial use is permitted to the extent
+ * that the code/component(s) do NOT become part of another Open Source or Commercially
+ * licensed development library or toolkit without explicit permission.
+ *
+ * License details: http://www.gnu.org/licenses/lgpl.html
+ */
+
+/* styles for rows */
+.ux-row-action-cell .x-grid3-cell-inner {
+	padding:1px 0 0 0;
+}
+.ux-row-action-item {
+	float:left;
+	min-width:16px;
+	height:16px;
+	background-repeat:no-repeat;
+	margin: 0 5px 0 0;
+	cursor:pointer;
+	overflow:hidden;
+}
+.ext-ie .ux-row-action-item {
+	width:16px;
+}
+.ext-ie .ux-row-action-text {
+	width:auto;
+}
+.ux-row-action-item span {
+	vertical-align:middle;
+	padding:0 0 0 20px;
+	line-height:18px;
+}
+.ext-ie .ux-row-action-item span {
+	width:auto;
+}
+
+/* styles for groups */
+.x-grid-group-hd div {
+	position:relative;
+	height:16px;
+}
+.ux-grow-action-item {
+	min-width:16px;
+	height:16px;
+	background-repeat:no-repeat;
+	background-position: 0 50% ! important;
+	margin: 0 0 0 4px;
+	padding: 0 ! important;
+	cursor:pointer;
+	float:left;
+}
+.ext-ie .ux-grow-action-item {
+	width:16px;
+}
+.ux-action-right {
+	float:right;
+	margin: 0 3px 0 2px;
+	padding: 0 ! important;
+}
+.ux-grow-action-text {
+	padding: 0 ! important;
+	margin:0 ! important;
+	background:transparent none ! important;
+	float:left;
+}
+
+/* eof */
+
+/*
+// Icon Classes */
+.icon-ob {
+	background-image:url(../img/icons/ob_16.png) ! important;
+}
+.icon-graph {
+	background-image:url(../images/silk/icons/chart_curve.png) ! important;
+}
+.icon-chart {
+	background-image:url(../images/silk/icons/chart_bar.png) ! important;
+}
+.icon-prefs {
+	background-image:url(../images/silk/icons/application_form.png) ! important;
+}
+.icon-ok {
+	background-image:url(../img/icons/ok16.png) ! important;
+}
+.icon-view-tile {
+	background-image:url(../images/silk/icons/application_view_tile.png) ! important;
+}
+.icon-check, .icon-check-off {
+	background-image:url(../ext/resources/images/default/menu/unchecked.gif) ! important;
+}
+.icon-check-on {
+	background-image:url(../ext/resources/images/default/menu/checked.gif) ! important;
+}
+.icon-stat-data {
+	background-image:url(../img/icons/kate_16.png) ! important;
+}
+.icon-rename {
+	background-image:url(../images/silk/icons/textfield_rename.png) ! important;
+}
+.icon-add-col {
+	background-image:url(../images/silk/icons/page_white_add.png) ! important;
+}
+.icon-del-col {
+	background-image:url(../images/silk/icons/page_white_delete.png) ! important;
+}
+.icon-save-table {
+	background-image:url(../images/silk/icons/table_save.png) ! important;
+}
+.icon-add-tab {
+	background-image:url(../images/silk/icons/tab_add.png) ! important;
+}
+.icon-del-tab {
+	background-image:url(../images/silk/icons/tab_delete.png) ! important;
+}
+.icon-go-tab {
+	background-image:url(../images/silk/icons/tab_go.png) ! important;
+}
+.icon-add-table {
+	background-image:url(../images/silk/icons/table_add.png) ! important;
+}
+.icon-del-table {
+	background-image:url(../images/silk/icons/table_delete.png) ! important;
+}
+.icon-admin {
+	background-image:url(../img/icons/adv_settings_16.png) ! important;
+}
+.icon-grid {
+    background-image:url(../images/silk/icons/application_view_columns.png) !important;
+}
+.icon-key {
+	background-image:url(../images/silk/icons/key.png) ! important;
+}
+.icon-key2 {
+	background-image:url(../img/icons/key_16.png) ! important;
+}
+.icon-expand-all {
+	background-image:url(../img/icons/expand-all.gif) ! important;
+}
+.icon-collapse-all {
+	background-image:url(../img/icons/collapse-all.gif) ! important;
+}
+.icon-expand {
+	background-image:url(../img/icons/expand-all.gif) ! important;
+}
+.icon-collapse {
+	background-image:url(../img/icons/collapse-all.gif) ! important;
+}
+.icon-tree-orgboard {
+	background-image:url(../images/silk/icons/chart_organisation.png) ! important;
+}
+.icon-tree-area {
+	background-image:url(../images/silk/icons/post_title.png) ! important;
+}
+.icon-tree-post {
+	background-image:url(../images/silk/icons/page_white.png) ! important;
+}
+.icon-plus {
+	background-image:url(../images/silk/icons/add.png) ! important;
+}
+.icon-minus {
+	background-image:url(../images/silk/icons/delete.png) ! important;
+}
+.icon-house {
+	background-image:url(../img/icons/house_16.png) ! important;
+}
+.icon-user {
+	background-image:url(../img/icons/user2_16.png) ! important;
+}
+.icon-trash-empty {
+	background-image:url(../images/silk/icons/bin_empty.png) ! important;
+}
+.icon-trash-closed {
+	background-image:url(../images/silk/icons/bin_closed.png) ! important;
+}
+.icon-disk {
+	background-image:url(../images/silk/icons/disk.png) ! important;
+}
+.icon-disk-bullet {
+	background-image:url(../images/silk/icons/bullet_disk.png) ! important;
+}
+.icon-undo {
+	background-image:url(../images/silk/icons/arrow_undo.png) ! important;
+}
+.icon-loading {
+	background-image:url(../ext/resources/images/default/grid/grid-loading.gif) ! important;
+}
+.icon-db-refresh {
+	background-image:url(../images/silk/icons/database_refresh.png) ! important;
+}
+.icon-db-gear {
+	background-image:url(../images/silk/icons/database_gear.png) ! important;
+}
+.icon-magnifier {
+	background-image:url(../images/silk/icons/magnifier.png) ! important;
+}
+.icon-wrench {
+	background-image:url(../img/icons/wrench_16.png) ! important;
+}
+.icon-wrench-orange {
+	background-image:url(../images/silk/icons/wrench_orange.png) ! important;
+}
+.icon-star {
+	background-image:url(../images/silk/icons/star.png) ! important;
+}
+.icon-lock-go {
+	background-image:url(../images/silk/icons/lock_go.png) ! important;
+}
+.icon-group-add {
+	background-image:url(../images/silk/icons/group_add.png) ! important;
+}
+.icon-group-del {
+	background-image:url(../images/silk/icons/group_delete.png) ! important;
+}
+.icon-stat-portal {
+	background-image:url(../img/icons/stat_portal_16.png) ! important;
+}
+.icon-stat-list {
+	background-image:url(../img/icons/stat_list_16.png) ! important;
+}
+.icon-cancel {
+	background-image:url(../img/icons/cancel16.png) ! important;
+}
+.icon-cross {
+	background-image:url(../images/silk/icons/cross.png) ! important;
+}
+.icon-defaults {
+	background-image:url(../images/silk/icons/arrow_rotate_clockwise.png) ! important;
+}
+.icon-load {
+	background-image:url(../images/silk/icons/database_go.png) ! important;
+}
+.icon-reconfigure {
+	background-image:url(../images/silk/icons/database_gear.png) ! important;
+}
+.icon-working {
+	background-image:url(../ext/resources/images/default/grid/wait.gif) ! important;
+}
+.icon-upload {
+	background-image:url(../img/icons/up.png) ! important;
+}
+.icon-folder-add {
+	background-image:url(../images/silk/icons/folder_add.png) ! important;
+}
+.icon-open {
+	background-image:url(../images/silk/icons/application_go.png) ! important;
+}
+.icon-open-self {
+	background-image:url(../images/silk/icons/application.png) ! important;
+}
+.icon-open-popup {
+	background-image:url(../images/silk/icons/application_double.png) ! important;
+}
+.icon-open-blank {
+	background-image:url(../images/silk/icons/application_cascade.png) ! important;
+}
+.icon-open-download {
+	background-image:url(../images/silk/icons/application_put.png) ! important;
+}
+.icon-refresh {
+	background-image:url(../images/silk/icons/arrow_refresh.png) ! important;
+}
+.icon-pencil {
+	background-image:url(../images/silk/icons/pencil.png) ! important;
+}
+.icon-stop {
+	background-image:url(../images/silk/icons/control_stop.png) ! important;
+}
+.icon-email {
+	background-image:url(../images/silk/icons/email.png) ! important;
+}
+.icon-email-compose {
+	background-image:url(../images/silk/icons/email_edit.png) ! important;
+}
+.icon-coins {
+	background-image:url(../images/silk/icons/coins.png) ! important;
+}
+.icon-clock {
+	background-image:url(../images/silk/icons/clock.png) ! important;
+}
+.icon-zoom {
+	background-image:url(../images/silk/icons/zoom.png) ! important;
+}
+.icon-print {
+	background-image:url(../images/silk/icons/printer.png) ! important;
+}
+.icon-folder-component {
+	background-image:url(../images/silk/icons/folder_brick.png) ! important;
+}
+.icon-plugin {
+	background-image:url(../images/silk/icons/plugin.png) ! important;
+}
+.icon-extension {
+	background-image:url(../images/silk/icons/brick.png) ! important;
+}
+.icon-function {
+	background-image:url(../images/silk/icons/flag_yellow.png) ! important;
+}
+.icon-bulb {
+	background-image:url(../images/silk/icons/lightbulb.png) ! important;
+}
+.icon-bulb-off {
+	background-image:url(../images/silk/icons/lightbulb_off.png) ! important;
+}
+.icon-copy {
+	background-image:url(../images/silk/icons/page_white_copy.png) ! important;
+}
+.icon-star {
+	background-image:url(../images/silk/icons/award_star_gold_3.png) ! important;
+}
+.icon-edit-record {
+	background-image:url(../images/silk/icons/table_edit.png) ! important;
+}
+.icon-actions {
+	background-image:url(../images/silk/icons/lightning.png) ! important;
+}
+.icon-form-add {
+	background-image:url(../images/silk/icons/layout_add.png) ! important;
+}
+.icon-html {
+	background-image:url(../images/silk/icons/html.png) ! important;
+}
+.icon-script {
+	background-image:url(../images/silk/icons/script.png) ! important;
+}
+.icon-php {
+	background-image:url(../images/silk/icons/script_code.png) ! important;
+}
+.icon-css {
+	background-image:url(../images/silk/icons/css.png) ! important;
+}
+.icon-run {
+	background-image:url(../images/silk/icons/application_go.png) ! important;
+}
+.icon-info {
+	background-image:url(../images/silk/icons/information.png) ! important;
+}
+.icon-error {
+	background-image:url(../images/silk/icons/cancel.png) ! important;
+}
+.icon-warn {
+	background-image:url(../images/silk/icons/error.png) ! important;
+}
+.icon-wages {
+	background-image:url(../img/icons/euro_16.png) ! important;
+}
+.icon-calculator {
+	background-image:url(../images/silk/icons/calculator.png) ! important;
+}
+.icon-add-wage {
+	background-image:url(../images/silk/icons/coins_add.png) ! important;
+}
+.icon-del-wage {
+	background-image:url(../images/silk/icons/bin_closed.png) ! important;
+}
+.icon-manual {
+	background-image:url(../images/silk/icons/book_open.png) ! important;
+}
+.icon-lock {
+	background-image:url(../img/icons/lock16.png) ! important;
+}
+.icon-lock-open {
+	background-image:url(../img/icons/unlock16.png) ! important;
+}
+.icon-arrow-down {
+	background-image:url(../images/silk/icons/arrow_down.png) ! important;
+}
+.icon-arrow-right {
+	background-image:url(../images/silk/icons/arrow_right.png) ! important;
+}
+.icon-blank-img {
+	background-image:url(../ext/resources/images/default/s.gif) ! important;
+}
+.icon-delete {
+	background-image:url(../images/silk/icons/bin_empty.png) ! important;
+}
+
+.icon-down {
+	background-image:url(../images/silk/icons/arrow_down.png) ! important;
+}
+.icon-up {
+	background-image:url(../images/silk/icons/arrow_up.png) ! important;
+}
+.icon-top {
+	background-image:url(../images/silk/icons/arrow_top.png) ! important;
+}
+.icon-bottom {
+	background-image:url(../images/silk/icons/arrow_bottom.png) ! important;
+}
+
+.icon-tree {
+	background-image:url(../img/icons/tree_16.png) ! important;
+}
+.icon-form-edit {
+	background-image:url(../images/silk/icons/application_form_edit.png) ! important;
+}
+.icon-form-add {
+	background-image:url(../images/silk/icons/application_form_add.png) ! important;
+}
+.icon-filter {
+	background-image:url(../img/icons/view-filter16.png) ! important;
+}
+.icon-filter-active {
+	background-image:url(../img/icons/view-filter-go16.png) ! important;
+}
+.icon-stat-cat {
+	background-image:url(../img/icons/stat-cat_16.png) ! important;
+}
+.x-form-field-wrap .trigger-tag-add {
+	background-image: url(../img/trigger-tag-add.png);
+	cursor:pointer;
+}
+.x-form-field-wrap .trigger-tag {
+	background-image: url(../img/trigger-tag.png);
+	cursor:pointer;
+}
+.x-form-field-wrap .x-trigger-disabled {
+	cursor:default;
+	opacity:0.5;
+	background-position:0 0;
+}
+.x-form-field-wrap .trigger-tree {
+	background-image: url(../img/trigger-tree.png);
+	cursor:pointer;
+}
+
+
+/*  Icon Classes end */
+
+
+
+
+/*!
+ * Ext JS Library 3.0+
+ * Copyright(c) 2006-2009 Ext JS, LLC
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+/**
+ * GridFilters Styles
+ **/
+/*
+.x-grid3-hd-row .ux-filtered-column {
+	border-left:  1px solid #C7E3B4;
+	border-right: 1px solid #C7E3B4;
+}
+
+.x-grid3-hd-row .ux-filtered-column .x-grid3-hd-inner {
+	background-image: url(../images/header_bg.gif);
+}
+
+.ux-filtered-column .x-grid3-hd-btn {
+	background-image: url(../images/hd-btn.gif);
+}
+*/
+.x-grid3-hd-row td.ux-filtered-column {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.ux-filtered-column.sort-asc .x-grid3-sort-icon {
+	background-image: url(../images/sort_filtered_asc.gif) !important;
+}
+
+.ux-filtered-column.sort-desc .x-grid3-sort-icon {
+	background-image: url(../images/sort_filtered_desc.gif) !important;
+}
+
+.ux-gridfilter-text-icon {
+	background-image: url(../images/find.png) !important;
+}
+
+/* Temporary Patch for Bug ??? */
+.x-menu-list-item-indent .x-menu-item-icon {
+	position: relative;
+    top: 3px;
+    left: 3px;
+	margin-right: 10px;
+}
+li.x-menu-list-item-indent {
+	padding-left:0px;
+}
+li.x-menu-list-item div {
+	display: inline;
+}
+
+
+
+
+
+
+/*
+ *
+ * ETFW
+ *
+ *
+ */
+.etfw-grid-rules{
+    margin-bottom:15px;
+}

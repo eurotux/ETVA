@@ -1,0 +1,297 @@
+sfGuardUser:
+  sfGuardUser_1:
+    username: admin
+    algorithm: sha1
+    salt: a4eacdd48c2ba8faca99e179009dd7b3
+    password: 48354fcec0b5900a742cbf79f970fcabef99699d
+    created_at: '2009-08-06T19:12:31+0200'
+    last_login: '2009-08-27T10:49:46+0200'
+    is_active: '1'
+    is_super_admin: '1'
+  sfGuardUser_2:
+    username: user
+    algorithm: sha1
+    salt: 0dd7177f4167981cde143766557a1ed2
+    password: 449a1b8524079081445f98ec1ab8aa7154d7eceb
+    created_at: '2009-08-06T19:12:31+0200'
+    is_active: '1'
+    is_super_admin: ''
+sfGuardUserProfile:
+  sfGuardUserProfile_1:
+    user_id: sfGuardUser_1
+    first_name: Ricardo
+    last_name: Gomes
+    email: rjg@eurotux.com
+sfGuardPermission:
+  sfGuardPermission_1:
+    name: admin
+    description: 'Administrator permission'
+sfGuardGroup:
+  sfGuardGroup_1:
+    name: admin
+    description: 'Administrator group'
+  sfGuardGroup_2:
+    name: default
+    description: 'Defautl group'
+sfGuardGroupPermission:
+  sfGuardGroupPermission_1_1:
+    group_id: sfGuardGroup_1
+    permission_id: sfGuardPermission_1
+  sfGuardGroupPermission_2_1:
+    group_id: sfGuardGroup_2
+    permission_id: sfGuardPermission_1
+sfGuardUserGroup:
+  sfGuardUserGroup_1_1:
+    user_id: sfGuardUser_1
+    group_id: sfGuardGroup_1
+  sfGuardUserGroup_2_2:
+    user_id: sfGuardUser_2
+    group_id: sfGuardGroup_2
+EtvaNode:
+  EtvaNode_1:
+    name: VirtAgent01
+    memtotal: '1045430272'
+    memfree: '310259712'
+    cputotal: '2'
+    ip: 10.10.20.79
+    port: '7001'
+    uid: 030d25e8-ac6b-48c0-dae8-6cb94fd49abc
+    state: '1'
+    created_at: '2009-08-06T19:14:19+0200'
+    updated_at: '2009-08-27T12:13:08+0200'
+EtvaVolumegroup:
+  EtvaVolumegroup_1:
+    node_id: EtvaNode_1
+    vg: black
+    size: '498841157632'
+    freesize: '138688856064'
+EtvaLogicalvolume:
+  EtvaLogicalvolume_1:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: testeit
+    lvdevice: /dev/black/testeit
+    size: '5242880000'
+    freesize: '0'
+    writeable: '1'
+    in_use: '0'
+  EtvaLogicalvolume_2:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: finalmente
+    lvdevice: /dev/black/finalmente
+    size: '10485760000'
+    freesize: '0'
+    writeable: '1'
+    in_use: '0'
+  EtvaLogicalvolume_3:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: dew
+    lvdevice: /dev/black/dew
+    size: '52428800000'
+    freesize: '0'
+    writeable: '1'
+    in_use: '0'
+  EtvaLogicalvolume_4:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: swap_1
+    lvdevice: /dev/black/swap_1
+    size: '6375342080'
+    freesize: '0'
+    writeable: '1'
+    in_use: '0'
+  EtvaLogicalvolume_5:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: teste2
+    lvdevice: /dev/black/teste2
+    size: '10485760000'
+    freesize: '0'
+    writeable: '1'
+    in_use: '0'
+  EtvaLogicalvolume_6:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: tre
+    lvdevice: /dev/black/tre
+    size: '10485760000'
+    freesize: '0'
+    writeable: '1'
+    in_use: '0'
+    target: xvda
+  EtvaLogicalvolume_7:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: root
+    lvdevice: /dev/black/root
+    size: '243424821248'
+    freesize: '0'
+    writeable: '1'
+    in_use: '0'
+  EtvaLogicalvolume_8:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: teste
+    lvdevice: /dev/black/teste
+    size: '10485760000'
+    freesize: '0'
+    writeable: '1'
+    in_use: '1'
+    target: xvda
+  EtvaLogicalvolume_9:
+    volumegroup_id: EtvaVolumegroup_1
+    node_id: EtvaNode_1
+    lv: etfw
+    lvdevice: /dev/black/etfw
+    size: '10737418240'
+    freesize: '0'
+    writeable: '1'
+    in_use: '0'
+EtvaServer:
+  EtvaServer_1:
+    logicalvolume_id: EtvaLogicalvolume_8
+    node_id: EtvaNode_1
+    name: bla
+    description: '5'
+    ip: 10.10.20.79
+    vnc_port: '5900'
+    uid: 8f1f6992-95f9-4ffc-b3ad-c2d80d07aab0
+    mem: '512'
+    vcpu: '0'
+    cpuset: '1'
+    location: f
+    network_cards: '13'
+    state: running
+    mac_addresses: '15'
+    sf_guard_group_id: sfGuardGroup_1
+    created_at: '2008-12-12T00:00:00+0100'
+    updated_at: '2009-08-25T13:26:16+0200'
+EtvaAgent:
+  EtvaAgent_1:
+    server_id: EtvaServer_1
+    name: bla
+    description: '5'
+    ip: 10.10.20.79    
+    uid: 8f1f6992-95f9-4ffc-b3ad-c2d80d07aab0   
+    state: running  
+    created_at: '2008-12-12T00:00:00+0100'
+    updated_at: '2009-08-25T13:26:16+0200'
+EtvaService:
+  EtvaService_1:
+    server_id: EtvaServer_1
+    name: webmin
+    description: 'Wemin admin tool'
+    params: '{"url":"http:\/\/10.10.20.116","port":"10000"}'  
+EtvaPhysicalvolume:
+  EtvaPhysicalvolume_1:
+    node_id: EtvaNode_1
+    name: sda5
+    device: /dev/sda5
+    devsize: '249801720832'
+    pv: /dev/sda5
+    pvsize: '249800163328'
+    pvfreesize: '0'
+    pvinit: '1'
+    storage_type: local
+    allocatable: '0'
+  EtvaPhysicalvolume_2:
+    node_id: EtvaNode_1
+    name: sdb1
+    device: /dev/sdb1
+    devsize: '100011147264'
+    pv: /dev/sdb1
+    pvsize: '100008984576'
+    pvfreesize: '394264576'
+    pvinit: '1'
+    storage_type: local
+    allocatable: '0'
+  EtvaPhysicalvolume_3:
+    node_id: EtvaNode_1
+    name: sdb3
+    device: /dev/sdb3
+    devsize: '149033847808'
+    pv: /dev/sdb3
+    pvsize: '149032009728'
+    pvfreesize: '138294591488'
+    pvinit: '1'
+    storage_type: local
+    allocatable: '0'
+EtvaVolumePhysical:
+  EtvaVolumePhysical_1:
+    volumegroup_id: EtvaVolumegroup_1
+    physicalvolume_id: EtvaPhysicalvolume_1
+  EtvaVolumePhysical_2:
+    volumegroup_id: EtvaVolumegroup_1
+    physicalvolume_id: EtvaPhysicalvolume_2
+  EtvaVolumePhysical_3:
+    volumegroup_id: EtvaVolumegroup_1
+    physicalvolume_id: EtvaPhysicalvolume_3 
+EtvaMac:
+  EtvaMac_1:
+    mac: '00:16:3e:0c:2c:55'
+    in_use: '1'
+  EtvaMac_2:
+    mac: '00:16:3e:15:1a:e9'
+    in_use: '0'
+  EtvaMac_3:
+    mac: '00:16:3e:4d:bd:6b'
+    in_use: '0'
+  EtvaMac_4:
+    mac: '00:16:3e:77:68:a7'
+    in_use: '0'
+  EtvaMac_5:
+    mac: '00:16:3e:0c:de:09'
+    in_use: '0'
+  EtvaMac_6:
+    mac: '00:16:3e:2a:5e:2a'
+    in_use: '0'
+  EtvaMac_7:
+    mac: '00:16:3e:25:0d:a0'
+    in_use: '0'
+  EtvaMac_8:
+    mac: '00:16:3e:0c:65:8e'
+    in_use: '0'
+  EtvaMac_9:
+    mac: '00:16:3e:23:69:67'
+    in_use: '0'
+  EtvaMac_10:
+    mac: '00:16:3e:41:ab:12'
+    in_use: '0'
+  EtvaMac_11:
+    mac: '00:16:3e:02:c2:de'
+    in_use: '0'
+  EtvaMac_12:
+    mac: '00:16:3e:15:f1:f9'
+    in_use: '0'
+  EtvaMac_13:
+    mac: '00:16:3e:64:3d:6d'
+    in_use: '0'
+  EtvaMac_14:
+    mac: '00:16:3e:2b:84:0f'
+    in_use: '0'
+  EtvaMac_15:
+    mac: '00:16:3e:77:ff:f0'
+    in_use: '0'
+EtvaVncToken:
+  EtvaVncToken_admin:
+    user_id: sfGuardUser_1
+    username: admin
+    token: mJYnktqWSXtWzT8TgRXG
+    enctoken: '{SHA}tZXs8zihd7KP50T995INPFdViYs='
+    created_at: '2009-08-27T10:49:46+0200'
+EtvaVlan:
+  EtvaVlan_1:
+    name: Management
+  EtvaVlan_2:
+    name: Operation
+  EtvaVlan_3:
+    name: toma
+  EtvaVlan_4:
+    name: teste
+EtvaNetwork:
+  EtvaNetwork_1:
+    server_id: EtvaServer_1
+    mac: '00:16:3e:0c:2c:55'
+    vlan: toma

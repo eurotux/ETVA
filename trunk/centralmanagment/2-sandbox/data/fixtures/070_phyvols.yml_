@@ -1,0 +1,20 @@
+EtvaPhysicalvolume:
+  phy1:    
+    node_id: node1
+    device: sda5
+    devsize: 249801720832
+    pv: /dev/sda5
+    pvsize: 249795297936
+    pvfreesize: 0
+    storage_type: local
+
+  phy2:
+    node_id: node1
+    device: sdb1
+    devsize: 100011147264
+    pv: /dev/sdb1
+    pvsize: 100008313488
+    pvfreesize: 97356171183
+    storage_type: local
+    
+

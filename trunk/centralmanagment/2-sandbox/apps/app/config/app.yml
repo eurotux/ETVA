@@ -1,0 +1,19 @@
+# default values
+all: 
+  rra:
+    dir: '%SF_DATA_DIR%/rra/'
+  sf_guard_plugin:
+    import_encrypted_passwords: true
+
+extdirect:
+  ds_ext_direct_plugin:
+        # Optional. Only use this parameter if you intend to create a mod_rewrite our route to a different URL for your extdirect front controller.
+        #router_url: /extdirect.php
+
+        # Optional. Set the javascript variable name for the js api spec (defaults to 'Ext.app.{YOUR_API_NAME}_API)
+        #js_var: Ext.app.EXTDIRECT_API
+
+        # Optional. Set a provider_type (defaults to remoting)
+        #provider_type: remoting
+
+ 

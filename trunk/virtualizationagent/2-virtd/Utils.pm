@@ -1,0 +1,785 @@
+#!/usr/bin/perl
+# Copywrite Eurotux 2009
+# 
+# CMAR 2009/04/14 (cmar@eurotux.com)
+
+# Utils
+#   util functions
+
+package Utils;
+
+use strict;
+
+use Socket;
+use POSIX;
+use Digest::MD5 qw(md5_hex md5_base64);
+use IO::Handle;
+use HTML::Entities;
+use SOAP::Lite;
+
+BEGIN {
+    # this is the worst damned warning ever, so SHUT UP ALREADY!
+    $SIG{__WARN__} = sub { warn @_ unless $_[0] =~ /Use of uninitialized value/ };
+
+    require Exporter;
+    use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $CRLF);
+    $VERSION = '0.0.1';
+    @ISA = qw( Exporter );
+    @EXPORT = qw( trim tokey enckey
+                    plog now nowStr retErr retOk isError isOk cmd_exec
+                    loadconfigfile saveconfigfile random_uuid
+                    get_conf set_conf random_mac tmpfile tmpdir
+                    fieldsAsString
+                    decode_content encode_content
+                    make_soap make_soap_args
+                    str2size prettysize
+                    list_processes find_procname
+                     );
+}
+
+my %CONF;
+
+sub trim {
+    my ($str) = @_;
+    $str =~ s/^\s+//;
+    $str =~ s/\s+$//;
+    return $str;
+}
+
+sub tokey {
+    my ($str) = @_;
+    my $key = trim($str);
+    $key =~ s/\s/_/g;
+    $key =~ s/\W//g;
+    return $key;
+}
+
+sub enckey {
+    my ($str) = @_;
+    my $key = trim($str);
+    $key =~ s/\s/_/g;
+    $key =~ s/[^a-zA-Z0-9_.-]/_/g;
+    return $key;
+}
+
+sub plog {
+	print STDERR @_,"\n";
+}
+
+sub now {
+    my ($secs) = @_;
+    $secs = 0 if( !$secs );
+    
+    return time()+$secs;
+}
+sub nowStr {
+    my ($secs,$fmt) = @_;
+    $fmt ||= '%Y-%m-%d %H:%M:%S';
+    return  strftime($fmt,localtime(now($secs)));    
+}
+
+sub retErr {
+    my ($type,$msg,$code) = @_;
+    
+    # TODO: 
+    plog "ERROR ($type): $msg"; 
+    my %E = ( '_error_'=>1, '_errorcode_'=>$code, '_errorstring_'=>$type, '_errordetail_'=>$msg );
+    return wantarray() ? %E : \%E;
+}
+sub retOk {
+    my ($type,$msg,$code,$obj) = @_;
+
+    plog "RETOK ($type)[$code]: $msg";
+    my %O = ( '_oktype_'=>$type, '_okmsg_'=>$msg );
+    $O{'_okcode_'} = $code if( $code );
+    $O{'_obj_'} = $obj if( $obj );
+    return wantarray() ? %O : \%O;
+}
+sub isError {
+    my ($R) = my %E = @_;
+    if( ( ref($R) ) eq 'HASH' && $R->{'_error_'} ){
+        return 1;
+    }
+    if( %E && $E{'_error_'} ){
+        return 1;
+    }
+    return 0;
+}
+sub isOk {
+    my ($R) = my %E = @_;
+    if( ( ref($R) ) eq 'HASH' && $R->{'_ok_'} ){
+        return 1;
+    }
+    if( %E && $E{'_ok_'} ){
+        return 1;
+    }
+    return 0;
+}
+
+sub cmd_exec {
+    my @cmds = @_;
+    
+    IO::Handle->autoflush(1);
+
+    my $tmpdir = "/tmp";
+    my $randtok = substr(md5_hex( rand(time()) ),0,5);
+    my $tmpfile = "cmd_exec_${randtok}.log";
+    my $fptmpfile = "${tmpdir}/${tmpfile}";
+    push(@cmds,">$fptmpfile","2>&1");
+    my $cmd_str = join(" ",@cmds);
+
+    my $e = system($cmd_str);
+
+    my $msg = "";
+    open(M,"$fptmpfile");
+    while(<M>){ $msg .= $_; }
+    close(M);
+    unlink($fptmpfile);
+
+    plog("system exec: $cmd_str ");
+    plog("  error: $e ");
+    plog("  message: $msg ");
+
+    return wantarray() ? ($e,$msg) : $e;
+}
+
+# load config file
+sub loadconfigfile {
+    sub confrefsect {
+        my $F = shift;
+        my $sect = shift;
+        my @as = @_;
+
+        my $A;
+        $F->{"$sect"} = {} if( !$F->{"$sect"} );
+        if( scalar(@as) ){
+            $A = confrefsect($F->{"$sect"},@as);
+        } else {
+            $A = $F->{"$sect"};
+        }
+        return $A;
+    }
+
+    my ($FILE,$CONF,$pq) = @_;
+    $pq ||= 0;  # parse quotes
+
+    open(C,$FILE);
+    my $C = $CONF;
+    while(<C>){
+        chomp;
+        my $line = $_;
+        next if( !$line );
+
+        next if( $line =~ m/^(\s+)?(#|--|;)/ );
+
+        # no spaces line
+        my $sline = $line;
+        $sline =~ s/\s//g;
+        if( my ($mline) = ($sline =~ m/^\s*\[((\w+:?)+)\]/) ){
+            my ($sect) = my @asect = split(/:/,$mline);
+            if( ( scalar(@asect) == 1 )  && ( lc($sect) eq "geral" ) ){
+                $C = $CONF;
+            } else {
+                $C = confrefsect($CONF,@asect); 
+            }
+        } else {
+            my ($f,$v) = split(/=/,$line,2);
+            my $cf = trim($f);
+            my $cv = trim($v);
+            if( $pq ){  # remove quotes
+                $cv =~ s/^\s*["']//;
+                $cv =~ s/["']\s*$//;
+            }
+            $C->{"$cf"} = $cv;
+        }
+    }
+    close(C);
+    return wantarray() ? %$CONF : $CONF;
+}
+# save config file
+sub saveconfigfile {
+    sub saveconfigfile_rec {
+        my ($fh,$C,$s,$pq,$ns) = @_;
+        # Only hash implemented
+        if( ref($C) eq 'HASH' ){
+            for my $k ( sort {(!ref($C->{$b})) <=> (!ref($C->{$a}))} keys %$C ){
+                my $v = $C->{"$k"};
+                if( ref($v) ){
+                    my $sec = $s;
+                    $sec .= ":" if( $sec );
+                    $sec .= $k;
+                    print $fh "[$sec]","\n";
+                    saveconfigfile_rec($fh,$v,$sec,$pq);
+                } else {
+                    if( $pq ){ # save value with quotes
+                        $v = '"'.$v.'"' if( $v =~ /\s/ && $v =~ /^["']/);
+                    }
+                    my $str = $ns ? "$k=$v" : "$k = $v";
+                    print $fh $str,"\n";
+                }
+            }
+        }
+    }
+    my ($FILE,$CONF,$append,$nocom,$pq,$ns) = @_;
+    my $com = !$nocom;
+    $pq ||= 0; # using quotes
+    $ns ||= 0; # no spaces
+
+    my $mode = ">"; # mode write
+    $mode = ">>" if( $append ); # mode append
+
+    my $FH;
+    open($FH,$mode,"$FILE");
+    print $FH "# -- This part was generated --","\n" if( $com );
+    saveconfigfile_rec($FH,$CONF,"",$pq,$ns);
+    print $FH "# -- End --","\n" if( $com );
+    close($FH);
+}
+
+# random_uuid
+#   generate random uuid in hexadecimal
+sub random_uuid {
+    return random_uuid_hex();
+}
+# random_uuid_base64
+#   generate random uuid in base64
+sub random_uuid_base64 {
+    my $uuid = "";
+    
+    my $uuid = join('-',
+                        substr(md5_base64(rand(time())),0,8),
+                        substr(md5_base64(rand(time())),0,4),
+                        substr(md5_base64(rand(time())),0,4),
+                        substr(md5_base64(rand(time())),0,4),
+                        substr(md5_base64(rand(time())),0,12),
+                        ); 
+    return $uuid;
+}
+# random UUID
+#   Version 4 (random)
+#   from http://en.wikipedia.org/wiki/UUID
+#       xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+#           with hexadecimal digits x and hexadecimal digits 8, 9, A, or B for y.
+sub random_uuid_hex {
+    my $uuid = "";
+    
+    my @y = qw( 8 9 a b );
+    my $i = int(rand(scalar(@y)));
+    my $uuid = join("-",
+                        substr(md5_hex(rand(time())),0,8),
+                        substr(md5_hex(rand(time())),0,4),
+                        "4".substr(md5_hex(rand(time())),0,3),
+                        $y[$i].substr(md5_hex(rand(time())),0,3),
+                        substr(md5_hex(rand(time())),0,12),
+                        ); 
+    return $uuid;
+}
+
+# random_mac
+#  Generate a random MAC address.
+#    http://standards.ieee.org/regauth/oui/oui.txt.
+#
+#    return: MAC address string
+sub random_mac {
+    my $mac = join(":",
+                        sprintf('%02x',0x00),
+                        sprintf('%02x',0x16),
+                        sprintf('%02x',0x3e),
+                        sprintf('%02x',rand(127)),
+                        sprintf('%02x',rand(255)),
+                        sprintf('%02x',rand(255))
+                    );
+    return $mac;
+}
+
+# get configuration hash
+sub get_conf {
+    my ($force,$cfg_file) = @_;
+    if( $force || !%CONF ){
+
+        $cfg_file = $cfg_file || $ENV{'CFG_FILE'};
+
+        if( -e "$cfg_file" ){
+            plog "load config file from '$cfg_file'","\n";
+            %CONF = loadconfigfile($cfg_file,\%CONF);
+            # configuration file
+            $CONF{'CFG_FILE'} = $cfg_file;
+
+            my %UC = ();   # conf to update
+
+            # uuid define
+            $UC{'uuid'} = $CONF{'uuid'} = random_uuid() if( !$CONF{'uuid'} );
+
+            # IP
+            $UC{'IP'} = $CONF{'IP'} = $CONF{'LocalIP'} = get_ip(%CONF) if( !$CONF{'IP'} && !$CONF{'LocalIP'} );
+            $UC{'IP'} = $CONF{'IP'} = $CONF{'LocalIP'} if( !$CONF{'IP'} );
+            $CONF{'LocalIP'} = $CONF{'IP'} if( !$CONF{'LocalIP'} );
+
+            # Port
+            $UC{'Port'} = $CONF{'Port'} = $CONF{'LocalPort'} = get_port() if( !$CONF{'Port'} && !$CONF{'LocalPort'} );
+            $UC{'Port'} = $CONF{'Port'} = $CONF{'LocalPort'} if( !$CONF{'Port'} );
+            $CONF{'LocalPort'} = $CONF{'Port'} if( !$CONF{'LocalPort'} );
+            if( !$CONF{'Port'} ){
+                die "ERROR: no Port defined \n";
+            }
+
+            # name
+            $UC{'name'} = $CONF{'name'} = get_name(%CONF) if( !$CONF{'name'} );
+            if( !isNameValid($CONF{'name'}) ){
+                die "ERROR: name is not valid\n";
+            }
+
+            if( %UC ){
+                # upade config
+                saveconfigfile($CONF{'CFG_FILE'},\%UC,1);
+            }
+        } else {
+            die "ERROR: Config file not defined\n";
+        }
+    }
+    return wantarray() ? %CONF : \%CONF;
+}
+
+# set configuration hash
+sub set_conf {
+    my ($cfg_file,%conf) = @_;
+
+    %CONF = (%CONF,%conf);
+
+    $cfg_file = $cfg_file || $ENV{'CFG_FILE'};
+
+    plog "set config file from '$cfg_file'","\n";
+
+    # configuration file
+    $CONF{'CFG_FILE'} = $cfg_file;
+
+    # uuid define
+    $CONF{'uuid'} = random_uuid() if( !$CONF{'uuid'} );
+
+    # IP
+    $CONF{'IP'} = $CONF{'LocalIP'} = get_ip(%CONF) if( !$CONF{'IP'} && !$CONF{'LocalIP'} );
+    $CONF{'IP'} = $CONF{'LocalIP'} if( !$CONF{'IP'} );
+    $CONF{'LocalIP'} = $CONF{'IP'} if( !$CONF{'LocalIP'} );
+
+    # Port
+    $CONF{'Port'} = $CONF{'LocalPort'} = get_port() if( !$CONF{'Port'} && !$CONF{'LocalPort'} );
+    $CONF{'Port'} = $CONF{'LocalPort'} if( !$CONF{'Port'} );
+    $CONF{'LocalPort'} = $CONF{'Port'} if( !$CONF{'LocalPort'} );
+    if( !$CONF{'Port'} ){
+        die "ERROR: no Port defined \n";
+    }
+
+    # name
+    $CONF{'name'} = get_name(%CONF) if( !$CONF{'name'} );
+    if( !isNameValid($CONF{'name'}) ){
+        die "ERROR: name is not valid\n";
+    }
+
+    # upade config
+    saveconfigfile($CONF{'CFG_FILE'},\%CONF);
+}
+sub get_name {
+    my %H = @_;
+    my $name;
+
+    if( my $ip = $H{'ip'} ){
+        $name = scalar gethostbyaddr(inet_aton("$ip"), AF_INET); 
+    }
+    if( !$name ){
+        open(N,"/bin/uname -n |");
+        my $sl = <N>;
+        chomp $sl;
+        # only first field
+        ($name) = split(/\./,$sl);
+        close(N);
+    }
+    return $name;
+}
+sub get_port {
+    my $port = 7000;
+
+    while( !( new IO::Socket::INET( Listen => 1, LocalPort => $port ) ) ){
+        # Just to prevent
+        die "No more ports available." if( $port >= 65535 );
+        $port++;
+    }
+    return $port;
+}
+sub get_ip {
+    my %H = @_;
+
+    my $ip;
+
+    my $name = $H{'name'};
+    if( !$name ){ $name = get_name(); }
+
+    if( $name && ( $name ne 'localhost' ) ){
+        my $iad = inet_aton($name);
+        if( $iad ){
+            if( $ip = inet_ntoa($iad) ){
+                return $ip;
+            }
+        }
+    }
+
+    # get IP from default interface
+    my %if = get_defaultinterface();
+    if( $ip = $if{"address"} ){
+        return $ip;
+    }
+
+    # return localhost by default
+    return "127.0.0.1";
+}
+sub get_listroutes {
+    my @list = ();
+    open(R,"/bin/netstat -rn 2>/dev/null |");
+    while(<R>){
+        if( /^([0-9\.]+)\s+([0-9\.]+)\s+([0-9\.]+)\s+\S+\s+\S+\s+\S+\s+\S+\s+(\S+)/ ){
+            push @list, { 'dest'=>$1,
+                            'gateway'=>$2,
+                            'netmask'=>$3,
+                            'iface'=>$4,
+                            'default'=> ($1 eq '0.0.0.0')? 1:0
+                        };
+        }
+    }
+    close(R);
+
+    return wantarray() ? @list : \@list;
+}
+sub get_defaultroute {
+    if( my ($DR) = grep { $_->{'default'} || ( $_->{'dest'} eq '0.0.0.0' ) } get_listroutes() ){
+        return wantarray() ? %$DR : $DR;
+    }
+    return;
+}
+sub get_allinterfaces {
+    open(F,"/sbin/ifconfig -a |");
+    my $if;
+    my %IFaces = ();
+    while(<F>){ 
+        if( /^(\S+)/ ){
+            $if = $1;
+        }
+        if( $if ){
+            if( /^([^:\s]+)/ ){
+                $IFaces{"$if"}{"name"} = $1;
+            }
+            if( /^(\S+)/ ){
+                $IFaces{"$if"}{"fullname"} = $1;
+            }
+            if( /^(\S+):(\d+)/ ){
+                $IFaces{"$if"}{"virtual"} = $2;
+            }
+            if( /HWaddr (\S+)/ ){
+                $IFaces{"$if"}{'macaddress'} = $1
+            }
+            if( /inet addr:(\S+)/ ){
+                $IFaces{"$if"}{'address'} = $1;
+                $IFaces{"$if"}{'active'} = 1;
+            }
+            if( /Mask:(\S+)/ ){
+                $IFaces{"$if"}{'netmask'} = $1;
+            }
+            if( /Bcast:(\S+)/ ){
+                $IFaces{"$if"}{'broadcast'} = $1;
+            }
+            if( /MTU:(\d+)/ ){
+                $IFaces{"$if"}{'mtu'} = $1;
+            }
+            if( /P-t-P:(\S+)/ ){
+                $IFaces{"$if"}{'ptp'} = $1;
+            }
+
+            if( /\sUP\s/ ){
+                $IFaces{"$if"}{'up'} = 1;
+            }
+            if( /\sPROMISC\s/ ){
+                $IFaces{"$if"}{'promisc'} = 1;
+            }
+            $IFaces{"$if"}{'edit'} = ($if !~ /^ppp/)? 1:0;
+
+            $IFaces{"$if"}{'type'} = iface_type($if);
+
+            # TODO inet6
+        }
+    }
+    close(F);
+    return wantarray() ? %IFaces : \%IFaces;
+}
+
+# iface_type(name)
+# Returns a human-readable interface type name
+sub iface_type { 
+    my ($name) = @_;
+    if ($name =~ /^(.*)\.(\d+)$/) {
+        return iface_type("$1") . " VLAN";
+    }
+    return "PPP" if ($name =~ /^ppp/);
+    return "SLIP" if ($name =~ /^sl/);
+    return "PLIP" if ($name =~ /^plip/);
+    return "Ethernet" if ($name =~ /^eth/);
+    return "Wireless Ethernet" if ($name =~ /^(wlan|ath)/);
+    return "Arcnet" if ($name =~ /^arc/);
+    return "Token Ring" if ($name =~ /^tr/);
+    return "Pocket/ATP" if ($name =~ /^atp/);
+    return "Loopback" if ($name =~ /^lo/);
+    return "ISDN rawIP" if ($name =~ /^isdn/);
+    return "ISDN syncPPP" if ($name =~ /^ippp/);
+    return "CIPE" if ($name =~ /^cip/);
+    return "VmWare" if ($name =~ /^vmnet/);
+    return "Wireless" if ($name =~ /^wlan/);
+    return "Bonded" if ($name =~ /^bond/);
+    return "Unknown";
+}
+
+sub get_defaultinterface {
+    if( my $DR = get_defaultroute() ){
+        my $if = $DR->{"iface"};
+        my %IFs = get_allinterfaces();
+        if( my $IF = $IFs{"$if"} ){
+            return wantarray() ? %$IF : $IF;
+        }
+    }
+    return;
+}
+sub isNameValid {
+    my ($name) = @_;
+    my $v = 1;
+    if( !$name ){ $v = 0; }
+    if( $name eq 'localhost' ){ $v = 0; }
+    if( $name eq 'localhost.localdomain' ){ $v = 0; }
+    return $v;
+}
+sub tmpfile {
+    my ($pr) = @_;
+    my $randtok = substr(md5_hex( rand(time()) ),0,5);
+    return $pr ? "$pr.$randtok" : $randtok ;
+}
+sub tmpdir {
+    my ($pr) = @_;
+    my $randtok = substr(md5_hex( rand(time()) ),0,5);
+    my $dir = $pr ? "$pr.$randtok" : $randtok ;
+    mkdir $dir;
+    return $dir;
+}
+
+# fieldsAsString
+#   convert fields to string
+#   f1=v1,f2=v2,...,fn=vn
+#
+#   args: hash, list of fields
+#   return: string
+sub fieldsAsString {
+    my ($N,$list) = @_;
+    my @keys = $list ? @$list : keys %$N;
+    my $str = "";
+    for my $f (@keys){
+        $str .= "," if( $str );
+        $str .= "$f=$N->{$f}" if( $N->{"$f"} );
+    }
+    return $str;
+}
+
+sub encode_content {
+    my ($cnt,$nashash) = @_;
+    $nashash ||= 0;  # flag to disable encode as hash
+
+    my $res = {};
+    if( ref($cnt) eq 'ARRAY' ){
+        # SOAP doenst work well with array
+        #   convert it intro hash
+        my $cnt_as_hash = $nashash ? [] : {};
+        for(my $i=0; $i<scalar(@$cnt); $i++){
+            $nashash ? 
+                $cnt_as_hash->[$i] = encode_content($cnt->[$i],$nashash)
+                : $cnt_as_hash->{"arrayi-$i"} = encode_content($cnt->[$i],$nashash);
+
+        }
+        $res = $cnt_as_hash;
+    } elsif( ref($cnt) eq 'HASH' ){
+        for my $k ( keys %$cnt ){
+           my $ek = enckey($k);
+           $res->{"$ek"} = encode_content($cnt->{"$k"},$nashash);
+        }
+    } else {
+        $cnt = '' if( not defined $cnt );
+        $res = encode_entities($cnt);
+    } 
+    return $res;
+}
+
+sub decode_content {
+    my ($cnt) = @_;
+
+    if( ref($cnt) eq "ARRAY" ){
+        for(my $i=0; $i<scalar(@$cnt); $i++){
+            $cnt->[$i] = decode_content($cnt->[$i]);
+        }
+    } elsif( ref($cnt) ){   # Hash or object
+        my $is_array = 0;
+        for my $key (keys %$cnt){
+            if( $key =~ m/soap_/ ){
+                delete $cnt->{$key};
+            } else {
+                if( $key =~ m/arrayi-/ ){
+                    $is_array = 1;
+                }
+                $cnt->{"$key"} = decode_content($cnt->{"$key"});
+            }
+        }
+        if( $is_array ){
+            sub tonum {
+                my ($x) = @_;
+                my ($d) = ($x =~ m/arrayi-(\d+)/);
+                return $d;
+            }
+            my @as_array = ();
+            for my $k (sort {tonum($a) <=> tonum($b)} keys %$cnt){
+                push(@as_array,$cnt->{"$k"});
+            }
+            $cnt = \@as_array;
+        }
+    } else {
+        decode_entities($cnt);
+    }
+    return $cnt;
+}
+
+sub make_soap_args {
+    my ($serializer,@args) = @_;
+
+    my $soapenc = $serializer->find_prefix($SOAP::Constants::NS_ENC);
+
+    my @rargs = ();
+    while(@args){
+        my $k = shift(@args);
+        my $v = shift(@args);
+        if( ref($v) eq 'HASH' ){
+            push(@rargs, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) )) );
+        } elsif( ref($v) eq 'ARRAY' ){
+            my $c = scalar(@$v);
+            my %attr = ( "$soapenc:arrayType"=>"xsd:anyType[$c]", "xsi:type"=>"$soapenc:Array" );
+#            $attr{"xsi:nil"} = "true" if( !$c );
+            push(@rargs, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
+        } else {
+            push(@rargs, SOAP::Data->name( $k => $v )); 
+        }
+    }
+
+    return @rargs;
+}
+sub make_soap {
+    my ($serializer,$st) = @_;
+
+    my $soapenc = $serializer->find_prefix($SOAP::Constants::NS_ENC);
+
+    my @res = ();
+    if( ref($st) eq 'HASH' ){
+        my @sres = ();
+        for my $k ( keys %$st ){
+            my $v = $st->{"$k"};
+            if( ref($v) eq 'HASH' ){
+                push(@sres, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) )) );
+            } elsif( ref($v) eq 'ARRAY' ){
+                my $c = scalar(@$v);
+                my %attr = ( "$soapenc:arrayType"=>"xsd:anyType[$c]", "xsi:type"=>"$soapenc:Array" );
+#                $attr{"xsi:nil"} = "true" if( !$c );
+                push(@sres, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
+            } else {
+                push(@sres, SOAP::Data->name( $k => $v )); 
+            }
+        }
+        push(@res, @sres);
+    } elsif( ref($st) eq 'ARRAY' ){
+        if( @$st ){
+            my @sres = ();
+            for my $e (@$st){
+                if( ref($e) eq 'HASH' ){
+                    push(@sres, SOAP::Data->name('item' => \SOAP::Data->value( make_soap($serializer,$e) ) ));
+                } elsif( ref($e) eq 'ARRAY' ){
+                    my $c = scalar(@$e);
+                    my %attr = ( "$soapenc:arrayType"=>"xsd:anyType[$c]", "xsi:type"=>"$soapenc:Array" );
+#                    $attr{"xsi:nil"} = "true" if( !$c );
+                    push(@sres, SOAP::Data->name('item' => \SOAP::Data->value( make_soap($serializer,$e) ) )->attr( \%attr ));
+                } else {
+                    push(@sres, SOAP::Data->name('item' => $e ));
+                }
+            }
+            push(@res, SOAP::Data->name("arrayOfItems" => @sres ) );
+        }
+    } else {
+        push(@res,$st);
+    }
+
+    return @res;
+}
+
+sub str2size {
+    my ($str) = @_;
+    my ($size,$t) = ($str =~ m/([0-9.]+)(\w+)/);
+    $size = 0 if( !$size );
+
+    $size = $size * 1024 if( $t =~ /K/i );              # convert kbytes to bytes
+    $size = $size * 1024 * 1024 if( $t =~ /M/i );       # convert mbytes to bytes
+    $size = $size * 1024 * 1024 * 1024 if( $t =~ /G/i );# convert Gbytes to bytes
+
+    my $int_size = int($size);              # convert to int
+    $int_size ++ if( $int_size < $size );   # increase one if less then original
+
+    return $int_size;
+}
+sub prettysize {
+    my ($size) = @_;
+    
+    my $psize = $size || 0;
+    my $spsize = "${psize}B";
+    
+    if( $psize > 1000 ){
+        $psize = $psize / 1024;
+        $spsize = sprintf("%.2fKb",$psize);
+    }
+    if( $psize > 1000 ){
+        $psize = $psize / 1024;
+        $spsize = sprintf("%.2fMb",$psize);
+    }
+    if( $psize > 1000 ){
+        $psize = $psize / 1024;
+        $spsize = sprintf("%.2fGb",$psize);
+    }
+    return $spsize;
+}
+
+# list_processes
+#   list processes with ps command
+sub list_processes {
+    
+    my @list = ();
+    open(P,"/bin/ps fax |");
+    my $fst=<P>;
+    while(<P>){
+        chomp;
+        if( /^\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(.+)$/ ){
+            
+            push(@list, { pid=>$1,
+                            tty=>$2,
+                            'stat'=>$3,
+                            'time'=>$4,
+                            args=>$5 });
+        }
+    }
+    close(P);
+
+    return wantarray() ? @list : \@list;
+}
+
+# find_procname
+#   find process on list_processes by name
+sub find_procname {
+    my ($name) = @_;
+    my @l = grep { $_->{"args"} =~ /$name/ } list_processes();
+    return wantarray() ? @l : \@l;
+}
+
+1;

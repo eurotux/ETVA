@@ -1,0 +1,55 @@
+--- php-5.2.10/ext/imap/php_imap.c.pgmfree
++++ php-5.2.10/ext/imap/php_imap.c
+@@ -2626,7 +2626,7 @@
+ {
+ 	zval **streamind, **pgm, **rev, **flags, **criteria, **charset;
+ 	pils *imap_le_struct;
+-	unsigned long *slst, *sl;
++	unsigned long *slst, *sl, lflags;
+ 	char *search_criteria;
+ 	SORTPGM *mypgm=NIL;
+ 	SEARCHPGM *spg=NIL;
+@@ -2650,6 +2650,9 @@
+ 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Search options parameter has to be greater than or equal to 0");
+ 			RETURN_FALSE;
+ 		}
++		lflags = Z_LVAL_PP(flags) | SE_FREE;
++	} else {
++		lflags = SE_FREE;
+ 	}
+ 	if (myargc >= 5) {
+ 		convert_to_string_ex(criteria);
+@@ -2668,11 +2671,7 @@
+ 	mypgm->function = (short) Z_LVAL_PP(pgm);
+ 	mypgm->next = NIL;
+ 
+-	slst = mail_sort(imap_le_struct->imap_stream, (myargc == 6 ? Z_STRVAL_PP(charset) : NIL), spg, mypgm, (myargc >= 4 ? Z_LVAL_PP(flags) : NIL));
+-
+-	if (spg) {
+-		mail_free_searchpgm(&spg);
+-	}
++	slst = mail_sort(imap_le_struct->imap_stream, (myargc == 6 ? Z_STRVAL_PP(charset) : NIL), spg, mypgm, lflags);
+ 
+ 	array_init(return_value);
+ 	if (slst != NIL && slst != 0) {
+@@ -3701,7 +3700,7 @@
+ 		flags = SE_FREE;
+ 	} else {
+ 		convert_to_long_ex(search_flags);
+-		flags = Z_LVAL_PP(search_flags);
++		flags = Z_LVAL_PP(search_flags) | SE_FREE;
+ 		if (argc == 4) {
+ 			convert_to_string_ex(charset);
+ 		}
+@@ -3712,10 +3711,6 @@
+ 
+ 	mail_search_full(imap_le_struct->imap_stream, (argc == 4 ? Z_STRVAL_PP(charset) : NIL), pgm, flags);
+ 
+-	if (pgm) {
+-		mail_free_searchpgm(&pgm);
+-	}
+-
+ 	if (IMAPG(imap_messages) == NIL) {
+ 		efree(search_criteria);
+ 		RETURN_FALSE;
+

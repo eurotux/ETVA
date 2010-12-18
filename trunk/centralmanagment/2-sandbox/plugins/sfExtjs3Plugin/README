@@ -1,0 +1,490 @@
+= sfExtjs3Plugin =
+
+= sfExtjs3Plugin =
+
+Write ExtJS3.0.0 code in PHP
+
+== Installation ==
+
+Installation is only available via SVN.'''
+Extjs libraries have been removed due to licensing concerns.'''
+To use, download the Extjs3 full package from www.extjs.com.'''
+Create an alias in your webserver config for folder /sfExtjs3.'''
+The folder the alias points to needs to contain 2 folders, "extjs" and "patches".'''
+Then extract theh Extjs3 package to the "extjs" folder.'''
+
+=== Single Checkout ===
+Move into your project directory and issue the following command:
+
+{{{
+svn export http://svn.symfony-project.com/plugins/sfExtjs3Plugin/trunk/ ./plugins/sfExtjs3Plugin
+}}}
+
+=== Automatic Checkout ===
+
+If you are already using subversion for your project, and want to automatically include the latest version of this plugin on each svn update, the correct way to include the sfExtjs3Plugin repository is to define svn:externals.
+Go to your symfony project
+
+svn propedit svn:externals plugins
+
+in this file add
+
+
+{{{
+sfExtjs3Plugin http://svn.symfony-project.com/plugins/sfExtjs3Plugin/trunk/
+}}}
+
+This way, every time you use svn update, it will get the latest version of sfExtjs3Plugin from the symfony repository
+
+== Usage - A short Tutorial ==
+=== Preparation ===
+
+Include The Helper and create a new instance of the sfExtjs3Plugin:
+
+{{{
+#!php
+<?php
+  $sfExtjs3Plugin = new sfExtjs3Plugin(array('theme'=>'gray'), array('css' => '/sfExtjsThemePlugin/css/symfony-extjs.css'));
+?>
+}}}
+
+To add the sources for css and js to the html head. and writing an opening Tag for javascript add the following OUTSIDE your head (so inside the body) of your HTML document.
+
+{{{
+#!php
+<?php
+  $sfExtjs3Plugin->load();
+  $sfExtjs3Plugin->begin();
+?>
+}}}
+
+=== Accessing Ext3 ===
+sfExtjs3Plugin has a magic method __call to render calls to Extjs classes automagically. At the moment the following classes are supported:
+|| '''Method''' || '''Ext Class''' ||
+||!JsonReader    || [http://extjs.com/deploy/dev/docs/?class=Ext.data.JsonReader Ext.data.JsonReader] ||
+||Store         || [http://extjs.com/deploy/dev/docs/?class=Ext.data.Store Ext.data.Store] ||
+||SimpleStore   || [http://extjs.com/deploy/dev/docs/?class=Ext.data.SimpleStore Ext.data.SimpleStore] ||
+||!GroupingStore || [http://extjs.com/deploy/dev/docs/?class=Ext.data.GroupingStore Ext.data.GroupingStore] ||
+||!HttpProxy     || [http://extjs.com/deploy/dev/docs/?class=Ext.data.HttpProxy Ext.data.HttpProxy] ||
+||Template      || [http://extjs.com/deploy/dev/docs/?class=Ext.Template Ext.Template] ||
+||XTemplate     || [http://extjs.com/deploy/dev/docs/?class=Ext.XTemplate Ext.XTemplate] ||
+|| '''Widgets''' || ||
+||!BoxComponent      || [http://extjs.com/deploy/dev/docs/?class=Ext.BoxComponent Ext.BoxComponent] ||
+||Button            || [http://extjs.com/deploy/dev/docs/?class=Ext.Button Ext.Button] ||
+||!GridPanel         || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.GridPanel Ext.grid.GridPanel] ||
+||!ColumnModel       || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.ColumnModel Ext.grid.ColumnModel] ||
+||!GridView          || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.GridView Ext.grid.GridView] ||
+||!GroupingView      || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.GroupingView Ext.grid.GroupingView] ||
+||!EditorGridPanel   || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.EditorGridPanel Ext.grid.EditorGridPanel] ||
+||!RowSelectionModel || [http://extjs.com/deploy/dev/docs/?class=Ext.grid.RowSelectionModel Ext.grid.RowSelectionModel] ||
+||Panel             || [http://extjs.com/deploy/dev/docs/?class=Ext.Panel Ext.Panel] ||
+||!TabPanel          || [http://extjs.com/deploy/dev/docs/?class=Ext.TabPanel Ext.TabPanel] ||
+||!FormPanel         || [http://extjs.com/deploy/dev/docs/?class=Ext.FormPanel Ext.FormPanel] ||
+||Viewport          || [http://extjs.com/deploy/dev/docs/?class=Ext.Viewport Ext.Viewport] ||
+||Window            || [http://extjs.com/deploy/dev/docs/?class=Ext.Window Ext.Window] ||
+||!DateField         || [http://extjs.com/deploy/dev/docs/?class=Ext.form.DateField Ext.form.DateField] ||
+||!TextField         || [http://extjs.com/deploy/dev/docs/?class=Ext.form.TextField Ext.form.TextField] ||
+||!TimeField         || [http://extjs.com/deploy/dev/docs/?class=Ext.form.TimeField Ext.form.TimeField] ||
+||!HtmlEditor        || [http://extjs.com/deploy/dev/docs/?class=Ext.form.HtmlEditor Ext.form.HtmlEditor] ||
+||!ComboBox        || [http://extjs.com/deploy/dev/docs/?class=Ext.form.ComboBox Ext.form.ComboBox] ||
+||Menu              || [http://extjs.com/deploy/dev/docs/?class=Ext.menu.Menu Ext.menu.Menu] ||
+||Item              || [http://extjs.com/deploy/dev/docs/?class=Ext.menu.Item Ext.menu.Item] ||
+||!CheckItem         || [http://extjs.com/deploy/dev/docs/?class=Ext.menu.CheckItem Ext.menu.CheckItem] ||
+||Toolbar           || [http://extjs.com/deploy/dev/docs/?class=Ext.Toolbar Ext.Toolbar] ||
+||!MenuButton       || [http://coldfusion.shigeru-nakagaki.com/CFIDE/scripts/ajax/ext/docs/output/Ext.Toolbar.MenuButton.html Ext.Toolbar.MenuButton] ||
+||Fill              || [http://extjs.com/deploy/dev/docs/?class=Ext.Toolbar.Fill Ext.Toolbar.Fill] ||
+||!PagingToolbar     || [http://extjs.com/deploy/dev/docs/?class=Ext.PagingToolbar Ext.PagingToolbar] ||
+||!MessageBox        || [http://extjs.com/deploy/dev/docs/?class=Ext.MessageBox Ext.MessageBox] ||
+||!KeyMap            || [http://extjs.com/deploy/dev/docs/?class=Ext.KeyMap Ext.KeyMap] ||
+
+An example on how to access the methods, the parameter is a simple array with the config options:
+
+{{{
+#!php
+<?php
+$source = $sfExtjs3Plugin->TabPanel(
+  array(
+    'id' => 'tabPanel',
+    'title' => 'A title',
+    'deferredRender' => false,
+    'resizeTabs' => true,
+    'activeTab'  => 0,
+    'border'     => false,
+    'plain'      => false,
+    'tabWidth'   => 200,
+    'items'      => array
+    (
+      $sfExtjs3Plugin->asVar($item1source), $sfExtjs3Plugin->asVar($item2source)
+    )
+  )
+);
+?>
+}}}
+
+=== JavaScript output through sfExtjs3Plugin ===
+
+The plugin knows two ways to return the code
+
+Simple source in a String, parses evaled PHP:
+
+{{{
+#!php
+<?php
+  $sfExtjs3Plugin->asVar($source)
+?>
+}}}
+
+Packs the source in a method. Also parses evaled PHP:
+
+{{{
+#!php
+<?php
+  $sfExtjs3Plugin->asMethod($source)
+?>
+}}}
+
+=== Create the Application ===
+After you initiated all widgets you might want to create the application:
+
+{{{
+#!php
+<?php
+$sfExtjs3Plugin->beginApplication(
+  array(
+    'name'   => 'App',
+    'private' => array
+    (
+      'test' => 'ok'
+    ),
+    'public' => array
+    (
+      // public attributes
+      'counter' => '0',
+      // public methods
+      'init'    =>  $sfExtjs3Plugin->asMethod("Ext.QuickTips.init(); $source"),
+      'getTest' => $sfExtjs3Plugin->asMethod('return test;')
+    )
+  )
+);
+?>
+}}}
+
+Now you can enter your own javascript-code. When you're finished, write the closing tag for the application:
+
+{{{
+#!php
+<?php
+  $sfExtjs3Plugin->endApplication();
+?>
+}}}
+
+As the Last thing you have to call the init method of the Ext Application class:
+{{{
+#!php
+<?php
+  $sfExtjs3Plugin->initApplication('App');
+?>
+}}}
+
+=== Write the closing Tag ===
+At the end of the code you should close the script-tag you openend in "Preparations" above:
+
+{{{
+#!php
+<?php
+  $sfExtjs3Plugin->end();
+?>
+}}}
+
+== Create a custom class ==
+To create a custom class you'll need the usual stuff: Variables, methods, a constructor etc. To create one with sfExtjs3Plugin you first need an array in PHP:
+
+{{{
+  $myclass = array();
+}}}
+
+=== Variables ===
+This is how you can add a variable to your class:
+
+{{{
+  $myclass['myVar1'] = $sfExtjs3Plugin->asVar('this.variable');
+  $myclass['nullVar'] = $sfExtjs3Plugin->asVar('null');
+
+  $myclass['copiedMyVar1'] = $sfExtjs3Plugin->asVar('this.myVar1');
+}}}
+
+This will bring you two public variables myVar1 and myVar2 and the array myArrayVar.
+
+If you want to initialize a variable with a value from PHP you can do this with a normal string in PHP:
+{{{
+  $myclass['myVar2'] = 'A value';
+  $myclass['myVar3'] = $myvalue;
+}}}
+
+=== Methods ===
+This is how you can add a method to your class:
+
+{{{
+  $myclass['myFnc'] = $sfExtjs3Plugin->asMethod(array(
+     'parameters' => 'para1, para2, para3',
+     'source' => "
+       if( this.nullVar != null )
+         alert('this.nullvar is set to ' + this.nullVar + 'and para2 is' + para2);
+     "
+  ));
+}}}
+
+Of course there is a shorthand for methods without parameters:
+
+{{{
+  $myclass['myNoParaFnc'] = $sfExtjs3Plugin->asMethod( "
+       if( this.myVar2 == '$myvalue' ) {
+          alert('this.myVar2 was not touched!');
+          return true;
+        }
+        else
+        {
+          alert('this.myVar2 has changed!');
+          return false;
+        }
+ ");
+}}}
+
+=== The Constructor ===
+=== Anonymous Classes ===
+=== Normal Classes ===
+=== Singletons ===
+== Using XTemplate ==
+
+== Examples ==
+
+=== A complete grid example ===
+{{{
+#!php
+<div id="grid-example"></div>
+
+<?php
+$private = array();
+$public = array();
+
+$sfExtjs3Plugin = new sfExtjs3Plugin(array('theme'=>'blue'), array('css' => '/sfExtjsThemePlugin/css/symfony-extjs.css'));
+$sfExtjs3Plugin->load();
+$sfExtjs3Plugin->begin();
+
+// **************************************
+// Application
+// **************************************
+
+//data
+$private['data'] = $sfExtjs3Plugin->asVar("[
+  ['Rotterdam', 'the Netherlands'],
+  ['Amsterdam', 'the Netherlands'],
+  ['Paris', 'France'],
+]");
+
+// create the data store
+$private['ds'] = $sfExtjs3Plugin->SimpleStore(array(
+  'fields' => array (
+     array('name' => 'city'),
+     array('name' => 'country'),
+  )
+));
+
+// create the columnModel
+$private['cm'] = $sfExtjs3Plugin->ColumnModel(array
+(
+  'parameters' => array
+  (
+    $sfExtjs3Plugin->asAnonymousClass(array('header' => 'City', 'width' => 200,  'sortable' => true, 'dataIndex' => 'city')),
+    $sfExtjs3Plugin->asAnonymousClass(array('header' => 'Country', 'width' => 120, 'sortable' => true, 'dataIndex' => 'country')),
+  )
+));
+
+//create the gridPanel
+$private['gridPanel'] = $sfExtjs3Plugin->GridPanel(
+  array(
+    'id'      => 'GridPanel',
+    'title'   => 'GridPanel Title',
+    'width'   => 600,
+    'heigth'  => 400,
+    'frame'   => true,
+    'iconCls' => 'icon-grid',
+    'cm'      => $sfExtjs3Plugin->asVar('cm'),
+    'ds'      => $sfExtjs3Plugin->asVar('ds'),
+  )
+);
+
+$public['init'] = $sfExtjs3Plugin->asMethod("
+  Ext.QuickTips.init();
+
+  ds.loadData(data);
+
+  gridPanel.render('grid-example');
+");
+
+$sfExtjs3Plugin->beginApplication(
+  array(
+    'name'    => 'App',
+
+    'private' => $private,
+    'public'  => $public
+  )
+);
+$sfExtjs3Plugin->endApplication();
+
+$sfExtjs3Plugin->initApplication('App');
+$sfExtjs3Plugin->end();
+
+?>
+}}}
+
+=== A complete data grid with paging ===
+{{{
+<div id="grid-details"></div>
+
+<?php
+  $private = array ( );
+  $public = array ( );
+
+  $sfExtjs3Plugin = new sfExtjs3Plugin( array ('theme' => 'blue' ), array ('css' => '/sfExtjsThemePlugin/css/symfony-extjs.css' ) );
+  $sfExtjs3Plugin->load();
+  $sfExtjs3Plugin->begin();
+
+  // **************************************
+  // Application
+  // **************************************
+
+  /*
+   * Create the data store
+   */
+  $private ['ds'] = $sfExtjs3Plugin->JsonStore (
+    array (
+      'url'     => 'http://localhost/test/json.php',
+      'id'      =>  'id',
+      'totalProperty' => 'total',
+      'root'      => 'data',
+      'fields'    => array(
+        array(
+          'name'  => 'date'
+        ),
+        array(
+          'name'  => 'label'
+        ),
+        array(
+          'name'  => 'amount'
+        ),
+        array(
+          'name'  => 'extra'
+        ),
+      ),
+      'sortInfo'  => array(
+        'field'   => 'label',
+        'direction' => 'ASC'
+      ),
+      'remoteSort'=> true
+    )
+  );
+
+  /*
+   * Create the column model
+   */
+  $private ['cm'] = $sfExtjs3Plugin->ColumnModel (
+    array (
+      'parameters' => array (
+        $sfExtjs3Plugin->asAnonymousClass (
+          array (
+            'id'=>'date',
+            'header' => 'Date',
+            'width' => 120,
+            'sortable' => true,
+            'dataIndex' => 'date'
+          )
+        ),
+        $sfExtjs3Plugin->asAnonymousClass (
+          array (
+            'id'=>'label',
+            'header' => 'Libellé',
+            'width' => 170,
+            'sortable' => true,
+            'dataIndex' => 'label'
+          )
+        ),
+        $sfExtjs3Plugin->asAnonymousClass (
+          array (
+            'id'=>'amount',
+            'header' => 'Montant ( '.sfConfig::get('app_money_symbol').' )',
+            'width' => 120,
+            'sortable' => true,
+            'dataIndex' => 'amount'
+          )
+        ),
+        $sfExtjs3Plugin->asAnonymousClass (
+          array (
+            'id'=>'extra',
+            'header' => 'Extra',
+            'width' => 120,
+            'sortable' => true,
+            'dataIndex' => 'extra'
+          )
+        )
+      )
+    )
+  );
+
+  /*
+   * Create the paging toolbar
+   */
+  $private ['pt'] = $sfExtjs3Plugin->PagingToolbar (
+    array(
+      'store'       => $sfExtjs3Plugin->asVar ( 'ds' ),
+      'pageSize'      => 15,
+      'plugins'     => $sfExtjs3Plugin->asVar ( 'fi' ),
+    )
+  );
+
+  /*
+   * Create the Grid
+   */
+  $private ['gridPanel'] = $sfExtjs3Plugin->GridPanel (
+    array (
+      'id'        => 'GridPanel',
+      'title'       => 'Data grid example',
+      'cm'        => $sfExtjs3Plugin->asVar ( 'cm' ),
+      'ds'        => $sfExtjs3Plugin->asVar ( 'ds' ),
+      'enableColLock'   => false,
+      'loadMask'      => true,
+      'width'       => 550,
+      'height'      => 350,
+      'frame'       => true,
+      'iconCls'       => 'grid-details',
+      'autoExpandColumn'  => 'extra',
+      'plugins'     => $sfExtjs3Plugin->asVar ( 'fi' ),
+      'bbar'        => $sfExtjs3Plugin->asVar ( 'pt' ),
+    )
+  );
+
+  $public ['init'] = $sfExtjs3Plugin->asMethod ( "
+    Ext.QuickTips.init();
+    gridPanel.render('grid-details');
+    ds.load({params:{start: 0, limit: 15}});
+    " );
+
+  $sfExtjs3Plugin->beginApplication ( array ('name' => 'App', 'private' => $private, 'public' => $public ) );
+  $sfExtjs3Plugin->endApplication ();
+
+  $sfExtjs3Plugin->initApplication ( 'App' );
+  $sfExtjs3Plugin->end ();
+}}}
+
+Please take a look at:
+http://www.symfony-project.org/forum/index.php/t/12399/
+
+== Notes ==
+
+Use only with PHP 5.2.x and above!
+
+=== !ToDo in this tutorial ===
+ * Explain the Listener Methods
+ * Explain the Custom class methods
+ * Explain the anonymous class methods
+ * Some Tutorials in other language

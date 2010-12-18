@@ -1,0 +1,159 @@
+# dsExtDirectPlugin (for symfony 1.1/1.2 and Ext Js 3.x)
+
+Ext.Direct provides a single interface to build AJAX-driven applications in Ext Js 3.x quickly and reliably
+
+The dsExtDirectPlugin is a symfony adaptation of the Ext.Direct router for the Ext Js 3.x framework. It includes an API generator enabling you to easily generate the JavaScript required to run Ext.Direct methods
+
+# Installation
+
+To install the latest release:
+
+    > symfony plugin:install  dsExtDirectPlugin
+
+# Configuration
+
+Configuration is simple but can include several optional parameters that add flexibility to your configuration.
+
+### app.yml
+
+Configure plugin settings for the extdirect environment in your application's `app.yml` file.
+For this example we'll assume you've used the default environment name `'extdirect'`. This name can be set when running the `generate-api` task which we will cover shortly.
+
+    extdirect:
+      ds_ext_direct_plugin:
+		    # Optional. Only use this parameter if you intend to create a mod_rewrite our route to a different URL for your extdirect front controller.
+		    #router_url: /extdirect.php
+
+		    # Optional. Set the javascript variable name for the js api spec (defaults to 'Ext.app.{YOUR_API_NAME}_API)
+		    #js_var: Ext.app.EXTDIRECT_API
+
+		    # Optional. Set a provider_type (defaults to remoting)
+		    #provider_type: remoting
+		
+### factories.yml
+
+Enable the `dsExtDirectController` for your enironment.
+Again, this example assumes the environment name is `'extdirect'`.
+
+    extdirect:
+		  controller:
+		    class: dsExtDirectController
+
+# Using the `extdirect:generate-api` task
+
+Before running the `extdirect:generate-api` task we need to define some actions that we wish to enable Ext.Direct to have access to. This is done by simply adding `@extdirect-enable` to the comments of any action. For example:
+
+    [php]
+    /**
+	   * Multiplies a number by 8
+	   * 
+	   * @extdirect-enable
+	   * @extdirect-len 1
+	   *
+	   */
+	  public function executeMultiply()
+	  {
+	    $num = $this->getRequestParameter('number');
+	    if(is_numeric($num))
+	    {
+	      $this->result = $num * 8;
+	    }
+	    else
+	    {
+         $this->result = false;
+	    }
+	
+	    return sfView::SUCCESS;
+	  }
+	
+By simply adding `@extdirect-enable` to the comments above the action method the `extdirect:generate-api` task knows to include this method into the API spec.
+
+### Method-level doc comment options include:
+
+*    `@extdirect-enable` - flags the action method for inclusion in the API spec.
+*    `@extdirect-method` {string method name} - Optional. Allows you to set a custom method name.
+*    `@extdirect-len` {int length} - Optional. Tells Ext.Direct the number of parameters to expect when generating the request. (Omitting this parameter defaults to 0).
+*    `@extdirect-formhandler` - Optional. Flags the method as a formhandler method. This is important when dealing with how we handle the sfRequest parameters as discussed later. (Omitting this sets the formHandler to false in the API spec - this should be omitted unless you know what it means)
+
+### Action-level doc comment options include:
+
+*    `@extdirect-action` {string action name} - Optional. Allows you to set a custom action name.
+
+Now that we've added our doc comments, let's run the `extdirect:generate-api` task:
+
+    > symfony extdirect:generate-api frontend
+
+The `extdirect:generate-api` task performs the following operations:
+
+*   Creates a front controller in the `web/` directory
+*   Builds an YAML API spec in `apps/{yourapp}/config` directory
+*   Generates a javascript API spec in the `web/js` directory
+
+There are several additional options that allow you to set the environment name, etc. See the task's help screen for more information and examples.
+
+# How requests are handled
+
+One of the perks of Ext.Direct is its ability to marshal and pass several remote procedure calls in a single request. To that end, the `dsExtDirectPlugin` makes sure the relevant request parameters (and ONLY the relevant parameters) are available within the current action for each RPC.
+
+Example Ext.Direct Call:
+
+    [javascript]
+    // ...
+		handler: function(){
+		  directTest.multiply({"number":num.getValue(),"another_val":'foobar'}, function(result, e){
+		    // ...
+		});
+	  // ...
+
+Notice the call to `directTest.multiply` and the parameters `number` and `another_val`. When the call is made, these values will be accessible via `$this->getRequstParamter()` from within the action:
+
+    [php]
+    public function executeMultiply()
+    {
+      $num         = $this->getRequestParameter('number');
+      $another_val = $this->getRequestParameter('another_val');
+      // ...
+    }
+
+# Action results
+
+In symfony, the default return value of an action is a pointer to a template. Therefore the `dsExtDirectPlugin` relies on result adapters to retrieve the action results. The plugin is bundled with property result adapter that, by default, will enable the plugin to retrieve the value assigned to `$this->result` in the action method.
+
+Looking again at our `multiply` example:
+
+    [php]
+    public function executeMultiply()
+    {
+      $num = $this->getRequestParameter('number');
+      if(is_numeric($num))
+      {
+        $this->result = $num * 8;
+      }
+      // ...
+      return sfView::SUCCESS;
+    }
+
+From the above example, the value assigned to `$this->result` will be passed to the `dsExtDirectPlugin` as the return value for the `multiply` method.
+
+You can create your own adapter by extending the `dsAbstractResultAdapter` class to retrieve a return value from the action using any means you prefer. You may also configure the name of the result property:
+
+Example module.yml file (only required if customizing the result adapter):
+
+    extdirect:
+      action_name:
+        result:
+          class: dsPropertyResultAdapter
+          param:
+            property: result
+
+# Support
+
+If you have any questions, suggestions, bug reports, or enhancements please feel free to contact me: danhstevens [at] gmail [dot] com
+
+## Special thanks to:
+
+### Christian Kerl
+Developer of the `ckWebServicePlugin`, a soap server for symfony, provided several design patterns in his plugin that were utilized in the `dsExtDirectPlugin`.
+
+### The Ext JS Team
+Thanks for the amazing framework. Keep up the great work.

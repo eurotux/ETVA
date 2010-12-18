@@ -1,0 +1,30 @@
+# default rules
+
+dynamic_javascript:
+   url: /djs
+   param: { module: script}
+
+login:
+  url: /login
+  param: { module: sfGuardAuth, action: signin }
+
+signout:
+  url:   /logout
+  param: { module: sfGuardAuth, action: signout }
+
+homepage:
+  url:   /
+  param: { module: view, action: index }
+
+default_index:
+  url:   /:module
+  param: { action: index }
+
+xport_format:
+  url:   /server/:action/:id.:sf_format
+  param: { module: server }
+  requirements:
+    sf_format: (?:html|xml|json|js|png)
+
+default:
+  url:   /:module/:action/*

@@ -1,0 +1,33 @@
+
+http://svn.apache.org/viewvc?rev=733052&view=rev
+
+--- apr-1.3.3/buildconf.libtool22
++++ apr-1.3.3/buildconf
+@@ -45,6 +45,14 @@ $libtoolize --copy --automake
+ 
+ if [ -f libtool.m4 ]; then 
+    ltfile=`pwd`/libtool.m4
++elif grep all_pkgmacro_files $libtoolize > /dev/null; then
++    # libtool 2.x
++   aclocal_dir=`sed -n '/^aclocaldir=/{s/.*=//;p;q;}' < $libtoolize`
++   ltfiles=`sed -n '/^all_pkgmacro_files=/{s/.*=//;;s/"//;p;q;}' < $libtoolize`
++   for f in $ltfiles; do
++       test -f "$aclocal_dir/$f" && cp "$aclocal_dir/$f" build
++   done
++   ltfile=$aclocal_dir/libtool.m4
+ else
+    ltfindcmd="`sed -n \"/=[^\\\`]/p;/libtool_m4=/{s/.*=/echo /p;q;}\" \
+                    < $libtoolize`"
+--- apr-1.3.3/configure.in.libtool22
++++ apr-1.3.3/configure.in
+@@ -20,6 +20,10 @@ sinclude(build/apr_win32.m4)
+ sinclude(build/apr_hints.m4)
+ sinclude(build/libtool.m4)
+ sinclude(build/ltsugar.m4)
++sinclude(build/argz.m4)
++sinclude(build/ltoptions.m4)
++sinclude(build/ltversion.m4)
++sinclude(build/lt~obsolete.m4)
+ 
+ dnl Hard-coded inclusion at the tail end of apr_private.h:
+ AH_BOTTOM([

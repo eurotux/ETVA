@@ -1,0 +1,27 @@
+
+http://issues.apache.org/bugzilla/show_bug.cgi?id=36780
+
+Upstream-Status: committed to trunk, r583817
+
+--- httpd-2.2.4/server/util_filter.c.oldflush
++++ httpd-2.2.4/server/util_filter.c
+@@ -578,8 +578,18 @@ AP_DECLARE_NONSTD(apr_status_t) ap_filte
+                                                 void *ctx)
+ {
+     ap_filter_t *f = ctx;
++    apr_status_t rv;
+ 
+-    return ap_pass_brigade(f, bb);
++    rv = ap_pass_brigade(f, bb);
++
++    /* apr_brigade_write* require that the flush function ensures that
++     * the brigade is empty upon return; otherwise the brigade may be
++     * left with a transient bucket whose contents have fallen out of
++     * scope.  Call cleanup here unconditionally to avoid the issue in
++     * all cases. */
++    apr_brigade_cleanup(bb);
++
++    return rv;
+ }
+ 
+ AP_DECLARE(apr_status_t) ap_fflush(ap_filter_t *f, apr_bucket_brigade *bb)

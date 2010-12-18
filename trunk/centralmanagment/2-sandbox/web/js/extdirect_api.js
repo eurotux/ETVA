@@ -1,0 +1,1 @@
+Ext.app.EXTDIRECT_API = {"url":"\/extdirect.php\/dsExtDirect\/router","type":"remoting","actions":{"server":[{"name":"multiply","len":1}]}};

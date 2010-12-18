@@ -1,0 +1,18 @@
+EtvaLogicalvolume:
+  log1:
+    node_id: node1
+    volumegroup_id: vg1
+    lv: teste
+    size: 54525952
+    freesize: 0
+    storage_type: local
+
+  log2:
+    node_id: node1
+    volumegroup_id: vg1
+    lv: teste55
+    size: 64525952
+    freesize: 0
+    storage_type: local
+    
+

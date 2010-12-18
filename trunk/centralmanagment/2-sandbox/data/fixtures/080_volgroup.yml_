@@ -1,0 +1,10 @@
+EtvaVolumegroup:
+  vg1:
+    node_id: node1   
+    vg: teste
+    size: 100008313488
+    freesize: 97399120856
+
+ 
+    
+

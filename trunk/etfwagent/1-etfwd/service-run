@@ -1,0 +1,4 @@
+#!/bin/sh
+
+exec su -c "cd /srv/etva-etfw && /usr/bin/perl -I./lib -I/srv/etva-vdaemon etfwd > /var/log/etva-etfw/etfwd.log 2>&1"
+

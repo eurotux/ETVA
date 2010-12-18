@@ -1,0 +1,31 @@
+EtvaServer:
+  server1:
+    name:  master_server
+    description:  |
+                 This server has very critical stuff
+    ip:  192.168.100.100
+    mem:  16000
+    disk: 250000
+    vcpu: 4
+    rcpu: 2,4,6,8
+    network_cards: 4
+    state:  1
+    node_id: node1
+    sf_guard_group_id: default
+
+<?php for ($i = 2; $i <= 7; $i++): ?>
+  server<?php echo $i ?>:
+    name:  server_<?php echo $i."\n" ?>
+    description:  |
+                 Server #ID <?php echo $i."\n" ?>
+    ip:  192.168.100.110
+    mem:  8000
+    disk: 250000
+    vcpu: 3
+    rcpu: 1,3,6
+    network_cards: 4
+    state:  1
+    node_id: node2
+    sf_guard_group_id: admin
+
+<?php endfor; ?>

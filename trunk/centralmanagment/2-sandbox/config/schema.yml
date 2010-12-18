@@ -1,0 +1,111 @@
+propel:
+  _attributes:
+    defaultIdMethod: native
+    package: lib.model
+  agent:
+    _attributes: { phpName: EtvaAgent }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    server_id: { type: INTEGER, required: true, foreignTable: server, foreignReference: id, onDelete: restrict }
+    name: { type: VARCHAR, size: '255', required: true }
+    description: { type: LONGVARCHAR }
+    service: { type: LONGVARCHAR }
+    ip: { type: VARCHAR, size: '255' }
+    state: { type: INTEGER, required: true, default: '1' }
+    created_at: { type: TIMESTAMP, required: true }
+    updated_at: { type: TIMESTAMP, required: true }
+  network:
+    _attributes: { phpName: EtvaNetwork }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    server_id: { type: INTEGER, required: true, foreignTable: server, foreignReference: id, onDelete: restrict }
+    port: { type: VARCHAR, size: '255' }
+    ip: { type: VARCHAR, size: '255' }
+    mask: { type: VARCHAR, size: '255' }
+    mac: { type: VARCHAR, size: '255' }
+    vlan: { type: VARCHAR, size: '255' }
+  server:
+    _attributes: { phpName: EtvaServer }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    logicalvolume_id: { type: INTEGER, required: true, foreignTable: logicalvolume, foreignReference: id, onDelete: restrict }
+    node_id: { type: INTEGER, required: true, foreignTable: node, foreignReference: id, onDelete: restrict }
+    name: { type: VARCHAR, size: '255', required: true }
+    description: { type: LONGVARCHAR }
+    ip: { type: VARCHAR, required: true }
+    vnc_port: { type: INTEGER }
+    uid: { type: VARCHAR, size: '255' }
+    mem: { type: VARCHAR, size: '255' }
+    vcpu: { type: INTEGER }
+    cpuset: { type: VARCHAR, size: '255' }
+    location: { type: VARCHAR, size: '255' }
+    network_cards: { type: INTEGER }
+    state: { type: VARCHAR, size: '255', required: true }
+    mac_addresses: { type: LONGVARCHAR }
+    sf_guard_group_id: { type: INTEGER, required: true, foreignTable: sf_guard_group, foreignReference: id }
+    created_at: { type: TIMESTAMP, required: true }
+    updated_at: { type: TIMESTAMP, required: true }
+  node:
+    _attributes: { phpName: EtvaNode }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    name: { type: VARCHAR, size: '255', required: true }
+    memtotal: { type: INTEGER }
+    memfree: { type: INTEGER }
+    cputotal: { type: INTEGER }
+    ip: { type: VARCHAR }
+    port: { type: INTEGER }
+    uid: { type: VARCHAR, size: '255' }
+    network_cards: { type: INTEGER }
+    state: { type: INTEGER, required: true, default: '1' }
+    created_at: { type: TIMESTAMP, required: true }
+    updated_at: { type: TIMESTAMP }
+  mac:
+    _attributes: { phpName: EtvaMac }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    mac: { type: VARCHAR, size: '255' }
+    in_use: { type: INTEGER, default: '0' }
+  vlan:
+    _attributes: { phpName: EtvaVlan }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    name: { type: VARCHAR, size: '255' }
+  physicalvolume:
+    _attributes: { phpName: EtvaPhysicalvolume }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    node_id: { type: INTEGER, required: true, foreignTable: node, foreignReference: id, onDelete: restrict }
+    name: { type: VARCHAR, size: '255' }
+    device: { type: VARCHAR, size: '255' }
+    devsize: { type: BIGINT }
+    pv: { type: VARCHAR, size: '255' }
+    pvsize: { type: BIGINT }
+    pvfreesize: { type: BIGINT }
+    pvinit: { type: INTEGER, default: '0' }
+    storage_type: { type: VARCHAR, size: '255' }
+    allocatable: { type: INTEGER }
+  volumegroup:
+    _attributes: { phpName: EtvaVolumegroup }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    node_id: { type: INTEGER, required: true, foreignTable: node, foreignReference: id, onDelete: restrict }
+    vg: { type: VARCHAR, size: '255' }
+    size: { type: BIGINT }
+    freesize: { type: BIGINT }
+  logicalvolume:
+    _attributes: { phpName: EtvaLogicalvolume }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    volumegroup_id: { type: INTEGER, required: true, foreignTable: volumegroup, foreignReference: id, onDelete: restrict }
+    node_id: { type: INTEGER, required: true, foreignTable: node, foreignReference: id, onDelete: restrict }
+    lv: { type: VARCHAR, size: '255' }
+    lvdevice: { type: VARCHAR, size: '255' }
+    size: { type: BIGINT }
+    freesize: { type: BIGINT }
+    storage_type: { type: VARCHAR, size: '255' }
+    writeable: { type: INTEGER }
+    in_use: { type: INTEGER, default: '0' }
+  volume_physical:
+    _attributes: { phpName: EtvaVolumePhysical }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    volumegroup_id: { type: INTEGER, required: true, foreignTable: volumegroup, foreignReference: id, onDelete: restrict }
+    physicalvolume_id: { type: INTEGER, required: true, foreignTable: physicalvolume, foreignReference: id, onDelete: restrict }
+  vnc_token:
+    _attributes: { phpName: EtvaVncToken }
+    username: { type: VARCHAR, size: '255', primaryKey: true, required: true }
+    token: { type: VARCHAR, size: '255', required: true }
+    enctoken: { type: VARCHAR, size: '255', required: true }
+    user_id:     { type: integer, foreignTable: sf_guard_user, foreignReference: id, required: true }
+    created_at: { type: TIMESTAMP }

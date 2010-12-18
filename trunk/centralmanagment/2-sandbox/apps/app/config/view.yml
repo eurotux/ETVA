@@ -1,0 +1,22 @@
+default:
+  http_metas:
+    content-type: text/html
+    charset: UTF-8
+
+  metas:
+    #title:        symfony project
+    #description:  symfony project
+    #keywords:     symfony, project
+    #language:     en
+    #robots:       index, follow
+
+  stylesheets:    []
+
+  javascripts:    []
+
+  has_layout:     on
+  layout:         layout
+
+graph_image:
+  has_layout:     on
+  layout:         graph_image
