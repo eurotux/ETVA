@@ -1,10 +1,11 @@
 rendering: ~
-security:
-  class: sfGuardBasicSecurityFilter
+security: ~
 
 # insert your own filters here
-
+myUser: # filter that updates vnc token
+  class: myUserFilter
 cache:     ~
-common:    ~
+common:
+  class: sfCommonFilter
 execution: ~
 

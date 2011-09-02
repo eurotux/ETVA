@@ -25,16 +25,21 @@ package ETFW;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
+use ETVA::ArchiveTar;
+
 use FileFuncs;
 
+use LWP::Simple;
+
 # Default Active modules
-my %DefMod = ( 'network'=>'ETFW::Network', 'firewall'=>'ETFW::Firewall', 'webmin'=>'ETFW::Webmin' );
+my %DefMod = ( 'network'=>'ETFW::Network', 'firewall'=>'ETFW::Firewall', 'webmin'=>'ETFW::Webmin', 'wizard'=>'ETFWWizard' );
 
 # ETFW/Perl modules match
 my %ModMatch = ();
 
 my %CONF = ( 'conf_dir'=>"/etc/etfw", 'pkg_list'=>"/etc/etfw/keys/pkg_list.txt",
+                'conf_file'=>"/etc/etfw/etfw.ini",
                 'pkg_match'=>'./pkg_match.conf', 'etfw_bin'=>'/usr/sbin/etfw' );
 
 sub load_module {
@@ -139,7 +144,10 @@ sub etfw_save {
 
     if( -x $CONF{"etfw_bin"} ){
         my $to = $p{"to"} || "harddisk";
-        cmd_exec($CONF{"etfw_bin"},"save",$to);
+        my ($e,$m) = cmd_exec($CONF{"etfw_bin"},"save",$to);
+        unless( $e == 0 ){
+            return retErr("_ERR_ETFWSAVE_","Error saving ETFW: $m");
+        }
     } else {
         return retErr("_ERR_NOETFWBIN_","ETFW binary file not found.");
     }
@@ -151,10 +159,117 @@ sub etfw_restore {
 
     if( -x $CONF{"etfw_bin"} ){
         my $from = $p{"from"} || "harddisk";
-        cmd_exec($CONF{"etfw_bin"},"save",$from);
+        my $file = $p{"file"};
+        my ($e,$m) = cmd_exec($CONF{"etfw_bin"},"restore",$from,$file);
+        unless( $e == 0 ){
+            return retErr("_ERR_ETFWRESTORE_","Error restore ETFW: $m");
+        }
     } else {
         return retErr("_ERR_NOETFWBIN_","ETFW binary file not found.");
     }
+}
+
+sub get_etfw_backupfile {
+    my $self = shift;
+
+    my $cfg = new Config::IniFiles( -file => "$CONF{'conf_file'}");
+    my $location = $cfg->val('harddisk','location');
+
+    if( $location ){
+        my (undef,$fbkp) = ( $location =~ m/^(\w+:\/\/)?(.+)$/ );
+        return $fbkp;
+    }
+    return;
+}
+
+# get_backupconf - get backup of configuration file
+sub get_backupconf {
+    my $self = shift;
+    my (%p) = @_;
+    
+    # save to harddisk to create backup
+    my $E = $self->etfw_save( 'to'=>'harddisk' );
+    if( isError($E) ){
+        plog "get_backupconf","etfw_save";
+        return wantarray() ? %$E : $E;
+    }
+
+    my $sock = $p{'_socket'};
+
+    # set blocking for wait to transmission end
+    $sock->blocking(1);
+    
+    if( $p{'_make_response'} ){
+        print $sock $p{'_make_response'}->("",'-type'=>'application/x-compressed-tar');
+    }
+
+    if( my $c_path = $self->get_etfw_backupfile() ){
+        if( -e "$c_path" ){
+            plog "get_backupconf","c_path=$c_path";
+            my $fh;
+            open($fh,"$c_path");    # read from file
+#            binmode($fh);
+            my $buf;
+            while (read($fh, $buf, 60*57)) {
+                print $sock $buf;   # write to socket
+            }
+            close($fh);
+        } else {
+            plog "get_backupconf","backup file '$c_path' doesnt exists.";
+            return retErr("_ERR_GETBACKUPCONF_","backup file '$c_path' doesnt exists.");
+        }
+    } else {
+        plog "get_backupconf","No backup file.";
+        return retErr("_ERR_GETBACKUPCONF_","No backup file.");
+    }
+    return;
+}
+
+# set_backupconf - overwrite configuration file
+sub set_backupconf {
+    my $self = shift;
+    my (%p) = @_;
+
+    # create previous backup
+    my $E = $self->etfw_save( 'to'=>'harddisk' );
+    if( isError($E) ){
+        return wantarray() ? %$E : $E;
+    }
+
+
+    if( my $bf = $self->get_etfw_backupfile() ){
+        # TODO fix this name
+        my $oribf = "$bf.recoverbackupconf";
+        my @lbf = split(/\//,$oribf);
+        my $fn = pop(@lbf); # get file name
+
+        if( $p{'_url'} ){
+            my $rc = LWP::Simple::getstore("$p{'_url'}","$oribf");
+            if( is_error($rc) || !-e "$oribf" ){
+                return retErr('_ERR_SET_BACKUPCONF_',"Error get backup file ($oribf status=$rc) ");
+            }
+        } else {
+            my $sock = $p{'_socket'};
+
+            # set blocking for wait to transmission end
+            $sock->blocking(1);
+
+            my $tar = ETVA::ArchiveTar->new();
+            $tar->read($sock);
+            plog "set_backupconf files=",$tar->list_files();
+            $tar->write($oribf);
+        }
+
+        my $S = $self->etfw_restore( 'from'=>'harddisk', 'file'=>"$fn" );
+        if( isError($S) ){
+            return wantarray() ? %$S : $S;
+        }
+        
+    } else {
+        return retErr("_ERR_SETBACKUPCONF_","No media to backup file.");
+    }
+
+    return;
 }
 
 load_module();

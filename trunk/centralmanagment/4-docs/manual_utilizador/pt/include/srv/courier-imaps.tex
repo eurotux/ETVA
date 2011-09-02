@@ -1,0 +1,17 @@
+\subsection{Serviço de IMAPS -- Courier-Imap}
+
+O serviço \emph{IMAPS} é idêntico ao anteriormente descrito com a componente adicional de \emph{SSL}, garantindo assim a segurança na transacção dos dados.
+
+
+Os ficheiros de configuração deste serviço são:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\srv/courier/etc/imapd-ssl.cnf
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# \srv/courier/libexec/imapd-ssl.rc start
+# \srv/courier/libexec/imapd-ssl.rc stop
+\end{Verbatim}

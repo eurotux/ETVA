@@ -62,6 +62,10 @@ $result = array();
 $i=0;
 // $table = Propel::getDatabaseMap()->getTable('nodes');
  $cols = $table_map->getColumns();
+ $class = $table_map->getClassname();
+
+ eval("\$peer_class = $class::PEER;");
+ 
  $ds_model = array();
  foreach ($cols as $column)
     {
@@ -69,13 +73,17 @@ $i=0;
         $attrs = array();
         $ds = array();
         $val = $column->getDefaultValue();
+
+        $phpName = $column->getPhpName();
+//$col_name = $column->getPhpName();
+        eval("\$col_name = $peer_class::translateFieldName($phpName,BasePeer::TYPE_PHPNAME,BasePeer::TYPE_FIELDNAME);");
     //    $val = $column->getDefaultSetting();
       //  print_r($val);
     //    $val2 = $column->getPhpDefaultValue();
       //  echo($val.$val2);
       
         $attrs[] = "header:".json_encode($column->getPhpName());
-        $attrs[] = "dataIndex:".json_encode($column->getPhpName());
+        $attrs[] = "dataIndex:".json_encode($col_name);
         $attrs[] = "sortable:true";
 
         if($extraCM && array_key_exists($column->getPhpName(),$extraCM)){
@@ -91,7 +99,7 @@ $i=0;
 
         }
 
-         if ($column->isPrimaryKey()) $pk = $column->getPhpName();
+         if ($column->isPrimaryKey()) $pk = $col_name;
      //   $result[$i] = "{header:'".."',".
        //     "dataIndex:'".$column->getPhpName()."', sortable:true".
 
@@ -99,7 +107,7 @@ $i=0;
       
 
 
-       $ds[] = "name:".json_encode($column->getPhpName());
+       $ds[] = "name:".json_encode($col_name);
        // if(!empty($form))
        // $ds_model[] = $column->getPhpName().':'.json_encode($form->getDefault(strtolower($column->getName())));
 

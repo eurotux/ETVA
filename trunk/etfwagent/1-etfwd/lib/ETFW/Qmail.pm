@@ -24,7 +24,7 @@ package ETFW::Qmail;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 
 BEGIN {

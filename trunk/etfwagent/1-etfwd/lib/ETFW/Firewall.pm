@@ -24,7 +24,7 @@ package ETFW::Firewall;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 
 my %TABLES = ( "filter"=>1, "mangle"=>1, "nat"=>1 );
 my @ARGS = ('-p', '-m', '-s', '-d', '-i', '-o', '-f',

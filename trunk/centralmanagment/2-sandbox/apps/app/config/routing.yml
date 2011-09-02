@@ -1,10 +1,10 @@
 # default rules
-
+  
 dynamic_javascript:
    url: /djs
    param: { module: script}
 
-login:
+signin:
   url: /login
   param: { module: sfGuardAuth, action: signin }
 
@@ -12,9 +12,7 @@ signout:
   url:   /logout
   param: { module: sfGuardAuth, action: signout }
 
-homepage:
-  url:   /
-  param: { module: view, action: index }
+
 
 default_index:
   url:   /:module
@@ -28,3 +26,7 @@ xport_format:
 
 default:
   url:   /:module/:action/*
+
+homepage:
+  url:   /
+  param: { module: view, action: index }

@@ -1,0 +1,211 @@
+# if you make changes, the it is advised to increment this number, and provide 
+# a descriptive suffix to identify who owns or what the change represents
+# e.g. release_version 2.MSW
+%define release 1%{?dist}
+
+# if you wish to compile an rpm without ibverbs support, compile like this...
+# rpmbuild -ta glusterfs-3.0.0git.tar.gz --without ibverbs
+%{?_without_ibverbs:%define _without_ibverbs --disable-ibverbs}
+
+# if you wish to compile an rpm without libglusterfsclient...
+# rpmbuild -ta glusterfs-3.0.0git.tar.gz --without libglfsclient
+%{?_without_libglfsclient:%define _without_libglfsclient --disable-libglusterclient}
+
+# if you wish to compile an rpm without libglusterfsclient...
+# rpmbuild -ta glusterfs-3.0.0git.tar.gz --without epoll
+%{?_without_epoll:%define _without_epoll --disable-epoll}
+
+# if you wish to compile an rpm with fusermount...
+# rpmbuild -ta glusterfs-3.0.0git.tar.gz --with fusermount
+%{?_with_fusermount:%define _with_fusermount --enable-fusermount}
+
+Summary: Cluster File System
+Name: glusterfs
+Version: 3.0.0git
+Release: %{release}
+License: GPLv3+
+Group: System Environment/Base
+Vendor: Gluster Inc
+Packager: gluster-users@gluster.org
+URL: http://www.gluster.org/docs/index.php/GlusterFS
+Source0: ftp://ftp.gluster.com/pub/gluster/glusterfs/2.0/3.0.0git/glusterfs-3.0.0git.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/service, /sbin/chkconfig
+Requires(postun): /sbin/service
+
+%{!?_without_ibverbs:BuildRequires: libibverbs-devel}
+
+BuildRequires: bison flex 
+BuildRequires: gcc make
+
+%description
+GlusterFS is a clustered file-system capable of scaling to several
+peta-bytes. It aggregates various storage bricks over Infiniband RDMA
+or TCP/IP interconnect into one large parallel network file
+system. GlusterFS is one of the most sophisticated file system in
+terms of features and extensibility.  It borrows a powerful concept
+called Translators from GNU Hurd kernel. Much of the code in GlusterFS
+is in userspace and easily manageable.
+
+%package common
+Summary: GlusterFS common files for both the client and the server 
+Group: System Environment/Libraries
+Obsoletes: glusterfs-libs <= 2.0.0
+Provides: glusterfs-libs = %{version}-%{release}
+
+%description common
+GlusterFS is a clustered file-system capable of scaling to several
+peta-bytes. It aggregates various storage bricks over Infiniband RDMA
+or TCP/IP interconnect into one large parallel network file
+system. GlusterFS is one of the most sophisticated file system in
+terms of features and extensibility.  It borrows a powerful concept
+called Translators from GNU Hurd kernel. Much of the code in GlusterFS
+is in userspace and easily manageable.
+
+This package includes the glusterfs binary, libglusterfs and glusterfs
+translator modules common to both GlusterFS server and client framework.
+
+%package client
+Summary: GlusterFS Client
+Group: Applications/File
+Requires: %{name}-common = %{version}-%{release}
+
+%description client
+GlusterFS is a clustered file-system capable of scaling to several
+peta-bytes. It aggregates various storage bricks over Infiniband RDMA
+or TCP/IP interconnect into one large parallel network file
+system. GlusterFS is one of the most sophisticated file system in
+terms of features and extensibility.  It borrows a powerful concept
+called Translators from GNU Hurd kernel. Much of the code in GlusterFS
+is in userspace and easily manageable.
+
+This package provides the FUSE based GlusterFS client.
+
+
+%package server
+Summary: GlusterFS Server
+Group: System Environment/Daemons
+Requires: %{name}-common = %{version}-%{release}
+
+%description server
+GlusterFS is a clustered file-system capable of scaling to several
+peta-bytes. It aggregates various storage bricks over Infiniband RDMA
+or TCP/IP interconnect into one large parallel network file
+system. GlusterFS is one of the most sophisticated file system in
+terms of features and extensibility.  It borrows a powerful concept
+called Translators from GNU Hurd kernel. Much of the code in GlusterFS
+is in userspace and easily manageable.
+
+This package provides the glusterfs server daemon.
+
+%package devel
+Summary: GlusterFS Development Libraries
+Group: Development/Libraries
+Requires: %{name}-common = %{version}-%{release}
+
+%description devel
+GlusterFS is a clustered file-system capable of scaling to several
+peta-bytes. It aggregates various storage bricks over Infiniband RDMA
+or TCP/IP interconnect into one large parallel network file
+system. GlusterFS is one of the most sophisticated file system in
+terms of features and extensibility.  It borrows a powerful concept
+called Translators from GNU Hurd kernel. Much of the code in GlusterFS
+is in userspace and easily manageable.
+
+This package provides the development libraries.
+
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+
+%configure %{?_without_ibverbs} %{?_without_libglfsclient} %{?_without_client} %{?_without_epoll} %{?_with_fusermount}
+
+# Remove rpath
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+%{__make} %{?_smp_mflags}
+
+
+%install
+%{__rm} -rf %{buildroot} 
+%{__make} install DESTDIR=%{buildroot}
+%{__mkdir_p} %{buildroot}%{_includedir}/glusterfs
+%{__mkdir_p} %{buildroot}/var/log/glusterfs
+%{__install} -p -m 0644 libglusterfs/src/*.h \
+    %{buildroot}%{_includedir}/glusterfs/
+
+# Remove unwanted files from all the shared libraries
+find %{buildroot}%{_libdir} -name '*.la' | xargs rm -f
+find %{buildroot}%{_libdir} -name '*.a' | xargs rm -f
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%post common
+/sbin/ldconfig -n %{_libdir}
+
+%postun common
+/sbin/ldconfig -n %{_libdir}
+
+%post server 
+/sbin/chkconfig --add glusterfsd
+
+%preun server
+if [ $1 -eq 0 ]; then 
+    /sbin/chkconfig --del glusterfsd
+fi
+
+%files common
+%defattr(-,root,root)
+%doc AUTHORS ChangeLog COPYING INSTALL NEWS README
+%doc /usr/share/doc/glusterfs
+%if 0%{!?_without_client:1}
+%exclude %{_libdir}/glusterfs/%{version}/xlator/mount
+%endif
+%if 0%{?_with_fusermount:1}
+%{_bindir}/fusermount-glusterfs 
+%endif
+%{_datadir}/glusterfs
+%{_bindir}/glusterfs-volgen
+%{_libdir}/glusterfs
+%{_libdir}/*.so.*
+%{_sbindir}/glusterfs*
+%{_mandir}/man8/*glusterfs.8*
+%dir /var/log/glusterfs
+
+%if 0%{!?_without_client:1}
+%files client
+%defattr(-,root,root)
+/sbin/mount.glusterfs
+%{_libdir}/glusterfs/%{version}/xlator/mount
+%endif 
+
+%files server
+%defattr(-,root,root)
+%config %{_sysconfdir}/glusterfs
+%{_sysconfdir}/init.d/glusterfsd
+
+%files devel
+%defattr(-,root,root,-)
+%{_includedir}/glusterfs
+%{_includedir}/libglusterfsclient.h
+%exclude %{_includedir}/glusterfs/y.tab.h
+%{_libdir}/*.so
+
+%changelog
+* Wed Jul 01 2009 Harshavardhana <harsha@gluster.com> - 2.1
+- Removed mod_glusterfs.so and added new --without epoll build
+  option. 
+
+* Thu Apr 16 2009 Harshavardhana <harsha@gluster.com> - 2.0
+- Galore of updates including new packages added common,
+  client,server splitting the original package. rpmbuild 
+  fully restructured to adhere to Fedora rpm standards. 
+  Older changelog removed as there were warnings when 
+  tried with 'rpmlint'. 
+
+
+

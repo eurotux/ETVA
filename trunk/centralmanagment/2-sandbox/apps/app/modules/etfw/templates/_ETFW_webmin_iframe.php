@@ -1,30 +1,24 @@
 <script>
-
+  
 ETFW_Webmin = function(){
         return{
             init:function(){
-
-
 
                 var loadframe = new Ext.ux.ManagedIFrame.Panel(
                 {
                     border:false,
                //     loadMask:{msg:'Loading...'},
                     // defaultSrc :  '<?php // echo $url.':'.$port ?>',
-                    defaultSrc :  '<?php echo $url ?>/session_login.cgi?user=root&pass=ola123&page=/',
-
+                    defaultSrc :  '<?php echo $url ?>/session_login.cgi?user=<?php echo sfConfig::get('mod_etfw_webmin_user') ?>&pass=<?php echo sfConfig::get('mod_etfw_webmin_pass') ?>&page=/',
                     listeners : {
-
-                documentloaded : function(){
-
-
-                    notify({html:'Document loaded '});
-                    // Demo.balloon(null, MIF.title+' reports:','docloaded ');
-                },
-                beforedestroy : function(){
-
-                }
-            }
+                        documentloaded : function(){
+                            View.notify({html:'Document loaded '});
+                            // Demo.balloon(null, MIF.title+' reports:','docloaded ');
+                        },
+                        exception:function(){},
+                        domready:function(){},
+                        beforedestroy : function(){}
+                    }
                 });
 
 
@@ -45,10 +39,9 @@ ETFW_Webmin = function(){
 
                             handler: function(button,event)
                             {
-                                button.addClass('x-item-disabled');
-                                //alert(this.ownerCt.id);
+                                //button.addClass('x-item-disabled');
                                 loadframe.setSrc('',false,function(){
-                                    button.removeClass('x-item-disabled');
+                                    //button.removeClass('x-item-disabled');
                                 });
 
                             }

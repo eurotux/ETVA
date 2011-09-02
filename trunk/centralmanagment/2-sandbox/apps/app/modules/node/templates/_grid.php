@@ -2,8 +2,8 @@
 /*
  * Use Extjs helper to dynamic create data store and column model javascript
  */
-
-$js_grid = js_grid_info($node_tableMap);
+$extraDSfields = array('mem_text','mem_available','state_text');
+$js_grid = js_grid_info($node_tableMap,true,$extraDSfields);
 
 /*
  * Default data to be inserted in DB
@@ -19,19 +19,42 @@ $default_model_values = array('default'=>'name','items'=>
 <script>
 
 Ext.namespace('Node');
-  Node.Grid = function(){    
+  Node.Grid = function(){
   return{
-    init:function(){
+    init:function(config){
     Ext.QuickTips.init();
 
-    var fm = Ext.form;        
+    var fm = Ext.form;    
+    
+    Ext.apply(this,config);
 
-    // the column model has information about grid columns
-    // dataIndex maps the column to the specific data field in
-    // the data store (created below)
-    
-    
-    var cm = new Ext.grid.ColumnModel([<?php echo $js_grid['cm'] ?>]);
+
+    var expander = new Ext.ux.grid.RowExpander({
+        enableCaching : false,
+        tpl : new Ext.XTemplate(
+        '<p><b>UUID:</b> {uuid}&nbsp&nbsp <b>Port:</b> {port}<br>',
+        '<b>VirtAgent status:</b>',
+        '<span style="color:{[values.state === 1 ? "green" : "red"]}">',
+            ' {values.state_text}',
+        '</span>&nbsp&nbsp <b>Created at:</b> {created_at}<br>',
+        '</p>'
+    )});
+  
+    //var cm = new Ext.grid.ColumnModel([expander,<?php // echo $js_grid['cm'] ?>]);
+    var cm = new Ext.grid.ColumnModel([expander,
+                    {header:'Name', dataIndex:'name'},
+                    {header:'Memory (MB)', dataIndex:'mem_text'},
+                    {header:'Memory Available (MB)', dataIndex:'mem_available', width:150},
+                    {header:'CPUs', dataIndex:'cputotal'},
+                    {header:'Network cards', dataIndex:'network_cards'},
+                    {header:'IP', dataIndex:'ip'},
+                    {header:'Hypervisor', dataIndex:'hypervisor'},
+                    {header: "State", dataIndex:'state_text',renderer: function (value, metadata, record, rowIndex, colIndex, store) {
+                                if(value=='Down') metadata.attr = 'style="background-color: red;color:white;"';
+                                else metadata.attr = 'style="background-color: green;color:white;"';
+                                return value;
+                    }}
+    ]);
 
 
     /*
@@ -39,23 +62,15 @@ Ext.namespace('Node');
     *  Data Source model. Used when creating new network object
     *
     */
-    
+
     // var ds_model = Ext.data.Record.create([<?php // echo $js_grid['ds'] ?>]);
     // var ds_model_insert = <?php // echo $ds_model ?>;
 <?php
-    if(isset($node_id)){
-    $title = json_encode('Node info');
-    $url = json_encode(url_for('node/jsonGridInfo?id='.$node_id,false));
-    }else{
-    $title = json_encode('Nodes');
-    $url = json_encode(url_for('node/jsonGrid',false));
-    }
-
     $store_id = json_encode($js_grid['pk']);
 ?>
-              
-    var grid_title = <?php echo $title ?>;
-    var gridUrl = <?php echo $url ?>;
+
+    var grid_title = this.title;
+    var gridUrl = this.url;
     var store_id = <?php echo $store_id ?>;
     var sort_field = store_id;
     var httpProxy = new Ext.data.HttpProxy({url: gridUrl});
@@ -67,8 +82,8 @@ Ext.namespace('Node');
         totalProperty: 'total',
         root: 'data',
         fields: [<?php echo $js_grid['ds'] ?>],
-        sortInfo: { field: sort_field,
-        direction: 'DESC' },
+        sortInfo: { field: 'name',
+        direction: 'ASC' },
         remoteSort: true
     });
 
@@ -80,22 +95,29 @@ Ext.namespace('Node');
             plugins:new Ext.ux.Andrie.pPageSize({comboCfg: {width: 50}})
         });
 
+    // row expander
+            
+
 
     // create the editor grid
     var nodeGrid = new Ext.grid.EditorGridPanel({
         store: store,
         cm: cm,
         border: false,
-        loadMask: {msg: 'Retrieving info...'},
-        viewConfig:{forceFit:true},
-        layout:'fit',     
+        loadMask: {msg: <?php echo json_encode(__('Retrieving data...')) ?>},
+        viewConfig:{
+            emptyText: __('Empty!'),  //  emptyText Message
+            forceFit:true
+        },
+        layout:'fit',        
         autoScroll:true,
         title: grid_title,
         stripeRows:true,
         clicksToEdit:1,
-        tbar: [
+        plugins:expander,
+//        tbar: [
 //              {
-//            text: 'Add Node',
+//            text: 'Add node',
 //            iconCls: 'icon-add',
 //            handler: function() {
 //                var insert_model = <?php // echo json_encode($insert_model['db']); ?>;
@@ -127,45 +149,46 @@ Ext.namespace('Node');
 //            }// END Add handler
 //           }// END Add button
 //           ,
-           {
-            text: 'Remove Node',
-            iconCls: 'icon-remove',
-            //cls: 'x-btn-text-icon',
-            handler: function() {
-                var sm = nodeGrid.getSelectionModel();
-                var sel = sm.getSelected();
-                if (sm.hasSelection()){
-                    Ext.Msg.show({
-                        title: 'Remove Node',
-                        buttons: Ext.MessageBox.YESNOCANCEL,
-                        msg: 'Remove '+sel.data.Name+'?',
-                        fn: function(btn){
-                            if (btn == 'yes'){
-                                var conn = new Ext.data.Connection();
-                                conn.request({
-                                    url: 'node/jsonDelete',
-                                    params: {                                        
-                                        'sf_method':'delete',
-                                        id: sel.id
-                                    },
-                                    success: function(resp,opt) {
-                                        nodeGrid.getStore().remove(sel);
-                                        nodesPanel.removeNode(sel.id);
-                                        //nodes.fireEvent('removeNode',sel.id);
-                                           
-                                    },
-                                    failure: function(resp,opt) {
-                                        Ext.Msg.alert('Error',
-                                        'Unable to delete node');
-                                    }
-                                });// END Ajax request
-                            }//END button==yes
-                        }// END fn
-                    }); //END Msg.show
-                };//END if
-            }//END handler Remove
-           }// END Remove button
-    ],// END tbar
+//           {
+//            text: <?php //echo json_encode(__('Remove Node'))?>,
+//            iconCls: 'icon-remove',
+//            hidden:true,
+//            tooltip: <?php //echo json_encode(__('Disabled in this version')) ?>,
+//            //cls: 'x-btn-text-icon',
+//            handler: function() {
+//                var sm = nodeGrid.getSelectionModel();
+//                var sel = sm.getSelected();
+//                if (sm.hasSelection()){
+//                    Ext.Msg.show({
+//                        title: <?php //echo json_encode(__('Remove Node'))?>,
+//                        buttons: Ext.MessageBox.YESNOCANCEL,
+//                        msg: String.format(<?php //echo json_encode(__('Remove Node {0} ?')) ?>,sel.data.Name),
+//                        fn: function(btn){
+//                            if (btn == 'yess'){
+//                                var conn = new Ext.data.Connection();
+//                                conn.request({
+//                                    url: 'node/jsonDelete',
+//                                    params: {
+//                                        'sf_method':'delete',
+//                                        id: sel.id
+//                                    },
+//                                    success: function(resp,opt) {
+//                                        nodeGrid.getStore().remove(sel);
+//                                        nodesPanel.removeNode(sel.id);
+//                                        //nodes.fireEvent('removeNode',sel.id);
+//
+//                                    },
+//                                    failure: function(resp,opt) {
+//                                        Ext.Msg.alert(<?php //echo json_encode(__('Error!')) ?>, <?php //echo json_encode(__('Unable to delete node!')) ?>);
+//                                    }
+//                                });// END Ajax request
+//                            }//END button==yes
+//                        }// END fn
+//                    }); //END Msg.show
+//                };//END if
+//            }//END handler Remove
+//           }// END Remove button
+//    ],// END tbar
     bbar : bpaging,
   //  bbar : new Ext.PagingToolbar({
     //        store: store,
@@ -177,7 +200,7 @@ Ext.namespace('Node');
     sm: new Ext.grid.RowSelectionModel({
             singleSelect: true,
             moveEditorOnEnter:false
-          
+
     }),
     listeners: {
             afteredit: function(e){
@@ -193,7 +216,7 @@ Ext.namespace('Node');
                     success: function(resp,opt) {
 
                         if(e.field=='Name'){
-                            
+
                             var currentNode = nodesPanel.getSelectionModel().getSelectedNode();
                             var updateNodeId = currentNode.id;
 
@@ -203,7 +226,7 @@ Ext.namespace('Node');
                                 updateNodeId = 's'+e.record.id;
                             }
 
-                            
+
                             nodesPanel.updateNode({
                             id: updateNodeId,
                             text: e.value});
@@ -215,25 +238,25 @@ Ext.namespace('Node');
                             nodeGrid.startEditing(e.row,e.column+1);
                     },
                     failure: function(resp,opt) {
-                        Ext.Msg.alert('Error','Could not save changes');
+                        Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Could not save changes!')) ?>);
                         //e.record.reject();
                     }
                 });//END Ajax request
             }//END afteredit
-           
 
-                                    
+
+
     }
 });//END nodeGrid
+ 
  nodeGrid.on({
- afterlayout:{scope:this, single:true, fn:function() {
- <?php if(isset($node_id)):?>
- store.load({params:{start:0, limit:10}});
- <?php else: ?>
-     store.load();
- <?php endif; ?>
- }}
+    activate:{scope:this,fn:function() {
+    
+        if(this.type=='info') store.load.defer(100,store);
+        else store.load.defer(100,store,[{params:{start:0, limit:10}}]);
+    }}
  });
+ 
  return nodeGrid;
      }//Fim init
 

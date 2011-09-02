@@ -1,103 +1,169 @@
 <?php
-require_once 'SOAP/Client.php';
 
 class soapController extends sfController {
 
 
-    // public $request;
-
     public function __construct(){
-      /**
-       * Since we're bypassing Symfony's action dispatcher, we have to initialize manually.
-       */
+        /*
+         * Since we're bypassing Symfony's action dispatcher, we have to initialize manually.
+         */
         $this->context = sfContext::getInstance();
         $this->request = $this->context->getRequest();
 
+        $this->__typedef['TupleNode'] = array('success'=>'boolean','uuid'=>'string');
 
+        $this->__typedef['ArrayOfStrings'] = array(array('item'=>'string'));
+
+        $this->__typedef['VirtAgentUpdateParams'] = array('ip'=>'string', 'state'=>'integer');
+
+        $this->__typedef['VirtAgentInitParams'] = array('name'=>'string',
+                                                        'memtotal'=>'long',
+                                                        'memfree'=>'long',
+                                                        'storagedir'=>'string',
+                                                        'cputotal'=>'integer',
+                                                        'netcards'=>'integer',
+                                                        'ip'=>'string',
+                                                        'port'=>'integer',
+                                                        'uuid'=>'string',
+                                                        'hypervisor'=>'string',
+                                                        'state'=>'integer');
+
+        $this->__typedef['ArraySuccess'] = array('success'=>'boolean');
+
+        /*
+         * Initialize virtual agent data in DB
+         * @params
+         * array('name'=>$in->name
+         *       'memtotal'=>$in->memtotal,
+         *       'memfree'=>$in->memfree,
+         *       'cputotal'=>$in->cputotal,
+         *       'network_cards'=>$in->netcards,
+         *       'ip'=>$in->ip,
+         *       'port'=>$in->port,
+         *       'uuid'=>$in->uuid,
+         *       'storagedir'=>$in->storagedir,
+         *       'hypervisor'=>$in->hypervisor,
+         *       'state'=>$in->state);
+         *
+         */
         $this->__dispatch_map['initializeVirtAgent'] = array(
-                                                     'in'    => array('agent_name'=>'string',
-                                                                        'agent_mem'=>'integer',
-                                                                        'agent_memfree'=>'integer',
-                                                                        'agent_cpu'=>'integer',
-                                                                        'agent_ip'=>'string',
-                                                                        'agent_port'=>'integer',
-                                                                        'agent_uid'=>'string',
-                                                                        'agent_state'=>'integer'),
-                                                     'out'   => array('return'=>"{urn:soapController}Tuple")
+                                                     'in'    => array('array'=>'{urn:soapController}VirtAgentInitParams'),
+                                                     'out'   => array('return'=>"{urn:soapController}TupleNode")
+        );
+        
+        $this->__dispatch_map['clearVirtAgent'] = array(
+                                                     'in'    => array('uuid'=>'string','error'=>'{urn:soapController}ArrayOfStrings'),
+                                                     'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
-        $this->__typedef['Tuple'] = array('success'=>'boolean','insert_id'=>'integer');
+        $this->__dispatch_map['restoreVirtAgent'] = array(
+                                                     'in'    => array('uuid'=>'string','ok'=>'{urn:soapController}ArrayOfStrings'),
+                                                     'out'   => array('return'=>"{urn:soapController}ArraySuccess")
+        );
 
+        /*
+         * Updates DB field data for an specified node
+         */
         $this->__dispatch_map['updateVirtAgent'] = array(
-                                                        'in'    => array('uid'=>'string',
-                                                                        'field'=>'string',
-                                                                        'value'=>'string'),
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'data'=>'{urn:soapController}VirtAgentUpdateParams'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
+        /*
+         * Return vlans that are on DB
+         */
         $this->__dispatch_map['updateVirtAgentVlans'] = array(
-                                                        'in'    => array('uid'=>'string',
-                                                                        'vlans'=>array('string')),
-                                                        'out'   => array('return'=>"{urn:soapController}ArraySuccess")
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'vlans'=>'{urn:soapController}ArrayOfStrings'),
+                                                        'out'   => array('return'=>'{urn:soapController}ArrayOfStrings')
         );
 
+        /*
+         * Updates DB info about node devices
+         *
+         */
         $this->__dispatch_map['updateVirtAgentDevices'] = array(
-                                                        'in'    => array('uid'=>'string',
-                                                                        'devs'=>array('string')),
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'devs'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
-
-
+        /*
+         * Updates DB info about node physical volumes
+         *
+         */
         $this->__dispatch_map['updateVirtAgentPvs'] = array(
-                                                        'in'    => array('uid'=>'string',
-                                                                        'pvs'=>array('string')),
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'pvs'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
+        /*
+         * Updates DB info about node logical volumes
+         *
+         */
         $this->__dispatch_map['updateVirtAgentLvs'] = array(
-                                                        'in'    => array('uid'=>'string',
-                                                                        'lvs'=>array('string')),
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'lvs'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
-
+        /*
+         * Updates DB info about node volume groups
+         *
+         */
         $this->__dispatch_map['updateVirtAgentVgs'] = array(
-                                                        'in'    => array('uid'=>'string',
-                                                                        'vgs'=>array('string')),
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'vgs'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
-
-
-
+        /*
+         * Return virtual machines (servers) that are on DB
+         *
+         */
         $this->__dispatch_map['updateVirtAgentServers'] = array(
-                                                        'in'    => array('uid'=>'string',
-                                                                        'vms'=>array('string')),
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'vms'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
-
+        /*
+         * updates statistics logs RRA files
+         */
         $this->__dispatch_map['updateVirtAgentLogs'] = array(
-                                                        'in'    => array('uid'=>'string',
-                                                                        'info'=>array('string')),
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'data'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
-
+        /*
+         * Initialize virtual server services
+         *
+         */
         $this->__dispatch_map['initAgentServices'] = array(
                                                         'in'    => array(
                                                                          'name'=>'string',
                                                                          'ip'=>'string',
                                                                          'port'=>'integer',
                                                                         'macaddr'=>'string',
-                                                                        'services'=>array('string')),
+                                                                        'services'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
+        
+        
+        $this->__dispatch_map['restoreManagAgent'] = array(
+                                                     'in'    => array('macaddr'=>'string','ok'=>'{urn:soapController}ArrayOfStrings'),
+                                                     'out'   => array('return'=>"{urn:soapController}ArraySuccess")
+        );        
 
 
-
-        $this->__typedef['ArraySuccess'] = array('success'=>'boolean');
+        $this->__dispatch_map['updateVirtAgentServersStats'] = array(
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'vms'=>'{urn:soapController}ArrayOfStrings'),
+                                                        'out'   => array('return'=>"{urn:soapController}ArraySuccess")
+        );
 
 
 
@@ -127,98 +193,279 @@ class soapController extends sfController {
         }
     }
 
+    /*
+     * if this method invoked means that MA restore OK
+     */
+    function restoreManagAgent($macaddr, $ok)
+    {
+        $data_array = array('macaddr'=>$macaddr, 'ok'=>$ok);
 
+        $request_array = array('request'=>array_merge($data_array,array('method'=>'restoreManagAgent')));
+
+        $this->request->setParameter('macaddr', $data_array['macaddr']);
+        $this->request->setParameter('ok', $data_array['ok']);
+
+        $action = $this->getAction('service','soapRestore');
+        $result = $action->executeSoapRestore($this->request);
+
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
+        return $result;
+
+    }
+
+    /*
+     * if this method invoked means VA restore success
+     */
+    function restoreVirtAgent($uuid, $ok)
+    {
+        $node_array = array('uuid'=>$uuid, 'ok'=>$ok);
+
+        $request_array = array('request'=>array_merge($node_array,array('method'=>'restoreVirtAgent')));
+
+        $this->request->setParameter('node_uuid', $node_array['uuid']);
+        $this->request->setParameter('ok', $node_array['ok']);
+
+        $action = $this->getAction('node','soapRestore');
+        $result = $action->executeSoapRestore($this->request);
+
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
+        return $result;
+        
+
+    }
+
+
+   /*
+    * clears virtagent from DB
+    * if receiving this means that agent could not perform operations. Reset DB data. and initialize agent.
+    */
+    function clearVirtAgent($uuid,$error)
+    {
+        $node_array = array('uuid'=>$uuid, 'error'=>$error);
+        
+        $request_array = array('request'=>array_merge($node_array,array('method'=>'clearVirtAgent')));        
+        
+        $this->request->setParameter('node_uuid', $node_array['uuid']);
+        $this->request->setParameter('error', $node_array['error']);
+
+        $action = $this->getAction('node','soapClear');
+        
+        $result = $action->executeSoapClear($this->request);        
+        
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
+        return $result;
+
+    }
 
 
    /*
     * receives initialization data from node virt agent and store it in db
     */
-    function initializeVirtAgent($node_name, $node_mem, $node_memfree, $node_cpu, $node_ip, $node_port, $node_uid, $node_state){
+    function initializeVirtAgent($data){
 
-        //     $this->soapAuth($user, $password); //I call this at the start of each function call in the soap controller (You can choose not to do it)
+        $node_array = array(
+                'name'=>$data->name,
+                'memtotal'=>$data->memtotal,                
+                'cputotal'=>$data->cputotal,
+                'network_cards'=>$data->netcards,
+                'ip'=>$data->ip,
+                'port'=>$data->port,
+                'uuid'=>$data->uuid,
+                'storagedir'=>$data->storagedir,
+                'hypervisor'=>$data->hypervisor,
+                'state'=>$data->state);
 
-        $array = array(
-                'name'=>$node_name,
-                'memtotal'=>$node_mem,
-                'memfree'=>$node_memfree,
-                'cputotal'=>$node_cpu,
-                'ip'=>$node_ip,
-                'port'=>$node_port,
-                'uid'=>$node_uid,
-                'state'=>$node_state);
+        $request_array = array('request'=>array_merge($node_array,array('method'=>'initializeVirtAgent')));
 
-
-        $this->request->setParameter('etva_node', $array);
+        $this->request->setParameter('etva_node', $node_array);
 
         $action = $this->getAction('node','soapCreate');
         $result = $action->executeSoapCreate($this->request);
 
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
         return $result;
+
     }
 
-    function updateVirtAgent($node_uid, $node_field, $node_value)
+    function updateVirtAgent($node_uuid, $node_data)
     {
 
-        $array = array(
-                'field'=>$node_field,
-                'value'=>$node_value,
-        );
-        $this->request->setParameter('uid', $node_uid);
-        $this->request->setParameter('field',$node_field);
-        $this->request->setParameter('value',$node_value);
+        $node_array = array(
+                'ip'=>$node_data->ip,
+                'state'=>$node_data->state);
+
+
+        $request_array = array('request'=>array_merge($node_array,array('uuid' => $node_uuid, 'method'=>'updateVirtAgent')));        
+
+        $this->request->setParameter('uuid', $node_uuid);
+        $this->request->setParameter('data',$node_array);
 
         $action = $this->getAction('node','soapUpdate');
         $result = $action->executeSoapUpdate($this->request);
 
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
         return $result;
     }
 
-    function updateVirtAgentServers($node_uid, $vms)
+    function updateVirtAgentServers($node_uuid, $vms)
     {
 
-
-
-        $this->request->setParameter('uid', $node_uid);
+        $this->request->setParameter('uuid', $node_uuid);
+        $this->request->setParameter('action', 'domains_init');
         $this->request->setParameter('vms',$vms);
+
+        $data = $this->request->getParameterHolder();
+        $all_data = $data->getAll();
+        $all_data['module'] = 'server';
+        $all_data['action'] = 'soapUpdate';
+        $all_data['method'] = 'updateVirtAgentServers';
+
+        $request_array = array('request'=>$all_data);
 
         $action = $this->getAction('server','soapUpdate');
         $result = $action->executeSoapUpdate($this->request);
+
+        $response_array = array('response'=>$result);
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
+
         return $result;
 
     }
 
 
-    function updateVirtAgentVlans($node_uid, $vlans)
+    function updateVirtAgentServersStats($node_uuid, $vms)
     {
 
-        $this->request->setParameter('uid', $node_uid);
-        $this->request->setParameter('vlans',$vlans);
+        $this->request->setParameter('uuid', $node_uuid);
+        $this->request->setParameter('action', 'domains_stats');
+        $this->request->setParameter('vms',$vms);
 
-        $action = $this->getAction('vlan','soapUpdate');
+        $data = $this->request->getParameterHolder();
+        $all_data = $data->getAll();
+        $all_data['module'] = 'server';
+        $all_data['action'] = 'soapUpdate';
+        $all_data['method'] = 'updateVirtAgentServersStats';
+
+        $request_array = array('request'=>$all_data);
+
+        $action = $this->getAction('server','soapUpdate');
         $result = $action->executeSoapUpdate($this->request);
 
+        $response_array = array('response'=>$result);
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
+
         return $result;
+
     }
 
 
-    function updateVirtAgentDevices($node_uid, $devs)
+    function updateVirtAgentVlans($node_uuid, $vlans)
+    {
+        $this->request->setParameter('uuid', $node_uuid);
+        $this->request->setParameter('vlans',$vlans);
+
+        $data = $this->request->getParameterHolder();
+        $send_data = $data->getAll();
+        $send_data['module'] = 'vlan';
+        $send_data['method'] = 'updateVirtAgentVlans';
+        $send_data['action'] = 'soapUpdate';
+
+        $request_array = array('request'=>$send_data);
+
+
+        $action = $this->getAction('vlan','soapUpdate');
+        $response = $action->executeSoapUpdate($this->request);
+
+        $response_array = array('response'=>$response);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
+        return $response;
+    }
+
+
+    function updateVirtAgentDevices($node_uuid, $devs)
     {
 
-
-        $this->request->setParameter('uid', $node_uid);
+        $this->request->setParameter('uuid', $node_uuid);
         $this->request->setParameter('devs',$devs);
+
+        $data = $this->request->getParameterHolder();
+        $all_data = $data->getAll();
+        $all_data['module'] = 'physicalvol';
+        $all_data['action'] = 'soapUpdate';
+        $all_data['method'] = 'updateVirtAgentDevices';
+
+        $request_array = array('request'=>$all_data);
 
         $action = $this->getAction('physicalvol','soapUpdate');
         $result = $action->executeSoapUpdate($this->request);
 
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'), $all_params));
+
         return $result;
     }
 
-    function updateVirtAgentPvs($node_uid, $lvs)
+    function updateVirtAgentPvs($node_uuid, $lvs)
     {
 
 
-        //    $this->request->setParameter('uid', $node_uid);
+        //    $this->request->setParameter('uid', $node_uuid);
         //    $this->request->setParameter('lvs',$lvs);
         //
         //    $action = $this->getAction('logicalvol','soapUpdate');
@@ -230,65 +477,89 @@ class soapController extends sfController {
 
 
 
-    function updateVirtAgentLvs($node_uid, $lvs)
+    function updateVirtAgentLvs($node_uuid, $lvs)
     {
-
-
-        $this->request->setParameter('uid', $node_uid);
+        $this->request->setParameter('uuid', $node_uuid);
         $this->request->setParameter('lvs',$lvs);
+
+        $data = $this->request->getParameterHolder();
+        $all_data = $data->getAll();
+        $all_data['module'] = 'logicalvol';
+        $all_data['action'] = 'soapUpdate';
+        $all_data['method'] = 'updateVirtAgentLvs';
+
+        $request_array = array('request'=>$all_data);
 
         $action = $this->getAction('logicalvol','soapUpdate');
         $result = $action->executeSoapUpdate($this->request);
 
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'), $all_params));
+
         return $result;
     }
 
 
-    function updateVirtAgentVgs($node_uid, $vgs)
+    function updateVirtAgentVgs($node_uuid, $vgs)
     {
 
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
 
-        $this->request->setParameter('uid', $node_uid);
+        $this->request->setParameter('uuid', $node_uuid);
         $this->request->setParameter('vgs',$vgs);
+
+        $data = $this->request->getParameterHolder();
+        $all_data = $data->getAll();
+        $all_data['module'] = 'volgroup';
+        $all_data['action'] = 'soapUpdate';
+        $all_data['method'] = 'updateVirtAgentVgs';
 
         $action = $this->getAction('volgroup','soapUpdate');
         $result = $action->executeSoapUpdate($this->request);
 
+        $request_array = array('request'=>$all_data);
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        //log to file soap message
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
         return $result;
     }
 
 
-    /**
-    *
-    * Convert an object to an array
-    *
-    * @param    object  $object The object to convert
-    * @reeturn      array
-    *
-    */
-    function objectToArray( $object )
-    {
-        if( !is_object( $object ) && !is_array( $object ) )
-        {
-            return $object;
-        }
-        if( is_object( $object ) )
-        {
-            $object = get_object_vars( $object );
-        }
-        return array_map(array($this,'objectToArray'), $object );
-    }
-
-
-
-    function updateVirtAgentLogs($node_uid,$data)
+    function updateVirtAgentLogs($node_uuid,$data)
     {
 
         $c = new Criteria();
-        $c->add(EtvaNodePeer::UID ,$node_uid);
+        $c->add(EtvaNodePeer::UUID ,$node_uuid);
+        $return = 0;
 
         $etva_node = EtvaNodePeer::doSelectOne($c);
-        $node_name = $etva_node->getName();
+
+        if(!$etva_node = EtvaNodePeer::doSelectOne($c)){
+            $error_msg = sprintf('Object etva_node does not exist (%s).', $node_uuid);
+            $error = array('success'=>false,'error'=>$error_msg);
+            return $error;
+        }
+
+        $node_initialize = $etva_node->getInitialize();
+        if($node_initialize!=EtvaNode_VA::INITIALIZE_OK)
+        {
+            $error_msg = sprintf('Etva node initialize status: %s', $node_initialize);
+            $error = array('success'=>false,'error'=>$error_msg);
+
+            return $error;
+
+        }
+
+        $node_uuid = $etva_node->getUuid();
 
 
         $cpu_load = $data->load;
@@ -297,158 +568,160 @@ class soapController extends sfController {
             $cpu_load->fifteenmin
         );
 
-        $cpu_load = new NodeLoadRRA($node_name);
+        $cpu_load = new NodeLoadRRA($node_uuid);
         $cpu_load->update($cpu_load_sort);
 
         $virtServers = $data->virtualmachines;
 
-        if(!$virtServers) return array('success'=>true);
 
-        foreach($virtServers as $server_name => $server_data){
+        if($virtServers)
+            foreach($virtServers as $server_name => $server_data){
 
-            if($etva_server = $etva_node->retrieveServerByName($server_name)){
-
-
-            /*
-             * store network info in RRA file
-             */
-            $server_network_data = $server_data->network;
-            /*
-             * create file per network device
-             */
-            foreach($server_network_data as $intfname=>$intfdata){
-
-                $macaddr = $intfdata->macaddr;
-                $etva_network = $etva_server->retrieveByMac($macaddr);
-                if($etva_network){
-                    $target = $etva_network->getTarget();
+                if($etva_server = $etva_node->retrieveServerByName($server_name)){
 
 
-                    // if target not in network table of the DB
-                    if($target!=$intfname){
-                        $etva_network->updateTarget($intfname);
+                /*
+                 * store network info in RRA file
+                 */
+                $server_network_data = $server_data->network;
+                /*
+                 * create file per network device
+                 */
+                foreach($server_network_data as $intfname=>$intfdata){
+
+                    $macaddr = $intfdata->macaddr;
+                    $etva_network = $etva_server->retrieveByMac($macaddr);
+                    if($etva_network){
+                        $target = $etva_network->getTarget();
+
+
+                        // if target not in network table of the DB
+                        if($target!=$intfname){
+                            $etva_network->updateTarget($intfname);
+                        }
+
+
+                        $tx = $intfdata->tx_bytes;
+                        $rx = $intfdata->rx_bytes;
+
+                        $intf_sort = array($rx,$tx);
+
+                        $mac_strip = str_replace(':','',$macaddr);
+                        // create log file
+                        $server_network_rra = new ServerNetworkRRA($node_uuid,$etva_server->getUuid(),$mac_strip);
+                        //send/update file information
+                        $return = $server_network_rra->update($intf_sort);
                     }
 
 
-                    $tx = $intfdata->tx_bytes;
-                    $rx = $intfdata->rx_bytes;
+                }// end server networks
 
-                    $intf_sort = array($rx,$tx);
 
-                    $mac_strip = str_replace(':','',$macaddr);
-                    // create log file
-                    $server_network_rra = new ServerNetworkRRA($node_name,$etva_server->getName(),$mac_strip);
-                    //send/update file information
-                    $return = $server_network_rra->update($intf_sort);
+                /*
+                 * disk stuff
+                 */
+                if(isset($server_data->disk)){
+                    $server_disk_data = $server_data->disk;
 
-                    $logger = new virtAgentLogger(sfContext::getInstance()->getEventDispatcher(),array('file' => sfConfig::get("sf_log_dir").'/virtAgent/lixo.xml'));
-                    // $logger->log("tx ".$tx." rx ".$rx);
+                    foreach($server_disk_data as $disk=>$diskdata){
+                        
+                        $diskname = $diskdata->name;
+
+                        $read_b = $diskdata->rd_bytes;
+                        $write_b = $diskdata->wr_bytes;
+                        $disk_sort = array($read_b,$write_b);
+
+                        // create log file
+                        $server_disk_rw_log = new ServerDisk_rwRRA($node_uuid,$etva_server->getUuid(),$diskname);
+                        //send/update file information
+                        $return = $server_disk_rw_log->update($disk_sort);
+
+                        /*
+                         * DISK SPACE RRA NOT USED ANYMORE
+                         */
+                        //$size = $diskdata->size;
+                        //$freesize = $diskdata->freesize;
+                        //$disk_space = array($size,$freesize);
+                        //$server_disk_spaceRRA = new ServerDiskSpaceRRA($node_uuid,$etva_server->getUuid(),$diskname);
+                        //$return = $server_disk_spaceRRA->update($disk_space);
+
+
+
+                    }// end server disk
                 }
 
+                // store cpu utilization
+                $server_cpu_data = $server_data->cpu;
+                $server_cpu_per = array($server_cpu_data->cpu_per);
 
-            }// end server networks
+          //      $logger->log("cpu ".$server_cpu_data->cpu_per);
+
+                // create log file
+                $server_cpu_per_rra = new ServerCpuUsageRRA($node_uuid,$etva_server->getUuid());
+                //send/update file information
+                $return = $server_cpu_per_rra->update($server_cpu_per);
 
 
-            /*
-             * disk stuff
-             */
-            if(isset($server_data->disk)){
-                $server_disk_data = $server_data->disk;
+                /*
+                 * store memory info
+                 */
 
-                foreach($server_disk_data as $diskname=>$diskdata){
+                // store memory utilization
+                $server_memory_data = $server_data->memory;
 
-
-                    $size = $diskdata->size;
-                    $freesize = $diskdata->freesize;
-                    $disk_space = array($size,$freesize);
-
-                    $read_t = $diskdata->r_spent;
-                    $write_t = $diskdata->w_spent;
-                    $disk_sort = array($read_t,$write_t);
-
-                    // create log file
-                    $server_disk_rw_log = new ServerDisk_rwspentRRA($node_name,$etva_server->getName(),$diskname);
-                    //send/update file information
-                    $return = $server_disk_rw_log->update($disk_sort);
-
-                    $server_disk_spaceRRA = new ServerDiskSpaceRRA($node_name,$etva_server->getName(),$diskname);
-                    $return = $server_disk_spaceRRA->update($disk_space);
-
-                    $logger = new virtAgentLogger(sfContext::getInstance()->getEventDispatcher(),array('file' => sfConfig::get("sf_log_dir").'/virtAgent/lixo.xml'));
-                    // $logger->log("readtime ".$read_t." writetime ".$write_t);
+                $server_memory_per = array($server_memory_data->mem_per);
+                // create log file
+                $server_memory_per_rra = new ServerMemoryUsageRRA($node_uuid,$etva_server->getUuid());
+                //send/update file information
+                $return = $server_memory_per_rra->update($server_memory_per);
 
 
 
-                }// end server disk
+                $server_memory_sort = array($server_memory_data->mem_m,
+                                            $server_memory_data->mem_v);
+
+                $server_memory = new ServerMemoryRRA($node_uuid,$etva_server->getUuid());
+                $server_memory->update($server_memory_sort);
+
+
+
+                }// end virtualmachine stuff
+
             }
 
-            // store cpu utilization
-            $server_cpu_data = $server_data->cpu;
-            $server_cpu_per = array($server_cpu_data->cpu_per);
+      //  $this->updateVirtAgentLogs_($node_uuid,$data);
 
-    //        $logger = new virtAgentLogger(sfContext::getInstance()->getEventDispatcher(),array('file' => sfConfig::get("sf_log_dir").'/virtAgent/lixo.xml'));
-      //      $logger->log("cpu ".$server_cpu_data->cpu_per);
+        $all_params = array('request'=>array('uuid'=>$etva_node->getUuid(),
+                                            'data'=>$data,
+                                            'method'=>'updateVirtAgentLogs'
+                                    ),
+                            'response'=>$return);
 
-            // create log file
-            $server_cpu_per_rra = new ServerCpuUsageRRA($node_name,$etva_server->getName());
-            //send/update file information
-            $return = $server_cpu_per_rra->update($server_cpu_per);
-
-
-            /*
-             * store memory info
-             */
-
-            // store memory utilization
-            $server_memory_data = $server_data->memory;
-
-            $server_memory_per = array($server_memory_data->mem_per);
-            // create log file
-            $server_memory_per_rra = new ServerMemoryUsageRRA($node_name,$etva_server->getName());
-            //send/update file information
-            $return = $server_memory_per_rra->update($server_memory_per);
-
-
-
-//            $server_memory_buffers = array($server_memory_data->mem_v);
-
-//            $server_memory_swap = array($server_memory_data->mem_m);
-            
-            $server_memory_sort = array($server_memory_data->mem_m,
-                                        $server_memory_data->mem_v);
-
-            $server_memory = new ServerMemoryRRA($node_name,$etva_server->getName());
-            $server_memory->update($server_memory_sort);
-
- //           $server_memory_buffers_rra = new ServerMemory_buffersRRA($node_name,$etva_server->getName());
- //           $return = $server_memory_buffers_rra->update($server_memory_buffers);
-
- //           $server_memory_swap_rra = new ServerMemory_swapRRA($node_name,$etva_server->getName());
- //           $return = $server_memory_swap_rra->update($server_memory_swap);
-
-
-            }// end virtualmachine stuff
-
-
-            // $logger = new virtAgentLogger(sfContext::getInstance()->getEventDispatcher(),array('file' => sfConfig::get("sf_log_dir").'/virtAgent/lixo.xml'));
-            // $logger->log("swap ".$server_memory_data->mem_m." buffers ".$server_memory_data->mem_v);
-
-
-            // $return = $cpu_load_log->update($cpu_load_sort);
-
-        }
-
-      //  $this->updateVirtAgentLogs_($node_uid,$data);
-
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
 
 
         return $return;
 
     }
 
+    /*
+     * Initializes server with services...
+     */
     function initAgentServices($agent_name,$agent_ip,$agent_port,$server_mac,$services)
     {
-        
+        // log function called
+        $request_array = array('request'=>
+                            array(
+                                'name'=>$agent_name,
+                                'ip'=>$agent_ip,
+                                'port'=>$agent_port,
+                                'macaddr'=>$server_mac,
+                                'method'=>'initAgentServices',
+                                'services'=>$services));
+
+
         $this->request->setParameter('name', $agent_name);
         $this->request->setParameter('ip', $agent_ip);
         $this->request->setParameter('port', $agent_port);
@@ -456,98 +729,19 @@ class soapController extends sfController {
         $this->request->setParameter('services',$services);
 
         $action = $this->getAction('service','soapInit');
-        $result = $action->executeSoapInit($this->request);
+        $result = $action->executeSoapInit($this->request);        
+
+        $response_array = array('response'=>$result);
+
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
 
         return $result;
-        
-    }
-
-
-    function updateVirtAgentLogs_($node_uid,$info)
-    {
-        require_once 'XML/Serializer.php';
-
-        $c = new Criteria();
-        $c->add(EtvaNodePeer::UID ,$node_uid);
-
-
-        $etva_node = EtvaNodePeer::doSelectOne($c);
-        $node_name = $etva_node->getName();
-        $options = array(
-          XML_SERIALIZER_OPTION_INDENT        => '    ',
-          XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-          XML_SERIALIZER_OPTION_ROOT_NAME => 'da'
-        );
-
-
-       // $time = $info->time;
-        //$view_time = date("Ymd",$time);
-
-
-        $serializer = new XML_Serializer($options);
-
-
-        //$array = $this->objectToArray( $info );
-        $result = $serializer->serialize($info);
-
-$logger = new virtAgentLogger(sfContext::getInstance()->getEventDispatcher(),array('file' => sfConfig::get("sf_log_dir").'/virtAgent/datasent.xml'));
-                 $logger->log($result);
-                 return '';
-        /*
-         * create/append files
-         */
-        $virtServers = $info->virtualmachines;
-        //return $virtServers;
-
-        $store_logs_of_virtServers = array('network','cpu_per','disk','mem_per');
-
-        foreach($virtServers as $server_name => $data){
-
-            foreach($store_logs_of_virtServers as $tag){
-
-                $options = array(
-                                 "indent"          => "    ",
-                                 "rootName"        => $tag,
-                                 "returnResult"    => true
-                );
-
-                $serializer = new XML_Serializer($options);
-                $result = $serializer->serialize($data->$tag);
-
-                $logger = new virtAgentLogger(sfContext::getInstance()->getEventDispatcher(),array('file' => sfConfig::get("sf_log_dir").'/virtAgent/'.$node_name.'/'.$server_name.'/'.$tag.'_'.$view_time.'.xml'));
-                // $logger->log($result);
-
-            }
-
-        }
-
-        $store_logs_of_virtAgent = array('network','cpu','disk','memory','load');
-
-        foreach($store_logs_of_virtAgent as $tag){
-
-            $options = array(
-                                 "indent"          => "    ",
-                                 "rootName"        => $tag,
-                                 "returnResult"    => true
-            );
-
-            $serializer = new XML_Serializer($options);
-            $result = $serializer->serialize($info->$tag);
-
-            $logger = new virtAgentLogger(sfContext::getInstance()->getEventDispatcher(),array('file' => sfConfig::get("sf_log_dir").'/virtAgent/'.$node_name.'/'.$tag.'_'.$view_time.'.xml'));
-            //  $logger->log($result);
-
-        }
-
-
-        $return = array('success'=>true);
-
-
-        return $return;
-
 
     }
-
-
 
 }

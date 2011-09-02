@@ -1,0 +1,4 @@
+config/config.yml: # custom handler...other config stuff file
+  class:    sfDefineEnvironmentConfigHandler
+  param:
+    prefix: config_

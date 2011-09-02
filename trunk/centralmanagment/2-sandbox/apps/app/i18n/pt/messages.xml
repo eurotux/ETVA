@@ -1,0 +1,2275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file source-language="EN" target-language="pt" datatype="plaintext" original="messages" date="2010-08-17T11:55:18Z" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="modules">
+        <source>Modules</source>
+        <target>Módulos</target>
+      </trans-unit>
+      <trans-unit id="welcome">
+        <source>Welcome</source>
+        <target>Bem-vindo</target>
+      </trans-unit>                  
+      <trans-unit id="welcome_user">
+        <source>Welcome %1%!</source>
+        <target>Bem-vindo %1%!</target>
+      </trans-unit>      
+      <trans-unit id="logout">
+        <source>Logout</source>
+        <target>Sair</target>
+      </trans-unit>
+      <trans-unit id="required">
+        <source>Required.</source>
+        <target>Em falta.</target>
+      </trans-unit>      
+      <trans-unit id="finished">
+        <source>Finished!</source>
+        <target>Finalização!</target>
+      </trans-unit>
+      <trans-unit id="change_pwd">
+        <source>Change password</source>
+        <target>Alterar Password</target>
+      </trans-unit>
+      <trans-unit id="curr_pwd">
+        <source>Current Password</source>
+        <target>Password actual</target>
+      </trans-unit>
+      <trans-unit id="new_pwd">
+        <source>New Password</source>
+        <target>Nova Password</target>
+      </trans-unit>
+      <trans-unit id="confir_new_pwd">
+        <source>Confirm New Password</source>
+        <target>Confirmar Password</target>
+      </trans-unit>
+      <trans-unit id="pwd_not_match">
+        <source>Passwords do not match</source>
+        <target>Passwords não conferem</target>
+      </trans-unit>
+      <trans-unit id="set_pwd">
+        <source>Set new password!</source>
+        <target>Alterar password!</target>
+      </trans-unit>
+      <trans-unit id="new_pwd_save">
+        <source>New password saved!</source>
+        <target>Password guardada!</target>
+      </trans-unit>
+      <trans-unit id="wrong_user_pwd">
+        <source>Wrong user password</source>
+        <target>Password de utilizador inválida</target>
+      </trans-unit>
+      <trans-unit id="mac_managemnt">
+        <source>MAC Pool Management</source>
+        <target>Gestão da Pool de MAC</target>
+      </trans-unit>
+      <trans-unit id="init_mac">
+        <source>Initial MAC</source>
+        <target>MAC inicial</target>
+      </trans-unit>
+      <trans-unit id="init_mac">
+        <source>MAC pool size</source>
+        <target>Tamanho da MAC pool</target>
+      </trans-unit>
+      <trans-unit id="gen_mac">
+        <source>Generating MAC pool...</source>
+        <target>Gerando a MAC pool...</target>
+      </trans-unit>
+      <trans-unit id="gen">
+        <source>Generate!</source>
+        <target>Gerar!</target>
+      </trans-unit>
+      <trans-unit id="gen_mac_size">
+        <source>Generated pool of {0} MAC's</source>
+        <target>Gerada pool com {0} MAC's</target>
+      </trans-unit>
+      <trans-unit id="err_gen_mac">
+        <source>Unable to generate MAC pool</source>
+        <target>Erro ao gerar a MAC pool</target>
+      </trans-unit>
+      <trans-unit id="notgen_mac">
+        <source>MAC pool not generated!</source>
+        <target>MAC pool não gerada!</target>
+      </trans-unit>
+      <trans-unit id="notgen_mac">
+        <source>MAC pool generation</source>
+        <target>Geração da MAC pool</target>
+      </trans-unit>
+      <trans-unit id="notgen_mac">
+        <source>Networks in the system</source>
+        <target>Redes no sistema</target>
+      </trans-unit>
+      <trans-unit id="remove">
+        <source>Remove</source>
+        <target>Remover</target>
+      </trans-unit>
+
+      <trans-unit id="no_spaces_numchar_only">
+        <source>No spaces and only alpha-numeric characters allowed!</source>
+        <target>Sem espaços e apenas caracteres alfa-númericos são permitidos!</target>
+      </trans-unit>
+      <trans-unit id="no_spaces_vlan_eth_bond">
+        <source>No spaces and no reserved words 'vlan' or 'eth' or 'bond'. Only alpha-numeric characters allowed!</source>
+        <target>Sem espaços e sem as palavras reservadas 'vlan' ou 'eth' ou 'bond'. Apenas caracteres alfa-númericos são permitidos!</target>
+      </trans-unit>
+
+      <trans-unit id="preferences">
+        <source>System preferences</source>
+        <target>Preferências</target>
+      </trans-unit>
+      <trans-unit id="welcome_msg">
+        <source>Welcome. Choose from left</source>
+        <target>Bem-vindo. Seleccione a partir do painel esquerdo</target>
+      </trans-unit>
+      <trans-unit id="remove_node_question">
+        <source>Remove node {0} ?</source>
+        <target>Remover node {0} ?</target>
+      </trans-unit>
+      <trans-unit id="removing_node">
+        <source>Removing node...</source>
+        <target>A remover node...</target>
+      </trans-unit>
+      <trans-unit id="err_remove_node">
+        <source>Unable to delete node!</source>
+        <target>Não foi possivel remover o node!</target>
+      </trans-unit>
+
+
+
+      <trans-unit id="available_macs">
+        <source>Available MAC Addresses</source>
+        <target>Endereços MAC disponiveis</target>
+      </trans-unit>
+      <trans-unit id="available_macs">
+        <source>No macs available in pool</source>
+        <target>Não existem endereços MAC disponiveis na pool</target>
+      </trans-unit>
+      <trans-unit id="at_least_macs">
+        <source>Should have at least %num% macs available in pool</source>
+        <target>Necessita de ter no mínimo %num% macs disponiveis na pool</target>
+      </trans-unit>
+
+
+      <!-- ISO MANAGER -->
+      <!--             -->
+      <trans-unit id="upload_applet">
+        <source>Upload Applet (FTP mode)</source>
+        <target>Applet de upload (modo FTP)</target>
+      </trans-unit>
+      <trans-unit id="upload_ftp">
+        <source>Upload through FTP</source>
+        <target>Upload via FTP</target>
+      </trans-unit>
+      <trans-unit id="download_file">
+        <source>Download selected file</source>
+        <target>Download do ficheiro seleccionado</target>
+      </trans-unit>
+      <trans-unit id="rename">
+        <source>Rename</source>
+        <target>Renomear</target>
+      </trans-unit>
+      <trans-unit id="rename_selected_file">
+        <source>Rename selected file</source>
+        <target>Renomear ficheiro seleccionado</target>
+      </trans-unit>
+      <trans-unit id="rename_file">
+        <source>Rename file</source>
+        <target>Renomear ficheiro</target>
+      </trans-unit>      
+      <trans-unit id="err_rename">
+        <source>Could not rename ISO. %info%</source>
+        <target>Não foi possível renomear a ISO. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_delete">
+        <source>Could not delete ISO. %info%</source>
+        <target>Não foi possível apagar a ISO. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_iso_in_use">
+        <source>ISO %name% in use. %info%</source>
+        <target>ISO %name% em uso. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_iso_problem">
+        <source>ISO %name% problem. %info%</source>
+        <target>Problema com ISO %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="no_files">
+        <source>No files found.</source>
+        <target>Nenum ficheiro encontrado.</target>
+      </trans-unit>
+      <trans-unit id="delete">
+        <source>Delete</source>
+        <target>Apagar</target>
+      </trans-unit>
+      <trans-unit id="delete_file">
+        <source>Delete selected file</source>
+        <target>Apagar ficheiro seleccionado</target>
+      </trans-unit>
+      <trans-unit id="confirm_delete">
+        <source>Confirm delete</source>
+        <target>Confirmar apagar</target>
+      </trans-unit>
+      <trans-unit id="confirm_delete">
+        <source>Are you sure you wanto to delete {0} ?</source>
+        <target>Tem a certeza que pretende apagar {0} ?</target>
+      </trans-unit>
+      <trans-unit id="deleting">
+        <source>Deleting...</source>
+        <target>A apagar...</target>
+      </trans-unit>
+
+      <!-- Users permissions administration -->
+      <trans-unit id="permission_details">
+        <source>Permission details</source>
+        <target>Detalhes da permissão</target>
+      </trans-unit>
+      <trans-unit id="add_permission">
+        <source>Add permission</source>
+        <target>Adicionar permissão</target>
+      </trans-unit>
+      <trans-unit id="add_new_permission">
+        <source>Add new permission</source>
+        <target>Adicionar nova permissão</target>
+      </trans-unit>
+      <trans-unit id="edit_permission">
+        <source>Edit permission</source>
+        <target>Editar permissão</target>
+      </trans-unit>
+      <trans-unit id="edit_selected_permission">
+        <source>Edit selected permission</source>
+        <target>Editar permissão seleccionada</target>
+      </trans-unit>
+      <trans-unit id="remove_permission">
+        <source>Remove permission</source>
+        <target>Remover permissão</target>
+      </trans-unit>
+      <trans-unit id="remove_selected_permission">
+        <source>Remove selected permission</source>
+        <target>Remover permissão seleccionada</target>
+      </trans-unit>
+      <trans-unit id="remove_permission_question">
+        <source>Remove permission {0} ?</source>
+        <target>Remover permissão {0} ?</target>
+      </trans-unit>
+      <trans-unit id="removing_permission">
+        <source>Removing permission...</source>
+        <target>A remover permissão...</target>
+      </trans-unit>
+      <trans-unit id="unable_remove_permission">
+        <source>Unable to remove permission</source>
+        <target>Não foi possível remover a permissão</target>
+      </trans-unit>
+      <trans-unit id="add_group">
+        <source>Add group</source>
+        <target>Adicionar grupo</target>
+      </trans-unit>
+      <trans-unit id="add_new_group">
+        <source>Add new group</source>
+        <target>Adicionar novo grupo</target>
+      </trans-unit>
+      <trans-unit id="edit_group">
+        <source>Edit group</source>
+        <target>Editar grupo</target>
+      </trans-unit>
+      <trans-unit id="edit_selected_group">
+        <source>Edit selected group</source>
+        <target>Editar grupo seleccionado</target>
+      </trans-unit>
+      <trans-unit id="remove_group">
+        <source>Remove group</source>
+        <target>Remover grupo</target>
+      </trans-unit>
+      <trans-unit id="remove_selected_group">
+        <source>Remove selected group</source>
+        <target>Remover grupo seleccionado</target>
+      </trans-unit>
+      <trans-unit id="remove_group_question">
+        <source>Remove group {0} ?</source>
+        <target>Remover grupo {0} ?</target>
+      </trans-unit>
+      <trans-unit id="removing_group">
+        <source>Removing group...</source>
+        <target>A remover grupo...</target>
+      </trans-unit>
+      <trans-unit id="unable_remove_group">
+        <source>Unable to remove group</source>
+        <target>Não foi possível remover o grupo</target>
+      </trans-unit>
+      <trans-unit id="cannot_removedefault">
+        <source>CANNOT REMOVE DEFAULT GROUP ID {0}</source>
+        <target>Não é possível remover o grupo com ID {0}</target>
+      </trans-unit>
+      <trans-unit id="group_details">
+        <source>Group details</source>
+        <target>Detalhes do grupo</target>
+      </trans-unit>
+      <trans-unit id="description">
+        <source>Description</source>
+        <target>Descrição</target>
+      </trans-unit>
+      <trans-unit id="add_user">
+        <source>Add user</source>
+        <target>Adicionar utilizador</target>
+      </trans-unit>
+      <trans-unit id="add_user_account">
+        <source>Add user account</source>
+        <target>Adicionar conta de utilizador</target>
+      </trans-unit>
+      <trans-unit id="edit_user">
+        <source>Edit user</source>
+        <target>Editar utilizador</target>
+      </trans-unit>
+      <trans-unit id="edit_selected_user">
+        <source>Edit selected user</source>
+        <target>Editar utilizador seleccionado</target>
+      </trans-unit>
+      <trans-unit id="remove_user">
+        <source>Remove user</source>
+        <target>Remover utilizador</target>
+      </trans-unit>
+      <trans-unit id="remove_selected_user">
+        <source>Remove selected user</source>
+        <target>Remover utilizador seleccionado</target>
+      </trans-unit>
+      <trans-unit id="remove_user_question">
+        <source>Remove user {0} ?</source>
+        <target>Remover utilizador {0} ?</target>
+      </trans-unit>
+      <trans-unit id="removing_user">
+        <source>Removing user...</source>
+        <target>A remover utilizador...</target>
+      </trans-unit>
+      <trans-unit id="unable_remove_user">
+        <source>Unable to remove user</source>
+        <target>Não foi possível remover o utilizador</target>
+      </trans-unit>
+      <trans-unit id="right_click_edit">
+        <source>Right-click to open sub-menu or double-click to edit</source>
+        <target>Botão direito para abrir sub-menu ou duplo clique para editar</target>
+      </trans-unit>
+      <trans-unit id="manage_users">
+        <source>Manage Users</source>
+        <target>Gestão de Utilizadores</target>
+      </trans-unit>
+      <trans-unit id="manage_groups">
+        <source>Manage Groups</source>
+        <target>Gestão de Grupos</target>
+      </trans-unit>
+      <trans-unit id="manage_permissions">
+        <source>Manage Permissions</source>
+        <target>Gestão de Permissões</target>
+      </trans-unit>
+      <trans-unit id="permissions">
+        <source>Permissions</source>
+        <target>Permissões</target>
+      </trans-unit>
+      <trans-unit id="user_details">
+        <source>User details</source>
+        <target>Detalhes de utilizador</target>
+      </trans-unit>
+      <trans-unit id="groups">
+        <source>Groups</source>
+        <target>Grupos</target>
+      </trans-unit>
+      <trans-unit id="first_name">
+        <source>First name</source>
+        <target>Primeiro nome</target>
+      </trans-unit>
+      <trans-unit id="last_name">
+        <source>Last name</source>
+        <target>Último nome</target>
+      </trans-unit>
+      <trans-unit id="correct_email">
+        <source>Please provide correct email address</source>
+        <target>P.f. introduza um endereço de email válido</target>
+      </trans-unit>
+
+
+      <trans-unit id="list_users">
+        <source>List users</source>
+        <target>Lista Utilizadores</target>
+      </trans-unit>
+
+
+
+      <!--                                  -->
+
+      <!-- MAIN -->
+      <!--      -->
+      <trans-unit id="sysadmin">
+        <source>System Administration</source>
+        <target>Administração do sistema</target>
+      </trans-unit>
+      <trans-unit id="sysadmin_users_perms">
+        <source>Users and permissions administration</source>
+        <target>Administração de utilizadores e permissões</target>
+      </trans-unit>
+      <trans-unit id="iso_manager">
+        <source>ISO Manager</source>
+        <target>Gestor de ISOs</target>
+      </trans-unit>
+      <trans-unit id="node_monitor">
+        <source>Nodes Agent Monitor keepalive</source>
+        <target>Monitorização do agente dos nodes</target>
+      </trans-unit>
+      <trans-unit id="change_to_agressive">
+        <source>Increases the frequency of the nodes status verification</source>
+        <target>Aumenta a frequência com que o estado dos nodes é verificada</target>
+      </trans-unit>
+      <trans-unit id="events_log">
+        <source>System events log</source>
+        <target>Registo de eventos do sistema</target>
+      </trans-unit>
+      <trans-unit id="events_log_options">
+        <source>Events log options</source>
+        <target>Opções do registo de eventos</target>
+      </trans-unit>
+      <trans-unit id="keep_log_data">
+        <source>Keep log data</source>
+        <target>Manter registos por</target>
+      </trans-unit>
+      <trans-unit id="events_filter">
+        <source>Filter by log level</source>
+        <target>Filtrar por nível</target>
+      </trans-unit>      
+      <trans-unit id="tools">
+        <source>Tools</source>
+        <target>Ferramentas</target>
+      </trans-unit>
+      <trans-unit id="storage">
+        <source>Storage</source>
+        <target>Armazenamento</target>
+      </trans-unit>
+
+
+      <!-- NETWORKS -->
+      <!--          -->
+      <trans-unit id="host_network">
+        <source>Host network</source>
+        <target>Rede do servidor</target>
+      </trans-unit>
+      <trans-unit id="manage_networks">
+        <source>Manage networks</source>
+        <target>Gestão das redes</target>
+      </trans-unit>
+      <trans-unit id="missing_network_interface_data">
+        <source>Missing network interface data!</source>
+        <target>Dados das interfaces de rede em falta!</target>
+      </trans-unit>
+      <trans-unit id="select_network">
+        <source>Select network...</source>
+        <target>Seleccione uma rede...</target>
+      </trans-unit>
+      <trans-unit id="select_model">
+        <source>Select model...</source>
+        <target>Seleccione o modelo...</target>
+      </trans-unit>
+      <trans-unit id="select_type">
+        <source>Select type...</source>
+        <target>Seleccione o tipo...</target>
+      </trans-unit>
+      <trans-unit id="network_notfound">
+        <source>Network %1% not found!</source>
+        <target>Rede %1% inexistente!</target>
+      </trans-unit>
+      <trans-unit id="network_notset">
+        <source>Networks not set!</source>
+        <target>Redes inexistentes!</target>
+      </trans-unit>
+      <trans-unit id="network_onsys">
+        <source>{0} network(s) on the system</source>
+        <target>{0} redes existentes no sistema</target>
+      </trans-unit>
+      <trans-unit id="network">
+        <source>Network</source>
+        <target>Rede</target>
+      </trans-unit>
+      <trans-unit id="networks">
+        <source>Networks</source>
+        <target>Redes</target>
+      </trans-unit>
+      <trans-unit id="network_name">
+        <source>Network name</source>
+        <target>Nome da rede</target>
+      </trans-unit>
+      <trans-unit id="network_id">
+        <source>Network ID (1...)</source>
+        <target>ID da rede (1...)</target>
+      </trans-unit>
+      <trans-unit id="network_config">
+        <source>Network setup</source>
+        <target>Configuração da Rede</target>
+      </trans-unit>
+      <trans-unit id="add_network">
+        <source>Add network</source>
+        <target>Adicionar rede</target>
+      </trans-unit>
+      <trans-unit id="remove_network">
+        <source>Remove network</source>
+        <target>Remover rede</target>
+      </trans-unit>
+      <trans-unit id="err_add_network">
+        <source>Network could not be created!</source>
+        <target>Não foi possível criar a rede!</target>
+      </trans-unit>
+      <trans-unit id="added_network">
+        <source>Network added to system!</source>
+        <target>Rede criada com sucesso!</target>
+      </trans-unit>
+      <trans-unit id="adding_network">
+        <source>Creating network...</source>
+        <target>Criando a rede...</target>
+      </trans-unit>
+      <trans-unit id="err_network_init">
+        <source>Network {0} could not be initialized: {1}</source>
+        <target>Erro ao inicializar a rede {0}: {1}</target>
+      </trans-unit>
+      <trans-unit id="network_init">
+        <source>Network {0} initialized: </source>
+        <target>Rede {0} inicializada: </target>
+      </trans-unit>
+      <trans-unit id="err_network_uninit">
+        <source>Network {0} could not be uninitialized: {1}</source>
+        <target>Erro ao remover a rede {0}: {1}</target>
+      </trans-unit>
+      <trans-unit id="network_uninit">
+        <source>Network {0} uninitialized: </source>
+        <target>Rede {0} removida: </target>
+      </trans-unit>
+      <trans-unit id="err_network_exist">
+        <source>Network %1% already exist!</source>
+        <target>Rede %1% já existe!</target>
+      </trans-unit>
+      <trans-unit id="err_network_untagged">
+        <source>Untagged network already exist!</source>
+        <target>Rede untagged já existe!</target>
+      </trans-unit>     
+      <trans-unit id="remove_network_question">
+        <source>Remove network {0} ?</source>
+        <target>Remover a rede {0} ?</target>
+      </trans-unit>
+      <trans-unit id="removing_network">
+        <source>Removing network...</source>
+        <target>Removendo a rede...</target>
+      </trans-unit>
+      <trans-unit id="using_network">
+        <source>Network %1% in use!</source>
+        <target>Rede %1% em utilização!</target>
+      </trans-unit>
+
+
+
+      <!-- INTERFACES -->
+      <!--            -->
+      <trans-unit id="remove_network_interface">
+        <source>Remove network interface</source>
+        <target>Remover interface de rede</target>
+      </trans-unit>
+      <trans-unit id="err_nics_saveall">
+        <source>Could not save all network interfaces. Interface with mac address %name% problem.</source>
+        <target>Não foi possivel guardar todas as interfaces de rede. Problema com a interface com o mac %name%.</target>
+      </trans-unit>
+      <trans-unit id="mac_assinged">
+        <source>Mac address %name% already assigned</source>
+        <target>Endereço MAC já atribuido</target>
+      </trans-unit>
+      <trans-unit id="nics_problem">
+        <source>Network interfaces problem.</source>
+        <target>Problema com as interfaces de rede.</target>
+      </trans-unit>
+      <trans-unit id="specify_nics">
+        <source>Specify the NIC's to use.</source>
+        <target>Especifique as NIC's a usar.</target>
+      </trans-unit>
+      <trans-unit id="youhave_interfaces">
+        <source>You have {0} network interface(s) defined!</source>
+        <target>Tem {0} interface(s) de rede definida(s)!</target>
+      </trans-unit>
+      <trans-unit id="listall_interfaces">
+        <source>List all network interfaces</source>
+        <target>Lista de todas as interfaces de rede</target>
+      </trans-unit>
+      <trans-unit id="list_interfaces_network">
+        <source>List of {0} network interfaces</source>
+        <target>Lista das interfaces de rede em {0}</target>
+      </trans-unit>
+      <trans-unit id="manage_interfaces">
+        <source>Manage network interfaces</source>
+        <target>Gestão das interfaces de rede</target>
+      </trans-unit>
+      <trans-unit id="attach_detach_interfaces">
+        <source>Attach/detach network interfaces for server {0}</source>
+        <target>Alterar interfaces de rede do servidor {0}</target>
+      </trans-unit>
+      <trans-unit id="err_attach_detach_interfaces">
+        <source>Unable to attach/detach interfaces for server {0}!</source>
+        <target>Não foi possivel alterar as interfaces de rede do servidor {0}!</target>
+      </trans-unit>
+      <trans-unit id="err_detach_interface">
+        <source>Unable to detach network interface {0} from {1}!</source>
+        <target>Não foi possivel remover do servidor {1} a interface de rede com o mac {0}!</target>
+      </trans-unit>      
+
+      <trans-unit id="add_interface">
+        <source>Add interface</source>
+        <target>Adicionar interface</target>
+      </trans-unit>
+      <trans-unit id="edit_interface">
+        <source>Edit interface</source>
+        <target>Editar interface</target>
+      </trans-unit>
+      <trans-unit id="remove_interface">
+        <source>Remove interface</source>
+        <target>Remover interface</target>
+      </trans-unit>
+      <trans-unit id="processing_interface">
+        <source>Processing interfaces...</source>
+        <target>A processar as interfaces...</target>
+      </trans-unit>
+      <trans-unit id="interfaces_create">
+        <source>Network interfaces of server %server% created successfully</source>
+        <target>Interfaces de rede do servidor %server% criadas com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_interfaces_create">
+        <source>Network interfaces could not be created. %info%</source>
+        <target>Não foi possivel criar as interfaces de rede. %info%</target>
+      </trans-unit>
+      <trans-unit id="interface_remove">
+        <source>Network interface %name% of server %server% removed successfully</source>
+        <target>Interface de rede do servidor %server% com o mac %name% removido com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_interface_remove">
+        <source>Network interface %name% could not be removed. %info%</source>
+        <target>Não foi possivel remover a interface de rede com o mac %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_interfaces_remove">
+        <source>Network interfaces could not be removed. %info%</source>
+        <target>Não foi possivel remover as interfaces de rede. %info%</target>
+      </trans-unit>
+      <trans-unit id="remove__network_interface">
+        <source>Remove network interface</source>
+        <target>Remover interface de rede</target>
+      </trans-unit>
+      <trans-unit id="removing_network_interface">
+        <source>Removing network interface...</source>
+        <target>A remover a interface de rede...</target>
+      </trans-unit>
+      <trans-unit id="remove_interface_question">
+        <source>Remove network interface with mac {0} ?</source>
+        <target>Remover a interface de rede com o mac {0} ?</target>
+      </trans-unit>
+
+
+      <!-- DEVICES RELATED -->
+      <!--                 -->
+      <trans-unit id="pv_uninit_ok">
+        <source>Device %name% uninitialized successfully</source>
+        <target>Removida a inicialização com sucesso do device %name%</target>
+      </trans-unit>
+      <trans-unit id="pv_uninit_err">
+        <source>Device %name% could not be uninitialized. %info%</source>
+        <target>Erro ao remover a inicialização do device %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="pv_vgassoc">
+        <source>Physical volume %name% associated to volume group %vg%</source>
+        <target>Physical volume %name% associado ao volume group %vg%</target>
+      </trans-unit>      
+      <trans-unit id="pv_init_err">
+        <source>Device %name% could not be initialized. %info%</source>
+        <target>Erro ao inicializar o device %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="pv_init_ok">
+        <source>Physical volume %name% initialized successfully</source>
+        <target>Physical volume %name% inicializado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="pv_notinvg">
+        <source>Physical volume %name% does not belong to volume group %vg%</source>
+        <target>Physical volume %name% não pertence ao volume group %vg%</target>
+      </trans-unit>
+      <trans-unit id="pv_notfound">
+        <source>Physical volume %name% could not be found</source>
+        <target>Não foi possivel encontrar o physical volume %name%</target>
+      </trans-unit>
+      <trans-unit id="pv_notavailable">
+        <source>Physical volume %name% not available</source>
+        <target>Physical volume não disponivel</target>
+      </trans-unit>
+      <trans-unit id="pvs_notavailable">
+        <source>No physical volumes available</source>
+        <target>Não foram encontrados physical volumes disponiveis</target>
+      </trans-unit>
+      <trans-unit id="pv_inconsistent">
+        <source>Shared physical volumes info reported inconsistent. %info%</source>
+        <target>Informação dos physical volumes partilhados inconsistente. %info%</target>
+      </trans-unit>
+      <trans-unit id="pv_init">
+        <source>Initialize physical volume</source>
+        <target>Inicializar physical volume</target>
+      </trans-unit>
+      <trans-unit id="pv_initializing">
+        <source>Initializing physical volume...</source>
+        <target>Inicializando physical volume...</target>
+      </trans-unit>
+      <trans-unit id="remove_pv">
+        <source>Remove physical volume</source>
+        <target>Remover physical volume</target>
+      </trans-unit>
+      <trans-unit id="removing_pv">
+        <source>Removing physical volume...</source>
+        <target>A remover physical volume...</target>
+      </trans-unit>
+      <trans-unit id="pv_uninit">
+        <source>Uninitialize physical volume</source>
+        <target>Remover inicialização do physical volume</target>
+      </trans-unit>
+      <trans-unit id="pv_uninitializing">
+        <source>Uninitializing physical volume...</source>
+        <target>A remover a inicialização do physical volume...</target>
+      </trans-unit>
+      <trans-unit id="pv_initialized">
+        <source>Physical volume %name% initialized</source>
+        <target>Physical volume %name% inicializado</target>
+      </trans-unit>
+      <trans-unit id="pv_notinitialized">
+        <source>Physical volume %name% not initialized</source>
+        <target>Physical volume %name% não inicializado</target>
+      </trans-unit>
+      <trans-unit id="pv_notinit">
+        <source>Physical volume {0} not initialized!</source>
+        <target>Physical volume {0} não inicializado!</target>
+      </trans-unit>
+      <trans-unit id="err_pv_init">
+        <source>Unable to initialize {0}!</source>
+        <target>Não foi possivel inicializar {0}!</target>
+      </trans-unit>
+      <trans-unit id="err_pv_uninit">
+        <source>Unable to uninitialize {0}!</source>
+        <target>Não foi possível remover a inicialização de {0}!</target>
+      </trans-unit>
+      <trans-unit id="pv_resize">
+        <source>Resize physical volume {0}</source>
+        <target>Redimensionar physical volume {0}</target>
+      </trans-unit>
+
+
+      <!-- VOLUME GROUP RELATED -->
+      <!--                      -->
+      <trans-unit id="vg_inconsistent">
+        <source>Volume groups info reported inconsistent. %info%</source>
+        <target>Informação dos volume groups inconsistente. %info%</target>
+      </trans-unit>
+      <trans-unit id="vg_notavailable">
+        <source>No volume groups available</source>
+        <target>Não foram encontrados volume groups disponiveis</target>
+      </trans-unit>
+      <trans-unit id="vg_reduce_ok">
+        <source>Volume group %name% reduced successfully</source>
+        <target>Volume group %name% reduzido com sucesso</target>
+      </trans-unit>
+      <trans-unit id="vg_remove_ok">
+        <source>Volume group %name% removed successfully</source>
+        <target>Volume group %name% removido com sucesso</target>
+      </trans-unit>
+      <trans-unit id="vg_lvassoc">
+        <source>Special volume group %name% cannot be removed</source>
+        <target>Volume group especial %name% não pode ser removido</target>
+      </trans-unit>
+      <trans-unit id="vg_lvassoc">
+        <source>Logical volumes associated with volume group %name%</source>
+        <target>Existem logical volumes associados ao volume group %name%</target>
+      </trans-unit>
+      <trans-unit id="vg_notfound">
+        <source>Volume group %name% could not be found</source>
+        <target>Não foi possivel encontrar o volume group %name%</target>
+      </trans-unit>      
+      <trans-unit id="vg_create_ok">
+        <source>Volume group %name%  created successfully with %pvs%</source>
+        <target>Volume group %name% com %pvs% criado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="vg_extend_ok">
+        <source>Volume group %name% extended successfully with %pvs%</source>
+        <target>Volume group %name% com %pvs% extendido com sucesso</target>
+      </trans-unit>
+      <trans-unit id="vg_create_error">
+        <source>Volume group %name% could not be created. %info%</source>
+        <target>Não foi possivel criar o volume group %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="vg_extend_error">
+        <source>Volume group %name% could not be extended. %info%</source>
+        <target>Não foi possivel extender o volume group %name%. %info%</target>
+      </trans-unit>      
+      <trans-unit id="vg_size">
+        <source>Volume group available size (MB)</source>
+        <target>Tamanho disponivel no volume group (MB)</target>
+      </trans-unit>
+      <trans-unit id="remove_pv_vg_question">
+        <source>Remove {0} from volume group {1} ?</source>
+        <target>Remover {0} do volume group {1} ?</target>
+      </trans-unit>
+      <trans-unit id="err_remove_pv_vg">
+        <source>Unable to remove {0} from volume group {1}</source>
+        <target>Não foi possivel remover {0} do volume group {1}</target>
+      </trans-unit>
+      <trans-unit id="add_vg">
+        <source>Add volume group</source>
+        <target>Adicionar volume group</target>
+      </trans-unit>
+      <trans-unit id="adding_vg">
+        <source>Creating volume group...</source>
+        <target>A criar volume group...</target>
+      </trans-unit>
+      <trans-unit id="vg_name">
+        <source>Volume group name</source>
+        <target>Nome do volume group</target>
+      </trans-unit>
+      <trans-unit id="remove_vg">
+        <source>Remove volume group</source>
+        <target>Remover volume group</target>
+      </trans-unit>
+      <trans-unit id="remove_vg_question">
+        <source>Remove volume group {0} ?</source>
+        <target>Remover volume group {0} ?</target>
+      </trans-unit>
+      <trans-unit id="removing_vg">
+        <source>Removing volume group...</source>
+        <target>A remover volume group...</target>
+      </trans-unit>
+      <trans-unit id="vg_extending">
+        <source>Adding physical volume to volume group...</source>
+        <target>Adicionando physical volume ao volume group...</target>
+      </trans-unit>
+      <trans-unit id="err_vg_extend">
+        <source>Unable to extend {0}!</source>
+        <target>Não foi possivel extender {0}!</target>
+      </trans-unit>
+      <trans-unit id="err_add_vg">
+        <source>Unable to create volume group {0}</source>
+        <target>Não foi possivel criar o volume group {0}</target>
+      </trans-unit>
+      <trans-unit id="err_remove_vg">
+        <source>Unable to remove volume group {0}</source>
+        <target>Não foi possivel remover o volume group {0}</target>
+      </trans-unit>
+
+
+      <!-- LOGICAL VOLUME RELATED -->
+      <!--                        -->
+      <trans-unit id="lv_resize_ok">
+        <source>Logical volume %name% cannot be used. SYSTEM LV</source>
+        <target>Não é possível usar o logical volume %name%. LV DE SISTEMA</target>
+      </trans-unit>
+      <trans-unit id="lv_resize_ok">
+        <source>Logical volume %name% resized to %size%MB successfully</source>
+        <target>Logical volume %name% redimensionado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="lv_remove_ok">
+        <source>Logical volume %name% removed successfully</source>
+        <target>Logical volume %name% removido com sucesso</target>
+      </trans-unit>
+      <trans-unit id="lv_create_ok">
+        <source>Logical volume %name% created successfully</source>
+        <target>Logical volume %name% criado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="lv_diskfile_exist">
+        <source>Disk file %name% already exist</source>
+        <target>Ficheiro %name% já existe</target>
+      </trans-unit>
+      <trans-unit id="lv_exist">
+        <source>Logical volume %name% already exist</source>
+        <target>Logical volume %name% já existe</target>
+      </trans-unit>
+      <trans-unit id="lv_aboutdecrease">
+        <source>You are about to decrease size.</source>
+        <target>Está prestes a dimnuir o tamanho.</target>
+      </trans-unit>
+      <trans-unit id="areyousure">
+        <source>Are you sure you want to do this?</source>
+        <target>Tem a certeza que pretende efectuar a operação?</target>
+      </trans-unit>
+      <trans-unit id="lv_decreasing">
+        <source>When DECREASING size you must BE CAREFULL because you may LOST ALL DATA!</source>
+        <target>Atenção ao diminuir o tamanho porque pode PERDER DADOS!</target>
+      </trans-unit>
+      <trans-unit id="curr_lv_size">
+        <source>Current logical volume size (MB)</source>
+        <target>Tamanho actual do logical volume (MB)</target>
+      </trans-unit>
+      <trans-unit id="new_lv_size">
+        <source>New logical volume size (MB)</source>
+        <target>Novo tamanho do logical volume (MB)</target>
+      </trans-unit>
+      <trans-unit id="enabled_lv">
+        <source>Enabled if virtual server {0} is not running</source>
+        <target>Habilitado se a máquina virtual {0} não tiver a correr</target>
+      </trans-unit>
+      <trans-unit id="add_lv">
+        <source>Add logical volume</source>
+        <target>Adicionar logical volume</target>
+      </trans-unit>
+      <trans-unit id="resize_lv">
+        <source>Resize logical volume</source>
+        <target>Redimensionar logical volume</target>
+      </trans-unit>
+      <trans-unit id="resizing_lv">
+        <source>Resizing logical volume...</source>
+        <target>A redimensionar logical volume...</target>
+      </trans-unit>
+      <trans-unit id="resize_lv_name">
+        <source>Resize logical volume {0}</source>
+        <target>Redimensionar logical volume {0}</target>
+      </trans-unit>
+      <trans-unit id="remove_lv">
+        <source>Remove logical volume</source>
+        <target>Remover logical volume</target>
+      </trans-unit>
+      <trans-unit id="removing_lv">
+        <source>Removing logical volume...</source>
+        <target>A remover logical volume...</target>
+      </trans-unit>
+      <trans-unit id="remove_lv_question">
+        <source>Remove logical volume {0} ?</source>
+        <target>Remover logical volume {0} ?</target>
+      </trans-unit>
+      <trans-unit id="err_remove_lv">
+        <source>Unable to remove logical volume {0}</source>
+        <target>Não foi possivel remover o logical volume {0}</target>
+      </trans-unit>
+      <trans-unit id="err_resize_lv">
+        <source>Unable to resize logical volume {0}!</source>
+        <target>Não foi possivel redimensionar o logical volume {0}!</target>
+      </trans-unit>
+      <trans-unit id="err_invalid_lvsize">
+        <source>Invalid logical volume size</source>
+        <target>Tamanho do logical volume inválido</target>
+      </trans-unit>
+      <trans-unit id="lv_notavailable">
+        <source>No logical volumes available</source>
+        <target>Não foram encontrados logical volumes disponiveis</target>
+      </trans-unit>
+      <trans-unit id="enabled_ifnot_server">
+        <source>Enabled if not in use by any virtual server</source>
+        <target>Habilitado se não tiver associado a nenhum servidor</target>
+      </trans-unit>
+      <trans-unit id="lv_inuse">
+        <source>Logical volume %name% in use by  virtual server %server%</source>
+        <target>Logical volume %name% em uso pelo servidor %server%</target>
+      </trans-unit>
+      <trans-unit id="lv_notinuse">
+        <source>Logical volume %name% not in use</source>
+        <target>Logical volume %name% não está em uso</target>
+      </trans-unit>
+      <trans-unit id="lv_inconsistent">
+        <source>Logical volumes info reported inconsistent. %info%</source>
+        <target>Informação dos logical volumes inconsistente. %info%</target>
+      </trans-unit>
+      <trans-unit id="lv_notfound">
+        <source>Logical volume %name% could not be found</source>
+        <target>Não foi possivel encontrar o logical volume %name%</target>
+      </trans-unit>
+      <trans-unit id="lv_notfound_id">
+        <source>Logical volume with ID %id% could not be found</source>
+        <target>Não foi possível encontrar o logical volume com ID %id%</target>
+      </trans-unit>
+      <trans-unit id="err_add_lv">
+        <source>Unable to create logical volume {0}!</source>
+        <target>Não foi possivel criar o logical volume {0}!</target>
+      </trans-unit>
+
+      <!-- NODE RELATED -->
+      <!--              -->
+      <trans-unit id="remove_cm">
+        <source>Some errors occurred. See events log!</source>
+        <target>Ocorreram alguns erros. Ver registo de eventos do sistema!</target>
+      </trans-unit>
+      <trans-unit id="remove_cm">
+        <source>This will only remove data from Central Management</source>
+        <target>Apenas será removido do Central Management</target>
+      </trans-unit>
+      <trans-unit id="initialization">
+        <source>Initialization</source>
+        <target>Inicialização</target>
+      </trans-unit>
+      <trans-unit id="init_cmd">
+        <source>Sending initialization command {0} to {1}...</source>
+        <target>A enviar comando {0} para {1}...</target>
+      </trans-unit>
+      <trans-unit id="ip_inuse">
+        <source>IP address %ip% in use by %name%</source>
+        <target>Endereço IP %ip% atribuido a %name%</target>
+      </trans-unit>
+
+      <trans-unit id="updated_ip_settings">
+        <source>Updated {0} IP settings</source>
+        <target>Atualizada a configuração IP de {0}</target>
+      </trans-unit>
+      <trans-unit id="ok_node_updated_ip_settings">
+        <source>Node %name% IP settings changed successfully</source>
+        <target>Atualizada a configuração IP de %name%</target>
+      </trans-unit>
+      <trans-unit id="err_node_updated_ip_settings">
+        <source>Could not change node %name% IP settings. %info%</source>
+        <target>Não foi possível alterar a configuração IP de %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="change_node_hostname">
+        <source>Change {0} hostname</source>
+        <target>Alterar hostname de {0}</target>
+      </trans-unit>
+      <trans-unit id="change_hostname">
+        <source>Change hostname</source>
+        <target>Alterar hostname</target>
+      </trans-unit>
+      <trans-unit id="updating_hostname">
+        <source>Updating hostname...</source>
+        <target>Atualizando hostname...</target>
+      </trans-unit>
+      <trans-unit id="ok_change_hostname">
+        <source>Node %name_old% changed successfully to %name_new%</source>
+        <target>Node %name_old% alterado com sucesso para %name_new%</target>
+      </trans-unit>
+      <trans-unit id="err_change_hostname">
+        <source>Name of node %name% could not be changed. %info%</source>
+        <target>Não foi possível alterar o nome do node %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="needs_initialized">
+        <source>Needs to be initialized</source>
+        <target>Necessita estar inicializado</target>
+      </trans-unit>
+      <trans-unit id="initialization_pending">
+        <source>Node %name% initialization pending</source>
+        <target>Inicialização do node %name% pendente</target>
+      </trans-unit>
+      <trans-unit id="ok_initialize">
+        <source>Node %name% initialized</source>
+        <target>Node %name% inicializado</target>
+      </trans-unit>
+      <trans-unit id="err_initialize">
+        <source>Node %name% not initialized. %info%</source>
+        <target>Node %name% não inicializado. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_node_mem_available">
+        <source>Node %name% has no memory available. Need %info% MB</source>
+        <target>Node %name% não tem memória disponível. Necessita %info% MB</target>
+      </trans-unit>     
+      <trans-unit id="node_up">
+        <source>Node %name% is up</source>
+        <target>Node %name% está a correr</target>
+      </trans-unit>
+      <trans-unit id="node_down">
+        <source>Node %name% is down</source>
+        <target>Node %name% não está a correr</target>
+      </trans-unit>
+      <trans-unit id="authorize">
+        <source>Authorize</source>
+        <target>Autorizar</target>
+      </trans-unit>
+      <trans-unit id="reinitialize">
+        <source>Re-initialize</source>
+        <target>Re-inicializar</target>
+      </trans-unit>      
+      <trans-unit id="add_node">
+        <source>Add node</source>
+        <target>Adicionar node</target>
+      </trans-unit>
+      <trans-unit id="remove_node">
+        <source>Remove node</source>
+        <target>Remover node</target>
+      </trans-unit>
+      <trans-unit id="node_info">
+        <source>Node info</source>
+        <target>Informação do node</target>
+      </trans-unit>
+      <trans-unit id="node_notfound">
+        <source>Node with ID %id% could not be found</source>
+        <target>Node inexistente com ID %id%</target>
+      </trans-unit>
+      <trans-unit id="node_nopv">
+        <source>Node %name% does not have physical volume %pv%</source>
+        <target>Node %name% não possui o physical volume %pv%</target>
+      </trans-unit>
+      <trans-unit id="node_nodev">
+        <source>Node %name% does not have device %dev%</source>
+        <target>Node %name% não possui o device %dev%</target>
+      </trans-unit>
+
+
+      <!-- VLAN STUFF     -->
+      <!--                -->
+      <trans-unit id="ok_vlan_create">
+        <source>VLAN %name% created successfully</source>
+        <target>VLAN %name% criada com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_vlan_create">
+        <source>VLAN %name% could not be created. %info%</source>
+        <target>Não foi possível criar a VLAN %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_vlan_remove">
+        <source>VLAN %name% removed successfully</source>
+        <target>VLAN %name% removida com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_vlan_remove">
+        <source>VLAN %name% could not be removed. %info%</source>
+        <target>Não foi possível remover a VLAN %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="cannot_delete_default_network">
+        <source>Cannot delete default network</source>
+        <target>Não é possível remover a rede padrão</target>
+      </trans-unit>
+
+
+      <!-- SERVER RELATED -->
+      <!--                -->
+      <trans-unit id="total_interfaces">
+        <source>Total of {2} interface(s)</source>
+        <target>Total de {2} interface(s)</target>
+      </trans-unit>
+      <trans-unit id="total_disks">
+        <source>Total of {2} disk(s)</source>
+        <target>Total de {2} disco(s)</target>
+      </trans-unit>      
+      <trans-unit id="cdrom_in_use">
+        <source>Server %name% has ISO mounted in CD-ROM</source>
+        <target>Servidor %name% possui uma ISO em uso no CD-ROM</target>
+      </trans-unit>
+      <trans-unit id="iso_repo_in_use">
+        <source>ISO REPO in use. Make sure it is not currently in use. %info%</source>
+        <target>ISO REPO em uso. Verifique que não está a ser utilizado. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_create_server">
+        <source>Server with name %name% could not be created. %info%</source>
+        <target>Não foi possível criar o servidor %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="edit_server">
+        <source>Server need to be stop to edit!</source>
+        <target>Servidor tem que estar parado para ser editado!</target>
+      </trans-unit>
+      <trans-unit id="edit_server">
+        <source>Edit server</source>
+        <target>Editar servidor</target>
+      </trans-unit>
+      <trans-unit id="edit_server_name">
+        <source>Edit server {0}</source>
+        <target>Editar servidor {0}</target>
+      </trans-unit>
+      <trans-unit id="load_server_panel">
+        <source>Loading server {0} panel...</source>
+        <target>A carregar o painel {0} do servidor...</target>
+      </trans-unit>
+      <trans-unit id="server_info">
+        <source>Server info</source>
+        <target>Informação do servidor</target>
+      </trans-unit>
+      <trans-unit id="servers">
+        <source>Servers</source>
+        <target>Servidores</target>
+      </trans-unit>
+      <trans-unit id="instead_perform_migrate">
+        <source>To perform a migrate instead of a move the server must be running!</source>
+        <target>Para efectuar uma migração em vez de mover, a máquina virtual necessita estar a correr!</target>
+      </trans-unit>
+      <trans-unit id="err_migrate_fromto">
+        <source>Could not migrate %name% from %from% to %to%. %info%</source>
+        <target>Não é possivel migrar %name% de %from% para %to%. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_migrate_fromto">
+        <source>Server %name% migrated successfully from %from% to %to%. %info%</source>
+        <target>Servidor %name% migrado com sucesso de %from% para %to%. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_migrate_cond">
+        <source>Could not migrate %name% between different clusters and/or same node</source>
+        <target>Não é possivel migrar %name% para o mesmo node e/ou entre nodes de clusters diferentes</target>
+      </trans-unit>
+      <trans-unit id="cannot_migrate_cond">
+        <source>Cannot migrate %name% between different clusters and/or same node</source>
+        <target>Não é possivel migrar %name% para o mesmo node e/ou entre nodes de clusters diferentes</target>
+      </trans-unit>      
+      <trans-unit id="unable_migrate_server">
+        <source>Unable to migrate virtual server {0}!</source>
+        <target>Não foi possivel migrar a máquina virtual {0}!</target>
+      </trans-unit>      
+      <trans-unit id="migrating_server">
+        <source>Migrating virtual server...</source>
+        <target>A migrar máquina virtual...</target>
+      </trans-unit>
+      <trans-unit id="destination_node">
+        <source>Destination node</source>
+        <target>Node de destino</target>
+      </trans-unit>
+      <trans-unit id="no_destination_node">
+        <source>No destination nodes available</source>
+        <target>Não existem nodes de destino disponíveis</target>
+      </trans-unit>
+      <trans-unit id="server_migrate">
+        <source>Migrate server</source>
+        <target>Migrar servidor</target>
+      </trans-unit>
+      <trans-unit id="server_move">
+        <source>Move server</source>
+        <target>Mover servidor</target>
+      </trans-unit>
+       <trans-unit id="instead_perform_move">
+        <source>To perform a move instead of a migrate the server must be stopped!</source>
+        <target>Para mover em vez de migrar, a máquina virtual necessita estar parada!</target>
+      </trans-unit>
+      <trans-unit id="err_create_vm_interfaces">
+        <source>Server name %name% networks info problem. %info%</source>
+        <target>Problema com as NIC'S da máquina virtual %name%. %info%</target>
+      </trans-unit>
+
+
+      <trans-unit id="adding_vm">
+        <source>Creating virtual server...</source>
+        <target>A criar máquina virtual...</target>
+      </trans-unit>
+      <trans-unit id="saving_vm">
+        <source>Saving virtual server...</source>
+        <target>A guardar máquina virtual...</target>
+      </trans-unit>
+      <trans-unit id="err_add_vm">
+        <source>Unable to create virtual server {0}!</source>
+        <target>Não foi possivel criar a máquina virtual {0}!</target>
+      </trans-unit>
+      <trans-unit id="unable_edit_server">
+        <source>Unable to edit virtual server {0}!</source>
+        <target>Não foi possivel editar a máquina virtual {0}!</target>
+      </trans-unit>
+      <trans-unit id="adding_lv">
+        <source>Creating logical volume...</source>
+        <target>Criando logical volume...</target>
+      </trans-unit>
+      <trans-unit id="finish_server_wiz">
+        <source>Thank you! Your data has been collected.&lt;br&gt;When you click on the "Finish" button, the virtual server will be created.</source>
+        <target>Obrigado! Todos os dados foram recolhidos.&lt;br&gt;Ao clicar em "Finalizar" a máquina virtual será criada.</target>
+      </trans-unit>
+      <trans-unit id="welcome_server_wiz">
+        <source>Welcome to the virtual server creation wizard.&lt;br&gt;Follow the steps to configure a full capable server</source>
+        <target>Bem-vindo ao assistente de criação de uma máquina virtual.&lt;br&gt;Siga os próximos passos para configurar uma máquina virtual.</target>
+      </trans-unit>
+      <trans-unit id="boot_pxe">
+        <source>Network boot (PXE)</source>
+        <target>Boot de rede (PXE)</target>
+      </trans-unit>
+      <trans-unit id="boot_device">
+        <source>Specify boot device.</source>
+        <target>Especifique o dispositivo de boot.</target>
+      </trans-unit>
+      <trans-unit id="boot_options">
+        <source>Boot options</source>
+        <target>Opções de boot</target>
+      </trans-unit>
+      <trans-unit id="net_install">
+        <source>Network install (http,ftp,...)</source>
+        <target>Instalação via rede (http,ftp,...)</target>
+      </trans-unit>
+      <trans-unit id="specify_installation">
+        <source>Specify the installation source.</source>
+        <target>Especifique a origem da instalação.</target>
+      </trans-unit>
+      <trans-unit id="location_options">
+        <source>Location options</source>
+        <target>Opções de location</target>
+      </trans-unit>
+      <trans-unit id="choose_iso">
+        <source>Choose iso to load</source>
+        <target>Seleccione a iso a carregar</target>
+      </trans-unit>
+      <trans-unit id="boot_location_specify">
+        <source>Specify the boot/location parameters used by the virtual server.</source>
+        <target>Especifique os parametros de boot/location da máquina virtual.</target>
+      </trans-unit>
+      <trans-unit id="network_type">
+        <source>Network Type</source>
+        <target>Tipo de rede</target>
+      </trans-unit>
+      <trans-unit id="network_typeconn">
+        <source>Specify the network type connection to use in virtual server.</source>
+        <target>Especifique o tipo de ligação de rede a usar com a máquina virtual.</target>
+      </trans-unit>
+      <trans-unit id="choose_lv">
+        <source>Choose logical volume</source>
+        <target>Escolha o logical volume</target>
+      </trans-unit>
+      <trans-unit id="choose_vg">
+        <source>Choose volume group</source>
+        <target>Escolha volume group</target>
+      </trans-unit>
+      <trans-unit id="existing_lv">
+        <source>Existing logical volume</source>
+        <target>Logical volume existente</target>
+      </trans-unit>
+      <trans-unit id="lv_size">
+        <source>Logical volume size (MB)</source>
+        <target>Tamanho do logical volume (MB)</target>
+      </trans-unit>
+      <trans-unit id="new_lv">
+        <source>New logical volume</source>
+        <target>Novo logical volume</target>
+      </trans-unit>
+      <trans-unit id="lv_name">
+        <source>Logical volume name</source>
+        <target>Nome do logical volume</target>
+      </trans-unit>
+      <trans-unit id="new_file">
+        <source>New disk file</source>
+        <target>Novo ficheiro</target>
+      </trans-unit>
+      <trans-unit id="filename">
+        <source>File name</source>
+        <target>Nome do ficheiro</target>
+      </trans-unit>
+      <trans-unit id="max_filename_size">
+        <source>Max file size (MB)</source>
+        <target>Tamanho máximo do ficheiro (MB)</target>
+      </trans-unit>
+      <trans-unit id="choose_storage">
+        <source>Choose storage for the machine.</source>
+        <target>Seleccione o disco a usar pela máquina.</target>
+      </trans-unit>
+      <trans-unit id="processor">
+        <source>Processor</source>
+        <target>Processador</target>
+      </trans-unit>
+      <trans-unit id="amount_processor">
+        <source>Specify the amount of processors to use with this machine.</source>
+        <target>Especifique os processadores a usar.</target>
+      </trans-unit>
+      <trans-unit id="total_processor">
+        <source>Total usable CPU</source>
+        <target>Total de CPU</target>
+      </trans-unit>
+      <trans-unit id="cpus_to_use">
+        <source>CPUs to use</source>
+        <target>CPUs a usar</target>
+      </trans-unit>
+      <trans-unit id="memory">
+        <source>Memory</source>
+        <target>Memória</target>
+      </trans-unit>
+      <trans-unit id="amount_memory">
+        <source>Specify the amount of memory to allocate to this machine. It should be a multiple of 4 MB.</source>
+        <target>Introduza o tamanho da memória a reservar para a máquina. Deve ser múltiplo de 4MB.</target>
+      </trans-unit>
+      <trans-unit id="total_amount_memory">
+        <source>Total system memory (MB)</source>
+        <target>Memória total do sistema (MB)</target>
+      </trans-unit>
+      <trans-unit id="memory_available">
+        <source>Memory available (MB)</source>
+        <target>Memória disponivel (MB)</target>
+      </trans-unit>
+      <trans-unit id="max_file_size">
+        <source>Max available file size (MB)</source>
+        <target>Tamanho máximo disponivel (MB)</target>
+      </trans-unit>
+      <trans-unit id="amount_memory_size">
+        <source>Memory size (MB)</source>
+        <target>Tamanho da memória (MB)</target>
+      </trans-unit>
+      <trans-unit id="enter_name_os">
+        <source>Please enter a name and choose operating system.</source>
+        <target>P.f. introduza um nome e seleccione um sistema operativo</target>
+      </trans-unit>
+      <trans-unit id="guest_os">
+        <source>Guest operating system</source>
+        <target>Sistema Operativo</target>
+      </trans-unit>
+      <trans-unit id="hvm_support">
+        <source>Enabled only if this machine supports Hardware Virtual Machine</source>
+        <target>Habilitado se houver suporte a Hardware Virtual Machine</target>
+      </trans-unit>
+      <trans-unit id="new_server_name">
+        <source>Virtual server name</source>
+        <target>Nome da máquina virtual</target>
+      </trans-unit>
+      <trans-unit id="memory_exceed">
+        <source>Cannot exceed total allocatable memory size</source>
+        <target>Não pode exceder a memória disponivel</target>
+      </trans-unit>
+      <trans-unit id="volume_group_exceed">
+        <source>Cannot exceed total volume group size</source>
+        <target>Não pode exceder o total disponivel no volume group</target>
+      </trans-unit>
+      <trans-unit id="cpu_exceed">
+        <source>Cannot exceed max cpu</source>
+        <target>Não pode exceder o número máximo de CPUs</target>
+      </trans-unit>
+
+
+      <trans-unit id="open_new_server_wiz">
+        <source>Click to open new server wizard</source>
+        <target>Clicar para abrir o assistente de criação de um servidor</target>
+      </trans-unit>
+      <trans-unit id="server_notfound">
+        <source>Server with ID %id% could not be found</source>
+        <target>Servidor inexistente com ID %id%</target>
+      </trans-unit>
+      <trans-unit id="err_servername">
+        <source>Server %name% could not be found</source>
+        <target>Servidor %name% inexistente</target>
+      </trans-unit>
+      <trans-unit id="add_server_wiz">
+        <source>Add server wizard</source>
+        <target>Assistente de criação de servidor</target>
+      </trans-unit>
+      <trans-unit id="create_new_server">
+        <source>Create new virtual server</source>
+        <target>Criar nova máquina virtual</target>
+      </trans-unit>
+      <trans-unit id="server_from_grid">
+        <source>Server from grid must be selected!</source>
+        <target>Seleccionar servidor da tabela!</target>
+      </trans-unit>
+      <trans-unit id="open_console">
+        <source>Open console</source>
+        <target>Abrir numa consola</target>
+      </trans-unit>
+      <trans-unit id="err_open_console">
+        <source>Cannot open console. Maybe server not running!</source>
+        <target>Não foi possivel abrir a consola. Servidor pode não estar a correr!</target>
+      </trans-unit>      
+      <trans-unit id="start_server">
+        <source>Start server</source>
+        <target>Iniciar servidor</target>
+      </trans-unit>
+      <trans-unit id="start_server_question">
+        <source>Start server {0} ?</source>
+        <target>Iniciar servidor {0} ?</target>
+      </trans-unit>
+      <trans-unit id="err_start_server">
+        <source>Unable to start virtual server {0}!</source>
+        <target>Não foi possivel iniciar a máquina virtual {0}!</target>
+      </trans-unit>
+      <trans-unit id="server_starting">
+        <source>Starting virtual server...</source>
+        <target>A iniciar a máquina virtual...</target>
+      </trans-unit>
+      <trans-unit id="stop_server">
+        <source>Stop server</source>
+        <target>Parar servidor</target>
+      </trans-unit>
+      <trans-unit id="stop_server_question">
+        <source>Stop server {0} ?</source>
+        <target>Parar servidor {0} ?</target>
+      </trans-unit>
+      <trans-unit id="err_stop_server">
+        <source>Unable to stop virtual server {0}!</source>
+        <target>Não foi possivel parar a máquina virtual {0}!</target>
+      </trans-unit>
+      <trans-unit id="server_stoping">
+        <source>Stoping virtual server...</source>
+        <target>A parar máquina virtual...</target>
+      </trans-unit>
+      <trans-unit id="remove_server">
+        <source>Remove server</source>
+        <target>Remover servidor</target>
+      </trans-unit>
+      <trans-unit id="remove_server_question">
+        <source>Remove server {0} ?</source>
+        <target>Remover servidor {0} ?</target>
+      </trans-unit>
+      <trans-unit id="removing_server">
+        <source>Removing virtual server...</source>
+        <target>A remover máquina virtual...</target>
+      </trans-unit>
+      <trans-unit id="server_exist">
+        <source>Server with name %name% already exists</source>
+        <target>Servidor com o nome %name% já existe</target>
+      </trans-unit>
+      <trans-unit id="created_server">
+        <source>Server with name %name% created successfully</source>
+        <target>Servidor %name% criado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="started_server">
+        <source>Server with name %name% started successfully</source>
+        <target>Servidor %name% iniciado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_start_server">
+        <source>Server with name %name% could not be started. %info%</source>
+        <target>Não foi possível iniciar o servidor %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="stopped_server">
+        <source>Server with name %name% stopped successfully</source>
+        <target>Servidor %name% parado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_stop_server">
+        <source>Server with name %name% could not be stopped. %info%</source>
+        <target>Não foi possível parar o servidor %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="removed_server">
+        <source>Server with name %name% removed successfully. %info%</source>
+        <target>Servidor %name% removido com sucesso. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_removed_server">
+        <source>Server with name %name% could not be removed. %info%</source>
+        <target>Não foi possivel remover o servidor %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_removed_server_id">
+        <source>Server could not be removed. %info%</source>
+        <target>Não foi possivel remover o servidor. %info%</target>
+      </trans-unit>
+      <trans-unit id="edited_server">
+        <source>Server with name %name% edited successfully</source>
+        <target>Servidor %name% editado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_edited_server">
+        <source>Server with name %name% could not be edited. %info%</source>
+        <target>Não foi possível editar o servidor %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_remove_server">
+        <source>Unable to remove virtual server {0}!</source>
+        <target>Não foi possivel remover a máquina virtual {0}!</target>
+      </trans-unit>
+
+      <!-- NETWORK INTERFACES -->
+      <!--                    -->
+      <trans-unit id="loading_network_interfaces">
+        <source>Loading network interfaces...</source>
+        <target>A carregar interfaces de rede</target>
+      </trans-unit>
+      <trans-unit id="network_interfaces">
+        <source>Network interfaces</source>
+        <target>Interfaces de rede</target>
+      </trans-unit>
+      <trans-unit id="network_interface_from_grid">
+        <source>Network interface from grid must be selected!</source>
+        <target>Seleccionar interface de rede da tabela!</target>
+      </trans-unit>
+
+      <!-- STATISTICS -->
+      <!--            -->
+      <trans-unit id="node_load">
+        <source>Node Load</source>
+        <target>Utilização do node</target>
+      </trans-unit>
+      <trans-unit id="memory_usage">
+        <source>Memory Usage</source>
+        <target>Utilização da memória</target>
+      </trans-unit>
+      <trans-unit id="disk_usage">
+        <source>Disk Usage</source>
+        <target>Utilização do disco</target>
+      </trans-unit>
+      <trans-unit id="cpu_usage">
+        <source>CPU Usage</source>
+        <target>Utilização do CPU</target>
+      </trans-unit>
+      <trans-unit id="cpu_load">
+        <source>CPU Load</source>
+        <target>Carga no CPU</target>
+      </trans-unit>
+      <trans-unit id="statistics">
+        <source>Statistics</source>
+        <target>Estatísticas</target>
+      </trans-unit>
+      <trans-unit id="poll_start_stop">
+        <source>Disk {0} :: size</source>
+        <target>Disco {0} :: Tamanho</target>
+      </trans-unit>
+      <trans-unit id="poll_start_stop">
+        <source>START / STOP Polling</source>
+        <target>INICIAR / PARAR Polling</target>
+      </trans-unit>
+      <trans-unit id="polling_started">
+        <source>{0} polling STARTED</source>
+        <target>{0} polling iniciado</target>
+      </trans-unit>
+      <trans-unit id="polling_stopped">
+        <source>{0} polling STOPPED</source>
+        <target>{0} polling parado</target>
+      </trans-unit>
+      
+      <!-- SERVICES -->
+      <!--          -->
+      <trans-unit id="services">
+        <source>Services</source>
+        <target>Serviços</target>
+      </trans-unit>
+
+      <!-- SETTINGS -->
+      <!--          -->
+      <trans-unit id="events_log_msg">
+        <source>Number of days before flushing system events log data.</source>
+        <target>Número de dias ao fim dos quais o registo de eventos do sistema será apagado.</target>
+      </trans-unit>
+      <trans-unit id="vnc_options">
+        <source>VNC options</source>
+        <target>Opções VNC</target>
+      </trans-unit>
+      <trans-unit id="updating_settings">
+        <source>Updating system settings...</source>
+        <target>Atualizando preferências...</target>
+      </trans-unit>
+      <trans-unit id="updated_settings">
+        <source>Updated system settings</source>
+        <target>Preferências atualizadas</target>
+      </trans-unit>
+
+      <!-- OVF -->
+      <!--     -->
+      <trans-unit id="err_parsing_ovf">
+        <source>Could not parse OVF %url%</source>
+        <target>Não foi possivel efectuar o parsing do OVF %url%</target>
+      </trans-unit>
+      <trans-unit id="err_import_ovf">
+        <source>Could not import OVF. %info%</source>
+        <target>Não foi possivel importar OVF. %info%</target>
+      </trans-unit>       
+      <trans-unit id="no_servers_available">
+        <source>No virtual servers available</source>
+        <target>Não existem máquinas virtuais disponíveis</target>
+      </trans-unit>
+      <trans-unit id="server_needs_stopped">
+        <source>Server needs to be stopped!</source>
+        <target>Máquina virtual necessita estar parada!</target>
+      </trans-unit>
+      <trans-unit id="server_needs_stopped">
+        <source>Server to export</source>
+        <target>Máquina virtual a exportar</target>
+      </trans-unit>
+      <trans-unit id="ovf_export">
+        <source>OVF Export</source>
+        <target>Exportar OVF</target>
+      </trans-unit>
+      <trans-unit id="welcome_ovf_import_wiz">
+        <source>Welcome to the OVF import wizard.&lt;br&gt;The following steps will assist you on importing a virtual machine.</source>
+        <target>Bem-vindo ao assistente de importação OVF.&lt;br&gt;Os próximos passos permitirão importar uma máquina virtual.</target>
+      </trans-unit>
+      <trans-unit id="finish_ovf_wiz">
+        <source>Thank you! Your data has been collected.&lt;br&gt;When you click on the "Finish" button, the virtual server will be imported.</source>
+        <target>Obrigado! Todos os dados foram recolhidos.&lt;br&gt;Ao clicar em "Finalizar" a máquina virtual será importada.</target>
+      </trans-unit>
+      <trans-unit id="loading_ovf">
+        <source>Loading OVF...</source>
+        <target>A carregar OVF...</target>
+      </trans-unit>
+      <trans-unit id="importing_vm">
+        <source>Importing virtual server...</source>
+        <target>A importar máquina virtual...</target>
+      </trans-unit>
+      <trans-unit id="err_import_vm">
+        <source>Unable to import virtual server {0}!</source>
+        <target>Não foi possivel importar a máquina virtual {0}!</target>
+      </trans-unit>
+      <trans-unit id="source_ovf_file">
+        <source>Source OVF file</source>
+        <target>Ficheiro OVF de origem</target>
+      </trans-unit>
+      <trans-unit id="network_interface_mapping_incomplete">
+        <source>Network interfaces mapping incomplete!</source>
+        <target>Mapeamento das interfaces de rede não concluído!</target>
+      </trans-unit>
+      <trans-unit id="storage_mapping_incomplete">
+        <source>Storage mapping incomplete!</source>
+        <target>Mapeamento dos discos não concluído!</target>
+      </trans-unit>
+      <trans-unit id="storage_mapping_complete">
+        <source>Storage mapping completed!</source>
+        <target>Mapeamento dos discos concluído!</target>
+      </trans-unit>      
+      <trans-unit id="name_location">
+        <source>Name and location</source>
+        <target>Nome e localização</target>
+      </trans-unit>
+      <trans-unit id="node_destination_no_mem_ovf">
+        <source>Destination node does not have enought memory available ({0}) to import VM with {1}</source>
+        <target>Node de destino não tem memória disponível ({0}) para importar máquina virtual com {1}</target>
+      </trans-unit>
+      <trans-unit id="vm_type_interfaces_not_supported">
+        <source>VM type selected does not support network interfaces drivers defined in OVF.</source>
+        <target>Tipo de máquina virtual seleccionado não suporta drivers das interfaces definidas no OVF.</target>
+      </trans-unit>
+      <trans-unit id="vm_type_interfaces_not_supported">
+        <source>VM type selected does not support disk drivers defined in OVF.</source>
+        <target>Tipo de máquina virtual seleccionado não suporta drivers dos discos definidos no OVF.</target>
+      </trans-unit>
+      <trans-unit id="could_not_continue">
+        <source>Could not continue!</source>
+        <target>Não é possível continuar!</target>
+      </trans-unit>
+      <trans-unit id="product">
+        <source>Product</source>
+        <target>Produto</target>
+      </trans-unit>
+      <trans-unit id="version">
+        <source>Version</source>
+        <target>Versão</target>
+      </trans-unit>
+      <trans-unit id="vendor">
+        <source>Vendor</source>
+        <target>Fornecedor</target>
+      </trans-unit>
+      <trans-unit id="ovf_import">
+        <source>OVF Import</source>
+        <target>Importar OVF</target>
+      </trans-unit>
+      <trans-unit id="ovf_import_help">
+        <source>OVF Import Help</source>
+        <target>Ajuda Importar OVF</target>
+      </trans-unit>
+      <trans-unit id="ovf_import_wizard">
+        <source>OVF import wizard</source>
+        <target>Assistente de importação OVF</target>
+      </trans-unit>
+      <trans-unit id="ovf_export">
+        <source>OVF Export</source>
+        <target>Exportar OVF</target>
+      </trans-unit>
+      <trans-unit id="ovf_export_help">
+        <source>OVF Export Help</source>
+        <target>Ajuda Exportar OVF</target>
+      </trans-unit>
+      <trans-unit id="approx_size">
+        <source>Approx. size</source>
+        <target>Tamanho aprox.</target>
+      </trans-unit>
+      <trans-unit id="ovf_details">
+        <source>OVF details</source>
+        <target>Resumo do OVF</target>
+      </trans-unit>
+      <trans-unit id="please_agree">
+        <source>Please agree to continue</source>
+        <target>Necessita concordar com a licença</target>
+      </trans-unit>
+      <trans-unit id="agree">
+        <source>Agree</source>
+        <target>Concordo</target>
+      </trans-unit>
+      <trans-unit id="agree">
+        <source>License agreement</source>
+        <target>Contrato de licença</target>
+      </trans-unit>
+
+      <!-- OTHER -->
+      <!--       -->
+      <trans-unit id="node_status">
+        <source>Node status</source>
+        <target>Estado do node</target>
+      </trans-unit>
+      <trans-unit id="check_status">
+        <source>Check status</source>
+        <target>Verificar estado</target>
+      </trans-unit>
+      <trans-unit id="load_node">
+        <source>Load node</source>
+        <target>Carregar node</target>
+      </trans-unit>
+      <trans-unit id="ip_address">
+        <source>IP address</source>
+        <target>Endereço IP</target>
+      </trans-unit>
+      <trans-unit id="subnet_mask">
+        <source>Subnet mask</source>
+        <target>Máscara de sub-rede</target>
+      </trans-unit>
+      <trans-unit id="default_gw">
+        <source>Default gateway</source>
+        <target>Gateway padrão</target>
+      </trans-unit>
+      <trans-unit id="static_config">
+        <source>Static</source>
+        <target>Estático</target>
+      </trans-unit>
+      <trans-unit id="primary">
+        <source>Primary</source>
+        <target>Primário</target>
+      </trans-unit>
+      <trans-unit id="secondary">
+        <source>Secondary</source>
+        <target>Secundário</target>
+      </trans-unit>      
+      <trans-unit id="changing_ip">
+        <source>Changing IP...</source>
+        <target>Alterando IP...</target>
+      </trans-unit>
+      <trans-unit id="general">
+        <source>General</source>
+        <target>Geral</target>
+      </trans-unit>
+      <trans-unit id="browser_redir">
+        <source>Browser redirection in {0} secs...</source>
+        <target>Browser redireccionado em {0} segundos...</target>
+      </trans-unit>
+      <trans-unit id="connectivity">
+        <source>Connectivity</source>
+        <target>Conectividade</target>
+      </trans-unit>
+      <trans-unit id="interface_not_found">
+        <source>Interface %name% could not be found. %info%</source>
+        <target>Não foi possível encontrar a interface %name%. %info%</target>
+      </trans-unit>      
+      <trans-unit id="lan_ip">
+        <source>LAN interface IP</source>
+        <target>IP da interface LAN</target>
+      </trans-unit>      
+      <trans-unit id="one_disk_atleast">
+        <source>At least one disk is required!</source>
+        <target>Necessário pelo menos um disco!</target>
+      </trans-unit>
+      <trans-unit id="cannot_change_system_disk">
+        <source>Cannot make changes to system disk while server is running!</source>
+        <target>Não é possível alterar o disco do sistema enquanto a máquina tiver a correr!</target>
+      </trans-unit>
+      <trans-unit id="available_disks">
+        <source>Available disks</source>
+        <target>Discos disponíveis</target>
+      </trans-unit>
+      <trans-unit id="edit_disk_type">
+        <source>Edit disk type</source>
+        <target>Editar tipo do disco</target>
+      </trans-unit>
+      <trans-unit id="edit_type">
+        <source>Edit {0} type</source>
+        <target>Editar disco {0}</target>
+      </trans-unit>
+      <trans-unit id="disk_type">
+        <source>Disk type</source>
+        <target>Tipo de disco</target>
+      </trans-unit>
+      <trans-unit id="disks">
+        <source>Disks</source>
+        <target>Discos</target>
+      </trans-unit>
+      <trans-unit id="loading_disks">
+        <source>Loading disks...</source>
+        <target>A carregar discos...</target>
+      </trans-unit>
+      <trans-unit id="attached_disks">
+        <source>Attached disks</source>
+        <target>Discos atribuídos</target>
+      </trans-unit>
+      <trans-unit id="system_notifications">
+        <source>System notification</source>
+        <target>Notificação do sistema</target>
+      </trans-unit>
+      <trans-unit id="need_restart">
+        <source>This changes will only take effect after restarting virtual machine.</source>
+        <target>Estas alterações só terão efeito após reiniciar a máquina virtual.</target>
+      </trans-unit>
+      <trans-unit id="updating_vnckeymap">
+        <source>Updating VNC keymap...</source>
+        <target>A atualizar VNC keymap...</target>
+      </trans-unit>
+      <trans-unit id="use_default_keymap">
+        <source>Use default keymap</source>
+        <target>Usar keymap geral</target>
+      </trans-unit>
+      <trans-unit id="conn_settings">
+        <source>Connectivity settings</source>
+        <target>Opções de conectividade</target>
+      </trans-unit>
+      <trans-unit id="node_conn_settings">
+        <source>{0} connection settings</source>
+        <target>Opções de conectividade de {0}</target>
+      </trans-unit>
+      <trans-unit id="set_keymap">
+        <source>Set keymap</source>
+        <target>Alterar keymap</target>
+      </trans-unit>
+      <trans-unit id="default_keymap">
+        <source>Default keymap</source>
+        <target>Keymap geral</target>
+      </trans-unit>
+      <trans-unit id="default_keymap_message">
+        <source>Default keymap only applies to servers that uses default keymap. Custom servers keymap will NOT be changed.</source>
+        <target>O Keymap geral especificado é usado pelos servidores que usem o keymap geral. Os servidores que tenham um keymap especifico NÃO serão alterados.</target>
+      </trans-unit>
+      <trans-unit id="updated_vnc_keymap">
+        <source>Updated VNC keymap ({0})</source>
+        <target>VNC keymap atualizado ({0})</target>
+      </trans-unit>
+      <trans-unit id="disabled_version">
+        <source>Disabled in this version</source>
+        <target>Não disponível nesta versão</target>
+      </trans-unit>      
+      <trans-unit id="info_panel">
+        <source>Info panel</source>
+        <target>Painel de Informação</target>
+      </trans-unit>      
+      <trans-unit id="couldnotloadpanel">
+        <source>Couldn't load panel</source>
+        <target>Não foi possivel carregar o painel</target>
+      </trans-unit>
+      <trans-unit id="datapanelnotloaded">
+        <source>Data for the '{0}' panel could not be loaded.</source>
+        <target>Dados do painel '{0}' não foram carregados.</target>
+      </trans-unit>      
+      <trans-unit id="generate_graph_img">
+        <source>Generate graph image</source>
+        <target>Gerar imagem do gráfico</target>
+      </trans-unit>
+      <trans-unit id="nodatafound">
+        <source>No data found</source>
+        <target>Sem dados</target>
+      </trans-unit>
+      <trans-unit id="startup">
+        <source>Startup</source>
+        <target>Arranque</target>
+      </trans-unit>
+      <trans-unit id="invalid_formfields">
+        <source>Form fields may not be submitted with invalid values!</source>
+        <target>Formulário não pode ser submetido com campos inválidos!</target>
+      </trans-unit>
+      <trans-unit id="err_formfields">
+        <source>Please fix the errors noted!</source>
+        <target>P. f. corrija os erros!</target>
+      </trans-unit>
+      <trans-unit id="unknown_err">
+        <source>Unknown error</source>
+        <target>Erro desconhecido</target>
+      </trans-unit>
+      <trans-unit id="please_wait">
+        <source>Please wait...</source>
+        <target>P.f. aguarde...</target>
+      </trans-unit>
+      <trans-unit id="retrieving_data">
+        <source>Retrieving data...</source>
+        <target>Processando...</target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Status</source>
+        <target>Estado</target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Saving...</source>
+        <target>A gravar...</target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Error!</source>
+        <target>Erro!</target>
+      </trans-unit>
+      <trans-unit id="error_space">
+        <source>Error {0}</source>
+        <target>Erro {0}</target>
+      </trans-unit>
+      <trans-unit id="err_save">
+        <source>Could not save changes!</source>
+        <target>Não foi possivel guardar as alterações!</target>
+      </trans-unit>
+      <trans-unit id="disk_keep">
+        <source>Keep disk</source>
+        <target>Manter disco</target>
+      </trans-unit>
+      <trans-unit id="disk_keep_help">
+        <source>Enable this will prevent disk file of being deleted</source>
+        <target>Habilitado previne a remoção do disco</target>
+      </trans-unit>
+      <trans-unit id="boot_from">
+        <source>Boot From</source>
+        <target>Definir arranque</target>
+      </trans-unit>
+      <trans-unit id="vm_filesystem">
+        <source>VM Filesystem</source>
+        <target>Disco</target>
+      </trans-unit>
+      <trans-unit id="cur_state">
+        <source>Current state reported: {0}</source>
+        <target>Estado reportado: {0}</target>
+      </trans-unit>
+      <trans-unit id="virtagent_storage_menu">
+        <source>VirtAgent should have storage information to enable this menu</source>
+        <target>Habilitado apenas se o agente de virtualização contiver informação acerca do armazenamento</target>
+      </trans-unit>
+      <trans-unit id="virtagent_menu">
+        <source>VirtAgent should be running to enable this menu</source>
+        <target>Habilitado apenas se o agente de virtualização estiver a correr</target>
+      </trans-unit>
+      <trans-unit id="virtagent_init_menu">
+        <source>VirtAgent should be initialized to enable this menu</source>
+        <target>Habilitado apenas se o agente de virtualização estiver inicializado</target>
+      </trans-unit>
+      
+      <!-- MISC -->
+      <trans-unit id="module_view_notfound">
+        <source>No module view found!</source>
+        <target>View do módulo não encontrada!</target>
+      </trans-unit>
+      <!-- APPLIANCE -->
+      <trans-unit id="delete_backup">
+        <source>Delete backup</source>
+        <target>Remover backup</target>
+      </trans-unit>
+      <trans-unit id="delete_selected_backup">
+        <source>Delete selected backup</source>
+        <target>Remover backup seleccionado</target>
+      </trans-unit>
+      <trans-unit id="delete_backup_confirm">
+        <source>You are about to delete {0}. &lt;br /&gt;Are you sure you want to delete?</source>
+        <target>Irá remover {0}. &lt;br /&gt; Tem a certeza que pretende remover?</target>
+      </trans-unit>
+      <trans-unit id="restore_backup">
+        <source>Restore backup</source>
+        <target>Restaurar backup</target>
+      </trans-unit>
+      <trans-unit id="restore_selected_backup">
+        <source>Restore selected backup</source>
+        <target>Restaurar backup seleccionado</target>
+      </trans-unit>
+      <trans-unit id="restore_backup_confirm">
+        <source>You are about to restore {0}. &lt;br /&gt;Are you sure you want to restore?</source>
+        <target>Irá restaurar {0}. &lt;br /&gt; Tem a certeza que pretende restaurar?</target>
+      </trans-unit>
+      <trans-unit id="register_once">
+        <source>You should register ONLY ONCE! If you see a SERIAL NUMBER below it means you already register.&lt;br&gt; Optionally, you can also provide a brief description to better indentify this Appliance</source>
+        <target>Deverá registar apenas UMA VEZ! Se aparecer um SERIAL NUMBER em baixo significa que já efectuou o registo.&lt;br&gt; Opcionalmente, pode também efectuar uma breve descrição da Appliance</target>
+      </trans-unit>
+      <trans-unit id="authnetication">
+        <source>Authentication</source>
+        <target>Autenticação</target>
+      </trans-unit>
+      <trans-unit id="registering_etva">
+        <source>Registering ETVA...</source>
+        <target>A registar ETVA...</target>
+      </trans-unit>
+      <trans-unit id="could_not_register">        
+        <source>Could not register ETVA.&lt;br&gt; {0}</source>
+        <target>Não foi possível registar ETVA.&lt;br&gt; {0}</target>
+      </trans-unit>
+      <trans-unit id="register_ok">
+        <source>Register OK with serial number &lt;b&gt;{0}&lt;/b&gt;</source>
+        <target>Registo OK com serial number &lt;b&gt;{0}&lt;/b&gt;</target>
+      </trans-unit>
+      <trans-unit id="register_appliance">
+        <source>Register Appliance</source>
+        <target>Registar Appliance</target>
+      </trans-unit>
+      <trans-unit id="backup_appliance_notice">
+        <source>An appliance backup will save all ETVA settings. &lt;br&gt; If a virtual machine as an agent running, actual configuration/settings of that service will also be saved.&lt;br&gt;&lt;br&gt;IT DOES NOT BACKUP DISK DATA!!! ONLY CURRENT CONFIGURATION!</source>
+        <target>O backup da appliance irá guardar todas as configurações do ETVA. &lt;br&gt; Se uma máquina virtual tiver um agente a correr, a configuração do serviço desse agente será guardada.&lt;br&gt;&lt;br&gt;NÃO REALIZA BACKUP DA INFORMAÇÂO DOS DISCOS!!! APENAS CONFIGURAÇÃO ACTUAL!</target>
+      </trans-unit>
+      <trans-unit id="backup_now">
+        <source>BACKUP NOW!</source>
+        <target>EFECTUAR BACKUP!</target>
+      </trans-unit>
+      <trans-unit id="appliance_not_registered">
+        <source>Appliance not registered</source>
+        <target>Appliance não registada</target>
+      </trans-unit>
+      <trans-unit id="appliance_need_registered_backup">
+        <source>Need to register Appliance first before creating backup.&lt;br&gt;&lt;br&gt;Register now?</source>
+        <target>Necessita registar a Appliance para poder efectuar o backup.&lt;br&gt;&lt;br&gt;Registar agora?</target>
+      </trans-unit>
+      <trans-unit id="initializing">
+        <source>Initializing...</source>
+        <target>A inicializar...</target>
+      </trans-unit>
+      <trans-unit id="per_completed">
+        <source>% completed...</source>
+        <target>% completo...</target>
+      </trans-unit>
+      <trans-unit id="per_downloaded">
+        <source>{0} downloaded...</source>
+        <target>{0} downloaded...</target>
+      </trans-unit>
+      <trans-unit id="appliance_backup">
+        <source>Appliance Backup</source>
+        <target>Backup da Appliance</target>
+      </trans-unit>
+      <trans-unit id="preparing_backup">
+        <source>Preparing backup configuration...</source>
+        <target>A preparar configuração de backup...</target>
+      </trans-unit>
+      <trans-unit id="agents_down_backup">
+        <source>Some virtual machines agents reported down. If you proceed agent configuration WILL NOT BE SAVED IN BACKUP.</source>
+        <target>Alguns agentes das máquinas virtuais estão em baixo. Se prosseguir com o backup a configuração desses agentes NÃO SERÁ GUARDADA NO BACKUP.</target>
+      </trans-unit>
+      <trans-unit id="err_backup">
+        <source>Could not perform ETVA BACKUP.&lt;br&gt; {0}</source>
+        <target>Não foi possível efectuar o BACKUP da ETVA.&lt;br&gt; {0}</target>
+      </trans-unit>
+      <trans-unit id="ok_backup">
+        <source>Appliance Backup success!</source>
+        <target>Backup da Appliance com sucesso!</target>
+      </trans-unit>
+      <trans-unit id="errors_occurred">
+        <source>Some errors occurred.&lt;br&gt; {0}</source>
+        <target>Ocorreram alguns erros.&lt;br&gt; {0}</target>
+      </trans-unit>
+      <trans-unit id="appliance_need_registered_restore">
+        <source>Need to register Appliance first before restoring backup.&lt;br&gt;&lt;br&gt;Register now?</source>
+        <target>Necessita registar a Appliance para poder efectuar o restauro de um backup.&lt;br&gt;&lt;br&gt;Registar agora?</target>
+      </trans-unit>
+      <trans-unit id="appliance_restore">
+        <source>Appliance Restore</source>
+        <target>Restaurar Appliance</target>
+      </trans-unit>
+      <trans-unit id="preparing_restore">
+        <source>Preparing restore configuration...</source>
+        <target>A preparar configuração de restauro...</target>
+      </trans-unit>
+      <trans-unit id="va_down_restore">
+        <source>Node reported down. Cannot proceed. Remember to verify node connectivity to Central Management</source>
+        <target>Estado do node em baixo. Não é possível prosseguir. Verifique conectividade com Central Management</target>
+      </trans-unit>
+      <trans-unit id="err_restore">
+        <source>Could not perform ETVA RESTORE.&lt;br&gt; {0}</source>
+        <target>Não foi possível efectuar o RESTAURO da ETVA.&lt;br&gt; {0}</target>
+      </trans-unit>
+      <trans-unit id="removing_backup">
+        <source>Removing backup...</source>
+        <target>A remover backup...</target>
+      </trans-unit>
+      <trans-unit id="removed_backup">
+        <source>Backup {0} deleted</source>
+        <target>Backup {0} removido</target>
+      </trans-unit>
+      <trans-unit id="select_backup">
+        <source>Select a backup to see additional details</source>
+        <target>Seleccione um backup para ver informação adicional</target>
+      </trans-unit>
+      <trans-unit id="backups_list">
+        <source>Backups List</source>
+        <target>Lista de backups</target>
+      </trans-unit>
+      <trans-unit id="yes">
+        <source>Yes</source>
+        <target>Sim</target>
+      </trans-unit>
+      <trans-unit id="no">
+        <source>No</source>
+        <target>Não</target>
+      </trans-unit>
+      <trans-unit id="backup_plans">
+        <source>Backup plans</source>
+        <target>Planos de backup</target>
+      </trans-unit>
+      <trans-unit id="remove_backup_plan">
+        <source>Remove backup plan</source>
+        <target>Remove plano de backup</target>
+      </trans-unit>
+      <trans-unit id="new_backup_plan">
+        <source>New backup plan</source>
+        <target>Novo plano de backup</target>
+      </trans-unit>
+      <trans-unit id="backup_now">
+        <source>Backup now</source>
+        <target>Backup agora</target>
+      </trans-unit>
+      <trans-unit id="full_backup">
+        <source>Full backup</source>
+        <target>Backup integral</target>
+      </trans-unit>
+      <trans-unit id="restore">
+        <source>Restore</source>
+        <target>Restauro</target>
+      </trans-unit>
+      <trans-unit id="stop_primavera">
+        <source>Stop Primavera</source>
+        <target>Parar Primavera</target>
+      </trans-unit>
+      <trans-unit id="start_primavera">
+        <source>Start Primavera</source>
+        <target>Iniciar Primavera</target>
+      </trans-unit>
+      <trans-unit id="change_ip">
+        <source>Change IP</source>
+        <target>Alterar IP</target>
+      </trans-unit>
+      <trans-unit id="users">
+        <source>Users</source>
+        <target>Utilizadores</target>
+      </trans-unit>
+      <trans-unit id="delete_user_question">
+        <source>Are you sure you want delete user {0}?</source>
+        <target>Tem a certeza que pretende apagar o utilizador {0}?</target>
+      </trans-unit>
+
+      <!-- HELP -->
+      <trans-unit id="server_info_help">
+        <source>Server Info Help</source>
+        <target>Informação do Servidor - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="migrate_server_help">
+        <source>Migrate Server Help</source>
+        <target>Migrar Servidor - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="adding_vm_help">
+        <source>Add Server Help</source>
+        <target>Criar Servidor - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="edit_server_help">
+        <source>Edit Server Help</source>
+        <target>Editar Servidor - Ajuda</target>
+      </trans-unit>
+
+      <trans-unit id="physical_volume_help">
+        <source>Physical Volume Help</source>
+        <target>Armazenamento Físico - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="volume_groups_help">
+        <source>Volume Groups Help</source>
+        <target>Volume Groups - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="logical_volume_help">
+        <source>Logical Volume Help</source>
+        <target>Logical Volume - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="preferences_help">
+        <source>Preferences Help</source>
+        <target>Preferências - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="user_management_help">
+        <source>User Management Help</source>
+        <target>Gestão de Utilizadores - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="permissions_management_help">
+        <source>Permissions Management Help</source>
+        <target>Gestão de Permissões - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="groups_management_help">
+        <source>Groups Management Help</source>
+        <target>Gestão de Grupos - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="nodes_help">
+        <source>Nodes Help</source>
+        <target>Nodes - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="hostname_help">
+        <source>Hostname Help</source>
+        <target>Hostname - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="connectivity_help">
+        <source>Connectivity settings Help</source>
+        <target>Opções de Conectividade - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="default_keymap_help">
+        <source>Default keymap Help</source>
+        <target>Keymap geral - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="iso_help">
+        <source>ISO Manager Help</source>
+        <target>Gestor de ISOs - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="iso_up_help">
+        <source>ISO upload Help</source>
+        <target>Envio de ISOs - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="rename_file_help">
+        <source>Rename file Help</source>
+        <target>Renomear ficheiro - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="events_help">
+        <source>System events log Help</source>
+        <target>Registo de eventos do sistema - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="register_appliance_help">
+        <source>Register Appliance Help</source>
+        <target>Registar Appliance - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="appliance_backup">
+        <source>Appliance Backup Help</source>
+        <target>Backup da Appliance - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="appliance_restore_help">
+        <source>Appliance Restore Help</source>
+        <target>Restaurar Appliance - Help</target>
+      </trans-unit>
+      <trans-unit id="node_load_help">
+        <source>Node Load Help</source>
+        <target>Utilização do node - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="info_panel_help">
+        <source>Info panel Help</source>
+        <target>Painel de Informação - Ajuda</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

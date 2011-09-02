@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -13,6 +13,7 @@ Ext.ns('Ext.ux.form');
  * @xtype spinnerfield
  */
 Ext.ux.form.SpinnerField = Ext.extend(Ext.form.NumberField, {
+    actionMode: 'wrap',
     deferHeight: true,
     autoSize: Ext.emptyFn,
     onBlur: Ext.emptyFn,
@@ -31,17 +32,6 @@ Ext.ux.form.SpinnerField = Ext.extend(Ext.form.NumberField, {
 
 		Ext.ux.form.SpinnerField.superclass.constructor.call(this, Ext.apply(config, {plugins: plugins}));
 	},
-
-    onShow: function(){
-        if (this.wrap) {
-            this.wrap.dom.style.display = '';
-            this.wrap.dom.style.visibility = 'visible';
-        }
-    },
-
-    onHide: function(){
-        this.wrap.dom.style.display = 'none';
-    },
 
     // private
     getResizeEl: function(){

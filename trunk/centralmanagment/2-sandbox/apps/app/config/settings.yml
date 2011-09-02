@@ -1,37 +1,52 @@
 prod:
   .settings:
-    no_script_name:         on
-    logging_enabled:        off
+    no_script_name:         true
+    logging_enabled:        true
+
+soap:
+  .settings:    
+    error_reporting:        <?php if(defined('E_DEPRECATED')) echo (E_ALL & ~E_DEPRECATED)."\n";
+                                  else echo (E_ALL)."\n";  ?>
+    logging_enabled:        true
     
 dev:
   .settings:
-   # error_reporting:        <?php echo (E_ALL | E_STRICT)."\n" ?>
-   # error_reporting:        <?php echo (E_ALL)."\n" ?>
-    error_reporting:        <?php echo (E_ALL & ~E_WARNING)."\n" ?>
-    web_debug:              on
-    cache:                  off
-    no_script_name:         off
-    etag:                   off
+    web_debug:              true # web debug should be off since may occur javascript problems
+   # error_reporting:        <?php // echo (E_ALL | E_STRICT)."\n" ?>
+    error_reporting:        <?php echo (E_ALL)."\n" ?>
+  #  error_reporting:        <?php echo (E_ALL & ~E_WARNING)."\n" ?>
+   # error_reporting:        <?php // echo (E_ALL & ~E_DEPRECATED)."\n" ?>    
+    cache:                  false
+    no_script_name:         false
+    etag:                   false
+    logging_enabled:        true
 
 remote:
-  .settings:   
+  .settings:
     error_reporting:        <?php echo (E_ALL & ~E_WARNING)."\n" ?>
-    web_debug:              on
-    cache:                  off
-    no_script_name:         off
-    etag:                   off
+    web_debug:              true
+    cache:                  false
+    no_script_name:         false
+    etag:                   false
 
 test:
   .settings:
     error_reporting:        <?php echo ((E_ALL | E_STRICT) ^ E_NOTICE)."\n" ?>
-    cache:                  off
-    web_debug:              off
-    no_script_name:         off
-    etag:                   off
+    cache:                  false
+    web_debug:              false
+    no_script_name:         false
+    etag:                   false
 
 all:
-  .settings:    
+  .settings:
+    check_lock:  on
+    # i18n
+    default_culture:   pt        # Default user culture
+    i18n:              on       # Enable interface translation. Set to off if your application should not be translated.
+    #    # Helpers included in all templates by default
+    standard_helpers:  [Partial, Cache, I18N]
     max_forwards:      7
+
     # Form security secret (CSRF protection)
     # csrf_secret:       UniqueSecret     # Unique secret to enable CSRF protection or false to disable
     csrf_secret:       false     # Unique secret to enable CSRF protection or false to disable
@@ -107,7 +122,7 @@ all:
 #    max_forwards:           5
 #
 #    # Logging
-#    logging_enabled:        on
+#    logging_enabled:        true
 #
 #    # i18n
 #    default_culture:        en        # Default user culture

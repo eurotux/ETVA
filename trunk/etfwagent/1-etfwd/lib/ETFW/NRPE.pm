@@ -24,7 +24,7 @@ package ETFW::NRPE;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 
 my %CONF = ( "conf_file"=>"/etc/nagios/nrpe.cfg",
                 "service_path"=>"/etc/init.d/nrpe" );

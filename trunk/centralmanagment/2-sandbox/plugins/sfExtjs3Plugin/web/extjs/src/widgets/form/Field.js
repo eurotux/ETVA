@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -15,8 +15,14 @@
  */
 Ext.form.Field = Ext.extend(Ext.BoxComponent,  {
     /**
+     * <p>The label Element associated with this Field. <b>Only available after this Field has been rendered by a
+     * {@link form Ext.layout.FormLayout} layout manager.</b></p>
+     * @type Ext.Element
+     * @property label
+     */
+    /**
      * @cfg {String} inputType The type attribute for input fields -- e.g. radio, text, password, file (defaults
-     * to "text"). The types "file" and "password" must be used to render those field types currently -- there are
+     * to 'text'). The types 'file' and 'password' must be used to render those field types currently -- there are
      * no separate Ext components for those. Note that if you use <tt>inputType:'file'</tt>, {@link #emptyText}
      * is not supported and should be avoided.
      */
@@ -28,32 +34,37 @@ Ext.form.Field = Ext.extend(Ext.BoxComponent,  {
      * @cfg {Mixed} value A value to initialize this field with (defaults to undefined).
      */
     /**
-     * @cfg {String} name The field's HTML name attribute (defaults to "").
+     * @cfg {String} name The field's HTML name attribute (defaults to '').
      * <b>Note</b>: this property must be set if this field is to be automatically included with
      * {@link Ext.form.BasicForm#submit form submit()}.
      */
     /**
-     * @cfg {String} cls A custom CSS class to apply to the field's underlying element (defaults to "").
+     * @cfg {String} cls A custom CSS class to apply to the field's underlying element (defaults to '').
      */
 
     /**
-     * @cfg {String} invalidClass The CSS class to use when marking a field invalid (defaults to "x-form-invalid")
+     * @cfg {String} invalidClass The CSS class to use when marking a field invalid (defaults to 'x-form-invalid')
      */
-    invalidClass : "x-form-invalid",
+    invalidClass : 'x-form-invalid',
     /**
      * @cfg {String} invalidText The error text to use when marking a field invalid and no message is provided
-     * (defaults to "The value in this field is invalid")
+     * (defaults to 'The value in this field is invalid')
      */
-    invalidText : "The value in this field is invalid",
+    invalidText : 'The value in this field is invalid',
     /**
-     * @cfg {String} focusClass The CSS class to use when the field receives focus (defaults to "x-form-focus")
+     * @cfg {String} focusClass The CSS class to use when the field receives focus (defaults to 'x-form-focus')
      */
-    focusClass : "x-form-focus",
+    focusClass : 'x-form-focus',
+    /**
+     * @cfg {Boolean} preventMark
+     * <tt>true</tt> to disable {@link #markInvalid marking the field invalid}.
+     * Defaults to <tt>false</tt>.
+     */
     /**
      * @cfg {String/Boolean} validationEvent The event that should initiate field validation. Set to false to disable
-      automatic validation (defaults to "keyup").
+      automatic validation (defaults to 'keyup').
      */
-    validationEvent : "keyup",
+    validationEvent : 'keyup',
     /**
      * @cfg {Boolean} validateOnBlur Whether the field should validate when it loses focus (defaults to true).
      */
@@ -67,25 +78,24 @@ Ext.form.Field = Ext.extend(Ext.BoxComponent,  {
      * @cfg {String/Object} autoCreate <p>A {@link Ext.DomHelper DomHelper} element spec, or true for a default
      * element spec. Used to create the {@link Ext.Component#getEl Element} which will encapsulate this Component.
      * See <tt>{@link Ext.Component#autoEl autoEl}</tt> for details.  Defaults to:</p>
-     * <pre><code>{tag: "input", type: "text", size: "20", autocomplete: "off"}</code></pre>
+     * <pre><code>{tag: 'input', type: 'text', size: '20', autocomplete: 'off'}</code></pre>
      */
-    defaultAutoCreate : {tag: "input", type: "text", size: "20", autocomplete: "off"},
+    defaultAutoCreate : {tag: 'input', type: 'text', size: '20', autocomplete: 'off'},
     /**
-     * @cfg {String} fieldClass The default CSS class for the field (defaults to "x-form-field")
+     * @cfg {String} fieldClass The default CSS class for the field (defaults to 'x-form-field')
      */
-    fieldClass : "x-form-field",
+    fieldClass : 'x-form-field',
     /**
-     * @cfg {String} msgTarget The location where error text should display.  Should be one of the following values
-     * (defaults to 'qtip'):
-     *<pre>
-Value         Description
------------   ----------------------------------------------------------------------
-qtip          Display a quick tip when the user hovers over the field
-title         Display a default browser title attribute popup
-under         Add a block div beneath the field containing the error text
-side          Add an error icon to the right of the field with a popup on hover
-[element id]  Add the error text directly to the innerHTML of the specified element
-</pre>
+     * @cfg {String} msgTarget <p>The location where the message text set through {@link #markInvalid} should display.
+     * Must be one of the following values:</p>
+     * <div class="mdetail-params"><ul>
+     * <li><code>qtip</code> Display a quick tip containing the message when the user hovers over the field. This is the default.
+     * <div class="subdesc"><b>{@link Ext.QuickTips#init Ext.QuickTips.init} must have been called for this setting to work.</b></div</li>
+     * <li><code>title</code> Display the message in a default browser title attribute popup.</li>
+     * <li><code>under</code> Add a block div beneath the field containing the error message.</li>
+     * <li><code>side</code> Add an error icon to the right of the field, displaying the message in a popup on hover.</li>
+     * <li><code>[element id]</code> Add the error message directly to the innerHTML of the specified element.</li>
+     * </ul></div>
      */
     msgTarget : 'qtip',
     /**
@@ -109,9 +119,17 @@ side          Add an error icon to the right of the field with a popup on hover
      * disabled Fields will not be {@link Ext.form.BasicForm#submit submitted}.</p>
      */
     disabled : false,
+    /**
+     * @cfg {Boolean} submitValue False to clear the name attribute on the field so that it is not submitted during a form post.
+     * Defaults to <tt>true</tt>.
+     */
+    submitValue: true,
 
     // private
     isFormField : true,
+
+    // private
+    msgDisplay: '',
 
     // private
     hasFocus : false,
@@ -193,9 +211,9 @@ var form = new Ext.form.FormPanel({
     /**
      * Returns the {@link Ext.form.Field#name name} or {@link Ext.form.ComboBox#hiddenName hiddenName}
      * attribute of the field if available.
-     * @return {String} name The field {@link Ext.form.Field#name name} or {@link Ext.form.ComboBox#hiddenName hiddenName}  
+     * @return {String} name The field {@link Ext.form.Field#name name} or {@link Ext.form.ComboBox#hiddenName hiddenName}
      */
-    getName: function(){
+    getName : function(){
         return this.rendered && this.el.dom.name ? this.el.dom.name : this.name || this.id || '';
     },
 
@@ -213,7 +231,9 @@ var form = new Ext.form.FormPanel({
             this.autoEl = cfg;
         }
         Ext.form.Field.superclass.onRender.call(this, ct, position);
-        
+        if(this.submitValue === false){
+            this.el.dom.removeAttribute('name');
+        }
         var type = this.el.dom.type;
         if(type){
             if(type == 'password'){
@@ -222,7 +242,7 @@ var form = new Ext.form.FormPanel({
             this.el.addClass('x-form-'+type);
         }
         if(this.readOnly){
-            this.el.dom.readOnly = true;
+            this.setReadOnly(true);
         }
         if(this.tabIndex !== undefined){
             this.el.dom.setAttribute('tabIndex', this.tabIndex);
@@ -233,7 +253,7 @@ var form = new Ext.form.FormPanel({
 
     // private
     getItemCt : function(){
-        return this.el.up('.x-form-item', 4);
+        return this.itemCt;
     },
 
     // private
@@ -270,6 +290,17 @@ var form = new Ext.form.FormPanel({
         return String(this.getValue()) !== String(this.originalValue);
     },
 
+    /**
+     * Sets the read only state of this field.
+     * @param {Boolean} readOnly Whether the field should be read only.
+     */
+    setReadOnly : function(readOnly){
+        if(this.rendered){
+            this.el.dom.readOnly = readOnly;
+        }
+        this.readOnly = readOnly;
+    },
+
     // private
     afterRender : function(){
         Ext.form.Field.superclass.afterRender.call(this);
@@ -280,7 +311,7 @@ var form = new Ext.form.FormPanel({
     // private
     fireKey : function(e){
         if(e.isSpecialKey()){
-            this.fireEvent("specialkey", this, e);
+            this.fireEvent('specialkey', this, e);
         }
     },
 
@@ -295,23 +326,34 @@ var form = new Ext.form.FormPanel({
 
     // private
     initEvents : function(){
-        this.mon(this.el, Ext.EventManager.useKeydown ? "keydown" : "keypress", this.fireKey,  this);
+        this.mon(this.el, Ext.EventManager.useKeydown ? 'keydown' : 'keypress', this.fireKey,  this);
         this.mon(this.el, 'focus', this.onFocus, this);
 
-        // fix weird FF/Win editor issue when changing OS window focus
-        var o = this.inEditor && Ext.isWindows && Ext.isGecko ? {buffer:10} : null;
-        this.mon(this.el, 'blur', this.onBlur, this, o);
+        // standardise buffer across all browsers + OS-es for consistent event order.
+        // (the 10ms buffer for Editors fixes a weird FF/Win editor issue when changing OS window focus)
+        this.mon(this.el, 'blur', this.onBlur, this, this.inEditor ? {buffer:10} : null);
     },
 
     // private
+    preFocus: Ext.emptyFn,
+
+    // private
     onFocus : function(){
+        this.preFocus();
         if(this.focusClass){
             this.el.addClass(this.focusClass);
         }
         if(!this.hasFocus){
             this.hasFocus = true;
+            /**
+             * <p>The value that the Field had at the time it was last focused. This is the value that is passed
+             * to the {@link #change} event which is fired if the value has been changed when the Field is blurred.</p>
+             * <p><b>This will be undefined until the Field has been visited.</b> Compare {@link #originalValue}.</p>
+             * @type mixed
+             * @property startValue
+             */
             this.startValue = this.getValue();
-            this.fireEvent("focus", this);
+            this.fireEvent('focus', this);
         }
     },
 
@@ -325,18 +367,24 @@ var form = new Ext.form.FormPanel({
             this.el.removeClass(this.focusClass);
         }
         this.hasFocus = false;
-        if(this.validationEvent !== false && this.validateOnBlur && this.validationEvent != "blur"){
+        if(this.validationEvent !== false && (this.validateOnBlur || this.validationEvent == 'blur')){
             this.validate();
         }
         var v = this.getValue();
         if(String(v) !== String(this.startValue)){
             this.fireEvent('change', this, v, this.startValue);
         }
-        this.fireEvent("blur", this);
+        this.fireEvent('blur', this);
+        this.postBlur();
     },
 
+    // private
+    postBlur : Ext.emptyFn,
+
     /**
-     * Returns whether or not the field value is currently valid
+     * Returns whether or not the field value is currently valid by
+     * {@link #validateValue validating} the {@link #processValue processed value}
+     * of the field. <b>Note</b>: {@link #disabled} fields are ignored.
      * @param {Boolean} preventMark True to disable marking the field invalid
      * @return {Boolean} True if the value is valid, else false
      */
@@ -363,62 +411,128 @@ var form = new Ext.form.FormPanel({
         return false;
     },
 
-    // protected - should be overridden by subclasses if necessary to prepare raw values for validation
+    /**
+     * This method should only be overridden if necessary to prepare raw values
+     * for validation (see {@link #validate} and {@link #isValid}).  This method
+     * is expected to return the processed value for the field which will
+     * be used for validation (see validateValue method).
+     * @param {Mixed} value
+     */
     processValue : function(value){
         return value;
     },
 
-    // private
-    // Subclasses should provide the validation implementation by overriding this
-    validateValue : function(value){
-        return true;
+    /**
+     * Uses getErrors to build an array of validation errors. If any errors are found, markInvalid is called
+     * with the first and false is returned, otherwise true is returned. Previously, subclasses were invited
+     * to provide an implementation of this to process validations - from 3.2 onwards getErrors should be
+     * overridden instead.
+     * @param {Mixed} The current value of the field
+     * @return {Boolean} True if all validations passed, false if one or more failed
+     */
+     validateValue : function(value) {
+         //currently, we only show 1 error at a time for a field, so just use the first one
+         var error = this.getErrors(value)[0];
+
+         if (error == undefined) {
+             return true;
+         } else {
+             this.markInvalid(error);
+             return false;
+         }
+     },
+    
+    /**
+     * Runs this field's validators and returns an array of error messages for any validation failures.
+     * This is called internally during validation and would not usually need to be used manually.
+     * Each subclass should override or augment the return value to provide their own errors
+     * @return {Array} All error messages for this field
+     */
+    getErrors: function() {
+        return [];
     },
 
     /**
-     * Mark this field as invalid, using {@link #msgTarget} to determine how to display the error and
-     * applying {@link #invalidClass} to the field's element.
+     * Gets the active error message for this field.
+     * @return {String} Returns the active error message on the field, if there is no error, an empty string is returned.
+     */
+    getActiveError : function(){
+        return this.activeError || '';
+    },
+
+    /**
+     * <p>Display an error message associated with this field, using {@link #msgTarget} to determine how to
+     * display the message and applying {@link #invalidClass} to the field's UI element.</p>
+     * <p><b>Note</b>: this method does not cause the Field's {@link #validate} method to return <code>false</code>
+     * if the value does <i>pass</i> validation. So simply marking a Field as invalid will not prevent
+     * submission of forms submitted with the {@link Ext.form.Action.Submit#clientValidation} option set.</p>
+     * {@link #isValid invalid}.
      * @param {String} msg (optional) The validation message (defaults to {@link #invalidText})
      */
     markInvalid : function(msg){
-        if(!this.rendered || this.preventMark){ // not rendered
-            return;
-        }
-        msg = msg || this.invalidText;
+        //don't set the error icon if we're not rendered or marking is prevented
+        if (this.rendered && !this.preventMark) {
+            msg = msg || this.invalidText;
 
-        var mt = this.getMessageHandler();
-        if(mt){
-            mt.mark(this, msg);
-        }else if(this.msgTarget){
-            this.el.addClass(this.invalidClass);
-            var t = Ext.getDom(this.msgTarget);
-            if(t){
-                t.innerHTML = msg;
-                t.style.display = this.msgDisplay;
+            var mt = this.getMessageHandler();
+            if(mt){
+                mt.mark(this, msg);
+            }else if(this.msgTarget){
+                this.el.addClass(this.invalidClass);
+                var t = Ext.getDom(this.msgTarget);
+                if(t){
+                    t.innerHTML = msg;
+                    t.style.display = this.msgDisplay;
+                }
             }
         }
-        this.fireEvent('invalid', this, msg);
+        
+        this.setActiveError(msg);
     },
-
+    
     /**
      * Clear any invalid styles/messages for this field
      */
     clearInvalid : function(){
-        if(!this.rendered || this.preventMark){ // not rendered
-            return;
-        }
-        this.el.removeClass(this.invalidClass);
-        var mt = this.getMessageHandler();
-        if(mt){
-            mt.clear(this);
-        }else if(this.msgTarget){
+        //don't remove the error icon if we're not rendered or marking is prevented
+        if (this.rendered && !this.preventMark) {
             this.el.removeClass(this.invalidClass);
-            var t = Ext.getDom(this.msgTarget);
-            if(t){
-                t.innerHTML = '';
-                t.style.display = 'none';
+            var mt = this.getMessageHandler();
+            if(mt){
+                mt.clear(this);
+            }else if(this.msgTarget){
+                this.el.removeClass(this.invalidClass);
+                var t = Ext.getDom(this.msgTarget);
+                if(t){
+                    t.innerHTML = '';
+                    t.style.display = 'none';
+                }
             }
         }
-        this.fireEvent('valid', this);
+        
+        this.unsetActiveError();
+    },
+
+    /**
+     * Sets the current activeError to the given string. Fires the 'invalid' event.
+     * This does not set up the error icon, only sets the message and fires the event. To show the error icon,
+     * use markInvalid instead, which calls this method internally
+     * @param {String} msg The error message
+     * @param {Boolean} suppressEvent True to suppress the 'invalid' event from being fired
+     */
+    setActiveError: function(msg, suppressEvent) {
+        this.activeError = msg;
+        if (suppressEvent !== true) this.fireEvent('invalid', this, msg);
+    },
+    
+    /**
+     * Clears the activeError and fires the 'valid' event. This is called internally by clearInvalid and would not
+     * usually need to be called manually
+     * @param {Boolean} suppressEvent True to suppress the 'invalid' event from being fired
+     */
+    unsetActiveError: function(suppressEvent) {
+        delete this.activeError;
+        if (suppressEvent !== true) this.fireEvent('valid', this);
     },
 
     // private
@@ -432,7 +546,12 @@ var form = new Ext.form.FormPanel({
             this.el.findParent('.x-form-field-wrap', 5, true);   // else direct field wrap
     },
 
-    // private
+    // Alignment for 'under' target
+    alignErrorEl : function(){
+        this.errorEl.setWidth(this.getErrorCt().getWidth(true) - 20);
+    },
+
+    // Alignment for 'side' target
     alignErrorIcon : function(){
         this.errorIcon.alignTo(this.el, 'tl-tr', [2, 0]);
     },
@@ -470,7 +589,7 @@ var form = new Ext.form.FormPanel({
      * @return {Mixed} value The field value that is set
      */
     setRawValue : function(v){
-        return (this.el.dom.value = (Ext.isEmpty(v) ? '' : v));
+        return this.rendered ? (this.el.dom.value = (Ext.isEmpty(v) ? '' : v)) : '';
     },
 
     /**
@@ -490,26 +609,6 @@ var form = new Ext.form.FormPanel({
     // private, does not work for all fields
     append : function(v){
          this.setValue([this.getValue(), v].join(''));
-    },
-
-    // private
-    adjustSize : function(w, h){
-        var s = Ext.form.Field.superclass.adjustSize.call(this, w, h);
-        s.width = this.adjustWidth(this.el.dom.tagName, s.width);
-        if(this.offsetCt){
-            var ct = this.getItemCt();
-            s.width -= ct.getFrameWidth('lr');
-            s.height -= ct.getFrameWidth('tb');
-        }
-        return s;
-    },
-
-    // private
-    adjustWidth : function(tag, w){
-        if(typeof w == 'number' && (Ext.isIE && (Ext.isIE6 || !Ext.isStrict)) && /input|textarea/i.test(tag) && !this.inEditor){
-            return w - 3;
-        }
-        return w;
     }
 
     /**
@@ -559,8 +658,12 @@ Ext.form.MessageTargets = {
                     return;
                 }
                 field.errorEl = elp.createChild({cls:'x-form-invalid-msg'});
-                field.errorEl.setWidth(elp.getWidth(true)-20);
+                field.on('resize', field.alignErrorEl, field);
+                field.on('destroy', function(){
+                    Ext.destroy(this.errorEl);
+                }, field);
             }
+            field.alignErrorEl();
             field.errorEl.update(msg);
             Ext.form.Field.msgFx[field.msgFx].show(field.errorEl, field);
         },
@@ -578,24 +681,31 @@ Ext.form.MessageTargets = {
             field.el.addClass(field.invalidClass);
             if(!field.errorIcon){
                 var elp = field.getErrorCt();
-                if(!elp){ // field has no container el
+                // field has no container el
+                if(!elp){
                     field.el.dom.title = msg;
                     return;
                 }
                 field.errorIcon = elp.createChild({cls:'x-form-invalid-icon'});
+                if (field.ownerCt) {
+                    field.ownerCt.on('afterlayout', field.alignErrorIcon, field);
+                    field.ownerCt.on('expand', field.alignErrorIcon, field);
+                }
+                field.on('resize', field.alignErrorIcon, field);
+                field.on('destroy', function(){
+                    Ext.destroy(this.errorIcon);
+                }, field);
             }
             field.alignErrorIcon();
             field.errorIcon.dom.qtip = msg;
             field.errorIcon.dom.qclass = 'x-form-invalid-tip';
             field.errorIcon.show();
-            field.on('resize', field.alignErrorIcon, field);
         },
         clear: function(field){
             field.el.removeClass(field.invalidClass);
             if(field.errorIcon){
                 field.errorIcon.dom.qtip = '';
                 field.errorIcon.hide();
-                field.un('resize', field.alignErrorIcon, field);
             }else{
                 field.el.dom.title = '';
             }

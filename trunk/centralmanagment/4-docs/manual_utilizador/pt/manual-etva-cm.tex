@@ -1,0 +1,41 @@
+\documentclass[12pt,a4paper,portuges]{scrreprt}
+%not free anymore, is this really neaded?
+%\usepackage{floatflt}
+\usepackage{varioref}
+\usepackage{shadow}
+\usepackage{footmisc}
+\usepackage{include/eurotux}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% forçar numeração nas secções
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+
+\author{Eurotux Informática, S.A.}
+\title{Manual ETVA Central Management}
+\subtitle{Eurotux Informática, S.A.}
+\date{\today}
+%\date{Fevereiro de 2006}
+
+\begin{document}
+
+\maketitle
+
+\begin{Log}
+\LogEntry{Carlos Rodrigues}{cmar@eurotux.com}{2011-07-13}
+Sub-secção \textit{ETFW} da secção \textit{ETVA Management Agents}
+\LogEntry{Carlos Rodrigues}{cmar@eurotux.com}{2011-07-01}
+Sub-secção \textit{Primavera} da secção \textit{ETVA Management Agents}
+\LogEntry{Ricardo Gomes}{rjg@eurotux.com}{2010-08-06}
+Versão inicial.
+\end{Log}
+
+\tableofcontents
+
+\listoffigures
+
+\input{etva-cm}
+%\input{modulos_etfw}
+%\makertchapter
+%\input{serviços}
+
+\end{document}

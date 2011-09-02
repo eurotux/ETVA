@@ -1,0 +1,17 @@
+\subsection{Balance}
+
+O \emph{balance} é uma solução de balanceamento, simples mas poderosa e que consiste num serviço de proxy tcp com balanceamento round robin e mecanismos de failover.
+
+Os vários ficheiros de configuração deste serviço encontram-se em:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/srv/balance
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -dk /service/balance
+# svc -u /service/balance
+\end{Verbatim}
+

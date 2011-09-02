@@ -1,0 +1,12 @@
+diff -uNr anaconda-11.1.2.16__orig/iw/progress_gui.py anaconda-11.1.2.16/iw/progress_gui.py
+--- anaconda-11.1.2.16__orig/iw/progress_gui.py	2006-10-20 16:15:47.000000000 +0100
++++ anaconda-11.1.2.16/iw/progress_gui.py	2007-03-08 01:50:48.000000000 +0000
+@@ -371,7 +371,7 @@
+ 	if statusflag:
+ 	    statusTable = gtk.Table (2, 2, False)
+ 	    self.pkgstatus = gtk.Label("")
+-	    statusTable.attach (gtk.Label(_("Status: ")), 0, 1, 0, 1, gtk.SHRINK)
++	    statusTable.attach (gtk.Label(_("")), 0, 1, 0, 1, gtk.SHRINK)
+ 	    statusTable.attach (self.pkgstatus, 1, 2, 0, 1, gtk.FILL, gtk.FILL, ypadding=2)
+ 	    vbox.pack_start (statusTable, False, False)
+ 	else:

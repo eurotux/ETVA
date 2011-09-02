@@ -99,7 +99,7 @@ Ext.ux.Wiz.Card = Ext.extend(Ext.FormPanel, {
         var valid = true;
         
         this.form.items.each(function(f){
-
+            
             if(f.isXType('editorgrid')) alert('tala');
 // alert('aki');
             /** [ itemselector validation begin ] ******************************** **/

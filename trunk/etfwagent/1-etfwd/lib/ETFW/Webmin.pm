@@ -24,7 +24,7 @@ package ETFW::Webmin;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 
 =item load_config
 
@@ -52,7 +52,7 @@ sub load_config {
     close(S);
 
     if( !$CONF{"host"} ){
-        $CONF{"host"} = Utils::get_ip();
+        $CONF{"host"} = ETVA::Utils::get_ip();
     }
     if( !$CONF{"url"} ){
         my $proto = $CONF{"ssl"} ? "https" : "http";

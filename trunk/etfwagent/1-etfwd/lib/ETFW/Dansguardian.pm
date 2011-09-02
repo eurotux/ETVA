@@ -28,7 +28,7 @@ BEGIN {
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $CRLF $AUTOLOAD);
 };
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 
 use Fcntl qw(:DEFAULT :flock);

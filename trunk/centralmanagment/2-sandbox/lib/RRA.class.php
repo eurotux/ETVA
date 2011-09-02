@@ -20,37 +20,78 @@ class RRA
                                 '--font UNIT:8:');
                              
                                             
- 
+
+    public function delete($remove_dir = false)
+    {
+        $deleted = true;
+        if($this->filepath)
+        {
+            if (!unlink($this->filepath))
+                $deleted = false;            
+
+        } else {
+            $deleted = false;
+        }
+
+        if($remove_dir)
+        {
+            $dir = dirname($this->filepath);
+            if (is_dir($dir)){
+
+                $objects = scandir($dir);
+                // remove files...if any
+                foreach ($objects as $object) {
+                    if ($object != "." && $object != "..")
+                        if (filetype($dir."/".$object) != "dir") unlink($dir."/".$object);
+                }
+
+                $deleted = rmdir($dir);
+            }else $deleted = false;
+        }
+
+        return $deleted;
+    }
     
     function init_rrdcreate($opts)
-    {
-
-        $this->filepath = sfConfig::get("app_rra_dir").$this->file;
-        
-        
+    {        
+              
         $dir = dirname($this->filepath);
         if (!is_dir($dir))
         {
-            mkdir($dir, 0777, true);
+            
+            $hasDir = mkdir($dir, 0777, true);
+            if(!$hasDir) throw new sfException(sprintf('Unable to create directory "%s" for writing.', $dir));
         }
 
         $fileExists = file_exists($this->filepath);
-        if (!is_writable($dir) || ($fileExists && !is_writable($this->filepath)))
+        
+        if (!is_writable($dir) || ($fileExists && !is_writable($this->filepath)))      
         {
-            throw new sfFileException(sprintf('Unable to open the log file "%s" for writing.', $this->filepath));
+            
+            throw new sfFileException(sprintf('Unable to open the rra file "%s" for writing.', $this->file));        
+
         }
 
 
-        if (!$fileExists) system("rrdtool create ".$this->filepath." ".implode(" ",$opts),$res);
+        if (!$fileExists){
+            $command = "rrdtool create '".$this->filepath."' ".implode(" ",$opts);
+            $msg = "rrdtool create '".$this->file."'";
+            system($command,$res);
+            // if $res==1 means that command failed
+            if($res) throw new sfException(sprintf('Unable to execute "%s" ', $msg));
+            
+            
+        }
 
         
     }    
 
-    function RRA($file,$opts)
+    function RRA($file,$opts,$init=true)
     {
        
         $this->file = $file;
-        $this->init_rrdcreate($opts);
+        $this->filepath = sfConfig::get("app_rra_dir").'/'.$this->file;
+        if($init) $this->init_rrdcreate($opts);
         
     }    
 
@@ -62,7 +103,7 @@ class RRA
 
         system("rrdupdate  ".$this->filepath." ".$data_string,$res);
 
-        return $res."d";
+        return $res;
 
     }
 

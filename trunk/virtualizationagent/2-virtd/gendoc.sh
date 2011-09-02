@@ -27,45 +27,41 @@ if [ ! -e "$POD_WIKI" ]; then
     mkdir -p $POD_WIKI;
 fi
 
-/usr/bin/pod2wiki --style moinmoin Agent.pm > $POD_WIKI/Agent.wiki;
-
-if [ ! -e "$POD_WIKI/Agent" ]; then
-    mkdir -p $POD_WIKI/Agent;
+if [ ! -e "$POD_WIKI/ETVA/Agent" ]; then
+    mkdir -p $POD_WIKI/ETVA/Agent;
 fi
 
-/usr/bin/pod2wiki --style moinmoin Agent/JSON.pm > $POD_WIKI/Agent/JSON.wiki;
-
-/usr/bin/pod2wiki --style moinmoin Agent/SOAP.pm > $POD_WIKI/Agent/SOAP.wiki;
-
-/usr/bin/pod2wiki --style moinmoin Client.pm > $POD_WIKI/Client.wiki;
-
-if [ ! -e "$POD_WIKI/Client" ]; then
-    mkdir -p $POD_WIKI/Client;
+if [ ! -e "$POD_WIKI/ETVA/Client/SOAP" ]; then
+    mkdir -p $POD_WIKI/ETVA/Client/SOAP;
 fi
-
-/usr/bin/pod2wiki --style moinmoin Client/SOAP.pm > $POD_WIKI/Client/SOAP.wiki;
-
-if [ ! -e "$POD_WIKI/Client/SOAP" ]; then
-    mkdir -p $POD_WIKI/Client/SOAP;
-fi
-
-/usr/bin/pod2wiki --style moinmoin Client/SOAP/HTTP.pm > $POD_WIKI/Client/SOAP/HTTP.wiki;
-
-/usr/bin/pod2wiki --style moinmoin VirtAgent.pm > $POD_WIKI/VirtAgent.wiki;
 
 if [ ! -e "$POD_WIKI/VirtAgent" ]; then
     mkdir -p $POD_WIKI/VirtAgent;
 fi
 
-/usr/bin/pod2wiki --style moinmoin VirtAgent/Disk.pm > $POD_WIKI/VirtAgent/Disk.wiki;
+/usr/bin/pod2wiki --style moinmoin lib/ETVA/Agent.pm > $POD_WIKI/ETVA/Agent.wiki;
 
-/usr/bin/pod2wiki --style moinmoin VirtAgent/Network.pm > $POD_WIKI/VirtAgent/Network.wiki;
+/usr/bin/pod2wiki --style moinmoin lib/ETVA/Agent/JSON.pm > $POD_WIKI/ETVA/Agent/JSON.wiki;
 
-/usr/bin/pod2wiki --style moinmoin VirtAgentInterface.pm > $POD_WIKI/VirtAgentInterface.wiki;
+/usr/bin/pod2wiki --style moinmoin lib/ETVA/Agent/SOAP.pm > $POD_WIKI/ETVA/Agent/SOAP.wiki;
 
-/usr/bin/pod2wiki --style moinmoin VirtMachine.pm > $POD_WIKI/VirtMachine.wiki;
+/usr/bin/pod2wiki --style moinmoin lib/ETVA/Client.pm > $POD_WIKI/ETVA/Client.wiki;
 
-/usr/bin/pod2wiki --style moinmoin virtClient.pl > $POD_WIKI/virtClient.wiki;
+/usr/bin/pod2wiki --style moinmoin lib/ETVA/Client/SOAP.pm > $POD_WIKI/ETVA/Client/SOAP.wiki;
+
+/usr/bin/pod2wiki --style moinmoin lib/ETVA/Client/SOAP/HTTP.pm > $POD_WIKI/ETVA/Client/SOAP/HTTP.wiki;
+
+/usr/bin/pod2wiki --style moinmoin lib/VirtAgent.pm > $POD_WIKI/VirtAgent.wiki;
+
+/usr/bin/pod2wiki --style moinmoin lib/VirtAgent/Disk.pm > $POD_WIKI/VirtAgent/Disk.wiki;
+
+/usr/bin/pod2wiki --style moinmoin lib/VirtAgent/Network.pm > $POD_WIKI/VirtAgent/Network.wiki;
+
+/usr/bin/pod2wiki --style moinmoin lib/VirtAgentInterface.pm > $POD_WIKI/VirtAgentInterface.wiki;
+
+/usr/bin/pod2wiki --style moinmoin lib/VirtMachine.pm > $POD_WIKI/VirtMachine.wiki;
+
+/usr/bin/pod2wiki --style moinmoin client.pl > $POD_WIKI/client.wiki;
 
 /usr/bin/pod2wiki --style moinmoin virtd > $POD_WIKI/virtd.wiki;
 
@@ -81,28 +77,28 @@ if [ ! -e "$POD_MAN/man3" ]; then
     mkdir -p $POD_MAN/man3;
 fi
 
-/usr/bin/pod2man Agent.pm > $POD_MAN/man3/Agent.3pm;
+/usr/bin/pod2man lib/ETVA/Agent.pm > $POD_MAN/man3/ETVA::Agent.3pm;
 
-/usr/bin/pod2man Agent/JSON.pm > $POD_MAN/man3/Agent::JSON.3pm;
+/usr/bin/pod2man lib/ETVA/Agent/JSON.pm > $POD_MAN/man3/ETVA::Agent::JSON.3pm;
 
-/usr/bin/pod2man Agent/SOAP.pm > $POD_MAN/man3/Agent::SOAP.3pm;
+/usr/bin/pod2man lib/ETVA/Agent/SOAP.pm > $POD_MAN/man3/ETVA::Agent::SOAP.3pm;
 
-/usr/bin/pod2man Client.pm > $POD_MAN/man3/Client.3pm;
+/usr/bin/pod2man lib/ETVA/Client.pm > $POD_MAN/man3/ETVA::Client.3pm;
 
-/usr/bin/pod2man Client/SOAP.pm > $POD_MAN/man3/Client::SOAP.3pm;
+/usr/bin/pod2man lib/ETVA/Client/SOAP.pm > $POD_MAN/man3/ETVA::Client::SOAP.3pm;
 
-/usr/bin/pod2man Client/SOAP/HTTP.pm > $POD_MAN/man3/Client::SOAP::HTTP.3pm;
+/usr/bin/pod2man lib/ETVA/Client/SOAP/HTTP.pm > $POD_MAN/man3/ETVA::Client::SOAP::HTTP.3pm;
 
-/usr/bin/pod2man VirtAgent.pm > $POD_MAN/man3/VirtAgent.3pm;
+/usr/bin/pod2man lib/VirtAgent.pm > $POD_MAN/man3/VirtAgent.3pm;
 
-/usr/bin/pod2man VirtAgent/Disk.pm > $POD_MAN/man3/VirtAgent::Disk.3pm;
+/usr/bin/pod2man lib/VirtAgent/Disk.pm > $POD_MAN/man3/VirtAgent::Disk.3pm;
 
-/usr/bin/pod2man VirtAgent/Network.pm > $POD_MAN/man3/VirtAgent::Network.3pm;
+/usr/bin/pod2man lib/VirtAgent/Network.pm > $POD_MAN/man3/VirtAgent::Network.3pm;
 
-/usr/bin/pod2man VirtAgentInterface.pm > $POD_MAN/man3/VirtAgentInterface.3pm;
+/usr/bin/pod2man lib/VirtAgentInterface.pm > $POD_MAN/man3/VirtAgentInterface.3pm;
 
-/usr/bin/pod2man VirtMachine.pm > $POD_MAN/man3/VirtMachine.3pm;
+/usr/bin/pod2man lib/VirtMachine.pm > $POD_MAN/man3/VirtMachine.3pm;
 
-/usr/bin/pod2man virtClient.pl > $POD_MAN/man3/virtClient.3pm;
+/usr/bin/pod2man client.pl > $POD_MAN/man3/virtClient.3pm;
 
 /usr/bin/pod2man virtd > $POD_MAN/man3/virtd.3pm;

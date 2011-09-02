@@ -11,41 +11,62 @@
 class etfwActions extends sfActions
 {
     public function executeView(sfWebRequest $request)
-    {
-        $this->etva_server = EtvaServerPeer::retrieveByPK($request->getParameter('sid'));
-
-        $dispatcher = $request->getParameter('dispatcher');
+    {        
+        $dispatcher_id = $request->getParameter('dispatcher_id');        
 
         // used to get parent id component (extjs)
-        $this->containerId = $request->getParameter('containerId');
+        //$this->containerId = $request->getParameter('containerId');
         
         // load modules file of dispatcher
-        if($dispatcher){
+        if($dispatcher_id){
 
             $criteria = new Criteria();
-            $criteria->add(EtvaServicePeer::SERVER_ID,$this->etva_server->getId());
-            $criteria->add(EtvaServicePeer::NAME_TMPL,$dispatcher);
+            $criteria->add(EtvaServicePeer::ID,$dispatcher_id);
+            //$criteria->add(EtvaServicePeer::NAME_TMPL,$dispatcher);
 
-            $this->etva_service = EtvaServicePeer::doSelectOne($criteria);
+            $etva_service = EtvaServicePeer::doSelectOne($criteria);
+            $dispatcher = $etva_service->getNameTmpl();
+            $etva_server = $etva_service->getEtvaServer();
 
-            $tmpl = $this->etva_server->getAgentTmpl().'_'.$dispatcher.'_modules';
+            $tmpl = $etva_server->getAgentTmpl().'_'.$dispatcher.'_modules';
             $directory = $this->context->getConfiguration()->getTemplateDir('etfw', '_'.$tmpl.'.php');
 
             if($directory)
                 return $this->renderPartial($tmpl);
             else
                 return $this->renderText('Template '.$tmpl.' not found');
+        }else{
+            $this->etva_server = EtvaServerPeer::retrieveByPK($request->getParameter('sid'));
         }
         
     }
-
-     // called by 'Add Server Wizard' button
-    public function executeETFW_network_wizard(sfWebRequest $request)
+     
+    public function executeETFW_wizard(sfWebRequest $request)
     {
-//        $this->etva_node = EtvaNodePeer::retrieveByPk(1);
-//        // remove session macs for cleanup the wizard
-//        $this->getUser()->getAttributeHolder()->remove('macs_in_wizard');
-    }    
+        $etva_server = EtvaServerPeer::retrieveByPK($request->getParameter('sid'));
+        $criteria = new Criteria();
+        $criteria->add(EtvaServicePeer::SERVER_ID,$etva_server->getId());
+        $criteria->add(EtvaServicePeer::NAME_TMPL,'wizard');
+        $network_dispatcher = EtvaServicePeer::doSelectOne($criteria);
+        $this->wizard_dispatcher_id = $network_dispatcher->getId();
+        $this->wizard_name = $request->getParameter('tpl');
+        $this->containerId = $request->getParameter('containerId');
+
+        if($this->wizard_name=='dhcp'){
+            //get active interfaces info...
+            $active_ifaces = $this->ETFW_network($etva_server, 'active_interfaces', array(), '');
+            if($active_ifaces['success']){
+                $data = $active_ifaces['data'];
+                $ifaces = array();
+                foreach ($data as $key => $val) {
+                    $ifaces[$val['fullname']] = $data[$key];
+                }
+                $this->interfaces = $ifaces;
+            }
+
+        }
+        
+    }
 
     /*
      * processes ETFW json requests and invokes dispatcher
@@ -80,6 +101,7 @@ class etfwActions extends sfActions
 
             if($ret['success'])
                 $result = json_encode($ret);
+                //$result = json_encode(array(utf8_encode($ret)));
             else
                 $result = $this->setJsonError($ret);
         }else{
@@ -90,7 +112,8 @@ class etfwActions extends sfActions
 
             // $result = json_encode($ret);
 
-        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json; charset=utf-8');
+        $this->getResponse()->setHttpHeader("X-JSON", '()');
 
         return $this->renderText($result);
 
@@ -317,9 +340,41 @@ class etfwActions extends sfActions
 
             if($mode) $method = $mode;
             switch($method){
+                case 'get_config_rules' :
+                                $rules = (array) $response_decoded['rules'];
+                                $boot = (array) $response_decoded['boot'];
+                                $boot_active = $boot['active'];
+            
+                                foreach($rules as &$table){
+                                    foreach($table as $chain=>&$chain_data){
+                                        $chain_data = (array) $chain_data;
+                                        $elements = array();
+                                        $i=0;
+                                        if(isset($chain_data['rules'])){
+                                            $rules_chain = (array) $chain_data['rules'];
+                                            foreach($rules_chain as $rule){
+                                                $rule = (array) $rule;
+                                                $elements[$i]['index'] = $rule['index'];
+                                                if(!isset($rule['j'])) $rule['j'] = '';
+                                                $elements[$i]['action'] = ETFW_Firewall::describe_rule_action($rule['j']);
+                                                $elements[$i]['condition'] = ETFW_Firewall::describe_rule_condition($rule);
+                                                $i++;
+                                            }
+                                        }
+                                        $chain_data['rules'] = array('total' =>   count($elements),'data'  => $elements);
+                                        $chain_data['chain_desc'] = ETFW_Firewall::describe_rule_chain($chain);
+                                    }
+
+                                }
+                                
+                                $return = array('success' => true,'total' => count($rules),'boot_active'=>$boot_active, 'rules'  => $rules);
+                                break;
+
+
+                                 break;
                 case 'get_rule': // return data for EXTJS form presentation
 
-                                 $response_decoded['chain-desc'] = ETFW_firewall::describe_rule_chain($response_decoded['chain']);
+                                 $response_decoded['chain-desc'] = ETFW_Firewall::describe_rule_chain($response_decoded['chain']);
 
                                  if(isset($response_decoded['reject-with'])) $response_decoded['reject-with-src'] = 'type';
 
@@ -746,8 +801,8 @@ class etfwActions extends sfActions
                                  foreach($rules as $rule){
                                      $rule = (array) $rule;
                                      $elements[$i]['index'] = $rule['index'];
-                                     $elements[$i]['action'] = ETFW_firewall::describe_rule_action($rule['j']);
-                                     $elements[$i]['condition'] = ETFW_firewall::describe_rule_condition($rule);
+                                     $elements[$i]['action'] = ETFW_Firewall::describe_rule_action($rule['j']);
+                                     $elements[$i]['condition'] = ETFW_Firewall::describe_rule_condition($rule);
                                      $i++;
                                  }
 
@@ -794,10 +849,18 @@ class etfwActions extends sfActions
 
         // prepare soap info....
         $initial_params = array(
-                        'dispatcher'=>'dhcp'
+                        'dispatcher'=>'dhcp'                        
         );
 
         $call_params = array_merge($initial_params,$params);
+        
+        $action = $method;
+        if($mode) $action = $mode;
+
+        $validate_fields = $this->validateFields('Dhcp',$action,$params);
+
+        if(!$validate_fields['success'])
+            return $validate_fields;
 
         // send soap request
         $response = $etva_server->soapSend($method,$call_params);
@@ -806,9 +869,8 @@ class etfwActions extends sfActions
         // if soap response is ok
         if($response['success']){
             $response_decoded = (array) $response['response'];
-
-            if($mode) $method = $mode;
-            switch($method){
+            
+            switch($action){
                 case 'list_key':
                                 $response_decoded = $response_decoded['list'];
                                 $elements = array();
@@ -882,248 +944,29 @@ class etfwActions extends sfActions
                                     $elements[] = $data_pass;
                                 }
                                 $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
-                                break;
+                                break;                
                 case 'list_clientoptions':
                                 $response_option = (array) $response_decoded['option'];
-                                //unset($response_decoded['option']);
-                                $elements = array();
-                                $data_dec = $response_decoded;
-                                $data_pass = array();
-
-                                foreach($response_option as $index_option=>$data_option)
-                                    $data_pass['option_'.$index_option] = $data_option;                                
-
-                                if(isset($data_dec['filename'])) $data_pass['filename'] = $data_dec['filename'];
-                                if(isset($data_dec['next-server'])) $data_pass['next-server'] = $data_dec['next-server'];
-                                if(isset($data_dec['dynamic-bootp-lease-length'])) $data_pass['dynamic-bootp-lease-length'] = $data_dec['dynamic-bootp-lease-length'];
-                                if(isset($data_dec['ddns-rev-domainname'])) $data_pass['ddns-rev-domainname'] = $data_dec['ddns-rev-domainname'];
-                                if(isset($data_dec['default-lease-time'])) $data_pass['default-lease-time'] = $data_dec['default-lease-time'];
-                                if(isset($data_dec['max-lease-time'])) $data_pass['max-lease-time'] = $data_dec['max-lease-time'];
-                                if(isset($data_dec['server-name'])) $data_pass['server-name'] = $data_dec['server-name'];
-                                if(isset($data_dec['dynamic-bootp-lease-cutoff'])) $data_pass['dynamic-bootp-lease-cutoff'] = $data_dec['dynamic-bootp-lease-cutoff'];
-                                if(isset($data_dec['ddns-domainname'])) $data_pass['ddns-domainname'] = $data_dec['ddns-domainname'];
-                                if(isset($data_dec['ddns-hostname'])) $data_pass['ddns-hostname'] = $data_dec['ddns-hostname'];
-                                if(isset($data_dec['ddns-updates'])) $data_pass['ddns-updates'] = $data_dec['ddns-updates'];
-                                if(isset($data_dec['use-host-decl-names'])) $data_pass['use-host-decl-names'] = $data_dec['use-host-decl-names'];
-                                if(isset($data_dec['ddns-update-style'])) $data_pass['ddns-update-style'] = $data_dec['ddns-update-style'];
-
-                                $data_pass['authoritative'] = isset($data_dec['authoritative']) ? 1:0;
-
-
-                                $deny = $data_dec['deny'];
-                                if($deny)
-                                if(!is_array($deny))
-                                    $data_pass[$deny] = 'deny';
-                                else
-                                    foreach($deny as $data_deny)
-                                        $data_pass[$data_deny] = 'deny';
-
-                                $allow = $data_dec['allow'];
-                                if($allow)
-                                if(!is_array($allow))
-                                    $data_pass[$allow] = 'allow';
-                                else
-                                    foreach($allow as $data_allow)
-                                        $data_pass[$data_allow] = 'allow';
-
-
-                                if(isset($data_dec['ignore'])){
-                                    $ignore = $data_dec['ignore'];
-                                
-                                    if(!is_array($ignore))
-                                        $data_pass[$ignore] = 'ignore';
-                                    else
-                                        foreach($ignore as $data_ignore)
-                                            $data_pass[$data_ignore] = 'ignore';
-                                }
-
-                                $elements = $data_pass;
-
-                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
-                                break;
+                                $cliOption = new ETFW_Dhcp($response_decoded,'list_clientoptions');                                                                                             
+                                $elements = $cliOption->getAllData();
+                                $return = array('success' => true,'total' => count($elements),'data'  => $elements);
+                                break;                
                 case 'list_all':
-                                //build shared network combo store
-                                $shared_network_elements = array();
-                                $data_shared_networks = (array) $response_decoded['sharednetworks'];
-
-
-
-                                $subnet_shared = array();
-                                $coll_sharednetwork = array();
-                                //shared networks....
-                                foreach($data_shared_networks as $data_shared_network){
-                                    $shared_network = (array) $data_shared_network;
-                                    $name = $shared_network['name'];
-                                    $uuid = $shared_network['uuid'];
-                                    $shared_network_elements[] = array('name'=>$name,'value'=>$uuid);
-                                    $coll_sharednetwork[] = array('uuid'=>$uuid,'type'=>'shared-network','value'=>$name);
-
-                                    $subnet_shared['hosts_list'][$uuid] = array('success'=>true,'data'=>array());
-                                    $subnet_shared['groups_list'][$uuid] = array('success'=>true,'data'=>array());
-
-                                }
-
-
-                                $shared_networks_cmb = array('success' => true,'total' =>   count($shared_network_elements),
-                                                                        'data'  => $shared_network_elements);
-
-
-                               $data_subnets = (array) $response_decoded['subnets'];
-                               $sharednetwork = array('subnets_list'=>array('success'=>true,'data'=>array()),
-                                                      'groups_list'=>array('success'=>true,'data'=>array()),
-                                                      'hosts_list'=>array('success'=>true,'data'=>array())
-                                                     );
-
-
-                               $subnet = array('groups_list'=>array('success'=>true,'data'=>array()),
-                                                      'hosts_list'=>array('success'=>true,'data'=>array())
-                                              );
-                               //subnets info
-                               $coll_subnet = array();
-                               foreach($data_subnets as $data_subnet){
-                                   $subnet_dec = (array) $data_subnet;
-                                   $data_parent = (array) $subnet_dec['parent'];
-                                   $sharednetwork['subnets_list']['data'][] = array('uuid'=>$subnet_dec['uuid'],'subnet'=>$subnet_dec['address']);
-                                   $data_parent['type'] = isset($data_parent['type']) ? $data_parent['type'] : '';
-                                   switch($data_parent['type']){
-                                            case 'shared-network':
-                                                                $coll_subnet[] = array('uuid'=>$subnet_dec['uuid'],'type'=>'subnet','value'=>$subnet_dec['address'].' in '.$data_parent['name']);
-                                                                break;
-                                            case '':
-                                                                $coll_subnet[] = array('uuid'=>$subnet_dec['uuid'],'type'=>'subnet','value'=>$subnet_dec['address']);
-                                                                break;
-
-                                            default:break;
-                                   }
-                               }
-
-
-
-                               //groups_info
-                               $data_groups = (array) $response_decoded['groups'];
-                               $coll_group = $group_hosts = $group_hosts_info_parents = array();
-
-                               foreach($data_groups as $data_group){
-                                   $group = (array) $data_group;
-                                   $group_parent = (!empty($group['parent'])) ? (array) $group['parent'] : array('type'=>'');
-                                   $hosts_data = (array) $group['hosts'];
-                                   $hosts_count = count($hosts_data);
-
-                                   $group_hosts[$group['uuid']] = array('success'=>true,'data'=>array());
-
-
-                                   switch($group_parent['type']){
-                                       case 'subnet':
-
-                                                     $group_hosts_info_parents[$group['uuid']][] = $group_parent['uuid'];
-
-
-
-                                                     if(empty($group_parent['parent'])){
-                                                         $coll_group[] = array('uuid'=>$group['uuid'],'type'=>'group','value'=>$hosts_count.' members in '.$group_parent['address']);
-                                                         $subnet['groups_list']['data'][] = array('uuid'=>$group['uuid'],'hosts_count'=>$hosts_count.' members');
-                                                     }else{
-                                                     $aux_data = (array) $group_parent['parent'];
-                                                     $coll_group[] = array('uuid'=>$group['uuid'],'type'=>'group','value'=>$hosts_count.' members in '.$group_parent['address'].' in '.$aux_data['name']);
-                                                     $subnet_shared['groups_list'][$aux_data['uuid']]['data'][] = array('uuid'=>$group['uuid'],'hosts_count'=>$hosts_count.' members');
-
-                                                     }
-                                                      break;
-                                        case 'shared-network':
-
-                                                    $group_hosts_info_parents[$group['uuid']][] = $group_parent['uuid'];
-
-                                                    $sharednetwork['groups_list']['data'][] = array('uuid'=>$group['uuid'],'hosts_count'=>$hosts_count.' members');
-                                                    $subnet_shared['groups_list'][$group_parent['uuid']]['data'][] = array('uuid'=>$group['uuid'],'hosts_count'=>$hosts_count.' members');
-                                                    $coll_group[] = array('uuid'=>$group['uuid'],'type'=>'group','value'=>$hosts_count.' members in '.$group_parent['name']);
-                                                    break;
-
-                                       case '':
-                                                $group_hosts_info_parents[$group['uuid']][] = '';
-
-                                                $sharednetwork['groups_list']['data'][] = array('uuid'=>$group['uuid'],'hosts_count'=>$hosts_count.' members');
-                                                $subnet['groups_list']['data'][] = array('uuid'=>$group['uuid'],'hosts_count'=>$hosts_count.' members');
-                                                $coll_group[] = array('uuid'=>$group['uuid'],'type'=>'group','value'=>$hosts_count.' members');
-                                                break;
-                                        default:break;
-                                   }
-
-                               }
-
-                               //hosts_info
-                               $data_hosts = (array) $response_decoded['hosts'];
-                               $host_info_parents = array();
-                               $hosts_empty_parent = array();
-
-                               foreach($data_hosts as $data_host){
-                                   $host = (array) $data_host;
-                                   $host_parent = (!empty($host['parent'])) ? (array) $host['parent'] : array('type'=>'');
-                                   switch($host_parent['type']){
-                                       case 'subnet':
- 
-                                                     $host_info_parents[$host['uuid']] = array('host'=>$host['host'],'uuid'=>$host_parent['uuid']);
-
-                                                     if(empty($host_parent['parent'])){
-                                                        $subnet['hosts_list']['data'][] = array('uuid'=>$host['uuid'],'host'=>$host['host']);
-                                                     }else{
-                                                         $aux_data = (array) $host_parent['parent'];
-                                                         $subnet_shared['hosts_list'][$aux_data['uuid']]['data'][] = array('uuid'=>$host['uuid'],'host'=>$host['host']);
-                                                     }
-                                                     break;
-                               case 'shared-network':
-                                                    $sharednetwork['hosts_list']['data'][] = array('uuid'=>$host['uuid'],'host'=>$host['host']);
-                                                    $subnet_shared['hosts_list'][$host_parent['uuid']]['data'][] = array('uuid'=>$host['uuid'],'host'=>$host['host']);
-                                                    break;
-                                        case 'group':
-
-                                                   if(!empty($host_parent['parent'])){
-                                                        $aux_data = (array) $host_parent['parent'];
-                                                        $host_info_parents[$host['uuid']] = array('host'=>$host['host'],'uuid'=>$aux_data['uuid']);
-                                                    }else{
-                                                        $host_info_parents[$host['uuid']] = array('host'=>$host['host'],'uuid'=>'');                                                        
-                                                        $group_hosts['']['data'][] = array('uuid'=>$host['uuid'],'host'=>$host['host']);
-                                                    }
-
-                                                    break;
-                                            case '':
-                                                    
-                                                    $host_info_parents[$host['uuid']] = array('host'=>$host['host'],'uuid'=>'');
-                                                    $group_hosts['']['data'][] = array('uuid'=>$host['uuid'],'host'=>$host['host']);
-
-                                                    $sharednetwork['hosts_list']['data'][] = array('uuid'=>$host['uuid'],'host'=>$host['host']);
-                                                    $subnet['hosts_list']['data'][] = array('uuid'=>$host['uuid'],'host'=>$host['host']);
-                                                    break;
-                                            default:break;
-                                   }
-                               }
-
-                                 while(list($uuid) = current($group_hosts_info_parents)){
-
-                                        foreach($host_info_parents as $host_uuid=>$host_parent_uuid){
-
-                                            if($uuid==$host_parent_uuid['uuid']){
-
-
-                                                $group_hosts[key($group_hosts_info_parents)]['data'][] = array('uuid'=>$host_uuid,'host'=>$host_parent_uuid['host']);
-                                            }
-
-                                            if($uuid==''){
-
-                                            }
-
-                                        }
-
-                                        next($group_hosts_info_parents);
-                                  }
-
-
-                              $assigned_to = array('success'=>true,
-                                                    'data'=>array_merge($coll_subnet,$coll_sharednetwork,$coll_group)
-                              );                           
-
-                              $return = array('success' => true,
+                                $listAll = new ETFW_Dhcp((array) $response_decoded);
+                              
+                                $sharednetwork = $listAll->getSharednetworks();
+                                $subnets = $listAll->getSubnets();
+                                $subnet_shared = $listAll->getSubnetshared();
+                                $assigned_to = $listAll->getAssignedTo();
+                                $group_hosts = $listAll->getGrouphosts();
+                                $subnet_shared = $listAll->getSubnetshared();
+                                $coll_shared = $listAll->getCollSharednetwork();
+                                $shared_networks_cmb = array('success' => true,'total' =>   count($coll_shared),
+                                                                        'data'  => $coll_shared);
+                                
+                                $return = array('success' => true,
                                                 'data'=>array('shared_networks'=>$shared_networks_cmb,
-                                                                'subnet'=>$subnet,
+                                                                'subnet'=>$subnets,
                                                                 'subnet_shared'=>$subnet_shared,
                                                                 'sharednetwork'=>$sharednetwork,
                                                                 'assigned_to'=>$assigned_to,
@@ -1132,729 +975,85 @@ class etfwActions extends sfActions
 
                                 break;
 
-
                 case 'list_pool':
-                                $elements = array();
-                                $index = 1;
+
                                 $response_decoded = $response_decoded['list'];
-                                foreach($response_decoded as $index=>$data){
-                                    $data_dec = (array) $data;
-                                    $data_pass = array();
-                                    $data_parent = (array) $data_dec['parent'];
-                                    //if($data_parent['type']=='shared-network'){
-                                    $data_pass['uuid'] = $data_dec['uuid'];
-                                    $data_pass['parent-uuid'] = $data_parent['uuid'];
-                                    $data_pass['parent-type'] = $data_parent['type'];
-                                    $data_pass['parent-args'] = str_replace(' netmask ','/',$data_parent['args']);
-                                    switch($data_pass['parent-type']){
-                                        case 'subnet': $data_pass['parent'] = $data_parent['address'];
-                                                        break;
-                                        case 'shared-network' :
-                                                         $data_pass['parent'] = $data_parent['name'];
-                                                        break;
-                                                        default:break;
-                                    }
-
-                                    $data_pass['name'] = 'Pool '.$index;
-                                    $range_array = is_array($data_dec['range']) ? $data_dec['range']: array($data_dec['range']);
-
-                                    foreach($range_array as $range){
-
-                                    $bootp='No';
-                                    if(strpos($range,'dynamic-bootp ')!==false){
-                                        $bootp='Yes';
-                                        $range = str_replace('dynamic-bootp ','',$range);
-                                    }
-
-
-                                        $data_pass['range_display'][] = array('address'=>$range,'bootp'=>$bootp);
-                                    }
-
-
-
-                                    $allow_data = (array) $data_dec['allow'];
-                                    $deny_data = (array) $data_dec['deny'];
-
-
-
-                                     $data_pass['params'] = array(
-                                                             'range' => $range_array,
-                                                             'failover' => $data_dec['failover'],
-                                                             'allow' => implode("\r\n",$allow_data),
-                                                             'deny' => implode("\r\n",$deny_data),
-
-                                                              /*
-                                                               *
-                                                               *
-                                                               * default params
-                                                               */
-                                                             'filename'=>$data_dec['filename'],
-                                                             'next-server' => $data_dec['next-server'],
-                                                             'dynamic-bootp-lease-length' => $data_dec['dynamic-bootp-lease-length'],
-                                                             'ddns-rev-domainname' => $data_dec['ddns-rev-domainname'],
-                                                             'default-lease-time' => $data_dec['default-lease-time'],
-                                                             'max-lease-time' => $data_dec['max-lease-time'],
-                                                             'server-name' => $data_dec['server-name'],
-                                                             'dynamic-bootp-lease-cutoff' => $data_dec['dynamic-bootp-lease-cutoff'],
-                                                             'ddns-domainname' => $data_dec['ddns-domainname'],
-                                                             'ddns-hostname' => $data_dec['ddns-hostname'],
-                                                             'ddns-updates' => $data_dec['ddns-updates']
-                                                             // end
-                                    );
-
-
-                                    $deny = $data_dec['deny'];
-                                    if(!is_array($deny))
-                                        $data_pass['params'][$deny] = 'deny';
-                                    else
-                                        foreach($deny as $data_deny)
-                                            $data_pass['params'][$data_deny] = 'deny';
-
-                                    $allow = $data_dec['allow'];
-                                    if(!is_array($allow))
-                                        $data_pass['params'][$allow] = 'allow';
-                                    else
-                                        foreach($allow as $data_allow)
-                                            $data_pass['params'][$data_allow] = 'allow';
-
-
-                                    $ignore = $data_dec['ignore'];
-                                    if(!is_array($ignore))
-                                        $data_pass['params'][$ignore] = 'ignore';
-                                    else
-                                        foreach($ignore as $data_ignore)
-                                            $data_pass['params'][$data_ignore] = 'ignore';
-
-
-
-                                    $elements[] = $data_pass;
-                                    $index++;
-                                }
-
-                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                $listPool = new ETFW_Dhcp($response_decoded,'list_pool');
+                                $elements = $listPool->getAllData();
+                                $fields = $listPool->getGridListPoolFields();
+                                $return = array('success' => true,'total' =>   count($elements),
+                                    'metaData'=>array("totalProperty"=>"total","root"=>"data","fields"=>$fields),"data"=>$elements);
                                 break;
                 case 'list_group':
-                                $elements = array();
-                                $groups_response = $response_decoded['groups'];
-
-                               //subnets info
-                               $subnets_response = $response_decoded['subnets'];
-                               $list_subnets = array();
-                               foreach($subnets_response as $data_subnet){
-                                   $subnet_dec = (array) $data_subnet;
-                                   $data_parent = (array) $subnet_dec['parent'];
-                                   $data_parent['type'] = isset($data_parent['type']) ? $data_parent['type'] : '' ;
-                                   switch($data_parent['type']){
-                                            case 'shared-network':
-                                                                $list_subnets[$subnet_dec['uuid']] = $subnet_dec['address'].' in '.$data_parent['name'];
-                                                                break;
-                                            case '':
-                                                                $list_subnets[$subnet_dec['uuid']] = $subnet_dec['address'];
-                                                                break;
-
-                                           default:break;
-
-                                   }
-                               }
-
-
-                                foreach($groups_response as $data_group){
-                                        $data_pass = array();
-                                        $data_dec = (array) $data_group;
-                                        $group_parent = (!empty($data_dec['parent'])) ? (array) $data_dec['parent'] : array('uuid'=>'','type'=>'');
-
-                                        $hosts_data = (array) $data_dec['hosts'];
-                                        $hosts_count = count($hosts_data);
-
-                                        $data_pass['group'] = $hosts_count.' members';
-
-                                        //hosts
-                                         $coll_hosts = array();
-                                         foreach($hosts_data as $host){
-                                             //get data with type==subnet
-                                             $host_dec = (array) $host;
-                                             $parent_data = (array) $host_dec['parent'];
-                                             if($parent_data['type']=='group') $coll_hosts[] = $host_dec['uuid'];
-                                         }
-                                         
-                                        // get assigned element
-                                        $assigned_data = $group_parent['uuid'];
-                                        $assigned = $parent = '';
-                                        switch($group_parent['type']){
-                                            case 'shared-network':
-                                                        $parent = $assigned = $group_parent['name'];
-                                                    break;
-                                            case 'subnet':
-                                                        $assigned = $list_subnets[$group_parent['uuid']];
-                                                        $parent = str_replace(' netmask ','/',$group_parent['args']);
-                                                        break;
-
-                                            default:break;
-                                        }
-
-
-                                        $data_pass['uuid'] = $data_dec['uuid'];
-                                        $data_pass['assigned'] = $assigned;
-                                        $data_pass['parent'] = $parent;
-
-                                        $data_dec['filename'] = (isset($data_dec['filename'])) ? $data_dec['filename'] : '';
-                                        $data_dec['next-server'] = (isset($data_dec['next-server'])) ? $data_dec['next-server'] : '';
-                                        $data_dec['dynamic-bootp-lease-length'] = (isset($data_dec['dynamic-bootp-lease-length'])) ? $data_dec['dynamic-bootp-lease-length'] : '';
-                                        $data_dec['ddns-rev-domainname'] = (isset($data_dec['ddns-rev-domainname'])) ? $data_dec['ddns-rev-domainname'] : '';
-                                        $data_dec['default-lease-time'] = (isset($data_dec['default-lease-time'])) ? $data_dec['default-lease-time'] : '';
-                                        $data_dec['max-lease-time'] = (isset($data_dec['max-lease-time'])) ? $data_dec['max-lease-time'] : '';
-                                        $data_dec['server-name'] = (isset($data_dec['server-name'])) ? $data_dec['server-name'] : '';
-                                        $data_dec['dynamic-bootp-lease-cutoff'] = (isset($data_dec['dynamic-bootp-lease-cutoff'])) ? $data_dec['dynamic-bootp-lease-cutoff'] : '';
-                                        $data_dec['ddns-domainname'] = (isset($data_dec['ddns-domainname'])) ? $data_dec['ddns-domainname'] : '';
-                                        $data_dec['ddns-hostname'] = (isset($data_dec['ddns-hostname'])) ? $data_dec['ddns-hostname'] : '';
-                                        $data_dec['ddns-updates'] = (isset($data_dec['ddns-updates'])) ? $data_dec['ddns-updates'] : '';
-
-
-                                        $data_pass['assigned_type']= $group_parent['type'];
-
-                                        $data_options = array();
-                                        if(isset($data_dec['option']))
-                                            foreach($data_dec['option'] as $index_option=>$data_option)
-                                                $data_options['option_'.$index_option] = $data_option;
-                                        
-                                        $data_pass['option'] = $data_options;
-
-                                        $data_pass['params'] = array(
-                                                                     'lastcomment' => $data_dec['lastcomment'],                                                                                                  
-                                                                     'parent-type' => $group_parent['type'],
-                                                                     'assigned_data' => $assigned_data,
-                                                                     'hosts' => $coll_hosts,
-                                                                     'use-host-decl-names'=>$data_dec['use-host-decl-names'],
-
-                                                                      /*
-                                                                       *
-                                                                       *
-                                                                       * default params
-                                                                       */
-                                                                     'filename'=>$data_dec['filename'],
-                                                                     'next-server' => $data_dec['next-server'],
-                                                                     'dynamic-bootp-lease-length' => $data_dec['dynamic-bootp-lease-length'],
-                                                                     'ddns-rev-domainname' => $data_dec['ddns-rev-domainname'],
-                                                                     'default-lease-time' => $data_dec['default-lease-time'],
-                                                                     'max-lease-time' => $data_dec['max-lease-time'],
-                                                                     'server-name' => $data_dec['server-name'],
-                                                                     'dynamic-bootp-lease-cutoff' => $data_dec['dynamic-bootp-lease-cutoff'],
-                                                                     'ddns-domainname' => $data_dec['ddns-domainname'],
-                                                                     'ddns-hostname' => $data_dec['ddns-hostname'],
-                                                                     'ddns-updates' => $data_dec['ddns-updates']
-                                                                     // end
-                                        );
-
-                                        if(isset($data_dec['deny'])){
-                                            $deny = $data_dec['deny'];
-                                            if(!is_array($deny))
-                                                $data_pass['params'][$deny] = 'deny';
-                                            else
-                                                foreach($deny as $data_deny)
-                                                    $data_pass['params'][$data_deny] = 'deny';
-                                        }
-
-
-                                        if(isset($data_dec['allow'])){
-                                            $allow = $data_dec['allow'];
-                                            if(!is_array($allow))
-                                                $data_pass['params'][$allow] = 'allow';
-                                            else
-                                                foreach($allow as $data_allow)
-                                                    $data_pass['params'][$data_allow] = 'allow';
-                                        }
-
-
-                                        if(isset($data_dec['ignore'])){
-                                            $ignore = $data_dec['ignore'];
-                                            if(!is_array($ignore))
-                                                $data_pass['params'][$ignore] = 'ignore';
-                                            else
-                                                foreach($ignore as $data_ignore)
-                                                    $data_pass['params'][$data_ignore] = 'ignore';
-                                        }
-
-
-                                        $elements[] = $data_pass;
-                                    }
-
-                                    $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
-                                    break;
-                case 'list_host'  :
-                                    $elements = array();
-                                    $hosts_response = $response_decoded['hosts'];
-                                    $groups_response = $response_decoded['groups'];
-
-                                    $list_groups = $list_assigned_net = array();
-                                    foreach($groups_response as $data_group){
-                                        $group = (array) $data_group;
-                                        $group_parent = (array) $group['parent'];
-                                        $group_parent['type'] = isset($group_parent['type']) ? $group_parent['type'] : '';
-                                        $hosts_data = (array) $group['hosts'];
-                                        $hosts_count = count($hosts_data);
-
-                                        switch($group_parent['type']){
-                                            case 'subnet':
-                                                            $list_assigned_net[$group['uuid']] = " in subnet ".str_replace(' netmask ','/',$group_parent['args']);
-                                                            if(empty($group_parent['parent'])){
-                                                                $list_groups[$group['uuid']] = $hosts_count.' members in '.$group_parent['address'];
-                                                            }else{
-                                                                $aux_data = (array) $group_parent['parent'];
-                                                                $list_groups[$group['uuid']] = $hosts_count.' members in '.$group_parent['address'].' in '.$aux_data['name'];
-                                                            }
-                                                            break;
-                                            case 'shared-network':
-                                                            $list_assigned_net[$group['uuid']] = " in shared network ".$group_parent['name'];
-                                                            $list_groups[$group['uuid']] = $hosts_count.' members in '.$group_parent['name'];
-                                                            break;
-
-                                            case '':
-                                                            $list_groups[$group['uuid']] = $hosts_count.' members';
-                                                            break;
-                                            default:break;
-                                        }
-
-                                    }
-
-                                    //subnets info
-                                    $subnets_response = $response_decoded['subnets'];
-                                    $list_subnets = array();
-                                    foreach($subnets_response as $data_subnet){
-                                        $subnet_dec = (array) $data_subnet;
-                                        $data_parent = (array) $subnet_dec['parent'];
-                                        $data_parent['type'] = isset($data_parent['type']) ? $data_parent['type'] : '';
-                                        switch($data_parent['type']){
-                                                case 'shared-network':
-                                                                $list_subnets[$subnet_dec['uuid']] = $subnet_dec['address'].' in '.$data_parent['name'];
-                                                                break;
-                                                case '':
-                                                                $list_subnets[$subnet_dec['uuid']] = $subnet_dec['address'];
-                                                                break;
-
-                                               default:break;
-
-                                        }
-                                    }
-
-
-                                    foreach($hosts_response as $index=>$data){
-                                        $data_dec = (array) $data;
-                                        $data_pass = array();
-                                        $data_pass['host'] = $data_dec['host'];
-
-                                        $data_parent = (isset($data_dec['parent']) && !empty($data_dec['parent'])) ? (array) $data_dec['parent'] : array('type'=>'','uuid'=>'');
-
-                                        // get assigned element
-                                        $data_parent_type = $data_parent['type'];
-                                        $assigned_data = $data_parent['uuid'];
-                                        $assigned = $assigned_net = '';
-                                        switch($data_parent_type){
-                                            case 'shared-network':
-                                                        $assigned = $data_parent['name'];
-                                                    break;
-                                            case 'subnet':
-                                                        $assigned = $list_subnets[$data_parent['uuid']];
-                                                        $assigned_net = " in subnet ".str_replace(' netmask ','/',$data_parent['args']);
-                                                        break;
-                                            case 'group':
-                                                        $assigned = $list_groups[$data_parent['uuid']];
-                                                        $assigned_net = $list_assigned_net[$data_parent['uuid']];
-                                                        break;
-                                            default:break;
-                                        }
-
-                                        $data_pass['uuid'] = $data_dec['uuid'];
-                                        $data_pass['assigned'] = $assigned;
-                                        $data_pass['assigned_net'] = $assigned_net;
-
-                                        $data_dec['hardware'] = (isset($data_dec['hardware'])) ? $data_dec['hardware']: '';
-
-                                        $data_dec['filename'] = (isset($data_dec['filename'])) ? $data_dec['filename'] : '';
-                                        $data_dec['next-server'] = (isset($data_dec['next-server'])) ? $data_dec['next-server'] : '';
-                                        $data_dec['dynamic-bootp-lease-length'] = (isset($data_dec['dynamic-bootp-lease-length'])) ? $data_dec['dynamic-bootp-lease-length'] : '';
-                                        $data_dec['ddns-rev-domainname'] = (isset($data_dec['ddns-rev-domainname'])) ? $data_dec['ddns-rev-domainname'] : '';
-                                        $data_dec['default-lease-time'] = (isset($data_dec['default-lease-time'])) ? $data_dec['default-lease-time'] : '';
-                                        $data_dec['max-lease-time'] = (isset($data_dec['max-lease-time'])) ? $data_dec['max-lease-time'] : '';
-                                        $data_dec['server-name'] = (isset($data_dec['server-name'])) ? $data_dec['server-name'] : '';
-                                        $data_dec['dynamic-bootp-lease-cutoff'] = (isset($data_dec['dynamic-bootp-lease-cutoff'])) ? $data_dec['dynamic-bootp-lease-cutoff'] : '';
-                                        $data_dec['ddns-domainname'] = (isset($data_dec['ddns-domainname'])) ? $data_dec['ddns-domainname'] : '';
-                                        $data_dec['ddns-hostname'] = (isset($data_dec['ddns-hostname'])) ? $data_dec['ddns-hostname'] : '';
-                                        $data_dec['ddns-updates'] = (isset($data_dec['ddns-updates'])) ? $data_dec['ddns-updates'] : '';
-
-
-                                        $data_options = array();
-                                        if(isset($data_dec['option']))
-                                            foreach($data_dec['option'] as $index_option=>$data_option)
-                                                $data_options['option_'.$index_option] = $data_option;
-
-                                        $data_pass['option'] = $data_options;
-                                        
-                                        $data_pass['assigned_type']=$data_parent_type;
-                                        $data_pass['params'] = array(
-                                                                     'host' => $data_dec['host'],
-                                                                     'lastcomment' => $data_dec['lastcomment'],
-                                                                     'hardware' => $data_dec['hardware'],
-                                                                     'fixed-address' => $data_dec['fixed-address'],
-                                                                     'parent-type' => $data_parent_type,
-                                                                     'assigned_data' => $assigned_data,
-                                                                      /*
-                                                                       * default params
-                                                                       */
-                                                                     'filename'=>$data_dec['filename'],
-                                                                     'next-server' => $data_dec['next-server'],
-                                                                     'dynamic-bootp-lease-length' => $data_dec['dynamic-bootp-lease-length'],
-                                                                     'ddns-rev-domainname' => $data_dec['ddns-rev-domainname'],
-                                                                     'default-lease-time' => $data_dec['default-lease-time'],
-                                                                     'max-lease-time' => $data_dec['max-lease-time'],
-                                                                     'server-name' => $data_dec['server-name'],
-                                                                     'dynamic-bootp-lease-cutoff' => $data_dec['dynamic-bootp-lease-cutoff'],
-                                                                     'ddns-domainname' => $data_dec['ddns-domainname'],
-                                                                     'ddns-hostname' => $data_dec['ddns-hostname'],
-                                                                     'ddns-updates' => $data_dec['ddns-updates']
-                                                                     // end
-                                        );
-
-                                        if(isset($data_dec['deny'])){
-                                            $deny = $data_dec['deny'];
-                                            if(!is_array($deny))
-                                                $data_pass['params'][$deny] = 'deny';
-                                            else
-                                                foreach($deny as $data_deny)
-                                                    $data_pass['params'][$data_deny] = 'deny';
-                                        }
-                                        
-                                        
-                                        if(isset($data_dec['allow'])){
-                                            $allow = $data_dec['allow'];
-                                            if(!is_array($allow))
-                                                $data_pass['params'][$allow] = 'allow';
-                                            else
-                                                foreach($allow as $data_allow)
-                                                    $data_pass['params'][$data_allow] = 'allow';
-                                        }
-
-                                        
-                                        if(isset($data_dec['ignore'])){
-                                            $ignore = $data_dec['ignore'];
-                                            if(!is_array($ignore))
-                                                $data_pass['params'][$ignore] = 'ignore';
-                                            else
-                                                foreach($ignore as $data_ignore)
-                                                    $data_pass['params'][$data_ignore] = 'ignore';
-                                        }
-                                        
-
-                                        $elements[] = $data_pass;
-                                    }
-
-                                    $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
-                                    break;
-                case 'list_subnet': // return data for EXTJS form presentation
-                                    $elements = array();
-                                    $response_decoded = $response_decoded['list'];
-
-                                    foreach($response_decoded as $index=>$data){
-                                        $data_dec = (array) $data;
-                                        $data_pass = array();
-                                        $data_pass['uuid'] = $data_dec['uuid'];
-                                        $data_pass['args'] = str_replace(' netmask ','/',$data_dec['args']);
-                                        $data_pass['address'] = $data_dec['address'];
-
-                                        $data_pass['netmask'] = $data_dec['netmask'];
-                                        if($data_dec['range'])
-                                            $range = is_array($data_dec['range']) ? $data_dec['range']: array($data_dec['range']);
-                                        else $range = array();
-
-                                        $data_parent = (array) $data_dec['parent'];
-                                        $data_pass['parent'] = $data_pass['parent-type'] = '';
-                                        
-                                        if($data_dec['parent']){
-                                            // subnet has parent
-                                            if($data_parent['type']=='shared-network')
-                                                $data_pass['parent'] = $data_parent['name'];
-                                        
-                                            $data_pass['parent-type'] = $data_parent['type'];
-                                        
-                                        }
-
-                                        $parent_uuid = (isset($data_parent['uuid'])) ? $data_parent['uuid'] : '';
-                                        $parent_type = (isset($data_parent['type'])) ? $data_parent['type'] : '';
-
-                                        $data_dec['filename'] = (isset($data_dec['filename'])) ? $data_dec['filename'] : '';
-                                        $data_dec['next-server'] = (isset($data_dec['next-server'])) ? $data_dec['next-server'] : '';
-                                        $data_dec['dynamic-bootp-lease-length'] = (isset($data_dec['dynamic-bootp-lease-length'])) ? $data_dec['dynamic-bootp-lease-length'] : '';
-                                        $data_dec['ddns-rev-domainname'] = (isset($data_dec['ddns-rev-domainname'])) ? $data_dec['ddns-rev-domainname'] : '';
-                                        $data_dec['default-lease-time'] = (isset($data_dec['default-lease-time'])) ? $data_dec['default-lease-time'] : '';
-                                        $data_dec['max-lease-time'] = (isset($data_dec['max-lease-time'])) ? $data_dec['max-lease-time'] : '';
-                                        $data_dec['server-name'] = (isset($data_dec['server-name'])) ? $data_dec['server-name'] : '';
-                                        $data_dec['dynamic-bootp-lease-cutoff'] = (isset($data_dec['dynamic-bootp-lease-cutoff'])) ? $data_dec['dynamic-bootp-lease-cutoff'] : '';
-                                        $data_dec['ddns-domainname'] = (isset($data_dec['ddns-domainname'])) ? $data_dec['ddns-domainname'] : '';
-                                        $data_dec['ddns-hostname'] = (isset($data_dec['ddns-hostname'])) ? $data_dec['ddns-hostname'] : '';
-                                        $data_dec['ddns-updates'] = (isset($data_dec['ddns-updates'])) ? $data_dec['ddns-updates'] : '';
-                                                                     
-                                         //hosts
-                                         $coll_hosts = array();
-                                         $hosts = $data_dec['hosts'];
-                                         foreach($hosts as $host){
-                                             //get data with type==subnet
-                                             $host_dec = (array) $host;
-                                             $parent_data = (array) $host_dec['parent'];
-                                             if($parent_data['type']=='subnet') $coll_hosts[] = $host_dec['uuid'];
-                                         }
-
-
-
-                                         //groups
-                                         $coll_groups = array();
-                                         $groups = $data_dec['groups'];
-                                         foreach($groups as $group){
-                                             //get data with type==subnet
-                                             $group_dec = (array) $group;
-                                             $parent_data = (array) $group_dec['parent'];
-                                             if($parent_data['type']=='subnet') $coll_groups[] = $group_dec['uuid'];
-                                         }
-
-
-                                         $data_options = array();
-                                         if(isset($data_dec['option']))
-                                            foreach($data_dec['option'] as $index_option=>$data_option)
-                                                $data_options['option_'.$index_option] = $data_option;
-
-                                         $data_pass['option'] = $data_options;
-
-
-                                         $data_pass['params'] = array(
-                                                                     'address' => $data_dec['address'],
-                                                                     'netmask' => $data_dec['netmask'],
-                                                                     'lastcomment' => $data_dec['lastcomment'],
-                                                                     'parent-uuid' => $parent_uuid,
-                                                                     'parent-type' => $parent_type,
-                                                                     'hosts' => $coll_hosts,
-                                                                     'groups' => $coll_groups,
-                                                                     'authoritative' => isset($data_dec['authoritative']) ? 1:0,
-                                                                     'range' => $range,
-                                                                      /*
-                                                                       *
-                                                                       *
-                                                                       * default params
-                                                                       */
-                                                                     'filename'=>$data_dec['filename'],
-                                                                     'next-server' => $data_dec['next-server'],
-                                                                     'dynamic-bootp-lease-length' => $data_dec['dynamic-bootp-lease-length'],
-                                                                     'ddns-rev-domainname' => $data_dec['ddns-rev-domainname'],
-                                                                     'default-lease-time' => $data_dec['default-lease-time'],
-                                                                     'max-lease-time' => $data_dec['max-lease-time'],
-                                                                     'server-name' => $data_dec['server-name'],
-                                                                     'dynamic-bootp-lease-cutoff' => $data_dec['dynamic-bootp-lease-cutoff'],
-                                                                     'ddns-domainname' => $data_dec['ddns-domainname'],
-                                                                     'ddns-hostname' => $data_dec['ddns-hostname'],
-                                                                     'ddns-updates' => $data_dec['ddns-updates']
-                                                                     // end
-                                       );
-
-                                       if(isset($data_dec['deny'])){
-                                            $deny = $data_dec['deny'];
-                                            if(!is_array($deny))
-                                                $data_pass['params'][$deny] = 'deny';
-                                            else
-                                                foreach($deny as $data_deny){
-                                                    $data_pass['params'][$data_deny] = 'deny';
-                                                }
-                                       }
-
-                                       if(isset($data_dec['allow'])){
-                                            $allow = $data_dec['allow'];
-                                            if(!is_array($allow))
-                                                $data_pass['params'][$allow] = 'allow';
-                                            else
-                                                foreach($allow as $data_allow)
-                                                    $data_pass['params'][$data_allow] = 'allow';
-                                       }
-
-
-                                       if(isset($data_dec['ignore'])){
-                                            $ignore = $data_dec['ignore'];
-                                            if(!is_array($ignore))
-                                                $data_pass['params'][$ignore] = 'ignore';
-                                            else
-                                                foreach($ignore as $data_ignore)
-                                                    $data_pass['params'][$data_ignore] = 'ignore';
-                                       }
-                                        
-                                       $elements[] = $data_pass;
-
-                                    }
-                                    $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
-                                    break;
-                   case 'list_sharednetwork': // return data for EXTJS form presentation
-                                    $elements = array();
-                                    $response_decoded = $response_decoded['list'];
-
-
-                                    foreach($response_decoded as $index=>$data){
-                                        $data_dec = (array) $data;
-                                        $data_pass = array();
-                                        $data_pass['uuid'] = $data_dec['uuid'];
-                                        $data_pass['name'] = $data_dec['name'];
-                                        $data_pass['lastcomment'] = $data_dec['lastcomment'];
-                                        $authoritative = isset($data_dec['authoritative']) ? 1:0;
-                                        if($authoritative==1)
-                                            $data_pass['authoritative_txt'] = 'Yes';
-                                        else $data_pass['authoritative_txt'] = 'No';
-
-
-                                         //hosts
-                                         $coll_hosts = array();
-                                         $hosts = $data_dec['hosts'];
-                                         foreach($hosts as $host){
-                                             //get data with type==subnet
-                                             $host_dec = (array) $host;
-                                             $parent_data = (array) $host_dec['parent'];
-                                             if($parent_data['type']=='shared-network') $coll_hosts[] = $host_dec['uuid'];
-                                         }
-
-
-                                         //groups
-                                         $coll_groups = array();
-                                         $groups = $data_dec['groups'];
-                                         foreach($groups as $group){
-                                             //get data with type==subnet
-                                             $group_dec = (array) $group;
-                                             $parent_data = (array) $group_dec['parent'];
-                                             if($parent_data['type']=='shared-network') $coll_groups[] = $group_dec['uuid'];
-                                         }
-
-
-
-                                         //subnets
-                                         $coll_subnets = array();
-                                         $subnets = $data_dec['subnets'];
-                                         foreach($subnets as $subnet){
-                                             //get data with type==subnet
-                                             $subnet_dec = (array) $subnet;
-                                             $parent_data = (array) $subnet_dec['parent'];
-                                             if($parent_data['type']=='shared-network') $coll_subnets[] = $subnet_dec['uuid'];
-                                         }
-
-
-                                         $data_options = array();
-                                         if(isset($data_dec['option']))
-                                            foreach($data_dec['option'] as $index_option=>$data_option)
-                                                $data_options['option_'.$index_option] = $data_option;
-
-                                         $data_pass['option'] = $data_options;
-
-                                         $data_dec['filename'] = (isset($data_dec['filename'])) ? $data_dec['filename'] : '';
-                                         $data_dec['next-server'] = (isset($data_dec['next-server'])) ? $data_dec['next-server'] : '';
-                                         $data_dec['dynamic-bootp-lease-length'] = (isset($data_dec['dynamic-bootp-lease-length'])) ? $data_dec['dynamic-bootp-lease-length'] : '';
-                                         $data_dec['ddns-rev-domainname'] = (isset($data_dec['ddns-rev-domainname'])) ? $data_dec['ddns-rev-domainname'] : '';
-                                         $data_dec['default-lease-time'] = (isset($data_dec['default-lease-time'])) ? $data_dec['default-lease-time'] : '';
-                                         $data_dec['max-lease-time'] = (isset($data_dec['max-lease-time'])) ? $data_dec['max-lease-time'] : '';
-                                         $data_dec['server-name'] = (isset($data_dec['server-name'])) ? $data_dec['server-name'] : '';
-                                         $data_dec['dynamic-bootp-lease-cutoff'] = (isset($data_dec['dynamic-bootp-lease-cutoff'])) ? $data_dec['dynamic-bootp-lease-cutoff'] : '';
-                                         $data_dec['ddns-domainname'] = (isset($data_dec['ddns-domainname'])) ? $data_dec['ddns-domainname'] : '';
-                                         $data_dec['ddns-hostname'] = (isset($data_dec['ddns-hostname'])) ? $data_dec['ddns-hostname'] : '';
-                                         $data_dec['ddns-updates'] = (isset($data_dec['ddns-updates'])) ? $data_dec['ddns-updates'] : '';
-
-
-                                         $data_pass['params'] = array(
-                                                                     'name' => $data_dec['name'],
-                                                                     'authoritative' => $authoritative,
-                                                                     'lastcomment' => $data_dec['lastcomment'],
-                                                                     'hosts' => $coll_hosts,
-                                                                     'groups' => $coll_groups,
-                                                                     'subnets' => $coll_subnets,
-                                                                      /*
-                                                                       *
-                                                                       *
-                                                                       * default params
-                                                                       */
-                                                                     'filename'=>$data_dec['filename'],
-                                                                     'next-server' => $data_dec['next-server'],
-                                                                     'dynamic-bootp-lease-length' => $data_dec['dynamic-bootp-lease-length'],
-                                                                     'ddns-rev-domainname' => $data_dec['ddns-rev-domainname'],
-                                                                     'default-lease-time' => $data_dec['default-lease-time'],
-                                                                     'max-lease-time' => $data_dec['max-lease-time'],
-                                                                     'server-name' => $data_dec['server-name'],
-                                                                     'dynamic-bootp-lease-cutoff' => $data_dec['dynamic-bootp-lease-cutoff'],
-                                                                     'ddns-domainname' => $data_dec['ddns-domainname'],
-                                                                     'ddns-hostname' => $data_dec['ddns-hostname'],
-                                                                     'ddns-updates' => $data_dec['ddns-updates']
-                                                                     // end
-                                        );
-                                       
-                                       if(isset($data_dec['deny'])){
-                                            $deny = $data_dec['deny'];
-                                            if(!is_array($deny))
-                                                $data_pass['params'][$deny] = 'deny';
-                                            else
-                                                foreach($deny as $data_deny){
-                                                    $data_pass['params'][$data_deny] = 'deny';
-                                                }
-                                       }
-
-                                       if(isset($data_dec['allow'])){
-                                            $allow = $data_dec['allow'];
-                                            if(!is_array($allow))
-                                                $data_pass['params'][$allow] = 'allow';
-                                            else
-                                                foreach($allow as $data_allow)
-                                                    $data_pass['params'][$data_allow] = 'allow';
-                                       }
-
-
-                                       if(isset($data_dec['ignore'])){
-                                            $ignore = $data_dec['ignore'];
-                                            if(!is_array($ignore))
-                                                $data_pass['params'][$ignore] = 'ignore';
-                                            else
-                                                foreach($ignore as $data_ignore)
-                                                    $data_pass['params'][$data_ignore] = 'ignore';
-                                       }
-
-
-                                       $elements[] = $data_pass;
-
-                                    }
-                                    $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
-                                    break;
-                        case 'set_pool' :
-                        case 'set_zone' :
-                        case 'set_clientoptions' :
-                        case 'set_interface' :
-                        case 'set_subnet' :
-                        case 'set_sharednetwork' :
-                        case 'set_group' :
-                        case 'set_host' :
-                        case 'set_options' :
-                        case 'add_host' :
-                        case 'add_subnet' :
-                        case 'add_sharednetwork' :
-                        case 'add_group' :
-                        case 'add_zone' :
-                        case 'add_pool' :
-                        case 'del_pool' :
-                        case 'del_leases' :
-                        case 'del_declarations' :
-                        case 'save_configfile_content':
-                                 $return = array('success' => true);
-                                 break;
-                        default : $return = array('success' => false,'error'=>'No action \''.$method.'\' defined yet',
-                                            'info'=>'No action \''.$method.'\' implemented yet');
+                                $listGroup = new ETFW_Dhcp($response_decoded,'list_group');
+                                $elements = $listGroup->getAllData();
+                                $fields = $listGroup->getGridListGroupFields();
+                                $return = array('success' => true,'total' =>   count($elements),
+                                    'metaData'=>array("totalProperty"=>"total","root"=>"data","fields"=>$fields),"data"=>$elements);
+                                break;
+                
+                case 'list_host':                                    
+                                $listHost = new ETFW_Dhcp($response_decoded,'list_host');
+                                $elements = $listHost->getAllData();
+                                $fields = $listHost->getGridListHostFields();
+
+                                $return = array('success' => true,'total' =>   count($elements),
+                                    'metaData'=>array("totalProperty"=>"total","root"=>"data","fields"=>$fields),"data"=>$elements);
+                                break;
+                case 'list_subnet':
+                                $response_decoded = $response_decoded['list'];
+                                $listSubnet = new ETFW_Dhcp((array) $response_decoded,'list_subnet');
+                                $elements = $listSubnet->getAllData();
+                                $fields = $listSubnet->getGridListSubnetFields();
+                         
+                                $return = array('success' => true,'total' =>   count($elements),
+                                    'metaData'=>array("totalProperty"=>"total","root"=>"data","fields"=>$fields),"data"=>$elements);
+                                break;
+                case 'list_sharednetwork':
+                                $response_decoded = $response_decoded['list'];
+                                $listShared = new ETFW_Dhcp($response_decoded,'list_sharednetwork');
+                                $elements = $listShared->getAllData();
+                                $fields = $listShared->getGridListSharednetworkFields();
+                                $return = array('success' => true,'total' =>   count($elements),
+                                    'metaData'=>array("totalProperty"=>"total","root"=>"data","fields"=>$fields),"data"=>$elements);
+                                break;
+                case 'set_pool' :
+                case 'set_zone' :
+                case 'set_clientoptions' :
+                case 'set_interface' :
+                case 'set_subnet' :
+                case 'set_sharednetwork' :
+                case 'set_group' :
+                case 'set_host' :
+                case 'set_options' :
+                case 'add_host' :
+                case 'add_subnet' :
+                case 'add_sharednetwork' :
+                case 'add_group' :
+                case 'add_zone' :
+                case 'add_pool' :
+                case 'del_pool' :
+                case 'del_leases' :
+                case 'del_declarations' :
+                case 'save_configfile_content':
+                                $return = array('success' => true);
+                                break;
+                default :       $return = array('success' => false,'error'=>'No action \''.$action.'\' defined yet',
+                                    'info'=>'No action \''.$action.'\' implemented yet');
 
             }
             return $return;
         }
-        else{
-            $error_details = $response['info'];
-            $error_details = nl2br($error_details);
-            $error = $response['error'];
-            $result = array('success'=>false,'error'=>$error,'info'=>$error_details,'faultcode'=>$response['faultcode']);
-            return $result;
+        else{                        
+            return $response;
         }
 
 
     }
+
+
+
+    
 
 
     /*
@@ -1865,10 +1064,17 @@ class etfwActions extends sfActions
 
         // prepare soap info....
         $initial_params = array(
-                        'dispatcher'=>'squid'
+                        'dispatcher'=>'squid','force'=>1
         );
 
         $call_params = array_merge($initial_params,$params);
+        $action = $method;
+        if($mode) $action = $mode;
+
+        $validate_fields = $this->validateFields('Squid',$action,$params);
+        
+        if(!$validate_fields['success'])
+            return $validate_fields;        
 
         // send soap request
         $response = $etva_server->soapSend($method,$call_params);
@@ -1877,39 +1083,203 @@ class etfwActions extends sfActions
         // if soap response is ok
         if($response['success']){
             $response_decoded = (array) $response['response'];
-
-            if($mode) $method = $mode;
-            switch($method){
-                case 'get_proxy_ports':
-                                $proxy_ports = (array) $response_decoded['http_port'];
+                        
+            switch($action){
+               case 'get_http_port':
+                                $squid = new ETFW_Squid($response_decoded);                                                                
+                                $elements = $squid->getHttpPort();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_https_port':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getHttpsPort();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_http_access':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getHttpAccessData();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_uniq_acl':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = (array) $response_decoded['uniq_acl'];
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_icp_access':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getIcpAccessData();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_always_direct':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getAlwaysDirectData();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_never_direct':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getNeverDirectData();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_http_reply_access':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getHttpReplyAccessData();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_cache_peer':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getCachePeerData();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_external_acl_type':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getExternalAclData();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+              case 'get_external_acl_combo':                                
+                                $external_data = (array) $response_decoded['external_acl_type'];
                                 $elements = array();
-                                foreach($proxy_ports as $index=>$data){
-                                    $port = $data;
-                                    $ip = $options = '';
-                                    if(!(strpos($data,':')===false)){
-                                        $pieces = explode(':',$data);
-                                        $ip = $pieces[0];
-                                        $port_options = $pieces[1];
-                                        if(!(strpos($port_options,' ')===false)){
-                                            $port_options_pieces = explode(' ',$port_options);
-                                            $port = $port_options_pieces[0];
-                                            $options = $port_options_pieces[1];
-                                        }
-
-                                        
-                                    }
-
-                                    
-                                    
-                                    $elements[] = array('port'=>$port,'ip_address'=>$ip,'options'=>$options);
-
+                                foreach($external_data as $data){
+                                    $data_dec = (array) $data;
+                                    $pass_data = array('name'=>$data_dec['name'],'value'=>$data_dec['index']);
+                                    $elements[] = $pass_data;
                                 }
                                 $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
                                 break;
-                default        :
+                     case 'get_acl':
+                                $squid = new ETFW_Squid($response_decoded);
+                                $elements = $squid->getAclData();
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+             case 'get_network':
+                                $elements = $response_decoded;
+                                $squid = new ETFW_Squid($response_decoded);
+
+                                // setting http_port data...
+                                $http_port = $squid->getHttpPort();
+                                $elements['http_port'] = array('success'=>true,'total'=>count($http_port),'data'=>$http_port);
+
+                                // setting https_port data...
+                                $https_port = $squid->getHttpsPort();
+                                $elements['https_port'] = array('success'=>true,'total'=>count($https_port),'data'=>$https_port);
+                                
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+             case 'get_othercaches_options':
+                                $elements = $response_decoded;                                
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+
+    
+                                // called in etfw/squid othercaches
+//                                $other_params = isset($response_decoded['auth_param']) ? $response_decoded['auth_param'] : array();
+//                                if(!is_array($auth_params) && !empty($auth_params)) $auth_params = array($auth_params);
+//
+//                                $ip_ttl = isset($response_decoded['authenticate_ip_ttl']) ? $response_decoded['authenticate_ip_ttl'] : '';
+//
+//                                $elements = array();
+//                                $time_pieces = explode(' ',$ip_ttl,2);
+//                                if(count($time_pieces)>1){
+//                                    $elements['authenticate_ip_ttl'] = $time_pieces[0];
+//                                    $elements['authenticate_ip_ttl-time'] = $time_pieces[1];
+//                                }
+//
+//
+//                                foreach($auth_params as $data){
+//
+//                                    $pieces = explode(' ',$data,3);
+//                                    $field = $pieces[0];
+//                                    $param = $pieces[1];
+//                                    $value = $pieces[2];
+//                                    $pass_field = $field.'_'.$param;
+//                                    switch($param){
+//                                        case 'credentialsttl':
+//                                        case 'max_challenge_lifetime':
+//                                                                $time_pieces = explode(' ',$value,2);
+//                                                                $elements[$pass_field.'-time'] = $time_pieces[1];
+//                                                                $elements[$pass_field] = $time_pieces[0];
+//                                                                break;
+//
+//                                                      default:
+//                                                                $elements[$pass_field] = $value;
+//                                                                break;
+//                                    }
+//
+//                                }                               
+                                break;
+                case 'get_auth_program':
+                                // called in etfw/squid authentication
+                                $auth_params = isset($response_decoded['auth_param']) ? $response_decoded['auth_param'] : array();
+                                if(!is_array($auth_params) && !empty($auth_params)) $auth_params = array($auth_params);
+
+                                $ip_ttl = isset($response_decoded['authenticate_ip_ttl']) ? $response_decoded['authenticate_ip_ttl'] : '';
+                                
+                                $elements = array();
+                                $time_pieces = explode(' ',$ip_ttl,2);
+                                if(count($time_pieces)>1){
+                                    $elements['authenticate_ip_ttl'] = $time_pieces[0];
+                                    $elements['authenticate_ip_ttl-time'] = $time_pieces[1];
+                                }
+                                
+                                
+                                foreach($auth_params as $data){
+
+                                    $pieces = explode(' ',$data,3);
+                                    $field = $pieces[0];
+                                    $param = $pieces[1];
+                                    $value = $pieces[2];
+                                    $pass_field = $field.'_'.$param;
+                                    switch($param){
+                                        case 'credentialsttl':
+                                        case 'max_challenge_lifetime':
+                                                                $time_pieces = explode(' ',$value,2);
+                                                                $elements[$pass_field.'-time'] = $time_pieces[1];
+                                                                $elements[$pass_field] = $time_pieces[0];
+                                                                break;
+
+                                                      default:
+                                                                $elements[$pass_field] = $value;
+                                                                break;
+                                    }                                    
+                                    
+                                }      
+                                $return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;
+                    case 'set_cache_options':
+                    case 'set_config':
+                    case 'add_external_acl_type':
+                    case 'set_external_acl_type':
+                    case 'del_external_acl_type':
+                    case 'add_icp_access':
+                    case 'set_icp_access':
+                    case 'del_icp_access':
+                    case 'move_icp_access':
+                    case 'add_http_access':
+                    case 'set_http_access':
+                    case 'del_http_access':
+                    case 'move_http_access':
+                    case 'add_http_reply_access':
+                    case 'set_http_reply_access':
+                    case 'del_http_reply_access':
+                    case 'move_http_reply_access':
+                    case 'add_always_direct':
+                    case 'set_always_direct':
+                    case 'del_always_direct':
+                    case 'move_always_direct':
+                    case 'add_never_direct':
+                    case 'set_never_direct':
+                    case 'del_never_direct':
+                    case 'move_never_direct':
+                    case 'add_cache_peer':
+                    case 'set_cache_peer':
+                    case 'del_cache_peer':
+                    case 'add_acl':
+                    case 'del_acl':
+                    case 'set_acl':
+                                $return = array('success' => true);
+                                break;
+                      default        :
                                 $return = array('success' => false,
-                                                'error'=>'No action \''.$method.'\' defined yet',
-                                                'info'=>'No action \''.$method.'\' implemented yet');
+                                                'error'=>'No action \''.$action.'\' defined yet',
+                                                'info'=>'No action \''.$action.'\' implemented yet');
         
             }
             
@@ -1926,12 +1296,209 @@ class etfwActions extends sfActions
         }
     }
 
+
+
+    /*
+     * ETFW snmp dispatcher...
+     */
+    public function ETFW_snmp(EtvaServer $etva_server, $method, $params,$mode)
+    {
+
+        // prepare soap info....
+        $initial_params = array(
+                        'dispatcher'=>'snmp','force'=>1
+        );
+
+        $call_params = array_merge($initial_params,$params);
+        $action = $method;
+        if($mode) $action = $mode;
+
+        $validate_fields = $this->validateFields('Snmp',$action,$params);        
+
+        if(!$validate_fields['success'])
+            return $validate_fields;
+
+
+        switch($action){
+            case 'set_config':
+                                $snmp = new ETFW_Snmp();
+                                $snmp->createConfig($params);
+                                $va_data = $snmp->_VA();
+
+                                $call_params = array_merge($call_params,$va_data);
+                                
+                                                            
+
+                                break;
+            default:
+                                break;
+        }
+
+        // send soap request
+        $response = $etva_server->soapSend($method,$call_params);
+
+
+        // if soap response is ok
+        if($response['success']){
+            $response_decoded = (array) $response['response'];            
+            switch($action){
+               case 'get_config':
+               case 'set_config':
+                                
+                                $snmp = new ETFW_Snmp($response_decoded);
+                                
+                                $security = $snmp->getSecurityInfo();
+                                $directives = $snmp->getDirectivesInfo();
+                                
+                                $merged_dir = array();
+                                foreach($directives as $dir)
+                                    $merged_dir = array_merge($merged_dir,$dir);
+                                                                                                
+                                $security_data = array('security' => array('total' =>   count($security),'data'  => $security));
+
+                                $all_data = array_merge($merged_dir,$security_data);
+                                
+                                $return = array('success' => true,'total' =>   count($all_data),'data'  => $all_data);
+                                
+                                //$elements =
+                      //          print_r($squid->getData());
+                                
+                             //   $elements = $squid->getHttpPort();
+                                //$return = array('success' => true,'total' =>   count($elements),'data'  => $elements);
+                                break;                
+            }
+
+            return $return;
+
+        }else{
+
+            $error_details = $response['info'];
+            $error_details = nl2br($error_details);
+            $error = $response['error'];
+
+            $result = array('success'=>false,'error'=>$error,'info'=>$error_details,'faultcode'=>$response['faultcode']);
+            return $result;
+        }
+
+    }
+
+
+    /*
+     * ETFW network wizard...
+     */
+    public function ETFW_wizard(EtvaServer $etva_server, $method, $params,$mode)
+    {
+
+        // prepare soap info....
+        $initial_params = array(
+                        'dispatcher'=>'wizard'
+        );
+
+        $call_params = array_merge($initial_params,$params);
+
+        // send soap request
+        $response = $etva_server->soapSend($method,$call_params);        
+
+        // if soap response is ok
+        if($response['success']){
+            $response_decoded = (array) $response['response'];
+
+            if($mode) $method = $mode;
+
+            switch($method){
+                    case 'submit':
+                                $return = $response;
+                                break;
+                    default:
+                                $return = array('success' => false,
+                                                'error'=>'No action \''.$method.'\' defined yet',
+                                                'info'=>'No action \''.$method.'\' implemented yet');
+            }
+            return $return;
+
+        }else{
+
+            $error_details = $response['info'];
+            $error_details = nl2br($error_details);
+            $error = $response['error'];
+
+            $result = array('success'=>false,'error'=>$error,'info'=>$error_details,'faultcode'=>$response['faultcode']);
+            return $result;
+        }
+    }
+
+
+
+    public function validateFields($tmpl,$action,$params){
+
+        /*
+         * check fields validation before send set_ or add_....
+         */
+        $action_set = preg_match("/^set_/",$action);
+        $action_add = preg_match("/^add_/",$action);
+
+        if($this->getRequest()->isMethod('post') && ($action_set || $action_add)){
+
+            if($action_add) $toCamel = preg_replace("/^add_/","",$action);
+            if($action_set) $toCamel = preg_replace("/^set_/","",$action);
+
+            $formCamel = $tmpl.sfInflector::camelize($toCamel).'Form';
+
+            if(class_exists($formCamel)){
+
+                $this->form = new $formCamel();
+                $this->form->bind($params);
+                $errors = array();
+                if (!$this->form->isValid())
+                {
+                    foreach ($this->form->getFormattedErrors() as $error) {
+                            $errors[] = $error;
+                    }
+
+//                    foreach ($this->getFormattedErrors($this->form,$this->form->getErrorSchema()) as $error) {
+//                            $errors[] = $error;
+//                    }
+
+
+
+
+
+//                    foreach ($this->form->getErrorSchema() as $field => $error) {
+//
+//                            //if(is_string($field)) $errors[] = $field.':'.$error->getMessage();
+//                            //else
+//                            $nestedErrorSchema = $error->getErrors();
+//
+//                          if  ($this->form->offsetExists($field)){
+//                                $txt = $this->form[$field]->renderLabel();
+//                                $errors[] = $txt.':'.$error->getMessage();
+//                          }
+//                          else $errors[] = $field.'--'.$error->getMessage();
+//
+//                    }
+
+                    $error_msg = implode($errors);
+                    $info = implode('<br>',$errors);
+                    $response = array('success' => false,
+                                'error' => $error_msg,
+                                'info' => $info);
+                    return $response;
+                }
+            }
+
+        }
+
+        $response = array('success'=>true);
+        return $response;
+    }
+
+
     protected function setJsonError($info,$statusCode = 400){
 
         if(isset($info['faultcode']) && $info['faultcode']=='TCP') $statusCode = 404;
         $this->getContext()->getResponse()->setStatusCode($statusCode);
-        $error = json_encode($info);        
-        $this->getContext()->getResponse()->setHttpHeader("X-JSON", '()');
+        $error = json_encode($info);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $error;
 
     }

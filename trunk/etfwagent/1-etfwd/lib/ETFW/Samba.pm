@@ -24,7 +24,7 @@ package ETFW::Samba;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 
 use Config::IniFiles;
 
@@ -130,18 +130,18 @@ sub joindomain {
         system("/sbin/service smb restart > /dev/null");
         system("/sbin/service winbind restart > /dev/null");
 
-        retErr "_error_", "Nao consigo acertar a hora pelo servidor de dominio" if (system("/usr/bin/net time set > /dev/null"));
-        retErr "_error_", "Nao consigo obter token de administrador" if (system("echo '$PASS' | /usr/kerberos/bin/kinit $USER\@$DOMAIN > /dev/null"));
-        retErr "_error_", "Ja existe uma maquina com o mesmo nome no dominio" if (not system("/usr/bin/net ads status > /dev/null"));
-        retErr "_error_", "Nao consigo fazer o join" if (system("/usr/bin/net ads join"));
-        retErr "_error_", "Nao consigo mudar as permissoes do winbind" if (system("/bin/chgrp squid /mnt/harddisk/var/cache/samba/winbindd_privileged"));
+        return retErr "_error_", "Nao consigo acertar a hora pelo servidor de dominio" if (system("/usr/bin/net time set > /dev/null"));
+        return retErr "_error_", "Nao consigo obter token de administrador" if (system("echo '$PASS' | /usr/kerberos/bin/kinit $USER\@$DOMAIN > /dev/null"));
+        return retErr "_error_", "Ja existe uma maquina com o mesmo nome no dominio" if (not system("/usr/bin/net ads status > /dev/null"));
+        return retErr "_error_", "Nao consigo fazer o join" if (system("/usr/bin/net ads join"));
+        return retErr "_error_", "Nao consigo mudar as permissoes do winbind" if (system("/bin/chgrp squid /mnt/harddisk/var/cache/samba/winbindd_privileged"));
 
         system("/sbin/hwclock --systohc");
         system("/sbin/service smb restart > /dev/null");
         system("/sbin/service winbind restart > /dev/null");
     }
 
-    retOk("_ok_","Ok");
+    return retOk("_ok_","Ok");
 }
 
 #########################################################################

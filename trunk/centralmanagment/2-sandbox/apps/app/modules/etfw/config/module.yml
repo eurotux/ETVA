@@ -1,5 +1,8 @@
 # default values
 all:  
+   webmin:
+         user: root
+         pass: ola123
    interface:
          wan : eth0
          lan : eth1

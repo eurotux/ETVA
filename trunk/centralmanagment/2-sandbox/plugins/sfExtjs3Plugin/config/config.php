@@ -50,7 +50,7 @@ sfConfig::set('sf_extjs3_spacer', sfConfig::get('sf_extjs3_images_dir').'default
 #
 # attributes which must handled as array
 #
-sfConfig::set('sf_extjs3_list_attributes', array('items', 'tbar', 'bbar', 'buttons', 'plugins', 'view', 'fields', 'tools', 'actions'));
+sfConfig::set('sf_extjs3_list_attributes', array('items', 'tbar', 'bbar', 'buttons', 'plugins', 'view', 'fields', 'tools', 'actions', 'data'));
 #
 # array values that don't need quotes
 #
@@ -97,6 +97,7 @@ sfConfig::set('sf_extjs3_classes',
     'TimeField'               => 'Ext.form.TimeField',
     'HtmlEditor'              => 'Ext.form.HtmlEditor',
     'ComboBox'                => 'Ext.form.ComboBox',
+    'Checkbox'                => 'Ext.form.Checkbox',
     'Menu'                    => 'Ext.menu.Menu',
     'Item'	  		            => 'Ext.menu.Item',
     'TextItem'                => 'Ext.menu.TextItem',
@@ -342,6 +343,13 @@ sfConfig::set('Ext.form.HtmlEditor',
 sfConfig::set('Ext.form.ComboBox',
   array(
     'class'       => 'Ext.form.ComboBox',
+    'attributes'  => array()
+  )
+);
+
+sfConfig::set('Ext.form.Checkbox',
+  array(
+    'class'       => 'Ext.form.Checkbox',
     'attributes'  => array()
   )
 );

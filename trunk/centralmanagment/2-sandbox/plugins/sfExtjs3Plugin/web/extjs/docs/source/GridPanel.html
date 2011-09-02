@@ -1,11 +1,18 @@
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
   <title>The source code</title>
     <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
 </head>
 <body  onload="prettyPrint();">
-    <pre class="prettyprint lang-js"><div id="cls-Ext.grid.GridPanel"></div>/**
+    <pre class="prettyprint lang-js">/*!
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+<div id="cls-Ext.grid.GridPanel"></div>/**
  * @class Ext.grid.GridPanel
  * @extends Ext.Panel
  * <p>This class represents the primary interface of a component based grid control to represent data
@@ -15,27 +22,36 @@
  * <div class="sub-desc"></div></li>
  * <li><b>{@link Ext.grid.ColumnModel Column model}</b> : Column makeup
  * <div class="sub-desc"></div></li>
- * <li><b>{@link Ext.grid.GridView View}</b> : Encapsulates the user interface 
+ * <li><b>{@link Ext.grid.GridView View}</b> : Encapsulates the user interface
  * <div class="sub-desc"></div></li>
- * <li><b>{@link Ext.grid.AbstractSelectionModel selection model}</b> : Selection behavior 
+ * <li><b>{@link Ext.grid.AbstractSelectionModel selection model}</b> : Selection behavior
  * <div class="sub-desc"></div></li>
  * </ul></div>
  * <p>Example usage:</p>
  * <pre><code>
 var grid = new Ext.grid.GridPanel({
-    {@link #store}: new (@link Ext.data.Store}({
+    {@link #store}: new {@link Ext.data.Store}({
         {@link Ext.data.Store#autoDestroy autoDestroy}: true,
         {@link Ext.data.Store#reader reader}: reader,
         {@link Ext.data.Store#data data}: xg.dummyData
     }),
-    {@link #columns}: [
-        {id: 'company', header: 'Company', width: 200, sortable: true, dataIndex: 'company'},
-        {header: 'Price', width: 120, sortable: true, renderer: Ext.util.Format.usMoney, dataIndex: 'price'},
-        {header: 'Change', width: 120, sortable: true, dataIndex: 'change'},
-        {header: '% Change', width: 120, sortable: true, dataIndex: 'pctChange'},
-        // instead of specifying renderer: Ext.util.Format.dateRenderer('m/d/Y') use xtype
-        {header: 'Last Updated', width: 135, sortable: true, dataIndex: 'lastChange', xtype: 'datecolumn', format: 'M d, Y'}
-    ],
+    {@link #colModel}: new {@link Ext.grid.ColumnModel}({
+        {@link Ext.grid.ColumnModel#defaults defaults}: {
+            width: 120,
+            sortable: true
+        },
+        {@link Ext.grid.ColumnModel#columns columns}: [
+            {id: 'company', header: 'Company', width: 200, sortable: true, dataIndex: 'company'},
+            {header: 'Price', renderer: Ext.util.Format.usMoney, dataIndex: 'price'},
+            {header: 'Change', dataIndex: 'change'},
+            {header: '% Change', dataIndex: 'pctChange'},
+            // instead of specifying renderer: Ext.util.Format.dateRenderer('m/d/Y') use xtype
+            {
+                header: 'Last Updated', width: 135, dataIndex: 'lastChange',
+                xtype: 'datecolumn', format: 'M d, Y'
+            }
+        ],
+    }),
     {@link #viewConfig}: {
         {@link Ext.grid.GridView#forceFit forceFit}: true,
 
@@ -141,7 +157,9 @@ Ext.grid.GridPanel = Ext.extend(Ext.Panel, {
      * @cfg {Boolean} enableColumnResize <tt>false</tt> to turn off column resizing for the whole grid. Defaults to <tt>true</tt>.
      */
     <div id="cfg-Ext.grid.GridPanel-enableColumnHide"></div>/**
-     * @cfg {Boolean} enableColumnHide Defaults to <tt>true</tt> to enable hiding of columns with the header context menu.
+     * @cfg {Boolean} enableColumnHide
+     * Defaults to <tt>true</tt> to enable {@link Ext.grid.Column#hidden hiding of columns}
+     * with the {@link #enableHdMenu header menu}.
      */
     enableColumnHide : true,
     <div id="cfg-Ext.grid.GridPanel-enableColumnMove"></div>/**
@@ -207,19 +225,28 @@ Ext.grid.GridPanel = Ext.extend(Ext.Panel, {
      * @cfg {Array} stateEvents
      * An array of events that, when fired, should trigger this component to save its state.
      * Defaults to:<pre><code>
-     * stateEvents: ['columnmove', 'columnresize', 'sortchange']
+     * stateEvents: ['columnmove', 'columnresize', 'sortchange', 'groupchange']
      * </code></pre>
      * <p>These can be any types of events supported by this component, including browser or
      * custom events (e.g., <tt>['click', 'customerchange']</tt>).</p>
      * <p>See {@link Ext.Component#stateful} for an explanation of saving and restoring
      * Component state.</p>
      */
-    stateEvents : ['columnmove', 'columnresize', 'sortchange'],
+    stateEvents : ['columnmove', 'columnresize', 'sortchange', 'groupchange'],
     <div id="cfg-Ext.grid.GridPanel-view"></div>/**
      * @cfg {Object} view The {@link Ext.grid.GridView} used by the grid. This can be set
      * before a call to {@link Ext.Component#render render()}.
      */
     view : null,
+
+    <div id="cfg-Ext.grid.GridPanel-bubbleEvents"></div>/**
+     * @cfg {Array} bubbleEvents
+     * <p>An array of events that, when fired, should be bubbled to any parent container.
+     * See {@link Ext.util.Observable#enableBubble}.
+     * Defaults to <tt>[]</tt>.
+     */
+    bubbleEvents: [],
+
     <div id="cfg-Ext.grid.GridPanel-viewConfig"></div>/**
      * @cfg {Object} viewConfig A config object that will be applied to the grid's UI view.  Any of
      * the config options available for {@link Ext.grid.GridView} can be specified here. This option
@@ -347,6 +374,33 @@ Ext.grid.GridPanel = Ext.extend(Ext.Panel, {
              */
             'headermousedown',
 
+            <div id="event-Ext.grid.GridPanel-groupmousedown"></div>/**
+             * @event groupmousedown
+             * Fires before a group header is clicked. <b>Only applies for grids with a {@link Ext.grid.GroupingView GroupingView}</b>.
+             * @param {Grid} this
+             * @param {String} groupField
+             * @param {String} groupValue
+             * @param {Ext.EventObject} e
+             */
+            'groupmousedown',
+
+            <div id="event-Ext.grid.GridPanel-rowbodymousedown"></div>/**
+             * @event rowbodymousedown
+             * Fires before the row body is clicked. <b>Only applies for grids with {@link Ext.grid.GridView#enableRowBody enableRowBody} configured.</b>
+             * @param {Grid} this
+             * @param {Number} rowIndex
+             * @param {Ext.EventObject} e
+             */
+            'rowbodymousedown',
+
+            <div id="event-Ext.grid.GridPanel-containermousedown"></div>/**
+             * @event containermousedown
+             * Fires before the container is clicked. The container consists of any part of the grid body that is not covered by a row.
+             * @param {Grid} this
+             * @param {Ext.EventObject} e
+             */
+            'containermousedown',
+
             <div id="event-Ext.grid.GridPanel-cellclick"></div>/**
              * @event cellclick
              * Fires when a cell is clicked.
@@ -407,6 +461,56 @@ function(grid, rowIndex, columnIndex, e) {
              * @param {Ext.EventObject} e
              */
             'headerdblclick',
+            <div id="event-Ext.grid.GridPanel-groupclick"></div>/**
+             * @event groupclick
+             * Fires when group header is clicked. <b>Only applies for grids with a {@link Ext.grid.GroupingView GroupingView}</b>.
+             * @param {Grid} this
+             * @param {String} groupField
+             * @param {String} groupValue
+             * @param {Ext.EventObject} e
+             */
+            'groupclick',
+            <div id="event-Ext.grid.GridPanel-groupdblclick"></div>/**
+             * @event groupdblclick
+             * Fires when group header is double clicked. <b>Only applies for grids with a {@link Ext.grid.GroupingView GroupingView}</b>.
+             * @param {Grid} this
+             * @param {String} groupField
+             * @param {String} groupValue
+             * @param {Ext.EventObject} e
+             */
+            'groupdblclick',
+            <div id="event-Ext.grid.GridPanel-containerclick"></div>/**
+             * @event containerclick
+             * Fires when the container is clicked. The container consists of any part of the grid body that is not covered by a row.
+             * @param {Grid} this
+             * @param {Ext.EventObject} e
+             */
+            'containerclick',
+            <div id="event-Ext.grid.GridPanel-containerdblclick"></div>/**
+             * @event containerdblclick
+             * Fires when the container is double clicked. The container consists of any part of the grid body that is not covered by a row.
+             * @param {Grid} this
+             * @param {Ext.EventObject} e
+             */
+            'containerdblclick',
+
+            <div id="event-Ext.grid.GridPanel-rowbodyclick"></div>/**
+             * @event rowbodyclick
+             * Fires when the row body is clicked. <b>Only applies for grids with {@link Ext.grid.GridView#enableRowBody enableRowBody} configured.</b>
+             * @param {Grid} this
+             * @param {Number} rowIndex
+             * @param {Ext.EventObject} e
+             */
+            'rowbodyclick',
+            <div id="event-Ext.grid.GridPanel-rowbodydblclick"></div>/**
+             * @event rowbodydblclick
+             * Fires when the row body is double clicked. <b>Only applies for grids with {@link Ext.grid.GridView#enableRowBody enableRowBody} configured.</b>
+             * @param {Grid} this
+             * @param {Number} rowIndex
+             * @param {Ext.EventObject} e
+             */
+            'rowbodydblclick',
+
             <div id="event-Ext.grid.GridPanel-rowcontextmenu"></div>/**
              * @event rowcontextmenu
              * Fires when a row is right clicked
@@ -432,6 +536,30 @@ function(grid, rowIndex, columnIndex, e) {
              * @param {Ext.EventObject} e
              */
             'headercontextmenu',
+            <div id="event-Ext.grid.GridPanel-groupcontextmenu"></div>/**
+             * @event groupcontextmenu
+             * Fires when group header is right clicked. <b>Only applies for grids with a {@link Ext.grid.GroupingView GroupingView}</b>.
+             * @param {Grid} this
+             * @param {String} groupField
+             * @param {String} groupValue
+             * @param {Ext.EventObject} e
+             */
+            'groupcontextmenu',
+            <div id="event-Ext.grid.GridPanel-containercontextmenu"></div>/**
+             * @event containercontextmenu
+             * Fires when the container is right clicked. The container consists of any part of the grid body that is not covered by a row.
+             * @param {Grid} this
+             * @param {Ext.EventObject} e
+             */
+            'containercontextmenu',
+            <div id="event-Ext.grid.GridPanel-rowbodycontextmenu"></div>/**
+             * @event rowbodycontextmenu
+             * Fires when the row body is right clicked. <b>Only applies for grids with {@link Ext.grid.GridView#enableRowBody enableRowBody} configured.</b>
+             * @param {Grid} this
+             * @param {Number} rowIndex
+             * @param {Ext.EventObject} e
+             */
+            'rowbodycontextmenu',
             <div id="event-Ext.grid.GridPanel-bodyscroll"></div>/**
              * @event bodyscroll
              * Fires when the body element is scrolled
@@ -460,6 +588,13 @@ function(grid, rowIndex, columnIndex, e) {
              * @param {Object} sortInfo An object with the keys field and direction
              */
             'sortchange',
+            <div id="event-Ext.grid.GridPanel-groupchange"></div>/**
+             * @event groupchange
+             * Fires when the grid's grouping changes (only applies for grids with a {@link Ext.grid.GroupingView GroupingView})
+             * @param {Grid} this
+             * @param {String} groupField A string with the grouping field, null if the store is not grouped.
+             */
+            'groupchange',
             <div id="event-Ext.grid.GridPanel-reconfigure"></div>/**
              * @event reconfigure
              * Fires when the grid is reconfigured with a new store and/or column model.
@@ -467,7 +602,13 @@ function(grid, rowIndex, columnIndex, e) {
              * @param {Ext.data.Store} store The new store
              * @param {Ext.grid.ColumnModel} colModel The new column model
              */
-            'reconfigure'
+            'reconfigure',
+            <div id="event-Ext.grid.GridPanel-viewready"></div>/**
+             * @event viewready
+             * Fires when the grid view is available (use this for selecting a default row).
+             * @param {Grid} this
+             */
+            'viewready'
         );
     },
 
@@ -475,26 +616,24 @@ function(grid, rowIndex, columnIndex, e) {
     onRender : function(ct, position){
         Ext.grid.GridPanel.superclass.onRender.apply(this, arguments);
 
-        var c = this.body;
+        var c = this.getGridEl();
 
         this.el.addClass('x-grid-panel');
 
-        var view = this.getView();
-        view.init(this);
-
         this.mon(c, {
+            scope: this,
             mousedown: this.onMouseDown,
             click: this.onClick,
             dblclick: this.onDblClick,
-            contextmenu: this.onContextMenu,
-            keydown: this.onKeyDown,
-            scope: this
+            contextmenu: this.onContextMenu
         });
 
-        this.relayEvents(c, ['mousedown','mouseup','mouseover','mouseout','keypress']);
+        this.relayEvents(c, ['mousedown','mouseup','mouseover','mouseout','keypress', 'keydown']);
 
+        var view = this.getView();
+        view.init(this);
+        view.render();
         this.getSelectionModel().init(this);
-        this.view.render();
     },
 
     // private
@@ -513,32 +652,54 @@ function(grid, rowIndex, columnIndex, e) {
     },
 
     applyState : function(state){
-        var cm = this.colModel;
-        var cs = state.columns;
+        var cm = this.colModel,
+            cs = state.columns,
+            store = this.store,
+            s,
+            c,
+            oldIndex;
+
         if(cs){
             for(var i = 0, len = cs.length; i < len; i++){
-                var s = cs[i];
-                var c = cm.getColumnById(s.id);
+                s = cs[i];
+                c = cm.getColumnById(s.id);
                 if(c){
                     c.hidden = s.hidden;
                     c.width = s.width;
-                    var oldIndex = cm.getIndexById(s.id);
+                    oldIndex = cm.getIndexById(s.id);
                     if(oldIndex != i){
                         cm.moveColumn(oldIndex, i);
                     }
                 }
             }
         }
-        if(state.sort && this.store){
-            this.store[this.store.remoteSort ? 'setDefaultSort' : 'sort'](state.sort.field, state.sort.direction);
+        if(store){
+            s = state.sort;
+            if(s){
+                store[store.remoteSort ? 'setDefaultSort' : 'sort'](s.field, s.direction);
+            }
+            s = state.group;
+            if(store.groupBy){
+                if(s){
+                    store.groupBy(s);
+                }else{
+                    store.clearGrouping();
+                }
+            }
+
         }
-        delete state.columns;
-        delete state.sort;
-        Ext.grid.GridPanel.superclass.applyState.call(this, state);
+        var o = Ext.apply({}, state);
+        delete o.columns;
+        delete o.sort;
+        Ext.grid.GridPanel.superclass.applyState.call(this, o);
     },
 
     getState : function(){
-        var o = {columns: []};
+        var o = {columns: []},
+            store = this.store,
+            ss,
+            gs;
+
         for(var i = 0, c; (c = this.colModel.config[i]); i++){
             o.columns[i] = {
                 id: c.id,
@@ -548,10 +709,16 @@ function(grid, rowIndex, columnIndex, e) {
                 o.columns[i].hidden = true;
             }
         }
-        if(this.store){
-            var ss = this.store.getSortState();
+        if(store){
+            ss = store.getSortState();
             if(ss){
                 o.sort = ss;
+            }
+            if(store.getGroupState){
+                gs = store.getGroupState();
+                if(gs){
+                    o.group = gs;
+                }
             }
         }
         return o;
@@ -560,11 +727,16 @@ function(grid, rowIndex, columnIndex, e) {
     // private
     afterRender : function(){
         Ext.grid.GridPanel.superclass.afterRender.call(this);
-        this.view.layout();
+        var v = this.view;
+        this.on('bodyresize', v.layout, v);
+        v.layout();
         if(this.deferRowRender){
-            this.view.afterRender.defer(10, this.view);
+            if (!this.deferRowRenderTask){
+                this.deferRowRenderTask = new Ext.util.DelayedTask(v.afterRender, this.view);
+            }
+            this.deferRowRenderTask.delay(10);
         }else{
-            this.view.afterRender();
+            v.afterRender();
         }
         this.viewReady = true;
     },
@@ -582,31 +754,31 @@ function(grid, rowIndex, columnIndex, e) {
      * @param {Ext.grid.ColumnModel} colModel The new {@link Ext.grid.ColumnModel} object
      */
     reconfigure : function(store, colModel){
-        if(this.loadMask){
-            this.loadMask.destroy();
-            this.loadMask = new Ext.LoadMask(this.bwrap,
-                    Ext.apply({}, {store:store}, this.initialConfig.loadMask));
+        var rendered = this.rendered;
+        if(rendered){
+            if(this.loadMask){
+                this.loadMask.destroy();
+                this.loadMask = new Ext.LoadMask(this.bwrap,
+                        Ext.apply({}, {store:store}, this.initialConfig.loadMask));
+            }
         }
-        this.view.initData(store, colModel);
+        if(this.view){
+            this.view.initData(store, colModel);
+        }
         this.store = store;
         this.colModel = colModel;
-        if(this.rendered){
+        if(rendered){
             this.view.refresh(true);
         }
         this.fireEvent('reconfigure', this, store, colModel);
     },
 
     // private
-    onKeyDown : function(e){
-        this.fireEvent('keydown', e);
-    },
-
-    // private
     onDestroy : function(){
+        if (this.deferRowRenderTask && this.deferRowRenderTask.cancel){
+            this.deferRowRenderTask.cancel();
+        }
         if(this.rendered){
-            var c = this.body;
-            c.removeAllListeners();
-            c.update('');
             Ext.destroy(this.view, this.loadMask);
         }else if(this.store && this.store.autoDestroy){
             this.store.destroy();
@@ -618,22 +790,7 @@ function(grid, rowIndex, columnIndex, e) {
 
     // private
     processEvent : function(name, e){
-        this.fireEvent(name, e);
-        var t = e.getTarget();
-        var v = this.view;
-        var header = v.findHeaderIndex(t);
-        if(header !== false){
-            this.fireEvent('header' + name, this, header, e);
-        }else{
-            var row = v.findRowIndex(t);
-            var cell = v.findCellIndex(t);
-            if(row !== false){
-                this.fireEvent('row' + name, this, row, e);
-                if(cell !== false){
-                    this.fireEvent('cell' + name, this, row, cell, e);
-                }
-            }
-        }
+        this.view.processEvent(name, e);
     },
 
     // private
@@ -658,8 +815,12 @@ function(grid, rowIndex, columnIndex, e) {
 
     // private
     walkCells : function(row, col, step, fn, scope){
-        var cm = this.colModel, clen = cm.getColumnCount();
-        var ds = this.store, rlen = ds.getCount(), first = true;
+        var cm    = this.colModel,
+            clen  = cm.getColumnCount(),
+            ds    = this.store,
+            rlen  = ds.getCount(),
+            first = true;
+
         if(step < 0){
             if(col < 0){
                 row--;
@@ -698,14 +859,6 @@ function(grid, rowIndex, columnIndex, e) {
             }
         }
         return null;
-    },
-
-    // private
-    onResize : function(){
-        Ext.grid.GridPanel.superclass.onResize.apply(this, arguments);
-        if(this.viewReady){
-            this.view.layout();
-        }
     },
 
     <div id="method-Ext.grid.GridPanel-getGridEl"></div>/**
@@ -768,129 +921,129 @@ function(grid, rowIndex, columnIndex, e) {
         return String.format(this.ddText, count, count == 1 ? '' : 's');
     }
 
-    <div id="cfg-Ext.grid.GridPanel-activeItem"></div>/** 
-     * @cfg {String/Number} activeItem 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-activeItem"></div>/**
+     * @cfg {String/Number} activeItem
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-autoDestroy"></div>/** 
-     * @cfg {Boolean} autoDestroy 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-autoDestroy"></div>/**
+     * @cfg {Boolean} autoDestroy
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-autoLoad"></div>/** 
-     * @cfg {Object/String/Function} autoLoad 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-autoLoad"></div>/**
+     * @cfg {Object/String/Function} autoLoad
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-autoWidth"></div>/** 
-     * @cfg {Boolean} autoWidth 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-autoWidth"></div>/**
+     * @cfg {Boolean} autoWidth
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-bufferResize"></div>/** 
-     * @cfg {Boolean/Number} bufferResize 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-bufferResize"></div>/**
+     * @cfg {Boolean/Number} bufferResize
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-defaultType"></div>/** 
-     * @cfg {String} defaultType 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-defaultType"></div>/**
+     * @cfg {String} defaultType
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-defaults"></div>/** 
-     * @cfg {Object} defaults 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-defaults"></div>/**
+     * @cfg {Object} defaults
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-hideBorders"></div>/** 
-     * @cfg {Boolean} hideBorders 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-hideBorders"></div>/**
+     * @cfg {Boolean} hideBorders
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-items"></div>/** 
-     * @cfg {Mixed} items 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-items"></div>/**
+     * @cfg {Mixed} items
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-layout"></div>/** 
-     * @cfg {String} layout 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-layout"></div>/**
+     * @cfg {String} layout
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-layoutConfig"></div>/** 
-     * @cfg {Object} layoutConfig 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-layoutConfig"></div>/**
+     * @cfg {Object} layoutConfig
+     * @hide
      */
-    <div id="cfg-Ext.grid.GridPanel-monitorResize"></div>/** 
-     * @cfg {Boolean} monitorResize 
-     * @hide 
+    <div id="cfg-Ext.grid.GridPanel-monitorResize"></div>/**
+     * @cfg {Boolean} monitorResize
+     * @hide
      */
-    <div id="prop-Ext.grid.GridPanel-items"></div>/** 
-     * @property items 
-     * @hide 
+    <div id="prop-Ext.grid.GridPanel-items"></div>/**
+     * @property items
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-add"></div>/** 
-     * @method add 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-add"></div>/**
+     * @method add
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-cascade"></div>/** 
-     * @method cascade 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-cascade"></div>/**
+     * @method cascade
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-doLayout"></div>/** 
-     * @method doLayout 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-doLayout"></div>/**
+     * @method doLayout
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-find"></div>/** 
-     * @method find 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-find"></div>/**
+     * @method find
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-findBy"></div>/** 
-     * @method findBy 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-findBy"></div>/**
+     * @method findBy
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-findById"></div>/** 
-     * @method findById 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-findById"></div>/**
+     * @method findById
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-findByType"></div>/** 
-     * @method findByType 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-findByType"></div>/**
+     * @method findByType
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-getComponent"></div>/** 
-     * @method getComponent 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-getComponent"></div>/**
+     * @method getComponent
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-getLayout"></div>/** 
-     * @method getLayout 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-getLayout"></div>/**
+     * @method getLayout
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-getUpdater"></div>/** 
-     * @method getUpdater 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-getUpdater"></div>/**
+     * @method getUpdater
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-insert"></div>/** 
-     * @method insert 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-insert"></div>/**
+     * @method insert
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-load"></div>/** 
-     * @method load 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-load"></div>/**
+     * @method load
+     * @hide
      */
-    <div id="method-Ext.grid.GridPanel-remove"></div>/** 
-     * @method remove 
-     * @hide 
+    <div id="method-Ext.grid.GridPanel-remove"></div>/**
+     * @method remove
+     * @hide
      */
-    <div id="event-Ext.grid.GridPanel-add"></div>/** 
-     * @event add 
-     * @hide 
+    <div id="event-Ext.grid.GridPanel-add"></div>/**
+     * @event add
+     * @hide
      */
-    <div id="event-Ext.grid.GridPanel-afterLayout"></div>/** 
-     * @event afterLayout 
-     * @hide 
+    <div id="event-Ext.grid.GridPanel-afterlayout"></div>/**
+     * @event afterlayout
+     * @hide
      */
-    <div id="event-Ext.grid.GridPanel-beforeadd"></div>/** 
-     * @event beforeadd 
-     * @hide 
+    <div id="event-Ext.grid.GridPanel-beforeadd"></div>/**
+     * @event beforeadd
+     * @hide
      */
-    <div id="event-Ext.grid.GridPanel-beforeremove"></div>/** 
-     * @event beforeremove 
-     * @hide 
+    <div id="event-Ext.grid.GridPanel-beforeremove"></div>/**
+     * @event beforeremove
+     * @hide
      */
-    <div id="event-Ext.grid.GridPanel-remove"></div>/** 
-     * @event remove 
-     * @hide 
+    <div id="event-Ext.grid.GridPanel-remove"></div>/**
+     * @event remove
+     * @hide
      */
 
 

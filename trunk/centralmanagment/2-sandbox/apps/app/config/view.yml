@@ -14,9 +14,9 @@ default:
 
   javascripts:    []
 
-  has_layout:     on
+  has_layout:     true
   layout:         layout
 
 graph_image:
-  has_layout:     on
+  has_layout:     true
   layout:         graph_image

@@ -1,0 +1,11 @@
+--- text.py.orig	2010-09-28 17:52:45.250651032 +0100
++++ text.py	2010-09-28 17:53:05.716829154 +0100
+@@ -592,7 +592,7 @@
+         pass
+ 
+     def drawFrame(self):
+-        self.welcomeText = _("Welcome to %s") % (productName,)
++        self.welcomeText = _("Welcome to ETVA")
+         self.screen.drawRootText (0, 0, self.welcomeText)
+ 	self.screen.drawRootText (len(_(self.welcomeText)), 0,
+                                   (self.screen.width -

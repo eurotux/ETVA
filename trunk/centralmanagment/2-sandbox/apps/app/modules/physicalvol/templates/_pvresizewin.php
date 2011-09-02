@@ -20,10 +20,7 @@ Ext.apply(Ext.form.VTypes, {
 
 Ext.ns("pvwin.resizeForm");
 
-pvwin.resizeForm.Main = function(id_win,id_node) {
-
-    Ext.QuickTips.init();
-   	Ext.form.Field.prototype.msgTarget = 'side';
+pvwin.resizeForm.Main = function(id_win,id_node) {    
 
     this.device = new Ext.form.Hidden({
         id: 'device-id-'+id_win,
@@ -166,15 +163,15 @@ Ext.extend(pvwin.resizeForm.Main, Ext.form.FormPanel, {
     load : function(node) {
      
         var unalloc_size = node.attributes.size - node.attributes.pvsize;
-        var unnalloc = byte_to_MBconvert(unalloc_size,2);
+        var unnalloc = byte_to_MBconvert(unalloc_size,2,'floor');
         this.unalloc.setValue(unnalloc);
         
-        var dev_size = byte_to_MBconvert(node.attributes.size,2);
+        var dev_size = byte_to_MBconvert(node.attributes.size,2,'floor');
         this.device_size.setValue(dev_size);
      
         this.device.setValue(node.id);
                 
-        this.pv_size.setValue(byte_to_MBconvert(node.attributes.pvsize,2));
+        this.pv_size.setValue(byte_to_MBconvert(node.attributes.pvsize,2,'floor'));
 
     }
 

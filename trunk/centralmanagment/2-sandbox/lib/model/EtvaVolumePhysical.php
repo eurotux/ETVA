@@ -16,9 +16,7 @@ class EtvaVolumePhysical extends BaseEtvaVolumePhysical
 
   }
 
-
-  // updates physical volume info and delete volume//physical relation
-  public function delete(PropelPDO $con = null)
+  public function preDelete(PropelPDO $con = null)
   {
       $etva_phy = $this->getEtvaPhysicalvolume();
       $etva_phy_devsize = $etva_phy->getDevsize();
@@ -26,11 +24,8 @@ class EtvaVolumePhysical extends BaseEtvaVolumePhysical
       $etva_phy->setPvfreesize($etva_phy_devsize);
       $etva_phy->setAllocatable(1);
       $etva_phy->save();
-      
-      parent::delete($con);
-
-
-  }
+      return true;
+  }  
 
 
 }

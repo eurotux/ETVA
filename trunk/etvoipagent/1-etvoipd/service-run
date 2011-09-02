@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd /srv/etva-etvoip
+exec > /var/log/etva-etvoip/etvoipd.log 2>&1
+exec /usr/bin/perl -I./lib etvoipd
+
+

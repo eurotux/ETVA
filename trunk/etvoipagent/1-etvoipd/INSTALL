@@ -1,0 +1,2 @@
+Perl version should be greater than 0.7203. Tested with perl-version 0.88
+Perl-AnyEvent may confilt dependency version. Install older perl-AnyEvent like 5.2

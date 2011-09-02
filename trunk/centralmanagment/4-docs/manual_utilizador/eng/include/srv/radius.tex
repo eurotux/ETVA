@@ -1,0 +1,39 @@
+\subsection{FreeRadius}
+
+O serviço de RADIUS\footnote{Remote Authentication Dial In User Service} é assegurado pelo programa FreeRadius cuja configuração está na directoria
+\emph{/etc/raddb} e pode ser terminada a sua execução com o seguinte comando:
+
+\begin{verbatim}
+# service radiusd stop
+\end{verbatim}
+
+Este serviço é utilizado pelo servidor de VPNs para autenticar os utilizadores daí que, caso esteja desligado, não será possível utilizar o serviço de VPN. Embora a autenticação seja feita no LDAP, podem ser configurados utilizadores que não estão no LDAP mas que podem aceder ao serviço de VPN. Para tal, deve ser editado o ficheiro \emph{/etc/raddb/users} e acrescentado o seguinte (alterando o UTILIZADOR, PASSWORD e ENDEREÇO\_IP\_DO\_CLIENTE:
+
+\begin{verbatim}
+UTILIZADOR User-Password == "PASSWORD"
+       Service-Type = Framed-User,
+       Framed-Protocol = PPP,
+       Framed-IP-Address = ENDEREÇO_IP_DO_CLIENTE,
+       Framed-IP-Netmask = 255.255.255.255,
+       Framed-Routing = Broadcast-Listen,
+       Framed-Compression = Van-Jacobsen-TCP-IP
+\end{verbatim}
+
+No caso do utilizador já existir no LDAP (chamamos a atenção de que o utilizador necessita neste caso de pertencer ao grupo ``vpnusers'') e apenas querer definir qual o ip com que vai ficar deve acrescentar ao ficheiro (alterando o UTILIZADOR e o ENDEREÇO\_IP\_DO\_CLIENTE):
+
+\begin{verbatim}
+UTILIZADOR
+       Service-Type = Framed-User,
+       Framed-Protocol = PPP,
+       Framed-IP-Address = ENDEREÇO_IP_DO_CLIENTE,
+       Framed-IP-Netmask = 255.255.255.255,
+       Framed-Routing = Broadcast-Listen,
+       Framed-Compression = Van-Jacobsen-TCP-IP
+\end{verbatim}
+
+Depois destas alterações será necessário reiniciar o serviço de radius com o comando:
+
+\begin{verbatim}
+# service radiusd restart
+\end{verbatim}
+

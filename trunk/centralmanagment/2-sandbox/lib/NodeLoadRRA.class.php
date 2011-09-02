@@ -30,12 +30,12 @@ class NodeLoadRRA extends RRA
 
     }
 
-    function NodeLoadRRA($node){
+    function NodeLoadRRA($node,$init_rrd=true){
 
         $file = $node.'/cpuLoad.rrd';
         $this->init_log();
 
-        parent::RRA($file, $this->opts);
+        parent::RRA($file, $this->opts, $init_rrd);
 
     }
 
@@ -85,7 +85,7 @@ class NodeLoadRRA extends RRA
 
         $initial_params = array('--start='.$graph_start,
                            '--end='.$graph_end,
-                           '--title="'.$title.'  '.self::$name.'"');
+                           '--title="'.$title.'"');
 
         $defs = array('DEF:a="'.$this->getFilepath().'":load_1min:AVERAGE',
                       'DEF:b="'.$this->getFilepath().'":load_5min:AVERAGE',

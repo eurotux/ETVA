@@ -1,0 +1,17 @@
+\subsection{NTPD}
+
+O \emph{NTP}\footnote{Network Time Protocol} é um protocolo desenvolvido sobre IP para permitir a sincronização dos relógios dos sistemas de uma rede. A sincronização destes é efectuada a pedido, mediante um cliente (aplicação) que questiona periodicamente um servidor, obtendo amostragens regularmente e efectuando adaptações o mais pequenas possível, espalhadas pelo tempo, de forma a não alterar significativamente o horizonte temporal.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/ntp.conf
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/ntpd start
+# /etc/rc.d/init.d/ntpd stop
+\end{Verbatim}
+

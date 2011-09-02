@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -28,24 +28,25 @@ Ext.grid.CheckboxSelectionModel = Ext.extend(Ext.grid.RowSelectionModel, {
      * <tt>'Select Rows'</tt>), but the automatic check all/none behavior will only work if the
      * <tt>'x-grid3-hd-checker'</tt> class is supplied.
      */
-    header: '<div class="x-grid3-hd-checker">&#160;</div>',
+    header : '<div class="x-grid3-hd-checker">&#160;</div>',
     /**
      * @cfg {Number} width The default width in pixels of the checkbox column (defaults to <tt>20</tt>).
      */
-    width: 20,
+    width : 20,
     /**
      * @cfg {Boolean} sortable <tt>true</tt> if the checkbox column is sortable (defaults to
      * <tt>false</tt>).
      */
-    sortable: false,
+    sortable : false,
 
     // private
-    menuDisabled:true,
-    fixed:true,
-    dataIndex: '',
-    id: 'checker',
+    menuDisabled : true,
+    fixed : true,
+    hideable: false,
+    dataIndex : '',
+    id : 'checker',
 
-    constructor: function(){
+    constructor : function(){
         Ext.grid.CheckboxSelectionModel.superclass.constructor.apply(this, arguments);
 
         if(this.checkOnly){
@@ -64,20 +65,31 @@ Ext.grid.CheckboxSelectionModel = Ext.extend(Ext.grid.RowSelectionModel, {
         }, this);
     },
 
+    // If handleMouseDown was called from another event (enableDragDrop), set a flag so
+    // onMouseDown does not process it a second time
+    handleMouseDown : function() {
+        Ext.grid.CheckboxSelectionModel.superclass.handleMouseDown.apply(this, arguments);
+        this.mouseHandled = true;
+    },
+
     // private
     onMouseDown : function(e, t){
         if(e.button === 0 && t.className == 'x-grid3-row-checker'){ // Only fire if left-click
             e.stopEvent();
             var row = e.getTarget('.x-grid3-row');
-            if(row){
+
+            // mouseHandled flag check for a duplicate selection (handleMouseDown) call
+            if(!this.mouseHandled && row){
                 var index = row.rowIndex;
                 if(this.isSelected(index)){
                     this.deselectRow(index);
                 }else{
                     this.selectRow(index, true);
+                    this.grid.getView().focusRow(index);
                 }
             }
         }
+        this.mouseHandled = false;
     },
 
     // private

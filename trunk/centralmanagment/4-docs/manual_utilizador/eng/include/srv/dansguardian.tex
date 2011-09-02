@@ -1,0 +1,148 @@
+\subsection{Serviço de Filtragem de Conteúdo -- Dansguardian}
+
+\subsubsection{Configuração}
+
+O servidor de filtragem de conteúdo tem a sua configuração em
+/etc/dansguardian pelo que futuras referências farão uso desta
+mesma informação.
+
+\confoption{dansguardian.conf}~\\
+
+O principal ficheiro de configuração é o \emph{dansguardian.conf} e
+contém as características principais de funcionamento nomeadamente as
+portas onde está à espera de pedidos, para que servidor envia os
+pedidos e quais os ficheiros que especificam as regras de filtragem.
+É possível também definir qual o número máximo e mínimo de processos
+de filtragem usando as directivas \emph{maxchildren},
+\emph{minchildren}, \emph{minsparechildren}, \emph{maxsparechildren}
+e \emph{maxagechildren} tal como estão comentadas no ficheiro em
+questão.
+De seguida são apresentados alguns parâmetros de configuração:
+
+\begin{description}
+\item[Reporting Level]~\\
+Permite modificar o nível de verbosidade quando uma página é negada.
+Pode dizer apenas \emph{Access Denied}, ou explicar porquê, ou então
+qual a frase negada.
+
+\item[Logging Settings]~\\
+Permite configurar o nível de \emph{logging}.
+
+\item[Log File Format]~\\
+Permite mudar o formato de como o dansguardian guarda os \emph{logs}.
+
+\item[Network Settings]~\\
+Permite modificar a porta onde o dansguardian está à espera de pedidos,
+o endereço IP do servidor que tem o squid bem como a respectiva porta. 
+Permite configurar a página que irá ser mostrada no caso de o acesso
+for negado.
+
+\item[Content Filtering Settings]~\\
+Permite mudar o local onde estão os ficheiros com conteúdos filtrados.
+
+\item[Naughtyness limit]~\\
+Esta directiva permite definir o limite a partir do qual um conteúdo
+irá ser bloqueado.
+
+Cada palavra ou conjunto de palavras poderá ter um peso positivo
+(ou seja, vai levar a que o conteúdo seja mais rapidamente bloqueado)
+ou um peso negativo.
+
+O ficheiro \emph{weightedphraselist} contém alguns exemplos.
+Os seguintes valores são usados frequentemente, 50 para crianças, 100
+para jovens e 160 para adultos.
+
+\item[Show weighted phrases found]~\\
+Se ligado, as palavras ou frases encontradas que levam a que a
+pontuação exceda o limite vão ser registadas e, caso o
+\emph{reporting level} seja suficiente, reportadas.
+\end{description}
+
+\confoption{Outros ficheiros}~\\
+
+De seguida são apresentados outros ficheiros de configuração do
+dansguardian com as respectivas finalidades:
+
+\begin{description}
+\item[exceptionsitelist]~\\
+Este ficheiro contém uma lista de domínios para os quais o dansguardian
+não vai fazer filtragem de conteúdo.
+
+De notar que não se deve colocar o http:// ou o www início de cada
+entrada.
+
+\item[exceptioniplist]~\\
+Contém uma lista de ips de origem que não serão filtrados, por exemplo,
+o ip de um administrador.
+
+De notar que este ficheiro só tem relevância caso o dansguardian receba
+directamente os pedidos dos browsers ou caso o proxy anterior envie o
+\emph{X-ForwardFor}.
+
+\item[exceptionuserlist]~\\
+Utilizadores que não vão ser filtrados (só funciona com autenticação
+básica ou \emph{ident}).
+
+\item[exceptionphraselist]~\\
+Se alguma destas palavras aparecer no conteúdo de uma página, a
+filtragem vai ser desactivada para este conteúdo.
+
+Como tal é preciso algum cuidado ao adicionar entradas novas neste
+ficheiro. 
+Uma melhor solução poderia ser colocar um valor negativo no
+\emph{weightedphraselist}.
+
+\item[exceptionurllist]~\\
+\emph{URL's} colocados nesta página não vão ser alvo de filtragem.
+
+\item[bannediplist]~\\
+Endereços IP de clientes a negar o acesso Web.
+
+Só devem ser aqui colocados ips e não \emph{hostnames}.
+
+\item[bannedphraselist]~\\
+Os conteúdos a negar na filtragem podem ser modificados no ficheiro
+\emph{bannedphraselist}.
+
+Este ficheiro já inclui alguns tipos de palavras como se pode ver pelo
+extracto:
+
+\begin{Output}
+.Include</etc/dansguardian/phraselists/pornography/banned>
+.Include</etc/dansguardian/phraselists/illegaldrugs/banned>
+.Include</etc/dansguardian/phraselists/gambling/banned>
+\end{Output}
+
+\item[banneduserlist]~\\
+Nomes de utilizadores que, caso a autenticação básica esteja activada,
+lhes será negado o acesso ao exterior.
+Funcionalidades relativas a ips de origem e utilizadores apenas fazem
+sentido quando o dansguardian é o proxy de entrada em vez do squid.
+
+\item[bannedmimetypelist]~\\
+Contém uma lista de \emph{MIME-types} banidos.
+
+Se um pedido a um \emph{URL} retornar um \emph{MIME-type} que esteja
+nesta lista vai ser bloqueado pelo DansGuardian.
+
+Permite, por exemplo, bloquear filmes, ficheiros de música, etc.
+É aconselhável não banir os \emph{MIME-types} text/html ou image/*.
+
+\item[bannedextensionlist]~\\
+Contém uma lista de extensões de ficheiros banidos.
+
+Se um \emph{URL} termina com uma extensão desta lista vai ser
+bloqueado pelo DansGuardian.
+
+\item[bannedregexpurllist]~\\
+Permite banir determinados endereços baseado em expressões regulares.
+\end{description}
+
+\subsubsection{Operações sobre o serviço}
+
+\ServiceCommands{dansguardian}
+
+Para que o serviço se inicie correctamente é necessário que o proxy
+de saída esteja a funcionar.
+
+Todas estas alterações podem ser realizadas no frontend da \textsf{ETFW}.

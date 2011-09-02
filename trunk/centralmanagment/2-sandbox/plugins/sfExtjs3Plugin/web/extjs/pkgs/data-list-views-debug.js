@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -122,6 +122,12 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
      * @cfg {Boolean} trackOver True to enable mouseenter and mouseleave events
      */
     trackOver: false,
+    
+    /**
+     * @cfg {Boolean} blockRefresh Set this to true to ignore datachanged events on the bound store. This is useful if
+     * you wish to provide custom transition animations via a plugin (defaults to false)
+     */
+    blockRefresh: false,
 
     //private
     last: false,
@@ -154,7 +160,7 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
             "click",
             /**
              * @event mouseenter
-             * Fires when the mouse enters a template node. trackOver:true or an overCls must be set to enable this event.
+             * Fires when the mouse enters a template node. trackOver:true or an overClass must be set to enable this event.
              * @param {Ext.DataView} this
              * @param {Number} index The index of the target node
              * @param {HTMLElement} node The target node
@@ -163,7 +169,7 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
             "mouseenter",
             /**
              * @event mouseleave
-             * Fires when the mouse leaves a template node. trackOver:true or an overCls must be set to enable this event.
+             * Fires when the mouse leaves a template node. trackOver:true or an overClass must be set to enable this event.
              * @param {Ext.DataView} this
              * @param {Number} index The index of the target node
              * @param {HTMLElement} node The target node
@@ -252,7 +258,7 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
     /**
      * Refreshes the view by reloading the data from the store and re-rendering the template.
      */
-    refresh : function(){
+    refresh : function() {
         this.clearSelections(false, true);
         var el = this.getTemplateTarget();
         el.update("");
@@ -317,16 +323,18 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
     // private
     onUpdate : function(ds, record){
         var index = this.store.indexOf(record);
-        var sel = this.isSelected(index);
-        var original = this.all.elements[index];
-        var node = this.bufferRender([record], index)[0];
+        if(index > -1){
+            var sel = this.isSelected(index);
+            var original = this.all.elements[index];
+            var node = this.bufferRender([record], index)[0];
 
-        this.all.replaceElement(index, node, true);
-        if(sel){
-            this.selected.replaceElement(original, node);
-            this.all.item(index).addClass(this.selectedClass);
+            this.all.replaceElement(index, node, true);
+            if(sel){
+                this.selected.replaceElement(original, node);
+                this.all.item(index).addClass(this.selectedClass);
+            }
+            this.updateIndexes(index, index);
         }
-        this.updateIndexes(index, index);
     },
 
     // private
@@ -388,14 +396,18 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
      */
     bindStore : function(store, initial){
         if(!initial && this.store){
-            this.store.un("beforeload", this.onBeforeLoad, this);
-            this.store.un("datachanged", this.refresh, this);
-            this.store.un("add", this.onAdd, this);
-            this.store.un("remove", this.onRemove, this);
-            this.store.un("update", this.onUpdate, this);
-            this.store.un("clear", this.refresh, this);
             if(store !== this.store && this.store.autoDestroy){
                 this.store.destroy();
+            }else{
+                this.store.un("beforeload", this.onBeforeLoad, this);
+                this.store.un("datachanged", this.onDataChanged, this);
+                this.store.un("add", this.onAdd, this);
+                this.store.un("remove", this.onRemove, this);
+                this.store.un("update", this.onUpdate, this);
+                this.store.un("clear", this.refresh, this);
+            }
+            if(!store){
+                this.store = null;
             }
         }
         if(store){
@@ -403,7 +415,7 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
             store.on({
                 scope: this,
                 beforeload: this.onBeforeLoad,
-                datachanged: this.refresh,
+                datachanged: this.onDataChanged,
                 add: this.onAdd,
                 remove: this.onRemove,
                 update: this.onUpdate,
@@ -413,6 +425,16 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
         this.store = store;
         if(store){
             this.refresh();
+        }
+    },
+    
+    /**
+     * @private
+     * Calls this.refresh if this.blockRefresh is not true
+     */
+    onDataChanged: function() {
+        if (this.blockRefresh !== true) {
+            this.refresh.apply(this, arguments);
         }
     },
 
@@ -603,7 +625,7 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
 
     /**
      * Returns true if the passed node is selected, else false.
-     * @param {HTMLElement/Number} node The node or node index to check
+     * @param {HTMLElement/Number/Ext.data.Record} node The node, node index or record to check
      * @return {Boolean} True if selected, else false
      */
     isSelected : function(node){
@@ -612,7 +634,7 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
 
     /**
      * Deselects a node.
-     * @param {HTMLElement/Number} node The node to deselect
+     * @param {HTMLElement/Number/Record} node The node, node index or record to deselect
      */
     deselect : function(node){
         if(this.isSelected(node)){
@@ -628,8 +650,8 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
 
     /**
      * Selects a set of nodes.
-     * @param {Array/HTMLElement/String/Number} nodeInfo An HTMLElement template node, index of a template node,
-     * id of a template node or an array of any of those to select
+     * @param {Array/HTMLElement/String/Number/Ext.data.Record} nodeInfo An HTMLElement template node, index of a template node,
+     * id of a template node, record associated with a node or an array of any of those to select
      * @param {Boolean} keepExisting (optional) true to keep existing selections
      * @param {Boolean} suppressEvent (optional) true to skip firing of the selectionchange vent
      */
@@ -677,7 +699,8 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
 
     /**
      * Gets a template node.
-     * @param {HTMLElement/String/Number} nodeInfo An HTMLElement template node, index of a template node or the id of a template node
+     * @param {HTMLElement/String/Number/Ext.data.Record} nodeInfo An HTMLElement template node, index of a template node, 
+     * the id of a template node or the record associated with the node.
      * @return {HTMLElement} The node or null if it wasn't found
      */
     getNode : function(nodeInfo){
@@ -685,6 +708,9 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
             return document.getElementById(nodeInfo);
         }else if(Ext.isNumber(nodeInfo)){
             return this.all.elements[nodeInfo];
+        }else if(nodeInfo instanceof Ext.data.Record){
+            var idx = this.store.indexOf(nodeInfo);
+            return this.all.elements[idx];
         }
         return nodeInfo;
     },
@@ -714,7 +740,8 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
 
     /**
      * Finds the index of the passed node.
-     * @param {HTMLElement/String/Number} nodeInfo An HTMLElement template node, index of a template node or the id of a template node
+     * @param {HTMLElement/String/Number/Record} nodeInfo An HTMLElement template node, index of a template node, the id of a template node
+     * or a record associated with a node.
      * @return {Number} The index of the node or -1
      */
     indexOf : function(node){
@@ -735,6 +762,8 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
     },
 
     onDestroy : function(){
+        this.all.clear();
+        this.selected.clear();
         Ext.DataView.superclass.onDestroy.call(this);
         this.bindStore(null);
     }
@@ -746,10 +775,11 @@ Ext.DataView = Ext.extend(Ext.BoxComponent, {
  */
 Ext.DataView.prototype.setStore = Ext.DataView.prototype.bindStore;
 
-Ext.reg('dataview', Ext.DataView);/**
- * @class Ext.ListView
+Ext.reg('dataview', Ext.DataView);
+/**
+ * @class Ext.list.ListView
  * @extends Ext.DataView
- * <p>Ext.ListView is a fast and light-weight implentation of a
+ * <p>Ext.list.ListView is a fast and light-weight implentation of a
  * {@link Ext.grid.GridPanel Grid} like view with the following characteristics:</p>
  * <div class="mdetail-params"><ul>
  * <li>resizable columns</li>
@@ -778,7 +808,7 @@ Ext.reg('dataview', Ext.DataView);/**
          "url":"images\/thumbs\/zack_sink.jpg"
       }
    ]
-} 
+}
 var store = new Ext.data.JsonStore({
     url: 'get-images.php',
     root: 'images',
@@ -790,7 +820,7 @@ var store = new Ext.data.JsonStore({
 });
 store.load();
 
-var listView = new Ext.ListView({
+var listView = new Ext.list.ListView({
     store: store,
     multiSelect: true,
     emptyText: 'No images to display',
@@ -801,7 +831,7 @@ var listView = new Ext.ListView({
         dataIndex: 'name'
     },{
         header: 'Last Modified',
-        width: .35, 
+        width: .35,
         dataIndex: 'lastmod',
         tpl: '{lastmod:date("m-d h:i a")}'
     },{
@@ -835,7 +865,7 @@ listView.on('selectionchange', function(view, nodes){
  * @param {Object} config
  * @xtype listview
  */
-Ext.ListView = Ext.extend(Ext.DataView, {
+Ext.list.ListView = Ext.extend(Ext.DataView, {
     /**
      * Set this property to <tt>true</tt> to disable the header click handler disabling sort
      * (defaults to <tt>false</tt>).
@@ -851,7 +881,7 @@ Ext.ListView = Ext.extend(Ext.DataView, {
      * @cfg {String} itemSelector
      * Defaults to <tt>'dl'</tt> to work with the preconfigured <b><tt>{@link Ext.DataView#tpl tpl}</tt></b>.
      * This setting specifies the CSS selector (e.g. <tt>div.some-class</tt> or <tt>span:first-child</tt>)
-     * that will be used to determine what nodes the ListView will be working with.   
+     * that will be used to determine what nodes the ListView will be working with.
      */
     itemSelector: 'dl',
     /**
@@ -880,12 +910,13 @@ Ext.ListView = Ext.extend(Ext.DataView, {
      */
     /**
      * @cfg {Number} scrollOffset The amount of space to reserve for the scrollbar (defaults to
-     * <tt>19</tt> pixels)
+     * <tt>undefined</tt>). If an explicit value isn't specified, this will be automatically
+     * calculated.
      */
-    scrollOffset : 19,
+    scrollOffset : undefined,
     /**
      * @cfg {Boolean/Object} columnResize
-     * Specify <tt>true</tt> or specify a configuration object for {@link Ext.ListView.ColumnResizer}
+     * Specify <tt>true</tt> or specify a configuration object for {@link Ext.list.ListView.ColumnResizer}
      * to enable the columns to be resizable (defaults to <tt>true</tt>).
      */
     columnResize: true,
@@ -899,7 +930,7 @@ Ext.ListView = Ext.extend(Ext.DataView, {
     tpl: '{size:fileSize}',
     width: .35
 }
-     * </code></pre> 
+     * </code></pre>
      * Acceptable properties for each column configuration object are:
      * <div class="mdetail-params"><ul>
      * <li><b><tt>align</tt></b> : String<div class="sub-desc">Set the CSS text-align property
@@ -921,7 +952,7 @@ Ext.ListView = Ext.extend(Ext.DataView, {
      */
     /**
      * @cfg {Boolean/Object} columnSort
-     * Specify <tt>true</tt> or specify a configuration object for {@link Ext.ListView.Sorter}
+     * Specify <tt>true</tt> or specify a configuration object for {@link Ext.list.ListView.Sorter}
      * to enable the columns to be sortable (defaults to <tt>true</tt>).
      */
     columnSort: true,
@@ -930,20 +961,25 @@ Ext.ListView = Ext.extend(Ext.DataView, {
      * The template to be used for the header row.  See {@link #tpl} for more details.
      */
 
+    /*
+     * IE has issues when setting percentage based widths to 100%. Default to 99.
+     */
+    maxWidth: Ext.isIE ? 99 : 100,
+
     initComponent : function(){
         if(this.columnResize){
-            this.colResizer = new Ext.ListView.ColumnResizer(this.colResizer);
+            this.colResizer = new Ext.list.ColumnResizer(this.colResizer);
             this.colResizer.init(this);
         }
         if(this.columnSort){
-            this.colSorter = new Ext.ListView.Sorter(this.columnSort);
+            this.colSorter = new Ext.list.Sorter(this.columnSort);
             this.colSorter.init(this);
         }
         if(!this.internalTpl){
             this.internalTpl = new Ext.XTemplate(
                 '<div class="x-list-header"><div class="x-list-header-inner">',
                     '<tpl for="columns">',
-                    '<div style="width:{width}%;text-align:{align};"><em unselectable="on" id="',this.id, '-xlhd-{#}">',
+                    '<div style="width:{[values.width*100]}%;text-align:{align};"><em unselectable="on" id="',this.id, '-xlhd-{#}">',
                         '{header}',
                     '</em></div>',
                     '</tpl>',
@@ -958,7 +994,8 @@ Ext.ListView = Ext.extend(Ext.DataView, {
                 '<tpl for="rows">',
                     '<dl>',
                         '<tpl for="parent.columns">',
-                        '<dt style="width:{width}%;text-align:{align};"><em unselectable="on">',
+                        '<dt style="width:{[values.width*100]}%;text-align:{align};">',
+                        '<em unselectable="on"<tpl if="cls"> class="{cls}</tpl>">',
                             '{[values.tpl.apply(parent)]}',
                         '</em></dt>',
                         '</tpl>',
@@ -967,42 +1004,52 @@ Ext.ListView = Ext.extend(Ext.DataView, {
                 '</tpl>'
             );
         };
-        var cs = this.columns, allocatedWidth = 0, colsWithWidth = 0, len = cs.length;
+
+        var cs = this.columns,
+            allocatedWidth = 0,
+            colsWithWidth = 0,
+            len = cs.length,
+            columns = [];
+
         for(var i = 0; i < len; i++){
             var c = cs[i];
-            if(!c.tpl){
-                c.tpl = new Ext.XTemplate('{' + c.dataIndex + '}');
-            }else if(Ext.isString(c.tpl)){
-                c.tpl = new Ext.XTemplate(c.tpl);
+            if(!c.isColumn) {
+                c.xtype = c.xtype ? (/^lv/.test(c.xtype) ? c.xtype : 'lv' + c.xtype) : 'lvcolumn';
+                c = Ext.create(c);
             }
-            c.align = c.align || 'left';
-            if(Ext.isNumber(c.width)){
-                c.width *= 100;
-                allocatedWidth += c.width;
+            if(c.width) {
+                allocatedWidth += c.width*100;
                 colsWithWidth++;
             }
+            columns.push(c);
         }
+
+        cs = this.columns = columns;
+
         // auto calculate missing column widths
         if(colsWithWidth < len){
             var remaining = len - colsWithWidth;
-            if(allocatedWidth < 100){
-                var perCol = ((100-allocatedWidth) / remaining);
+            if(allocatedWidth < this.maxWidth){
+                var perCol = ((this.maxWidth-allocatedWidth) / remaining)/100;
                 for(var j = 0; j < len; j++){
                     var c = cs[j];
-                    if(!Ext.isNumber(c.width)){
+                    if(!c.width){
                         c.width = perCol;
                     }
                 }
             }
         }
-        Ext.ListView.superclass.initComponent.call(this);
+        Ext.list.ListView.superclass.initComponent.call(this);
     },
 
     onRender : function(){
-        Ext.ListView.superclass.onRender.apply(this, arguments);
+        this.autoEl = {
+            cls: 'x-list-wrap'
+        };
+        Ext.list.ListView.superclass.onRender.apply(this, arguments);
 
         this.internalTpl.overwrite(this.el, {columns: this.columns});
-        
+
         this.innerBody = Ext.get(this.el.dom.childNodes[1].firstChild);
         this.innerHd = Ext.get(this.el.dom.firstChild.firstChild);
 
@@ -1017,7 +1064,7 @@ Ext.ListView = Ext.extend(Ext.DataView, {
 
     /**
      * <p>Function which can be overridden which returns the data object passed to this
-     * view's {@link #tpl template} to render the whole ListView. The returned object 
+     * view's {@link #tpl template} to render the whole ListView. The returned object
      * shall contain the following properties:</p>
      * <div class="mdetail-params"><ul>
      * <li><b>columns</b> : String<div class="sub-desc">See <tt>{@link #columns}</tt></div></li>
@@ -1030,7 +1077,7 @@ Ext.ListView = Ext.extend(Ext.DataView, {
      * XTemplate as described above.
      */
     collectData : function(){
-        var rs = Ext.ListView.superclass.collectData.apply(this, arguments);
+        var rs = Ext.list.ListView.superclass.collectData.apply(this, arguments);
         return {
             columns: this.columns,
             rows: rs
@@ -1046,13 +1093,13 @@ Ext.ListView = Ext.extend(Ext.DataView, {
     // private
     onResize : function(w, h){
         var bd = this.innerBody.dom;
-        var hd = this.innerHd.dom
+        var hd = this.innerHd.dom;
         if(!bd){
             return;
         }
         var bdp = bd.parentNode;
         if(Ext.isNumber(w)){
-            var sw = w - this.scrollOffset;
+            var sw = w - Ext.num(this.scrollOffset, Ext.getScrollBarWidth());
             if(this.reserveScrollOffset || ((bdp.offsetWidth - bdp.clientWidth) > 10)){
                 bd.style.width = sw + 'px';
                 hd.style.width = sw + 'px';
@@ -1067,13 +1114,13 @@ Ext.ListView = Ext.extend(Ext.DataView, {
                 }, 10);
             }
         }
-        if(Ext.isNumber(h == 'number')){
+        if(Ext.isNumber(h)){
             bdp.style.height = (h - hd.parentNode.offsetHeight) + 'px';
         }
     },
 
     updateIndexes : function(){
-        Ext.ListView.superclass.updateIndexes.apply(this, arguments);
+        Ext.list.ListView.superclass.updateIndexes.apply(this, arguments);
         this.verifyInternalSize();
     },
 
@@ -1091,19 +1138,173 @@ Ext.ListView = Ext.extend(Ext.DataView, {
     setHdWidths : function(){
         var els = this.innerHd.dom.getElementsByTagName('div');
         for(var i = 0, cs = this.columns, len = cs.length; i < len; i++){
-            els[i].style.width = cs[i].width + '%';
+            els[i].style.width = (cs[i].width*100) + '%';
         }
     }
 });
 
-Ext.reg('listview', Ext.ListView);/**
- * @class Ext.ListView.ColumnResizer
+Ext.reg('listview', Ext.list.ListView);
+
+// Backwards compatibility alias
+Ext.ListView = Ext.list.ListView;/**
+ * @class Ext.list.Column
+ * <p>This class encapsulates column configuration data to be used in the initialization of a
+ * {@link Ext.list.ListView ListView}.</p>
+ * <p>While subclasses are provided to render data in different ways, this class renders a passed
+ * data field unchanged and is usually used for textual columns.</p>
+ */
+Ext.list.Column = Ext.extend(Object, {
+    /**
+     * @private
+     * @cfg {Boolean} isColumn
+     * Used by ListView constructor method to avoid reprocessing a Column
+     * if <code>isColumn</code> is not set ListView will recreate a new Ext.list.Column
+     * Defaults to true.
+     */
+    isColumn: true,
+    
+    /**
+     * @cfg {String} align
+     * Set the CSS text-align property of the column. Defaults to <tt>'left'</tt>.
+     */        
+    align: 'left',
+    /**
+     * @cfg {String} header Optional. The header text to be used as innerHTML
+     * (html tags are accepted) to display in the ListView.  <b>Note</b>: to
+     * have a clickable header with no text displayed use <tt>'&#160;'</tt>.
+     */    
+    header: '',
+    
+    /**
+     * @cfg {Number} width Optional. Percentage of the container width
+     * this column should be allocated.  Columns that have no width specified will be
+     * allocated with an equal percentage to fill 100% of the container width.  To easily take
+     * advantage of the full container width, leave the width of at least one column undefined.
+     * Note that if you do not want to take up the full width of the container, the width of
+     * every column needs to be explicitly defined.
+     */    
+    width: null,
+
+    /**
+     * @cfg {String} cls Optional. This option can be used to add a CSS class to the cell of each
+     * row for this column.
+     */
+    cls: '',
+    
+    /**
+     * @cfg {String} tpl Optional. Specify a string to pass as the
+     * configuration string for {@link Ext.XTemplate}.  By default an {@link Ext.XTemplate}
+     * will be implicitly created using the <tt>dataIndex</tt>.
+     */
+
+    /**
+     * @cfg {String} dataIndex <p><b>Required</b>. The name of the field in the
+     * ListViews's {@link Ext.data.Store}'s {@link Ext.data.Record} definition from
+     * which to draw the column's value.</p>
+     */
+    
+    constructor : function(c){
+        if(!c.tpl){
+            c.tpl = new Ext.XTemplate('{' + c.dataIndex + '}');
+        }
+        else if(Ext.isString(c.tpl)){
+            c.tpl = new Ext.XTemplate(c.tpl);
+        }
+        
+        Ext.apply(this, c);
+    }
+});
+
+Ext.reg('lvcolumn', Ext.list.Column);
+
+/**
+ * @class Ext.list.NumberColumn
+ * @extends Ext.list.Column
+ * <p>A Column definition class which renders a numeric data field according to a {@link #format} string.  See the
+ * {@link Ext.list.Column#xtype xtype} config option of {@link Ext.list.Column} for more details.</p>
+ */
+Ext.list.NumberColumn = Ext.extend(Ext.list.Column, {
+    /**
+     * @cfg {String} format
+     * A formatting string as used by {@link Ext.util.Format#number} to format a numeric value for this Column
+     * (defaults to <tt>'0,000.00'</tt>).
+     */    
+    format: '0,000.00',
+    
+    constructor : function(c) {
+        c.tpl = c.tpl || new Ext.XTemplate('{' + c.dataIndex + ':number("' + (c.format || this.format) + '")}');       
+        Ext.list.NumberColumn.superclass.constructor.call(this, c);
+    }
+});
+
+Ext.reg('lvnumbercolumn', Ext.list.NumberColumn);
+
+/**
+ * @class Ext.list.DateColumn
+ * @extends Ext.list.Column
+ * <p>A Column definition class which renders a passed date according to the default locale, or a configured
+ * {@link #format}. See the {@link Ext.list.Column#xtype xtype} config option of {@link Ext.list.Column}
+ * for more details.</p>
+ */
+Ext.list.DateColumn = Ext.extend(Ext.list.Column, {
+    format: 'm/d/Y',
+    constructor : function(c) {
+        c.tpl = c.tpl || new Ext.XTemplate('{' + c.dataIndex + ':date("' + (c.format || this.format) + '")}');      
+        Ext.list.DateColumn.superclass.constructor.call(this, c);
+    }
+});
+Ext.reg('lvdatecolumn', Ext.list.DateColumn);
+
+/**
+ * @class Ext.list.BooleanColumn
+ * @extends Ext.list.Column
+ * <p>A Column definition class which renders boolean data fields.  See the {@link Ext.list.Column#xtype xtype}
+ * config option of {@link Ext.list.Column} for more details.</p>
+ */
+Ext.list.BooleanColumn = Ext.extend(Ext.list.Column, {
+    /**
+     * @cfg {String} trueText
+     * The string returned by the renderer when the column value is not falsey (defaults to <tt>'true'</tt>).
+     */
+    trueText: 'true',
+    /**
+     * @cfg {String} falseText
+     * The string returned by the renderer when the column value is falsey (but not undefined) (defaults to
+     * <tt>'false'</tt>).
+     */
+    falseText: 'false',
+    /**
+     * @cfg {String} undefinedText
+     * The string returned by the renderer when the column value is undefined (defaults to <tt>'&#160;'</tt>).
+     */
+    undefinedText: '&#160;',
+    
+    constructor : function(c) {
+        c.tpl = c.tpl || new Ext.XTemplate('{' + c.dataIndex + ':this.format}');
+        
+        var t = this.trueText, f = this.falseText, u = this.undefinedText;
+        c.tpl.format = function(v){
+            if(v === undefined){
+                return u;
+            }
+            if(!v || v === 'false'){
+                return f;
+            }
+            return t;
+        };
+        
+        Ext.list.DateColumn.superclass.constructor.call(this, c);
+    }
+});
+
+Ext.reg('lvbooleancolumn', Ext.list.BooleanColumn);/**
+ * @class Ext.list.ColumnResizer
  * @extends Ext.util.Observable
- * <p>Supporting Class for Ext.ListView.</p>
+ * <p>Supporting Class for Ext.list.ListView</p>
  * @constructor
  * @param {Object} config
  */
-Ext.ListView.ColumnResizer = Ext.extend(Ext.util.Observable, {
+Ext.list.ColumnResizer = Ext.extend(Ext.util.Observable, {
     /**
      * @cfg {Number} minPct The minimum percentage to allot for any column (defaults to <tt>.05</tt>)
      */
@@ -1111,7 +1312,7 @@ Ext.ListView.ColumnResizer = Ext.extend(Ext.util.Observable, {
 
     constructor: function(config){
         Ext.apply(this, config);
-        Ext.ListView.ColumnResizer.superclass.constructor.call(this);
+        Ext.list.ColumnResizer.superclass.constructor.call(this);
     },
     init : function(listView){
         this.view = listView;
@@ -1133,20 +1334,20 @@ Ext.ListView.ColumnResizer = Ext.extend(Ext.util.Observable, {
     },
 
     handleHdMove : function(e, t){
-        var hw = 5;
-        var x = e.getPageX();
-        var hd = e.getTarget('em', 3, true);
+        var hw = 5,
+            x = e.getPageX(),
+            hd = e.getTarget('em', 3, true);
         if(hd){
-            var r = hd.getRegion();
-            var ss = hd.dom.style;
-            var pn = hd.dom.parentNode;
+            var r = hd.getRegion(),
+                ss = hd.dom.style,
+                pn = hd.dom.parentNode;
 
             if(x - r.left <= hw && pn != pn.parentNode.firstChild){
                 this.activeHd = Ext.get(pn.previousSibling.firstChild);
-				ss.cursor = Ext.isWebKit ? 'e-resize' : 'col-resize';
+                ss.cursor = Ext.isWebKit ? 'e-resize' : 'col-resize';
             } else if(r.right - x <= hw && pn != pn.parentNode.lastChild.previousSibling){
                 this.activeHd = hd;
-				ss.cursor = Ext.isWebKit ? 'w-resize' : 'col-resize';
+                ss.cursor = Ext.isWebKit ? 'w-resize' : 'col-resize';
             } else{
                 delete this.activeHd;
                 ss.cursor = '';
@@ -1164,8 +1365,8 @@ Ext.ListView.ColumnResizer = Ext.extend(Ext.util.Observable, {
         this.proxy = this.view.el.createChild({cls:'x-list-resizer'});
         this.proxy.setHeight(this.view.el.getHeight());
 
-        var x = this.tracker.getXY()[0];
-        var w = this.view.innerHd.getWidth();
+        var x = this.tracker.getXY()[0],
+            w = this.view.innerHd.getWidth();
 
         this.hdX = this.dragHd.getX();
         this.hdIndex = this.view.findHeaderIndex(this.dragHd);
@@ -1183,43 +1384,49 @@ Ext.ListView.ColumnResizer = Ext.extend(Ext.util.Observable, {
     },
 
     onEnd: function(e){
+        /* calculate desired width by measuring proxy and then remove it */
         var nw = this.proxy.getWidth();
         this.proxy.remove();
 
-        var index = this.hdIndex;
-        var vw = this.view, cs = vw.columns, len = cs.length;
-        var w = this.view.innerHd.getWidth(), minPct = this.minPct * 100;
-
-        var pct = Math.ceil((nw*100) / w);
-        var diff = cs[index].width - pct;
-        var each = Math.floor(diff / (len-1-index));
-        var mod = diff - (each * (len-1-index));
+        var index = this.hdIndex,
+            vw = this.view,
+            cs = vw.columns,
+            len = cs.length,
+            w = this.view.innerHd.getWidth(),
+            minPct = this.minPct * 100,
+            pct = Math.ceil((nw * vw.maxWidth) / w),
+            diff = (cs[index].width * 100) - pct,
+            eachItem = Math.floor(diff / (len-1-index)),
+            mod = diff - (eachItem * (len-1-index));
 
         for(var i = index+1; i < len; i++){
-            var cw = cs[i].width + each;
-            var ncw = Math.max(minPct, cw);
+            var cw = (cs[i].width * 100) + eachItem,
+                ncw = Math.max(minPct, cw);
             if(cw != ncw){
                 mod += cw - ncw;
             }
-            cs[i].width = ncw;
+            cs[i].width = ncw / 100;
         }
-        cs[index].width = pct;
-        cs[index+1].width += mod;
+        cs[index].width = pct / 100;
+        cs[index+1].width += (mod / 100);
         delete this.dragHd;
-        this.view.setHdWidths();
-        this.view.refresh();
+        vw.setHdWidths();
+        vw.refresh();
         setTimeout(function(){
             vw.disableHeaders = false;
         }, 100);
     }
-});/**
- * @class Ext.ListView.Sorter
+});
+
+// Backwards compatibility alias
+Ext.ListView.ColumnResizer = Ext.list.ColumnResizer;/**
+ * @class Ext.list.Sorter
  * @extends Ext.util.Observable
- * <p>Supporting Class for Ext.ListView.</p>
+ * <p>Supporting Class for Ext.list.ListView</p>
  * @constructor
  * @param {Object} config
  */
-Ext.ListView.Sorter = Ext.extend(Ext.util.Observable, {
+Ext.list.Sorter = Ext.extend(Ext.util.Observable, {
     /**
      * @cfg {Array} sortClasses
      * The CSS classes applied to a header when it is sorted. (defaults to <tt>["sort-asc", "sort-desc"]</tt>)
@@ -1228,7 +1435,7 @@ Ext.ListView.Sorter = Ext.extend(Ext.util.Observable, {
 
     constructor: function(config){
         Ext.apply(this, config);
-        Ext.ListView.Sorter.superclass.constructor.call(this);
+        Ext.list.Sorter.superclass.constructor.call(this);
     },
 
     init : function(listView){
@@ -1276,3 +1483,6 @@ Ext.ListView.Sorter = Ext.extend(Ext.util.Observable, {
         }
     }
 });
+
+// Backwards compatibility alias
+Ext.ListView.Sorter = Ext.list.Sorter;

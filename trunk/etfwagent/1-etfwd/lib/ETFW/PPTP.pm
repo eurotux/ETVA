@@ -24,7 +24,7 @@ package ETFW::PPTP;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 
 BEGIN {
@@ -266,7 +266,7 @@ use strict;
 use FileFuncs;
 use ETFW::PPTP;
 use ETFW::Network;
-use Utils;
+use ETVA::Utils;
 
 BEGIN {
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $CRLF $AUTOLOAD);
@@ -518,7 +518,7 @@ package ETFW::PPTP::Server;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 use ETFW::PPTP;
 

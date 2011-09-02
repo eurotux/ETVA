@@ -21,12 +21,12 @@ class ServerMemory_buffersRRA extends RRA
         
     }
 
-    function ServerMemory_buffersRRA($node,$name){
+    function ServerMemory_buffersRRA($node,$name,$init_rrd=true){
 
         $file = $node.'/'.$name.'__serverMemory_buffers.rrd';
         $this->init_log();
 
-        parent::RRA($file, $this->opts);
+        parent::RRA($file, $this->opts, $init_rrd);
 
         
     }

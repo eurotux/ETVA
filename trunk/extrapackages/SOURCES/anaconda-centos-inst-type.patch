@@ -1,0 +1,53 @@
+diff -uNr anaconda-11.1.2.209__orig/installclasses/rhel.py anaconda-11.1.2.209/installclasses/rhel.py
+--- anaconda-11.1.2.209__orig/installclasses/rhel.py	2010-04-25 04:00:52.293535000 +0000
++++ anaconda-11.1.2.209/installclasses/rhel.py	2010-04-25 04:04:25.643535894 +0000
+@@ -29,23 +29,13 @@
+     if 0: # not productName.startswith("Red Hat Enterprise"):
+         hidden = 1
+ 
+-    taskMap = {'client'        : [(N_("Office"), ["office"]),
+-                                  (N_("Multimedia"), ["graphics", 
+-                                                      "sound-and-video"])],
+-               'server'        : [(N_("Software Development"), 
+-                                   ["development-libs", "development-tools",
+-                                    "gnome-software-development", 
+-                                    "x-software-development"],),
+-                                  (N_("Web server"), ["web-server"])],
+-               'workstation'   : [(N_("Software Development"), 
+-                                   ["development-libs", "development-tools",
+-                                    "gnome-software-development", 
+-                                    "x-software-development"],)],
+-               'vt'            : [(N_("Virtualization"), ["xen"])],
+-               'cluster'       : [(N_("Clustering"), ["clustering"])],
+-               'clusterstorage': [(N_("Storage Clustering"), 
+-                                   ["cluster-storage"])]
+-             }
++    tasks = [(N_("Desktop - Gnome "), ["graphics", "office", "games", "sound-and-video","base-x","gnome-desktop","graphical-internet","printing"]),
++             (N_("Desktop - KDE "), ["graphics", "office", "games", "sound-and-video","base-x","kde-desktop","graphical-internet","printing"]),
++             (N_("Server "), ["server-cfg", "dns-server", "web-server", "ftp-server", "smb-server", "mail-server", "network-server", "legacy-network-server", "news-server"]),
++             (N_("Server - GUI "), ["server-cfg", "dns-server", "web-server", "ftp-server", "smb-server", "mail-server", "network-server", "legacy-network-server", "news-server", "base-x", "gnome-desktop", "admin-tools"]),
++             (N_("Virtualization"), ["virtualization"]),
++             (N_("Clustering"), ["clustering"]),
++             (N_("Storage Clustering"), ["cluster-storage"]) ]
+ 
+     instkeyname = N_("Installation Number")
+     instkeydesc = N_("Would you like to enter an Installation Number "
+@@ -65,6 +55,11 @@
+     def setGroupSelection(self, anaconda):
+         grps = anaconda.backend.getDefaultGroups(anaconda)
+         map(lambda x: anaconda.backend.selectGroup(x), grps)
++        coregrps = ["core", "base", "dialup", "text-internet"]
++        map(lambda x: anaconda.backend.selectGroup(x), coregrps)
++        desktopgrps = ["editors", "graphics", "office", "games", "sound-and-video","base-x","gnome-desktop","graphical-internet","printing"]
++        map(lambda x: anaconda.backend.selectGroup(x), desktopgrps)
++
+ 
+     def setSteps(self, dispatch):
+ 	BaseInstallClass.setSteps(self, dispatch);
+@@ -136,5 +131,5 @@
+         self.repopaths = { "base": "%s" %(productPath,) }
+ 
+         # minimally set up tasks in case no key is provided
+-        self.tasks = self.taskMap[productPath.lower()]
++        # self.tasks = self.taskMap[productPath.lower()]
+ 

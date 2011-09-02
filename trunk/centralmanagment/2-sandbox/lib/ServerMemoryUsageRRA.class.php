@@ -6,7 +6,7 @@ class ServerMemoryUsageRRA extends RRA
     private $step = 300;
     private $node_name;
     private $server_name;
-    static private $name = 'Memory usage';
+    static private $name = 'Memory %';
     
 
     function init_log()
@@ -24,7 +24,7 @@ class ServerMemoryUsageRRA extends RRA
         
     }
 
-    function ServerMemoryUsageRRA($node,$name)
+    function ServerMemoryUsageRRA($node,$name, $init_rrd=true)
     {
         if(!$node || !$name) return;
         $this->node_name = $node;
@@ -33,7 +33,7 @@ class ServerMemoryUsageRRA extends RRA
         $file = $node.'/'.$name.'__serverMemoryUsage.rrd';
         $this->init_log();
 
-        parent::RRA($file, $this->opts);
+        parent::RRA($file, $this->opts, $init_rrd);
 
         
     }
@@ -103,7 +103,7 @@ class ServerMemoryUsageRRA extends RRA
 
         $initial_params = array('--start='.$graph_start,
                            '--end='.$graph_end,
-                           '--title="'.$title.'  '.self::$name.'"');
+                           '--title="'.$title.'"');
 
         $defs = array('DEF:a="'.$this->getFilepath().'":mem_per:AVERAGE');
 

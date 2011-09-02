@@ -23,12 +23,12 @@ class ServerMemoryRRA extends RRA
 
     }
 
-    function ServerMemoryRRA($node,$name){
+    function ServerMemoryRRA($node,$name,$init_rrd=true){
 
         $file = $node.'/'.$name.'__serverMemory.rrd';
         $this->init_log();
 
-        parent::RRA($file, $this->opts);
+        parent::RRA($file, $this->opts, $init_rrd);
 
 
     }
@@ -44,7 +44,7 @@ class ServerMemoryRRA extends RRA
 
         $initial_params = array('--start='.$graph_start,
                            '--end='.$graph_end,
-                           '--title="'.$title.'  '.self::$name.'"');
+                           '--title="'.$title.'"');
 
         $defs = array('DEF:a="'.$this->getFilepath().'":mem_m:AVERAGE',
                       'DEF:b="'.$this->getFilepath().'":mem_v:AVERAGE');
@@ -91,6 +91,10 @@ class ServerMemoryRRA extends RRA
 
 
 
+    }
+
+    static function getName(){
+        return self::$name;
     }
 
     function xportData($graph_start,$graph_end,$step=null)

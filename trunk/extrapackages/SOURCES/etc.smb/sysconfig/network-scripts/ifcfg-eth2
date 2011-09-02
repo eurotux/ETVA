@@ -1,0 +1,5 @@
+DEVICE=eth2
+BOOTPROTO=none
+ONBOOT=yes
+TYPE=Ethernet
+USERCTL=no

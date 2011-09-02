@@ -8,6 +8,8 @@
 # package are under the same license as the package itself.
 #
 # Please submit bug fixes or comments via http://bugs.opensuse.org/
+# NOTE
+# If memory limit error occur increase php memory limit or check /usr/bin/pear for memory limit param
 #
 
 %define peardir %(pear config-get php_dir 2> /dev/null)
@@ -15,8 +17,8 @@
 
 Summary: Symfony is a complete framework designed to optimize the development of web applications
 Name: symfony
-Version: 1.2.4
-Release: 1.2
+Version: 1.4.4
+Release: 1.4
 License: MIT license
 Group: Development/Libraries/Other
 BuildRoot: %{_tmppath}/%{name}-%{version}-build

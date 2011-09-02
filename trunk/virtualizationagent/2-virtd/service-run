@@ -1,3 +1,5 @@
-#!/bin/sh
+#!/bin/bash
 
-exec su -c "cd /srv/etva-vdaemon && /usr/bin/perl virtd > /var/log/etva-vdaemon/virtd.log 2>&1 "
+cd /srv/etva-vdaemon
+exec > /var/log/etva-vdaemon/virtd.log 2>&1
+exec /usr/bin/perl -I./lib/ virtd

@@ -1,0 +1,17 @@
+\subsection{IPSEC}
+
+O \emph{ipsec}\footnote{(IP Security Protocol} é uma extensão do protocolo IP que tem como objectivo o fornecimento de privacidade do utilizador (aumentando a confiabilidade das informações fornecidas pelo mesmo através da Internet), integridade dos dados (garantindo que o mesmo conteúdo que chegou ao destino seja o mesmo da origem) e autenticidade das informações ou \emph{identity spoofing} (garantia de que uma pessoa é quem diz ser), quando se transferem informações através de redes IP pela Internet.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/racoon/racoon.conf
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/init.d/racoon start
+# /etc/init.d/racoon stop
+\end{Verbatim}
+

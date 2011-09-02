@@ -15,47 +15,47 @@ Ext.apply(Ext.form.VTypes, {
 
         return true;
     },
-    lvsizeText : 'Cannot exceed total volume group size'
+    lvsizeText : <?php echo json_encode(__('Cannot exceed total volume group size')) ?>
 });
 
 Ext.ns("lvwin.createForm");
 
 lvwin.createForm.Main = function(node_id) {
 
-    Ext.QuickTips.init();
-   	Ext.form.Field.prototype.msgTarget = 'side';
+    Ext.QuickTips.init();   	
 
     this.node_id = node_id;
 
     this.totalvgsize = new Ext.form.Hidden({
-        id: 'total-vg-size',
+   //     id: 'total-vg-size',
         name:'total-vg-size'
     });
 
     this.lvname = new Ext.form.TextField({        
-        fieldLabel: 'Logical volume name',
+        fieldLabel: <?php echo json_encode(__('Logical volume name')) ?>,
         allowBlank: false,
-        name:'lvname',
+        name:'lvname',        
         maxLength: 50,
+        selectOnFocus:true,
 	    anchor: '90%'
     });
 
 
-    this.lvsize = new Ext.form.TextField({
-        id: 'form-lvsize',
-        fieldLabel: 'Logical volume size',
+    this.lvsize = new Ext.form.NumberField({
+       // id: 'form-lvsize',
+        fieldLabel: <?php echo json_encode(__('Logical volume size (MB)')) ?>,
         name: 'size',
         maxLength: 50,
         vtype: 'lvsize',
         allowBlank: false,
-        totallvsize: 'total-vg-size',
+        totallvsize: this.totalvgsize.id,
+        //'total-vg-size',
 	    anchor: '90%'
     });
 
     this.vg = new Ext.form.ComboBox({
-        
-        readOnly:true
-        ,valueField:'name'
+                
+        valueField:'name'
 
         // could be undefined as we use custom template
         ,displayField:'name'
@@ -70,10 +70,7 @@ lvwin.createForm.Main = function(node_id) {
         ,forceSelection:true
 
         // otherwise we will not receive key events
-        ,enableKeyEvents:true
-
-        // let's use paging combo
-        ,pageSize:5
+        ,enableKeyEvents:true      
 
         // make the drop down list resizable
         ,resizable:true
@@ -109,21 +106,22 @@ lvwin.createForm.Main = function(node_id) {
             }
         })
         // concatenate vgname and size (MB)
-        ,tpl:'<tpl for="."><div class="x-combo-list-item">{name} - Size {[byte_to_MBconvert(values.size,2)]}</div></tpl>'
+        ,tpl:'<tpl for="."><div class="x-combo-list-item">{name} ({[byte_to_MBconvert(values.size,2,"floor")]} MB)</div></tpl>'
 
         // listeners
         ,listeners:{
             // sets raw value to concatenated last and first names
-             select:function(combo, record, index) {
-                var size = byte_to_MBconvert(record.get('size'),2);
-                this.setRawValue(record.get('name') + ' - Size ' + size);              
-                Ext.getCmp('total-vg-size').setValue(size);                
-                Ext.getCmp('form-lvsize').setValue(size);
+             select:{scope:this,fn:function(combo, record, index) {
+                var size = byte_to_MBconvert(record.get('size'),2,'floor');
+                combo.setRawValue(record.get('name') + ' (' + size+' MB)');
+                //Ext.getCmp('total-vg-size').setValue(size);
+                this.totalvgsize.setValue(size);
+                //Ext.getCmp('form-lvsize').setValue(size);
+                this.lvsize.setValue(size);
                 
-            }
-
+            }}
             // repair raw value after blur
-            ,blur:function() {
+            ,blur:function() {                
                 var val = this.getRawValue();
                 this.setRawValue.defer(1, this, [val]);
             }
@@ -132,9 +130,9 @@ lvwin.createForm.Main = function(node_id) {
             ,render:function() {
                 this.el.set(
                     //{qtip:'Type at least ' + this.minChars + ' characters to search in volume group'}
-                    {qtip:'Choose volume group'}
+                    {qtip: <?php echo json_encode(__('Choose volume group')) ?>}
                 );
-                this.validate();
+                //this.validate();
             }
             // requery if field is cleared by typing
             ,keypress:{buffer:100, fn:function() {
@@ -146,7 +144,7 @@ lvwin.createForm.Main = function(node_id) {
         }
 
         // label
-        ,fieldLabel:'Volume Group'
+        ,fieldLabel: <?php echo json_encode(__('Volume Group')) ?>
         ,anchor:'90%'
     });// end this.vg
     
@@ -155,24 +153,30 @@ lvwin.createForm.Main = function(node_id) {
     var allFields = new Ext.form.FieldSet({
         autoHeight:true,
         border:false,
-        labelWidth:130,
+        labelWidth:160,defaults:{msgTarget: 'side'},
         items: [this.lvname, this.vg, this.lvsize]
     });
 
     // define window and pop-up - render formPanel
     lvwin.createForm.Main.superclass.constructor.call(this, {        
-        bodyStyle: 'padding-top:10px;',
+        bodyStyle: 'padding-top:10px;',monitorValid:true,
         items: [allFields],
         buttons: [{
-            text: 'Save',            
+            text: __('Save'),
+            formBind:true,
             handler: this.sendRequest,
             scope: this
             },
             {
-            text: 'Cancel',
+            text: __('Cancel'),
             scope:this,
             handler:function(){this.ownerCt.close();}
             }]// end buttons
+        ,listeners:{
+                render:{delay:100,fn:function(){
+                        this.lvname.focus.defer(500, this.lvname);                                                                  
+                }}
+            }
 
     });// end superclass constructor    
 
@@ -184,7 +188,7 @@ Ext.extend(lvwin.createForm.Main, Ext.form.FormPanel, {
     /*
     * send soap request
     * on success store returned object in DB (lvStoreDB)
-    */
+    */       
     sendRequest:function(){
         // if necessary fields valid...
         if(this.getForm().isValid()){            
@@ -195,21 +199,26 @@ Ext.extend(lvwin.createForm.Main, Ext.form.FormPanel, {
                           'nid':this.node_id,
                           'lv':lvname,
                           'vg':this.vg.getValue(),
-                          'size':this.lvsize.getValue()};
+                          'size':this.lvsize.getValue()+'M'};
 
             var conn = new Ext.data.Connection({
                             listeners:{
                                 // wait message.....
                                 beforerequest:function(){
+
                                     Ext.MessageBox.show({
-                                    title: 'Please wait',
-                                    msg: 'Creating logical volume...',
-                                    width:300,
-                                    wait:true,
-                                    modal: false
+                                        title: <?php echo json_encode(__('Please wait...')) ?>,
+                                        msg: <?php echo json_encode(__('Creating logical volume...')) ?>,
+                                        width:300,
+                                        wait:true,
+                                        modal: false
                                     });
+
                                 },// on request complete hide message
                                 requestcomplete:function(){Ext.MessageBox.hide();}
+                                ,requestexception:function(c,r,o){
+                                        Ext.MessageBox.hide();
+                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
                             }
             });// end conn
 
@@ -220,32 +229,33 @@ Ext.extend(lvwin.createForm.Main, Ext.form.FormPanel, {
                 scope:this,
                 success: function(resp,opt){
                     var response = Ext.util.JSON.decode(resp.responseText);
-                    Ext.ux.Logger.info(response['response']);
-
-                    var tree = Ext.getCmp('lv-tree');
-
-                    //close window
-                    this.ownerCt.close();
-
-                    var node = new Ext.tree.TreeNode({text:lvname,iconCls:'devices-folder'});
-                    tree.root.appendChild(node);
-
-                    Ext.fly(node.ui.elNode).slideIn('l', {
-                        callback: function(){tree.root.reload();},
-                        scope: node,
-                        duration: 0.4
-                    });
-                            
+                    Ext.ux.Logger.info(response['agent'],response['response']);                    
+                    this.fireEvent('updated');                                                
                     
                 },
                 failure: function(resp,opt) {
                     var response = Ext.util.JSON.decode(resp.responseText);
-                    Ext.ux.Logger.error(response['error']);
-
-                    Ext.Msg.show({title: 'Error',
-                                  buttons: Ext.MessageBox.OK,
-                                  msg: 'Unable to create logical volume '+lvname,
-                                  icon: Ext.MessageBox.ERROR});
+                    
+                    if(response)
+                    {
+                        if(response['action']=='reload'){
+                            
+                            Ext.Msg.show({
+                            title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                            buttons: Ext.MessageBox.OK,
+                            msg: String.format(<?php echo json_encode(__('Error reloading logical volume {0}!')) ?>,lvname)+'<br>'+response['info'],
+                            icon: Ext.MessageBox.ERROR});
+                        }
+                        else
+                        {
+                            Ext.Msg.show({
+                                title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                buttons: Ext.MessageBox.OK,
+                                msg: String.format(<?php echo json_encode(__('Unable to create logical volume {0}!')) ?>,lvname)+'<br>'+response['info'],
+                                icon: Ext.MessageBox.ERROR});
+                        }
+                    }
+                                        
                 }
             });// END Ajax request
 

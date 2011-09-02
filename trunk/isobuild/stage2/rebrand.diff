@@ -1,0 +1,10 @@
+--- images2/usr/lib/anaconda/textw/welcome_text.py.orig	2010-09-06 17:08:49.000000000 +0100
++++ images2/usr/lib/anaconda/textw/welcome_text.py	2010-09-06 17:48:20.000000000 +0100
+@@ -19,6 +19,7 @@
+ 
+ class WelcomeWindow:
+     def __call__(self, screen, anaconda):
++        productName = "ETVA"
+         rc = ButtonChoiceWindow(screen, _("%s") % (productName,), 
+                                 _("Welcome to %s!\n\n")
+                                 % (productName, ),

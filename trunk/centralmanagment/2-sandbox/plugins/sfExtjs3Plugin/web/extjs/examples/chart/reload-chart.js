@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -33,6 +33,7 @@ Ext.onReady(function(){
             xtype: 'columnchart',
             store: store,
             yField: 'hits',
+	    url: '../../resources/charts.swf',
             xField: 'month',
             xAxis: new Ext.chart.CategoryAxis({
                 title: 'Month'

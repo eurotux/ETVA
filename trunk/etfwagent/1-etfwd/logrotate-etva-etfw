@@ -1,0 +1,6 @@
+/var/log/etva-etfw/etfwd.log {
+    weekly
+    missingok
+    rotate 4
+    compress
+}

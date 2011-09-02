@@ -1,0 +1,40 @@
+\select@language {portuges}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Esquema geral do ETVA}}{6}{figure.1.1}
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Modelo ETVA Standard}}{7}{figure.1.2}
+\contentsline {figure}{\numberline {1.3}{\ignorespaces Modelo ETVA Enterprise}}{8}{figure.1.3}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Layout principal}}{10}{figure.2.1}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces P\IeC {\'a}gina de autentica\IeC {\c c}\IeC {\~a}o}}{11}{figure.2.2}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Assistente de configura\IeC {\c c}\IeC {\~a}o inicial ({\bf ETVA Enterprise})}}{12}{figure.2.3}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Vista dos nodes do Central Management}}{14}{figure.2.4}
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Vista das redes do sistema e das interfaces de rede}}{15}{figure.2.5}
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de uma Rede}}{16}{figure.2.6}
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o da pool de MAC's}}{16}{figure.2.7}
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Adicionar/Remover NIC's de uma m\IeC {\'a}quina virtual}}{17}{figure.2.8}
+\contentsline {figure}{\numberline {2.9}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do node \emph {VirtAgent01}}}{18}{figure.2.9}
+\contentsline {figure}{\numberline {2.10}{\ignorespaces Lista das m\IeC {\'a}quinas virtuais de um node}}{19}{figure.2.10}
+\contentsline {figure}{\numberline {2.11}{\ignorespaces Server Wizard - Welcome}}{20}{figure.2.11}
+\contentsline {figure}{\numberline {2.12}{\ignorespaces Server Wizard - Virtual Server name}}{21}{figure.2.12}
+\contentsline {figure}{\numberline {2.13}{\ignorespaces Server Wizard - Memory}}{21}{figure.2.13}
+\contentsline {figure}{\numberline {2.14}{\ignorespaces Server Wizard - Processor}}{22}{figure.2.14}
+\contentsline {figure}{\numberline {2.15}{\ignorespaces Server Wizard - Storage}}{23}{figure.2.15}
+\contentsline {figure}{\numberline {2.16}{\ignorespaces Server Wizard - Network Type}}{24}{figure.2.16}
+\contentsline {figure}{\numberline {2.17}{\ignorespaces Server Wizard - Host network}}{24}{figure.2.17}
+\contentsline {figure}{\numberline {2.18}{\ignorespaces Server Wizard - Startup}}{25}{figure.2.18}
+\contentsline {figure}{\numberline {2.19}{\ignorespaces Server Wizard - Finished!}}{26}{figure.2.19}
+\contentsline {figure}{\numberline {2.20}{\ignorespaces Janela de remo\IeC {\c c}\IeC {\~a}o de um server}}{26}{figure.2.20}
+\contentsline {figure}{\numberline {2.21}{\ignorespaces Par\IeC {\^a}metros de arranque de uma m\IeC {\'a}quina virtual}}{27}{figure.2.21}
+\contentsline {figure}{\numberline {2.22}{\ignorespaces Migra\IeC {\c c}\IeC {\~a}o de uma m\IeC {\'a}quina virtual}}{28}{figure.2.22}
+\contentsline {figure}{\numberline {2.23}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o da Storage de um \emph {node}}}{29}{figure.2.23}
+\contentsline {figure}{\numberline {2.24}{\ignorespaces Sub-menu de contexto de um physical volume}}{30}{figure.2.24}
+\contentsline {figure}{\numberline {2.25}{\ignorespaces Sub-menu de contexto de um volume group}}{31}{figure.2.25}
+\contentsline {figure}{\numberline {2.26}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um volume group}}{31}{figure.2.26}
+\contentsline {figure}{\numberline {2.27}{\ignorespaces Extens\IeC {\~a}o de um volume group}}{32}{figure.2.27}
+\contentsline {figure}{\numberline {2.28}{\ignorespaces Sub-menu de contexto de um logical volume}}{33}{figure.2.28}
+\contentsline {figure}{\numberline {2.29}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um logical volume}}{33}{figure.2.29}
+\contentsline {figure}{\numberline {2.30}{\ignorespaces Redimensionamento de um logical volume}}{34}{figure.2.30}
+\contentsline {figure}{\numberline {2.31}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o da m\IeC {\'a}quina virtual \emph {etfww}}}{36}{figure.2.31}
+\contentsline {figure}{\numberline {2.32}{\ignorespaces Estatisticas de uma m\IeC {\'a}quina virtual}}{37}{figure.2.32}
+\contentsline {figure}{\numberline {2.33}{\ignorespaces Estatisticas de \emph {Node Load} pdo node \emph {VirtAgent01} - Date Range}}{38}{figure.2.33}
+\contentsline {figure}{\numberline {2.34}{\ignorespaces Lista das interfaces de um server}}{39}{figure.2.34}

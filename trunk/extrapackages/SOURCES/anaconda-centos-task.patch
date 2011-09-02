@@ -1,0 +1,41 @@
+diff -uNr anaconda-11.1.2.16__orig/iw/task_gui.py anaconda-11.1.2.16/iw/task_gui.py
+--- anaconda-11.1.2.16__orig/iw/task_gui.py	2006-10-09 15:18:02.000000000 +0000
++++ anaconda-11.1.2.16/iw/task_gui.py	2007-03-10 05:11:43.000000000 +0000
+@@ -33,11 +33,14 @@
+             self.dispatch.skipStep("group-selection", skip = 1)
+ 
+         tasks = self.xml.get_widget("taskList").get_model()
++        
++        # Quick hack to handle overlapping groups in tasks for an installclass
++        for (cb, task, grps) in tasks:
++            if not cb:
++                map(self.backend.deselectGroup, grps)
+         for (cb, task, grps) in tasks:
+             if cb:
+                 map(self.backend.selectGroup, grps)
+-            else:
+-                map(self.backend.deselectGroup, grps)
+ 
+         if self.anaconda.id.instClass.allowExtraRepos:
+             repos = self.xml.get_widget("repoList").get_model()
+diff -uNr anaconda-11.1.2.16__orig/textw/task_text.py anaconda-11.1.2.16/textw/task_text.py
+--- anaconda-11.1.2.16__orig/textw/task_text.py	2006-09-05 18:57:39.000000000 +0000
++++ anaconda-11.1.2.16/textw/task_text.py	2007-03-10 05:11:10.000000000 +0000
+@@ -76,12 +76,15 @@
+ 	    anaconda.dispatch.skipStep("group-selection")
+ 
+         sel = ct.getSelection()
++        # quick hack to handle overlapping groups in tasks
++        for (txt, grps) in tasks:
++            if not txt in sel:
++                map(self.backend.deselectGroup, grps)
+         for (txt, grps) in tasks:
+             if txt in sel:
+                 map(self.backend.selectGroup, grps)
+-            else:
+-                map(self.backend.deselectGroup, grps)
+-	screen.popWindow()
++	
++        screen.popWindow()
+ 				 
+         return INSTALL_OK

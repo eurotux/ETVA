@@ -1,0 +1,23 @@
+\subsection{Zimbra}
+
+O serviço de email e colaboração é assegurado pelo Zimbra que pode ser iniciado e terminado com os seguintes comandos:
+
+\begin{verbatim}
+# service zimbra start
+# service zimbra stop
+\end{verbatim}
+
+É possível aceder à interface de administração do zimbra via web no seguinte endereço:
+
+https://<ip\_do\_servidor>:7071/
+
+Este sistema de email fica instalado em /opt/zimbra e os seus \emph{logs} estão alojados em /opt/zimbra/logs.
+Os backups do zimbra, por pre-definição, ficam em /opt/zimbra/backup e são efectuados da seguinte maneira:
+
+\begin{verbatim}
+Backup total semanal
+Backup incremental diário
+Retenção de 1 mês
+\end{verbatim}
+
+Pode ser encontrada mais informação sobre a administração deste produto na página do fabricante em \url{http://www.zimbra.com/products/documentation.html}.

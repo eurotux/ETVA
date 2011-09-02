@@ -1,0 +1,19 @@
+\subsection{QMAIL-POP3S}
+
+O \emph{POP3}\footnote{Post Office Protocol} é um protocolo utilizado no acesso remoto a uma caixa de correio electrónico, tendo o \emph{POP3S} a componente adicional de \emph{SSL}, garantindo assim a segurança na transacção dos dados.
+
+Especificamente este servidor de \emph{POP3} está integrado com o conjunto de software disponibilizado pelo \emph{QMAIL}.
+
+Os ficheiros de configuração deste serviço estão situados na seguinte directoria (Atenção que estes ficheiros são comuns para o conjunto de software disponibilizado pelo \emph{QMAIL}):
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/srv/qmail/control
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -u /service/qmail-pop3s
+# svc -dk /service/qmail-pop3s
+\end{Verbatim}
+

@@ -1,0 +1,20 @@
+\subsection{DNSCACHE}
+
+O \emph{dnscache} consiste num serviço de cache de pedidos de DNS. Onde
+os novos pedidos de resolução de nomes são guardados temporariamente de
+modo a satisfazer pedidos idênticos sem consulta de servidores externos 
+à solução.
+
+Os vários ficheiros de configuração deste serviço encontram-se em:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/dnscache/
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -dk /service/dnscache
+# svc -u /service/dnscache
+\end{Verbatim}
+

@@ -1,0 +1,31 @@
+\subsection{VPN-PPTPD}
+
+Os utilizadores de VPN, bem como os IP's que lhes serão atribuídos podem ser
+configurados no ficheiro \emph{/etc/ppp/chap-secrets}.
+Para adicionar novos utilizadores e alterar utilizadores existentes não é necessário
+reiniciar o serviço de VPN.
+
+Na interface Web também existe a possibilidade de se criarem, removerem e alterarem
+utilizadores conforme se pode observar na Figura~\ref{fig:vpn}, bastando seguir na árvore de navegação lateral a opção ``Rede'' $\rightarrow$ ``Servidor VPN PPTP'' e depois ``Contas PPP''.
+Esta interface apresenta também a opção de desactivar temporariamente um utilizador
+sem remover a sua configuração.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=12cm]{include/img/vpn}
+\end{center}
+\caption{Edição de utilizadores da VPN}
+\label{fig:vpn}
+\end{figure}
+
+Este serviço é automaticamente iniciado no arranque da plataforma, mas pode ser desligado utilizando para isso o seguinte comando via SSH ou na linha de comando:
+
+\begin{verbatim}
+# service pptpd stop
+\end{verbatim}
+
+Pode ser iniciado manualmente através do comando:
+
+\begin{verbatim}
+# service pptpd start
+\end{verbatim}

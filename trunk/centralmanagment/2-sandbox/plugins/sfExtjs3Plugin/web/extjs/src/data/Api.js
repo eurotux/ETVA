@@ -1,9 +1,10 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
+
 /**
  * @class Ext.data.Api
  * @extends Object
@@ -64,8 +65,7 @@ restActions : {
 
         /**
          * Returns true if supplied action-name is a valid API action defined in <code>{@link #actions}</code> constants
-         * @param {String} action
-         * @param {String[]}(Optional) List of available CRUD actions.  Pass in list when executing multiple times for efficiency.
+         * @param {String} action Action to test for availability.
          * @return {Boolean}
          */
         isAction : function(action) {
@@ -97,7 +97,7 @@ restActions : {
         /**
          * Returns true if the supplied API is valid; that is, check that all keys match defined actions
          * otherwise returns an array of mistakes.
-         * @return {String[]||true}
+         * @return {String[]|true}
          */
         isValid : function(api){
             var invalid = [];
@@ -168,7 +168,8 @@ new Ext.data.HttpProxy({
                 proxy.api[action] = proxy.api[action] || proxy.url || proxy.directFn;
                 if (typeof(proxy.api[action]) == 'string') {
                     proxy.api[action] = {
-                        url: proxy.api[action]
+                        url: proxy.api[action],
+                        method: (proxy.restful === true) ? Ext.data.Api.restActions[action] : undefined
                     };
                 }
             }
@@ -182,11 +183,83 @@ new Ext.data.HttpProxy({
         restify : function(proxy) {
             proxy.restful = true;
             for (var verb in this.restActions) {
-                proxy.api[this.actions[verb]].method = this.restActions[verb];
+                proxy.api[this.actions[verb]].method ||
+                    (proxy.api[this.actions[verb]].method = this.restActions[verb]);
             }
+            // TODO: perhaps move this interceptor elsewhere?  like into DataProxy, perhaps?  Placed here
+            // to satisfy initial 3.0 final release of REST features.
+            proxy.onWrite = proxy.onWrite.createInterceptor(function(action, o, response, rs) {
+                var reader = o.reader;
+                var res = new Ext.data.Response({
+                    action: action,
+                    raw: response
+                });
+
+                switch (response.status) {
+                    case 200:   // standard 200 response, send control back to HttpProxy#onWrite by returning true from this intercepted #onWrite
+                        return true;
+                        break;
+                    case 201:   // entity created but no response returned
+                        if (Ext.isEmpty(res.raw.responseText)) {
+                          res.success = true;
+                        } else {
+                          //if the response contains data, treat it like a 200
+                          return true;
+                        }
+                        break;
+                    case 204:  // no-content.  Create a fake response.
+                        res.success = true;
+                        res.data = null;
+                        break;
+                    default:
+                        return true;
+                        break;
+                }
+                if (res.success === true) {
+                    this.fireEvent("write", this, action, res.data, res, rs, o.request.arg);
+                } else {
+                    this.fireEvent('exception', this, 'remote', action, o, res, rs);
+                }
+                o.request.callback.call(o.request.scope, res.data, res, res.success);
+
+                return false;   // <-- false to prevent intercepted function from running.
+            }, proxy);
         }
     };
 })();
+
+/**
+ * Ext.data.Response
+ * Experimental.  Do not use directly.
+ */
+Ext.data.Response = function(params, response) {
+    Ext.apply(this, params, {
+        raw: response
+    });
+};
+Ext.data.Response.prototype = {
+    message : null,
+    success : false,
+    status : null,
+    root : null,
+    raw : null,
+
+    getMessage : function() {
+        return this.message;
+    },
+    getSuccess : function() {
+        return this.success;
+    },
+    getStatus : function() {
+        return this.status;
+    },
+    getRoot : function() {
+        return this.root;
+    },
+    getRawResponse : function() {
+        return this.raw;
+    }
+};
 
 /**
  * @class Ext.data.Api.Error
@@ -208,3 +281,5 @@ Ext.apply(Ext.data.Api.Error.prototype, {
         'execute': 'Attempted to execute an unknown action.  Valid API actions are defined in Ext.data.Api.actions"'
     }
 });
+
+

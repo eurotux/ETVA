@@ -11,8 +11,10 @@ class ServerNetworkRRA extends RRA
     function init_log()
     {
         $this->opts = array("--step",$this->step,
-                            "DS:input:COUNTER:600:U:U",
-                            "DS:output:COUNTER:600:U:U",
+                            "DS:input:DERIVE:600:0:U",
+                            "DS:output:DERIVE:600:0:U",
+                            //"DS:input:COUNTER:600:U:U",
+                            //"DS:output:COUNTER:600:U:U",
                             "RRA:AVERAGE:0.5:1:600", //daily (5 min average)
                             "RRA:AVERAGE:0.5:6:700", // weekly
                             "RRA:AVERAGE:0.5:24:775", // montlhy
@@ -24,12 +26,12 @@ class ServerNetworkRRA extends RRA
         
     }
 
-    function ServerNetworkRRA($node,$name,$interface){
+    function ServerNetworkRRA($node,$name,$interface,$init_rrd=true){
 
         $file = $node.'/'.$name.'__serverNetwork__'.$interface.'.rrd';
         $this->init_log();
 
-        parent::RRA($file, $this->opts);
+        parent::RRA($file, $this->opts, $init_rrd);
 
         
     }
@@ -49,7 +51,7 @@ class ServerNetworkRRA extends RRA
         
         $initial_params = array('--start='.$graph_start,
                            '--end='.$graph_end,
-                           '--title="'.$title.'  '.self::$name.'"');
+                           '--title="'.$title.' - '.self::$name.'"');
         
         $defs = array('DEF:a="'.$this->getFilepath().'":input:AVERAGE',
                       'DEF:b="'.$this->getFilepath().'":output:AVERAGE',

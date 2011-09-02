@@ -17,72 +17,73 @@
 class networkActions extends sfActions
 {
 
-    public function executeInterfacesWin(sfWebRequest $request)
-    {
-      $this->etva_server = EtvaServerPeer::retrieveByPk($request->getParameter('sid'));
+    public function executeNetwork_ManageInterfacesGrid(sfWebRequest $request)
+    {      
       // remove session macs for cleanup the wizard
       $this->getUser()->getAttributeHolder()->remove('macs_in_wizard');
     }
    
     // add network interfaces to server
-    // params: nid
-    //         server
+    // params: sid
     //          json array networks ('port':i,'vlan':vlan,'mac':macaddr)
     public function executeJsonReplace(sfWebRequest $request)
     {
 
-        $nid = $request->getParameter('nid');
-
-        $server = $request->getParameter('server');
+        $sid = $request->getParameter('sid');
 
         $networks = json_decode($request->getParameter('networks'),true);
+        
 
+        if(!$etva_server = EtvaServerPeer::retrieveByPK($sid)){
 
-        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+                $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$sid));
+                $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
 
-                $error = array('success'=>false,'error'=>'No node exist');
+                //notify system log
+                $server_log = Etva::getLogMessage(array('id'=>$sid), EtvaServerPeer::_ERR_NOTFOUND_ID_);
+                $message = Etva::getLogMessage(array('info'=>$server_log), EtvaNetworkPeer::_ERR_REMOVEALL_);
+
+                $this->dispatcher->notify(
+                    new sfEvent('ETVA', 'event.log',
+                        array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
                 // if is a CLI soap request return json encoded data
-                if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($error);
+                if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
 
                 // if is browser request return text renderer
                 $error = $this->setJsonError($error);
                 return $this->renderText($error);
-
         }
-
-        if(!$etva_server = $etva_node->retrieveServerByName($server)){
-
-                $error = array('success'=>false,'error'=>$server.': Server doesnt exist');
-
-                // if is a CLI soap request return json encoded data
-                if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($error);
-
-                // if is browser request return text renderer
-                $error = $this->setJsonError($error);
-                return $this->renderText($error);
-
-        }
-
-
+        
+        $etva_node = $etva_server->getEtvaNode();
         
         $method = 'detachall_interfaces';
 
         $params = array(
-                        'name'=>$etva_server->getName()
+                        'uuid'=>$etva_server->getUuid()
                        );
 
-        $response = $etva_node->soapSend($method,$params);
+        $response = $etva_node->soapSend($method,$params);        
 
         if(!$response['success']){
 
             $error_decoded = $response['error'];
-            $error = 'Deatching '.$server.' interfaces: '.$error_decoded;
+            //$error = 'Detaching '.$server.' interfaces: '.$error_decoded;
 
-            $result = array('success'=>false,'error'=>$error);
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNetworkPeer::_ERR_REMOVEALL_,array('%info%'=>$error_decoded));            
 
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($result);
+            $response['error'] = $msg_i18n;
 
+            $result = $response;
+
+            //notify system log            
+            $message = Etva::getLogMessage(array('info'=>$response['info']), EtvaNetworkPeer::_ERR_REMOVEALL_);
+            $this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));                        
+
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($result);
+            
             $return = $this->setJsonError($result);
             return  $this->renderText($return);
 
@@ -94,7 +95,12 @@ class networkActions extends sfActions
 
         $etva_server->deleteNetworks();
 
-
+        //notify system log
+        $message = Etva::getLogMessage(array('server'=>$etva_server->getName()), EtvaNetworkPeer::_OK_REMOVEALL_);
+        $this->dispatcher->notify(
+            new sfEvent($response['agent'], 'event.log',
+                array('message' => $message)));
+        
         $method = 'attach_interface';
 
         $netSend = array();
@@ -107,7 +113,7 @@ class networkActions extends sfActions
         $network_string = implode(';',$netSend);
 
         $params = array(
-                    'name'=>$etva_server->getName(),
+                    'uuid'=>$etva_server->getUuid(),
                     'network'=>$network_string
                    );
 
@@ -119,23 +125,32 @@ class networkActions extends sfActions
             $returned_status = $response_decoded['_okmsg_'];
 
             foreach ($networks as $network){
-
+                $etva_vlan = EtvaVlanPeer::retrieveByName($network['vlan']);
                 $etva_network = new EtvaNetwork();
                 $etva_network->fromArray($network,BasePeer::TYPE_FIELDNAME);
                 $etva_network->setEtvaServer($etva_server);
+                $etva_network->setEtvaVlan($etva_vlan);
                 $etva_network->save();
 
             }
 
-            $msg = $server.' attached interfaces: '.$returned_status;
+            //$msg = $server.' attached interfaces: '.$returned_status;
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNetworkPeer::_OK_CREATEALL_,array('%server%'=>$etva_server->getName()));
+            $response['response'] = $msg_i18n;
 
-            $result = array('success'=>true,'response'=>$msg);
+            $message = Etva::getLogMessage(array('server'=>$etva_server->getName()), EtvaNetworkPeer::_OK_CREATEALL_);
+            $this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $message)));
+
+            $result = $response;
 
             $return = json_encode($result);
 
             // if the request is made throught soap request...
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return $return;
+            if(sfConfig::get('sf_environment') == 'soap') return $return;
             // if is browser request return text renderer
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
             return  $this->renderText($return);
 
 
@@ -145,13 +160,21 @@ class networkActions extends sfActions
         {
 
             $error_decoded = $response['error'];
-            $error = 'Deatching '.$server.' interfaces: '.$error_decoded;
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNetworkPeer::_ERR_CREATEALL_,array('%info%'=>$error_decoded));
 
-            $result = array('success'=>false,'error'=>$error);
+            //$error = 'Attaching '.$server.' interfaces: '.$error_decoded;
+            $response['error'] = $msg_i18n;
 
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($result);
+            //notify system log
+            $message = Etva::getLogMessage(array('info'=>$response['info']), EtvaNetworkPeer::_ERR_CREATEALL_);
+            $this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
-            $return = $this->setJsonError($result);
+
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($response);
+
+            $return = $this->setJsonError($response);
             return  $this->renderText($return);
 
         }
@@ -163,44 +186,37 @@ class networkActions extends sfActions
     {
 
 
-        $nid = $request->getParameter('nid');
-
-        $server = $request->getParameter('server');
+        $sid = $request->getParameter('sid');
 
         $mac = $request->getParameter('macaddr');
+        
 
+        if(!$etva_server = EtvaServerPeer::retrieveByPK($sid)){
+                $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$sid));
 
-        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+                $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
 
-                $error = array('success'=>false,'error'=>'No node exist');
+                //notify system log
+                $server_log = Etva::getLogMessage(array('id'=>$sid), EtvaServerPeer::_ERR_NOTFOUND_ID_);
+                $message = Etva::getLogMessage(array('name'=>$mac,'info'=>$server_log), EtvaNetworkPeer::_ERR_REMOVE_);
+
+                $this->dispatcher->notify(
+                    new sfEvent('ETVA', 'event.log',
+                        array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
                 // if is a CLI soap request return json encoded data
-                if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($error);
+                if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
 
                 // if is browser request return text renderer
                 $error = $this->setJsonError($error);
                 return $this->renderText($error);
-
         }
-
-        if(!$etva_server = $etva_node->retrieveServerByName($server)){
-
-                $error = array('success'=>false,'error'=>$server.': Server doesnt exist');
-
-                // if is a CLI soap request return json encoded data
-                if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($error);
-
-                // if is browser request return text renderer
-                $error = $this->setJsonError($error);
-                return $this->renderText($error);
-
-        }        
-
-
+        
+        $etva_node = $etva_server->getEtvaNode();
         $method = 'detach_interface';        
 
         $params = array(
-                        'name'=>$etva_server->getName(),
+                        'uuid'=>$etva_server->getUuid(),
                         'macaddr'=>$mac
                        );
 
@@ -213,15 +229,23 @@ class networkActions extends sfActions
 
             $etva_server->deleteNetworkByMac($mac);
 
-            $msg = $mac.': '.$returned_status;
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNetworkPeer::_OK_REMOVE_,array('%name%'=>$mac,'%server%'=>$etva_server->getName()));
 
-            $result = array('success'=>true,'response'=>$msg);
+            $result = $response;
+            $result['response'] = $msg_i18n;
+
+            //notify system log
+            $message = Etva::getLogMessage(array('name'=>$mac,'server'=>$etva_server->getName()), EtvaNetworkPeer::_OK_REMOVE_);
+            $this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $message)));
 
             $return = json_encode($result);
 
             // if the request is made throught soap request...
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return $return;
+            if(sfConfig::get('sf_environment') == 'soap') return $return;
             // if is browser request return text renderer
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
             return  $this->renderText($return);
 
 
@@ -231,11 +255,19 @@ class networkActions extends sfActions
             {
 
             $error_decoded = $response['error'];
-            $error = 'Interface '.$mac.': '.$error_decoded;
+            //$error = 'Interface '.$mac.': '.$error_decoded;
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNetworkPeer::_ERR_REMOVE_,array('%name%'=>$mac, '%info%'=>$error_decoded));
+            $response['error'] = $msg_i18n;
+            
+            //notify system log
+            $message = Etva::getLogMessage(array('name'=>$mac,'info'=>$response['info']), EtvaNetworkPeer::_ERR_REMOVE_);
+            $this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
-            $result = array('success'=>false,'error'=>$error);
+            $result = $response;
 
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($result);
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($result);
 
             $return = $this->setJsonError($result);
             return  $this->renderText($return);
@@ -249,6 +281,11 @@ class networkActions extends sfActions
     public function executeXportRRA(sfWebRequest $request)
     {
         $etva_network = EtvaNetworkPeer::retrieveByPK($request->getParameter('id'));
+        if(!$etva_network){
+            $error = array('success'=>false,'agent'=>'ETVA','error'=>'Network not found');
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
         $etva_server = $etva_network->getEtvaServer();
         $etva_node = $etva_server->getEtvaNode();
 
@@ -257,13 +294,22 @@ class networkActions extends sfActions
         $step = $request->getParameter('step');
 
         $mac_strip = str_replace(':','',$etva_network->getMac());
-        $network_rra = new ServerNetworkRRA($etva_node->getName(),$etva_server->getName(),$mac_strip);
 
-        $this->getResponse()->setContentType('text/xml');
-        $this->getResponse()->setHttpHeader('Content-Type', 'text/xml', TRUE);
-        $this->getResponse()->sendHttpHeaders();
-        $this->getResponse()->setContent($network_rra->xportData($graph_start,$graph_end,$step));
-        return sfView::HEADER_ONLY;     
+        try{
+            $network_rra = new ServerNetworkRRA($etva_node->getUuid(),$etva_server->getUuid(),$mac_strip);
+            $this->getResponse()->setContentType('text/xml');
+            $this->getResponse()->setHttpHeader('Content-Type', 'text/xml', TRUE);
+            $this->getResponse()->sendHttpHeaders();
+            $this->getResponse()->setContent($network_rra->xportData($graph_start,$graph_end,$step));
+            return sfView::HEADER_ONLY;
+
+        }catch(sfException $e){
+            $error = array('success'=>false,'error'=>$e->getMessage());
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+        
+             
         
     }
     
@@ -281,15 +327,20 @@ class networkActions extends sfActions
         $graph_end = $request->getParameter('graph_end');        
 
         $mac_strip = str_replace(':','',$etva_network->getMac());
-        $network_rra = new ServerNetworkRRA($etva_node->getName(),$etva_server->getName(),$mac_strip);
-        $title = $etva_node->getName().'::'.$etva_server->getName().'-'.$etva_network->getTarget();
-        $this->getResponse()->setContentType('image/png');
-        $this->getResponse()->setHttpHeader('Content-Type', 'image/png', TRUE);
-        $this->getResponse()->sendHttpHeaders();
-        $this->getResponse()->setContent(print $network_rra->getGraphImg($title,$graph_start,$graph_end));
-        return sfView::HEADER_ONLY;
 
-
+        try{
+            $network_rra = new ServerNetworkRRA($etva_node->getUuid(),$etva_server->getUuid(),$mac_strip);
+            $title = sprintf("%s :: %s",$etva_server->getName(),$etva_network->getMac());
+            $this->getResponse()->setContentType('image/png');
+            $this->getResponse()->setHttpHeader('Content-Type', 'image/png', TRUE);
+            $this->getResponse()->sendHttpHeaders();
+            $this->getResponse()->setContent(print $network_rra->getGraphImg($title,$graph_start,$graph_end));
+            return sfView::HEADER_ONLY;
+        }catch(sfFileException $e){
+            $error = array('success'=>false,'error'=>$e->getMessage());
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }       
 
     }
     
@@ -360,24 +411,26 @@ class networkActions extends sfActions
         $i=0;
         foreach($etva_network_list as $item){
 
-            $etva_server = $item->getEtvaServer();            
+            $etva_server = $item->getEtvaServer();
+            $etva_vlan = $item->getEtvaVlan();
             
-            if($etva_server){
+            if($etva_server && $etva_vlan){
                 $etva_server_name = $etva_server->getName();
-                $etva_node = $etva_server->getEtvaNode();
-                $etva_node_name = '';
-                $etva_node_name = $etva_node->getName();
+                $etva_server_type = $etva_server->getVmType();
+                $etva_node = $etva_server->getEtvaNode();                
+                $etva_node_name = $etva_node->getName();                
+                $etva_vlan_name = $etva_vlan->getName();
 
                 $elements[$i] = $item->toArray();
                 $elements[$i]['ServerName'] = $etva_server_name;
+                $elements[$i]['VmType'] = $etva_server_type;
                 $elements[$i]['NodeId'] = $etva_node->getId();
                 $elements[$i]['NodeName'] = $etva_node_name;
+                $elements[$i]['Vlan'] = $etva_vlan_name;
 
                 $i++;
             }
-
-            
-           
+                    
         }
         
         $final = array(
@@ -387,7 +440,7 @@ class networkActions extends sfActions
 
         $result = json_encode($final);
 
-        $this->getResponse()->setHttpHeader("X-JSON", '()'); // set a header, (although it is empty, it is nicer than without a correct header. Filling the header with the result will not be parsed by extjs as far as I have seen).
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
 
     }
@@ -437,8 +490,15 @@ class networkActions extends sfActions
         $elements = array();
 
         # Get data from Pager
-        foreach($this->pager->getResults() as $item)
-        $elements[] = $item->toArray();
+        $i = 0;
+        foreach($this->pager->getResults() as $item){
+            $server = $item->getEtvaServer();
+            $server_name = $server->getName();
+            $elements[$i] = $item->toArray();
+            $elements[$i]['ServerName'] = $server_name;
+            $i++;
+        }
+        
 
         $final = array(
                       'total' =>   $this->pager->getNbResults(),
@@ -447,7 +507,7 @@ class networkActions extends sfActions
 
         $result = json_encode($final);
 
-        $this->getResponse()->setHttpHeader("X-JSON", '()'); // set a header, (although it is empty, it is nicer than without a correct header. Filling the header with the result will not be parsed by extjs as far as I have seen).
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
 
     }
@@ -525,9 +585,10 @@ class networkActions extends sfActions
    */
     protected function setJsonError($info,$statusCode = 400){
 
+        if(isset($info['faultcode']) && $info['faultcode']=='TCP') $statusCode = 404;
         $this->getContext()->getResponse()->setStatusCode($statusCode);
         $error = json_encode($info);
-        $this->getContext()->getResponse()->setHttpHeader("X-JSON", '()');
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $error;
 
     }

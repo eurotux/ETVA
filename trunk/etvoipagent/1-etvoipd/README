@@ -1,0 +1,49 @@
+Actualmente o ETVOIP apenas suporta operações do modulo PBX.
+Testado apenas com ligação DB MySQL (por defeito no Asterisk)
+
+Este agente foi testado na versão do freepbx 2.7.0.3.
+Sendo assim, as alterações efectuadas através do agente ETVOIP deverão ser reflectidas no freepbx 2.7.0.3
+
+Features:
+    - Add/edit/delete extension
+        * Supports SIP, IAX2, ZAP devices
+        * Does not set vmx locator voicemail        
+
+    - Add/edit/delete trunk
+        * SIP, IAX2, ZAP
+
+    - Add/edit/delete outbound route
+        * No pinset support
+
+    - Add/edit/delete inbound route
+        * No FAX support
+
+        
+
+
+TODO
+# check_extension_usage($extension)
+Necessita implementar para os restantes modulos do elastix
+Actualmente apenas verifica se a extensão está em uso nos seguintes módulos:
+    - core
+    - dundicheck (não testado)
+    - ringgroups
+    - paging
+    - vmblast
+
+Não verifica nos modulos (do freePBX):
+    - conferences
+    - customappregs    
+    - queues
+
+Voicemail vmx nao suportado
+
+
+OUTBOUND ROUTE
+- PINSET???
+
+INBOUNDROUTE
+- add/edit Fax???
+  on remove inboundroute delete fax
+- supported destinations:
+    Extensions, IVR,Ring group, Voicemail, PB,Terminate Call    

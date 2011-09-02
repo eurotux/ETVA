@@ -5,7 +5,7 @@ package ETFWDispatcher;
 use strict;
 
 use ETFW;
-use Utils;
+use ETVA::Utils;
 
 BEGIN {
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $CRLF $AUTOLOAD);
@@ -20,27 +20,27 @@ sub AUTOLOAD {
     my (%p) = @_;
 
     # get module dispatcher
-    if( my $dispatcher = delete $p{"dispatcher"} ){
-        # load active modules
-        if( !%ActiveETFWMods ){
-            force_loadmodules();
-        }
-        my $pmod = ( $dispatcher =~ m/^ETFW/ )? $dispatcher : $ActiveETFWMods{"$dispatcher"};
-        if( $pmod ){
-            # only ETFW::* is valid
-            eval "require $pmod";
-            if( !$@ ){
-                $AUTOLOAD = sub {
-                                return $pmod->$method( %p );
-                            };
-            } else {
-                die "Module '$pmod' is not available";
-            }
-        } elsif( $AllETFWMods{"$dispatcher"} ){
-            die "Module '$dispatcher' is not available";
+    my $dispatcher = delete $p{"dispatcher"} || 'ETFW';
+
+    # load active modules
+    if( !%ActiveETFWMods ){
+        force_loadmodules();
+    }
+    my $pmod = ( $dispatcher =~ m/^ETFW/ )? $dispatcher : $ActiveETFWMods{"$dispatcher"};
+    if( $pmod ){
+        # only ETFW::* is valid
+        eval "require $pmod";
+        if( !$@ ){
+            $AUTOLOAD = sub {
+                            return $pmod->$method( %p );
+                        };
         } else {
-            die "Module '$dispatcher' is not valid";
+            die "Module '$pmod' is not available";
         }
+    } elsif( $AllETFWMods{"$dispatcher"} ){
+        die "Module '$dispatcher' is not available";
+    } else {
+        die "Module '$dispatcher' is not valid";
     }
     if( $AUTOLOAD ){
         &$AUTOLOAD;

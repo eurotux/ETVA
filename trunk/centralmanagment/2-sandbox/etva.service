@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone='no'?><!--*-nxml-*-->
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+
+<service-group>
+    <name replace-wildcards="yes">%h centralmanagement</name>
+    <service>
+        <type>_etva._tcp</type>
+        <port>80</port>
+    </service>
+<!--    <service>
+	<type>_device-info._tcp</type>
+	<port>0</port>
+	<txt-record>model=RackMac</txt-record>
+    </service>
+-->
+</service-group>

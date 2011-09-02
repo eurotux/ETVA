@@ -1,0 +1,7 @@
+/var/log/etva-vdaemon/virtd.log {
+    weekly
+    missingok
+    rotate 4
+    compress
+}
+

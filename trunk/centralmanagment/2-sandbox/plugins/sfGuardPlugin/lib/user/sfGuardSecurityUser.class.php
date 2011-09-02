@@ -13,7 +13,7 @@
  * @package    symfony
  * @subpackage plugin
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfGuardSecurityUser.class.php 12075 2008-10-08 16:15:03Z noel $
+ * @version    SVN: $Id: sfGuardSecurityUser.class.php 15777 2009-02-25 15:38:34Z hartym $
  */
 class sfGuardSecurityUser extends sfBasicSecurityUser
 {
@@ -47,6 +47,11 @@ class sfGuardSecurityUser extends sfBasicSecurityUser
 
   public function hasCredential($credential, $useAnd = true)
   {
+    if (empty($credential))
+    {
+      return true;
+    }
+
     if (!$this->getGuardUser())
     {
       return false;

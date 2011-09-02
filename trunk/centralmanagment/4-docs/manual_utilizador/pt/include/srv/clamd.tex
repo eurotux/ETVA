@@ -1,0 +1,18 @@
+\subsection{ClamD}
+
+O \emph{ClamD} é um sistema de verificação vírus utilizado normalmente por servidores de email.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/clamd.conf
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/clamd start
+# /etc/rc.d/init.d/clamd stop
+\end{Verbatim}
+
+Este serviço também adiciona uma tarefa agendada diária que vai buscar as novas definições de vírus.

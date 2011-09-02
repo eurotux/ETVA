@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -54,8 +54,7 @@ Ext.onReady(function(){
         }),
         viewConfig: {
             forceFit:true
-        },
-        columnLines: true,
+        },        
         width: 600,
         height: 300,
         plugins: expander,

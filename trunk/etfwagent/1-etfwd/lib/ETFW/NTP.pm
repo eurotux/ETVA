@@ -24,7 +24,7 @@ package ETFW::NTP;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 
 my %CONF = ( 'conf_file'=>'/etc/ntp.conf',

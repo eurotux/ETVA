@@ -1,0 +1,24 @@
+\subsection{Serviço de SMTP -- qmail-smtpd}
+
+O \emph{SMTP}\footnote{Simple Mail Transfer Protocol} é um protocolo relativamente
+simples, baseado em texto simples, onde as mensagens são transferidas de um emissor
+para um ou mais receptores.
+
+Especificamente este servidor de \emph{SMTP} está integrado com o conjunto de software
+disponibilizado pelo \emph{qmail}.
+
+Os ficheiros de configuração deste serviço estão situados na seguinte directoria
+(atenção que estes ficheiros são comuns para o conjunto de software disponibilizado pelo
+\emph{qmail}):
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/srv/qmail/control
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -u /service/qmail-smtpd
+# svc -dk /service/qmail-smtpd
+\end{Verbatim}
+

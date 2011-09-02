@@ -24,7 +24,7 @@ package ETFW::IPSec;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 
 my %CONF = ( "conf_file"=>"/etc/ipsec.conf", "conf_dir"=>"/etc/ipsec.d",

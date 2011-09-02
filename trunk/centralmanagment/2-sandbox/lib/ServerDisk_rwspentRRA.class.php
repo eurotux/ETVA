@@ -27,14 +27,14 @@ class ServerDisk_rwspentRRA extends RRA
         
     }
 
-    function ServerDisk_rwspentRRA($node,$name,$disk)
+    function ServerDisk_rwspentRRA($node,$name,$disk,$init_rrd=true)
     {
         if(!$node || !$name || !$disk) return;
         
         $file = $node.'/'.$name.'__serverDisk_rwspent__'.$disk.'.rrd';
         $this->init_log();
 
-        parent::RRA($file, $this->opts);
+        parent::RRA($file, $this->opts, $init_rrd);
 
         
     }
@@ -55,7 +55,7 @@ class ServerDisk_rwspentRRA extends RRA
 
         $initial_params = array('--start='.$graph_start,
                            '--end='.$graph_end,
-                           '--title="'.$title.'  '.self::$name.'"');
+                           '--title="'.$title.' - '.self::$name.'"');
 
         $defs = array('DEF:a="'.$this->getFilepath().'":rspent:AVERAGE',
                       'DEF:b="'.$this->getFilepath().'":wspent:AVERAGE'

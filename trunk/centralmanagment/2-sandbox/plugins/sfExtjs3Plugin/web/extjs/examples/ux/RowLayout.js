@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -73,28 +73,62 @@ Ext.ux.layout.RowLayout = Ext.extend(Ext.layout.ContainerLayout, {
     // private
     monitorResize:true,
 
+    type: 'row',
+
+    // private
+    allowContainerRemove: false,
+
     // private
     isValidParent : function(c, target){
-        return c.getEl().dom.parentNode == this.innerCt.dom;
+        return this.innerCt && c.getPositionEl().dom.parentNode == this.innerCt.dom;
+    },
+
+    getLayoutTargetSize : function() {
+        var target = this.container.getLayoutTarget(), ret;
+        if (target) {
+            ret = target.getViewSize();
+
+            // IE in strict mode will return a height of 0 on the 1st pass of getViewSize.
+            // Use getStyleSize to verify the 0 height, the adjustment pass will then work properly
+            // with getViewSize
+            if (Ext.isIE && Ext.isStrict && ret.height == 0){
+                ret =  target.getStyleSize();
+            }
+
+            ret.width -= target.getPadding('lr');
+            ret.height -= target.getPadding('tb');
+        }
+        return ret;
+    },
+
+    renderAll : function(ct, target) {
+        if(!this.innerCt){
+            // the innerCt prevents wrapping and shuffling while
+            // the container is resizing
+            this.innerCt = target.createChild({cls:'x-column-inner'});
+            this.innerCt.createChild({cls:'x-clear'});
+        }
+        Ext.layout.ColumnLayout.superclass.renderAll.call(this, ct, this.innerCt);
     },
 
     // private
     onLayout : function(ct, target){
-        var rs = ct.items.items, len = rs.length, r, i;
+        var rs = ct.items.items,
+            len = rs.length,
+            r,
+            m,
+            i,
+            margins = [];
 
-        if(!this.innerCt){
-            target.addClass('ux-row-layout-ct');
-            this.innerCt = target.createChild({cls:'x-row-inner'});
-        }
-        this.renderAll(ct, this.innerCt);
+        this.renderAll(ct, target);
 
-        var size = target.getViewSize();
+        var size = this.getLayoutTargetSize();
 
         if(size.width < 1 && size.height < 1){ // display none?
             return;
         }
 
-        var h = size.height - target.getPadding('tb'),
+        var h = size.height,
             ph = h;
 
         this.innerCt.setSize({height:h});
@@ -104,8 +138,10 @@ Ext.ux.layout.RowLayout = Ext.extend(Ext.layout.ContainerLayout, {
 
         for(i = 0; i < len; i++){
             r = rs[i];
+            m = r.getPositionEl().getMargins('tb');
+            margins[i] = m;
             if(!r.rowHeight){
-                ph -= (r.getSize().height + r.getEl().getMargins('tb'));
+                ph -= (r.getHeight() + m);
             }
         }
 
@@ -113,10 +149,24 @@ Ext.ux.layout.RowLayout = Ext.extend(Ext.layout.ContainerLayout, {
 
         for(i = 0; i < len; i++){
             r = rs[i];
+            m = margins[i];
             if(r.rowHeight){
-                r.setSize({height: Math.floor(r.rowHeight*ph) - r.getEl().getMargins('tb')});
+                r.setSize({height: Math.floor(r.rowHeight*ph) - m});
             }
         }
+
+        // Browsers differ as to when they account for scrollbars.  We need to re-measure to see if the scrollbar
+        // spaces were accounted for properly.  If not, re-layout.
+        if (Ext.isIE) {
+            if (i = target.getStyle('overflow') && i != 'hidden' && !this.adjustmentPass) {
+                var ts = this.getLayoutTargetSize();
+                if (ts.width != size.width){
+                    this.adjustmentPass = true;
+                    this.onLayout(ct, target);
+                }
+            }
+        }
+        delete this.adjustmentPass;
     }
 
     /**

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /srv/lcdagent
+exec > /var/log/lcdagent/lcdagent.log 2>&1
+CFG_FILE="/etc/sysconfig/lcdagent/lcdagent.ini" \
+    exec /usr/bin/perl lcdagentd

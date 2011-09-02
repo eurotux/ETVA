@@ -1,0 +1,51 @@
+diff -uNr anaconda-11.1.2.87__orig/installclasses/rhel.py anaconda-11.1.2.87/installclasses/rhel.py
+--- anaconda-11.1.2.87__orig/installclasses/rhel.py	2007-07-12 20:35:46.000000000 +0100
++++ anaconda-11.1.2.87/installclasses/rhel.py	2007-11-14 01:08:34.000000000 +0000
+@@ -17,15 +17,15 @@
+ # custom installs are easy :-)
+ class InstallClass(BaseInstallClass):
+     # name has underscore used for mnemonics, strip if you dont need it
+-    id = "rhel"
+-    name = N_("Red Hat Enterprise Linux")
++    id = "centos"
++    name = N_("CentOS Linux")
+     _description = N_("The default installation of %s includes a set of "
+                      "software applicable for general internet usage. "
+                      "What additional tasks would you like your system "
+                      "to include support for?")
+     _descriptionFields = (productName,)
+     sortPriority = 10000
+-    allowExtraRepos = False
++    allowExtraRepos = True
+     if 0: # not productName.startswith("Red Hat Enterprise"):
+         hidden = 1
+ 
+diff -uNr anaconda-11.1.2.87__orig/installclasses/rhel.py anaconda-11.1.2.87/installclasses/rhel.py
+--- anaconda-11.1.2.87__orig/installclasses/rhel.py	2007-11-14 01:13:08.000000000 +0000
++++ anaconda-11.1.2.87/installclasses/rhel.py	2007-11-14 01:20:52.000000000 +0000
+@@ -75,25 +75,6 @@
+ 	dispatch.skipStep("partition")
+ 	dispatch.skipStep("regkey", skip = 0)        
+ 
+-    # for rhel, we're putting the metadata under productpath
+-    def getPackagePaths(self, uri):
+-        rc = {}
+-        for (name, path) in self.repopaths.items():
+-            if not type(uri) == types.ListType:
+-                uri = [uri,]
+-            if not type(path) == types.ListType:
+-                path = [path,]
+-
+-            lst = []
+-            for i in uri:
+-                for p in path:
+-                    lst.append("%s/%s" % (i, p))
+-
+-            rc[name] = lst
+-
+-        log.info("package paths is %s" %(rc,))
+-        return rc
+-
+     def handleRegKey(self, key, intf, interactive = True):
+         self.repopaths = { "base": "%s" %(productPath,) }
+         self.tasks = self.taskMap[productPath.lower()]

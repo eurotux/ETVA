@@ -1,0 +1,34 @@
+\subsection{Serviço de DNS -- djbdns}
+
+O servidor de \emph{DNS}\footnote{Domain Name System - Sistema de Nomes de Domínios} utilizado neste caso é o Servidor \emph{djbdns}.
+
+O \emph{djbdns} divide-se essencialmente em componentes:
+\begin{description}
+	\item[dnscache:] Componente responsável por realizar queries de dns recursivas. Mantém uma cache de dns, configurável, para mais rápidas respostas. Podem ser definidos quais os servidores a utilizar, bem como associações entre que servidores utilizar mediante o domínio a questionar.
+	\item[tinydns and tinydns-data:] Componente que apenas contém informação autoritativa, não contendo a informação pedida localmente simplesmente não responde. A dase de dados local indica ao tinydns informação sobre determinado domínio.
+	\item[axfrdns:] Componente para efectuar respostas via \emph{TCP}\footnote{Transmission Control Protocol} (porto 53), caso em que uma respostas exceda o tamanho de 512 bytes e para transferências de zona (\emph{AXFR}\footnote{Asynchronous Full Transfer Zone}).
+	\item[axfr-get:] Cliente para transferências de zonas, tipicamente para criar relações do tipo Master-Slave.
+\end{description}
+
+Os ficheiros de configuração deste serviço encontram-se em locais distintos, dependendo do componente a configurar:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/dnscache
+/etc/tinydns
+/etc/axfrdns
+\end{Verbatim}
+
+As zonas podem ser configuradas na seguinte directoria:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/tinydns/root/data
+\end{Verbatim}
+
+Tipicamente o djbdns corre os componentes separadamente em daemontools, e os comandos para controlar este serviço (iniciar/parar/ver estado) são os seguintes:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -u /service/_componente_
+# svc -d /service/_componente_
+# svstat /service/_componente_
+\end{Verbatim}
+

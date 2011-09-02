@@ -1,0 +1,102 @@
+\select@language {portuges}
+\contentsline {chapter}{\numberline {1}\textsf {ETVA}}{10}{chapter.1}
+\contentsline {section}{\numberline {1.1}Descri\IeC {\c c}\IeC {\~a}o}{10}{section.1.1}
+\contentsline {section}{\numberline {1.2}Vers\IeC {\~o}es}{11}{section.1.2}
+\contentsline {chapter}{\numberline {2}\textsf {Instala\IeC {\c c}\IeC {\~a}o}}{13}{chapter.2}
+\contentsline {section}{\numberline {2.1}Vers\IeC {\~a}o standard}{13}{section.2.1}
+\contentsline {chapter}{\numberline {3}\textsf {ETVA Central Management}}{16}{chapter.3}
+\contentsline {section}{\numberline {3.1}Estrutura da interface principal}{16}{section.3.1}
+\contentsline {section}{\numberline {3.2}Primeiro acesso}{18}{section.3.2}
+\contentsline {section}{\numberline {3.3}Main}{19}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}Nodes}{19}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}Redes}{19}{subsection.3.3.2}
+\contentsline {subsubsection}{\numberline {3.3.2.1}Administra\IeC {\c c}\IeC {\~a}o das redes}{20}{subsubsection.3.3.2.1}
+\contentsline {subsubsection}{\numberline {3.3.2.2}Gest\IeC {\~a}o da pool de endere\IeC {\c c}os MAC}{21}{subsubsection.3.3.2.2}
+\contentsline {subsubsection}{\numberline {3.3.2.3}Gest\IeC {\~a}o das interfaces de rede das m\IeC {\'a}quinas virtuais}{21}{subsubsection.3.3.2.3}
+\contentsline {section}{\numberline {3.4}Servidor de virtualiza\IeC {\c c}\IeC {\~a}o}{22}{section.3.4}
+\contentsline {subsection}{\numberline {3.4.1}Informa\IeC {\c c}\IeC {\~a}o do node}{23}{subsection.3.4.1}
+\contentsline {subsection}{\numberline {3.4.2}Servidores}{24}{subsection.3.4.2}
+\contentsline {subsubsection}{\numberline {3.4.2.1}Adicionar m\IeC {\'a}quina virtual}{25}{subsubsection.3.4.2.1}
+\contentsline {subsubsection}{\numberline {3.4.2.2}Editar m\IeC {\'a}quina virtual}{32}{subsubsection.3.4.2.2}
+\contentsline {subsubsection}{\numberline {3.4.2.3}Remover m\IeC {\'a}quina virtual}{34}{subsubsection.3.4.2.3}
+\contentsline {subsubsection}{\numberline {3.4.2.4}Abrir m\IeC {\'a}quina virtual numa consola VNC}{34}{subsubsection.3.4.2.4}
+\contentsline {subsubsection}{\numberline {3.4.2.5}Iniciar/parar m\IeC {\'a}quina virtual}{35}{subsubsection.3.4.2.5}
+\contentsline {subsubsection}{\numberline {3.4.2.6}Migrar m\IeC {\'a}quina virtual}{35}{subsubsection.3.4.2.6}
+\contentsline {subsection}{\numberline {3.4.3}Armazenamento}{36}{subsection.3.4.3}
+\contentsline {subsubsection}{\numberline {3.4.3.1}Administra\IeC {\c c}\IeC {\~a}o de Physical Volumes}{37}{subsubsection.3.4.3.1}
+\contentsline {subsubsection}{\numberline {3.4.3.2}Administra\IeC {\c c}\IeC {\~a}o de Volume Groups}{38}{subsubsection.3.4.3.2}
+\contentsline {subsubsection}{\numberline {3.4.3.3}Administra\IeC {\c c}\IeC {\~a}o de Logical Volumes}{40}{subsubsection.3.4.3.3}
+\contentsline {section}{\numberline {3.5}M\IeC {\'a}quina virtual}{43}{section.3.5}
+\contentsline {subsection}{\numberline {3.5.1}Informa\IeC {\c c}\IeC {\~a}o do servidor}{43}{subsection.3.5.1}
+\contentsline {subsection}{\numberline {3.5.2}Estat\IeC {\'\i }sticas}{44}{subsection.3.5.2}
+\contentsline {subsection}{\numberline {3.5.3}Servi\IeC {\c c}os}{45}{subsection.3.5.3}
+\contentsline {section}{\numberline {3.6}Ferramentas}{45}{section.3.6}
+\contentsline {subsection}{\numberline {3.6.1}Importar OVF}{46}{subsection.3.6.1}
+\contentsline {subsection}{\numberline {3.6.2}Exportar OVF}{51}{subsection.3.6.2}
+\contentsline {subsection}{\numberline {3.6.3}Gestor de ISOs}{51}{subsection.3.6.3}
+\contentsline {subsection}{\numberline {3.6.4}Monitoriza\IeC {\c c}\IeC {\~a}o do agente dos nodes}{52}{subsection.3.6.4}
+\contentsline {subsection}{\numberline {3.6.5}Registo de eventos do sistema}{53}{subsection.3.6.5}
+\contentsline {section}{\numberline {3.7}Administra\IeC {\c c}\IeC {\~a}o do sistema}{53}{section.3.7}
+\contentsline {subsection}{\numberline {3.7.1}Assistente de configura\IeC {\c c}\IeC {\~a}o inicial}{54}{subsection.3.7.1}
+\contentsline {subsection}{\numberline {3.7.2}Alterar prefer\IeC {\^e}ncias}{55}{subsection.3.7.2}
+\contentsline {subsection}{\numberline {3.7.3}Admininstra\IeC {\c c}\IeC {\~a}o de utilizadores e permiss\IeC {\~o}es}{56}{subsection.3.7.3}
+\contentsline {chapter}{\numberline {4}\textsf {ETVA Management Agents}}{58}{chapter.4}
+\contentsline {section}{\numberline {4.1}ETFW}{58}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Network setup Wizard}{59}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.2}Edi\IeC {\c c}\IeC {\~a}o de Rede - \textit {Network}}{64}{subsection.4.1.2}
+\contentsline {subsubsection}{\numberline {4.1.2.1}Interfaces de rede}{64}{subsubsection.4.1.2.1}
+\contentsline {subsubsection}{\numberline {4.1.2.2}Routing and gateways}{66}{subsubsection.4.1.2.2}
+\contentsline {subsubsection}{\numberline {4.1.2.3}Host Addresses}{68}{subsubsection.4.1.2.3}
+\contentsline {subsubsection}{\numberline {4.1.2.4}Hostname and DNS Client}{69}{subsubsection.4.1.2.4}
+\contentsline {subsection}{\numberline {4.1.3}Regras \textit {Firewall}}{70}{subsection.4.1.3}
+\contentsline {subsubsection}{\numberline {4.1.3.1}Tabela \textit {Filter} - \textit {Packet Filtering}}{71}{subsubsection.4.1.3.1}
+\contentsline {subsubsection}{\numberline {4.1.3.2}Tabela \textit {NAT} - \textit {Network address translation}}{74}{subsubsection.4.1.3.2}
+\contentsline {subsubsection}{\numberline {4.1.3.3}Tabela \textit {Mangle} - \textit {Packet alteration}}{76}{subsubsection.4.1.3.3}
+\contentsline {subsection}{\numberline {4.1.4}Servidor \textit {DHCP}}{76}{subsection.4.1.4}
+\contentsline {subsection}{\numberline {4.1.5}Servidor \textit {SQUID}}{79}{subsection.4.1.5}
+\contentsline {subsubsection}{\numberline {4.1.5.1}\textit {Ports and Networking}}{80}{subsubsection.4.1.5.1}
+\contentsline {subsubsection}{\numberline {4.1.5.2}\textit {Access Control}}{81}{subsubsection.4.1.5.2}
+\contentsline {subsubsection}{\numberline {4.1.5.3}\textit {Authentication Programs}}{84}{subsubsection.4.1.5.3}
+\contentsline {subsubsection}{\numberline {4.1.5.4}\textit {Other Caches}}{85}{subsubsection.4.1.5.4}
+\contentsline {subsubsection}{\numberline {4.1.5.5}Exemplos de utiliza\IeC {\c c}\IeC {\~a}o}{87}{subsubsection.4.1.5.5}
+\contentsline {subsection}{\numberline {4.1.6}Servidor \textit {SNMP}}{91}{subsection.4.1.6}
+\contentsline {section}{\numberline {4.2}ETMS}{92}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Separador 1 - Servi\IeC {\c c}o}{93}{subsection.4.2.1}
+\contentsline {subsection}{\numberline {4.2.2}Separador 2 - Gerir Dom\IeC {\'\i }nios}{93}{subsection.4.2.2}
+\contentsline {subsubsection}{\numberline {4.2.2.1}Cria\IeC {\c c}\IeC {\~a}o de um Dom\IeC {\'\i }nio}{94}{subsubsection.4.2.2.1}
+\contentsline {subsubsection}{\numberline {4.2.2.2}Edi\IeC {\c c}\IeC {\~a}o de um Dom\IeC {\'\i }nio}{95}{subsubsection.4.2.2.2}
+\contentsline {subsubsection}{\numberline {4.2.2.3}Remo\IeC {\c c}\IeC {\~a}o de um Dom\IeC {\'\i }nio}{96}{subsubsection.4.2.2.3}
+\contentsline {subsection}{\numberline {4.2.3}Gerir Caixas de Correio}{96}{subsection.4.2.3}
+\contentsline {subsubsection}{\numberline {4.2.3.1}Op\IeC {\c c}\IeC {\~a}o Detalhes}{97}{subsubsection.4.2.3.1}
+\contentsline {subsubsection}{\numberline {4.2.3.2}Cria\IeC {\c c}\IeC {\~a}o de \textit {Alias}}{98}{subsubsection.4.2.3.2}
+\contentsline {subsubsection}{\numberline {4.2.3.3}Remo\IeC {\c c}\IeC {\~a}o de \textit {Alias}}{99}{subsubsection.4.2.3.3}
+\contentsline {subsection}{\numberline {4.2.4}Separador 3 - Gerir Caixas de Correio}{99}{subsection.4.2.4}
+\contentsline {subsubsection}{\numberline {4.2.4.1}Pesquisar Caixas de Correio}{99}{subsubsection.4.2.4.1}
+\contentsline {subsubsection}{\numberline {4.2.4.2}Cria\IeC {\c c}\IeC {\~a}o de uma Caixa de Correio}{100}{subsubsection.4.2.4.2}
+\contentsline {subsubsection}{\numberline {4.2.4.3}Edi\IeC {\c c}\IeC {\~a}o de uma Caixa de Correio}{101}{subsubsection.4.2.4.3}
+\contentsline {subsubsection}{\numberline {4.2.4.4}Alterar a Palavra-Chave}{101}{subsubsection.4.2.4.4}
+\contentsline {subsubsection}{\numberline {4.2.4.5}Defini\IeC {\c c}\IeC {\~a}o de Alias para a Caixa de Correio}{102}{subsubsection.4.2.4.5}
+\contentsline {subsubsection}{\numberline {4.2.4.6}Defini\IeC {\c c}\IeC {\~a}o de Caixas de Correio para Encaminhamento}{103}{subsubsection.4.2.4.6}
+\contentsline {subsubsection}{\numberline {4.2.4.7}Caixas de Correio Dispon\IeC {\'\i }veis}{104}{subsubsection.4.2.4.7}
+\contentsline {subsubsection}{\numberline {4.2.4.8}Op\IeC {\c c}\IeC {\~a}o Detalhes}{105}{subsubsection.4.2.4.8}
+\contentsline {subsubsection}{\numberline {4.2.4.9}Remo\IeC {\c c}\IeC {\~a}o de uma Caixa de Correio}{105}{subsubsection.4.2.4.9}
+\contentsline {section}{\numberline {4.3}ETVOIP}{107}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Extens\IeC {\~o}es}{107}{subsection.4.3.1}
+\contentsline {subsubsection}{\numberline {4.3.1.1}Adicionar Extens\IeC {\~a}o}{108}{subsubsection.4.3.1.1}
+\contentsline {subsubsection}{\numberline {4.3.1.2}Editar extens\IeC {\~a}o}{111}{subsubsection.4.3.1.2}
+\contentsline {subsubsection}{\numberline {4.3.1.3}Remover extens\IeC {\~a}o}{111}{subsubsection.4.3.1.3}
+\contentsline {subsection}{\numberline {4.3.2}Trunks}{112}{subsection.4.3.2}
+\contentsline {subsubsection}{\numberline {4.3.2.1}Adicionar Trunk}{112}{subsubsection.4.3.2.1}
+\contentsline {subsubsection}{\numberline {4.3.2.2}Editar trunk}{115}{subsubsection.4.3.2.2}
+\contentsline {subsubsection}{\numberline {4.3.2.3}Remover trunk}{115}{subsubsection.4.3.2.3}
+\contentsline {subsection}{\numberline {4.3.3}Rotas de Sa\IeC {\'\i }da}{116}{subsection.4.3.3}
+\contentsline {subsubsection}{\numberline {4.3.3.1}Adicionar Rota}{117}{subsubsection.4.3.3.1}
+\contentsline {subsubsection}{\numberline {4.3.3.2}Editar rota}{118}{subsubsection.4.3.3.2}
+\contentsline {subsubsection}{\numberline {4.3.3.3}Remover rota}{119}{subsubsection.4.3.3.3}
+\contentsline {subsection}{\numberline {4.3.4}Rotas de Entrada}{119}{subsection.4.3.4}
+\contentsline {subsubsection}{\numberline {4.3.4.1}Adicionar rota}{120}{subsubsection.4.3.4.1}
+\contentsline {subsubsection}{\numberline {4.3.4.2}Editar rota}{121}{subsubsection.4.3.4.2}
+\contentsline {subsubsection}{\numberline {4.3.4.3}Remover rota}{121}{subsubsection.4.3.4.3}
+\contentsline {section}{\numberline {4.4}Primavera}{122}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Instala\IeC {\c c}\IeC {\~a}o}{122}{subsection.4.4.1}
+\contentsline {subsection}{\numberline {4.4.2}Interface}{124}{subsection.4.4.2}

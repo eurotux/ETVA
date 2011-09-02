@@ -19,19 +19,25 @@
         }
     </style>
     <script type="text/javascript">
-       
+
         Ext.onReady(function() {
+          
+            var currentName;
 
-            var replace = function(config){
-                var btns = Ext.getCmp('btns');
+            var replace = function(config, name) {
+              var btns = Ext.getCmp('btns');
+              
+              if (name && name != currentName) {
+                  currentName = name;
+                  
+                  btns.remove(0);
 
-                btns.remove(0);
-
-                btns.add(Ext.apply(config, {
-                    layout:'hbox'
-                }));
-
-                btns.doLayout();
+                  btns.add(Ext.apply(config, {
+                      layout:'hbox'
+                  }));
+              };
+              
+              btns.doLayout();
             }
 
 
@@ -97,7 +103,7 @@
                                         text: 'Button 4',
                                         margins:'0'
                                     }]
-                                });
+                                }, 'spaced');
                             }
                         },{
                             xtype:'button',
@@ -122,7 +128,7 @@
                                         xtype:'button',
                                         text: 'Button 4'
                                     }]
-                                });
+                                }, 'align top');
                             }
                         },{
                             xtype:'button',
@@ -147,7 +153,7 @@
                                         xtype:'button',
                                         text: 'Button 4'
                                     }]
-                                });
+                                }, 'align middle');
                             }
                         },{
                             xtype:'button',
@@ -172,7 +178,7 @@
                                         xtype:'button',
                                         text: 'Button 4'
                                     }]
-                                });
+                                }, 'align stretch');
                             }
                         },{
                             xtype:'button',
@@ -197,7 +203,7 @@
                                         xtype:'button',
                                         text: 'Button 4'
                                     }]
-                                });
+                                }, 'align stretchmax');
                             }
                         }]
                     },{
@@ -215,7 +221,7 @@
                         },
                         items: [{
                             xtype:'button',
-                            text: 'Flex: All even',
+                            text: 'Flex: All even / Align: middle',
                             handler: function(){
                                 replace({
                                     layoutConfig: {
@@ -241,16 +247,16 @@
                                         flex:1,
                                         margins:'0'
                                     }]
-                                });
+                                }, 'flex all even');
                             }
                         },{
                             xtype:'button',
-                            text: 'Flex: Ratio',
+                            text: 'Flex: Ratio / Align: top',
                             handler: function(){
                                 replace({
                                     layoutConfig: {
                                         padding:'5',
-                                        align:'middle'
+                                        align:'top'
                                     },
                                     defaults:{margins:'0 5 0 0'},
                                     items:[{
@@ -271,11 +277,11 @@
                                         flex:3,
                                         margins:'0'
                                     }]
-                                });
+                                }, 'flex ratio');
                             }
                         },{
                             xtype:'button',
-                            text: 'Pack: start',
+                            text: 'Pack: start / Align: middle',
                             handler: function(){
                                 replace({
                                     layoutConfig: {
@@ -297,11 +303,11 @@
                                         xtype:'button',
                                         text: 'Button 4'
                                     }]
-                                });
+                                }, 'pack start');
                             }
                         },{
                             xtype:'button',
-                            text: 'Pack: center',
+                            text: 'Pack: center / Align: middle',
                             handler: function(){
                                 replace({
                                     layoutConfig: {
@@ -324,11 +330,11 @@
                                         text: 'Button 4',
                                         margins:'0'
                                     }]
-                                });
+                                }, 'pack center');
                             }
                         },{
                             xtype:'button',
-                            text: 'Pack: end',
+                            text: 'Pack: end / Align: middle',
                             handler: function(){
                                 replace({
                                     layoutConfig: {
@@ -351,7 +357,7 @@
                                         text: 'Button 4',
                                         margins:'0'
                                     }]
-                                });
+                                }, 'pack end');
                             }
                         }]
                     }]

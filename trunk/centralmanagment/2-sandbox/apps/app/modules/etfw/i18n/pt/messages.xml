@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file source-language="EN" target-language="pt" datatype="plaintext" original="messages" date="2010-08-16T12:09:30Z" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="main_panel">
+        <source>Main panel</source>
+        <target>Painel principal</target>
+      </trans-unit>
+
+      <!-- SNM SERVER -->
+      <!--            -->
+      <trans-unit id="snmp_server">
+        <source>SNMP Server</source>
+        <target>Servidor SNMP</target>
+      </trans-unit>
+      <trans-unit id="add_station">
+        <source>Add station</source>
+        <target>Adicionar estação</target>
+      </trans-unit>
+      <trans-unit id="edit_station">
+        <source>Edit station</source>
+        <target>Editar estação</target>
+      </trans-unit>
+      <trans-unit id="edit_selected_station">
+        <source>Edit selected station</source>
+        <target>Editar estação seleccionada</target>
+      </trans-unit>
+      <trans-unit id="remove_station">
+        <source>Remove station</source>
+        <target>Remover estação</target>
+      </trans-unit>
+      <trans-unit id="remove_selected_station">
+        <source>Remove selected station</source>
+        <target>Remover estação seleccionada</target>
+      </trans-unit>
+      <trans-unit id="system_information">
+        <source>System information</source>
+        <target>Informação do sistema</target>
+      </trans-unit>
+      <trans-unit id="system_location">
+        <source>System location</source>
+        <target>Localização do sistema</target>
+      </trans-unit>
+      <trans-unit id="system_contact">
+        <source>System contact</source>
+        <target>Contacto do sistema</target>
+      </trans-unit>
+      <trans-unit id="trap_information">
+        <source>Trap information</source>
+        <target>Informação de Trap</target>
+      </trans-unit>
+      <trans-unit id="trap_information">
+        <source>Trap server</source>
+        <target>Servidor Trap</target>
+      </trans-unit>
+      <trans-unit id="management_stations">
+        <source>Management stations</source>
+        <target>Estações de gestão</target>
+      </trans-unit>
+      <trans-unit id="updated_snmp">
+        <source>Updated SNMP configuration</source>
+        <target>Atualizada a configuração SNMP</target>
+      </trans-unit>
+      <trans-unit id="updating_snmp">
+        <source>Updating SNMP configuration...</source>
+        <target>Atualizando a configuração SNMP...</target>
+      </trans-unit>
+
+      
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,23 @@
+\subsection{Serviço de DNS -- Bind}
+
+O servidor de \emph{DNS}\footnote{Domain Name System - Sistema de Nomes de Domínios} utilizado neste caso é o Servidor \emph{bind}.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/named.conf
+\end{Verbatim}
+
+As zonas podem ser configuradas na seguinte directoria:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/var/named
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/named start
+# /etc/rc.d/init.d/named stop
+\end{Verbatim}
+

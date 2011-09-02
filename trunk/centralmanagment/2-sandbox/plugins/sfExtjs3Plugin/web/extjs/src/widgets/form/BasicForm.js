@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -34,50 +34,51 @@
  * @param {Mixed} el The form element or its id
  * @param {Object} config Configuration options
  */
-Ext.form.BasicForm = function(el, config){
-    Ext.apply(this, config);
-    if(Ext.isString(this.paramOrder)){
-        this.paramOrder = this.paramOrder.split(/[\s,|]/);
-    }
-    /*
-     * @property items
-     * A {@link Ext.util.MixedCollection MixedCollection) containing all the Ext.form.Fields in this form.
-     * @type MixedCollection
-     */
-    this.items = new Ext.util.MixedCollection(false, function(o){
-        return o.itemId || o.id || (o.id = Ext.id());
-    });
-    this.addEvents(
-        /**
-         * @event beforeaction
-         * Fires before any action is performed. Return false to cancel the action.
-         * @param {Form} this
-         * @param {Action} action The {@link Ext.form.Action} to be performed
-         */
-        'beforeaction',
-        /**
-         * @event actionfailed
-         * Fires when an action fails.
-         * @param {Form} this
-         * @param {Action} action The {@link Ext.form.Action} that failed
-         */
-        'actionfailed',
-        /**
-         * @event actioncomplete
-         * Fires when an action is completed.
-         * @param {Form} this
-         * @param {Action} action The {@link Ext.form.Action} that completed
-         */
-        'actioncomplete'
-    );
+Ext.form.BasicForm = Ext.extend(Ext.util.Observable, {
 
-    if(el){
-        this.initEl(el);
-    }
-    Ext.form.BasicForm.superclass.constructor.call(this);
-};
+    constructor: function(el, config){
+        Ext.apply(this, config);
+        if(Ext.isString(this.paramOrder)){
+            this.paramOrder = this.paramOrder.split(/[\s,|]/);
+        }
+        /**
+         * A {@link Ext.util.MixedCollection MixedCollection} containing all the Ext.form.Fields in this form.
+         * @type MixedCollection
+         * @property items
+         */
+        this.items = new Ext.util.MixedCollection(false, function(o){
+            return o.getItemId();
+        });
+        this.addEvents(
+            /**
+             * @event beforeaction
+             * Fires before any action is performed. Return false to cancel the action.
+             * @param {Form} this
+             * @param {Action} action The {@link Ext.form.Action} to be performed
+             */
+            'beforeaction',
+            /**
+             * @event actionfailed
+             * Fires when an action fails.
+             * @param {Form} this
+             * @param {Action} action The {@link Ext.form.Action} that failed
+             */
+            'actionfailed',
+            /**
+             * @event actioncomplete
+             * Fires when an action is completed.
+             * @param {Form} this
+             * @param {Action} action The {@link Ext.form.Action} that completed
+             */
+            'actioncomplete'
+        );
 
-Ext.extend(Ext.form.BasicForm, Ext.util.Observable, {
+        if(el){
+            this.initEl(el);
+        }
+        Ext.form.BasicForm.superclass.constructor.call(this);
+    },
+
     /**
      * @cfg {String} method
      * The request method to use (GET or POST) for form actions if one isn't supplied in the action options.
@@ -184,6 +185,11 @@ paramOrder: 'param1|param2|param'
      */
     paramsAsHash: false,
 
+    /**
+     * @cfg {String} waitTitle
+     * The default title to show for the waiting message box (defaults to <tt>'Please Wait...'</tt>)
+     */
+    waitTitle: 'Please Wait...',
 
     // private
     activeAction : null,
@@ -195,23 +201,21 @@ paramOrder: 'param1|param2|param'
     trackResetOnLoad : false,
 
     /**
-     * @cfg {Boolean} standardSubmit If set to true, standard HTML form submits are used instead of XHR (Ajax) style
-     * form submissions. (defaults to false)<br>
-     * <p><b>Note:</b> When using standardSubmit, the options to {@link #submit} are ignored because Ext's
-     * Ajax infrastracture is bypassed. To pass extra parameters (baseParams and params), you will need to
-     * create hidden fields within the form.</p>
-     * <p>The url config option is also bypassed, so set the action as well:</p>
-     * <pre><code>
-PANEL.getForm().getEl().dom.action = 'URL'
-     * </code></pre>
-     * An example encapsulating the above:
+     * @cfg {Boolean} standardSubmit
+     * <p>If set to <tt>true</tt>, standard HTML form submits are used instead
+     * of XHR (Ajax) style form submissions. Defaults to <tt>false</tt>.</p>
+     * <br><p><b>Note:</b> When using <code>standardSubmit</code>, the
+     * <code>options</code> to <code>{@link #submit}</code> are ignored because
+     * Ext's Ajax infrastracture is bypassed. To pass extra parameters (e.g.
+     * <code>baseParams</code> and <code>params</code>), utilize hidden fields
+     * to submit extra data, for example:</p>
      * <pre><code>
 new Ext.FormPanel({
     standardSubmit: true,
     baseParams: {
         foo: 'bar'
     },
-    url: 'myProcess.php',
+    {@link url}: 'myProcess.php',
     items: [{
         xtype: 'textfield',
         name: 'userName'
@@ -219,21 +223,25 @@ new Ext.FormPanel({
     buttons: [{
         text: 'Save',
         handler: function(){
-            var O = this.ownerCt;
-            if (O.getForm().isValid()) {
-                if (O.url)
-                    O.getForm().getEl().dom.action = O.url;
-                if (O.baseParams) {
-                    for (i in O.baseParams) {
-                        O.add({
+            var fp = this.ownerCt.ownerCt,
+                form = fp.getForm();
+            if (form.isValid()) {
+                // check if there are baseParams and if
+                // hiddent items have been added already
+                if (fp.baseParams && !fp.paramsAdded) {
+                    // add hidden items for all baseParams
+                    for (i in fp.baseParams) {
+                        fp.add({
                             xtype: 'hidden',
                             name: i,
-                            value: O.baseParams[i]
-                        })
+                            value: fp.baseParams[i]
+                        });
                     }
-                    O.doLayout();
+                    fp.doLayout();
+                    // set a custom flag to prevent re-adding
+                    fp.paramsAdded = true;
                 }
-                O.getForm().submit();
+                form.{@link #submit}();
             }
         }
     }]
@@ -270,15 +278,20 @@ new Ext.FormPanel({
         e.stopEvent();
     },
 
-    // private
-    destroy: function() {
-        this.items.each(function(f){
-            Ext.destroy(f);
-        });
-        if(this.el){
-            this.el.removeAllListeners();
-            this.el.remove();
+    /**
+     * Destroys this object.
+     * @private
+     * @param {Boolean} bound true if the object is bound to a form panel. If this is the case
+     * the FormPanel will take care of destroying certain things, so we're just doubling up.
+     */
+    destroy: function(bound){
+        if(bound !== true){
+            this.items.each(function(f){
+                Ext.destroy(f);
+            });
+            Ext.destroy(this.el);
         }
+        this.items.clear();
         this.purgeListeners();
     },
 
@@ -427,10 +440,15 @@ myFormPanel.getForm().submit({
      * @return {BasicForm} this
      */
     submit : function(options){
+        options = options || {};
         if(this.standardSubmit){
-            var v = this.isValid();
+            var v = options.clientValidation === false || this.isValid();
             if(v){
-                this.el.dom.submit();
+                var el = this.el.dom;
+                if(this.url && Ext.isEmpty(el.action)){
+                    el.action = this.url;
+                }
+                el.submit();
             }
             return v;
         }
@@ -482,6 +500,12 @@ myFormPanel.getForm().submit({
 
     // private
     beforeAction : function(action){
+        // Call HtmlEditor's syncValue before actions
+        this.items.each(function(f){
+            if(f.isFormField && f.syncValue){
+                f.syncValue();
+            }
+        });
         var o = action.options;
         if(o.waitMsg){
             if(this.waitMsgTarget === true){
@@ -490,7 +514,7 @@ myFormPanel.getForm().submit({
                 this.waitMsgTarget = Ext.get(this.waitMsgTarget);
                 this.waitMsgTarget.mask(o.waitMsg, 'x-mask-loading');
             }else{
-                Ext.MessageBox.wait(o.waitMsg, o.waitTitle || this.waitTitle || 'Please Wait...');
+                Ext.MessageBox.wait(o.waitMsg, o.waitTitle || this.waitTitle);
             }
         }
     },
@@ -527,15 +551,23 @@ myFormPanel.getForm().submit({
      * {@link Ext.grid.Column#dataIndex dataIndex}, {@link Ext.form.Field#getName name or hiddenName}).
      * @return Field
      */
-    findField : function(id){
+    findField : function(id) {
         var field = this.items.get(id);
-        if(!Ext.isObject(field)){
-            this.items.each(function(f){
-                if(f.isFormField && (f.dataIndex == id || f.id == id || f.getName() == id)){
-                    field = f;
-                    return false;
+
+        if (!Ext.isObject(field)) {
+            //searches for the field corresponding to the given id. Used recursively for composite fields
+            var findMatchingField = function(f) {
+                if (f.isFormField) {
+                    if (f.dataIndex == id || f.id == id || f.getName() == id) {
+                        field = f;
+                        return false;
+                    } else if (f.isComposite && f.rendered) {
+                        return f.items.each(findMatchingField);
+                    }
                 }
-            });
+            };
+
+            this.items.each(findMatchingField);
         }
         return field || null;
     },
@@ -547,7 +579,7 @@ myFormPanel.getForm().submit({
      * @return {BasicForm} this
      */
     markInvalid : function(errors){
-        if(Ext.isArray(errors)){
+        if (Ext.isArray(errors)) {
             for(var i = 0, len = errors.length; i < len; i++){
                 var fieldError = errors[i];
                 var f = this.findField(fieldError.id);
@@ -555,7 +587,7 @@ myFormPanel.getForm().submit({
                     f.markInvalid(fieldError.msg);
                 }
             }
-        }else{
+        } else {
             var field, id;
             for(id in errors){
                 if(!Ext.isFunction(errors[id]) && (field = this.findField(id))){
@@ -563,6 +595,7 @@ myFormPanel.getForm().submit({
                 }
             }
         }
+
         return this;
     },
 
@@ -623,10 +656,33 @@ myFormPanel.getForm().submit({
         return Ext.urlDecode(fs);
     },
 
-    getFieldValues : function(){
-        var o = {};
-        this.items.each(function(f){
-           o[f.getName()] = f.getValue();
+    /**
+     * Retrieves the fields in the form as a set of key/value pairs, using the {@link Ext.form.Field#getValue getValue()} method.
+     * If multiple fields exist with the same name they are returned as an array.
+     * @param {Boolean} dirtyOnly (optional) True to return only fields that are dirty.
+     * @return {Object} The values in the form
+     */
+    getFieldValues : function(dirtyOnly){
+        var o = {},
+            n,
+            key,
+            val;
+        this.items.each(function(f) {
+            if (dirtyOnly !== true || f.isDirty()) {
+                n = f.getName();
+                key = o[n];
+                val = f.getValue();
+
+                if(Ext.isDefined(key)){
+                    if(Ext.isArray(key)){
+                        o[n].push(val);
+                    }else{
+                        o[n] = [key, val];
+                    }
+                }else{
+                    o[n] = val;
+                }
+            }
         });
         return o;
     },
@@ -671,7 +727,6 @@ myFormPanel.getForm().submit({
         return this;
     },
 
-
     /**
      * Removes a field from the items collection (does NOT remove its markup).
      * @param {Field} field
@@ -680,6 +735,13 @@ myFormPanel.getForm().submit({
     remove : function(field){
         this.items.remove(field);
         return this;
+    },
+
+    /**
+     * Removes all fields from the collection that have been destroyed.
+     */
+    cleanDestroyed : function() {
+        this.items.filterBy(function(o) { return !!o.isDestroyed; }).each(this.remove, this);
     },
 
     /**

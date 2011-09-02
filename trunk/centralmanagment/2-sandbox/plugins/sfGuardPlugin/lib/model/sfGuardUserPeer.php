@@ -13,8 +13,11 @@
  * @package    symfony
  * @subpackage plugin
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfGuardUserPeer.php 9999 2008-06-29 21:24:44Z fabien $
+ * @version    SVN: $Id: sfGuardUserPeer.php 7634 2008-02-27 18:01:40Z fabien $
  */
 class sfGuardUserPeer extends PluginsfGuardUserPeer
 {
+    const _ERR_NOTFOUND_ID_   = 'User with ID %id% could not be found';
+    const _ERR_CANNOT_DELETE_ = 'User with ID %id% could not be deleted';
+    
 }

@@ -26,7 +26,7 @@ use strict;
 
 use FileFuncs;
 
-my %CONF = ( 'conf_file'=>"/etc/snmp/snmpd.conf", 'conf_dir'=>"/etc/snmp" );
+my %CONF = ( 'conf_file'=>"/etc/snmp/snmpd.conf", 'conf_dir'=>"/etc/snmp", 'snmpd_restart'=>'/etc/init.d/squid restart', 'snmpd_reload'=>'/etc/init.d/squid reload' );
 
 =item get_config
 
@@ -94,6 +94,58 @@ sub get_config {
     my %conf = ( Security=>\%Security, Groups=>\@LGroups, View=>\@LView, Access=>\@LAccess, Directives=>\@LConf );
 
     return wantarray() ? %conf : \%conf;
+}
+
+=item set_config 
+
+=cut
+
+sub set_config {
+    my $self = shift;
+    my (%conf) = @_;
+
+    open(F,">$CONF{'conf_file'}");
+    if( my $ld = $conf{'Directives'} ){
+        for my $D ( @$ld ){
+            print F "$D->{'directive'} $D->{'value'}","\n";
+        }
+    }
+    if( my $ls = $conf{'Security'} ){
+        my @arr_ls = ref($ls) eq 'HASH' ? values %$ls : @$ls;
+        for my $S ( @arr_ls ){
+            print F "com2sec $S->{'secname'} $S->{'source'} $S->{'community'}","\n";
+        }
+    }
+    if( my $lg = $conf{'Groups'} ){
+        for my $G ( @$lg ){
+            print F "group $G->{'groupname'} $G->{'securitymodel'} $G->{'securityname'}","\n";
+        }
+    }
+    if( my $lv = $conf{'View'} ){
+        for my $V ( @$lv ){
+            print F "view $V->{'name'} $V->{'inc_exc'} $V->{'subtree'} $V->{'mask'}","\n";
+        }
+    }
+    if( my $la = $conf{'Access'} ){
+        for my $A ( @$la ){
+            print F "access $A->{'group'} \"$A->{'context'}\" $A->{'secmodel'} $A->{'seclevel'} $A->{'prefix'} $A->{'read'} $A->{'write'} $A->{'notif'}","\n"; 
+        }
+    }
+    close(F);
+
+    return wantarray() ? %conf : \%conf;
+}
+
+=item set_config_n_apply
+
+    set and apply configuration
+
+=cut
+
+sub set_config_n_apply {
+    my $self = shift;
+    $self->set_config(@_);
+    return $self->apply_config();
 }
 
 my @Security_args = qw(secname source community);
@@ -377,6 +429,38 @@ sub del_directive {
         }
         flush_file_lines($file);
     }
+}
+
+=item apply_config
+
+    apply configuration
+
+=cut
+
+sub apply_config {
+    my $self = shift;
+
+    my ($e,$m);
+
+    if( $CONF{'snmpd_reload'} ){
+        ($e,$m) = cmd_exec("$CONF{'snmpd_reload'}");
+    }
+    unless( defined($e) && ( $e == 0 ) ){
+        if( $CONF{'snmpd_restart'} ){
+            ($e,$m) = cmd_exec("$CONF{'snmpd_restart'}");
+        } elsif( -x "/etc/init.d/snmpd" ){
+            ($e,$m) = cmd_exec("/etc/init.d/snmpd reload");
+            unless( $e == 0 ){
+                ($e,$m) = cmd_exec("/etc/init.d/snmpd stop");
+                ($e,$m) = cmd_exec("/etc/init.d/snmpd start");
+            }
+        }
+    }
+    
+    unless( $e == 0 ){
+        return retErr("_ERR_APPLY_CONFIG_","Error apply configuration: $m");
+    }
+    return retOk("_OK_APPLY_CONFIG_","Apply configuration ok.");
 }
 
 1;

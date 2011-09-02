@@ -23,42 +23,33 @@ class macActions extends sfActions
     {
 
     }
-    
-   /**
-   * Returns pre-formated data for Extjs grid with one unused mac address
+
+
+
+    /**
+   * generate one unused mac address
    *
-   * Returns info of one single unused mac
-   * 
-   * @return array json array(mac address info))
+   * returns mac address
+   *
+   * @return string mac
    */
     /*
      * The return result is used to in server creation mac addresses step (wizard)
      */
-    public function executeJsonGetUnused()
-    {        
-
+    public function executeGenerateUnused()
+    {
         $criteria = new Criteria();
 
-        // get SESSION macs 
-        $session_macs = $this->getUser()->getAttribute('macs_in_wizard', array());
-        
-        $macs_in_use = array();
-        foreach($session_macs as $index=>$item){            
-            $macs_in_use[] = $item['Id'];
-        }
+        // get SESSION macs
+        $session_macs = $this->getUser()->getAttribute('macs_in_wizard', array());       
 
-        $criteria->add(EtvaMacPeer::ID, $macs_in_use, Criteria::NOT_IN);
+        $criteria->add(EtvaMacPeer::ID, $session_macs, Criteria::NOT_IN);
         $criteria->add(EtvaMacPeer::IN_USE, 0);
 
         $etva_mac = EtvaMacPeer::doSelectOne($criteria);
+        if(!$etva_mac) return false;
 
-        if(!$etva_mac){
-            $info = array('success'=>false,'error'=>'No macs available in pool');
-            $error = $this->setJsonError($info);
-            return $this->renderText($error);
-        }
-
-        $mac = $etva_mac->toArray();
+        $mac = $etva_mac->getId();
 
 
         // add the current mac at the beginning of the array
@@ -66,10 +57,33 @@ class macActions extends sfActions
 
         // store the new mac back into the session
         $this->getUser()->setAttribute('macs_in_wizard', $session_macs);
+        return $etva_mac->toArray();
+
+    }
+
+   /**
+   * Returns pre-formated data for Extjs grid with one unused mac address
+   *
+   * Returns info of one single unused mac
+   *
+   * @return array json array(mac address info))
+   */
+    /*
+     * The return result is used to in server creation mac addresses step (wizard)
+     */
+    public function executeJsonGetUnused()
+    {
+        $mac = $this->executeGenerateUnused();
+
+        if($mac === false){
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaMacPeer::_ERR_NOMACS_);
+            $info = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+            $error = $this->setJsonError($info);
+            return $this->renderText($error);
+        }
 
         $result = json_encode($mac);
-
-        $this->getResponse()->setHttpHeader("X-JSON", '()'); // set a header, (although it is empty, it is nicer than without a correct header. Filling the header with the result will not be parsed by extjs as far as I have seen).
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
 
 
@@ -92,47 +106,77 @@ class macActions extends sfActions
 
         if(!$isAjax) return $this->redirect('@homepage');
 
-        $macs = $this->generateMacPool($request->getParameter('size'));
+        $macs = $this->generateMacPool($request->getParameter('size'),$request->getParameter('octects'));
 
-        foreach($macs as $mac){
-            $etva_mac = new EtvaMac();
-            $etva_mac->setMac($mac);
-            $etva_mac->save();
-
+        if(!$macs){
+            $result = array('success'=>false,'agent'=>'ETVA','error'=>'No MACS generated!');
+            $return = $this->setJsonError($result);
+            return  $this->renderText($return);
         }
+        
         $result = array('success'=>true);
         $result = json_encode($result);
-
-        $this->getContext()->getResponse()->setHttpHeader("X-JSON", '()'); // set a header, (although it is empty, it is nicer than without a correct header. Filling the header with the result will not be parsed by extjs as far as I have seen).
-
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
 
     }
 
     /**
      * Used to generate random macs
-     * @return array
+     * @return
+     *  1 if successfully generated all pool size elements
+     *  0 if not
      */
-    protected function generateMacPool($pool_size)
+    protected function generateMacPool($pool_size,$octects)
     {
+        $octects = json_decode($octects,true);
+        $oct4 = hexdec($octects['oct4']);
+        $oct5 = hexdec($octects['oct5']);
+        $oct6 = hexdec($octects['oct6']);
 
-        $macs = array();
+        $rand4 = $oct4 ? 0 : 1;
+        $rand5 = $oct5 ? 0 : 1;
+        $rand6 = $oct6 ? 0 : 1;    
 
+        $macs = array();        
         for($i=0;$i<$pool_size;$i++){
-            $rmac = join(":",array(
-                    sprintf('%02x',0x00),
-                    sprintf('%02x',0x16),
-                    sprintf('%02x',0x3e),
-                    sprintf('%02x',mt_rand(1,127)),
-                    sprintf('%02x',mt_rand(1,255)),
-                    sprintf('%02x',mt_rand(1,255))
+            
+            $repeated = 1;
+            $tries = 0;
+
+            while($repeated && ($rand4 || $rand5 || $rand6)){
+
+                $oct4 = $rand4 ? mt_rand(1,127) : $oct4;
+                $oct5 = $rand5 ? mt_rand(1,255) : $oct5;
+                $oct6 = $rand6 ? mt_rand(1,255) : $oct6;
+
+                $rmac = join(":",array(
+
+                    sprintf('%02x',sfConfig::get('mod_mac_default_octects_first')),
+                    sprintf('%02x',sfConfig::get('mod_mac_default_octects_second')),
+                    sprintf('%02x',sfConfig::get('mod_mac_default_octects_third')),
+                    sprintf('%02x',$oct4),
+                    sprintf('%02x',$oct5),
+                    sprintf('%02x',$oct6)
                 ));
-            $macs[] = $rmac;
+
+                $etva_mac = EtvaMacPeer::retrieveByMac($rmac);
+                if(!$etva_mac){
+                    $repeated = 0;                  
+                    $etva_mac = new EtvaMac();
+                    $etva_mac->setMac($rmac);
+                    $etva_mac->save();
+
+
+                }
+                $tries++;
+                if($tries>$pool_size) return 0;
+
+            }
+            
         }
 
-
-
-        return $macs;
+        return 1;
 
     }
 
@@ -180,8 +224,7 @@ class macActions extends sfActions
         );
 
         $result = json_encode($final);
-
-        $this->getResponse()->setHttpHeader("X-JSON", '()'); // set a header, (although it is empty, it is nicer than without a correct header. Filling the header with the result will not be parsed by extjs as far as I have seen).
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
 
     }
@@ -197,7 +240,7 @@ class macActions extends sfActions
 
         $this->getContext()->getResponse()->setStatusCode($statusCode);
         $error = json_encode($info);
-        $this->getContext()->getResponse()->setHttpHeader("X-JSON", '()');
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $error;
 
     }

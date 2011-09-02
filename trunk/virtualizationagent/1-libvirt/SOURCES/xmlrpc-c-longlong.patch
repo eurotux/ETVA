@@ -1,0 +1,110 @@
+From 17701db33a5bbf34861a4fffb174dc62907a57f4 Mon Sep 17 00:00:00 2001
+From: Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+Date: Sat, 5 Apr 2008 11:41:34 +0200
+Subject: [PATCH 3/5] Use proper datatypes for 'long long'
+
+xmlrpc-c uses 'long long' at some places (e.g. in printf
+statements with PRId64) under the assumption that it has a
+width of exactly 64 bits.
+
+On 64 bit machines 'long long' has a width of 128 bit and
+will cause overhead both in memory and cpu usage there. As
+'long long' is used only to handle <i8> datatypes, the patch
+uses a plain 64 integer type there.
+
+It is arguable whether 'int_least64_t' (and 'int_least32_t')
+would be a better choice for 'int64_t' (and 'int32_t'), but
+for now, the patch uses datatypes with exact widths.
+---
+ include/xmlrpc-c/base.h |   10 ++++++----
+ src/cpp/param_list.cpp  |    8 ++++----
+ src/cpp/value.cpp       |    2 +-
+ 3 files changed, 11 insertions(+), 9 deletions(-)
+
+diff --git a/include/xmlrpc-c/base.h b/include/xmlrpc-c/base.h
+index 42808c8..bb5c348 100644
+--- a/include/xmlrpc-c/base.h
++++ b/include/xmlrpc-c/base.h
+@@ -5,7 +5,9 @@
+ 
+ #include <stddef.h>
+ #include <stdarg.h>
++#include <stdint.h>
+ #include <time.h>
++#include <stdint.h>
+ #include <xmlrpc-c/util.h>
+ #include <xmlrpc-c/config.h>
+   /* Defines XMLRPC_HAVE_WCHAR, XMLRPC_INT64, XMLRPC_HAVE_TIMEVAL */
+@@ -40,9 +42,9 @@ extern unsigned int const xmlrpc_version_point;
+ 
+ typedef signed int xmlrpc_int;  
+     /* An integer of the type defined by XML-RPC <int>; i.e. 32 bit */
+-typedef XMLRPC_INT32 xmlrpc_int32;
++typedef int32_t xmlrpc_int32;
+     /* An integer of the type defined by XML-RPC <i4>; i.e. 32 bit */
+-typedef XMLRPC_INT64 xmlrpc_int64;
++typedef int64_t xmlrpc_int64;
+     /* An integer of the type defined by "XML-RPC" <i8>; i.e. 64 bit */
+ typedef int xmlrpc_bool;
+     /* A boolean (of the type defined by XML-RPC <boolean>, but there's
+@@ -130,7 +132,7 @@ extern xmlrpc_type xmlrpc_value_type (xmlrpc_value* const value);
+ 
+ xmlrpc_value *
+ xmlrpc_int_new(xmlrpc_env * const envP,
+-               int          const intValue);
++               xmlrpc_int32 const intValue);
+ 
+ xmlrpc_value *
+ xmlrpc_i8_new(xmlrpc_env * const envP, 
+@@ -139,7 +141,7 @@ xmlrpc_i8_new(xmlrpc_env * const envP,
+ void 
+ xmlrpc_read_int(xmlrpc_env *         const envP,
+                 const xmlrpc_value * const valueP,
+-                int *                const intValueP);
++                xmlrpc_int32 *       const intValueP);
+ 
+ xmlrpc_value *
+ xmlrpc_bool_new(xmlrpc_env * const envP,
+diff --git a/src/cpp/param_list.cpp b/src/cpp/param_list.cpp
+index 67c636b..60f7df9 100644
+--- a/src/cpp/param_list.cpp
++++ b/src/cpp/param_list.cpp
+@@ -265,10 +265,10 @@ paramList::getNil(unsigned int const paramNumber) const {
+ 
+ 
+ 
+-long long
++xmlrpc_int64
+ paramList::getI8(unsigned int const paramNumber,
+-                 long long    const minimum,
+-                 long long    const maximum) const {
++                 xmlrpc_int64 const minimum,
++                 xmlrpc_int64 const maximum) const {
+ 
+     if (paramNumber >= this->paramVector.size())
+         throw(fault("Not enough parameters", fault::CODE_TYPE));
+@@ -277,7 +277,7 @@ paramList::getI8(unsigned int const paramNumber,
+         throw(fault("Parameter that is supposed to be 64-bit integer is not", 
+                     fault::CODE_TYPE));
+ 
+-    long long const longlongvalue(static_cast<long long>(
++    xmlrpc_int64 const longlongvalue(static_cast<xmlrpc_int64>(
+         value_i8(this->paramVector[paramNumber])));
+ 
+     if (longlongvalue < minimum)
+diff --git a/src/cpp/value.cpp b/src/cpp/value.cpp
+index e952a5f..fa2e5ce 100644
+--- a/src/cpp/value.cpp
++++ b/src/cpp/value.cpp
+@@ -265,7 +265,7 @@ value_int::value_int(xmlrpc_c::value const baseValue) {
+ 
+ value_int::operator int() const {
+ 
+-    int retval;
++    xmlrpc_int32 retval;
+     env_wrap env;
+ 
+     xmlrpc_read_int(&env.env_c, this->cValueP, &retval);
+-- 
+1.6.5.2
+

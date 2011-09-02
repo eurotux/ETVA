@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -8,7 +8,7 @@
  * @class Ext
  */
 
-Ext.ns("Ext.grid", "Ext.dd", "Ext.tree", "Ext.form", "Ext.menu",
+Ext.ns("Ext.grid", "Ext.list", "Ext.dd", "Ext.tree", "Ext.form", "Ext.menu",
        "Ext.state", "Ext.layout", "Ext.app", "Ext.ux", "Ext.chart", "Ext.direct");
     /**
      * Namespace alloted for extensions to the framework.
@@ -17,7 +17,9 @@ Ext.ns("Ext.grid", "Ext.dd", "Ext.tree", "Ext.form", "Ext.menu",
      */
 
 Ext.apply(Ext, function(){
-    var E = Ext, idSeed = 0;
+    var E = Ext,
+        idSeed = 0,
+        scrollWidth = null;
 
     return {
         /**
@@ -28,13 +30,13 @@ Ext.apply(Ext, function(){
         emptyFn : function(){},
 
         /**
-         * URL to a 1x1 transparent gif image used by Ext to create inline icons with CSS background images. 
+         * URL to a 1x1 transparent gif image used by Ext to create inline icons with CSS background images.
          * In older versions of IE, this defaults to "http://extjs.com/s.gif" and you should change this to a URL on your server.
          * For other browsers it uses an inline data URL.
          * @type String
          */
-        BLANK_IMAGE_URL : Ext.isIE6 || Ext.isIE7 ?
-                            'http:/' + '/extjs.com/s.gif' :
+        BLANK_IMAGE_URL : Ext.isIE6 || Ext.isIE7 || Ext.isAir ?
+                            'http:/' + '/www.extjs.com/s.gif' :
                             'data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',
 
         extendX : function(supr, fn){
@@ -50,23 +52,14 @@ Ext.apply(Ext, function(){
         },
 
         /**
-         * Returns true if the passed object is a JavaScript date object, otherwise false.
-         * @param {Object} object The object to test
-         * @return {Boolean}
-         */
-        isDate : function(v){
-            return Object.prototype.toString.apply(v) === '[object Date]';
-        },
-
-        /**
          * Utility method for validating that a value is numeric, returning the specified default value if it is not.
          * @param {Mixed} value Should be a number, but any type will be handled appropriately
          * @param {Number} defaultValue The value to return if the original value is non-numeric
          * @return {Number} Value, if numeric, else defaultValue
          */
         num : function(v, defaultValue){
-            v = Number(v === null || typeof v == 'boolean'? NaN : v);
-            return isNaN(v)? defaultValue : v;
+            v = Number(Ext.isEmpty(v) || Ext.isArray(v) || typeof v == 'boolean' || (typeof v == 'string' && v.trim().length == 0) ? NaN : v);
+            return isNaN(v) ? defaultValue : v;
         },
 
         /**
@@ -92,7 +85,7 @@ Ext.apply(Ext, function(){
          * @return {String}
          */
         escapeRe : function(s) {
-            return s.replace(/([.*+?^${}()|[\]\/\\])/g, "\\$1");
+            return s.replace(/([-.*+?^${}()|[\]\/\\])/g, "\\$1");
         },
 
         sequence : function(o, name, fn, scope){
@@ -108,13 +101,13 @@ Ext.addBehaviors({
     '#foo a&#64;click' : function(e, t){
         // do something
     },
-    
+
     // add the same listener to multiple selectors (separated by comma BEFORE the &#64;)
     '#foo a, #bar span.some-class&#64;mouseover' : function(){
         // do something
     }
 });
-         * </code></pre> 
+         * </code></pre>
          * @param {Object} obj The list of behaviors to apply
          */
         addBehaviors : function(o){
@@ -138,6 +131,31 @@ Ext.addBehaviors({
                 }
                 cache = null;
             }
+        },
+
+        /**
+         * Utility method for getting the width of the browser scrollbar. This can differ depending on
+         * operating system settings, such as the theme or font size.
+         * @param {Boolean} force (optional) true to force a recalculation of the value.
+         * @return {Number} The width of the scrollbar.
+         */
+        getScrollBarWidth: function(force){
+            if(!Ext.isReady){
+                return 0;
+            }
+
+            if(force === true || scrollWidth === null){
+                    // Append our div, do our calculation and then remove it
+                var div = Ext.getBody().createChild('<div class="x-hide-offsets" style="width:100px;height:50px;overflow:hidden;"><div style="height:200px;"></div></div>'),
+                    child = div.child('div', true);
+                var w1 = child.offsetWidth;
+                div.setStyle('overflow', (Ext.isWebKit || Ext.isGecko) ? 'auto' : 'scroll');
+                var w2 = child.offsetWidth;
+                div.remove();
+                // Need to add 2 to ensure we leave enough space
+                scrollWidth = w1 - w2 + 2;
+            }
+            return scrollWidth;
         },
 
 
@@ -167,10 +185,10 @@ ImageComponent = Ext.extend(Ext.BoxComponent, {
         this.initialBox = Ext.copyTo({}, this.initialConfig, 'x,y,width,height');
     }
 });
-         * </code></pre> 
-         * @param {Object} The destination object.
-         * @param {Object} The source object.
-         * @param {Array/String} Either an Array of property names, or a comma-delimited list
+         * </code></pre>
+         * @param {Object} dest The destination object.
+         * @param {Object} source The source object.
+         * @param {Array/String} names Either an Array of property names, or a comma-delimited list
          * of property names to copy.
          * @return {Object} The modified object.
         */
@@ -201,11 +219,11 @@ ImageComponent = Ext.extend(Ext.BoxComponent, {
                 if(arg){
                     if(Ext.isArray(arg)){
                         this.destroy.apply(this, arg);
-                    }else if(Ext.isFunction(arg.destroy)){
+                    }else if(typeof arg.destroy == 'function'){
                         arg.destroy();
                     }else if(arg.dom){
                         arg.remove();
-                    }    
+                    }
                 }
             }, this);
         },
@@ -314,7 +332,7 @@ ImageComponent = Ext.extend(Ext.BoxComponent, {
          * @return {Number} The mean.
          */
         mean : function(arr){
-           return Ext.sum(arr) / arr.length;
+           return arr.length > 0 ? Ext.sum(arr) / arr.length : undefined;
         },
 
         /**
@@ -332,8 +350,8 @@ ImageComponent = Ext.extend(Ext.BoxComponent, {
 
         /**
          * Partitions the set into two sets: a true set and a false set.
-         * Example: 
-         * Example2: 
+         * Example:
+         * Example2:
          * <pre><code>
 // Example 1:
 Ext.partition([true, false, true, true, false]); // [[true, true, true], [false, false]]
@@ -370,14 +388,14 @@ Ext.invoke(Ext.query("p"), "getAttribute", "id");
          * </code></pre>
          * @param {Array|NodeList} arr The Array of items to invoke the method on.
          * @param {String} methodName The method name to invoke.
-         * @param {Anything} ... Arguments to send into the method invocation.
+         * @param {...*} args Arguments to send into the method invocation.
          * @return {Array} The results of invoking the method on each item in the array.
          */
         invoke : function(arr, methodName){
             var ret = [],
                 args = Array.prototype.slice.call(arguments, 2);
             Ext.each(arr, function(v,i) {
-                if (v && typeof v[methodName] == "function") {
+                if (v && typeof v[methodName] == 'function') {
                     ret.push(v[methodName].apply(v, args));
                 } else {
                     ret.push(undefined);
@@ -424,7 +442,7 @@ Ext.zip(
          * @return {Array} The zipped set.
          */
         zip : function(){
-            var parts = Ext.partition(arguments, function( val ){ return !Ext.isFunction(val); }),
+            var parts = Ext.partition(arguments, function( val ){ return typeof val != 'function'; }),
                 arrs = parts[0],
                 fn = parts[1][0],
                 len = Ext.max(Ext.pluck(arrs, "length")),
@@ -514,7 +532,7 @@ Ext.zip(
 
         // internal
         callback : function(cb, scope, args, delay){
-            if(Ext.isFunction(cb)){
+            if(typeof cb == 'function'){
                 if(delay){
                     cb.defer(delay, scope, args || []);
                 }else{
@@ -548,12 +566,13 @@ var sayGoodbye = sayHi.createSequence(function(name){
 sayGoodbye('Fred'); // both alerts show
 </code></pre>
      * @param {Function} fcn The function to sequence
-     * @param {Object} scope (optional) The scope of the passed fcn (Defaults to scope of original function or window)
+     * @param {Object} scope (optional) The scope (<code><b>this</b></code> reference) in which the passed function is executed.
+     * <b>If omitted, defaults to the scope in which the original function is called or the browser window.</b>
      * @return {Function} The new function
      */
     createSequence : function(fcn, scope){
         var method = this;
-        return !Ext.isFunction(fcn) ?
+        return (typeof fcn != 'function') ?
                 this :
                 function(){
                     var retval = method.apply(this || window, arguments);

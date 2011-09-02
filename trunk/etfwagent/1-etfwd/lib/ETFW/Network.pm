@@ -24,8 +24,15 @@ package ETFW::Network;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
+
+BEGIN {
+    require Exporter;
+    use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $CRLF $AUTOLOAD);
+    @ISA = qw( Exporter );
+    @EXPORT = qw( make_netaddr );
+}
 
 my $network_config = "/etc/sysconfig/network";
 my $devices_dir = "/etc/sysconfig/networking/devices";
@@ -183,6 +190,18 @@ sub boot_interfaces {
 
 =cut
 
+sub make_netaddr {
+    my ($addr,$mask) = @_;
+
+    my ($ip1, $ip2, $ip3, $ip4) = split(/\./, $addr);
+    my ($nm1, $nm2, $nm3, $nm4) = split(/\./, $mask);
+    return sprintf "%d.%d.%d.%d",
+                                    ($ip1 & int($nm1))&0xff,
+                                    ($ip2 & int($nm2))&0xff,
+                                    ($ip3 & int($nm3))&0xff,
+                                    ($ip4 & int($nm4))&0xff;
+}
+
 sub save_boot_interface {
     my $self = shift;
     my (%p) = @_;
@@ -208,13 +227,7 @@ sub save_boot_interface {
     $conf{'IPADDR'} = $p{'address'} if( defined $p{'address'} );
     $conf{'NETMASK'} = $p{'netmask'} if( defined $p{'netmask'} );
     if( $p{'address'} && $p{'netmask'} ){
-        my ($ip1, $ip2, $ip3, $ip4) = split(/\./, $p{'address'});
-        my ($nm1, $nm2, $nm3, $nm4) = split(/\./, $p{'netmask'});
-        $conf{'NETWORK'} = sprintf "%d.%d.%d.%d",
-                                        ($ip1 & int($nm1))&0xff,
-                                        ($ip2 & int($nm2))&0xff,
-                                        ($ip3 & int($nm3))&0xff,
-                                        ($ip4 & int($nm4))&0xff;
+        $conf{'NETWORK'} = make_netaddr($p{'address'},$p{'netmask'});
     }
     $conf{'BROADCAST'} = $p{'broadcast'} if( defined $p{'broadcast'}  );
     $conf{'GATEWAY'} = $p{'gateway'} if( defined $p{'gateway'} );
@@ -224,6 +237,23 @@ sub save_boot_interface {
     $conf{'NAME'} = $p{'desc'} if( defined $p{'desc'} );
 
     saveconfigfile("$net_scripts_dir/$fn",\%conf,0,1,1,1);
+}
+
+=item save_n_apply_boot_interfaces
+
+    save and apply boot interfaces
+
+    ARGS: same as save_boot_interfaces
+
+=cut
+
+sub save_n_apply_boot_interfaces {
+    my $self = shift;
+    my (%p) = @_;
+
+    $self->save_boot_interface( %p );
+    $self->apply_interface( %p );
+
 }
 
 =item del_boot_interface
@@ -415,6 +445,20 @@ sub deactivate_interfaces {
             $self->deactivate_interface( %$if );
         }
     }
+}
+
+=item apply_interface
+
+    apply interface
+
+=cut
+
+sub apply_interface {
+    my $self = shift;
+    my (%p) = @_;
+
+    my $dev = $p{'name'} || $p{'dev'};
+    cmd_exec("cd / ; ifdown '$dev' >/dev/null 2>&1 </dev/null ; ifup '$dev' 2>&1 </dev/null");
 }
 
 # iface_type(name)
@@ -1276,6 +1320,19 @@ sub set_boot_routing {
     }
     flush_file_lines();
     write_env_file($network_config,\%conf);
+}
+
+=item apply_config
+
+=cut
+
+sub apply_config {
+    my $self = shift;
+
+    if( -x "/etc/init.d/network" ){
+        cmd_exec("/etc/init.d/network stop");
+        cmd_exec("/etc/init.d/network start");
+    }
 }
 
 1;

@@ -30,6 +30,16 @@ sub main {
 
     ETFW::Squid->set_http_port( port=>"3128" );
 
+    my $C = ETFW::Squid->get_enabled_config();
+
+    print Dumper($C),"\n";
+
+    ETFW::Squid->set_acl( 'name'=>'SSL_ports', 'type'=>'port', 'arg'=>'999', 'index'=>4 );
+
+    my $C = ETFW::Squid->get_enabled_config();
+
+    print Dumper($C),"\n";
+
 }
 
 main();

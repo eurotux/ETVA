@@ -1,0 +1,17 @@
+\subsection{NFS}
+
+O \emph{NFS}\footnote{Network File System} é um modelo de sistema de arquivos, que tem como função centralizar arquivos em um servidor, formando assim um directório virtual.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/exports
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/nfs start
+# /etc/rc.d/init.d/nfs stop
+\end{Verbatim}
+

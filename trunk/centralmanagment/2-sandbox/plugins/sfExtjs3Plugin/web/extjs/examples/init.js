@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -109,7 +109,7 @@ Ext.onReady(function(){
         titleEl   = bodyEl.child('h3:first-child');
 
     var doResize = function() {
-        var windowHeight = Ext.getDoc().getViewSize().height;
+        var windowHeight = Ext.getDoc().getViewSize(false).height;
 
         var footerHeight  = footerEl.getHeight() + footerEl.getMargins().top,
             titleElHeight = titleEl.getHeight() + titleEl.getMargins().top,

@@ -1,6 +1,12 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+/*!
+ * Ext JS Library 3.2.0
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -32,10 +38,7 @@ summaryRenderer: function(v, params, data){
     },
     init : function(grid){
         this.grid = grid;
-        this.cm = grid.getColumnModel();
-        this.view = grid.getView();
-
-        var v = this.view;
+        var v = this.view = grid.getView();
         v.doGroupEnd = this.doGroupEnd.createDelegate(this);
 
         v.afterMethod('onColumnWidthUpdated', this.doWidth, this);
@@ -82,9 +85,8 @@ summaryRenderer: function(v, params, data){
 
     renderSummary : function(o, cs){
         cs = cs || this.view.getColumnData();
-        var cfg = this.cm.config;
-
-        var buf = [], c, p = {}, cf, last = cs.length-1;
+        var cfg = this.grid.getColumnModel().config,
+            buf = [], c, p = {}, cf, last = cs.length-1;
         for(var i = 0, len = cs.length; i < len; i++){
             c = cs[i];
             cf = cfg[i];
@@ -112,7 +114,7 @@ summaryRenderer: function(v, params, data){
      * @param {Object} cs
      */
     calculate : function(rs, cs){
-        var data = {}, r, c, cfg = this.cm.config, cf;
+        var data = {}, r, c, cfg = this.grid.getColumnModel().config, cf;
         for(var j = 0, jlen = rs.length; j < jlen; j++){
             r = rs[j];
             for(var i = 0, len = cs.length; i < len; i++){
@@ -132,8 +134,14 @@ summaryRenderer: function(v, params, data){
     },
 
     doWidth : function(col, w, tw){
-        var gs = this.view.getGroups(), s;
-        for(var i = 0, len = gs.length; i < len; i++){
+        if(!this.isGrouped()){
+            return;
+        }
+        var gs = this.view.getGroups(),
+            len = gs.length,
+            i = 0,
+            s;
+        for(; i < len; ++i){
             s = gs[i].childNodes[2];
             s.style.width = tw;
             s.firstChild.style.width = tw;
@@ -142,26 +150,47 @@ summaryRenderer: function(v, params, data){
     },
 
     doAllWidths : function(ws, tw){
-        var gs = this.view.getGroups(), s, cells, wlen = ws.length;
-        for(var i = 0, len = gs.length; i < len; i++){
+        if(!this.isGrouped()){
+            return;
+        }
+        var gs = this.view.getGroups(),
+            len = gs.length,
+            i = 0,
+            j, 
+            s, 
+            cells, 
+            wlen = ws.length;
+            
+        for(; i < len; i++){
             s = gs[i].childNodes[2];
             s.style.width = tw;
             s.firstChild.style.width = tw;
             cells = s.firstChild.rows[0].childNodes;
-            for(var j = 0; j < wlen; j++){
+            for(j = 0; j < wlen; j++){
                 cells[j].style.width = ws[j];
             }
         }
     },
 
     doHidden : function(col, hidden, tw){
-        var gs = this.view.getGroups(), s, display = hidden ? 'none' : '';
-        for(var i = 0, len = gs.length; i < len; i++){
+        if(!this.isGrouped()){
+            return;
+        }
+        var gs = this.view.getGroups(),
+            len = gs.length,
+            i = 0,
+            s, 
+            display = hidden ? 'none' : '';
+        for(; i < len; i++){
             s = gs[i].childNodes[2];
             s.style.width = tw;
             s.firstChild.style.width = tw;
             s.firstChild.rows[0].childNodes[col].style.display = display;
         }
+    },
+    
+    isGrouped : function(){
+        return !Ext.isEmpty(this.grid.getStore().groupField);
     },
 
     // Note: requires that all (or the first) record in the
@@ -180,21 +209,21 @@ summaryRenderer: function(v, params, data){
     },
 
     refreshSummaryById : function(gid){
-        var g = document.getElementById(gid);
+        var g = Ext.getDom(gid);
         if(!g){
             return false;
         }
         var rs = [];
-        this.grid.store.each(function(r){
+        this.grid.getStore().each(function(r){
             if(r._groupId == gid){
                 rs[rs.length] = r;
             }
         });
-        var cs = this.view.getColumnData();
-        var data = this.calculate(rs, cs);
-        var markup = this.renderSummary({data: data}, cs);
-
-        var existing = this.getSummaryNode(gid);
+        var cs = this.view.getColumnData(),
+            data = this.calculate(rs, cs),
+            markup = this.renderSummary({data: data}, cs),
+            existing = this.getSummaryNode(gid);
+            
         if(existing){
             g.removeChild(existing);
         }
@@ -224,8 +253,8 @@ grid.on('afteredit', function(){
      * @param {String} msg Text to use as innerHTML for the summary row.
      */
     showSummaryMsg : function(groupValue, msg){
-        var gid = this.view.getGroupId(groupValue);
-        var node = this.getSummaryNode(gid);
+        var gid = this.view.getGroupId(groupValue),
+             node = this.getSummaryNode(gid);
         if(node){
             node.innerHTML = '<div class="x-grid3-summary-msg">' + msg + '</div>';
         }
@@ -317,9 +346,9 @@ Ext.ux.grid.HybridSummary = Ext.extend(Ext.ux.grid.GroupSummary, {
      * @param {Object} cs
      */
     calculate : function(rs, cs){
-        var gcol = this.view.getGroupField();
-        var gvalue = rs[0].data[gcol];
-        var gdata = this.getSummaryData(gvalue);
+        var gcol = this.view.getGroupField(),
+            gvalue = rs[0].data[gcol],
+            gdata = this.getSummaryData(gvalue);
         return gdata || Ext.ux.grid.HybridSummary.superclass.calculate.call(this, rs, cs);
     },
 
@@ -341,7 +370,7 @@ grid.on('afteredit', function(){
      * @param {Boolean} skipRefresh (Optional) Defaults to false
      */
     updateSummaryData : function(groupValue, data, skipRefresh){
-        var json = this.grid.store.reader.jsonData;
+        var json = this.grid.getStore().reader.jsonData;
         if(!json.summaryData){
             json.summaryData = {};
         }
@@ -357,9 +386,16 @@ grid.on('afteredit', function(){
      * @return {Object} summaryData
      */
     getSummaryData : function(groupValue){
-        var json = this.grid.store.reader.jsonData;
+        var reader = this.grid.getStore().reader,
+            json = reader.jsonData,
+            fields = reader.recordType.prototype.fields,
+            v;
+            
         if(json && json.summaryData){
-            return json.summaryData[groupValue];
+            v = json.summaryData[groupValue];
+            if(v){
+                return reader.extractValues(v, fields.items, fields.length);
+            }
         }
         return null;
     }

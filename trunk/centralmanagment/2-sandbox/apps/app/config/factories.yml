@@ -14,17 +14,20 @@ cli:
     class: sfConsoleResponse
 
 test:
-  storage:
-    class: sfSessionTestStorage
-    param:
-      session_path: %SF_TEST_CACHE_DIR%/sessions
-
+  #storage:
+  #  class: sfSessionTestStorage
+  #  param:
+  #    session_path: %SF_TEST_CACHE_DIR%/sessions
   response:
     class: sfWebResponse
     param:
       send_http_headers: false
 
 all:
+  user:
+    class: myUser
+    param:       
+      timeout: 1800 #session timeout 30 min
   request:
     class: sfWebRequest
     param:
@@ -42,8 +45,30 @@ all:
     class: sfPatternRouting
     param:
       generate_shortest_url:            true
-      extra_parameters_as_query_string: true
-
+      extra_parameters_as_query_string: true 
+  storage:
+    class: sfPDOSessionStorage
+    param:
+      database: propel
+      db_table: sessions
+  logger:
+    class: sfAggregateLogger
+    param:
+      level: debug
+      loggers:
+        sf_web_debug:
+          class: sfWebDebugLogger
+          param:
+            level: debug
+            condition:       %SF_WEB_DEBUG%
+            xdebug_logging:  false
+            web_debug_class: sfWebDebug
+        sf_syslog_debug:
+          class: sfSysLogLogger
+          param:
+            ident: ETVA
+            level: err
+            
 extdirect:
   controller:
     class: dsExtDirectController
@@ -75,13 +100,13 @@ extdirect:
 #      charset:           %SF_CHARSET%
 #      send_http_headers: true
 #
-  user:
-    class: myUser
-    param:
-      timeout:         2600 # 1 hour
-      logging:         %SF_LOGGING_ENABLED%
-      use_flash:       true
-      default_culture: %SF_DEFAULT_CULTURE%
+#  user:
+#  class: myUser
+#  param:
+#    timeout:         2600 # 1 hour
+#    logging:         %SF_LOGGING_ENABLED%
+#    use_flash:       true
+#    default_culture: %SF_DEFAULT_CULTURE%
 #
 #  storage:
 #    class: sfSessionStorage
@@ -100,7 +125,7 @@ extdirect:
 #    class: sfI18N
 #    param:
 #      source:               XLIFF
-#      debug:                off
+#      debug:                false
 #      untranslated_prefix:  "[T]"
 #      untranslated_suffix:  "[/T]"
 #      cache:

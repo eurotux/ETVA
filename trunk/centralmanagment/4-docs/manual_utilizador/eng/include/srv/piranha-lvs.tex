@@ -1,0 +1,71 @@
+\subsection{Sistema de Balanceamento}
+
+O serviço de balanceamento garante não só o balanceamente de carga das plataformas reais, mas também a redundancia dos servicos configurados.
+Para além destas funcionalidades o próprio serviço balanceamento garante a elevada disponibilidade de si próprio garantindo a redundância dele próprio.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/sysconfig/ha/lvs.cf
+\end{Verbatim}
+
+Como exemplo podemos ver o seguinte:
+
+Para iniciar a configuração de um novo serviço de balanceamento colocamos a seguinte directiva:
+
+\begin{verbatim}
+virtual nome_do_serviço {
+\end{verbatim}
+
+A opção seguinte apenas nos diz se este novo serviço vai estar activo ou não (neste caso iria estar activo):
+
+\begin{verbatim}
+     active = 1
+\end{verbatim}
+
+Os seguintes parâmetros indicam o IP, o interface e a máscara de rede onde este serviço vai ficar atribuído:
+
+\begin{verbatim}
+     address = 10.10.10.143 eth0:143
+     pmask = 255.255.255.0
+\end{verbatim}
+
+Os parâmetros seguintes indicam qual a porta e protocolo que se vai balancear e qual o par pergunta/resposta que o(s) servidor(es) deve(m) responder caso esteja(m) a funcionar correctamente:
+
+\begin{verbatim}
+     port = http
+     send = "GET / HTTP/1.0\r\n\r\n"
+     expect = "HTTP"
+     protocol = tcp
+\end{verbatim}
+
+A seguinte opção indica o algoritmo de balanceamento a aplicar neste serviço:
+
+\begin{verbatim}
+     scheduler = lc
+\end{verbatim}
+
+A seguinte secção descreve o servidor real (se está activo ou não e o seu peso) para onde os pedidos vão ser redireccionados. 
+Esta secção deve ter o número de servidores que se desejam balancear.
+
+\begin{verbatim}
+     server server1 {
+         address = 192.168.0.10
+         active = 1
+         weight = 1
+     }
+\end{verbatim}
+
+Para terminar a configuração apenas colocamos o caracter:
+
+\begin{verbatim}
+}
+\end{verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/pulse start
+# /etc/rc.d/init.d/pulse stop
+\end{Verbatim}
+

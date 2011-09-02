@@ -6,7 +6,7 @@
         // it is generally best to disable state management as dynamically-generated ids
         // can change across page loads, leading to unpredictable results.  The developer
         // should ensure that stable state ids are set for stateful components in real apps.
-        Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
+        //Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 
         Ext.QuickTips.init();
 
@@ -28,16 +28,24 @@
         var grid_networks = new Ext.grid.GridPanel({
             store: store_networks_created,            
             columns: [
-                {id:'mac', header: "MAC Address", width: 75, sortable: true, dataIndex: 'mac'},
-                {header: "VLAN", width: 75, sortable: true, dataIndex: 'vlan'}
+                {id:'mac', header: "MAC Address", width: 100, sortable: true, dataIndex: 'mac'},
+                {header: "Network", width: 75, sortable: true, dataIndex: 'vlan'}
             ],
+            viewConfig:{
+                emptyText: __('Empty!'),  //  emptyText Message
+                forceFit:true
+            },
+            tools:[{id:'refresh',
+                    on:{
+                        click: function(){store_networks_created.reload();}
+                    }
+                   }],
             stripeRows: true,
             autoExpandColumn: 'mac',
-            height:180,
-            viewConfig:{forceFit:true},
+            height:180,                     
             border:true,
-            title:'Networks',
-            loadMask: {msg: 'Retrieving info...'}
+            title: <?php echo json_encode(__('Networks')) ?>,
+            loadMask: {msg: <?php echo json_encode(__('Retrieving data...')) ?>}
         });
 
 
@@ -60,47 +68,39 @@
         var grid_unused_macs = new Ext.grid.GridPanel({
             store: store_unused_macs,
             columns: [
-                {id:'mac', header: "MAC Address", width: 75, sortable: true, dataIndex: 'mac'}
-
+                {id:'mac', header: "MAC Address", width: 100, sortable: true, dataIndex: 'mac'}
             ],
+            viewConfig:{
+                emptyText: __('Empty!'),  //  emptyText Message
+                forceFit:true
+            },
             stripeRows: true,
             autoExpandColumn: 'mac',
             height:180,
-            width:200,
-            autoWidth: true,
-    autoScroll: true,
-    stripeRows: true,
-            viewConfig:{forceFit:true},
-            title:'Available MAC Addresses',
-            loadMask: {msg: 'Retrieving info...'}
-        });
-
-
-
-        Ext.apply(Ext.form.VTypes, {
-
-            mac_valid : function(val, field) {
-                if (val.length > 2) {
-                    field.setValue(val.substr(0,2));
-                }
-                return true;
-            }
-        });
-
+            tools:[{id:'refresh',
+                    on:{
+                        click: function(){store_unused_macs.reload();}
+                    }
+                   }],
+            autoScroll: true,
+            stripeRows: true,            
+            title: <?php echo json_encode(__('Available MAC Addresses')) ?>,
+            loadMask: {msg: <?php echo json_encode(__('Retrieving data...')) ?>}
+        });        
 
         var nicForm = new Ext.FormPanel({
-            labelWidth: 75, // label settings here cascade unless overridden
+            labelWidth: 80, // label settings here cascade unless overridden
             frame:true,
          //   bodyStyle:'padding:5px 5px 0',
-            width: 350,
+            width: 385,
             items: [{
                     xtype:'fieldset',
                     checkboxToggle:true,
-                    title: 'MAC pool',
+                    title: <?php echo json_encode(__('MAC pool')) ?>,
                     autoHeight:true,
                     defaults     : {
-                        width: 350,                        
-                        labelStyle : 'width:100px;'
+                        width: 385
+                        //labelStyle : 'width:100px;'
                     },
                     collapsed: false,
                     items :[{
@@ -114,117 +114,131 @@
                                     columnWidth:.31,
                                     layout:'form',
 
-                                    items:[{xtype:'textfield',vtype:'mac_valid',fieldLabel: 'Initial MAC',width:22,
-                                            name: 'mac1',
+                                    items:[{xtype:'textfield',fieldLabel: <?php echo json_encode(__('Initial MAC')) ?>,width:22,
+                                            name: 'oct1',
                                             disabled:true,
-                                            value:'00'}]
+                                            value:<?php echo json_encode(sprintf('%02x',sfConfig::get('app_mac_default_first_octect'))); ?>,
+                                            vtype:'oct_valid'}]
                                 },
                                 {
                                     columnWidth:.11,
                                     layout:'form',
                                     labelWidth: 4,
                                     items:[{xtype:'textfield',width:22,
-                                            name: 'mac2',
+                                            name: 'oct2',
                                             disabled:true,
-                                            value:'30',
-                                            vtype:'mac_valid'}]
+                                            value:<?php echo json_encode(sprintf('%02x',sfConfig::get('app_mac_default_second_octect'))); ?>,
+                                            vtype:'oct_valid'}]
                                 },
                                 {
                                     columnWidth:.11,
                                     layout:'form',
                                     labelWidth: 4,
                                     items:[{xtype:'textfield',width:22,
-                                            name: 'mac3',
+                                            name: 'oct3',
                                             disabled:true,
-                                            value:'E3',
-                                            vtype:'mac_valid'}]
+                                            value:<?php echo json_encode(sprintf('%02x',sfConfig::get('app_mac_default_third_octect'))); ?>,
+                                            vtype:'oct_valid'}]
                                 },
                                 {
                                     columnWidth:.11,
                                     layout:'form',
                                     labelWidth: 4,
                                     items:[{xtype:'textfield',width:22,
-                                            name: 'mac4',
+                                            name: 'oct4',
                                             value:'00',
-                                            vtype:'mac_valid'}]
+                                            vtype:'oct_valid'}]
                                 },
                                 {
                                     columnWidth:.11,
                                     layout:'form',
                                     labelWidth: 4,
                                     items:[{xtype:'textfield',width:22,
-                                            name: 'mac5',
+                                            name: 'oct5',
                                             value:'00',
-                                            vtype:'mac_valid'}]
+                                            vtype:'oct_valid'}]
                                 },
                                 {
                                     columnWidth:.11,
                                     layout:'form',
                                     labelWidth: 4,
                                     items:[{xtype:'textfield',width:22,
-                                            name: 'mac6',
+                                            name: 'oct6',
                                             value:'00',
-                                            vtype:'mac_valid'}]
+                                            vtype:'oct_valid'}]
                                 }
                             ]// end column layout
                         }
                         ,
                         {xtype:'numberfield',
                             name       : 'pool_size',                            
-                            fieldLabel : 'Mac address pool',
+                            fieldLabel : <?php echo json_encode(__('MAC pool size')) ?>,
                             minValue:1,                            
-                            width:20,                            
+                            width:30,
                             allowBlank : false,
-                            vtype:'mac_valid',
+                            vtype:'pool_valid',
                             listeners:{invalid:function(){
-                                    Ext.getCmp('btnGenMac').disable();
+                                    this.ownerCt.btnGenMac.disable();
                                 },valid:function(){
-                                    Ext.getCmp('btnGenMac').enable();
+                                    this.ownerCt.btnGenMac.enable();
                                 }}
                         }
                         ,
                         {
                             xtype:'button',
-                            id:'btnGenMac',
-                            text: 'Generate!',
+                            ref:'btnGenMac',
+                            text: <?php echo json_encode(__('Generate!')) ?>,
                             name:'btnGenMac',
                             disabled:true,
                             isFormField:true,
                             width:30,
                             labelSeparator: '',
-                            handler:function(){
+                            handler:function(){                                
+                                
+                                if(nicForm.form.isValid()){
 
-                                var size = nicForm.form.findField('pool_size').getValue();
+                                    var nicValues = nicForm.form.getValues();
+                                    var size = nicValues['pool_size'];
+                                    var octects = {'oct4':nicValues['oct4'],
+                                            'oct5':nicValues['oct5'],
+                                            'oct6':nicValues['oct6']}
 
-                                var conn = new Ext.data.Connection({
-                                    listeners:{
-                                        // wait message.....
-                                        beforerequest:function(){
-                                            Ext.MessageBox.show({
-                                                title: 'Please wait',
-                                                msg: 'Generating mac pool...',
-                                                width:300,
-                                                wait:true,
-                                                modal: false
-                                            });
-                                        },// on request complete hide message
-                                        requestcomplete:function(){Ext.MessageBox.hide();}}
-                                });// end conn
+                                    var conn = new Ext.data.Connection({
+                                        listeners:{
+                                            // wait message.....
+                                            beforerequest:function(){
+                                                Ext.MessageBox.show({
+                                                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                    msg: <?php echo json_encode(__('Generating MAC pool...')) ?>,
+                                                    width:300,
+                                                    wait:true,
+                                                    modal: false
+                                                });
+                                            },// on request complete hide message
+                                            requestcomplete:function(){Ext.MessageBox.hide();}
+                                            ,requestexception:function(c,r,o){Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                        }
+                                    });// end conn
 
-                                conn.request({
-                                    url: 'mac/JsonGeneratePool',
-                                    params: {'size': size},
-                                    scope: this,
-                                    success: function(resp,options) {
+                                    conn.request({
+                                        url: 'mac/JsonGeneratePool',
+                                        params: {'size': size,'octects':Ext.encode(octects)},
+                                        scope: this,
+                                        success: function(resp,options) {
 
-                                        store_unused_macs.reload();
+                                            store_unused_macs.reload();
 
-                                    }
-                                    ,
-                                    failure: function(resp,opt) {
-                                        Ext.Msg.alert('Error','Unable to generate mac pool');
-                                    }
-                                }); // END Ajax request
+                                        }
+                                        ,failure: function(resp,opt) {                                            
+                                            Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>,<?php echo json_encode(__('Unable to generate MAC pool')) ?>);
+                                        }
+                                    
+                                    }); // END Ajax request
+
+                                }
+                                else{
+                                    Ext.MessageBox.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Please fix the errors noted!')) ?>);
+                                }
 
                             }
 
@@ -236,21 +250,18 @@
                 ,
                
                 {
-                layout:'table',
+                layout:'table',                
                 defaults: {
-                    // applied to each contained panel
+                    // applied to each contained panel                    
                     bodyStyle:'padding:10px'
                 },
                 layoutConfig:{columns:2},
-                items:[{items:
-                grid_networks},
-                {items:grid_unused_macs}
-                ]
+                items:[{width:240,items:grid_networks},
+                       {width:230,items:grid_unused_macs}]
                 }
-
             ],
 
-            buttons: [{text: 'Close',
+            buttons: [{text: __('Close'),
                     handler:function(){
 
                         win.close();
@@ -262,8 +273,8 @@
 
         var win = new Ext.Window({
             // id:'mac-pool-win',
-            title: 'Network Interface Card Management',
-            width:465,
+            title: <?php echo json_encode(__('MAC Pool Management')) ?>,
+            width:500,
             height:430,
             iconCls: 'icon-window',
             shim:false,
@@ -271,9 +282,21 @@
             //  closeAction:'hide',
             border:false,
             constrainHeader:true,
+            modal:true,
             defaults:{autoScroll: true},
             layout: 'fit',
             items: [nicForm]
+            ,tools: [{
+                id:'help',
+                qtip: __('Help'),
+                handler:function(){
+                    View.showHelp({
+                        anchorid:'help-vlan-mac',
+                        autoLoad:{ params:'mod=vlan'},
+                        title: <?php echo json_encode(__('MAC Pool Management Help')) ?>
+                    });
+                }
+            }]
         });
        
         win.show();

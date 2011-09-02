@@ -1,0 +1,45 @@
+*** daemontools-0.70/supervise.c.old	Sat Oct 28 17:29:24 2000
+--- daemontools-0.70/supervise.c	Sat Oct 28 17:32:53 2000
+***************
+*** 99,111 ****
+        return;
+      case 0:
+        execve(*run,run,environ);
+!       strerr_die4sys(111,FATAL,"unable to start ",dir,"/run: ");
+    }
+    flagpaused = 0;
+    pid = f;
+    pidchange();
+    announce();
+!   sleep(1);
+  }
+  
+  void doit(void)
+--- 99,113 ----
+        return;
+      case 0:
+        execve(*run,run,environ);
+!       strerr_warn4(FATAL,"unable to start ",dir,"/run, sleeping 5 seconds: ",&strerr_sys);
+!       sleep(5);
+!       _exit(111);
+    }
+    flagpaused = 0;
+    pid = f;
+    pidchange();
+    announce();
+!   if(sleep(1)) sleep(1);
+  }
+  
+  void doit(void)
+*** daemontools-0.70/CHANGES.old	Sat Oct 28 20:26:50 2000
+--- daemontools-0.70/CHANGES	Sat Oct 28 20:27:48 2000
+***************
+*** 32,34 ****
+--- 32,38 ----
+  	internal: sped up multilog.
+  	ui: multilog sets current to mode 644 on restart.
+  	version: daemontools 0.70, beta.
++ 20001028
++ 	fix: supervise would not properly sleep when ./run could not be
++ 	started or exited immediately. By Matthias Andree
++ 	<matthias.andree@gmx.de>

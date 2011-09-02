@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file source-language="EN" target-language="pt" datatype="plaintext" original="messages" date="2010-08-16T12:09:30Z" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="mail_read">
+        <source>Read</source>
+        <target>Lidas</target>
+      </trans-unit>
+      <trans-unit id="erase_and_close">
+        <source>Erase and Close</source>
+        <target>Eliminar e Fechar</target>
+      </trans-unit>
+      <trans-unit id="mail_unread">
+        <source>Unread</source>
+        <target>Por ler</target>
+      </trans-unit>
+      <trans-unit id="error_msg">
+        <source>Error Message</source>
+        <target>Mensagem de Erro</target>
+      </trans-unit>
+      <trans-unit id="space_usage">
+        <source>Space Usage</source>
+        <target>Espaço Utilizado</target>
+      </trans-unit>
+
+      <trans-unit id="details">
+        <source>Details</source>
+        <target>Detalhes</target>
+      </trans-unit>
+
+      <trans-unit id="backup">
+        <source>Backup</source>
+        <target>Guardar Configurações</target>
+      </trans-unit>
+
+      <trans-unit id="restore">
+        <source>Restore</source>
+        <target>Restaurar configurações</target>
+      </trans-unit>
+
+      <trans-unit id="state">
+        <source>State</source>
+        <target>Estado</target>
+      </trans-unit>
+
+      <trans-unit id="time_sec">
+        <source>Time (seconds)</source>
+        <target>Tempo (segundos)</target>
+      </trans-unit>
+
+      <trans-unit id="dominios">
+        <source>Domains</source>
+        <target>Domínios</target>
+      </trans-unit>
+
+      <trans-unit id="mailboxes">
+        <source>Mailboxes</source>
+        <target>Caixas de Correio</target>
+      </trans-unit>
+
+      <trans-unit id="refresh">
+        <source>Refresh</source>
+        <target>Atualizar</target>
+      </trans-unit>
+
+      <trans-unit id="service">
+        <source>Service</source>
+        <target>Serviço</target>
+      </trans-unit>
+
+      <trans-unit id="restart">
+        <source>Restart</source>
+        <target>Reiniciar</target>
+      </trans-unit>
+
+      <trans-unit id="start">
+        <source>Start</source>
+        <target>Iniciar</target>
+      </trans-unit>
+
+      <trans-unit id="stop">
+        <source>Stop</source>
+        <target>Parar</target>
+      </trans-unit>
+
+      <trans-unit id="force_stop">
+        <source>Force stop</source>
+        <target>Forçar paragem</target>
+      </trans-unit>
+
+      <trans-unit id="please_wait">
+        <source>Please wait</source>
+        <target>Aguarde por favor.</target>
+      </trans-unit>
+
+      <trans-unit id="appling_client_info">
+        <source>Updating Client options info...</source>
+        <target>A actualizar informação...</target>
+      </trans-unit>
+
+      <trans-unit id="administration_pwd">
+        <source>Administration Password</source>
+        <target>Palavra-Chave de Administração</target>
+      </trans-unit>
+
+       <trans-unit id="active">
+        <source>Active</source>
+        <target>Activa</target>
+      </trans-unit>
+
+      <trans-unit id="reset">
+        <source>Reset</source>
+        <target>Limpar Alterações</target>
+      </trans-unit>
+
+      <trans-unit id="six_at_least">
+        <source>Password must be at least 6 characters long.</source>
+        <target>A palavra-chave deve conter pelo menos 6 caracteres.</target>
+      </trans-unit>
+
+      <trans-unit id="name">
+        <source>Name</source>
+        <target>Nome</target>
+      </trans-unit>
+
+       <trans-unit id="account">
+        <source>Account</source>
+        <target>Conta</target>
+      </trans-unit>
+
+      <trans-unit id="description">
+        <source>Description</source>
+        <target>Descrição</target>
+      </trans-unit>
+
+      <trans-unit id="edit">
+        <source>Edit</source>
+        <target>Editar</target>
+      </trans-unit>
+
+      <trans-unit id="limited">
+        <source>Limited</source>
+        <target>Limitado</target>
+      </trans-unit>
+
+      <trans-unit id="unlimited">
+        <source>Unlimited</source>
+        <target>Sem Limite</target>
+      </trans-unit>
+
+      <trans-unit id="yes">
+        <source>yes</source>
+        <target>sim</target>
+      </trans-unit>
+
+      <trans-unit id="no">
+        <source>no</source>
+        <target>não</target>
+      </trans-unit>
+
+      <trans-unit id="search">
+        <source>Search</source>
+        <target>Procurar</target>
+      </trans-unit>
+
+      <trans-unit id="relay">
+        <source>Relay</source>
+        <target>Encaminhamento</target>
+      </trans-unit>
+
+      <trans-unit id="service_space_used">
+        <source>File Space Usage:</source>
+        <target>Espaço em Disco Utilizado:</target>
+      </trans-unit>
+
+
+      <!-- ============ETMS - Domains============ -->
+      <trans-unit id="success">
+        <source>Success</source>
+        <target>Operação concluida com sucesso</target>
+      </trans-unit>
+      <trans-unit id="alias_added_with_success">
+        <source>Alias added with success</source>
+        <target>Alias adicionado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="irregular_domain_name">
+        <source>Irregular Domain Name.</source>
+        <target>Formato incorrecto (deve ter pelo menos um '.').</target>
+      </trans-unit>
+      <trans-unit id="errors_fix">
+        <source>Please fix the errors noted.</source>
+        <target>Por favor, corrija os erros anotados.</target>
+      </trans-unit>
+      <trans-unit id="manage_domains">
+        <source>Manage Domains</source>
+        <target>Gerir Domínios</target>
+      </trans-unit>
+      <trans-unit id="alias_list">
+        <source>Alias List</source>
+        <target>Lista de Alias</target>
+      </trans-unit>
+      <trans-unit id="alias">
+        <source>Alias</source>
+        <target>Alias</target>
+      </trans-unit>
+      <trans-unit id="add">
+        <source>Add</source>
+        <target>Adicionar</target>
+      </trans-unit>
+      <trans-unit id="delete">
+        <source>Delete</source>
+        <target>Apagar</target>
+      </trans-unit>
+      <trans-unit id="warning">
+        <source>Warning</source>
+        <target>Atenção</target>
+      </trans-unit>
+      <trans-unit id="select_an_alias">
+        <source>You must select an alias.</source>
+        <target>Seleccione um alias.</target>
+      </trans-unit>
+      <trans-unit id="done">
+        <source>Done!</source>
+        <target>Operação concluída</target>
+      </trans-unit>
+      <trans-unit id="operation_canceled">
+        <source>Operation canceled!</source>
+        <target>Operação cancelada!</target>
+      </trans-unit>
+      <trans-unit id="domains_list">
+        <source>Domains List</source>
+        <target>Lista de Domínios</target>
+      </trans-unit>
+      <trans-unit id="domain_name">
+        <source>Domain Name</source>
+        <target>Nome do Domínio</target>
+      </trans-unit>
+      <trans-unit id="domain_name_">
+        <source>Domain Name:</source>
+        <target>Nome do Domínio:</target>
+      </trans-unit>
+      <trans-unit id="user">
+        <source>User</source>
+        <target>Utilizador</target>
+      </trans-unit>
+      <trans-unit id="description">
+        <source>Description</source>
+        <target>Descrição</target>
+      </trans-unit>
+      <trans-unit id="server_quota">
+        <source>Server Quota</source>
+        <target>Quota de Servidor</target>
+      </trans-unit>
+      <trans-unit id="max_mailboxes">
+        <source>Max. Mailboxes</source>
+        <target>Max. Caixas de Correio</target>
+      </trans-unit>
+      <trans-unit id="edit_domain">
+        <source>Edit Domain</source>
+        <target>Editar Domínio</target>
+      </trans-unit>
+      <trans-unit id="add_domain">
+        <source>Add Domain</source>
+        <target>Adicionar Domínio</target>
+      </trans-unit>
+
+
+      <!-- ========= MAILBOXES ========= -->
+      <trans-unit id="do_you_want_delete_user">
+        <source>Do you want to remove Mailbox and associated Emails?</source>
+        <target>Deseja remover a Caixa de Correio, incluindo os emails associados?</target>
+      </trans-unit>
+      <trans-unit id="create_mailbox">
+        <source>Create Mailbox</source>
+        <target>Criar Caixa de Correio</target>
+      </trans-unit>
+      <trans-unit id="edit_mailbox">
+        <source>Edit Mailbox</source>
+        <target>Editar Caixa de Correio</target>
+      </trans-unit>
+      <trans-unit id="avaialable_mailboxes">
+        <source>Avaialable Mailboxes:</source>
+        <target>Caixas de Correio Disponíveis:</target>
+      </trans-unit>
+      <trans-unit id="mailbox_destines">
+        <source>Mailbox Destines</source>
+        <target>Caixas de Destino</target>
+      </trans-unit>
+      <trans-unit id="mailbox_alias">
+        <source>Mailbox Alias</source>
+        <target>Alias</target>
+      </trans-unit>
+      <trans-unit id="manage_mailboxes">
+        <source>Manage Mailboxes</source>
+        <target>Gerir Caixas de Correio</target>
+      </trans-unit>
+      <trans-unit id="manage_mailbox">
+        <source>Manage Mailbox</source>
+        <target>Gerir Caixa de Correio</target>
+      </trans-unit>
+      <trans-unit id="external_send">
+        <source>External Send</source>
+        <target>Envio Externo</target>
+      </trans-unit>
+      <trans-unit id="allow_external_send">
+        <source>Allow External Send</source>
+        <target>Permitir Envio Externo</target>
+      </trans-unit>
+      <trans-unit id="mail_quota">
+        <source>Mail Quota</source>
+        <target>Quota de Email</target>
+      </trans-unit>
+      <trans-unit id="mail_address">
+        <source>Mail Address</source>
+        <target>Endereço de Email</target>
+      </trans-unit>
+      <trans-unit id="mailboxes_list">
+        <source>Mailboxes List</source>
+        <target>Lista de Caixas de Correio</target>
+      </trans-unit>
+      <trans-unit id="delivery_type">
+        <source>Delivery Type</source>
+        <target>Tipo de Entrega</target>
+      </trans-unit>
+      <trans-unit id="automatica_answer">
+        <source>Automatic Answer</source>
+        <target>Resposta Automática</target>
+      </trans-unit>
+      <trans-unit id="change_password">
+        <source>Change Password</source>
+        <target>Modificar Palavra-Chave</target>
+      </trans-unit>
+      <trans-unit id="account">
+        <source>Account</source>
+        <target>Conta</target>
+      </trans-unit>
+      <trans-unit id="accounts">
+        <source>Accounts</source>
+        <target>Contas</target>
+      </trans-unit>
+      <trans-unit id="real_name">
+        <source>Real Name</source>
+        <target>Nome Real</target>
+      </trans-unit>
+      <trans-unit id="main_options">
+        <source>Main Options</source>
+        <target>Opções Pricipais</target>
+      </trans-unit>
+
+      <!-- ========= REQUESTS ========= -->
+      <trans-unit id="remove_request">
+        <source>Are you sure you want to remove {0} ?</source>
+        <target>Tem a certeza que deseja remover o alias {0} ?</target>
+      </trans-unit>
+      <trans-unit id="remove_domain_request">
+        <source>Are you sure you want to remove {0}, associated alias and mailboxes?</source>
+        <target>Tem a certeza que deseja remover o domínio {0}, bem como os alias e caixas de correio associadas?</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

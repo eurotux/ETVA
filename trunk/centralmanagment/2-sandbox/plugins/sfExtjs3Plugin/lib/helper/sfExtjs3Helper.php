@@ -195,7 +195,7 @@ class sfExtjs3Plugin {
    * @param array attributes
    * @return string Javascript source of Extjs3.class
    */
-  public static function __call ($class, $attributes)
+  public function __call ($class, $attributes)
   {
     $classes = sfConfig::get('sf_extjs3_classes');
     if (is_array($classes) && isset($classes[$class]))

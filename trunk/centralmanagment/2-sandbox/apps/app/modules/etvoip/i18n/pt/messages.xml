@@ -1,0 +1,867 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file source-language="EN" target-language="pt" datatype="plaintext" original="messages" date="2010-08-16T12:09:30Z" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="advanced_mode">
+        <source>Advanced Mode: {0}</source>
+        <target>Modo Advançado: {0}</target>
+      </trans-unit>
+      <trans-unit id="apply_changes">
+        <source>Apply changes</source>
+        <target>Aplicar alterações</target>
+      </trans-unit>
+      <trans-unit id="apply_changes_hint">
+        <source>You have made changes to the configuration that have not yet been applied. When you are finished making all changes, click on &lt;b&gt;{0}&lt;/b&gt; to put them into effect.</source>
+        <target>Existem alerações à configuração que ainda não foram aplicadas. Após efectuar todas as alterações, clique em &lt;b&gt;{0}&lt;/b&gt; para aplicá-las</target>
+      </trans-unit>
+      <trans-unit id="need_apply_conf">
+        <source>&lt;i&gt;Configuration changed&lt;/i&gt;</source>
+        <target>&lt;i&gt;Configuração alterada&lt;/i&gt;</target>
+      </trans-unit>      
+      <!--           -->
+      <!-- EXTENSÕES -->
+      <!--           -->   
+      <trans-unit id="device_tech_label">
+        <source>This device uses {0} technology.{1}</source>
+        <target>Este dispositivo utiliza tecnologia {0}.{1}</target>
+      </trans-unit>
+      <trans-unit id="channel">
+        <source>Channel</source>
+        <target>Canal</target>
+      </trans-unit>
+      <trans-unit id="extensions">
+        <source>Extensions</source>
+        <target>Extensões</target>
+      </trans-unit>
+      <trans-unit id="loading_extension">
+        <source>Loading extension...</source>
+        <target>A carregar extensão...</target>
+      </trans-unit>
+      <trans-unit id="loading_extension_data">
+        <source>Loading extension data...</source>
+        <target>A carregar informação da extensão...</target>
+      </trans-unit>
+      <trans-unit id="updating_extension">
+        <source>Updating extension...</source>
+        <target>A atualizar extensão...</target>
+      </trans-unit>
+      <trans-unit id="updated_extension">
+        <source>Updated extension {0}</source>
+        <target>Extensão {0} atualizada</target>
+      </trans-unit>
+      <trans-unit id="generic_device">
+        <source>Generic {0} Device</source>
+        <target>Dispositivo {0}</target>
+      </trans-unit>
+      <trans-unit id="add_full_extension">
+        <source>Add {0} Extension {1}</source>
+        <target>Adicionar Extensão {0} {1}</target>
+      </trans-unit>
+      <trans-unit id="add_extension">
+        <source>Add extension</source>
+        <target>Adicionar extensão</target>
+      </trans-unit>
+      <trans-unit id="adding_extension">
+        <source>Adding extension...</source>
+        <target>Adicionando extensão...</target>
+      </trans-unit>
+      <trans-unit id="added_extension">
+        <source>Added extension {0}</source>
+        <target>Extensão {0} adicionada</target>
+      </trans-unit>                  
+      <trans-unit id="edit_extension">
+        <source>Edit extension</source>
+        <target>Editar extensão</target>
+      </trans-unit>
+      <trans-unit id="edit_selected_extension">
+        <source>Edit selected extension</source>
+        <target>Editar extensão seleccionada</target>
+      </trans-unit>
+      <trans-unit id="remove_extension">
+        <source>Remove extension</source>
+        <target>Remover extensão</target>
+      </trans-unit>
+      <trans-unit id="extension_remove_confirm">
+        <source>You are about to remove extension {0}. &lt;br /&gt;Are you sure ?</source>
+        <target>Irá remover a extensão {0}. &lt;br /&gt; Tem a certeza ?</target>
+      </trans-unit>
+      <trans-unit id="remove_selected_extension">
+        <source>Remove selected extension</source>
+        <target>Remover extensão seleccionada</target>
+      </trans-unit>
+      <trans-unit id="deleting_extension">
+        <source>Removing extension...</source>
+        <target>A remover extensão...</target>
+      </trans-unit>
+      <trans-unit id="deleted_extension">
+        <source>Removed extension {0}</source>
+        <target>Extensão {0} removida com sucesso</target>
+      </trans-unit>
+      <trans-unit id="user_extension">
+        <source>User Extension</source>
+        <target>Extensão utilizador</target>
+      </trans-unit>
+      <trans-unit id="user_extension_hint">
+        <source>The extension number to dial to reach this user</source>
+        <target>Número da extensão do utilizador</target>
+      </trans-unit>
+      <trans-unit id="display_name">
+        <source>Display Name</source>
+        <target>Nome de Exibição</target>
+      </trans-unit>
+      <trans-unit id="display_name_hint">
+        <source>The caller id name for calls from this user will be set to this name. Only enter the name, NOT the number</source>
+        <target>A identificação do nome nas chamadas efectuadas por este utilizador. Introduza apenas o nome e NÃO o número</target>
+      </trans-unit>
+      <trans-unit id="cid_num_alias">
+        <source>CID Num Alias</source>
+        <target>Número CID Alternativo</target>
+      </trans-unit>
+      <trans-unit id="cid_num_alias_hint">
+        <source>The CID Number to use for internal calls, if different from the extension number. This is used to masquerade as a different user. A common example is a team of support people who would like their internal callerid to display the general support number (a ringgroup or queue). There will be no effect on external calls</source>
+        <target>O número CID a ser usado para chamadas internas, se for diferente do número da extensão. Isto é usado para mascarar como um utilizador diferente. Um exemplo comum é uma equipa de pessoas de suporte que gostariam que a sua identificação interna exibisse o número de atendimento geral (um ringgroup ou queue). Não haverá nenhum efeito sobre as chamadas externas</target>
+      </trans-unit>
+      <trans-unit id="sip_alias">
+        <source>SIP Alias</source>
+        <target>SIP Alternativo</target>
+      </trans-unit>
+      <trans-unit id="sip_alias_hint">
+        <source>If you want to support direct sip dialing of users internally or through anonymous sip calls, you can supply a friendly name that can be used in addition to the users extension to call them</source>
+        <target>Se quiser ter suporte a chamadas sip directas a utilizadores internos ou através de chamadas sip anónimas, pode fornecer um nome amigável que pode ser usado em vez da extensão do utilizador</target>
+      </trans-unit>
+      <trans-unit id="extension">
+        <source>Extension</source>
+        <target>Extensão</target>
+      </trans-unit>
+      <trans-unit id="extension_options">
+        <source>Extension options</source>
+        <target>Opções da Extensão</target>
+      </trans-unit>
+      <trans-unit id="outbound_cid">
+        <source>Outbound CID</source>
+        <target>Outbound CID</target>
+      </trans-unit>
+      <trans-unit id="define_outbound_cid">
+        <source>You must define an Outbound Caller ID when Choosing this {0} value</source>
+        <target>Deve definir um Outbound CID ao seleccionar esta opção em {0}</target>
+      </trans-unit>
+
+      <trans-unit id="outbound_cid_hint">
+        <source>Overrides the caller id when dialing out a trunk. Any setting here will override the common outbound caller id set in the Trunks admin.&lt;br&gt;&lt;br&gt;Format: &lt;b&gt;"caller name" &lt;#######&gt;&lt;/b&gt;&lt;br&gt;&lt;br&gt;Leave this field blank to disable the outbound callerid feature for this user</source>
+        <target>Substitui a identificação da chamada ao passar por um trunk. Qualquer configuração aqui vai substituir a identificação da chamada efectuada ao nível da trunk.&lt;br&gt;&lt;br&gt; Formato: &lt;b&gt;"Nome do utilizador" &lt;#######&gt;&lt;/b&gt;&lt;br&gt;&lt;br&gt;Deixe este campo em branco para desabilitar o recurso de identificador de chamadas de saída para este utilizador</target>
+      </trans-unit>
+      <trans-unit id="ring_time">
+        <source>Ring Time</source>
+        <target>Tempo de chamada</target>
+      </trans-unit>
+      <trans-unit id="ring_time_hint">
+        <source>Number of seconds to ring prior to going to voicemail. If no voicemail is configured this will be ignored</source>
+        <target>Número de segundos para tocar antes de ir para o voicemail. Se não tiver voicemail configurado esta opção será ignorada</target>
+      </trans-unit>
+      <trans-unit id="call_waiting">
+        <source>Call Waiting</source>
+        <target>Chamada em Espera</target>
+      </trans-unit>      
+      <trans-unit id="call_waiting_hint">
+        <source>Set the initial/current Call Waiting state for this user extension</source>
+        <target>Define o estado de Chamada em Espera da extensão do utilizador</target>
+      </trans-unit>
+      <trans-unit id="call_screening">
+        <source>Call Screening</source>
+        <target>Triagem de chamada</target>
+      </trans-unit>
+      <trans-unit id="call_screening_hint">
+        <source>Call Screening requires external callers to say their name, which will be played back to the user and allow the user to accept or reject the call.  Screening with memory only verifies a caller for their caller-id once. Screening without memory always requires a caller to say their name. Either mode will always announce the caller based on the last introduction saved with that callerid. If any user on the system uses the memory option, when that user is called, the caller will be required to re-introduce themselves and all users on the system will have that new introduction associated with the caller CallerId</source>
+        <target>Triagem da chamada exige que um utilizador externo diga o seu nome, que será depois ouvido pelo utilizador, permitindo aceitar ou rejeitar a chamada. Triagem com memória verifica apenas uma vez a origem do identificador de chamada. Triagem sem memória requer sempre que o utilizador externo diga o seu nome. Qualquer dos modos anunciará sempre o utilizador a partir da última introdução guardada com essa identificação de chamada. Se algum utilizador do sistema utilizar a opção de memória, quando for efectuada uma chamada a esse utilizador, quem tiver a efectuar a chamada vai ter que re-introduzir-se e todos os utilizadores do sistema terão a nova introdução associada à identificação de chamada</target>
+      </trans-unit>
+      <trans-unit id="pinless_dialing">
+        <source>Pinless Dialing</source>
+        <target>Marcação sem PIN</target>
+      </trans-unit>
+      <trans-unit id="pinless_dialing_hint">
+        <source>Enabling Pinless Dialing will allow this extension to bypass any pin codes normally required on outbound calls</source>
+        <target>Habilitado permite efectuar chamadas de saída a partir desta extensão sem marcação de PIN</target>
+      </trans-unit>
+      <trans-unit id="emergency_cid">
+        <source>Emergency CID</source>
+        <target>CID de Emergência</target>
+      </trans-unit>
+      <trans-unit id="emergency_cid_hint">
+        <source>This caller id will always be set when dialing out an Outbound Route flagged as Emergency.  The Emergency CID overrides all other caller id settings</source>
+        <target>Este identificador de chamada será sempre definido quando se marca por uma rota de saída como Emergência. O CID de Emergência substitui todas as outras configurações da identificação de chamada</target>
+      </trans-unit>
+      <trans-unit id="assigned_did_cid">
+        <source>Assigned DID/CID</source>
+        <target>Atribuição DID/CID</target>
+      </trans-unit>
+      <trans-unit id="did_desc">
+        <source>DID Description</source>
+        <target>Descrição DID</target>
+      </trans-unit>
+      <trans-unit id="did_desc_hint">
+        <source>A description for this DID, such as "Fax"</source>
+        <target>Descrição DID, como por exemplo "Fax"</target>
+      </trans-unit>
+      <trans-unit id="add_inbound_did">
+        <source>Add Inbound DID</source>
+        <target>Adicionar DID entrada</target>
+      </trans-unit>
+      <trans-unit id="add_inbound_did_hint">
+        <source>A direct DID that is associated with this extension. The DID should be in the same format as provided by the provider (e.g. full number, 4 digits for 10x4, etc).&lt;br&gt;&lt;br&gt;Format should be: &lt;b&gt;XXXXXXXXXX&lt;/b&gt;&lt;br&gt;&lt;br&gt;.An optional CID can also be associated with this DID by setting the next box</source>
+        <target>DID associado a esta extensão. DID deve ser do mesmo formato que o do fornecedor (número completo, 4 digitos para 10x4, etc).&lt;br&gt;&lt;br&gt;Formato deve ser: &lt;b&gt;XXXXXXXXXX&lt;/b&gt;&lt;br&gt;&lt;br&gt;.Pde ser associado um CID opcional a este DID no parâmetro abaixo</target>
+      </trans-unit>
+      <trans-unit id="add_inbound_cid">
+        <source>Add Inbound CID</source>
+        <target>Adicionar CID entrada</target>
+      </trans-unit>
+      <trans-unit id="add_inbound_cid_hint">
+        <source>Add a CID for more specific DID + CID routing. A DID must be specified in the above Add DID box. In addition to standard dial sequences, you can also put Private, Blocked, Unknown, Restricted, Anonymous and Unavailable in order to catch these special cases if the Telco transmits them</source>
+        <target>Adicionar um CID para especificar melhor uma rota DID + CID. DID deve ser especificado no parâmetro acima. Para além da sequência normal da marcação, é possível por Private, Blocked, Unknown, Restricted, Anonymous e Unavailable de forma a apanhar esses casos na eventualidade da companhia de telefones os transmitir</target>
+      </trans-unit>
+      <trans-unit id="voicemail_directory">
+        <source>Voicemail &amp; Directory</source>
+        <target>Voicemail &amp; Directoria</target>
+      </trans-unit>
+      <trans-unit id="status">
+        <source>Status</source>
+        <target>Estado</target>
+      </trans-unit>
+      <trans-unit id="voicemail_password">
+        <source>Voicemail Password</source>
+        <target>Voicemail Password</target>
+      </trans-unit>
+      <trans-unit id="voicemail_password_hint">
+        <source>This is the password used to access the voicemail system.&lt;br /&gt;&lt;br /&gt;This password can only contain numbers.&lt;br /&gt;&lt;br /&gt;A user can change the password you enter here after logging into the voicemail system (*98) with a phone</source>
+        <target>Password de acesso ao sistema de voicemail.&lt;br /&gt;&lt;br /&gt;A password só pode conter números.&lt;br /&gt;&lt;br /&gt;Um utilizador pode alterar a password introduzida aqui após aceder ao sistema de voicemail (*98) via telefone</target>
+      </trans-unit>
+      <trans-unit id="email_address">
+        <source>Email Address</source>
+        <target>Endereço Email</target>
+      </trans-unit>
+      <trans-unit id="email_address">
+        <source>The email address that voicemails are sent to</source>
+        <target>Endereço email de destino dos voicemails</target>
+      </trans-unit>
+      <trans-unit id="pager_email_address">
+        <source>Pager Email Address</source>
+        <target>Endereço Email Pager</target>
+      </trans-unit>
+      <trans-unit id="pager_email_address_hint">
+        <source>Pager/mobile email address that short voicemail notifications are sent to</source>
+        <target>Endereço email pager/telemóvel para envio de notificações de voicemail</target>
+      </trans-unit>
+      <trans-unit id="email_attachment">
+        <source>Email Attachment</source>
+        <target>Anexar Email</target>
+      </trans-unit>
+      <trans-unit id="email_attachment_hint">
+        <source>Option to attach voicemails to email</source>
+        <target>Opção que permite anexar voicemails ao email</target>
+      </trans-unit>      
+      <trans-unit id="play_cid">
+        <source>Play CID</source>
+        <target>Tocar CID</target>
+      </trans-unit>
+      <trans-unit id="play_cid_hint">
+        <source>Read back caller telephone number prior to playing the incoming message, and just after announcing the date and time the message was left</source>
+        <target>Lê o número de telefone de quem efectuou a chamada antes de ler a mensagem, e logo após anunciar a data da mensagem</target>
+      </trans-unit>     
+      <trans-unit id="play_envelope">
+        <source>Play Envelope</source>
+        <target>Tocar Envelope</target>
+      </trans-unit>
+      <trans-unit id="play_envelope_hint">
+        <source>Envelope controls whether or not the voicemail system will play the message envelope (date/time) before playing the voicemail message</source>
+        <target>O Envelope controla se o sistema de voicemail toca ou não o envelope da mensagem (data/hora) antes de tocar a mensagem de voicemail</target>
+      </trans-unit>
+      <trans-unit id="delete_voicemail">
+        <source>Delete Voicemail</source>
+        <target>Apagar Voicemail</target>
+      </trans-unit>
+      <trans-unit id="delete_voicemail_hint">
+        <source>If set to "yes" the message will be deleted from the voicemailbox (after having been emailed). Provides functionality that allows a user to receive their voicemail via email alone, rather than having the voicemail able to be retrieved from the Webinterface or the Extension handset.  CAUTION: MUST HAVE attach voicemail to email SET TO YES OTHERWISE YOUR MESSAGES WILL BE LOST FOREVER</source>
+        <target>Se activado a mensagem será apagada do voicemailbox (após ter sida enviada por email). Permite a um utilizador recer voicemail via email, sem ter que recuperar o voicemail via interface web ou telefone.  PRECAUÇÂO: NECESSITA TER voicemail anexado ao email CASO CONTRÁRIO AS MENSAGENS SERÂO PERDIDAS</target>
+      </trans-unit>
+      <trans-unit id="imap_username">
+        <source>IMAP Username</source>
+        <target>Utilizador IMAP</target>
+      </trans-unit>
+      <trans-unit id="imap_username_hint">
+        <source>This is the IMAP username, if using IMAP storage</source>
+        <target>Utilizador IMAP</target>
+      </trans-unit>      
+      <trans-unit id="imap_password">
+        <source>IMAP Password</source>
+        <target>Password IMAP</target>
+      </trans-unit>
+      <trans-unit id="imap_password_hint">
+        <source>This is the IMAP password, if using IMAP storage</source>
+        <target>Password IMAP</target>
+      </trans-unit>
+      <trans-unit id="vm_options">
+        <source>VM Options</source>
+        <target>Opções VM</target>
+      </trans-unit>
+      <trans-unit id="vm_options_hint">
+        <source>Separate options with pipe ( | )&lt;br /&gt;&lt;br /&gt;ie: review=yes|maxmessage=60</source>
+        <target>Separar opções com pipe ( | )&lt;br /&gt;&lt;br /&gt;ie: review=yes|maxmessage=60</target>
+      </trans-unit>
+      <trans-unit id="vm_context">
+        <source>VM Context</source>
+        <target>Contexto VM</target>
+      </trans-unit>
+      <trans-unit id="vm_context_hint">
+        <source>This is the Voicemail Context which is normally set to default. Do not change unless you understand the implications</source>
+        <target>Contexto Voicemail. Não modificar se não perceber as suas implicações</target>
+      </trans-unit>
+      <trans-unit id="device_options">
+        <source>Device options</source>
+        <target>Opções dispositivo</target>
+      </trans-unit>
+      <trans-unit id="device_secret">
+        <source>Secret</source>
+        <target>Segredo</target>
+      </trans-unit>
+      <trans-unit id="device_options">
+        <source>Device options</source>
+        <target>Opções dispositivo</target>
+      </trans-unit>
+      <trans-unit id="dictation_services">
+        <source>Dictation services</source>
+        <target>Serviços dicção</target>
+      </trans-unit>
+      <trans-unit id="dictation_service">
+        <source>Dictation Service</source>
+        <target>Serviço Dicção</target>
+      </trans-unit>
+      <trans-unit id="dictation_format">
+        <source>Dictation Format</source>
+        <target>Formato Dicção</target>
+      </trans-unit>
+      <trans-unit id="dictation_email_hint">
+        <source>The email address that completed dictations are sent to</source>
+        <target>Endereço de email para onde são enviadas</target>
+      </trans-unit>
+      <trans-unit id="language">
+        <source>Language</source>
+        <target>Idioma</target>
+      </trans-unit>
+      <trans-unit id="language_code">
+        <source>Language Code</source>
+        <target>Código Idioma</target>
+      </trans-unit>
+      <trans-unit id="language_code_hint">
+        <source>This will cause all messages and voice prompts to use the selected language if installed</source>
+        <target>Irá perguntar se pretende usar o idioma seleccionado, se instalado</target>
+      </trans-unit>
+      <trans-unit id="recording_options">
+        <source>Recording options</source>
+        <target>Opções de gravação</target>
+      </trans-unit>
+      <trans-unit id="record_incoming">
+        <source>Record Incoming</source>
+        <target>Registo de entrada</target>
+      </trans-unit>
+      <trans-unit id="record_incoming_hint">
+        <source>Record all inbound calls received at this extension</source>
+        <target>Regista todas as chamadas de entrada desta extensão</target>
+      </trans-unit>
+      <trans-unit id="record_outgoing">
+        <source>Record Outgoing</source>
+        <target>Registo de saída</target>
+      </trans-unit>
+      <trans-unit id="record_outgoing_hint">
+        <source>Record all outbound calls received at this extension</source>
+        <target>Regista todas as chamadas de saída desta extensão</target>
+      </trans-unit>
+      <trans-unit id="edit_extension_name">
+        <source>Edit {0} Extension {1}</source>
+        <target>Editar Extensão {0} {1}</target>
+      </trans-unit>
+      <trans-unit id="device_op_not_yet_supported">
+        <source>DEVICE TYPE OPERATION NOT YET SUPPORTED!</source>
+        <target>OPERAÇÃO NÃO SUPORTADA PARA ESTE TIPO DE DISPOSITIVO!</target>
+      </trans-unit>
+      <trans-unit id="device_tech_op_not_yet_supported">
+        <source>DEVICE TECH OPERATION NOT YET SUPPORTED!</source>
+        <target>OPERAÇÃO NÃO SUPORTADA PARA ESTE TIPO DE TECNOLOGIA!</target>
+      </trans-unit>
+      <!--           -->
+      <!-- TRUNKS -->
+      <!--           -->
+      <trans-unit id="general_settings">
+        <source>General settings</source>
+        <target>Definições gerais</target>
+      </trans-unit>      
+      <trans-unit id="trunk description">
+        <source>Trunk Description</source>
+        <target>Descrição do Trunk</target>
+      </trans-unit>
+      <trans-unit id="trunk description_hint">
+        <source>Descriptive Name for this Trunk</source>
+        <target>Nome descritivo para este Trunk</target>
+      </trans-unit>
+      <trans-unit id="outbound_caller_id_hint">
+        <source>Caller ID for calls placed out on this trunk&lt;br&gt;&lt;br&gt;Format: &lt;b&gt;&lt;#######&gt;&lt;/b&gt;. You can also use the format: "hidden" &lt;b&gt;&lt;#######&gt;&lt;/b&gt; to hide the CallerID sent out over Digital lines if supported (E1/T1/J1/BRI/SIP/IAX)</source>
+        <target>Identificador da chamada usado em chamadas efectuadas por esta trunk&lt;br&gt;&lt;br&gt;Formato: &lt;b&gt;&lt;#######&gt;&lt;/b&gt;. É possível usar também este formato: "hidden" &lt;b&gt;&lt;#######&gt;&lt;/b&gt; para ocultar o CID através de linhas Digitais se suportado (E1/T1/J1/BRI/SIP/IAX)</target>
+      </trans-unit>
+      <trans-unit id="cid_options">
+        <source>CID Options</source>
+        <target>Opçóes CID</target>
+      </trans-unit>      
+      <trans-unit id="cid_options_hint">
+        <source>Determines what CIDs will be allowed out this trunk. IMPORTANT: EMERGENCY CIDs defined on an extension/device will ALWAYS be used if this trunk is part of an EMERGENCY Route regardless of these settings.&lt;br /&gt;Allow Any CID: all CIDs including foreign CIDS from forwarded external calls will be transmitted.&lt;br /&gt;Block Foreign CIDs: blocks any CID that is the result of a forwarded call from off the system. CIDs defined for extensions/users are transmitted.&lt;br /&gt;Remove CNAM: this will remove CNAM from any CID sent out this trunk&lt;br /&gt;Force Trunk CID: Always use the CID defined for this trunk except if part of any EMERGENCY Route with an EMERGENCY CID defined for the extension/device</source>
+        <target>Determina os CIDs que serão permitidos neste trunk. IMPORTANTE: CIDs de emergência definidos numa extensão serão sempre usados se o trunk fizer parte de uma rota de EMERGENCIA independentemente das configurações.&lt;br /&gt;Allow Any CID: todos os CIDs incluindo os provenientes de chamadas externas reencaminhadas serão transmitidos.&lt;br /&gt;Block Foreign CIDs: bloqueia CIDs que sejam provenientes de chamadas reencaminhadas para o sistema. CIDs defindos para estensões serão transmitidos.&lt;br /&gt;Remove CNAM: Esta opção removerá CNAM de cada CID enviado por este trunk&lt;br /&gt;Force Trunk CID: Utiliza sempre o CID definido para este trunk excepto se fizer parete de uma rota de emergência com um CID de emergência definido para uma extensão</target>
+      </trans-unit>
+      <trans-unit id="maximum_channels">
+        <source>Maximum Channels</source>
+        <target>Limite de canais</target>
+      </trans-unit>
+      <trans-unit id="maximum_channels_hint">
+        <source>Controls the maximum number of outbound channels (simultaneous calls) that can be used on this trunk. Inbound calls are not counted against the maximum. Leave blank to specify no maximum</source>
+        <target>Controla o número máximo de canais de saída (chamadas simultâneas) que podem ser usados por este trunk. Chamadas de entrada não são consideradas. Deixe em branco para não especificar um limite</target>
+      </trans-unit>
+      <trans-unit id="disable_trunk">
+        <source>Disable Trunk</source>
+        <target>Desabilitar Trunk</target>
+      </trans-unit>
+      <trans-unit id="disable_trunk_hint">
+        <source>Check this to disable this trunk in all routes where it is used</source>
+        <target>Desabilita o uso deste trunk em todas rotas em que é usado</target>
+      </trans-unit>
+      <trans-unit id="monit_truk_fail">
+        <source>Monitor Trunk Failures</source>
+        <target>Monitorizar Falhas no Trunk</target>
+      </trans-unit>
+      <trans-unit id="monit_truk_fail_hint">
+        <source>If checked, supply the name of a custom AGI Script that will be called to report, log, email or otherwise take some action on trunk failures that are not caused by either NOANSWER or CANCEL</source>
+        <target>Se habilitado, introduza o nome de um script AGI que será usado para log, email ou efectuar uma acção qualquer caso as falhas não são causadas por NOANSWER ou CANCEL</target>
+      </trans-unit>
+      <trans-unit id="incoming_settings">
+        <source>Incoming Settings</source>
+        <target>Definições de Entrada</target>
+      </trans-unit>
+      <trans-unit id="outgoing_dial_rules">
+        <source>Outgoing dial rules</source>
+        <target>Regras de marcação de saida</target>
+      </trans-unit>
+      <trans-unit id="dial_rules">
+        <source>Dial Rules</source>
+        <target>Regras de marcação</target>
+      </trans-unit>     
+      <trans-unit id="dial_rules_hint">
+        <source>A Dial Rule controls how calls will be dialed on this trunk. It can be used to add or remove prefixes. Numbers that don't match any patterns defined here will be dialed as-is. Note that a pattern without a + or | (to add or remove a prefix) will not make any changes but will create a match. Only the first matched rule will be executed and the remaining rules will not be acted on.&lt;br /&gt;
+                                                        &lt;br /&gt;&lt;b&gt;Rules:&lt;/b&gt;&lt;br /&gt;&lt;strong&gt;X&lt;/strong&gt; matches any digit from 0-9&lt;br /&gt;
+                                                        &lt;strong&gt;Z&lt;/strong&gt; matches any digit from 1-9&lt;br /&gt;
+                                                        &lt;strong&gt;N&lt;/strong&gt; matches any digit from 2-9&lt;br /&gt;
+                                                        &lt;strong&gt;[1237-9]&lt;/strong&gt; matches any digit or letter in the brackets (in this example, 1,2,3,7,8,9)&lt;br /&gt;
+                                                        &lt;strong&gt;.&lt;/strong&gt; wildcard, matches one or more characters (not allowed before a | or +)&lt;br /&gt;
+                                                        &lt;strong&gt;|&lt;/strong&gt; removes a dialing prefix from the number (for example, 613|NXXXXXX would match when some dialed "6135551234" but would only pass "5551234" to the trunk)	&lt;strong&gt;+&lt;/strong&gt; adds a dialing prefix from the number (for example, 1613+NXXXXXX would match when some dialed "5551234" and would pass "16135551234" to the trunk)&lt;br /&gt;
+                                                        &lt;br /&gt;You can also use both + and |, for example: 01+0|1ZXXXXXXXXX would match "016065551234" and dial it as "0116065551234" Note that the order does not matter, eg. 0|01+1ZXXXXXXXXX does the same thing</source>
+        <target>Uma regra de marcação controla o modo como as chamadas serão marcadas neste trunk. Pode ser usada para adicionar ou remover prefixos. Os números que não fizerem correspondência com os padrões definidos aqui serão marcados sem alteração. Um padrão sem + ou | (para adicionar ou remover um prefixo) não fará alterações mas irá criar uma correspondência. Apenas a primeira correspondência encontrada será executada sem executar as restantes regras.&lt;br /&gt;
+                                                        &lt;br /&gt;&lt;b&gt;Regras:&lt;/b&gt;&lt;br /&gt;&lt;strong&gt;X&lt;/strong&gt; faz correspondência com digitos entre 0-9&lt;br /&gt;
+                                                        &lt;strong&gt;Z&lt;/strong&gt; faz correspondência com digitos entre 1-9&lt;br /&gt;
+                                                        &lt;strong&gt;N&lt;/strong&gt; faz correspondência com digitos entre 2-9&lt;br /&gt;
+                                                        &lt;strong&gt;[1237-9]&lt;/strong&gt; faz correspondência com digitos ou letras entre parêntesis (neste exemplo, 1,2,3,7,8,9)&lt;br /&gt;
+                                                        &lt;strong&gt;.&lt;/strong&gt; wildcard, faz correspondência com um ou mais caracteres (não permitido antes de | ou +)&lt;br /&gt;
+                                                        &lt;strong&gt;|&lt;/strong&gt; remove um prefixo de marcação do número (por exemplo, 613|NXXXXXX tem correspondência quando alguém marca "6135551234" mas apenas passa "5551234" para o trunk)	&lt;strong&gt;+&lt;/strong&gt; Adiciona um prefixo de marcação ao número (por exemplo, 1613+NXXXXXX tem correspondência quando alguém marca "5551234" e passa "16135551234" para o trunk)&lt;br /&gt;
+                                                        &lt;br /&gt;Pode-se usar simultâneamente + e |, por examplo: 01+0|1ZXXXXXXXXX faz correspondência com "016065551234" e marca como "0116065551234" Note que a ordem não interessa, ou seja, 0|01+1ZXXXXXXXXX faz exactamente a mesma coisa</target>
+      </trans-unit>
+      <trans-unit id="outbound_dial_prefix">
+        <source>Outbound Dial Prefix</source>
+        <target>Prefixo de marcação Outbound</target>
+      </trans-unit>
+      <trans-unit id="outbound_dial_prefix_hint">
+        <source>The outbound dialing prefix is used to prefix a dialing string to all outbound calls placed on this trunk. For example, if this trunk is behind another PBX or is a Centrex line, then you would put 9 here to access an outbound line. Another common use is to prefix calls with 'w' on a POTS line that need time to obtain dial tone to avoid eating digits.&lt;br&gt;&lt;br&gt;Most users should leave this option blank</source>
+        <target>O prefixo de outbound é usado para colocar um prefixo em todas as chamadas de saída deste trunk. Por exemplo, se este trunk tiver por detràs de outro PBX, podemos usar o 9 para aceder a uma linha de saída. Outro uso comum, é o de usar 'w' como prefixo de linhas POTS que precisam de tempo para obter o tom de marcação para evitar a supressão de digitos.&lt;br&gt;&lt;br&gt;A maior parte dos utilizadores deverão deixar a opção em branco</target>
+      </trans-unit>
+      <trans-unit id="outgoing_settings">
+        <source>Outgoing Settings</source>
+        <target>Definições de Saída</target>
+      </trans-unit>
+      <trans-unit id="registration">
+        <source>Registration</source>
+        <target>Registo</target>
+      </trans-unit>
+      <trans-unit id="user_context">
+        <source>USER Context</source>
+        <target>Contexto UTILIZADOR</target>
+      </trans-unit>
+      <trans-unit id="user_context_hint">
+        <source>This is most often the account name or number your provider expects.&lt;br&gt;&lt;br&gt;This USER Context will be used to define the below user details</source>
+        <target>Isto é geralmente o nome da conta ou número que o provedor está à espera.&lt;br&gt;&lt;br&gt;Este Contexto UTILIZADOR é usado para definir os detalhes do utilizador abaixo definidos</target>
+      </trans-unit>
+      <trans-unit id="user_details">
+        <source>USER Details</source>
+        <target>Detalhes UTILIZADOR</target>
+      </trans-unit>
+      <trans-unit id="user_details_hint">
+        <source>Modify the default USER connection parameters for your VoIP provider.&lt;br&gt;&lt;br&gt;You may need to add to the default lines listed below, depending on your provider.&lt;br /&gt;&lt;br /&gt;WARNING: Order is important as it will be retained. For example, if you use the "allow/deny" directives make sure deny comes first</source>
+        <target>Modifique os parâmetros de ligação do UTILIZADOR ao provedor VoIP.&lt;br&gt;&lt;br&gt;Poderá ser necessário adicionar linhas à configuração abaixo, dependendo do provedor.&lt;br /&gt;&lt;br /&gt;AVISO: A ordem é importante.</target>
+      </trans-unit>
+      <trans-unit id="trunk_name">
+        <source>Trunk Name</source>
+        <target>Nome do Trunk</target>
+      </trans-unit>
+      <trans-unit id="trunk_name_hint">
+        <source>Give this trunk a unique name.  Example: myiaxtel</source>
+        <target>Introduza un nome único ao trunk. Exemplo: myiaxtel</target>
+      </trans-unit>
+      <trans-unit id="trunk_name_hint">
+        <source>Give this trunk a unique name.  Example: myiaxtel</source>
+        <target>Introduza un nome único ao trunk. Exemplo: myiaxtel</target>
+      </trans-unit>
+      <trans-unit id="peer_details">
+        <source>PEER Details</source>
+        <target>Detalhes PEER</target>
+      </trans-unit>
+      <trans-unit id="peer_details_hint">
+        <source>Modify the default PEER connection parameters for your VoIP provider.&lt;br&gt;&lt;br&gt;You may need to add to the default lines listed below, depending on your provider.&lt;br /&gt;&lt;br /&gt;WARNING: Order is important as it will be retained. For example, if you use the "allow/deny" directives make sure deny comes first</source>
+        <target>Modifique os parâmetros de ligação do PEER ao provedor VoIP.&lt;br&gt;&lt;br&gt;Poderá ser necessário adicionar linhas à configuração abaixo, dependendo do provedor.&lt;br /&gt;&lt;br /&gt;AVISO: A ordem é importante.</target>
+      </trans-unit>
+      <trans-unit id="register_string">
+        <source>Register String</source>
+        <target>Linha de registo</target>
+      </trans-unit>
+      <trans-unit id="register_string_hint">
+        <source>Most VoIP providers require your system to REGISTER with theirs. Enter the registration line here.&lt;br&gt;&lt;br&gt;example:&lt;br&gt;&lt;br&gt;username:password@switch.voipprovider.com.&lt;br&gt;&lt;br&gt;Many providers will require you to provide a DID number, ex: username:password@switch.voipprovider.com/didnumber in order for any DID matching to work</source>
+        <target>Muitos provedores VoIP requerem que o sistema se REGISTE. Introduza a linha de registo aqui.&lt;br&gt;&lt;br&gt;exemplo:&lt;br&gt;&lt;br&gt;username:password@switch.voipprovider.com.&lt;br&gt;&lt;br&gt;Muitos provedores requerem um número DID, ex: username:password@switch.voipprovider.com/didnumber para que funcione a correspondência DID</target>
+      </trans-unit>
+      <trans-unit id="loading_trunk_data">
+        <source>Loading trunk data...</source>
+        <target>A carregar informação do trunk...</target>
+      </trans-unit>
+      <trans-unit id="adding_trunk">
+        <source>Adding trunk...</source>
+        <target>Adicionando trunk...</target>
+      </trans-unit>
+      <trans-unit id="added_trunk">
+        <source>Added trunk {0}</source>
+        <target>Trunk {0} adicionado</target>
+      </trans-unit>
+      <trans-unit id="updating_trunk">
+        <source>Updating trunk...</source>
+        <target>Atualizando trunk...</target>
+      </trans-unit>
+      <trans-unit id="updated_trunk">
+        <source>Updated trunk {0}</source>
+        <target>Trunk {0} atualizado</target>
+      </trans-unit>
+      <trans-unit id="add_trunk">
+        <source>Add trunk</source>
+        <target>Adicionar trunk</target>
+      </trans-unit>
+      <trans-unit id="add_full_trunk">
+        <source>Add {0} Trunk {1}</source>
+        <target>Adicionar Trunk {0} {1}</target>
+      </trans-unit>
+      <trans-unit id="edit_trunk">
+        <source>Edit trunk</source>
+        <target>Editar trunk</target>
+      </trans-unit>
+      <trans-unit id="edit_trunk_name">
+        <source>Edit {0} Trunk {1}</source>
+        <target>Editar Trunk {0} {1}</target>
+      </trans-unit>
+      <trans-unit id="edit_selected_trunk">
+        <source>Edit selected trunk</source>
+        <target>Editar trunk seleccionado</target>
+      </trans-unit>
+      <trans-unit id="remove_trunk">
+        <source>Remove trunk</source>
+        <target>Remover trunk</target>
+      </trans-unit>
+      <trans-unit id="trunk_remove_confirm">
+        <source>You are about to remove trunk {0}. &lt;br /&gt;Are you sure ?</source>
+        <target>Irá remover o trunk {0}. &lt;br /&gt; Tem a certeza ?</target>
+      </trans-unit>
+      <trans-unit id="deleting_trunk">
+        <source>Removing trunk...</source>
+        <target>A remover trunk...</target>
+      </trans-unit>
+      <trans-unit id="deleted_trunk">
+        <source>Removed trunk {0}</source>
+        <target>Trunk {0} removido com sucesso</target>
+      </trans-unit>
+      <trans-unit id="remove_selected_trunk">
+        <source>Remove selected trunk</source>
+        <target>Remover trunk seleccionado</target>
+      </trans-unit>
+      <trans-unit id="loading_trunk">
+        <source>Loading trunk...</source>
+        <target>A carregar trunk...</target>
+      </trans-unit>
+      <!--                  -->
+      <!-- OUTBOUND ROUTES  -->
+      <!--                  -->
+      <trans-unit id="route_name">
+        <source>Route Name</source>
+        <target>Nome da rota</target>
+      </trans-unit>
+      <trans-unit id="route_name_hint">
+        <source>Name of this route. Should be used to describe what type of calls this route matches (for example, 'local' or 'longdistance')</source>
+        <target>Nome da rota. Deve descrever que tipo de chamadas são efectuadas por esta rota (por exemplo, 'local' ou 'longa-distancia')</target>
+      </trans-unit>
+      <trans-unit id="route_cid">
+        <source>Route CID</source>
+        <target>CID da rota</target>
+      </trans-unit>
+      <trans-unit id="route_cid_hint">
+        <source>Optional: Route CID to be used for this route. If set, this will override all CIDs specified except:&lt;br&gt;&amp;nbsp;&amp;nbsp;- extension/device EMERGENCY CIDs if this route is checked as an EMERGENCY Route&lt;br&gt;&amp;nbsp;&amp;nbsp;- trunk CID if trunk is set to force it's CID&lt;br&gt;&amp;nbsp;&amp;nbsp;- Forwarded call CIDs (CF, Follow Me, Ring Groups, etc)&lt;br&gt;&amp;nbsp;&amp;nbsp;- Extension/User CIDs if checked</source>
+        <target>Opcional: CID da rota. Se definida, irá reescrever todos os CIDs especificados excepto:&lt;br&gt;&amp;nbsp;&amp;nbsp;- CIDs de emergência de extensão/dispositivo se esta rota tiver marcada como rota de emergência&lt;br&gt;&amp;nbsp;&amp;nbsp;- CID do trunk se o trunk está marcado para forçar CID&lt;br&gt;&amp;nbsp;&amp;nbsp;- CIDs de chamadas reencaminhadas (CF, Follow Me, Ring Groups, etc)&lt;br&gt;&amp;nbsp;&amp;nbsp;- CIDs de extensões/Utilizadores se habilitados</target>
+      </trans-unit>
+      <trans-unit id="override_extension_cid">
+        <source>Override Extension CID</source>
+        <target>Substituir CID da Extensão</target>
+      </trans-unit>
+      <trans-unit id="route_password">
+        <source>Route Password</source>
+        <target>Password da rota</target>
+      </trans-unit>
+      <trans-unit id="route_password_hint">
+        <source>Optional: A route can prompt users for a password before allowing calls to progress.  This is useful for restricting calls to international destinations or 1-900 numbers.&lt;br&gt;&lt;br&gt;A numerical password, or the path to an Authenticate password file can be used.&lt;br&gt;&lt;br&gt;Leave this field blank to not prompt for password</source>
+        <target>Opcional: A rota pode requisitar ao utilizador pela password antes de autorizar a chamada. Torna-se útil nos casos de restrição de chamadas internacionais.&lt;br&gt;&lt;br&gt;Uma password numérica, ou o caminho para um ficheiro com a password podem ser usados.&lt;br&gt;&lt;br&gt;Deixe este campo em branco para não ser requisitada por uma password</target>
+      </trans-unit>
+      <trans-unit id="emergency_dialing">
+        <source>Emergency Dialing</source>
+        <target>Marcação de Emergência</target>
+      </trans-unit>
+      <trans-unit id="emergency_dialing_hint">
+        <source>Optional: Selecting this option will enforce the use of a device's Emergency CID setting (if set).  Select this option if this set of routes is used for emergency dialing (ie: 911)</source>
+        <target>Opcional: Seleccionando esta opção irá forçar o uso de um CID de emergência de um dispositivo (caso esteja configurado). Esta opção permite que um determinado conjunto de rotas seja usado para marcação do número de Emergência (ie: 911)</target>
+      </trans-unit>
+      <trans-unit id="intra_company_route">
+        <source>Intra Company Route</source>
+        <target>Rota Intra-Companhia</target>
+      </trans-unit>
+      <trans-unit id="intra_company_route_hint">
+        <source>Optional: Selecting this option will treat this route as a intra-company connection, preserving the internal Caller ID information and not use the outbound CID of either the extension or trunk</source>
+        <target>Opcional: Seleccionando esta opção a rota será tratada como uma ligação intra-companhia, preservando a informação do CID interno e não usando o CID de saída quer da extensão ou trunk</target>
+      </trans-unit>
+      <trans-unit id="music_on_hold">
+        <source>Music On Hold</source>
+        <target>Música em Espera</target>
+      </trans-unit>
+      <trans-unit id="music_on_hold_hint">
+        <source>You can choose which music category to use. For example, choose a type appropriate for a destination country which may have announcements in the appropriate language</source>
+        <target>Aqui pode escolher que categoria de música pretende usar. Por exemplo, escolha um tipo apropriado para o país de destino podendo conter anúncios na língua apropriada</target>
+      </trans-unit>
+      <trans-unit id="dial_patterns">
+        <source>Dial Patterns</source>
+        <target>Padrões de Marcação</target>
+      </trans-unit>
+      <trans-unit id="dial_patterns_hint">
+        <source>A Dial Pattern is a unique set of digits that will select this trunk. Enter one dial pattern per line.&lt;br&gt;&lt;br&gt;
+                                                &lt;b&gt;Rules:&lt;/b&gt;&lt;br&gt;&lt;strong&gt;X&lt;/strong&gt; matches any digit from 0-9&lt;br&gt;
+                                                &lt;strong&gt;Z&lt;/strong&gt; matches any digit from 1-9&lt;br&gt;
+                                                &lt;strong&gt;N&lt;/strong&gt; matches any digit from 2-9&lt;br&gt;
+                                                &lt;strong&gt;[1237-9]&lt;/strong&gt; matches any digit or letter in the brackets (in this example, 1,2,3,7,8,9)&lt;br&gt;
+                                                &lt;strong&gt;.&lt;/strong&gt; wildcard, matches one or more characters &lt;br&gt;
+                                                &lt;strong&gt;|&lt;/strong&gt; separates a dialing prefix from the number (for example, 9|NXXXXXX would match when some dialed "95551234" but would only pass "5551234" to the trunks)&lt;br /&gt;
+                                                &lt;strong&gt;/&lt;/strong&gt; appended to a dial pattern, matches a callerid or callerid pattern (for example, NXXXXXX/104 would match only if dialed by extension "104")</source>
+        <target>Um padrão de marcação é uma combinação única de digitos que seleccionarão este trunk. Introduza um por linha.&lt;br&gt;&lt;br&gt;
+                                                &lt;b&gt;Regras:&lt;/b&gt;&lt;br&gt;&lt;strong&gt;X&lt;/strong&gt; faz correspondência com digitos entre 0-9&lt;br&gt;
+                                                &lt;strong&gt;Z&lt;/strong&gt; faz correspondência com digitos entre 1-9&lt;br&gt;
+                                                &lt;strong&gt;N&lt;/strong&gt; faz correspondência com digitos entre 2-9&lt;br&gt;
+                                                &lt;strong&gt;[1237-9]&lt;/strong&gt; faz correspondência com digitos ou letras entre parêntesis (neste exemplo, 1,2,3,7,8,9)&lt;br&gt;
+                                                &lt;strong&gt;.&lt;/strong&gt; wildcard, faz correspondência com um ou mais caracteres &lt;br&gt;
+                                                &lt;strong&gt;|&lt;/strong&gt; separa o prefixo de marcação do número (por exemplo, 9|NXXXXXX faz correspondência com "95551234" mas apenas passa "5551234" para os trunks)&lt;br /&gt;
+                                                &lt;strong&gt;/&lt;/strong&gt; adiciona ao padrão de marcação, faz correspondência com um CID ou um padrão (por exemplo, NXXXXXX/104 faz correspondência apenas com a extensão "104")</target>
+        &lt;strong&gt;Z&lt;/strong&gt; faz correspondência com digitos entre 1-9&lt;br /&gt;
+      </trans-unit>
+      <trans-unit id="trunkpriority_hint">
+        <source>The Trunk Sequence controls the order of trunks that will be used when the above Dial Patterns are matched. &lt;br&gt;&lt;br&gt;For Dial Patterns that match long distance numbers, for example, you'd want to pick the cheapest routes for long distance (ie, VoIP trunks first) followed by more expensive routes (POTS lines)</source>
+        <target>A sequência de Trunks controla a ordem das trunks que serão usadas quando houver correspondência com os padrões de marcação acima definidos. &lt;br&gt;&lt;br&gt;Para padrões de marcação que fazem correspondência com números usados em chamadas internacionais, por exemplo, será pretendido que se use a rota mais barata para chamadas de longa distância (ie, primeiro trunks VoIP) seguido pelas rotas mais caras (linhas POTS)</target>
+      </trans-unit>
+      <trans-unit id="loading_route">
+        <source>Loading route...</source>
+        <target>A carregar rota...</target>
+      </trans-unit>
+      <trans-unit id="loading_route_data">
+        <source>Loading route data...</source>
+        <target>A carregar informação da rota...</target>
+      </trans-unit>
+      <trans-unit id="at_least_one_trunk">
+        <source>At least one trunk needed!</source>
+        <target>Necessário pelo menos um trunk!</target>
+      </trans-unit>
+      <trans-unit id="adding_route">
+        <source>Adding route...</source>
+        <target>Adicionando rota...</target>
+      </trans-unit>
+      <trans-unit id="added_route">
+        <source>Added route {0}</source>
+        <target>Rota {0} adicionada</target>
+      </trans-unit>
+      <trans-unit id="updating_route">
+        <source>Updating route...</source>
+        <target>Atualizando rota...</target>
+      </trans-unit>
+      <trans-unit id="updated_route">
+        <source>Updated route {0}</source>
+        <target>Rota {0} atualizada</target>
+      </trans-unit>
+      <trans-unit id="outbound_routes">
+        <source>Outbound Routes</source>
+        <target>Rotas de Saída</target>
+      </trans-unit>
+      <trans-unit id="outbound_remove_confirm">
+        <source>You are about to remove outbound route {0}. &lt;br /&gt;Are you sure ?</source>
+        <target>Irá remover a rota de saída {0}. &lt;br /&gt; Tem a certeza ?</target>
+      </trans-unit>
+      <trans-unit id="add_route">
+        <source>Add route</source>
+        <target>Adicionar rota</target>
+      </trans-unit>
+      <trans-unit id="edit_route">
+        <source>Edit route</source>
+        <target>Editar rota</target>
+      </trans-unit>
+      <trans-unit id="edit_route_name">
+        <source>Edit route {0}</source>
+        <target>Editar rota {0}</target>
+      </trans-unit>
+      <trans-unit id="edit_selected_route">
+        <source>Edit selected route</source>
+        <target>Editar rota seleccionada</target>
+      </trans-unit>
+      <trans-unit id="remove_route">
+        <source>Remove route</source>
+        <target>Remover rota</target>
+      </trans-unit>
+      <trans-unit id="remove_selected_route">
+        <source>Remove selected route</source>
+        <target>Remover rota seleccionada</target>
+      </trans-unit>
+      <trans-unit id="deleting_route">
+        <source>Removing route...</source>
+        <target>A remover rota...</target>
+      </trans-unit>
+      <trans-unit id="deleted_route">
+        <source>Removed route {0}</source>
+        <target>Rota {0} removida com sucesso</target>
+      </trans-unit>
+      <!--                  -->
+      <!-- INBOUND ROUTES   -->
+      <!--                  -->
+      <trans-unit id="inbound_remove_confirm">
+        <source>You are about to remove inbound route {0}. &lt;br /&gt;Are you sure ?</source>
+        <target>Irá remover a rota de entrada {0}. &lt;br /&gt; Tem a certeza ?</target>
+      </trans-unit>
+      <trans-unit id="inbound_description_hint">
+        <source>Provide a meaningful description of what this incoming route is</source>
+        <target>Descrição da rota de entrada</target>
+      </trans-unit>
+      <trans-unit id="did_number">
+        <source>DID Number</source>
+        <target>Número DID</target>
+      </trans-unit>
+      <trans-unit id="did_number_hint">
+        <source>Define the expected DID Number if your trunk passes DID on incoming calls. &lt;br&gt;&lt;br&gt;Leave this blank to match calls with any or no DID info.&lt;br&gt;&lt;br&gt;You can also use a pattern match (eg _2[345]X) to match a range of numbers</source>
+        <target>Define o número DID esperado se o trunk aceita DID nas chamadas de entrada. &lt;br&gt;&lt;br&gt;Deixe em branco para fazer correspondência com todos os DID.&lt;br&gt;&lt;br&gt;Também é possivel usar um padrão (p.ex. _2[345]X) para fazer correspondência com um intervalo de números</target>
+      </trans-unit>
+      <trans-unit id="cid_number">
+        <source>Caller ID Number</source>
+        <target>Número CID</target>
+      </trans-unit>
+      <trans-unit id="cid_number_hint">
+        <source>Define the Caller ID Number to be matched on incoming calls.&lt;br&gt;&lt;br&gt;Leave this field blank to match any or no CID info. In addition to standard dial sequences, you can also put Private, Blocked, Unknown, Restricted, Anonymous and Unavailable in order to catch these special cases if the Telco transmits them</source>
+        <target>Define o CID para fazer correspondência nas chamadas de entrada.Deixe em branco para fazer correspondência com todos os CID. Adicionalmente, pode usar Private, Blocked, Unknown, Restricted, Anonymous e Unavailable para fazer correspondência com esses códigos caso a operadora em questão transmite-os</target>
+      </trans-unit>
+      <trans-unit id="set_destination">
+        <source>Set Destination</source>
+        <target>Definir Destino</target>
+      </trans-unit>      
+      <trans-unit id="loading_incoming_route_data">
+        <source>Loading incoming route data...</source>
+        <target>A carregar informação da rota de entrada...</target>
+      </trans-unit>
+      <trans-unit id="loading_incoming_route">
+        <source>Loading incoming route...</source>
+        <target>A carregar rota de entrada...</target>
+      </trans-unit>
+      <trans-unit id="inbound_routes">
+        <source>Inbound Routes</source>
+        <target>Rotas de Entrada</target>
+      </trans-unit>
+      <trans-unit id="add_incoming_route">
+        <source>Add Incoming Route</source>
+        <target>Adicionar Rota de Entrada</target>
+      </trans-unit>
+      <trans-unit id="edit_incoming_route_name">
+        <source>Edit Incoming Route {0}</source>
+        <target>Editar Rota de Entrada {0}</target>
+      </trans-unit>
+      
+      
+      
+      
+      
+
+
+      
+      
+
+
+      
+
+
+
+                                                              
+
+      
+
+      
+      
+
+      
+      
+      
+
+      
+      
+
+      
+
+
+
+      
+
+
+      
+
+
+
+      
+
+
+
+
+
+
+      
+
+      
+
+
+
+
+      
+
+
+
+
+      
+
+
+
+      
+      
+
+           
+
+    </body>
+  </file>
+</xliff>

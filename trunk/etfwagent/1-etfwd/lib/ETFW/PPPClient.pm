@@ -24,7 +24,7 @@ package ETFW::PPPClient;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 
 my %CONF = ( 'conf_file'=>"/etc/wvdial.conf", "wvdial_bin"=>"/usr/bin/wvdial" );

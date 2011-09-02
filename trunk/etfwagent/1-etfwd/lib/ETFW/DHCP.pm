@@ -24,7 +24,7 @@ package ETFW::DHCP;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 
 use Data::Dumper;
@@ -178,7 +178,7 @@ sub parse_declarations {
     my ($L,$s,$f,$l,$i) = @_;
     
     while( my ($d,$def) = ( $s =~ /(\S+)\s+(.*)/gc ) ){
-        if( my $D = $self->parse_declaration($d,$def,$f,$l) ){
+        if( my $D = $self->parse_declaration($d,$def) ){
             $D->{"conf_file"} = $f;
             $D->{'line'} = $l;
             $D->{'index'} = $i;
@@ -213,66 +213,67 @@ sub parse_declarations {
 
 sub parse_declaration {
     my $self = shift;
-    my ($d,$def,$f,$l) = @_;
+    my ($d,$def,$force) = @_;
 
-    if( $d eq "subnet" ){ 
-        $def =~ /(\S+)\s+(\S+)\s+(\S+)/;
-        my %S = ( address=>"$1", netmask=>"$3", "args"=>"$1 $2 $3" );
-        return \%S;
-    } elsif( $d eq "pool" ){
-        my %P = ( "args"=>"" );
-        return \%P;
-    } elsif( $d eq "shared-network" ){
-        $def =~ /(\S+)/;
-        my %S = ( name=>"$1", "args"=>$1 );
-        return \%S;
-    } elsif( $d eq "group" ){
-        my %G = ( "args"=>"" );
-        return \%G;
-    } elsif( $d eq "host" ){
-        $def =~ /(\S+)/;
-        my %H = ( host=>$1, "args"=>$& );
-        return \%H;
-    } elsif( $d eq "zone" ){
-        $def =~ /"?([^"\s]+)"?/;
-        my %Z = ( name=>$1, "args"=>$& );
-        return \%Z;
-    } elsif( $d eq "key" &&
-                $def =~ m/([^;{\s]+)\s*({|$)/ ){
-        my %K = ( key=>$1, "args"=>"$1" );
-        $K{"end"} = 1 if( $2 ne "{" );
-        return \%K;
-    } elsif( $d eq "allow-update" ){
-        my %A = ( "args"=>"" );
-        return \%A;
-    } elsif( $d eq "logging" ){
-        my %L = ( "args"=>"" );
-        return \%L;
-    } elsif( $d eq "channel" ){
-        $def =~ /(\S+)/;
-        my %N = ( type=>$1, "args"=>$& );
-        return \%N;
-    } elsif( $d eq "category" ){
-        $def =~ /(\S+)/;
-        my %G = ( name=>$1, "args"=>$& );
-        return \%G;
-    } elsif( $d eq "failover" &&
-                $def =~ /((\S+)\s+"?([^"]+)"?(\s+"?([^"]+)"?)?)\s*({|$)/ ){
-        my %F = ( name=>$3, "args"=>$1 );
-        $F{"state"} = $5 if( $5 );
-        return \%F;
-    } elsif( $d eq "class" ){
-        $def =~ /"?([^"]+)"?/;
-        my %C = ( name=>$2, "args"=>$& );
-        return \%C;
-    } elsif( $d eq "subclass" ){
-        $def =~ /("?([^"]+)"?\s+(\S+))\s*(;|{|$)/;
-        my %C = ( name=>$2, subclass=>$3, "args"=>"$1" );
-        $C{"end"} = 1 if( $4 ne "{" );
-        return \%C;
-    } elsif( $def =~ /([^{]*){/ ){
-        my %O = ( "args"=> $1 );
-        return \%O;
+    # should end with {
+    if( $force || $def =~ /{\s*$/ ){
+        if( $d eq "subnet" ){ 
+            $def =~ /(\S+)\s+(\S+)\s+(\S+)/;
+            my %S = ( address=>"$1", netmask=>"$3", "args"=>"$1 $2 $3" );
+            return \%S;
+        } elsif( $d eq "pool" ){
+            my %P = ( "args"=>"" );
+            return \%P;
+        } elsif( $d eq "shared-network" ){
+            $def =~ /(\S+)/;
+            my %S = ( name=>"$1", "args"=>$1 );
+            return \%S;
+        } elsif( $d eq "group" ){
+            my %G = ( "args"=>"" );
+            return \%G;
+        } elsif( $d eq "host" ){
+            $def =~ /(\S+)/;
+            my %H = ( host=>$1, "args"=>$& );
+            return \%H;
+        } elsif( $d eq "zone" ){
+            $def =~ /"?([^"\s]+)"?/;
+            my %Z = ( name=>$1, "args"=>$& );
+            return \%Z;
+        } elsif( $d eq "key" &&
+                    $def =~ m/([^;{\s]+)/ ){
+            my %K = ( key=>$1, "args"=>"$1" );
+            return \%K;
+        } elsif( $d eq "allow-update" ){
+            my %A = ( "args"=>"" );
+            return \%A;
+        } elsif( $d eq "logging" ){
+            my %L = ( "args"=>"" );
+            return \%L;
+        } elsif( $d eq "channel" ){
+            $def =~ /(\S+)/;
+            my %N = ( type=>$1, "args"=>$& );
+            return \%N;
+        } elsif( $d eq "category" ){
+            $def =~ /(\S+)/;
+            my %G = ( name=>$1, "args"=>$& );
+            return \%G;
+        } elsif( $d eq "failover" &&
+                    $def =~ /((\S+)\s+"?([^"]+)"?(\s+"?([^"]+)"?)?)/ ){
+            my %F = ( name=>$3, "args"=>$1 );
+            $F{"state"} = $5 if( $5 );
+            return \%F;
+        } elsif( $d eq "class" ){
+            $def =~ /"?([^"]+)"?/;
+            my %C = ( name=>$2, "args"=>$& );
+            return \%C;
+        } elsif( $d eq "subclass" ){
+            $def =~ /("?([^"]+)"?\s+(\S+))/;
+            my %C = ( name=>$2, subclass=>$3, "args"=>"$1" );
+            return \%C;
+        } elsif( $def =~ /([^{]*)/ ){
+            my %O = ( "args"=> $1 );
+            return \%O;
+        }
     }
     return;
 }
@@ -359,6 +360,8 @@ sub save_config {
     my $fh;
     open($fh,">${c_file}");
     $self->save_declaration($fh,\%p,$c_file,0);
+    # unflush file
+    unflush_file_lines($c_file); 
     close($fh);
 }
 
@@ -1658,7 +1661,7 @@ sub mkparameters_declaration {
     my $self = shift;
     my ($L) = @_;
 
-    my $D = $self->parse_declaration( $L->{'type'},$L->{'args'} );
+    my $D = $self->parse_declaration( $L->{'type'},$L->{'args'}, 1 );
     if( my $parms = $L->{'parameters'} ){
         for my $P (@$parms){
             if( $P->{'name'} eq 'option' ){
@@ -2145,6 +2148,13 @@ sub save_configfile_content {
     close(OUTFILE);
 
     unflush_file_lines($file); 
+}
+
+# reset configuration
+sub reset_config {
+    my $self = shift;
+
+    $self->save_configfile_content();
 }
 
 1;

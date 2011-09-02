@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file source-language="EN" target-language="pt" datatype="plaintext" original="messages" date="2010-08-16T12:09:30Z" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="login_info">
+        <source>Login Information</source>
+        <target>Informação de Login</target>
+      </trans-unit>
+      <trans-unit id="language">
+        <source>Language</source>
+        <target>Idioma</target>
+      </trans-unit>
+      <trans-unit id="login_error">
+        <source>Login Error</source>
+        <target>Erro de login</target>
+      </trans-unit>      
+      <trans-unit id="user_pass_invalid">
+        <source>The username and/or password is invalid.</source>
+        <target>username e/ou password inválida(s).</target>
+      </trans-unit>
+      <trans-unit id="remember">
+        <source>Remember</source>
+        <target>Memorizar</target>
+      </trans-unit>      
+    </body>
+  </file>
+</xliff>

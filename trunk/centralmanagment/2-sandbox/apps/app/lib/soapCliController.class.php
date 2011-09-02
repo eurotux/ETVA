@@ -533,9 +533,12 @@ class soapCliController extends sfController {
 
         }
 
-
-        $this->request->setParameter('nid',$etva_node->getId());
-        $this->request->setParameter('server',$server);
+        if(!$etva_server = $etva_node->retrieveServerByName($server)){
+            $error = array('success'=>false,'error'=>$host.' : Server name not found');
+            return json_encode($error);
+        }
+        
+        $this->request->setParameter('sid',$etva_server->getId());
         $this->request->setParameter('networks', json_encode($nets_intfs));
 
         $action = $this->getAction('network','jsonReplace');
@@ -554,9 +557,13 @@ class soapCliController extends sfController {
 
         }
 
+        if(!$etva_server = $etva_node->retrieveServerByName($server)){
+            $error = array('success'=>false,'error'=>$host.' : Server name not found');
+            return json_encode($error);
+        }
 
-        $this->request->setParameter('nid',$etva_node->getId());
-        $this->request->setParameter('server',$server);
+
+        $this->request->setParameter('sid',$etva_server->getId());
         $this->request->setParameter('macaddr', $mac);
 
         $action = $this->getAction('network','jsonRemove');

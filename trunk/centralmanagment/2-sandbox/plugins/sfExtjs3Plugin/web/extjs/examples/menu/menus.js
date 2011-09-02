@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -19,7 +19,7 @@ Ext.onReady(function(){
             Ext.example.msg('Color Selected', 'You chose {0}.', color);
         }
     });
-    
+
     var store = new Ext.data.ArrayStore({
         fields: ['abbr', 'state'],
         data : Ext.exampledata.states // from states.js
@@ -98,7 +98,42 @@ Ext.onReady(function(){
             text:'Button w/ Menu',
             iconCls: 'bmenu',  // <-- icon
             menu: menu  // assign menu by instance
-        }, 
+        }, {
+            text: 'Users',
+            iconCls: 'user',
+            menu: {
+                xtype: 'menu',
+                plain: true,
+                items: {
+                    xtype: 'buttongroup',
+                    title: 'User options',
+                    autoWidth: true,
+                    columns: 2,
+                    defaults: {
+                        xtype: 'button',
+                        scale: 'large',
+                        width: '100%',
+                        iconAlign: 'left'
+                    },
+                    items: [{
+                        text: 'User<br/>manager',
+                        iconCls: 'edit'
+                    },{
+                        iconCls: 'add',
+                        width: 'auto',
+                        tooltip: 'Add user'
+                    },{
+                        colspan: 2,
+                        text: 'Import',
+                        scale: 'small'
+                    },{
+                        colspan: 2,
+                        text: 'Who is online?',
+                        scale: 'small'
+                    }]
+                }
+            }
+        },
         new Ext.Toolbar.SplitButton({
             text: 'Split Button',
             handler: onButtonClick,
@@ -166,7 +201,7 @@ Ext.onReady(function(){
         cls: 'x-btn-icon',
         tooltip: '<b>Quick Tips</b><br/>Icon only button with tooltip'
     }, '-');
-    
+
     var scrollMenu = new Ext.menu.Menu();
     for (var i = 0; i < 50; ++i){
         scrollMenu.add({

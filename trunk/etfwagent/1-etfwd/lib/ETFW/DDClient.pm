@@ -24,7 +24,7 @@ package ETFW::DDClient;
 
 use strict;
 
-use Utils;
+use ETVA::Utils;
 use FileFuncs;
 
 my %CONF = ( "conf_file"=>"/etc/ddclient/ddclient.conf",

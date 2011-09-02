@@ -21,20 +21,20 @@ class ServerCpuUsageRRA extends RRA
                             "RRA:MAX:0.5:288:797");     
         
     }
+    
 
-    function ServerCpuUsageRRA($node,$name)
+    function ServerCpuUsageRRA($node,$name,$init_rrd=true)
     {
         if(!$node || !$name) return;
 
         $file = $node.'/'.$name.'__serverCpuUsage.rrd';
         $this->init_log();
 
-        parent::RRA($file, $this->opts);
+        parent::RRA($file, $this->opts, $init_rrd);
 
         
     }
-
-    
+   
 
     static function getName(){
         return self::$name;
@@ -70,7 +70,7 @@ class ServerCpuUsageRRA extends RRA
 
         $initial_params = array('--start='.$graph_start,
                            '--end='.$graph_end,
-                           '--title="'.$title.'  '.self::$name.'"');
+                           '--title="'.$title.'"');
 
         $defs = array('DEF:a="'.$this->getFilepath().'":cpu_per:AVERAGE');
 

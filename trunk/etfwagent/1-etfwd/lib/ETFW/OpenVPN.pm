@@ -25,7 +25,7 @@ package ETFW::OpenVPN;
 use strict;
 
 use FileFuncs;
-use Utils;
+use ETVA::Utils;
 
 use Data::Dumper;
 

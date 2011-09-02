@@ -8,68 +8,72 @@ use_helper('Extjs');
  * var networkGrid
  *
  */
-//include_partial('agent/grid',array('server_id'=>$server_id,'agent_form'=>$agent_form,'agent_tableMap'=>$agent_tableMap));
-//include_partial('agent/view');
-include_partial('network/grid',array('server_id'=>$server_id,'node_id'=>$node_id,'network_tableMap'=>$network_tableMap));
+
+//include_partial('network/grid',array('network_tableMap'=>$network_tableMap)); //not used...remove it?
 // include_partial('server/formView',array('server_id'=>$server_id));
-include_partial('server/grid',array('server_id'=>$server_id,'node_id'=>$node_id,'sfGuardGroup_tableMap'=>$sfGuardGroup_tableMap,'server_tableMap'=>$server_tableMap));
+include_partial('server/info');
 //include_partial('server/stats',array('server_id'=>$server_id,'rra_stores'=>$rra_stores,'rra_names'=>$rra_names));
-include_partial('server/stats',array('containerId'=>$containerId,'node_id'=>$node_id,'server_id'=>$server_id,'networks'=>$networks,'lv'=>$lv));
+include_partial('server/stats');
+include_partial('server/services');
+
 ?>
 <script>
-    var containerId = <?php echo json_encode($containerId) ?>;
+Ext.ns('Server.View');
 
-    
-    Services = function(){
+Server.View.Main = function(config) {
 
-        return{
-            // var networkGrid;
-            init:function(){
-                Ext.QuickTips.init();
+    Ext.apply(this,config);
 
-                var servicesPanel = new Ext.Panel({
-                        //id:'server-services-panel-'+containerId,
-                        title:'Services',
-                        layout:'fit',
-                        autoLoad:{url:<?php echo json_encode(url_for('service/view?sid='.$server_id.'&containerId='.$containerId)); ?>,scripts:true,callback:function(){
-                        // add component ID
-                        servicesPanel.add(Ext.getCmp('service-tabs-'+containerId));
-                        servicesPanel.doLayout();
-                        }},
-                        listeners:{
-                            afterlayout:{scope:this, single:true, fn:function() {
+    var items = [];
+
+    var server_info = new Server.View.Info({title:<?php echo json_encode(__('Server info')) ?>,server_id:this.server['id']});
+   
+    server_info.on('afterlayout',function(){
+        server_info.loadRecord({id:this.server['id']});
+    },this,{single:true});
 
 
+    server_info.on({
+        'updateNodeState':{fn:function(node_attrs,data){this.fireEvent('updateNodeCss',node_attrs,data);},scope:this}
+    });
 
-                                var updater = servicesPanel.getUpdater();
-                                updater.on('beforeupdate', function(){
-                                    Ext.getBody().mask('Loading...');});
+    items.push(server_info);
 
-                                updater.on('update', function(){
-                                    Ext.getBody().unmask();});
+    //not used. remove it?
+    //var network_grid = new Network.Grid.init({server_id:this.server['id']});
+    //items.push(network_grid);
+
+    var server_stats = new Server.Stats({node_id:this.node_id,server_id:this.server['id']});
+    items.push(server_stats);
+
+    if(!Ext.isEmpty(this.server['agent_tmpl']))
+    {
+        var services_disabled = this.server['state'] ? false : true;
+        var services_tabTip = this.server['state'] ? '' : 'Disabled....hihihihi! Management agent should be running';
+        //var server_services = new Server.View.Services({server_id:this.server['id'],disable_panels:services_disabled,tabTip:services_tabTip});
+        var server_services = new Server.View.Services({server:this.server,disable_panels:services_disabled,tabTip:services_tabTip});
+        items.push(server_services);
+    }
+
+    Server.View.Main.superclass.constructor.call(this, {
+        activeTab:0,
+        items: [items]
+    });
 
 
-                            }}
-                        }
-                });
-                return servicesPanel;
-            }//Fim init
+    this.on({
+            'reload':function(){
+                var active = this.getActiveTab();
+                active.fireEvent('refresh');
+            }
+    });
 
 
-        }
-    }();
 
-    // add to main panel
-    Ext.getCmp('view-center-panel-'+containerId).add(new Ext.TabPanel({
-       activeTab:0,
-       items: [Server.Grid.init()
-               ,Stats.Server.init()
-               ,Network.Grid.init()
-               ,Services.init()
-             ]
-       
-       })
-    );
-    
+}
+
+
+// define public methods
+Ext.extend(Server.View.Main, Ext.TabPanel,{});
 
 </script>

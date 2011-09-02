@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file source-language="EN" target-language="pt" datatype="plaintext" original="first_time_wizard" date="2010-08-16T12:09:30Z" product-name="first_time_wizard">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>One-Time Setup Wizard</source>
+        <target>Assistente de configuração inicial</target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>One-Time setup</source>
+        <target>Configuração inicial</target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Recommended to change DEFAULT system password!</source>
+        <target>Recomendado a alteração da password por defeito do sistema!</target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Welcome to the one-time configuration utility.&lt;br&gt;Follow the steps to do system initial setup</source>
+        <target>Bem-vindo ao assistente de configuração inicial.&lt;br&gt;Nos próximos passos é efectuada a configuração inicial do sistema.</target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Thank you! Initial system setup has be done!</source>
+        <target>Obrigado! A configuração inicial do sistema foi efectuada!</target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>New password not set!</source>
+        <target>Password não alterada!</target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>New password set!</source>
+        <target>Password alterada!</target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Default password change</source>
+        <target>Alteração da password inicial</target>
+      </trans-unit>
+
+
+
+    </body>
+  </file>
+</xliff>

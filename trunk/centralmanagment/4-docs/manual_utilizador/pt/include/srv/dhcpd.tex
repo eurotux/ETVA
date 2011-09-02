@@ -1,0 +1,20 @@
+\subsection{DHCP}
+
+O \emph{DHCP}\footnote{Dynamic Host Configuration Protocol} é um protocolo,
+desenvolvido sobre IP, que permite um serviço de configuração dinâmica 
+dos parâmetros de rede de máquinas clientes.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/dhcpd.conf
+\end{Verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/dhcpd start
+# /etc/rc.d/init.d/dhcpd stop
+\end{Verbatim}
+
+A configuração e gestão deste serviço pode ser efectuada através do \textit{frontend} de administração da ETFW.

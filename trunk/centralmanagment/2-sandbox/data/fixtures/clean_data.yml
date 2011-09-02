@@ -1,0 +1,36 @@
+sfGuardUser:
+  admin:
+    username:       admin
+    password:       admin
+    is_super_admin: true
+
+sfGuardUserProfile:
+  admin:
+    user_id: admin
+    first_name: Ricardo
+    last_name: Gomes
+    email: rjg@eurotux.com
+
+sfGuardPermission:
+  admin:
+    name:           admin
+    description:    Administrator permission
+
+sfGuardGroup:
+  admin:
+    name:           admin
+    description:    Administrator group
+
+sfGuardGroupPermission:
+  admin:
+    group_id:       admin
+    permission_id:  admin
+
+sfGuardUserGroup:
+  admin:
+    group_id:       admin
+    user_id:        admin
+EtvaCluster:
+  EtvaCluster_1:
+    name: Default
+    isDefaultCluster: 1

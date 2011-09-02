@@ -1,6 +1,6 @@
 /*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
  * licensing@extjs.com
  * http://www.extjs.com/license
  */
@@ -129,6 +129,10 @@ if(Ext.PagingToolbar){
     displayMsg     : "Displaying {0} - {1} of {2}",
     emptyMsg       : 'No data to display'
   });
+}
+
+if(Ext.form.BasicForm){
+    Ext.form.BasicForm.prototype.waitTitle = "Please Wait..."
 }
 
 if(Ext.form.Field){
@@ -281,7 +285,9 @@ if(Ext.grid.PropertyColumnModel){
   Ext.apply(Ext.grid.PropertyColumnModel.prototype, {
     nameText   : "Name",
     valueText  : "Value",
-    dateFormat : "j/m/Y"
+    dateFormat : "j/m/Y",
+    trueText: "true",
+    falseText: "false"
   });
 }
 

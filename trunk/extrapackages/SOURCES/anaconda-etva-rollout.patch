@@ -1,0 +1,659 @@
+diff -Naur anaconda-11.1.2.224.orig/installclasses/custom.py anaconda-11.1.2.224/installclasses/custom.py
+--- anaconda-11.1.2.224.orig/installclasses/custom.py	2010-12-20 17:06:23.000000000 +0000
++++ anaconda-11.1.2.224/installclasses/custom.py	1970-01-01 01:00:00.000000000 +0100
+@@ -1,27 +0,0 @@
+-from installclass import BaseInstallClass
+-from rhpl.translate import N_
+-from constants import *
+-import os
+-import iutil
+-
+-# custom installs are easy :-)
+-class InstallClass(BaseInstallClass):
+-    # name has underscore used for mnemonics, strip if you dont need it
+-    id = "custom"
+-    name = N_("_Custom")
+-    pixmap = "custom.png"
+-    _description = N_("Select this installation type to gain complete "
+-		     "control over the installation process, including "
+-		     "software package selection and partitioning.")
+-    sortPriority = 10000
+-    showLoginChoice = 1
+-    showMinimal = 1
+-    hidden = 1
+-
+-    def setInstallData(self, anaconda):
+-	BaseInstallClass.setInstallData(self, anaconda)
+-        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
+-                                                CLEARPART_TYPE_LINUX)
+-
+-    def __init__(self, expert):
+-	BaseInstallClass.__init__(self, expert)
+diff -Naur anaconda-11.1.2.224.orig/installclasses/etva.py anaconda-11.1.2.224/installclasses/etva.py
+--- anaconda-11.1.2.224.orig/installclasses/etva.py	1970-01-01 01:00:00.000000000 +0100
++++ anaconda-11.1.2.224/installclasses/etva.py	2011-05-10 16:54:26.000000000 +0100
+@@ -0,0 +1,153 @@
++from installclass import BaseInstallClass
++import rhpl
++from rhpl.translate import N_,_
++from constants import *
++from flags import flags
++import os
++import iutil
++import types
++try:
++    import instnum
++except ImportError:
++    instnum = None
++
++import logging
++log = logging.getLogger("anaconda")
++
++import rpmUtils.arch
++
++# custom installs are easy :-)
++class InstallClass(BaseInstallClass):
++    # name has underscore used for mnemonics, strip if you dont need it
++    id = "etva"
++    name = N_("ETVA - Eurotux Virtual Appliance")
++    _description = N_("The default installation of %s includes a set of "
++                     "software applicable for general internet usage. "
++                     "What additional tasks would you like your system "
++                     "to include support for?")
++    _descriptionFields = (productName,)
++    sortPriority = 10000
++    allowExtraRepos = True
++    if 0: # not productName.startswith("Red Hat Enterprise"):
++        hidden = 1
++
++    tasks = [(N_("Virtualization"), ["virtualization"]),
++             (N_("Clustering"), ["clustering"]) ]
++
++    instkeyname = N_("Installation Number")
++    instkeydesc = N_("Would you like to enter an Installation Number "
++                     "(sometimes called Subscription Number) now? This feature "
++                     "enables the installer to access any extra components "
++                     "included with your subscription.  If you skip this step, "
++                     "additional components can be installed manually later.\n\n"
++                     "See http://www.redhat.com/InstNum/ for more information.")
++    skipkeytext = N_("If you cannot locate the Installation Number, consult "
++                     "http://www.redhat.com/InstNum/")
++    repos = { 
++             "Packages from CentOS Extras": (None, "http://mirrorlist.centos.org/?release=5&arch=%s&repo=extras" %(rpmUtils.arch.getBaseArch() )) }
++
++    def setInstallData(self, anaconda):
++	BaseInstallClass.setInstallData(self, anaconda)
++        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
++                                                CLEARPART_TYPE_ALL)
++
++	# Setup so that the default language is US English as we do not current support other
++	# translations
++	self.setLanguage(anaconda.id, 'en_US.UTF-8')
++	self.setLanguageDefault(anaconda.id, 'en_US.UTF-8')
++
++	# Force the bootloader to use GRUB with no parameters, no passwd and no forced LBA
++	# User will be able to choose bootloader location during install and nothing else
++	anaconda.id.bootloader.setPassword(None)
++	anaconda.id.bootloader.setUseGrub(1)
++	anaconda.id.bootloader.args.set('')
++	anaconda.id.bootloader.setForceLBA(0)
++
++    def setGroupSelection(self, anaconda):
++	grps = anaconda.backend.getDefaultGroups(anaconda)
++	map(lambda x: anaconda.backend.selectGroup(x), grps)
++	anaconda.backend.selectGroup("virtagent")
++	anaconda.backend.selectGroup("kvm")
++
++    def setSteps(self, dispatch):
++	BaseInstallClass.setSteps(self, dispatch);
++	dispatch.skipStep("welcome", permanent = 1)
++	dispatch.skipStep("language", permanent = 1)
++	dispatch.skipStep("bootloader", permanent = 1)
++	dispatch.skipStep("regkey", permanent = 1)
++	dispatch.skipStep("tasksel", permanent = 1)
++	dispatch.skipStep("firewall")
++	# used on the command line to force not looking
++	# for partitions to upgrade.  useful in some cases...
++	dispatch.skipStep("findrootparts", skip = 1)
++	# we want to make sure _NOT_ to skip instbootloader and bootloaderadvanced
++	dispatch.skipStep("bootloaderadvanced", skip=0)
++	dispatch.skipStep("instbootloader", skip=0)
++
++    def handleRegKey(self, key, intf, interactive = True):
++        self.repopaths = { "base": "%s" %(productPath,) }
++        self.tasks = self.taskMap[productPath.lower()]
++        self.installkey = key
++
++        try:
++            inum = instnum.InstNum(key)
++        except Exception, e:
++            if True or not BETANAG: # disable hack keys for non-beta
++                # make sure the log is consistent
++                log.info("repopaths is %s" %(self.repopaths,))
++                raise
++            else:
++                inum = None
++
++        if inum is not None:
++            # make sure the base products match
++            if inum.get_product_string().lower() != productPath.lower():
++                raise ValueError, "Installation number incompatible with media"
++
++            for name, path in inum.get_repos_dict().items():
++                # virt is only supported on i386/x86_64.  so, let's nuke it
++                # from our repo list on other arches unless you boot with
++                # 'linux debug'
++                if name.lower() == "virt" and ( \
++                        rhpl.getArch() not in ("x86_64","i386","ia64")
++                        and not flags.debug):
++                    continue
++                self.repopaths[name.lower()] = path
++                log.info("Adding %s repo" % (name,))
++
++        else:
++            key = key.upper()
++            # simple and stupid for now... if C is in the key, add Clustering
++            # if V is in the key, add Virtualization. etc
++            if key.find("C") != -1:
++                self.repopaths["cluster"] = "Cluster"
++                log.info("Adding Cluster option")
++            if key.find("S") != -1:
++                self.repopaths["clusterstorage"] = "ClusterStorage"
++                log.info("Adding ClusterStorage option")
++            if key.find("W") != -1:
++                self.repopaths["workstation"] = "Workstation"
++                log.info("Adding Workstation option")
++            if key.find("V") != -1:
++                self.repopaths["virt"] = "VT"
++                log.info("Adding Virtualization option")
++
++        for repo in self.repopaths.values():
++            if not self.taskMap.has_key(repo.lower()):
++                continue
++
++            for task in self.taskMap[repo.lower()]:
++                if task not in self.tasks:
++                    self.tasks.append(task)
++        self.tasks.sort()
++
++        log.info("repopaths is %s" %(self.repopaths,))
++
++    def __init__(self, expert):
++	BaseInstallClass.__init__(self, expert)
++
++        self.repopaths = { "base": "%s" %(productPath,) }
++
++        # minimally set up tasks in case no key is provided
++        # self.tasks = self.taskMap[productPath.lower()]
++
+diff -Naur anaconda-11.1.2.224.orig/installclasses/fedora.py anaconda-11.1.2.224/installclasses/fedora.py
+--- anaconda-11.1.2.224.orig/installclasses/fedora.py	2010-12-20 17:06:23.000000000 +0000
++++ anaconda-11.1.2.224/installclasses/fedora.py	1970-01-01 01:00:00.000000000 +0100
+@@ -1,42 +0,0 @@
+-from installclass import BaseInstallClass
+-from rhpl.translate import N_,_
+-from constants import *
+-import os
+-import iutil
+-
+-import rpmUtils.arch
+-
+-class InstallClass(BaseInstallClass):
+-    # name has underscore used for mnemonics, strip if you dont need it
+-    id = "fedora"
+-    name = N_("_Fedora")
+-    _description = N_("The default installation of %s includes a set of "
+-                    "software applicable for general internet usage. "
+-                    "What additional tasks would you like your system "
+-                    "to include support for?") 
+-    _descriptionFields = (productName,)
+-    sortPriority = 10000
+-    if productName.startswith("Red Hat Enterprise") or 1:
+-        hidden = 1
+-
+-    tasks = [(N_("Office and Productivity"), ["graphics", "office", "games", "sound-and-video"]),
+-             (N_("Software Development"), ["development-libs", "development-tools", "gnome-software-development", "x-software-development"],),
+-             (N_("Web server"), ["web-server"])]
+-
+-    repos = { "Fedora Extras": ("http://download.fedora.redhat.com/pub/fedora/linux/extras/development/%s" %(rpmUtils.arch.getBaseArch() ,), None) }
+-
+-    def setInstallData(self, anaconda):
+-	BaseInstallClass.setInstallData(self, anaconda)
+-        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
+-                                                CLEARPART_TYPE_LINUX)
+-
+-    def setGroupSelection(self, anaconda):
+-        grps = anaconda.backend.getDefaultGroups(anaconda)
+-        map(lambda x: anaconda.backend.selectGroup(x), grps)
+-
+-    def setSteps(self, dispatch):
+-	BaseInstallClass.setSteps(self, dispatch);
+-	dispatch.skipStep("partition")
+-
+-    def __init__(self, expert):
+-	BaseInstallClass.__init__(self, expert)
+diff -Naur anaconda-11.1.2.224.orig/installclasses/personal_desktop.py anaconda-11.1.2.224/installclasses/personal_desktop.py
+--- anaconda-11.1.2.224.orig/installclasses/personal_desktop.py	2010-12-20 17:06:23.000000000 +0000
++++ anaconda-11.1.2.224/installclasses/personal_desktop.py	1970-01-01 01:00:00.000000000 +0100
+@@ -1,52 +0,0 @@
+-from installclass import BaseInstallClass
+-from rhpl.translate import N_, _
+-from constants import *
+-import os
+-import iutil
+-from fsset import *
+-
+-class InstallClass(BaseInstallClass):
+-    # name has underscore used for mnemonics, strip if you dont need it
+-    id = "personal desktop"
+-    name = N_("_Personal Desktop")
+-    pixmap = "workstation.png"
+-    _description = N_("Perfect for personal computers or laptops, select this "
+-		     "installation type to install a graphical desktop "
+-		     "environment and create a system ideal for home "
+-		     "or desktop use.")
+-    
+-    pkgstext = N_("\tDesktop shell (GNOME)\n"
+-                  "\tOffice suite (OpenOffice.org)\n"
+-                  "\tWeb browser \n"
+-                  "\tEmail (Evolution)\n"
+-                  "\tInstant messaging\n"
+-                  "\tSound and video applications\n"
+-                  "\tGames\n")
+-    
+-
+-    showLoginChoice = 0
+-    sortPriority = 1
+-    hidden = 1
+-
+-    def setSteps(self, dispatch):
+-	BaseInstallClass.setSteps(self, dispatch);
+-	dispatch.skipStep("partition")
+-        dispatch.skipStep("desktopchoice", skip = 0)
+-        dispatch.skipStep("package-selection", skip = 1)
+-
+-    def setGroupSelection(self, anaconda):
+-	BaseInstallClass.__init__(self, anaconda.backend)
+-
+-        anaconda.backend.unselectAll()
+-
+-        anaconda.backend.selectGroup("workstation-common", asMeta = 1)
+-        anaconda.backend.selectGroup("gnome-desktop")
+-        anaconda.backend.selectGroup("compat-arch-support", asMeta = 1, missingOk = 1)
+-
+-    def setInstallData(self, anaconda):
+-	BaseInstallClass.setInstallData(self, anaconda)
+-        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
+-                                                CLEARPART_TYPE_LINUX)
+-
+-    def __init__(self, expert):
+-	BaseInstallClass.__init__(self, expert)
+diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py anaconda-11.1.2.224/installclasses/rhel.py
+--- anaconda-11.1.2.224.orig/installclasses/rhel.py	2011-05-10 16:48:34.000000000 +0100
++++ anaconda-11.1.2.224/installclasses/rhel.py	1970-01-01 01:00:00.000000000 +0100
+@@ -1,135 +0,0 @@
+-from installclass import BaseInstallClass
+-import rhpl
+-from rhpl.translate import N_,_
+-from constants import *
+-from flags import flags
+-import os
+-import iutil
+-import types
+-try:
+-    import instnum
+-except ImportError:
+-    instnum = None
+-
+-import logging
+-log = logging.getLogger("anaconda")
+-
+-# custom installs are easy :-)
+-class InstallClass(BaseInstallClass):
+-    # name has underscore used for mnemonics, strip if you dont need it
+-    id = "centos"
+-    name = N_("CentOS Linux")
+-    _description = N_("The default installation of %s includes a set of "
+-                     "software applicable for general internet usage. "
+-                     "What additional tasks would you like your system "
+-                     "to include support for?")
+-    _descriptionFields = (productName,)
+-    sortPriority = 10000
+-    allowExtraRepos = True
+-    if 0: # not productName.startswith("Red Hat Enterprise"):
+-        hidden = 1
+-
+-    tasks = [(N_("Desktop - Gnome "), ["graphics", "office", "games", "sound-and-video","base-x","gnome-desktop","graphical-internet","printing"]),
+-             (N_("Desktop - KDE "), ["graphics", "office", "games", "sound-and-video","base-x","kde-desktop","graphical-internet","printing"]),
+-             (N_("Server "), ["server-cfg", "dns-server", "web-server", "ftp-server", "smb-server", "mail-server", "network-server", "legacy-network-server", "news-server"]),
+-             (N_("Server - GUI "), ["server-cfg", "dns-server", "web-server", "ftp-server", "smb-server", "mail-server", "network-server", "legacy-network-server", "news-server", "base-x", "gnome-desktop", "admin-tools"]),
+-             (N_("Virtualization"), ["virtualization"]),
+-             (N_("Clustering"), ["clustering"]),
+-             (N_("Storage Clustering"), ["cluster-storage"]) ]
+-
+-    instkeyname = N_("Installation Number")
+-    instkeydesc = N_("Would you like to enter an Installation Number "
+-                     "(sometimes called Subscription Number) now? This feature "
+-                     "enables the installer to access any extra components "
+-                     "included with your subscription.  If you skip this step, "
+-                     "additional components can be installed manually later.\n\n"
+-                     "See http://www.redhat.com/InstNum/ for more information.")
+-    skipkeytext = N_("If you cannot locate the Installation Number, consult "
+-                     "http://www.redhat.com/InstNum/")
+-
+-    def setInstallData(self, anaconda):
+-	BaseInstallClass.setInstallData(self, anaconda)
+-        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
+-                                                CLEARPART_TYPE_LINUX)
+-
+-    def setGroupSelection(self, anaconda):
+-        grps = anaconda.backend.getDefaultGroups(anaconda)
+-        map(lambda x: anaconda.backend.selectGroup(x), grps)
+-        coregrps = ["core", "base", "dialup", "text-internet"]
+-        map(lambda x: anaconda.backend.selectGroup(x), coregrps)
+-        desktopgrps = ["editors", "graphics", "office", "games", "sound-and-video","base-x","gnome-desktop","graphical-internet","printing"]
+-        map(lambda x: anaconda.backend.selectGroup(x), desktopgrps)
+-
+-
+-    def setSteps(self, dispatch):
+-	BaseInstallClass.setSteps(self, dispatch);
+-	dispatch.skipStep("partition")
+-	dispatch.skipStep("regkey", skip = 1)        
+-
+-    def handleRegKey(self, key, intf, interactive = True):
+-        self.repopaths = { "base": "%s" %(productPath,) }
+-        self.tasks = self.taskMap[productPath.lower()]
+-        self.installkey = key
+-
+-        try:
+-            inum = instnum.InstNum(key)
+-        except Exception, e:
+-            if True or not BETANAG: # disable hack keys for non-beta
+-                # make sure the log is consistent
+-                log.info("repopaths is %s" %(self.repopaths,))
+-                raise
+-            else:
+-                inum = None
+-
+-        if inum is not None:
+-            # make sure the base products match
+-            if inum.get_product_string().lower() != productPath.lower():
+-                raise ValueError, "Installation number incompatible with media"
+-
+-            for name, path in inum.get_repos_dict().items():
+-                # virt is only supported on i386/x86_64.  so, let's nuke it
+-                # from our repo list on other arches unless you boot with
+-                # 'linux debug'
+-                if name.lower() == "virt" and ( \
+-                        rhpl.getArch() not in ("x86_64","i386","ia64")
+-                        and not flags.debug):
+-                    continue
+-                self.repopaths[name.lower()] = path
+-                log.info("Adding %s repo" % (name,))
+-
+-        else:
+-            key = key.upper()
+-            # simple and stupid for now... if C is in the key, add Clustering
+-            # if V is in the key, add Virtualization. etc
+-            if key.find("C") != -1:
+-                self.repopaths["cluster"] = "Cluster"
+-                log.info("Adding Cluster option")
+-            if key.find("S") != -1:
+-                self.repopaths["clusterstorage"] = "ClusterStorage"
+-                log.info("Adding ClusterStorage option")
+-            if key.find("W") != -1:
+-                self.repopaths["workstation"] = "Workstation"
+-                log.info("Adding Workstation option")
+-            if key.find("V") != -1:
+-                self.repopaths["virt"] = "VT"
+-                log.info("Adding Virtualization option")
+-
+-        for repo in self.repopaths.values():
+-            if not self.taskMap.has_key(repo.lower()):
+-                continue
+-
+-            for task in self.taskMap[repo.lower()]:
+-                if task not in self.tasks:
+-                    self.tasks.append(task)
+-        self.tasks.sort()
+-
+-        log.info("repopaths is %s" %(self.repopaths,))
+-
+-    def __init__(self, expert):
+-	BaseInstallClass.__init__(self, expert)
+-
+-        self.repopaths = { "base": "%s" %(productPath,) }
+-
+-        # minimally set up tasks in case no key is provided
+-        # self.tasks = self.taskMap[productPath.lower()]
+-
+diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py.orig anaconda-11.1.2.224/installclasses/rhel.py.orig
+--- anaconda-11.1.2.224.orig/installclasses/rhel.py.orig	2011-05-10 16:48:34.000000000 +0100
++++ anaconda-11.1.2.224/installclasses/rhel.py.orig	1970-01-01 01:00:00.000000000 +0100
+@@ -1,140 +0,0 @@
+-from installclass import BaseInstallClass
+-import rhpl
+-from rhpl.translate import N_,_
+-from constants import *
+-from flags import flags
+-import os
+-import iutil
+-import types
+-try:
+-    import instnum
+-except ImportError:
+-    instnum = None
+-
+-import logging
+-log = logging.getLogger("anaconda")
+-
+-# custom installs are easy :-)
+-class InstallClass(BaseInstallClass):
+-    # name has underscore used for mnemonics, strip if you dont need it
+-    id = "centos"
+-    name = N_("CentOS Linux")
+-    _description = N_("The default installation of %s includes a set of "
+-                     "software applicable for general internet usage. "
+-                     "What additional tasks would you like your system "
+-                     "to include support for?")
+-    _descriptionFields = (productName,)
+-    sortPriority = 10000
+-    allowExtraRepos = True
+-    if 0: # not productName.startswith("Red Hat Enterprise"):
+-        hidden = 1
+-
+-    taskMap = {'client'        : [(N_("Office"), ["office"]),
+-                                  (N_("Multimedia"), ["graphics", 
+-                                                      "sound-and-video"])],
+-               'server'        : [(N_("Software Development"), 
+-                                   ["development-libs", "development-tools",
+-                                    "gnome-software-development", 
+-                                    "x-software-development"],),
+-                                  (N_("Web server"), ["web-server"])],
+-               'workstation'   : [(N_("Software Development"), 
+-                                   ["development-libs", "development-tools",
+-                                    "gnome-software-development", 
+-                                    "x-software-development"],)],
+-               'vt'            : [(N_("Virtualization"), ["xen"])],
+-               'cluster'       : [(N_("Clustering"), ["clustering"])],
+-               'clusterstorage': [(N_("Storage Clustering"), 
+-                                   ["cluster-storage"])]
+-             }
+-
+-    instkeyname = N_("Installation Number")
+-    instkeydesc = N_("Would you like to enter an Installation Number "
+-                     "(sometimes called Subscription Number) now? This feature "
+-                     "enables the installer to access any extra components "
+-                     "included with your subscription.  If you skip this step, "
+-                     "additional components can be installed manually later.\n\n"
+-                     "See http://www.redhat.com/InstNum/ for more information.")
+-    skipkeytext = N_("If you cannot locate the Installation Number, consult "
+-                     "http://www.redhat.com/InstNum/")
+-
+-    def setInstallData(self, anaconda):
+-	BaseInstallClass.setInstallData(self, anaconda)
+-        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
+-                                                CLEARPART_TYPE_LINUX)
+-
+-    def setGroupSelection(self, anaconda):
+-        grps = anaconda.backend.getDefaultGroups(anaconda)
+-        map(lambda x: anaconda.backend.selectGroup(x), grps)
+-
+-    def setSteps(self, dispatch):
+-	BaseInstallClass.setSteps(self, dispatch);
+-	dispatch.skipStep("partition")
+-	dispatch.skipStep("regkey", skip = 0)        
+-
+-    def handleRegKey(self, key, intf, interactive = True):
+-        self.repopaths = { "base": "%s" %(productPath,) }
+-        self.tasks = self.taskMap[productPath.lower()]
+-        self.installkey = key
+-
+-        try:
+-            inum = instnum.InstNum(key)
+-        except Exception, e:
+-            if True or not BETANAG: # disable hack keys for non-beta
+-                # make sure the log is consistent
+-                log.info("repopaths is %s" %(self.repopaths,))
+-                raise
+-            else:
+-                inum = None
+-
+-        if inum is not None:
+-            # make sure the base products match
+-            if inum.get_product_string().lower() != productPath.lower():
+-                raise ValueError, "Installation number incompatible with media"
+-
+-            for name, path in inum.get_repos_dict().items():
+-                # virt is only supported on i386/x86_64.  so, let's nuke it
+-                # from our repo list on other arches unless you boot with
+-                # 'linux debug'
+-                if name.lower() == "virt" and ( \
+-                        rhpl.getArch() not in ("x86_64","i386","ia64")
+-                        and not flags.debug):
+-                    continue
+-                self.repopaths[name.lower()] = path
+-                log.info("Adding %s repo" % (name,))
+-
+-        else:
+-            key = key.upper()
+-            # simple and stupid for now... if C is in the key, add Clustering
+-            # if V is in the key, add Virtualization. etc
+-            if key.find("C") != -1:
+-                self.repopaths["cluster"] = "Cluster"
+-                log.info("Adding Cluster option")
+-            if key.find("S") != -1:
+-                self.repopaths["clusterstorage"] = "ClusterStorage"
+-                log.info("Adding ClusterStorage option")
+-            if key.find("W") != -1:
+-                self.repopaths["workstation"] = "Workstation"
+-                log.info("Adding Workstation option")
+-            if key.find("V") != -1:
+-                self.repopaths["virt"] = "VT"
+-                log.info("Adding Virtualization option")
+-
+-        for repo in self.repopaths.values():
+-            if not self.taskMap.has_key(repo.lower()):
+-                continue
+-
+-            for task in self.taskMap[repo.lower()]:
+-                if task not in self.tasks:
+-                    self.tasks.append(task)
+-        self.tasks.sort()
+-
+-        log.info("repopaths is %s" %(self.repopaths,))
+-
+-    def __init__(self, expert):
+-	BaseInstallClass.__init__(self, expert)
+-
+-        self.repopaths = { "base": "%s" %(productPath,) }
+-
+-        # minimally set up tasks in case no key is provided
+-        self.tasks = self.taskMap[productPath.lower()]
+-
+diff -Naur anaconda-11.1.2.224.orig/installclasses/server.py anaconda-11.1.2.224/installclasses/server.py
+--- anaconda-11.1.2.224.orig/installclasses/server.py	2010-12-20 17:06:23.000000000 +0000
++++ anaconda-11.1.2.224/installclasses/server.py	1970-01-01 01:00:00.000000000 +0100
+@@ -1,39 +0,0 @@
+-from installclass import BaseInstallClass
+-from rhpl.translate import *
+-from constants import *
+-import os
+-import iutil
+-
+-class InstallClass(BaseInstallClass):
+-
+-    # name has underscore used for mnemonics, strip if you dont need it
+-    id = "server"
+-    name = N_("_Server")
+-    pixmap = "server.png"
+-    _description = N_("Select this installation type if you would like to "
+-		     "set up file sharing, print sharing, and Web services. "
+-		     "Additional services can also be enabled, and you "
+-		     "can choose whether or not to install a graphical "
+-		     "environment.")
+-    
+-    sortPriority = 10
+-    showLoginChoice = 1
+-    hidden = 1
+-
+-    def setSteps(self, dispatch):
+-	BaseInstallClass.setSteps(self, dispatch);
+-
+-    def setGroupSelection(self, anaconda):
+-	BaseInstallClass.__init__(self, anaconda.backend)
+-
+-        anaconda.backend.unselectAll()
+-        anaconda.backend.selectGroup("server", asMeta = 1)
+-        anaconda.backend.selectGroup("compat-arch-support", asMeta = 1, missingOk = 1)
+-
+-    def setInstallData(self, anaconda):
+-	BaseInstallClass.setInstallData(self, anaconda)
+-        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
+-                                                CLEARPART_TYPE_ALL)
+-
+-    def __init__(self, expert):
+-	BaseInstallClass.__init__(self, expert)
+diff -Naur anaconda-11.1.2.224.orig/installclasses/workstation.py anaconda-11.1.2.224/installclasses/workstation.py
+--- anaconda-11.1.2.224.orig/installclasses/workstation.py	2010-12-20 17:06:23.000000000 +0000
++++ anaconda-11.1.2.224/installclasses/workstation.py	1970-01-01 01:00:00.000000000 +0100
+@@ -1,39 +0,0 @@
+-import personal_desktop
+-from rhpl.translate import N_, _
+-import os
+-
+-class InstallClass(personal_desktop.InstallClass):
+-    # name has underscore used for mnemonics, strip if you dont need it
+-    id = "workstation"
+-    name = N_("_Workstation")
+-    pixmap = "workstation.png"
+-    _description = N_("This option installs a graphical desktop "
+-		     "environment with tools for software "
+-		     "development and system administration. ")
+-
+-    pkgstext = N_("\tDesktop shell (GNOME)\n"
+-                  "\tOffice suite (OpenOffice.org)\n"
+-                  "\tWeb browser \n"
+-                  "\tEmail (Evolution)\n"
+-                  "\tInstant messaging\n"
+-                  "\tSound and video applications\n"
+-                  "\tGames\n"
+-                  "\tSoftware Development Tools\n"
+-                  "\tAdministration Tools\n")
+-    
+-
+-    sortPriority = 2
+-    showLoginChoice = 0
+-    hidden = 1
+-
+-    def setGroupSelection(self, anaconda):
+-        personal_desktop.InstallClass.setGroupSelection(self, anaconda.backend)
+-        anaconda.backend.selectGroup("emacs")
+-        anaconda.backend.selectGroup("gnome-software-development")
+-	anaconda.backend.selectGroup("x-software-development")
+-        anaconda.backend.selectGroup("development-tools")
+-        anaconda.backend.selectGroup("compat-arch-support", asMeta = 1, missingOk = 1)
+-        anaconda.backend.selectGroup("compat-arch-development", asMeta = 1, missingOk = 1)
+-        
+-    def __init__(self, expert):
+-	personal_desktop.InstallClass.__init__(self, expert)

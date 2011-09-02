@@ -1,0 +1,60 @@
+\subsection{Serviço Balanceamento Web -- Pound}
+
+O servidor de balanceamento instalado é o Pound. Este sistema permite efectuar o balanceamento web http e https. Permite efectuar o SSL offloading, ou seja, todo calculo de SSL é efectuado por este serviço enviando para o servidor interno apenas http. Se a ligação vier por https é acrescentado no pedido ao servidor interno o seguinte cabeçalho:
+
+X-SSL-Connect: true
+
+Deste modo o servidor interno poderá saber se a ligação veio por http ou https.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/pound/pound.conf
+\end{Verbatim}
+
+Um exemplo de configuração é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+ListenHTTP
+    Address IP\_ONDE\_RECEBE\_LIGACOES
+    Port 80
+    HeadRemove "X-Forwarded-For"
+    RewriteLocation 0
+    Service
+        HeadRequire "Host: site1.eurotux.pt"
+        URL ".*"
+        BackEnd
+            Address IP\_INTERNO1
+            Port 80
+        End
+      Session
+          Type  Cookie
+          ID  "JSESSIONID"
+          TTL  1800
+      End
+    End
+    Service
+        HeadRequire "Host: .*eurotux.pt"
+        URL ".*"
+        BackEnd
+            Address IP\_INTERNO2
+            Port 80
+        End
+      Session
+          Type  Cookie
+          ID  "JSESSIONID"
+          TTL  1800
+      End
+    End
+End
+\end{Verbatim}
+
+Esta configuração permite que o pound encaminhe os pedidos para o site site1.eurotux.pt para o IP\_INTERNO1 e os pedidos para todos os outros sites eurotux.pt para o servidor interno IP\_INTERNO2.
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/pound start
+# /etc/rc.d/init.d/pound stop
+\end{Verbatim}
+

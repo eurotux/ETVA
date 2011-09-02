@@ -1,0 +1,55 @@
+Extensões:
+    Protocolos/Devices suportados (Phone protocol)
+        - SIP (Session initialization protocol)
+            - Standard
+            - Application Layer
+            - Vunerável a restrições Firewall/NAT
+            - Autenticação baseada em HTTP
+            - DTMF (dual-tone multifrequency) padrão rfc2833 (obsoleto??)
+                - inband - O dispositivo onde se carrega na tecla gera os DTMF tones.
+                           Se o codedc não for ulaw ou alaw os tones serão distorcidos. Se o telefone estiver configurado para RFC2833 e o
+                           asterisk tiver em inband não se ouve nada.
+                - rfc 2833 (outband) (RTP (Real time protocol) Payload for DTMF Digits, Telephony Tones and Telephony Signals)
+                - info
+                - auto - o asterisk usa o rfc2833 para o DTMF por defeito mas muda para inband se no lado remoto não suportar rfc2833
+
+        - IAX2 (Inter Asterisk Protocol)
+            - Transporta o sinal e media na mesma porta
+            - Devices recentes apenas
+            - UDP
+        - ZAP
+            - Hardware ligado ao asterisk
+            - Permite utilizar hardware com interface zaptel, para estabelecer ligação do PBX com equipamento digital e analógico.
+        - Custom
+            - Dispositivos H323
+            - Pode ser usada para mapear uma extensão para um numero exterior. Ex. route extension 211 to 1-800-555-1212 cria-se a extensão 211
+              com o 'dial' Local/18005551212@outbound-allroutes
+
+
+    CID Num Alias
+        - Numero usado em chamadas internas. Serve por exemplo para uma equipa de suporte pertencer a um mesmo ringgroup ou queue
+
+    SIP Alias
+        - Nome de alias para estabelecer ligação directa entre SIPs internamente
+
+    Secret
+        - Password usada na autenticação do telefone ao servidor asterisk
+
+
+
+Outband -não é possivel controlar o tone (ex. telemoveis)
+Inband - usado em linhas analógicas
+
+PSTN (Public Switched Telephone Network) - linhas analógicas
+
+DTMF botão premido
+    - RFC 2833 (outband)
+    - SIP INFO (outband)
+    - DAHDI/ZAP (inband)
+
+
+ENUM (E.164 Numbers to URI mapping) - Faz mapameamento de numeros de telefone para endereços ip.
+                                     Possibilita marcar um numero de telefone e alcançar um dispositivo SIP
+                                     Um servidor com suporte ENUM procura na ENUM tree do DNS para ver se existe uma alternativa a usar a linha PSTN.
+                                     ENUM pode conter uma referência para um SIP, um numero a marcar, uma pagina web ou email.
+                                     Protocolo que utiliza o DNS para traduzir E.164 (numeros de telefone padarao) em endereço IP

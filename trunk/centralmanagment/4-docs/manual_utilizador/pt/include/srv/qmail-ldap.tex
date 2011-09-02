@@ -1,0 +1,45 @@
+\subsection{Serviço de email -- qmail-ldap}
+
+O \emph{SMTP}\footnote{Simple Mail Transfer Protocol} é um protocolo relativamente
+simples, baseado em texto simples, onde as mensagens são transferidas de um emissor
+para um ou mais receptores.
+
+Especificamente este servidor de \emph{SMTP} está integrado com o conjunto de software
+disponibilizado pelo \emph{qmail}.
+
+Os ficheiros de configuração deste serviço estão situados na seguinte directoria
+(atenção que estes ficheiros são comuns para o conjunto de software disponibilizado pelo
+\emph{qmail}):
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/srv/qmail/control
+\end{Verbatim}
+
+O comando para controlar o serviço de smtp (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -u /service/qmail-smtpd
+# svc -dk /service/qmail-smtpd
+\end{Verbatim}
+
+O comando para controlar o serviço de envio (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -u /service/qmail
+# svc -dk /service/qmail
+\end{Verbatim}
+
+O comando para controlar o serviço de pop3 (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -u /service/qmail-pop3d
+# svc -dk /service/qmail-pop3d
+\end{Verbatim}
+
+O comando para controlar o serviço de pop3s (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -u /service/qmail-pop3d-ssl
+# svc -dk /service/qmail-pop3d-ssl
+\end{Verbatim}
+

@@ -9,36 +9,90 @@ use_helper('Extjs');
 *
 */
 include_partial('view/welcome');
-include_partial('node/grid',array('node_form'=>$node_form,'node_tableMap'=>$node_tableMap));
+include_partial('node/grid',array('node_tableMap'=>$node_tableMap));
 ?>
 <script>
-    var containerId = <?php echo json_encode($containerId) ?>;    
+Ext.ns('View');
 
-    var tab_networks_url = <?php echo json_encode(url_for('view/networks')); ?>;
-    var tab_networks = new Ext.Panel({
-                title:'Networks',
-                layout:'fit',
-                border:false,
-                autoLoad:{url:tab_networks_url,scripts:true,callback:function(){
-                        // add component ID
-                        tab_networks.add(Ext.getCmp('view-networks'));
-                        tab_networks.doLayout();
-                        
-                }}                
+
+View.Networks = Ext.extend(Ext.Panel,{
+    title: <?php echo json_encode(__('Networks')) ?>,
+    layout:'fit',
+    initComponent:function(){
+
+
+        View.Networks.superclass.initComponent.call(this);
+
+        this.on({
+            'activate':function(){
+                if(this.items.length>0){
+                  for(var i=0,len=this.items.length;i<len;i++){
+                      var item = this.items.get(i);
+                      item.fireEvent('reload');
+                  }
+                }
+            }
+        });
+    }    
+    ,loadPanelFromUrl:function(){
+        
+        this.on('render',function(panel){
+            panel.load({
+                url:<?php echo json_encode(url_for('view/networks')); ?>
+                ,scripts:true,scope:this,
+                callback:function(){
+                    
+                    var viewerSize = this.el.getViewSize();
+
+                    var southHeight = viewerSize.height * 0.40;
+                    southHeight = Ext.util.Format.round(southHeight,0);            
+
+                    this.add(new View.Networks.Main({south_height:southHeight}));
+                    this.doLayout();
+                }
             });
+        });// end render
+    }
+});
 
-    //add to main panel ID all the stuff (node grid tab and network tab )
-    Ext.getCmp('view-center-panel-'+containerId).add(new Ext.TabPanel({
-       activeTab:0,     
-       items: [{
-                title:'Welcome',
+
+View.Main = function(config) {
+
+    Ext.apply(this,config);
+
+    var node_grid = Node.Grid.init({url:'node/jsonGrid',type:'list',title: <?php echo json_encode(__('Nodes')) ?>});
+    var tab_networks = this.loadNetworks();
+    
+    View.Main.superclass.constructor.call(this, {        
+        activeTab:0,        
+        items:[{
+                title: <?php echo json_encode(__('Welcome')) ?>,
                 contentEl:'welcome',
                 bodyStyle:'padding:5px 5px 0'
                }
-               ,Node.Grid.init()
-               ,tab_networks
-             ]
-       })       
-    );
+               ,node_grid
+               ,tab_networks]
+    });
+
+    this.on({
+        'reload':function(){
+            var active = this.getActiveTab();
+            active.fireEvent('activate');
+        }
+    });
+
+};
+
+
+Ext.extend(View.Main, Ext.TabPanel,{
+    loadNetworks:function(){
+    
+        var tab_networks = new View.Networks();
+        tab_networks.loadPanelFromUrl();
+        
+        return tab_networks;
+    }
+
+});
 
 </script>

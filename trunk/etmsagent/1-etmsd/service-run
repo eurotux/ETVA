@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#exec su -c "cd /srv/etva-etms && /usr/bin/perl -I./lib etmsd > /var/log/etva-etms/etmsd.log 2>&1"
+cd /srv/etva-etms
+exec > /var/log/etva-etms/etmsd.log 2>&1
+exec /usr/bin/perl -I./lib etmsd
+

@@ -1,0 +1,21 @@
+\subsection{Serviço de POP3 -- Courier-Imap}
+
+O \emph{POP3}\footnote{Post Office Protocol} é um protocolo utilizado no acesso
+remoto a uma caixa de correio electrónico.
+
+Especificamente este servidor de \emph{POP3} está integrado com o conjunto de
+software disponibilizado pelo \emph{Courier-Imap}.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/usr/lib/courier-imap/etc/pop3d
+\end{Verbatim}
+
+Os comandos para controlar este serviço (iniciar/parar) são os seguintes:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /usr/lib/courier-imap/libexec/pop3d.rc start
+# /usr/lib/courier-imap/libexec/pop3d.rc stop
+\end{Verbatim}
+

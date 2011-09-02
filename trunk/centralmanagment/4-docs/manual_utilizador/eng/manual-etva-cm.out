@@ -1,0 +1,29 @@
+\BOOKMARK [0][]{chapter.1}{1 ETVA}{}
+\BOOKMARK [1][]{section.1.1}{1.1 Descri\347\343o}{chapter.1}
+\BOOKMARK [1][]{section.1.2}{1.2 Vers\365es}{chapter.1}
+\BOOKMARK [0][]{chapter.2}{2 ETVA Central Management}{}
+\BOOKMARK [1][]{section.2.1}{2.1 Estrutura da interface principal}{chapter.2}
+\BOOKMARK [1][]{section.2.2}{2.2 Primeiro acesso}{chapter.2}
+\BOOKMARK [1][]{section.2.3}{2.3 Main}{chapter.2}
+\BOOKMARK [2][]{subsection.2.3.1}{2.3.1 Nodes}{section.2.3}
+\BOOKMARK [2][]{subsection.2.3.2}{2.3.2 Networks}{section.2.3}
+\BOOKMARK [3][]{subsubsection.2.3.2.1}{2.3.2.1 Adicionar Rede}{subsection.2.3.2}
+\BOOKMARK [3][]{subsubsection.2.3.2.2}{2.3.2.2 Gest\343o da pools de MAC Addresses}{subsection.2.3.2}
+\BOOKMARK [3][]{subsubsection.2.3.2.3}{2.3.2.3 Gest\343o das interfaces de rede das m\341quinas virtuais}{subsection.2.3.2}
+\BOOKMARK [1][]{section.2.4}{2.4 Servidor de virtualiza\347\343o}{chapter.2}
+\BOOKMARK [2][]{subsection.2.4.1}{2.4.1 Node info}{section.2.4}
+\BOOKMARK [2][]{subsection.2.4.2}{2.4.2 Servers}{section.2.4}
+\BOOKMARK [3][]{subsubsection.2.4.2.1}{2.4.2.1 Adicionar m\341quina virtual \(server\)}{subsection.2.4.2}
+\BOOKMARK [3][]{subsubsection.2.4.2.2}{2.4.2.2 Remover m\341quina virtual}{subsection.2.4.2}
+\BOOKMARK [3][]{subsubsection.2.4.2.3}{2.4.2.3 Abrir m\341quina virtual numa consola VNC}{subsection.2.4.2}
+\BOOKMARK [3][]{subsubsection.2.4.2.4}{2.4.2.4 Iniciar/parar m\341quina virtual}{subsection.2.4.2}
+\BOOKMARK [3][]{subsubsection.2.4.2.5}{2.4.2.5 Migrar m\341quina virtual}{subsection.2.4.2}
+\BOOKMARK [2][]{subsection.2.4.3}{2.4.3 Storage}{section.2.4}
+\BOOKMARK [3][]{subsubsection.2.4.3.1}{2.4.3.1 Administra\347\343o de Physical Volumes}{subsection.2.4.3}
+\BOOKMARK [3][]{subsubsection.2.4.3.2}{2.4.3.2 Administra\347\343o de Volume Groups}{subsection.2.4.3}
+\BOOKMARK [3][]{subsubsection.2.4.3.3}{2.4.3.3 Administra\347\343o de Logical Volumes}{subsection.2.4.3}
+\BOOKMARK [1][]{section.2.5}{2.5 M\341quinal virtual}{chapter.2}
+\BOOKMARK [2][]{subsection.2.5.1}{2.5.1 Server info}{section.2.5}
+\BOOKMARK [2][]{subsection.2.5.2}{2.5.2 Statistics}{section.2.5}
+\BOOKMARK [2][]{subsection.2.5.3}{2.5.3 Networks}{section.2.5}
+\BOOKMARK [2][]{subsection.2.5.4}{2.5.4 Services}{section.2.5}

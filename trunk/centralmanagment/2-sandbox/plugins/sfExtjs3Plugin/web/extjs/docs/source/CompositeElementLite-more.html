@@ -1,47 +1,43 @@
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
   <title>The source code</title>
     <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
 </head>
 <body  onload="prettyPrint();">
-    <pre class="prettyprint lang-js">/**
+    <pre class="prettyprint lang-js">/*!
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+/**
  * @class Ext.CompositeElementLite
  */
-Ext.apply(Ext.CompositeElementLite.prototype, {	
-	addElements : function(els, root){
+Ext.apply(Ext.CompositeElementLite.prototype, {
+    addElements : function(els, root){
         if(!els){
             return this;
         }
         if(typeof els == "string"){
             els = Ext.Element.selectorFunction(els, root);
         }
-        var yels = this.elements;        
-	    Ext.each(els, function(e) {
-        	yels.push(Ext.get(e));
+        var yels = this.elements;
+        Ext.each(els, function(e) {
+            yels.push(Ext.get(e));
         });
         return this;
     },
-    
-    <div id="method-Ext.CompositeElementLite-fill"></div>/**
-    * Clears this composite and adds the elements returned by the passed selector.
-    * @param {String/Array} els A string CSS selector, an array of elements or an element
-    * @return {CompositeElement} this
-    */
-    fill : function(els){
-        this.elements = [];
-        this.add(els);
-        return this;
-    },
-    
+
     <div id="method-Ext.CompositeElementLite-first"></div>/**
      * Returns the first Element
      * @return {Ext.Element}
      */
     first : function(){
         return this.item(0);
-    },   
-    
+    },
+
     <div id="method-Ext.CompositeElementLite-last"></div>/**
      * Returns the last Element
      * @return {Ext.Element}
@@ -49,7 +45,7 @@ Ext.apply(Ext.CompositeElementLite.prototype, {
     last : function(){
         return this.item(this.getCount()-1);
     },
-    
+
     <div id="method-Ext.CompositeElementLite-contains"></div>/**
      * Returns true if this composite contains the passed element
      * @param el {Mixed} The id of an element, or an Ext.Element, or an HtmlElement to find within the composite collection.
@@ -59,22 +55,6 @@ Ext.apply(Ext.CompositeElementLite.prototype, {
         return this.indexOf(el) != -1;
     },
 
-    <div id="method-Ext.CompositeElementLite-filter"></div>/**
-    * Filters this composite to only elements that match the passed selector.
-    * @param {String} selector A string CSS selector
-    * @return {CompositeElement} this
-    */
-    filter : function(selector){
-        var els = [];
-        this.each(function(el){
-            if(el.is(selector)){
-                els[els.length] = el.dom;
-            }
-        });
-        this.fill(els);
-        return this;
-    },
-    
     <div id="method-Ext.CompositeElementLite-removeElement"></div>/**
     * Removes the specified element(s).
     * @param {Mixed} el The id of an element, the Element itself, the index of the element in this composite
@@ -84,22 +64,22 @@ Ext.apply(Ext.CompositeElementLite.prototype, {
     */
     removeElement : function(keys, removeDom){
         var me = this,
-	        els = this.elements,	    
-	    	el;	    	
-	    Ext.each(keys, function(val){
-		    if ((el = (els[val] || els[val = me.indexOf(val)]))) {
-		    	if(removeDom){
+            els = this.elements,
+            el;
+        Ext.each(keys, function(val){
+            if ((el = (els[val] || els[val = me.indexOf(val)]))) {
+                if(removeDom){
                     if(el.dom){
                         el.remove();
                     }else{
                         Ext.removeNode(el);
                     }
                 }
-		    	els.splice(val, 1);		    	
-			}
-	    });
+                els.splice(val, 1);
+            }
+        });
         return this;
-    }    
+    }
 });
 </pre>    
 </body>

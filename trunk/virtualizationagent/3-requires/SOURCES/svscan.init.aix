@@ -1,0 +1,59 @@
+#! /bin/bash
+#
+# svscan        Start TCP/IP networking services. This script
+#               starts the daemontools svscan.
+#
+# Author:       Andy Dustman <andy@dustman.net>
+#               Miquel van Smoorenburg, <miquels@drinkel.nl.mugnet.org>
+#               Various folks at Red Hat
+#
+# chkconfig: 345 50 50
+# description: svscan starts a variety of other internet services, watches \
+#              for services that are added or deleted, and starts or stops \
+#              them as needed. It is a general replacement for inetd. 
+# processname: svscan
+# config: /var/services
+# pidfile: /var/run/svscan.pid
+
+
+PREFIX=/opt/freeware
+RETVAL=0
+# XXX daemontools typically in /usr/local/bin
+export PATH=$PATH:${PREFIX}/bin
+
+# See how we were called.
+case "$1" in
+  start)
+	echo -n $"Starting svscan: "
+	env - PATH=${PREFIX}/bin:/usr/sbin:/usr/bin:/bin svscan ${PREFIX}/var/svscan </dev/null 2>/dev/console >/dev/console &
+	PID=$$
+	echo $PID >${PREFIX}/var/run/svscan.pid
+	RETVAL=$?
+	echo
+	;;
+  stop)
+	echo -n $"Stopping svscan: "
+	kill `cat ${PREFIX}/var/run/svscan.pid`
+	RETVAL=$?
+	echo
+	echo -n "Stopping svscan services: "
+	svc -dx ${PREFIX}/var/svscan/* ${PREFIX}/var/svscan/*/log
+	RETVAL=$?
+	echo
+	;;
+  status)
+	status svscan
+	RETVAL=$?
+	svstat ${PREFIX}/var/svscan/* ${PREFIX}/var/svscan/*/log
+	;;
+  restart|condrestart)
+  	$0 stop
+	$0 start
+	RETVAL=$?
+	;;
+  *)
+	echo "Usage: svscan {start|stop|status|restart|condrestart}"
+	exit 1
+esac
+
+exit $REVAL

@@ -9,6 +9,11 @@ if($environment=='remote'){
     sfConfig::set('sf_extjs3_js_dir', 'http://extjs.cachefly.net/ext-3.0.0/');
     sfConfig::set('sf_extjs3_css_dir', 'http://extjs.cachefly.net/ext-3.0.0/resources/css/');
     sfConfig::set('sf_extjs3_images_dir', 'http://extjs.cachefly.net/ext-3.0.0/resources/images/');
+
+    #
+    # spacer gif
+    #
+    sfConfig::set('sf_extjs3_spacer', sfConfig::get('sf_extjs3_images_dir').'default/s.gif');
 }
 
 ?>

@@ -1,0 +1,19 @@
+\subsection{Serviço de IMAP -- Courier-Imap}
+
+O \emph{IMAP}\footnote{Internet Message Access Protocol} é um protocolo utilizado para acesso a caixas de correio.
+Este protocolo tenta colmatar algumas das limitações do seu tradicional rival, o POP\footnote{Post Office Protocol}.
+A principal vantagem do IMAP é manter as mensagens de correio no lado do servidor, permitindo assim que a consulta das mesmas seja feita independentemente da localização ou cliente utilizado, possibilitando ainda a criação de pastas para organizar as mensagens.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/usr/lib/courier-imap/etc/imapd
+\end{Verbatim}
+
+Os comandos para controlar este serviço (iniciar/parar) são os seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /usr/lib/courier-imap/libexec/imapd.rc start
+# /usr/lib/courier-imap/libexec/imapd.rc stop
+\end{Verbatim}
+

@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
-exec su -c "cd /srv/etva-etfw && /usr/bin/perl -I./lib -I/srv/etva-vdaemon etfwd > /var/log/etva-etfw/etfwd.log 2>&1"
+cd /srv/etva-etfw
+exec > /var/log/etva-etfw/etfwd.log 2>&1
+exec /usr/bin/perl -I./lib etfwd
+
 

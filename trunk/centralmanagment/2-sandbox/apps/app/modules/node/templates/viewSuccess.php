@@ -9,35 +9,110 @@ use_helper('Extjs');
  *
  */
 
-include_partial('node/grid',array('node_id'=>$node_id,'node_tableMap'=>$node_tableMap));
-include_partial('server/grid',array('node_id'=>$node_id,'sfGuardGroup_tableMap'=>$sfGuardGroup_tableMap,'server_form'=>$server_form,'server_tableMap'=>$server_tableMap));
+include_partial('node/info');
+include_partial('server/grid',array('sfGuardGroup_tableMap'=>$sfGuardGroup_tableMap,'server_tableMap'=>$server_tableMap));
 // include_partial('vlan/grid',array('node_id'=>$node_id,'tableMap'=>$vlan_tableMap,'server_form'=>$server_form,'server_tableMap'=>$server_tableMap));
+include_partial('node/stats');
 
 ?>
 <script>
-    var containerId = <?php echo json_encode($containerId) ?>;
+Ext.ns('Node.View');
+
+Node.View.Storage = Ext.extend(Ext.Panel,{
+    title: <?php echo json_encode(__('Storage')) ?>,
+    layout:'fit',    
+    initComponent:function(){
+
+
+        Node.View.Storage.superclass.initComponent.call(this);
+
+        this.on({
+            'activate':function(){
+                if(this.items.length>0){
+                  for(var i=0,len=this.items.length;i<len;i++){
+                      var item = this.items.get(i);
+                      item.fireEvent('reload');
+                  }
+                }
+            }
+        });
+
+
+
+
+    }
+    // panel will be loaded on first request
+    ,loadPanel:function(conf){
+        
+        this.on('render',function(panel){
+            // class already exist
+            // load new object instance to panel
+            if(typeof Node.Storage !='undefined' && typeof Node.Storage.Main !='undefined'){
+                                            
+                      panel.add(new Node.Storage.Main(conf));                      
+            }else{
+                // no js class loaded....
+                panel.load({
+                    url:<?php echo json_encode(url_for('node/storage')); ?>
+                    ,scripts:true,scope:this
+                    ,callback:function(){
+                        this.add(new Node.Storage.Main(conf));
+                        this.doLayout();                        
+                    }
+                });
+            }
+        });// end render
+    }
+});
+
+
+Node.View.Main = function(config) {
+
+    Ext.apply(this,config);    
     
-    var tab_storage = new Ext.Panel({id:'storage-tab',
-            title:'Storage',
-            layout:'fit',
-            autoLoad:{url:<?php echo json_encode(url_for('node/storage?id='.$node_id)); ?>,
-                      scripts:true,callback:function(){
-                        tab_storage.add(Ext.getCmp('node-storage'));
-                        tab_storage.doLayout();
-                }} 
-            });
+    var node_info = new Node.View.Info({title:<?php echo json_encode(__('Node info')) ?>,node_id:this.node_id});    
+    var server_grid = new Server.Grid.init({url: <?php echo json_encode(url_for('server/jsonGrid?nid='))?>+this.node_id,node_id:this.node_id,title: <?php echo json_encode(__('Servers')) ?>});
+
+    /*
+     * on event updateNode state fire update node css (update server state on start stop)
+     */
+    server_grid.on({
+        'updateNodeState':{fn:function(node_attrs,data_to_check){this.fireEvent('updateNodeCss',node_attrs,data_to_check);},scope:this}
+    });
 
 
+    var tab_storage = this.loadStorage();
 
-    Ext.getCmp('view-center-panel-'+containerId).add(new Ext.TabPanel({
-       activeTab:0,
-       items: [Node.Grid.init()
-               ,Server.Grid.init()
-               ,tab_storage
-             ]
+    var nodeLoad = new Node.Stats_Load({title: <?php echo json_encode(__('Node Load')) ?>,type:'nodeLoad',node_id:this.node_id});
+    
+    Node.View.Main.superclass.constructor.call(this, {
+        activeTab:0,
+        items: [            
+            node_info
+           ,server_grid
+           ,tab_storage
+           ,nodeLoad
+       ]
+         
+    });
 
-       })
-    );
+    this.on({
+            'reload':function(){
+                var active = this.getActiveTab();
+                active.fireEvent('activate');
+            }
+    });
 
- 
+};
+
+// define public methods
+Ext.extend(Node.View.Main, Ext.TabPanel,{
+    loadStorage:function(){
+        var tab_storage = new Node.View.Storage();
+        tab_storage.loadPanel({node_id:this.node_id});
+
+        return tab_storage;                  
+    }
+});
+
 </script>

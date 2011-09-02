@@ -1,0 +1,12 @@
+diff -uNr anaconda-11.1.2.87__orig/installclasses/rhel.py anaconda-11.1.2.87/installclasses/rhel.py
+--- anaconda-11.1.2.87__orig/installclasses/rhel.py	2008-06-15 03:50:44.000000000 +0100
++++ anaconda-11.1.2.87/installclasses/rhel.py	2008-06-15 03:51:26.000000000 +0100
+@@ -73,7 +73,7 @@
+     def setSteps(self, dispatch):
+ 	BaseInstallClass.setSteps(self, dispatch);
+ 	dispatch.skipStep("partition")
+-	dispatch.skipStep("regkey", skip = 0)        
++	dispatch.skipStep("regkey", skip = 1)        
+ 
+     def handleRegKey(self, key, intf, interactive = True):
+         self.repopaths = { "base": "%s" %(productPath,) }

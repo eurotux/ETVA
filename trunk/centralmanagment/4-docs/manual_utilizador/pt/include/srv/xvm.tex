@@ -1,0 +1,140 @@
+\subsection{XVM}
+
+O serviço de monitorização em cada máquina real chama-se xvmd e é executado automaticamente pelo supervise.
+
+Para verificar o estado do processo de monitorização:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svstat /service/xvm
+/service/xvm: up (pid 2283) 6530 seconds
+\end{Verbatim}
+
+Para arrancar ou reiniciar o processo de monitorização:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# svc -u /service/xvm
+# svc -t /service/xvm
+\end{Verbatim}
+
+A script de controlo e manipulação das máquinas virtuais chama-se xvm. Detalhes sobre todos os comandos da script virão mais tarde, deixa-se agora apenas alguns casos úteis em emergência:
+
+arrancar uma máquina virtual:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xvm --start tmp1
+\end{Verbatim}
+
+terminar forçadamente uma máquina virtual:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xvm --stop --destroy tmp1
+\end{Verbatim}
+
+cancelar a definição de arranque automático:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xvm --set --auto no tmp1
+\end{Verbatim}
+
+ligar-se à consola de uma máquina virtual:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xvm --console tmp1
+\end{Verbatim}
+
+listagem das máquinas virtuais e seu estado:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xvm -l
+n=app1                       r=xen13                      a=xen13
+...
+n=tmp1                        r=                           a=xen12
+n=ws2                        r=xen14                      a=xen14
+\end{Verbatim}
+
+criar máquina virtual para-virtualizada:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /usr/sbin/xvm --add openerp --mem 2048 --max-mem 8064 --vcpus 2 \\
+     --vlan 100 --vbd /dev/mapper/openerp
+\end{Verbatim}
+
+instanciar um servidor virtual windows e iniciá-lo:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /usr/sbin/xvm --add windowsxp1 --hvm --mem 2048 --max-mem 8064 \\
+     --vcpus 1 --vlan 100 --vbd /dev/mapper/windowsxp1
+# xvm --start windowsxp1  ;  xvm --cdrom windowsxp1 \\
+     /root/windowsxp\_32bit.iso ; xvm --reboot windowsxp1 -y ; \\
+     sleep 2 ; xvm --console windowsxp1
+\end{Verbatim}
+
+modificar os parâmetros de uma máquina virtual
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /usr/sbin/xvm --set openerp --mem 1024
+# /usr/sbin/xvm --dump openerp > /xen/openerp/config.xm
+\end{Verbatim}
+
+migrar todas as máquinas virtuais a correr na real xen1 para a real xen2:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xvm -l | while read l; do eval $l; [ "$r" = "xen1" ] &&
+  xvm --migrate $n xen2; done
+\end{Verbatim}
+
+detalhes sobre máquinas virtuais:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xvm -l -v tmp1
+tmp1:
+  dn:            etXenName=tmp1,ou=XenGuests,dc=xvm
+  memory:        7500
+  max memory:    7168
+  vcpus:         1
+  auto start:    xen1
+  running in:    xen1
+  vlan:            96 (mac: 00:16:3e:a1:a1:a8)
+  vbd:           hda1 -> /dev/vgsata/root-tmp1
+  vbd:           hda2 -> /dev/vgsas/swap-tmp1
+\end{Verbatim}
+
+Para os casos excepcionais em que a script xvm se encontre inoperacional, apresentam-se de seguida os comandos para manipulação directa das máquinas virtuais.
+
+Para iniciar uma máquina virtual devemos fazer:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xm create /xen/tmp1/config.xm
+\end{Verbatim}
+
+É extremamente importante garantir que esta máquina virtual não está a correr noutro servidor, correndo o risco de corromper dados.
+
+Para ver que máquinas virtuais estão a correr no servidor em questão pode-se efectuar:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xm list
+Name                                      ID Mem(MiB) VCPUs State   Time(s)
+Domain-0                                   0      510     4 r-----   6024.1
+dns1                                       3      195     1 -b----    514.4
+dns2                                       4      195     1 -b----    281.3
+fw1                                        1       95     1 -b----    129.2
+fw2                                        2       95     1 -b----    159.5
+\end{Verbatim}
+
+Existe também o comando `xm top' que permite visualizar, muito ao estilo do comando top, as máquinas virtuais em execução e a sua utilização.
+
+Para migrar uma máquina virtual entre dois nós é necessário que a máquina virtual não tenha qualquer partição em discos específicas à máquina real. Devem estar todos nem VGs (Volume Groups) partilhados. Pode então ser efectuado o seguinte comando:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xm migrate --live tmp1 xen3
+\end{Verbatim}
+
+Se o live não funcionar deverá ser efectuado o migrate normal.
+
+A responsabilidade de arranque das máquinas virtuais de uma blade é do daemon xvmd que as iniciará no seu arranque.
+
+É extremamente importante que não seja arrancada a mesma máquina virtual em
+máquinas reais diferentes, uma vez que isso causaria corrupção do filesystem.
+Por essa razão, o sistema de arranque automático do xen (/etc/xen/auto e
+/etc/init.d/xendomains) não deve ser usado.
+

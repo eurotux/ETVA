@@ -1,0 +1,6 @@
+/var/log/etva-etms/etmsd.log {
+    weekly
+    missingok
+    rotate 4
+    compress
+}

@@ -5,8 +5,7 @@
 
 
     vgwin.createForm.Main = function(node_id) {
-        Ext.QuickTips.init();
-        Ext.form.Field.prototype.msgTarget = 'side';
+                
         this.node_id = node_id;
         this.fromStore = new Ext.data.Store({
             proxy: new Ext.data.HttpProxy({                
@@ -15,19 +14,13 @@
             baseParams:{'nid':node_id},
             listeners:{
                 'beforeload':function(){                                    
-                    this.ownerCt.body.mask('Loading', 'x-mask-loading');                
+                    this.ownerCt.body.mask(<?php echo json_encode(__('Please wait...')) ?>, 'x-mask-loading');
                 },
                 'load':function(){
                     this.ownerCt.body.unmask();                
                 },
-                'loadexception':function(store,options,resp,error){
-                    this.ownerCt.body.unmask();
-                    var response = Ext.util.JSON.decode(resp.responseText);
-
-                    Ext.Msg.show({title: 'Error',
-                        buttons: Ext.MessageBox.OK,
-                        msg: response['error'],
-                        icon: Ext.MessageBox.ERROR});
+                'loadexception':function(store,options,resp,error){                                        
+                    this.ownerCt.body.unmask();                    
                 }
                 ,
                 scope:this
@@ -35,68 +28,104 @@
             reader: new Ext.data.JsonReader({
                 root: 'response',
                 totalProperty: 'total'                
-            }, [{name: 'id'},{name: 'name'}])
+            }, [{name: 'value', mapping:'id'},{name: 'text', mapping:'name'}])
         });
 
         this.vgname = new Ext.form.TextField({            
-            fieldLabel: 'Group Name',
+            fieldLabel: <?php echo json_encode(__('Volume group name')) ?>,
             allowBlank: false,
+            msgTarget: 'side',
             name: 'vgname',
             maxLength: 10
-        });
+        });               
 
-
+    
         this.pvs = new Ext.ux.ItemSelector({                            
                             name:"pvs",
-                            fieldLabel:"Physical volumes",
-                            dataFields:["id", "name"],
-                            toData:[],
-                            msWidth:130,
-                            msHeight:150,
-                            valueField:"id",
-                            displayField:"name",
+                            fieldLabel:"Physical volumes",                           
                             imagePath:"/images/icons/",
-                            toLegend:"Selected",
-                            fromLegend:"Available",
-                            fromStore: this.fromStore,
-                            toTBar:[{
-                                    text:"Clear",
-                                    handler:function(){                                      
-                                       this.pvs.reset.call(this.pvs);
-                                    }
-                                    ,
-                                    scope:this
-                                }]
+                            multiselects: [{            
+                                height:200,
+                                width:150,
+                              //  dataFields:["id", "name"],
+                                legend: __('Available'),
+                                store: this.fromStore,
+                                displayField: 'text',
+                                valueField: 'value'
+                               },{
+                                height:200,
+                                width:150,
+                                legend: __('Selected'),
+                                store: [],
+                                tbar:[{
+                                    text: __('Clear'),
+                                    handler:function(){
+                                        this.pvs.reset.call(this.pvs);
+                                    },scope:this
+                               }]
+                            }]
                         });
+        var items = [this.vgname];
+        <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
 
+            this.types = new Ext.form.ComboBox({
+                        anchor:'90%',
+                        emptyText: __('Select...'),fieldLabel: <?php echo json_encode(__('Physical volumes type')) ?>,triggerAction: 'all',
+                        displayField:'name',
+                        store:new Ext.data.Store({
+                                sortInfo: { field: 'name',direction: 'DESC' },
+                                proxy:new Ext.data.HttpProxy({url:<?php echo json_encode(url_for('physicalvol/jsonListTypes')) ?>})
+                                ,reader: new Ext.data.JsonReader({
+                                            root:'data',
+                                            fields:['name']})
+                                ,listeners:{
+                                            'beforeload':function(){                                    
+                                                this.ownerCt.body.mask(<?php echo json_encode(__('Please wait...')) ?>, 'x-mask-loading');                                                
+                                            },
+                                            'load':function(st){
+                                                this.ownerCt.body.unmask();
+                                                if(this.types.getValue()==''){
+                                                    this.types.setValue(st.getAt(0).data['name']);
+                                                    this.types.fireEvent('select',this.types,st.getAt(0),0);
+                                                }
+                                            
+                                            },scope:this}
+                        })
+                        ,listeners:{
+
+                                select:{scope:this, fn:function(combo, record, index) {
+
+                                    this.fromStore.removeAll();
+                                    this.pvs.toMultiselect.store.removeAll();
+
+
+                                    this.fromStore.load({params:{'filter':Ext.encode({'storage_type':record.data['name']})}});
+                                }}
+                        }//end listeners
+                    });
+
+            items.push(this.types);
+            
+        <?php endif; ?>
+        items.push(this.pvs);
+        
         // define window and pop-up - render formPanel
-        vgwin.createForm.Main.superclass.constructor.call(this, {
-
-
-            /*
-             * Ext.ux.ItemSelector Example Code
-             */            
-            width:410,
-            bodyStyle: 'padding-top:10px;',
-
-            items:[
-                new Ext.form.FieldSet({
-                    autoHeight:true,
-                    border:false,
-                    labelWidth:140,
-                    items: [this.vgname,
-                        this.pvs]// end fieldset items
-                })// end fieldset
-            ],
+        vgwin.createForm.Main.superclass.constructor.call(this, {            
+            //width:500,
+            labelWidth:140,
+            monitorValid:true,            
+            bodyStyle: 'padding:10px;',
+            items:items,
             buttons: [{
-                    text: 'Save',
+                    text: __('Save'),
+                    formBind:true,
                     handler: this.sendRequest,
                     scope: this
                 },
-                {text:'Cancel',handler:function(){this.ownerCt.close();},scope:this}
-            ]// end buttons
+                {text: __('Cancel'),handler:function(){this.ownerCt.close();},scope:this}
+            ]// end buttons            
 
-        });// end superclass contructor
+        });// end superclass contructor        
 
     };// end vgwin.createForm.Main
 
@@ -105,7 +134,12 @@
         // load data
         load : function() {
             //loads data for the physical volumes available combo
-            this.fromStore.load();
+            //this.fromStore.load();
+            <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
+                this.types.getStore().load();
+            <?php else:?>
+                this.fromStore.load();
+            <?php endif;?>       
 
         },        
         sendRequest:function(){
@@ -115,7 +149,7 @@
 
             if(this.pvs.toStore.getCount() == 0){
 
-                this.pvs.markInvalid("Invalid");
+                this.pvs.markInvalid(<?php echo json_encode(__('Form fields may not be submitted with invalid values!')) ?>);
                 return false;
             }            
 
@@ -128,15 +162,20 @@
                     listeners:{
                         // wait message.....
                         beforerequest:function(){
+
                             Ext.MessageBox.show({
-                                title: 'Please wait',
-                                msg: 'Creating volume group...',
+                                title: <?php echo json_encode(__('Please wait...')) ?>,
+                                msg: <?php echo json_encode(__('Creating volume group...')) ?>,
                                 width:300,
                                 wait:true,
                                 modal: false
                             });
                         },// on request complete hide message
-                        requestcomplete:function(){Ext.MessageBox.hide();}}
+                        requestcomplete:function(){Ext.MessageBox.hide();}
+                        ,requestexception:function(c,r,o){
+                                        Ext.MessageBox.hide();
+                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                    }
                 });// end conn
 
                 conn.request({
@@ -145,12 +184,9 @@
                     scope:this,
                     success: function(resp,opt){
                         var response = Ext.util.JSON.decode(resp.responseText);
-                        Ext.ux.Logger.info(response['response']);
-                        var tree = Ext.getCmp('vg-tree');
-
-                        //close window
-                        this.ownerCt.close();
-                        tree.root.reload();
+                        Ext.ux.Logger.info(response['agent'],response['response']);
+                        this.fireEvent('onCreate');                        
+                        
                         
                     }
                     ,
@@ -159,24 +195,20 @@
 
                         Ext.ux.Logger.error(response['error']);
 
-                        Ext.Msg.show({title: 'Error',
+                        Ext.Msg.show({
+                            title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
                             buttons: Ext.MessageBox.OK,
-                            msg: 'Unable to create volume group '+vgname,
+                            msg: String.format(<?php echo json_encode(__('Unable to create volume group {0}')) ?>,vgname),
                             icon: Ext.MessageBox.ERROR});
+
                     }
                 });// END Ajax request
 
 
-
-
             }//end isValid
-
-
-
 
         }
 
     });
-
 
 </script>

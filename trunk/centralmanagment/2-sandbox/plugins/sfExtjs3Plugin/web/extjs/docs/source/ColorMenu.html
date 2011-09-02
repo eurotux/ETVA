@@ -1,11 +1,18 @@
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
   <title>The source code</title>
     <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
 </head>
 <body  onload="prettyPrint();">
-    <pre class="prettyprint lang-js"><div id="cls-Ext.menu.ColorMenu"></div>/**
+    <pre class="prettyprint lang-js">/*!
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+<div id="cls-Ext.menu.ColorMenu"></div>/**
  * @class Ext.menu.ColorMenu
  * @extends Ext.menu.Menu
  * <p>A menu containing a {@link Ext.ColorPalette} Component.</p>
@@ -45,6 +52,14 @@
      */
     hideOnClick : true,
     
+    cls : 'x-color-menu',
+    
+    <div id="cfg-Ext.menu.ColorMenu-paletteId"></div>/** 
+     * @cfg {String} paletteId
+     * An id to assign to the underlying color palette. Defaults to <tt>null</tt>.
+     */
+    paletteId : null,
+    
     <div id="cfg-Ext.menu.ColorMenu-maxHeight"></div>/** 
      * @cfg {Number} maxHeight
      * @hide 
@@ -74,7 +89,9 @@
         Ext.apply(this, {
             plain: true,
             showSeparator: false,
-            items: this.palette = new Ext.ColorPalette(this.initialConfig)
+            items: this.palette = new Ext.ColorPalette(Ext.applyIf({
+                id: this.paletteId
+            }, this.initialConfig))
         });
         this.palette.purgeListeners();
         Ext.menu.ColorMenu.superclass.initComponent.call(this);

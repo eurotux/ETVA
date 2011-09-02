@@ -1,0 +1,264 @@
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/i386/boot.msg anaconda-11.1.2.16/bootdisk/i386/boot.msg
+--- anaconda-11.1.2.16__orig/bootdisk/i386/boot.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/i386/boot.msg	2007-02-19 14:33:47.000000000 +0000
+@@ -1,9 +1,9 @@
+  
+ splash.lss
+ 
+- -  To install or upgrade in graphical mode, press the 01<ENTER>07 key.
++ -  To install or upgrade in graphical mode, press the 0b<ENTER>07 key.
+ 
+- -  To install or upgrade in text mode, type: 01linux text <ENTER>07.
++ -  To install or upgrade in text mode, type: 0blinux text <ENTER>07.
+ 
+  -  Use the function keys listed below for more information.
+ 
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/i386/general.msg anaconda-11.1.2.16/bootdisk/i386/general.msg
+--- anaconda-11.1.2.16__orig/bootdisk/i386/general.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/i386/general.msg	2007-02-19 14:34:43.000000000 +0000
+@@ -1,15 +1,15 @@
+ 00
+ 
+ 
+-                        01General Boot Help07
++                        0eGeneral Boot Help07
+ 
+ You are now ready to begin the installation process.  In most cases, 
+-the best way to get started is to simply press the 01<ENTER>07 key.
++the best way to get started is to simply press the 0b<ENTER>07 key.
+ 
+ If you are having problems with the graphical installer, you can use the 
+-'01resolution=<width>x<height>07' option to try and force a
++'0bresolution=<width>x<height>07' option to try and force a
+ particular resolution. For example, boot with 
+-'01linux resolution=1024x76807'.  
++'0blinux resolution=1024x76807'.  
+ 
+ Certain hardware configurations may have trouble with the automatic hardware
+ detection done during the installation.  If you experience problems during the 
+@@ -17,7 +17,7 @@
+ 'skipddc' option will also skip monitor probing which hangs some systems.
+ 
+ There are a number of parameters that can be passed to the Linux kernel
+-at boot time.  Press 01<F4>07 for more information. 
++at boot time.  Press 0b<F4>07 for more information. 
+ 
+ 
+ 0f[F1-Main] [F2-Options] [F3-General] [F4-Kernel] [F5-Rescue]07
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/i386/options.msg anaconda-11.1.2.16/bootdisk/i386/options.msg
+--- anaconda-11.1.2.16__orig/bootdisk/i386/options.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/i386/options.msg	2007-02-19 14:35:14.000000000 +0000
+@@ -1,23 +1,23 @@
+ 00
+  
+ 
+-                       01Installer Boot Options07
++                       0eInstaller Boot Options07
+ 
+- -  To disable hardware probing, type: 01linux noprobe <ENTER>07.  
++ -  To disable hardware probing, type: 0blinux noprobe <ENTER>07.  
+ 
+- -  To test the install media you are using, type: 01linux mediacheck <ENTER>07.  
++ -  To test the install media you are using, type: 0blinux mediacheck <ENTER>07.  
+ 
+- -  To enable rescue mode, type: 01linux rescue <ENTER>07.  
+-    Press 01<F5>07 for more information about rescue mode.
++ -  To enable rescue mode, type: 0blinux rescue <ENTER>07.  
++    Press 0b<F5>07 for more information about rescue mode.
+ 
+- -  If you have a driver disk, type: 01linux dd <ENTER>07.
++ -  If you have a driver disk, type: 0blinux dd <ENTER>07.
+ 
+  -  To prompt for the use of other install methods such as network
+-    install when booting from a CD, type 01linux askmethod <ENTER>07.
++    install when booting from a CD, type 0blinux askmethod <ENTER>07.
+ 
+- -  If you have an installer update disk, type: 01linux updates <ENTER>07.
++ -  If you have an installer update disk, type: 0blinux updates <ENTER>07.
+ 
+- -  To test the memory in your system type: 01memtest86 <ENTER>07.
++ -  To test the memory in your system type: 0bmemtest86 <ENTER>07.
+     (This option is only available when booting from CD.)
+ 
+ 0f[F1-Main] [F2-Options] [F3-General] [F4-Kernel] [F5-Rescue]07
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/i386/param.msg anaconda-11.1.2.16/bootdisk/i386/param.msg
+--- anaconda-11.1.2.16__orig/bootdisk/i386/param.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/i386/param.msg	2007-02-19 14:35:30.000000000 +0000
+@@ -1,21 +1,21 @@
+ 00
+ 
+ 
+-                        01Kernel Parameter Help07
++                        0eKernel Parameter Help07
+ 
+ Some kernel parameters can be specified on the command line and will be
+ passed to the kernel.
+ 
+ To pass an option to the kernel, use the following format:
+ 
+-     01linux <options>07
++     0blinux <options>07
+ 
+ If a different installation mode is desired, enter it after the option(s).
+ 
+ For example, to install on a system with 256MB of RAM using noprobe mode, 
+ type the following:
+ 
+-     01linux mem=256M noprobe07
++     0blinux mem=256M noprobe07
+ 
+ 
+ 0f[F1-Main] [F2-Options] [F3-General] [F4-Kernel] [F5-Rescue]07
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/i386/rescue.msg anaconda-11.1.2.16/bootdisk/i386/rescue.msg
+--- anaconda-11.1.2.16__orig/bootdisk/i386/rescue.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/i386/rescue.msg	2007-02-19 14:35:46.000000000 +0000
+@@ -1,7 +1,7 @@
+ 00
+ 
+ 
+-                        01Rescue Mode Help07
++                        0eRescue Mode Help07
+ 
+ The installer includes a rescue mode which can be used when a system
+ does not boot properly.  The rescue mode includes many useful
+@@ -9,7 +9,7 @@
+ one to restore a system to a working state.
+ 
+ To enter the rescue mode, boot your system from the installation
+-CDROM or floppy and type 01linux rescue <ENTER>07.
++CDROM or floppy and type 0blinux rescue <ENTER>07.
+ 
+ 
+ 
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/x86_64/boot.msg anaconda-11.1.2.16/bootdisk/x86_64/boot.msg
+--- anaconda-11.1.2.16__orig/bootdisk/x86_64/boot.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/x86_64/boot.msg	2007-02-19 14:36:04.000000000 +0000
+@@ -1,9 +1,9 @@
+  
+ splash.lss
+ 
+- -  To install or upgrade in graphical mode, press the 01<ENTER>07 key.
++ -  To install or upgrade in graphical mode, press the 0b<ENTER>07 key.
+ 
+- -  To install or upgrade in text mode, type: 01linux text <ENTER>07.
++ -  To install or upgrade in text mode, type: 0blinux text <ENTER>07.
+ 
+  -  Use the function keys listed below for more information.
+ 
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/x86_64/general.msg anaconda-11.1.2.16/bootdisk/x86_64/general.msg
+--- anaconda-11.1.2.16__orig/bootdisk/x86_64/general.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/x86_64/general.msg	2007-02-19 14:36:18.000000000 +0000
+@@ -1,15 +1,15 @@
+ 00
+ 
+ 
+-                        01General Boot Help07
++                        0eGeneral Boot Help07
+ 
+ You are now ready to begin the installation process.  In most cases, 
+-the best way to get started is to simply press the 01<ENTER>07 key.
++the best way to get started is to simply press the 0b<ENTER>07 key.
+ 
+ If you are having problems with the graphical installer, you can use the 
+-'01resolution=<width>x<height>07' option to try and force a
++'0bresolution=<width>x<height>07' option to try and force a
+ particular resolution. For example, boot with 
+-'01linux resolution=1024x76807'.  
++'0blinux resolution=1024x76807'.  
+ 
+ Certain hardware configurations may have trouble with the automatic hardware
+ detection done during the installation.  If you experience problems during the 
+@@ -17,7 +17,7 @@
+ 'skipddc' option will also skip monitor probing which hangs some systems.
+ 
+ There are a number of parameters that can be passed to the Linux kernel
+-at boot time.  Press 01<F4>07 for more information. 
++at boot time.  Press 0b<F4>07 for more information. 
+ 
+ 
+ 0f[F1-Main] [F2-Options] [F3-General] [F4-Kernel] [F5-Rescue]07
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/x86_64/options.msg anaconda-11.1.2.16/bootdisk/x86_64/options.msg
+--- anaconda-11.1.2.16__orig/bootdisk/x86_64/options.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/x86_64/options.msg	2007-02-19 14:36:33.000000000 +0000
+@@ -1,23 +1,23 @@
+ 00
+  
+ 
+-                       01Installer Boot Options07
++                       0eInstaller Boot Options07
+ 
+- -  To disable hardware probing, type: 01linux noprobe <ENTER>07.  
++ -  To disable hardware probing, type: 0blinux noprobe <ENTER>07.  
+ 
+- -  To test the install media you are using, type: 01linux mediacheck <ENTER>07.  
++ -  To test the install media you are using, type: 0blinux mediacheck <ENTER>07.  
+ 
+- -  To enable rescue mode, type: 01linux rescue <ENTER>07.  
+-    Press 01<F5>07 for more information about rescue mode.
++ -  To enable rescue mode, type: 0blinux rescue <ENTER>07.  
++    Press 0b<F5>07 for more information about rescue mode.
+ 
+- -  If you have a driver disk, type: 01linux dd <ENTER>07.
++ -  If you have a driver disk, type: 0blinux dd <ENTER>07.
+ 
+  -  To prompt for the use of other install methods such as network
+-    install when booting from a CD, type 01linux askmethod <ENTER>07.
++    install when booting from a CD, type 0blinux askmethod <ENTER>07.
+ 
+- -  If you have an installer update disk, type: 01linux updates <ENTER>07.
++ -  If you have an installer update disk, type: 0blinux updates <ENTER>07.
+ 
+- -  To test the memory in your system type: 01memtest86 <ENTER>07.
++ -  To test the memory in your system type: 0bmemtest86 <ENTER>07.
+     (This option is only available when booting from CD.)
+ 
+ 0f[F1-Main] [F2-Options] [F3-General] [F4-Kernel] [F5-Rescue]07
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/x86_64/param.msg anaconda-11.1.2.16/bootdisk/x86_64/param.msg
+--- anaconda-11.1.2.16__orig/bootdisk/x86_64/param.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/x86_64/param.msg	2007-02-19 14:36:48.000000000 +0000
+@@ -1,21 +1,21 @@
+ 00
+ 
+ 
+-                        01Kernel Parameter Help07
++                        0eKernel Parameter Help07
+ 
+ Some kernel parameters can be specified on the command line and will be
+ passed to the kernel.
+ 
+ To pass an option to the kernel, use the following format:
+ 
+-     01linux <options>07
++     0blinux <options>07
+ 
+ If a different installation mode is desired, enter it after the option(s).
+ 
+ For example, to install on a system with 256MB of RAM using noprobe mode, 
+ type the following:
+ 
+-     01linux mem=256M noprobe07
++     0blinux mem=256M noprobe07
+ 
+ 
+ 0f[F1-Main] [F2-Options] [F3-General] [F4-Kernel] [F5-Rescue]07
+diff -uNr anaconda-11.1.2.16__orig/bootdisk/x86_64/rescue.msg anaconda-11.1.2.16/bootdisk/x86_64/rescue.msg
+--- anaconda-11.1.2.16__orig/bootdisk/x86_64/rescue.msg	2007-02-19 02:07:11.000000000 +0000
++++ anaconda-11.1.2.16/bootdisk/x86_64/rescue.msg	2007-02-19 14:37:04.000000000 +0000
+@@ -1,7 +1,7 @@
+ 00
+ 
+ 
+-                        01Rescue Mode Help07
++                        0eRescue Mode Help07
+ 
+ The installer includes a rescue mode which can be used when a system
+ does not boot properly.  The rescue mode includes many useful
+@@ -9,7 +9,7 @@
+ one to restore a system to a working state.
+ 
+ To enter the rescue mode, boot your system from the installation
+-CDROM or floppy and type 01linux rescue <ENTER>07.
++CDROM or floppy and type 0blinux rescue <ENTER>07.
+ 
+ 
+ 

@@ -1,0 +1,3 @@
+ldapsearch -x -D cn=Manager,dc=domain,dc=com -wpassword -h localhost -LLL -b dc=domain,dc=com -s sub '(&(objectClass=qmailUser)(uid=teste@teste.local))'
+
+

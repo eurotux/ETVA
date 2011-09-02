@@ -21,12 +21,12 @@ class ServerMemory_swapRRA extends RRA
         
     }
 
-    function ServerMemory_swapRRA($node,$name){
+    function ServerMemory_swapRRA($node,$name,$init_rrd=true){
 
         $file = $node.'/'.$name.'__serverMemory_swap.rrd';        
         $this->init_log();
 
-        parent::RRA($file, $this->opts);
+        parent::RRA($file, $this->opts, $init_rrd);
 
         
     }

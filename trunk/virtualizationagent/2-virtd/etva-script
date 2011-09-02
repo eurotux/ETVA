@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+# etva-script		Script to start and stop ETVA configuration.
+#
+# Author:       Carlos Rodrigues <cmar@eurotux.com>
+#
+# chkconfig: 2345 99 01
+# description: Starts and stops ETVA configuration.
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+SERVICE=etva-script
+PROCESS=etva-script
+
+DIRCONFIG="/etc/sysconfig/etva-vdaemon/config"
+
+RETVAL=0
+
+start() {
+    echo -n $"Starting $SERVICE daemon: "
+    echo
+    cfup=`ls $DIRCONFIG/*up* 2>/dev/null`
+    for cf in $cfup;
+    do
+        if=$(echo "$cf" | sed 's/.*\/[0-9]*\-up\-\([a-zA-Z0-9]*\)/\1/')
+        echo "starting $if"
+        `/bin/sh $cf 2>/dev/null`;
+    done
+    RETVAL=1
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$SERVICE
+}
+
+stop() {
+    echo -n $"Stopping $SERVICE daemon: "
+    echo
+    cfdown=`ls $DIRCONFIG/*down* 2>/dev/null`
+    for cf in $cfdown;
+    do
+        if=$(echo "$cf" | sed 's/.*\/[0-9]*\-up\-\([a-zA-Z0-9]*\)/\1/')
+        echo "stopping $if"
+        `/bin/sh $cf 2>/dev/null`;
+    done
+    RETVAL=1
+    echo
+    if [ $RETVAL -eq 0 ]; then
+        rm -f /var/lock/subsys/$SERVICE
+        rm -f /var/run/$SERVICE.pid
+	rm -rf /var/cache/libvirt/*
+    fi
+}
+
+restart() {
+    stop
+    sleep 2
+    start
+}
+
+reload() {
+    echo -n $"Reloading $SERVICE configuration: "
+    RETVAL=1
+    echo
+    return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+    start|stop|restart|reload)
+        $1
+        ;;
+    status)
+        status $PROCESS
+        RETVAL=$?
+        ;;
+    force-reload)
+        reload
+	;;
+    condrestart|try-restart)
+        [ -f /var/lock/subsys/$SERVICE ] && restart || :
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
+	exit 1
+        ;;
+esac
+exit $RETVAL
+

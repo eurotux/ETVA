@@ -1,11 +1,18 @@
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
   <title>The source code</title>
     <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
 </head>
 <body  onload="prettyPrint();">
-    <pre class="prettyprint lang-js">/**
+    <pre class="prettyprint lang-js">/*!
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+/**
  * @class Ext.Element
  */
 (function(){
@@ -19,10 +26,6 @@ var D = Ext.lib.Dom,
         RELATIVE = "relative",
         AUTO = "auto",
         ZINDEX = "z-index";
-
-function animTest(args, animate, i) {
-	return this.preanim && !!animate ? this.preanim(args, i) : false	
-}
 
 Ext.Element.addMethods({
 	<div id="method-Ext.Element-getX"></div>/**
@@ -67,7 +70,7 @@ Ext.Element.addMethods({
      * @return {Ext.Element} this
      */
     setX : function(x, animate){	    
-	    return this.setXY([x, this.getY()], animTest.call(this, arguments, animate, 1));
+	    return this.setXY([x, this.getY()], this.animTest(arguments, animate, 1));
     },
 
     <div id="method-Ext.Element-setY"></div>/**
@@ -77,7 +80,7 @@ Ext.Element.addMethods({
      * @return {Ext.Element} this
      */
     setY : function(y, animate){	    
-	    return this.setXY([this.getX(), y], animTest.call(this, arguments, animate, 1));
+	    return this.setXY([this.getX(), y], this.animTest(arguments, animate, 1));
     },
 
     <div id="method-Ext.Element-setLeft"></div>/**
@@ -146,7 +149,7 @@ Ext.Element.addMethods({
      * @return {Ext.Element} this
      */
     setLocation : function(x, y, animate){
-        return this.setXY([x, y], animTest.call(this, arguments, animate, 2));
+        return this.setXY([x, y], this.animTest(arguments, animate, 2));
     },
 
     <div id="method-Ext.Element-moveTo"></div>/**
@@ -158,7 +161,7 @@ Ext.Element.addMethods({
      * @return {Ext.Element} this
      */
     moveTo : function(x, y, animate){
-        return this.setXY([x, y], animTest.call(this, arguments, animate, 2));        
+        return this.setXY([x, y], this.animTest(arguments, animate, 2));        
     },    
     
     <div id="method-Ext.Element-getLeft"></div>/**
@@ -299,7 +302,9 @@ Ext.Element.addMethods({
         return {left: (x - o[0] + l), top: (y - o[1] + t)}; 
     },
     
-    animTest : animTest
+    animTest : function(args, animate, i) {
+        return !!animate && this.preanim ? this.preanim(args, i) : false;
+    }
 });
 })();</pre>    
 </body>

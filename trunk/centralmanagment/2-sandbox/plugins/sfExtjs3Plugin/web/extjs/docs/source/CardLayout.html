@@ -1,11 +1,18 @@
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
   <title>The source code</title>
     <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
 </head>
 <body  onload="prettyPrint();">
-    <pre class="prettyprint lang-js"><div id="cls-Ext.layout.CardLayout"></div>/**
+    <pre class="prettyprint lang-js">/*!
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+<div id="cls-Ext.layout.CardLayout"></div>/**
  * @class Ext.layout.CardLayout
  * @extends Ext.layout.FitLayout
  * <p>This layout manages multiple child Components, each fitted to the Container, where only a single child Component can be
@@ -79,7 +86,7 @@ Ext.layout.CardLayout = Ext.extend(Ext.layout.FitLayout, {
      * true might improve performance.
      */
     deferredRender : false,
-    
+
     <div id="cfg-Ext.layout.CardLayout-layoutOnCardChange"></div>/**
      * @cfg {Boolean} layoutOnCardChange
      * True to force a layout of the active item when the active card is changed. Defaults to false.
@@ -91,28 +98,48 @@ Ext.layout.CardLayout = Ext.extend(Ext.layout.FitLayout, {
      */
     // private
     renderHidden : true,
-    
-    constructor: function(config){
-        Ext.layout.CardLayout.superclass.constructor.call(this, config);
-        this.forceLayout = (this.deferredRender === false);
-    },
+
+    type: 'card',
 
     <div id="method-Ext.layout.CardLayout-setActiveItem"></div>/**
      * Sets the active (visible) item in the layout.
      * @param {String/Number} item The string component id or numeric index of the item to activate
      */
     setActiveItem : function(item){
-        item = this.container.getComponent(item);
-        if(this.activeItem != item){
-            if(this.activeItem){
-                this.activeItem.hide();
+        var ai = this.activeItem,
+            ct = this.container;
+        item = ct.getComponent(item);
+
+        // Is this a valid, different card?
+        if(item && ai != item){
+
+            // Changing cards, hide the current one
+            if(ai){
+                ai.hide();
+                if (ai.hidden !== true) {
+                    return false;
+                }
+                ai.fireEvent('deactivate', ai);
             }
+
+            var layout = item.doLayout && (this.layoutOnCardChange || !item.rendered);
+
+            // Change activeItem reference
             this.activeItem = item;
+
+            // The container is about to get a recursive layout, remove any deferLayout reference
+            // because it will trigger a redundant layout.
+            delete item.deferLayout;
+
+            // Show the new component
             item.show();
-            this.container.doLayout();
-            if(this.layoutOnCardChange && item.doLayout){
+
+            this.layout();
+
+            if(layout){
                 item.doLayout();
             }
+            item.fireEvent('activate', item);
         }
     },
 
@@ -125,6 +152,7 @@ Ext.layout.CardLayout = Ext.extend(Ext.layout.FitLayout, {
         }
     }
 });
-Ext.Container.LAYOUTS['card'] = Ext.layout.CardLayout;</pre>    
+Ext.Container.LAYOUTS['card'] = Ext.layout.CardLayout;
+</pre>    
 </body>
 </html>

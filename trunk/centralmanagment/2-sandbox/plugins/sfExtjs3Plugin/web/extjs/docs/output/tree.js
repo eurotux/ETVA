@@ -1,9 +1,3 @@
-/*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
- * licensing@extjs.com
- * http://www.extjs.com/license
- */
 
 		Docs.classData ={"id":"apidocs","iconCls":"icon-docs","text":"API Documentation","singleClickExpand":true,"children":[
                 {"id":"pkg-Ext","text":"Ext","iconCls":"icon-pkg","cls":"package","singleClickExpand":true, children:[
@@ -90,6 +84,10 @@
 				,
                 {"href":"output/Ext.data.Record.html","text":"Record","id":"Ext.data.Record","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				,
+                {"href":"output/Ext.data.Request.html","text":"Request","id":"Ext.data.Request","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.data.Response.html","text":"Response","id":"Ext.data.Response","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
                 {"href":"output/Ext.data.ScriptTagProxy.html","text":"ScriptTagProxy","id":"Ext.data.ScriptTagProxy","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.data.SortTypes.html","text":"SortTypes","id":"Ext.data.SortTypes","isClass":true,"iconCls":"icon-static","cls":"cls","leaf":true}
@@ -99,6 +97,8 @@
                 {"href":"output/Ext.data.Store.Error.html","text":"Store.Error","id":"Ext.data.Store.Error","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.data.Tree.html","text":"Tree","id":"Ext.data.Tree","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.data.Types.html","text":"Types","id":"Ext.data.Types","isClass":true,"iconCls":"icon-static","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.data.XmlReader.html","text":"XmlReader","id":"Ext.data.XmlReader","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				,
@@ -166,6 +166,8 @@
 				,
                 {"href":"output/Ext.form.ComboBox.html","text":"ComboBox","id":"Ext.form.ComboBox","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
+                {"href":"output/Ext.form.CompositeField.html","text":"CompositeField","id":"Ext.form.CompositeField","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
+				,
                 {"href":"output/Ext.form.DateField.html","text":"DateField","id":"Ext.form.DateField","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.form.DisplayField.html","text":"DisplayField","id":"Ext.form.DisplayField","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
@@ -187,6 +189,8 @@
                 {"href":"output/Ext.form.Radio.html","text":"Radio","id":"Ext.form.Radio","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.form.RadioGroup.html","text":"RadioGroup","id":"Ext.form.RadioGroup","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.form.SliderField.html","text":"SliderField","id":"Ext.form.SliderField","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.form.TextArea.html","text":"TextArea","id":"Ext.form.TextArea","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
@@ -250,6 +254,8 @@
 				,
                 {"href":"output/Ext.layout.AnchorLayout.html","text":"AnchorLayout","id":"Ext.layout.AnchorLayout","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				,
+                {"href":"output/Ext.layout.AutoLayout.html","text":"AutoLayout","id":"Ext.layout.AutoLayout","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
                 {"href":"output/Ext.layout.BorderLayout.html","text":"BorderLayout","id":"Ext.layout.BorderLayout","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.layout.BorderLayout.Region.html","text":"BorderLayout.Region","id":"Ext.layout.BorderLayout.Region","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
@@ -279,6 +285,22 @@
                 {"href":"output/Ext.layout.VBoxLayout.html","text":"VBoxLayout","id":"Ext.layout.VBoxLayout","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				]}
 				,
+                {"id":"pkg-Ext.list","text":"list","iconCls":"icon-pkg","cls":"package","singleClickExpand":true, children:[
+                {"href":"output/Ext.list.BooleanColumn.html","text":"BooleanColumn","id":"Ext.list.BooleanColumn","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.list.Column.html","text":"Column","id":"Ext.list.Column","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.list.ColumnResizer.html","text":"ColumnResizer","id":"Ext.list.ColumnResizer","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.list.DateColumn.html","text":"DateColumn","id":"Ext.list.DateColumn","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.list.ListView.html","text":"ListView","id":"Ext.list.ListView","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.list.NumberColumn.html","text":"NumberColumn","id":"Ext.list.NumberColumn","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.list.Sorter.html","text":"Sorter","id":"Ext.list.Sorter","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				]}
+				,
                 {"id":"pkg-Ext.menu","text":"menu","iconCls":"icon-pkg","cls":"package","singleClickExpand":true, children:[
                 {"href":"output/Ext.menu.BaseItem.html","text":"BaseItem","id":"Ext.menu.BaseItem","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
@@ -297,6 +319,16 @@
                 {"href":"output/Ext.menu.Separator.html","text":"Separator","id":"Ext.menu.Separator","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.menu.TextItem.html","text":"TextItem","id":"Ext.menu.TextItem","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
+				]}
+				,
+                {"id":"pkg-Ext.slider","text":"slider","iconCls":"icon-pkg","cls":"package","singleClickExpand":true, children:[
+                {"href":"output/Ext.slider.MultiSlider.html","text":"MultiSlider","id":"Ext.slider.MultiSlider","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.slider.SingleSlider.html","text":"SingleSlider","id":"Ext.slider.SingleSlider","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.slider.Thumb.html","text":"Thumb","id":"Ext.slider.Thumb","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.slider.Tip.html","text":"Tip","id":"Ext.slider.Tip","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				]}
 				,
                 {"id":"pkg-Ext.state","text":"state","iconCls":"icon-pkg","cls":"package","singleClickExpand":true, children:[
@@ -417,13 +449,9 @@
 				,
                 {"href":"output/Ext.Layer.html","text":"Layer","id":"Ext.Layer","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				,
-                {"href":"output/Ext.ListView.html","text":"ListView","id":"Ext.ListView","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
-				,
-                {"href":"output/Ext.ListView.ColumnResizer.html","text":"ListView.ColumnResizer","id":"Ext.ListView.ColumnResizer","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
-				,
-                {"href":"output/Ext.ListView.Sorter.html","text":"ListView.Sorter","id":"Ext.ListView.Sorter","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
-				,
                 {"href":"output/Ext.LoadMask.html","text":"LoadMask","id":"Ext.LoadMask","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
+				,
+                {"href":"output/Ext.Loader.html","text":"Loader","id":"Ext.Loader","isClass":true,"iconCls":"icon-static","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.MessageBox.html","text":"MessageBox","id":"Ext.MessageBox","isClass":true,"iconCls":"icon-static","cls":"cls","leaf":true}
 				,
@@ -440,8 +468,6 @@
                 {"href":"output/Ext.Resizable.html","text":"Resizable","id":"Ext.Resizable","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.Shadow.html","text":"Shadow","id":"Ext.Shadow","isClass":true,"iconCls":"icon-cls","cls":"cls","leaf":true}
-				,
-                {"href":"output/Ext.Slider.html","text":"Slider","id":"Ext.Slider","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
                 {"href":"output/Ext.Spacer.html","text":"Spacer","id":"Ext.Spacer","isClass":true,"iconCls":"icon-cmp","cls":"cls","leaf":true}
 				,
@@ -588,6 +614,10 @@
 			,
 			"Ext.data.Record":"icon-cls"
 			,
+			"Ext.data.Request":"icon-cls"
+			,
+			"Ext.data.Response":"icon-cls"
+			,
 			"Ext.data.ScriptTagProxy":"icon-cls"
 			,
 			"Ext.data.SortTypes":"icon-static"
@@ -597,6 +627,8 @@
 			"Ext.data.Store.Error":"icon-cls"
 			,
 			"Ext.data.Tree":"icon-cls"
+			,
+			"Ext.data.Types":"icon-static"
 			,
 			"Ext.data.XmlReader":"icon-cls"
 			,
@@ -658,6 +690,8 @@
 			,
 			"Ext.form.ComboBox":"icon-cmp"
 			,
+			"Ext.form.CompositeField":"icon-cmp"
+			,
 			"Ext.form.DateField":"icon-cmp"
 			,
 			"Ext.form.DisplayField":"icon-cmp"
@@ -679,6 +713,8 @@
 			"Ext.form.Radio":"icon-cmp"
 			,
 			"Ext.form.RadioGroup":"icon-cmp"
+			,
+			"Ext.form.SliderField":"icon-cmp"
 			,
 			"Ext.form.TextArea":"icon-cmp"
 			,
@@ -738,6 +774,8 @@
 			,
 			"Ext.layout.AnchorLayout":"icon-cls"
 			,
+			"Ext.layout.AutoLayout":"icon-cls"
+			,
 			"Ext.layout.BorderLayout":"icon-cls"
 			,
 			"Ext.layout.BorderLayout.Region":"icon-cls"
@@ -766,6 +804,20 @@
 			,
 			"Ext.layout.VBoxLayout":"icon-cls"
 			,
+			"Ext.list.BooleanColumn":"icon-cls"
+			,
+			"Ext.list.Column":"icon-cls"
+			,
+			"Ext.list.ColumnResizer":"icon-cls"
+			,
+			"Ext.list.DateColumn":"icon-cls"
+			,
+			"Ext.list.ListView":"icon-cmp"
+			,
+			"Ext.list.NumberColumn":"icon-cls"
+			,
+			"Ext.list.Sorter":"icon-cls"
+			,
 			"Ext.menu.BaseItem":"icon-cmp"
 			,
 			"Ext.menu.CheckItem":"icon-cmp"
@@ -783,6 +835,14 @@
 			"Ext.menu.Separator":"icon-cmp"
 			,
 			"Ext.menu.TextItem":"icon-cmp"
+			,
+			"Ext.slider.MultiSlider":"icon-cmp"
+			,
+			"Ext.slider.SingleSlider":"icon-cmp"
+			,
+			"Ext.slider.Thumb":"icon-cls"
+			,
+			"Ext.slider.Tip":"icon-cmp"
 			,
 			"Ext.state.CookieProvider":"icon-cls"
 			,
@@ -896,13 +956,9 @@
 			,
 			"Ext.Layer":"icon-cls"
 			,
-			"Ext.ListView":"icon-cmp"
-			,
-			"Ext.ListView.ColumnResizer":"icon-cls"
-			,
-			"Ext.ListView.Sorter":"icon-cls"
-			,
 			"Ext.LoadMask":"icon-cls"
+			,
+			"Ext.Loader":"icon-static"
 			,
 			"Ext.MessageBox":"icon-static"
 			,
@@ -919,8 +975,6 @@
 			"Ext.Resizable":"icon-cls"
 			,
 			"Ext.Shadow":"icon-cls"
-			,
-			"Ext.Slider":"icon-cmp"
 			,
 			"Ext.Spacer":"icon-cmp"
 			,

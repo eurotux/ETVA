@@ -1,0 +1,177 @@
+PBX
+
+
+ADD EXTENSION
+EDIT EXTENSION
+    - SIP
+    -   add_extension
+          extension - extension number (required)
+          langcode
+          dictenabled
+          dictformat
+          dictemail
+          record_in -
+          record_out -
+          cid_masquerade
+          call_screen -> 0 || nomemory || memory
+          callwaiting -> 'enabled' || 'disabled'
+          pinless -> 'enabled' || 'disabled'
+          sipname -
+          tech -> sip || iax2 || zap
+          name -
+          outboundcid -
+          ringtimer -
+          emergency_cid
+          newdid -
+          newdid_name -
+          newdidcid -
+          vm
+          options
+          imapuser
+          imappassword
+          attach
+          saycid
+          envelope
+          delete
+          vmcontext
+          vmpwd
+          email
+          pager
+          noanswer
+          {DEVICE INFO}
+            SIP -
+
+
+{DEVICE INFO Structure}
+- SIP
+    devinfo_secret
+    devinfo_dtmfmode
+    devinfo_canreinvite = 'no'
+    devinfo_context = 'from-internal'
+    devinfo_host = 'dynamic'
+    devinfo_type = 'friend'
+    devinfo_nat = 'yes'
+    devinfo_port = '5060'
+    devinfo_qualify = 'yes'
+    devinfo_callgroup
+    devinfo_pickupgroup
+    devinfo_disallow
+    devinfo_allow
+    devinfo_dial
+    devinfo_accountcode
+    devinfo_mailbox
+    devinfo_deny = '0.0.0.0/0.0.0.0'
+    devinfo_permit = '0.0.0.0/0.0.0.0'
+
+
+
+- IAX2
+    devinfo_secret
+    devinfo_notransfer = 'yes'
+    devinfo_context = 'from-internal'
+    devinfo_host = 'dynamic'
+    devinfo_type = 'friend'
+    devinfo_port = '4569'
+    devinfo_qualify = 'yes'
+    devinfo_disallow
+    devinfo_allow
+    devinfo_dial
+    devinfo_accountcode
+    devinfo_mailbox
+    devinfo_deny = '0.0.0.0/0.0.0.0'
+    devinfo_permit = '0.0.0.0/0.0.0.0'
+    devinfo_requirecalltoken
+
+- ZAP
+    devinfo_channel
+    devinfo_context = 'from-internal'
+    devinfo_immediate = 'no'
+    devinfo_signalling = 'fxo_ks'
+    devinfo_echocancel = 'yes'
+    devinfo_echocancelwhenbridged = 'no'
+    devinfo_echotraining = '800'
+    devinfo_busydetect = 'no'
+    devinfo_busycount = '7'
+    devinfo_callprogress = 'no'
+    devinfo_dial
+    devinfo_accountcode
+    devinfo_callgroup
+    devinfo_pickupgroup
+    devinfo_mailbox
+
+DEL EXTENSION
+    extension - extension number (required)
+
+
+
+ADD TRUNK
+
+    tech -> sip || iax2 || zap
+    dialrules
+    disabletrunk -> off || on                         
+    trunk_name
+    outcid
+    keepcid -> off || on || cnum || all
+    maxchans
+    failtrunk
+    dialoutprefix
+    provider
+
+SIP || IAX2
+    channelid
+    peerdetails
+    usercontext
+    userconfig
+    register
+
+ZAP
+    channelid
+
+EDIT TRUNK
+trunknum (required)
+
+DEL TRUNK
+
+Add outboundroute
+add_outboundroute
+    dialpattern
+    trunkpriority
+    routename
+    emergency
+    intracompany
+    mohsilence
+    routecid
+    routecid_mode
+    routepass
+
+edit_outboundroute
+del_outboundroute
+    routename
+get_outboundroute
+    routename
+get_outboundroutes
+
+
+add_inboundroute
+    description
+    extension
+    cidnum
+    my $goto0 = $p->{'goto0'}; goto0 -> 'Extensions' || 'Terminate_Call' || 'Phonebook_Directory' || Ring_Groups || IVR
+    privacyman -> 0|1
+    pmmaxretries
+    pmminlength
+    alertinfo
+    ringing
+    mohclass
+    grppre
+    delay_answer
+    pricid
+    cidlookup_id
+
+edit_inboundroute
+extdisplay - composed by extension/cidnum
+del_inboundroute
+extdisplay - composed by extension/cidnum
+get_inboundroute
+extdisplay - composed by extension/cidnum
+get_inboundroutes

@@ -1,7 +1,58 @@
 # default values
-all: 
+all:
+  .array:
+   # device interface for connectivity with CM and Agents
+    device_interfaces:
+      standard:
+        cm_management: Management
+        va_management: Management
+        lan: LAN
+      enterprise:
+        cm_management: bond0
+        va_management: Management
+  # network interfaces hypervisor => driver supported
+    interfaces:
+      kvm:
+       - rtl8139
+       - e1000
+       - virtio
+      hvm:
+       - rtl8139
+       - e1000
+       
+  # disks drivers hypervisor => driver supported
+    disks:
+      pv:
+       - ide
+       - xen
+       - scsi
+      hvm:
+       - ide
+       - xen
+       - scsi
+      kvm:
+       - ide
+       - virtio
+       - scsi
+      
+  mac:
+    default_first_octect: 0x00 #default first three octects for mac pool
+    default_second_octect: 0x16
+    default_third_octect: 0x3e
+  node:
+    monitor_keepalive: 15000 # miliseconds to perform monitor alive checks.
+    monitor_keepalive_gap: 5000 # miliseconds between next node keepalive check.
+    keepalive_update: 60 # seconds to perform update. Added offset (keepalive_update_offset)
+                        # to add tolerance for comm delay..
+    keepalive_update_offset: 30 # seconds of tolerance before change node state
+  setting:
+    vnc_keymap: pt  # if not set in DB this will be used as default value
+    eventlog_flush: 14  # remove event records after specified days (two weeks)
+                       # if not set in DB this will be used as default value
+  volgroup:
+    disk_flag: __DISK__ # disk flag used to identify volume group that contains only logical volumes that are files
   rra:
-    dir: '%SF_DATA_DIR%/rra/'
+    dir: '%SF_DATA_DIR%/rra' 
   sf_guard_plugin:
     import_encrypted_passwords: true
 

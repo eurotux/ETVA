@@ -1,9 +1,3 @@
-/*!
- * Ext JS Library 3.0.0
- * Copyright(c) 2006-2009 Ext JS, LLC
- * licensing@extjs.com
- * http://www.extjs.com/license
- */
 Ext.BLANK_IMAGE_URL = 'resources/s.gif';
 
 Docs = {};
@@ -13,6 +7,7 @@ ApiPanel = function() {
         id:'api-tree',
         region:'west',
         split:true,
+        header: false,
         width: 280,
         minSize: 175,
         maxSize: 500,
@@ -46,6 +41,69 @@ ApiPanel = function() {
 };
 
 Ext.extend(ApiPanel, Ext.tree.TreePanel, {
+    initComponent: function(){
+        this.hiddenPkgs = [];
+        Ext.apply(this, {
+            tbar:[ ' ',
+			new Ext.form.TextField({
+				width: 200,
+				emptyText:'Find a Class',
+                enableKeyEvents: true,
+				listeners:{
+					render: function(f){
+                    	this.filter = new Ext.tree.TreeFilter(this, {
+                    		clearBlank: true,
+                    		autoClear: true
+                    	});
+					},
+                    keydown: {
+                        fn: this.filterTree,
+                        buffer: 350,
+                        scope: this
+                    },
+                    scope: this
+				}
+			}), ' ', ' ',
+			{
+                iconCls: 'icon-expand-all',
+				tooltip: 'Expand All',
+                handler: function(){ this.root.expand(true); },
+                scope: this
+            }, '-', {
+                iconCls: 'icon-collapse-all',
+                tooltip: 'Collapse All',
+                handler: function(){ this.root.collapse(true); },
+                scope: this
+            }]
+        })
+        ApiPanel.superclass.initComponent.call(this);
+    },
+	filterTree: function(t, e){
+		var text = t.getValue();
+		Ext.each(this.hiddenPkgs, function(n){
+			n.ui.show();
+		});
+		if(!text){
+			this.filter.clear();
+			return;
+		}
+		this.expandAll();
+		
+		var re = new RegExp('^' + Ext.escapeRe(text), 'i');
+		this.filter.filterBy(function(n){
+			return !n.attributes.isClass || re.test(n.text);
+		});
+		
+		// hide empty packages that weren't filtered
+		this.hiddenPkgs = [];
+                var me = this;
+		this.root.cascade(function(n){
+			if(!n.attributes.isClass && n.ui.ctNode.offsetHeight < 3){
+				n.ui.hide();
+				me.hiddenPkgs.push(n);
+			}
+		});
+	},
     selectClass : function(cls){
         if(cls){
             var parts = cls.split('.');
@@ -75,19 +133,66 @@ Ext.extend(ApiPanel, Ext.tree.TreePanel, {
 DocPanel = Ext.extend(Ext.Panel, {
     closable: true,
     autoScroll:true,
-
+    
     initComponent : function(){
         var ps = this.cclass.split('.');
         this.title = ps[ps.length-1];
-
+        Ext.apply(this,{
+            tbar: ['->',{
+                text: 'Config Options',
+                handler: this.scrollToMember.createDelegate(this, ['configs']),
+                iconCls: 'icon-config'
+            },'-',{
+                text: 'Properties',
+                handler: this.scrollToMember.createDelegate(this, ['props']),
+                iconCls: 'icon-prop'
+            }, '-',{
+                text: 'Methods',
+                handler: this.scrollToMember.createDelegate(this, ['methods']),
+                iconCls: 'icon-method'
+            }, '-',{
+                text: 'Events',
+                handler: this.scrollToMember.createDelegate(this, ['events']),
+                iconCls: 'icon-event'
+            }, '-',{
+                text: 'Direct Link',
+                handler: this.directLink,
+                scope: this,
+                iconCls: 'icon-fav'
+            }, '-',{
+                tooltip:'Hide Inherited Members',
+                iconCls: 'icon-hide-inherited',
+                enableToggle: true,
+                scope: this,
+                toggleHandler : function(b, pressed){
+                     this.body[pressed ? 'addClass' : 'removeClass']('hide-inherited');
+                }
+            }, '-', {
+                tooltip:'Expand All Members',
+                iconCls: 'icon-expand-members',
+                enableToggle: true,
+                scope: this,
+                toggleHandler : function(b, pressed){
+                    this.body[pressed ? 'addClass' : 'removeClass']('full-details');
+                }
+            }]
+        });
         DocPanel.superclass.initComponent.call(this);
     },
 
+    directLink : function(){
+        var link = String.format(
+            "<a href=\"{0}\" target=\"_blank\">{0}</a>",
+            document.location.href+'?class='+this.cclass
+        );
+        Ext.Msg.alert('Direct Link to ' + this.cclass,link);
+    },
+    
     scrollToMember : function(member){
         var el = Ext.fly(this.cclass + '-' + member);
         if(el){
             var top = (el.getOffsetsTo(this.body)[1]) + this.body.dom.scrollTop;
-            this.body.scrollTo('top', top-25, {duration:.75, callback: this.hlMember.createDelegate(this, [member])});
+            this.body.scrollTo('top', top-25, {duration:0.75, callback: this.hlMember.createDelegate(this, [member])});
         }
     },
 
@@ -95,8 +200,8 @@ DocPanel = Ext.extend(Ext.Panel, {
 		var el = Ext.getDom(id);
 		if(el){
 			var top = (Ext.fly(el).getOffsetsTo(this.body)[1]) + this.body.dom.scrollTop;
-			this.body.scrollTo('top', top-25, {duration:.5, callback: function(){
-                Ext.fly(el).next('h2').pause(.2).highlight('#8DB2E3', {attr:'color'});
+			this.body.scrollTo('top', top-25, {duration:0.5, callback: function(){
+                Ext.fly(el).next('h2').pause(0.2).highlight('#8DB2E3', {attr:'color'});
             }});
         }
 	},
@@ -104,7 +209,9 @@ DocPanel = Ext.extend(Ext.Panel, {
     hlMember : function(member){
         var el = Ext.fly(this.cclass + '-' + member);
         if(el){
-            el.up('tr').highlight('#cadaf9');
+            if (tr = el.up('tr')) {
+                tr.highlight('#cadaf9');
+            }
         }
     }
 });
@@ -229,7 +336,7 @@ Ext.extend(MainPanel, Ext.TabPanel, {
 	        '<tpl for=".">',
 	        '<div class="search-item">',
 	            '<a class="member" ext:cls="{cls}" ext:member="{member}" href="output/{cls}.html">',
-				'<img src="resources/images/default/s.gif" class="item-icon icon-{type}"/>{member}',
+				'<img src="../resources/images/default/s.gif" class="item-icon icon-{type}"/>{member}',
 				'</a> ',
 				'<a class="cls" ext:cls="{cls}" href="output/{cls}.html">{cls}</a>',
 	            '<p>{doc}</p>',
@@ -280,59 +387,17 @@ Ext.onReady(function(){
         api.selectClass(tab.cclass); 
     });
 
-    var hd = new Ext.Panel({
-        border: false,
-        layout:'anchor',
-        region:'north',
-        cls: 'docs-header',
-        height:60,
-        items: [{
+    var viewport = new Ext.Viewport({
+        layout:'border',
+        items:[ {
+            cls: 'docs-header',
+            height: 36,
+            region:'north',
             xtype:'box',
             el:'header',
             border:false,
-            anchor: 'none -25'
-        },
-        new Ext.Toolbar({
-            cls:'top-toolbar',
-            items:[ ' ',
-			new Ext.form.TextField({
-				width: 200,
-				emptyText:'Find a Class',
-				listeners:{
-					render: function(f){
-						f.el.on('keydown', filterTree, f, {buffer: 350});
-					}
-				}
-			}), ' ', ' ',
-			{
-                iconCls: 'icon-expand-all',
-				tooltip: 'Expand All',
-                handler: function(){ api.root.expand(true); }
-            }, '-', {
-                iconCls: 'icon-collapse-all',
-                tooltip: 'Collapse All',
-                handler: function(){ api.root.collapse(true); }
-            }, '->', {
-                tooltip:'Hide Inherited Members',
-                iconCls: 'icon-hide-inherited',
-                enableToggle: true,
-                toggleHandler : function(b, pressed){
-                     mainPanel[pressed ? 'addClass' : 'removeClass']('hide-inherited');
-                }
-            }, '-', {
-                tooltip:'Expand All Members',
-                iconCls: 'icon-expand-members',
-                enableToggle: true,
-                toggleHandler : function(b, pressed){
-                    mainPanel[pressed ? 'addClass' : 'removeClass']('full-details');
-                }
-            }]
-        })]
-    })
-
-    var viewport = new Ext.Viewport({
-        layout:'border',
-        items:[ hd, api, mainPanel ]
+            margins: '0 0 5 0'
+        }, api, mainPanel ]
     });
 
     api.expandPath('/root/apidocs');
@@ -351,37 +416,6 @@ Ext.onReady(function(){
         Ext.get('loading').remove();
         Ext.get('loading-mask').fadeOut({remove:true});
     }, 250);
-	
-	var filter = new Ext.tree.TreeFilter(api, {
-		clearBlank: true,
-		autoClear: true
-	});
-	var hiddenPkgs = [];
-	function filterTree(e){
-		var text = e.target.value;
-		Ext.each(hiddenPkgs, function(n){
-			n.ui.show();
-		});
-		if(!text){
-			filter.clear();
-			return;
-		}
-		api.expandAll();
-		
-		var re = new RegExp('^' + Ext.escapeRe(text), 'i');
-		filter.filterBy(function(n){
-			return !n.attributes.isClass || re.test(n.text);
-		});
-		
-		// hide empty packages that weren't filtered
-		hiddenPkgs = [];
-		api.root.cascade(function(n){
-			if(!n.attributes.isClass && n.ui.ctNode.offsetHeight < 3){
-				n.ui.hide();
-				hiddenPkgs.push(n);
-			}
-		});
-	}
 	
 });
 

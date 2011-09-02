@@ -1,0 +1,10 @@
+diff -uNr anaconda-11.1.2.224__orig/po/af.po anaconda-11.1.2.224/po/af.po
+--- anaconda-11.1.2.224__orig/po/af.po	2010-12-20 17:06:23.000000000 +0000
++++ anaconda-11.1.2.224/po/af.po	2011-02-20 20:07:32.830293618 +0000
+@@ -500,7 +500,7 @@
+ msgstr ""
+ "'n Onhanteerde uitsondering het voorgekom. Dis waarskynlik 'n programfout. "
+ "Kopieer die volledige teks van hierdie uitsondering en dien 'n "
+-"gedetailleerde verslag oor anaconda in by http://bugzilla.redhat.com/"
++"gedetailleerde verslag oor anaconda in by http://bugs.centos.org/"
+ "bugzilla/"

@@ -1,0 +1,3 @@
+DEVICE=bond0
+ONBOOT=yes
+BOOTPROTO=none

@@ -1,11 +1,18 @@
 <html>
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
   <title>The source code</title>
     <link href="../resources/prettify/prettify.css" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="../resources/prettify/prettify.js"></script>
 </head>
 <body  onload="prettyPrint();">
-    <pre class="prettyprint lang-js"><div id="cls-Ext.data.DirectStore"></div>/**
+    <pre class="prettyprint lang-js">/*!
+ * Ext JS Library 3.2.1
+ * Copyright(c) 2006-2010 Ext JS, Inc.
+ * licensing@extjs.com
+ * http://www.extjs.com/license
+ */
+<div id="cls-Ext.data.DirectStore"></div>/**
  * @class Ext.data.DirectStore
  * @extends Ext.data.Store
  * <p>Small helper class to create an {@link Ext.data.Store} configured with an
@@ -40,16 +47,18 @@
  * @constructor
  * @param {Object} config
  */
-Ext.data.DirectStore = function(c){
-    // each transaction upon a singe record will generatie a distinct Direct transaction since Direct queues them into one Ajax request.
-    c.batchTransactions = false;
-
-    Ext.data.DirectStore.superclass.constructor.call(this, Ext.apply(c, {
-        proxy: (typeof(c.proxy) == 'undefined') ? new Ext.data.DirectProxy(Ext.copyTo({}, c, 'paramOrder,paramsAsHash,directFn,api')) : c.proxy,
-        reader: (typeof(c.reader) == 'undefined' && typeof(c.fields) == 'object') ? new Ext.data.JsonReader(Ext.copyTo({}, c, 'totalProperty,root,idProperty'), c.fields) : c.reader
-    }));
-};
-Ext.extend(Ext.data.DirectStore, Ext.data.Store, {});
+Ext.data.DirectStore = Ext.extend(Ext.data.Store, {
+    constructor : function(config){
+        // each transaction upon a singe record will generate a distinct Direct transaction since Direct queues them into one Ajax request.
+        var c = Ext.apply({}, {
+            batchTransactions: false
+        }, config);
+        Ext.data.DirectStore.superclass.constructor.call(this, Ext.apply(c, {
+            proxy: Ext.isDefined(c.proxy) ? c.proxy : new Ext.data.DirectProxy(Ext.copyTo({}, c, 'paramOrder,paramsAsHash,directFn,api')),
+            reader: (!Ext.isDefined(c.reader) && c.fields) ? new Ext.data.JsonReader(Ext.copyTo({}, c, 'totalProperty,root,idProperty'), c.fields) : c.reader
+        }));
+    }
+});
 Ext.reg('directstore', Ext.data.DirectStore);
 </pre>    
 </body>

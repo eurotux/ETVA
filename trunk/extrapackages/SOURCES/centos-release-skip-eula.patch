@@ -1,0 +1,12 @@
+diff -uNr centos-release-4.92__orig/eula.py centos-release-4.92/eula.py
+--- centos-release-4.92__orig/eula.py	2007-02-19 15:07:05.000000000 +0000
++++ centos-release-4.92/eula.py	2007-02-19 15:07:28.000000000 +0000
+@@ -19,6 +19,8 @@
+     #You must specify a runPriority for the order in which you wish your module to run
+     runPriority = 15
+     moduleName = (_("License Agreement"))
++    # Turn this thing off completely
++    skipme=True
+ 
+     def launch(self, doDebug = None):
+         self.doDebug = doDebug

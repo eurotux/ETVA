@@ -1,0 +1,6 @@
+/var/log/etva-etvoip/etvoipd.log {
+    weekly
+    missingok
+    rotate 4
+    compress
+}

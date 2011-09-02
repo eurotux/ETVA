@@ -16,6 +16,39 @@
  */
 class vlanActions extends sfActions
 {
+    // in this case we want only to show create vlan form
+    // no action to be performed
+    public function executeVlan_CreateForm(sfWebRequest $request)
+    {
+        $vlan_form = new EtvaVlanForm();
+        $vlanid_val = $vlan_form->getValidator('vlanid');
+        $this->min_vlanid = $vlanid_val->getOption('min');
+        $this->max_vlanid = $vlanid_val->getOption('max');
+
+        $vlanname_val = $vlan_form->getValidator('name');
+        $this->min_vlanname = $vlanname_val->getOption('min_length');
+        $this->max_vlanname = $vlanname_val->getOption('max_length');
+    }
+
+
+    /*
+     * load data for create form (loads has_untagged check)
+     */
+    public function executeJsonLoadForm(sfWebRequest $request)
+    {
+        $untagged_vlan = EtvaVlanPeer::retrieveUntagged();
+        $untagged = 0;
+        if($untagged_vlan) $untagged = $untagged_vlan->getId();
+        
+        $result = array('success'=>true,'data' => array('vlan_untagged'=>$untagged));
+
+        $return = json_encode($result);
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+
+    }
+    
     /**
      * Creates vlan
      *
@@ -26,24 +59,110 @@ class vlanActions extends sfActions
      */
     public function executeJsonCreate(sfWebRequest $request)
     {
+        $form_data = array();
+
         $netname = $request->getParameter('name');
-        
+        if($netname) $form_data['name'] = $netname;
+
+
+        if(!preg_match('/^((?!vlan|eth|bond)[a-zA-Z0-9_]+)$/',$netname)){
+
+            $msg = EtvaVlanPeer::_ERR_NAME_;
+            $msg_i18n = $this->getContext()->getI18N()->__($msg);
+            $error_msg = array('success' => false,
+                                  'agent' => 'ETVA',
+                                  'error' => $msg_i18n);
+            
+            //notify system log
+            $this->dispatcher->notify(new sfEvent($error['agent'], 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname,'info'=>$msg), EtvaVlanPeer::_ERR_CREATE_),'priority'=>EtvaEventLogger::ERR)));
+            $error = array('success'=>false,'agent'=>'ETVA','info'=>$msg_i18n,'error'=>array($error_msg));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+            
+        }        
+
+        $netid = $request->getParameter('vlanid');
+        if($netid) $form_data['vlanid'] = $netid;        
+
         $etva_nodes = EtvaNodePeer::doSelect(new Criteria());
 
         $oks = array();
         $errors = array();
         $method = 'create_network';
         $params = array(
+                        'vlanid'=>$netid,
                         'name'=>$netname
                        );
-                       
-        // if network exists stop
-        if($etva_vlan = EtvaVlanPeer::retrieveByName($netname)){
 
-            $error = array('success'=>false,'error'=>array($netname.': Network already exist'));
+        $tagged = $request->getParameter('vlan_tagged');
+        if($tagged){
+            $params['vlan_tagged'] = 1;
+            $form_data['tagged'] = 1;
+        }
+
+
+        $untagged = $request->getParameter('vlan_untagged');
+        if($untagged){
+            $params['vlan_untagged'] = 1;
+            $form_data['tagged'] = 0;
+        }
+
+        /*
+         * if type of vlan is untagged check if there is already an untagged VLAN
+         */
+        if($params['vlan_untagged']){
+
+            $untagged_vlan = EtvaVlanPeer::retrieveUntagged();
+            if($untagged_vlan){
+                $msg = 'Untagged network already exist!';
+                $msg_i18n = $this->getContext()->getI18N()->__($msg);
+                $error = array('success' => false,
+                                  'agent' => 'ETVA',
+                                  'error' => $msg_i18n);
+
+            //notify system log
+            $this->dispatcher->notify(new sfEvent($error['agent'], 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname,'info'=>$msg), EtvaVlanPeer::_ERR_CREATE_),'priority'=>EtvaEventLogger::ERR)));
+            $error = array('success'=>false,'agent'=>'ETVA','info'=>$msg_i18n,'error'=>array($error));
 
             // if is a CLI soap request return json encoded data
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($error);
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+
+            }
+        }
+
+
+        // if network exists stop
+        if($etva_vlan = EtvaVlanPeer::isUnique($netid, $netname)){
+
+            if($etva_vlan->getName() == $netname){
+                $msg = "Network $netname already exist!";
+                $msg_i18n = $this->getContext()->getI18N()->__('Network %1% already exist!',array('%1%'=>$netname));
+            }
+            else{
+
+                $msg = "Network ID $netid already exist!";
+                $msg_i18n = $this->getContext()->getI18N()->__('Network %1% already exist!',array('%1%'=>'ID '.$netid));
+            }
+                        
+            $error = array('success' => false,
+                                  'agent' => 'ETVA',                                  
+                                  'error' => $msg_i18n);            
+
+            //notify system log
+            $this->dispatcher->notify(new sfEvent($error['agent'], 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname,'info'=>$msg), EtvaVlanPeer::_ERR_CREATE_),'priority'=>EtvaEventLogger::ERR)));
+            $error = array('success'=>false,'agent'=>'ETVA','info'=>$msg_i18n,'error'=>array($error));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
 
             // if is browser request return text renderer
             $error = $this->setJsonError($error);
@@ -52,53 +171,66 @@ class vlanActions extends sfActions
 
         }
 
+        $form = new EtvaVlanForm();
+        $result = $this->processJsonForm($form_data, $form);
+        if(!$result['success']){
+            //$result['ok'] = $oks;
+            //notify system log
+            $this->dispatcher->notify(new sfEvent('ETVA', 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname,'info'=>'Could not insert network'), EtvaVlanPeer::_ERR_CREATE_),'priority'=>EtvaEventLogger::CRIT)));
+            $error = $this->setJsonError($result);
+            return $this->renderText($error);
+        }
+        //notify system log
+        $this->dispatcher->notify(new sfEvent('ETVA', 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname), EtvaVlanPeer::_OK_CREATE_))));
+        $etva_vlan = $result['object'];
+
+
         // send soap request to all nodes (agents)
         foreach($etva_nodes as $etva_node){
 
             // send soap request
-            $response = $etva_node->soapSend($method,$params);
+            $response = $etva_node->soapSend($method,$params);            
 
             if($response['success']){
+                $msg_i18n = $this->getContext()->getI18N()->__(EtvaVlanPeer::_OK_CREATE_,array('%name%'=>$netname));
+                $response['info'] = $msg_i18n;
+                $oks[] =  $response;
 
-                $response_decoded = (array) $response['response'];
-                $returned_status = $response_decoded['_okmsg_'];                                
+                //notify system log
+                $this->dispatcher->notify(new sfEvent($etva_node->getName(), 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname), EtvaVlanPeer::_OK_CREATE_))));
 
-                $oks[] =  $etva_node->getName().': VLAN '.$netname.' - '.$returned_status;
                 
             }else
                 // soap response error....
                 {
-
-                $error_decoded = $response['error'];
-                $errors[] = $etva_node->getName().': VLAN '.$netname.' - '.$error_decoded;
-
+                $info = $response['info'];
+                $info_i18n = $this->getContext()->getI18N()->__($info);
+                $response['info'] = $info_i18n;
+                $errors[] = $response;
+                //notify system log
+                $this->dispatcher->notify(new sfEvent($etva_node->getName(), 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname,'info'=>$info), EtvaVlanPeer::_ERR_CREATE_),'priority'=>EtvaEventLogger::ERR)));
             }
 
-        }
+        }              
 
         if(!empty($errors)){
 
-            $result = array('success'=>false,'error'=>$errors);
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($result);
+            $result = array('success'=>false,'agent'=>'ETVA','ok'=>$oks,'error'=>$errors);
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($result);
 
             $return = $this->setJsonError($result);
-            return  $this->renderText($return);
+            return  $this->renderText($return);            
+        }                 
 
-        }
-
-        // create DB vlan and store
-        $etva_vlan = new EtvaVlan();
-        $etva_vlan->setName($netname);
-        $etva_vlan->save();
-
-
-        $result = array('success'=>true,'response'=>$oks);
+        $result = array('success'=>true,'agent'=>'ETVA','response'=>$oks);
 
         $return = json_encode($result);
 
         // if the request is made throught soap request...
-        if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return $return;
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
+
         // if is browser request return text renderer
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');        
         return  $this->renderText($return);
                   
     }
@@ -125,11 +257,15 @@ class vlanActions extends sfActions
                        );
 
         if(!$etva_vlan = EtvaVlanPeer::retrieveByName($netname)){
+            
+            $msg = "Network $netname not found!";
+            $msg_i18n = $this->getContext()->getI18N()->__('Network %1% not found!',array('%1%'=>$netname));
 
-            $error = array('success'=>false,'error'=>array($netname.': Network not found'));
-
+            $error = array('success'=>false,'ok'=>$oks,'error'=>array($msg_i18n));
+            //notify system log
+            $this->dispatcher->notify(new sfEvent('ETVA', 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname,'info'=>$msg), EtvaVlanPeer::_ERR_REMOVE_),'priority'=>EtvaEventLogger::CRIT)));
             // if is a CLI soap request return json encoded data
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($error);
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
 
             // if is browser request return text renderer
             $error = $this->setJsonError($error);
@@ -139,63 +275,79 @@ class vlanActions extends sfActions
 
         // check if is in use....
         $c = new Criteria();
-        $c->add(EtvaNetworkPeer::VLAN,$etva_vlan->getName());
+        $c->add(EtvaNetworkPeer::VLAN_ID,$etva_vlan->getId());
 
-        if($etva_network = EtvaNetworkPeer::doSelectOne($c)){
+        if($etva_network = EtvaNetworkPeer::doSelectOne($c)){            
+            $msg = "Network $netname in use!";
+            $msg_i18n = $this->getContext()->getI18N()->__('Network %1% in use!',array('%1%'=>$netname));
+            $msg_array = array('success' => false,
+                                  'agent' => 'ETVA',
+                                  'error' => $msg_i18n);
 
-            $error = array('success'=>false,'error'=>array($netname.': Network in use'));
+            $error = array('success'=>false,'agent'=>'ETVA','ok'=>$oks,'error'=>array($msg_array));
+            //notify system log
+            $this->dispatcher->notify(new sfEvent($error['agent'], 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname,'info'=>$msg), EtvaVlanPeer::_ERR_REMOVE_),'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($error);
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
 
             // if is browser request return text renderer
             $error = $this->setJsonError($error);
             return $this->renderText($error);
         }
-
+        
+        $etva_vlan->delete();
+        //notify system log
+        $this->dispatcher->notify(new sfEvent('ETVA', 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname), EtvaVlanPeer::_OK_REMOVE_))));
+        
         // send soap request to all nodes (agents)
         foreach($etva_nodes as $etva_node){
 
             // send soap request
-            $response = $etva_node->soapSend($method,$params);
+            $response = $etva_node->soapSend($method,$params);            
 
-            if($response['success']){
+            if($response['success']){                                                
 
-                $response_decoded = (array) $response['response'];
-                $returned_status = $response_decoded['_okmsg_'];
-
-                $oks[] =  $etva_node->getName().': VLAN '.$netname.' - '.$returned_status;
+                $msg_i18n = $this->getContext()->getI18N()->__(EtvaVlanPeer::_OK_REMOVE_,array('%name%'=>$netname));
+                $response['info'] = $msg_i18n;
+                
+                $oks[] =  $response;
+                //notify system log
+                $this->dispatcher->notify(new sfEvent($etva_node->getName(), 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname), EtvaVlanPeer::_OK_REMOVE_))));
 
             }else
                 // soap response error....
                 {
-
-                $error_decoded = $response['error'];
-                $errors[] = $etva_node->getName().': VLAN '.$netname.' - '.$error_decoded;
-
+                    $info = $response['info'];
+                    $info_i18n = $this->getContext()->getI18N()->__($info);
+                    $response['info'] = $info_i18n;
+                    $errors[] = $response;
+                                        
+                    //notify system log
+                    $this->dispatcher->notify(new sfEvent($etva_node->getName(), 'event.log', array('message' => Etva::getLogMessage(array('name'=>$netname,'info'=>$info), EtvaVlanPeer::_ERR_REMOVE_),'priority'=>EtvaEventLogger::ERR)));
             }
 
         }
-       // $errors[] = 'da';
+       
         if(!empty($errors)){
 
-            $result = array('success'=>false,'error'=>$errors);
-            if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return json_encode($result);
+            $result = array('success'=>false,'agent'=>'ETVA','ok'=>$oks,'error'=>$errors);
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($result);
 
             $return = $this->setJsonError($result);
             return  $this->renderText($return);
 
         }
     
-        $etva_vlan->delete();
+        
+        $result = array('success'=>true,'agent'=>'ETVA','response'=>$oks);
 
-        $result = array('success'=>true,'response'=>$oks);
-
-        $return = json_encode($result);
+        $return = json_encode($result);        
 
         // if the request is made throught soap request...
-        if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap') return $return;
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
         // if is browser request return text renderer
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');        
         return  $this->renderText($return);
 
 
@@ -211,25 +363,27 @@ class vlanActions extends sfActions
     {
 
         $c = new Criteria();
-
-        $etva_vlan_list = EtvaVlanPeer::doSelect($c);
+        $vlan_nodes = EtvaVlanPeer::doSelect($c);
 
         $list = array();
-        foreach($etva_vlan_list as $vlan)
-                    $list[] = $vlan->toArray();
+        foreach($vlan_nodes as $vlan){
+            $list[] = $vlan->toArray(BasePeer::TYPE_FIELDNAME);
+        }
 
+        $untagged_vlan = EtvaVlanPeer::retrieveUntagged();
+        $hasUntagged = 0;
+        if($untagged_vlan) $hasUntagged = 1;
 
-        $result = array('total' =>   count($list),'data'  => $list);
+        $result = array('total' =>   count($list),'data'  => $list,'hasUntagged'=>$hasUntagged);
 
         $result = json_encode($result);
 
-        if(defined('SF_ENVIRONMENT') && SF_ENVIRONMENT  == 'soap'){
+        if(sfConfig::get('sf_environment') == 'soap'){
             $soap_result = array( success=>true, 'total' =>   count($list), 'response' => $list);
             return json_encode($soap_result);
         }
 
-
-        $this->getResponse()->setHttpHeader("X-JSON", '()');
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
     }
     
@@ -246,8 +400,45 @@ class vlanActions extends sfActions
     
     $result = json_encode($tree);
 
-    $this->getResponse()->setHttpHeader("X-JSON", '()');
+    $this->getResponse()->setHttpHeader('Content-type', 'application/json');
     return $this->renderText($result);
+  }
+
+
+  protected function processJsonForm($request, sfForm $form)
+  {         
+
+    $form->bind($request);
+
+    if ($form->isValid())
+    {
+        try{
+            $etva_vlan = $form->save();
+
+        }catch(Exception $e){
+            $result = array('success'=>false,'error'=>array('vlan'=>$e->getMessage()));
+            return $result;
+        }
+        
+        //$result = array('success'=>true,'insert_id'=>$etva_server->getId());
+        $result = array('success'=>true, 'object'=>$etva_vlan);
+        return $result;
+
+    }
+    else
+    {
+        $errors = array();
+
+        foreach ($form->getFormattedErrors() as $error){            
+            $errors[] = $error;
+        }
+        
+        $msg_err = implode('<br>',$errors);        
+        $err = array('success'=>false,'agent'=>'ETVA','error'=>$msg_err);
+        $result = array('success'=>false,'agent'=>'ETVA','error'=>array($err));
+        return $result;
+    }
+
   }
 
 
@@ -262,7 +453,7 @@ class vlanActions extends sfActions
 
       $this->getContext()->getResponse()->setStatusCode($statusCode);
       $error = json_encode($info);
-      $this->getContext()->getResponse()->setHttpHeader("X-JSON", '()');
+      $this->getResponse()->setHttpHeader('Content-type', 'application/json');
       return $error;
 
   }
@@ -270,7 +461,7 @@ class vlanActions extends sfActions
   /**
    * Used to process soap requests => updateVirtAgentVlans
    *
-   * Updates logical volume info sent by virt Agent
+   * Updates vlan info sent by virt Agent
    *
    * Replies with succcess
    *
@@ -282,56 +473,93 @@ class vlanActions extends sfActions
   public function executeSoapUpdate(sfWebRequest $request)
   {
 
-  
+         
+    if(sfConfig::get('sf_environment') == 'soap'){
 
-       
-    if(SF_ENVIRONMENT == 'soap'){
+        //get config data file
+        $etva_data = Etva::getEtvaModelFile();
+        //check etva model type
+        $etvamodel = $etva_data['model'];
 
         $vlans = $request->getParameter('vlans');
 
 
         
         $vlans_names = array();
-        foreach($vlans as $name=>$vlanInfo){
-            $vlans_names[] = $name;
+        foreach($vlans as $vlanInfo){
+            $vlan_data = (array) $vlanInfo;
+            $vlans_names[] = $vlan_data['name'];
         }
 
 
 
         $c = new Criteria();
-        $c->add(EtvaNodePeer::UID ,$request->getParameter('uid'));
+        $c->add(EtvaNodePeer::UUID ,$request->getParameter('uuid'));
 
 
 
         if(!$etva_node = EtvaNodePeer::doSelectOne($c)){
-            $error_msg = sprintf('Object etva_node does not exist (%s).', $request->getParameter('uid'));
+            $error_msg = sprintf('Object etva_node does not exist (%s).', $request->getParameter('uuid'));
+
+            $node_log = Etva::getLogMessage(array('name'=>$request->getParameter('uuid')), EtvaNodePeer::_ERR_NOTFOUND_UUID_);
+            //notify system log
+            $this->dispatcher->notify(new sfEvent('ETVA', 'event.log', array('message' => Etva::getLogMessage(array('info'=>$node_log), EtvaVlanPeer::_ERR_SOAPUPDATE_),'priority'=>EtvaEventLogger::ERR)));
             $error = array('success'=>false,'error'=>$error_msg);            
             return $error;
         }
 
-       
+        $node_initialize = $etva_node->getInitialize();
+        if($node_initialize!=EtvaNode_VA::INITIALIZE_OK)
+        {
+            $error_msg = sprintf('Etva node initialize status: %s', $node_initialize);
+            $error = array('success'=>false,'error'=>$error_msg);
 
+            return $error;
+
+        }
+
+       
+        /*
+         * checks if CM vlans exists on node info Vlans
+         * return vlans to be created on node
+         *
+         */
         $etva_vlans = EtvaVlanPeer::doSelect(new Criteria());
-        // $node_vlans = EtvaVlanPeer::doSelect(new Criteria());
-
-
-       
-        // return $node_vlans;
-        // $result = 'Success';
+        
         $new_vlans =array();
         foreach($etva_vlans as $etva_vlan){
     
             if(!in_array($etva_vlan->getName(),$vlans_names)){
 
+                $data = array(
+                            'name'   => $etva_vlan->getName(),
+                            'ifout'  => $etva_vlan->getIntf()                            
+                );
 
-                    $new_vlans[$etva_vlan->getName()] = array('name'=>$etva_vlan->getName());
 
-            
+                /*
+                 * if model type == enterprise send vlan ID and untagged/tagged option
+                 */
+                if(strtolower($etvamodel)!='standard'){
+                    $data['vlanid'] = $etva_vlan->getVlanId();
+                    $tagged = $etva_vlan->getTagged();
+
+                    if($tagged) $data['vlan_tagged'] = 1;
+                    else $data['vlan_untagged'] = 1;
+                }
+
+                $new_vlans[$etva_vlan->getName()] = $data;          
             }
             
         
             
         }
+        
+        $vlans_names = array_keys($new_vlans);
+        $vlans = implode(', ',$vlans_names);
+                
+        //notify system log
+        $this->dispatcher->notify(new sfEvent('ETVA', 'event.log', array('message' => Etva::getLogMessage(array('name'=>$etva_node->getName(),'info'=>$vlans), EtvaVlanPeer::_OK_SOAPUPDATE_),'priority'=>EtvaEventLogger::INFO)));
 
         
         return $new_vlans;

@@ -1,0 +1,37 @@
+\subsection{Cluster}
+
+O serviço de \emph{cluster} instalado pela Eurotux na plataforma, tem como objectivo garantir a redundância dos serviços.
+Estes serviços ficam activos apenas em um dos nós do \emph{cluster}, ficando no outro nó desactivados até intervenção especifica do administrador ou por falha do nó activo.
+
+O estado do cluster poderá ser consultado pela execução do comando:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+clustat
+\end{Verbatim}
+
+A configuração poderá ser \underline{consultada} no ficheiro \emph{/etc/cluster/cluster.[conf|xml]} (Dependendo da versão do cluster).
+
+O serviço de cluster é composto por dois serviços:
+
+\begin{itemize}
+	\item cman - cluster manager
+	\item rgmanager - resource group manager
+\end{itemize}
+
+O primeiro é responsável pela gestão global do cluster, nomeadamente a nível de mecanismos de fencing\footnote{Mecanismo em que um servidor impede o acesso de outro a um recurso partilhado} e de ''locking''. O segundo necessita da funcionalidade do primeiro e implementa a gestão de serviços que o cluster vai gerir, nomeadamente arrancar e parar serviços, endereços IP, etc.
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/cman start
+# /etc/rc.d/init.d/cman stop
+\end{Verbatim}
+
+No entanto o comando acima não deve ser executado sem primeiro desligar o ''rgmanager'' devido às precedências. Como tal deverá primeiro executar:
+
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/rgmanager start
+# /etc/rc.d/init.d/rgmanager stop
+\end{Verbatim}
+

@@ -13,13 +13,18 @@
  * @package    symfony
  * @subpackage plugin
  * @author     Fabien Potencier <fabien.potencier@symfony-project.com>
- * @version    SVN: $Id: sfGuardUser.php 9999 2008-06-29 21:24:44Z fabien $
+ * @version    SVN: $Id: sfGuardUser.php 7634 2008-02-27 18:01:40Z fabien $
  */
 class sfGuardUser extends PluginsfGuardUser
 {
-
+  /*
+   *
+   * CUSTOM setPassword to store passwords as it is!
+   *
+   */
   public function setPassword($password)
   {
+
     // store the backtrace
     $bt = debug_backtrace();
 
@@ -38,7 +43,7 @@ class sfGuardUser extends PluginsfGuardUser
 
   		if ($password !== null && !is_string($password)) {
   			$password = (string) $password;
-  		}
+        }
 
   		if ($this->password !== $password) {
   			$this->password = $password;

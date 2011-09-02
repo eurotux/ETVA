@@ -1,382 +1,258 @@
 <?php
-/*
- * Use Extjs helper to dynamic create data store and column model javascript
- */
-use_helper('Extjs');
-/*
- * Include network grid
- * var networkGrid
- *
- */
-
-include_partial('sfGuardGroup/grid',array('sfGuardGroup_tableMap'=>$sfGuardGroup_tableMap,'sfGuardGroup_form'=>$sfGuardGroup_form));
+include_partial('sfGuardGroup/grid');
+include_partial('sfGuardGroup/SfGuardGroup_CreateEdit');
+include_partial('sfGuardPermission/grid');
+include_partial('sfGuardPermission/SfGuardPermission_CreateEdit');
 // include_partial('sfGuardGroup/grid',array('server_id'=>$server_id,'node_id'=>$node_id,'sfGuardGroup_tableMap'=>$sfGuardGroup_tableMap,'server_form'=>$server_form,'server_tableMap'=>$server_tableMap));
 
 ?>
 <script>
 
+Ext.ns("SfGuardGroup");
 
-//
-//
-//var accordion = {
-//                id: 'acc-win',
-//                title: 'Accordion Window',
-//                region      : 'west',
-//           // split       : true,
-//           // width       : 200,
-//                width:250,
-//                height:400,
-//             //   layout:'accordion',layoutConfig:{animate:true},
-//                iconCls: 'accordion',
-//                shim:false,
-//                animCollapse:false,
-//                constrainHeader:true,
-//
-//                tbar:[{
-//                    tooltip:{title:'Rich Tooltips', text:'Let your users know what they can do!'},
-//                    iconCls:'connect'
-//                },'-',{
-//                    tooltip:'Add a new user',
-//                    iconCls:'user-add'
-//                },' ',{
-//                    tooltip:'Remove the selected user',
-//                    iconCls:'user-delete'
-//                }],
-//
-//                layout:'accordion',
-//                border:false,
-//                layoutConfig: {
-//                    animate:false
-//                },
-//
-//                items: [
-//                    new Ext.tree.TreePanel({
-//                        id:'im-tree',
-//                        title: 'Online Users',
-//                        loader: new Ext.tree.TreeLoader(),
-//                        rootVisible:false,
-//                        lines:false,
-//                        autoScroll:true,
-//                        tools:[{
-//                            id:'refresh',
-//                            on:{
-//                                click: function(){
-//                                    var tree = Ext.getCmp('im-tree');
-//                                    tree.body.mask('Loading', 'x-mask-loading');
-//                                    tree.root.reload();
-//                                    tree.root.collapse(true, false);
-//                                    setTimeout(function(){ // mimic a server call
-//                                        tree.body.unmask();
-//                                        tree.root.expand(true, true);
-//                                    }, 1000);
-//                                }
-//                            }
-//                        }],
-//                        root: new Ext.tree.AsyncTreeNode({
-//                            text:'Online',
-//                            children:[{
-//                                text:'Friends',
-//                                expanded:true,
-//                                children:[{
-//                                    text:'Jack',
-//                                    iconCls:'user',
-//                                    leaf:true
-//                                },{
-//                                    text:'Brian',
-//                                    iconCls:'user',
-//                                    leaf:true
-//                                },{
-//                                    text:'Jon',
-//                                    iconCls:'user',
-//                                    leaf:true
-//                                },{
-//                                    text:'Tim',
-//                                    iconCls:'user',
-//                                    leaf:true
-//                                },{
-//                                    text:'Nige',
-//                                    iconCls:'user',
-//                                    leaf:true
-//                                },{
-//                                    text:'Fred',
-//                                    iconCls:'user',
-//                                    leaf:true
-//                                },{
-//                                    text:'Bob',
-//                                    iconCls:'user',
-//                                    leaf:true
-//                                }]
-//                            },{
-//                                text:'Family',
-//                                expanded:true,
-//                                children:[{
-//                                    text:'Kelly',
-//                                    iconCls:'user-girl',
-//                                    leaf:true
-//                                },{
-//                                    text:'Sara',
-//                                    iconCls:'user-girl',
-//                                    leaf:true
-//                                },{
-//                                    text:'Zack',
-//                                    iconCls:'user-kid',
-//                                    leaf:true
-//                                },{
-//                                    text:'John',
-//                                    iconCls:'user-kid',
-//                                    leaf:true
-//                                }]
-//                            }]
-//                        })
-//                    }), {
-//                        title: 'Settings',
-//                        html:'<p>Something useful would be in here.</p>',
-//                        autoScroll:true
-//                    },{
-//                        title: 'Even More Stuff',
-//                        html : '<p>Something useful would be in here.</p>'
-//                    },{
-//                        title: 'My Stuff',
-//                        html : '<p>Something useful would be in here.</p>'
-//                    }
-//                ]
-//            };
+SfGuardGroup.gridForm = function(config) {
+
+    var createEdit = new SfGuardGroup.CreateEdit();    
+    var listGrid = new SfGuardGroup.Grid();
+
+    //on save fire grid store update event to store data in db
+    createEdit.on('onSave',function(rec){
+        var store = listGrid.getStore();
+
+        var conn = new Ext.data.Connection({
+            listeners:{
+                // wait message.....
+                beforerequest:function(){
+                    Ext.MessageBox.show({
+                        title: 'Please wait',
+                        msg: 'Setting up configuration...',
+                        width:300,
+                        wait:true,
+                        modal: false
+                    });
+                },// on request complete hide message
+                requestcomplete:function(){Ext.MessageBox.hide();}}
+        });// end conn
+
+        conn.request({
+            url: 'sfGuardGroup/jsonUpdate',
+            scope:this,
+            params:rec.data,
+            success: function(resp,opt) {
+                store.reload();
+                if(rec.data['id']==null) this.fireEvent('onAdd');
+            },
+            failure: function(resp,opt) {
+
+                var response = Ext.util.JSON.decode(resp.responseText);
+                Ext.ux.Logger.error(response['agent'],response['error']);
+
+                Ext.Msg.show({title: 'Error '+response['agent'],
+                    buttons: Ext.MessageBox.OK,
+                    msg: response['info'],
+                    icon: Ext.MessageBox.ERROR});
+            }
+        });//END Ajax request
+
+        
+    });
+
+    listGrid.on({
+        rowclick:function(g, index, ev){
+            var rec = g.store.getAt(index);
+            createEdit.loadRecord(rec);
+        }
+        // on grid click Add button
+        ,onAdd:function(){
+            createEdit.clean();
+            createEdit.focusForm();
+        }
+        // on grid remove item (after remove)
+        ,onRemove:function(){
+            listGrid.getStore().reload();
+            createEdit.clean();
+        }
+    });
+
+    Ext.apply(this,config);
+
+   
+    SfGuardGroup.gridForm.superclass.constructor.call(this, {    	
+        frame: true,
+        labelAlign: 'left',
+        //bodyStyle:'padding:5px',
+        autoScroll:true,
+        layout: 'border',defaults:{layout:'fit'},
+        items: [{
+                    region:'center'
+                    ,items: [listGrid]
+                }
+                ,{
+                    region:'east',defaults:{autoScroll:true},
+                    bodyStyle: 'padding-left:10px;',
+                    width:300
+                    ,items:[createEdit]
+                }
+        ]
+    });
 
 
-/*
- * ================  AccordionLayout config  =======================
- */
-var accordion = {
-    title       : 'Navigation',
-            region      : 'west',
-            split       : true,
-            width       : 200,
-            collapsible : true,
-            margins     : '3 0 3 3',
-            cmargins    : '3 3 3 3',
+
+    this.on('activate',function(){
+        listGrid.store.reload();
+        createEdit.clean();
+        createEdit.reload();});
+}
+
+// define public methods
+Ext.extend(SfGuardGroup.gridForm, Ext.Panel, {});
+
+SfGuardPermission.gridForm = function(config) {
+
+    var createEdit = new SfGuardPermission.CreateEdit();
+    var listGrid = new SfGuardPermission.Grid();
+
+    //on save fire grid store update event to store data in db
+    createEdit.on('onSave',function(rec){
+        var store = listGrid.getStore();        
+        
+        var conn = new Ext.data.Connection({
+            listeners:{
+                // wait message.....
+                beforerequest:function(){
+                    Ext.MessageBox.show({
+                        title: 'Please wait',
+                        msg: 'Setting up configuration...',
+                        width:300,
+                        wait:true,
+                        modal: false
+                    });
+                },// on request complete hide message
+                requestcomplete:function(){Ext.MessageBox.hide();}}
+        });// end conn
+        
+        conn.request({
+            url: 'sfGuardPermission/jsonUpdate',
+            scope:this,
+            params:rec.data,
+            success: function(resp,opt) {
+                store.reload();
+                if(rec.data['id']==null) this.fireEvent('onAdd');
+            },
+            failure: function(resp,opt) {
+
+                var response = Ext.util.JSON.decode(resp.responseText);
+                Ext.ux.Logger.error(response['agent'],response['error']);
+
+                Ext.Msg.show({title: 'Error '+response['agent'],
+                    buttons: Ext.MessageBox.OK,
+                    msg: response['info'],
+                    icon: Ext.MessageBox.ERROR});
+            }
+        });//END Ajax request
+                
+
+
+
+
+
+    });
+
+    listGrid.on({
+        rowclick:function(g, index, ev){
+            var rec = g.store.getAt(index);
+            createEdit.loadRecord(rec);
+            
+            //createEdit.load(rec.id);
+        }
+        // on grid click Add button
+        ,onAdd:function(){
+            createEdit.clean();
+            createEdit.focusForm();
+        }
+        // on grid remove item (after remove)
+        ,onRemove:function(){
+            listGrid.getStore().reload();
+            createEdit.clean();
+        }
+    });
+
+    Ext.apply(this,config);
+
+
+    SfGuardPermission.gridForm.superclass.constructor.call(this, {
+        frame: true,
+        labelAlign: 'left',
+        //bodyStyle:'padding:5px',
+        autoScroll:true,
+        layout: 'border',defaults:{layout:'fit'},
+        items: [{
+                    region:'center'
+                    ,items: [listGrid]
+                }
+                ,{
+                    region:'east',defaults:{autoScroll:true},
+                    bodyStyle: 'padding-left:10px;',
+                    width:300
+                    ,items:[createEdit]
+                }
+        ]
+    });
+
+    this.on('activate',function(){
+        listGrid.store.reload();
+        createEdit.clean();
+        createEdit.reload();});
     
-    layout:'accordion',
-    bodyBorder: false,  // useful for accordion containers since the inner panels have borders already
-    bodyStyle: 'background-color:#DFE8F6',  // if all accordion panels are collapsed, this looks better in this layout
-	defaults: {bodyStyle: 'padding:15px'},
-    items: [{
-        title: 'Introduction',
-		tools: [{id:'gear'},{id:'refresh',
-                on:{
-                                click: function(){
-                                    var tree = Ext.getCmp('im-tree');
-                                    tree.body.mask('Loading', 'x-mask-loading');
-                                    tree.root.reload();
-                                    tree.root.collapse(true, false);
-                                    setTimeout(function(){ // mimic a server call
-                                        tree.body.unmask();
-                                        tree.root.expand(true, true);
-                                    }, 1000);
-                                }
-                            }
-            }],
-		html: '<p>Here is some accordion content.  Click on one of the other bars below for more.</p>'
-    },
-    new Ext.tree.TreePanel({
-                        id:'im-tree',
-                        title: 'Online Users',
-                        loader: new Ext.tree.TreeLoader(),
-                        rootVisible:false,
-                        lines:false,
-                        autoScroll:true,
-                        tbar:[{
-                    tooltip:'Add a new user',
-                    iconCls:'icon-user-add'
-                },' ',{
-                    tooltip:'Remove the selected user',
-                    iconCls:'icon-user-delete'
-                }],
-                        tools:[{
-                            id:'refresh',
-                            on:{
-                                click: function(){
-                                    var tree = Ext.getCmp('im-tree');
-                                    tree.body.mask('Loading', 'x-mask-loading');
-                                    tree.root.reload();
-                                    tree.root.collapse(true, false);
-                                    setTimeout(function(){ // mimic a server call
-                                        tree.body.unmask();
-                                        tree.root.expand(true, true);
-                                    }, 1000);
-                                }
-                            }
-                        }],
-                        root: new Ext.tree.AsyncTreeNode({
-                            text:'Online',
-                            children:[{
-                                text:'Friends',
-                             //   cls: 'x-tree-node-leaf',
-                                iconCls:'tree-node-leaf',
-                                expanded:true,
-                                children:[{
-                                    text:'Jack',
-                                    iconCls:'icon-user',
-                                    leaf:true
-                                },{
-                                    text:'Brian',
-                                    iconCls:'icon-user',
-                                    leaf:true
-                                },{
-                                    text:'Jon',
-                                    iconCls:'user',
-                                    leaf:true
-                                },{
-                                    text:'Tim',
-                                    iconCls:'user',
-                                    leaf:true
-                                },{
-                                    text:'Nige',
-                                    iconCls:'user',
-                                    leaf:true
-                                },{
-                                    text:'Fred',
-                                    iconCls:'user',
-                                    leaf:true
-                                },{
-                                    text:'Bob',
-                                    iconCls:'user',
-                                    leaf:true
-                                }]
-                            },{
-                                text:'Family',
-                                expanded:true,
-                                children:[{
-                                    text:'Kelly',
-                                    iconCls:'user-girl',
-                                    leaf:true
-                                },{
-                                    text:'Sara',
-                                    iconCls:'user-girl',
-                                    leaf:true
-                                },{
-                                    text:'Zack',
-                                    iconCls:'user-kid',
-                                    leaf:true
-                                },{
-                                    text:'John',
-                                    iconCls:'user-kid',
-                                    leaf:true
-                                }]
-                            }]
-                        })
-                    }), {
-                        title: 'Settings',
-                        html:'<p>Something useful would be in here.</p>',
-                        autoScroll:true
-                    },{
-                        title: 'Even More Stuff',
-                        html : '<p>Something useful would be in here.</p>'
-                    },{
-                        title: 'My Stuff',
-                        html : '<p>Something useful would be in here.</p>'
-                    },
+}
+
+// define public methods
+Ext.extend(SfGuardPermission.gridForm, Ext.Panel, {});
 
 
+SfGuardGroup.Main = function(app) {
 
+    // main panel
 
-    {
-        title: 'Basic Content',
-		html: '<br /><p>More content.  Open the third panel for a customized look and feel example.</p>',
-		items: {
-			xtype: 'button',
-			text: 'Show Next Panel',
-			handler: function(){
-				Ext.getCmp('acc-custom').expand(true);
-			}
-		}
-    },{
-		id: 'acc-custom',
-        title: 'Custom Panel Look and Feel',
-		cls: 'custom-accordion', // look in layout-browser.css to see the CSS rules for this class
-		html: '<p>Here is an example of how easy it is to completely customize the look and feel of an individual panel simply by adding a CSS class in the config.</p>'
-    }]
-};
+    var win = Ext.getCmp('sfguardGroup-main');
 
+    if(!win){        
 
-
-
- var menuScreenPanel = new Ext.Panel({
-    autoLoad: {url: 'sfGuardGroup/refresh', scope: this,scripts:true},
-    title: 'Screen Monitoring',
-    closable:false,
-    autoScroll:true
-});
-menuScreenPanel.on('render', function() {
-	menuScreenPanel.getUpdater().startAutoRefresh(5, 'sfGuardGroup/refresh');
-});
-
-
-// var mmm= sfGuardGroup.Grid.init();
-
-// tabs for the center
-        var tabs = new Ext.TabPanel({
-            region    : 'center',
-            margins   : '3 3 3 0',
-            activeTab : 0,
-            defaults  : {
-				autoScroll : true
-			},
-            items     : [
-               // sfGuardGroup.Grid.init(),
-               sfGuardGroupGrid,
-                menuScreenPanel,{
-
-                title    : 'Closable Tab',
-                html     : 'Ext.example.bogusMarkup',
-                closable : true
-            }]
-        });
-
-//        tabs.getUpdater().startAutoRefresh(3);
-
-
-
-
-
-        // Panel for the west
-        var nav = new Ext.Panel({
-            title       : 'Navigation',
-            region      : 'west',
-            split       : true,
-            width       : 200,
-            collapsible : true,
-            margins     : '3 0 3 3',
-            cmargins    : '3 3 3 3'
-        });
-
-        var win = new Ext.Window({
-            title    : 'User Administration',
+        win = new Ext.Window({
+            id: 'sfguardGroup-main',
+            title    : 'Groups/Permissions Administration',
             closable : true,
-            width    : 600,
+            closeAction:'hide',
+            width    : 900,
             height   : 350,
-            items    : [accordion, tabs],
-            //border : false,
+            modal:true,
+            items    : [
+                new Ext.TabPanel({
+                    region    : 'center',
+                    margins   : '3 3 3 0',
+                    activeTab : 0,
+                    defaults  : {autoScroll : true},
+                    items     : [new SfGuardGroup.gridForm({title:'Manage Groups',id:'gg'}),
+                                 new SfGuardPermission.gridForm({title:'Manage Permissions',id:'pp'})                                 
+                    ]                    
+                })
+            ],
             plain    : true,
             layout   : 'border'
-       //       ,autoLoad:{
- //url:'sfGuardGroup/view',scripts:true,scope:this
- //}
- // ,title:Ext.getDom('page-title').innerHTML
- 
- ,listeners:{show:function() {
- this.loadMask = new Ext.LoadMask(this.body, {
- msg:'Loading. Please wait...'
- });},
-hide:function(){
- if(menuScreenPanel.rendered) menuScreenPanel.getUpdater().stopAutoRefresh();}
-}
-            
-        });
+            ,listeners:{
+                show:function() {
+                    this.loadMask = new Ext.LoadMask(this.body, {msg:'Loading. Please wait...'});
+                }
+        }});
+                
+        alert('nao existe');
+    }else alert('ja existe');
 
-win.show();
- // win.on('afterlayout',function(){alert('aki');});
-        // winGroups.show(item);
+    win.show();
 
 
+};
+
+new SfGuardGroup.Main();
 
 </script>

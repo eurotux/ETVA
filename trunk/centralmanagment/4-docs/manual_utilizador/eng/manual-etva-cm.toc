@@ -1,0 +1,30 @@
+\select@language {portuges}
+\contentsline {chapter}{\numberline {1}\textsf {ETVA}}{6}{chapter.1}
+\contentsline {section}{\numberline {1.1}Descri\IeC {\c c}\IeC {\~a}o}{6}{section.1.1}
+\contentsline {section}{\numberline {1.2}Vers\IeC {\~o}es}{7}{section.1.2}
+\contentsline {chapter}{\numberline {2}\textsf {ETVA Central Management}}{9}{chapter.2}
+\contentsline {section}{\numberline {2.1}Estrutura da interface principal}{9}{section.2.1}
+\contentsline {section}{\numberline {2.2}Primeiro acesso}{11}{section.2.2}
+\contentsline {section}{\numberline {2.3}Main}{14}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Nodes}{14}{subsection.2.3.1}
+\contentsline {subsection}{\numberline {2.3.2}Networks}{14}{subsection.2.3.2}
+\contentsline {subsubsection}{\numberline {2.3.2.1}Adicionar Rede}{15}{subsubsection.2.3.2.1}
+\contentsline {subsubsection}{\numberline {2.3.2.2}Gest\IeC {\~a}o da pools de MAC Addresses}{16}{subsubsection.2.3.2.2}
+\contentsline {subsubsection}{\numberline {2.3.2.3}Gest\IeC {\~a}o das interfaces de rede das m\IeC {\'a}quinas virtuais}{16}{subsubsection.2.3.2.3}
+\contentsline {section}{\numberline {2.4}Servidor de virtualiza\IeC {\c c}\IeC {\~a}o}{17}{section.2.4}
+\contentsline {subsection}{\numberline {2.4.1}Node info}{17}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}Servers}{18}{subsection.2.4.2}
+\contentsline {subsubsection}{\numberline {2.4.2.1}Adicionar m\IeC {\'a}quina virtual (server)}{19}{subsubsection.2.4.2.1}
+\contentsline {subsubsection}{\numberline {2.4.2.2}Remover m\IeC {\'a}quina virtual}{26}{subsubsection.2.4.2.2}
+\contentsline {subsubsection}{\numberline {2.4.2.3}Abrir m\IeC {\'a}quina virtual numa consola VNC}{26}{subsubsection.2.4.2.3}
+\contentsline {subsubsection}{\numberline {2.4.2.4}Iniciar/parar m\IeC {\'a}quina virtual}{27}{subsubsection.2.4.2.4}
+\contentsline {subsubsection}{\numberline {2.4.2.5}Migrar m\IeC {\'a}quina virtual}{27}{subsubsection.2.4.2.5}
+\contentsline {subsection}{\numberline {2.4.3}Storage}{28}{subsection.2.4.3}
+\contentsline {subsubsection}{\numberline {2.4.3.1}Administra\IeC {\c c}\IeC {\~a}o de Physical Volumes}{29}{subsubsection.2.4.3.1}
+\contentsline {subsubsection}{\numberline {2.4.3.2}Administra\IeC {\c c}\IeC {\~a}o de Volume Groups}{30}{subsubsection.2.4.3.2}
+\contentsline {subsubsection}{\numberline {2.4.3.3}Administra\IeC {\c c}\IeC {\~a}o de Logical Volumes}{32}{subsubsection.2.4.3.3}
+\contentsline {section}{\numberline {2.5}M\IeC {\'a}quinal virtual}{35}{section.2.5}
+\contentsline {subsection}{\numberline {2.5.1}Server info}{35}{subsection.2.5.1}
+\contentsline {subsection}{\numberline {2.5.2}Statistics}{36}{subsection.2.5.2}
+\contentsline {subsection}{\numberline {2.5.3}Networks}{38}{subsection.2.5.3}
+\contentsline {subsection}{\numberline {2.5.4}Services}{39}{subsection.2.5.4}

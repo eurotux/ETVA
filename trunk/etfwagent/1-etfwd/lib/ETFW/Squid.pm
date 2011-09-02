@@ -26,13 +26,15 @@ use strict;
 
 #require ETFW::Squid::Webmin;
 
-use Utils;
+use ETVA::Utils;
 
 use Data::Dumper;
 
 BEGIN {
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $CRLF $AUTOLOAD);
 };
+
+my %PROTECTKEYS = ( 'force'=>1 );
 
 sub AUTOLOAD {
     my ($package,$method) = ( $AUTOLOAD =~ m/(.+)::([^:]+)$/ );
@@ -81,16 +83,29 @@ sub AUTOLOAD {
 
                         my %res = ();
                         if( ref($C) eq 'ARRAY' ){
-                            $res{"$a"} = @$C && $C->[0] ? [ @$C ] : [];
+                          $res{"$a"} = @$C && $C->[0] ? [ @$C ] : [];
                         } else {
-                            $res{"$a"} = $C || "";
-                        }
+                          $res{"$a"} = $C || "";
+                        } 
+                        
                         return wantarray() ? %res : \%res;
+                    };
+    } elsif( my ($a) = ($method =~ m/^move_(\S+)/) ){
+        $AUTOLOAD = sub {
+                        my $self = shift;
+                        my %p = @_;
+
+                        return $self->move_config_option( %p, 'name'=>$a );
                     };
     }
     if( $AUTOLOAD ){
         &$AUTOLOAD;
     }
+}
+
+sub startup_config {
+    my $self = shift;
+    return ETFW::Squid::Webmin->startup_config(@_);
 }
 
 sub load_config {
@@ -143,10 +158,12 @@ sub get_config_fields {
     my (%p) = @_;
 
     my @fields = $p{'fields'} ? @{$p{'fields'}} : @_;
-    my %ec = $self->get_enabled_config();
+    my %ec = $self->get_enabled_config(@_);
 
     my %sel_conf = ();
     for my $f (@fields){
+        next if( $PROTECTKEYS{"$f"} );
+
         my $fmkget = "mkget_$f";
         my $r = $self->$fmkget( $ec{"$f"} );
         $sel_conf{"$f"} = ( ref($r) eq 'HASH' ) ? $r->{"$f"} : $r;
@@ -162,12 +179,18 @@ sub get_config_fields {
 sub set_config {
     my $self = shift;
     my (%p) = @_;
-    my $conf = $self->load_config();
+    my $conf = $self->load_config(@_);
     for my $o ( keys %p ){
-        my @v = map { { name=>$o, 'values'=>[ $_ ] } } ref($p{"$o"}) eq "ARRAY" ? @{$p{"$o"}} : ($p{"$o"});
-        save_directive($conf,$o,\@v);
+        next if( $PROTECTKEYS{"$o"} );
+
+        my @lpv = ();
+        if( $p{"$o"} ){
+            @lpv = ref($p{"$o"}) eq "ARRAY" ? @{$p{"$o"}} : ($p{"$o"});
+        }
+        my @v = map { { name=>$o, 'values'=>[ $_ ] } } @lpv; 
+        ETFW::Squid::Webmin::save_directive($conf,$o,\@v);
     }
-    flush_file_lines();
+    ETFW::Squid::Webmin::flush_file_lines();
     $self->load_config(1);
 }
 
@@ -178,15 +201,23 @@ sub set_config {
 sub add_config {
     my $self = shift;
     my (%p) = @_;
-    my $conf = $self->load_config();
-    my %ec = $self->get_enabled_config();
+    my $conf = $self->load_config(@_);
+    my %ec = $self->get_enabled_config(@_);
     for my $o ( keys %p ){
-        my @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
-        my @newv = ref($p{"$o"}) eq "ARRAY" ? @{$p{"$o"}} : ($p{"$o"});
+        next if( $PROTECTKEYS{"$o"} );
+
+        my @oldv = ();
+        if( $ec{"$o"} ){
+            @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
+        }
+        my @newv = ();
+        if( $p{"$o"} ){
+            @newv = ref($p{"$o"}) eq "ARRAY" ? @{$p{"$o"}} : ($p{"$o"});
+        }
         my @v = map { { name=>$o, 'values'=>[ $_ ] } } @newv,@oldv;
-        save_directive($conf,$o,\@v);
+        ETFW::Squid::Webmin::save_directive($conf,$o,\@v);
     }
-    flush_file_lines();
+    ETFW::Squid::Webmin::flush_file_lines();
     $self->load_config(1);
 }
 
@@ -197,11 +228,13 @@ sub add_config {
 sub del_config {
     my $self = shift;
     my (%p) = @_;
-    my $conf = $self->load_config();
-    my %ec = $self->get_enabled_config();
+    my $conf = $self->load_config(@_);
+    my %ec = $self->get_enabled_config(@_);
     for my $o ( keys %p ){
+        next if( $PROTECTKEYS{"$o"} );
+
         my @qv = ref($p{"$o"}) eq "ARRAY" ? @{$p{"$o"}} : ($p{"$o"});
-        my $re = join('\s+',@qv);
+        my $re = join('\s',@qv);
 
         my @newv = ();
         for my $e (ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"})){
@@ -211,9 +244,9 @@ sub del_config {
             }
         }
         my @v = map { { name=>$o, 'values'=>[ $_ ] } } @newv;
-        save_directive($conf,$o,\@v);
+        ETFW::Squid::Webmin::save_directive($conf,$o,\@v);
     }
-    flush_file_lines();
+    ETFW::Squid::Webmin::flush_file_lines();
     $self->load_config(1);
 }
 
@@ -223,19 +256,22 @@ sub add_config_option {
 
     if( my $o = $p{'name'} ){
 
-        my $conf = $self->load_config();
-        my %ec = $self->get_enabled_config();
-        my $values = $p{'values'} || [ $p{'value'} ];
+        my $conf = $self->load_config(@_);
+        my %ec = $self->get_enabled_config(@_);
+        my $values = $p{'values'} || ( $p{'value'} ? [ $p{'value'} ] : [] );
 
         # get all values
-        my @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
+        my @oldv = ();
+        if( defined($ec{"$o"}) ){
+            @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
+        }
 
         # push it
         my @v = map { { name=>$o, 'values'=>[ $_ ] } } @oldv,@$values;
 
-        save_directive($conf,$o,\@v);
+        ETFW::Squid::Webmin::save_directive($conf,$o,\@v);
 
-        flush_file_lines();
+        ETFW::Squid::Webmin::flush_file_lines();
         $self->load_config(1);
     }
 }
@@ -245,16 +281,20 @@ sub del_config_option {
 
     if( my $o = $p{'name'} ){
 
-        my $conf = $self->load_config();
-        my %ec = $self->get_enabled_config();
-        my $values = $p{'values'} || [ $p{'value'} ];
+        my $conf = $self->load_config(@_);
+        my %ec = $self->get_enabled_config(@_);
+        my $values = $p{'values'} || ( $p{'value'} ? [ $p{'value'} ] : [] );
 
         # get all values
-        my @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
+        my @oldv = ();
+        if( defined($ec{"$o"}) ){
+            @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
+        }
 
         # drop it
         if( defined $p{'index'} ){          # by one index
             my $i = $p{'index'} || 0;
+            splice(@oldv,$i,1);
         } elsif( defined $p{'indexes'} ){   # by one or more index ( multi-index )
             my $li = $p{'indexes'};
             for my $i ( sort { $b <=> $a } @$li ){
@@ -273,9 +313,9 @@ sub del_config_option {
 
         my @v = map { { name=>$o, 'values'=>[ $_ ] } } @oldv;
 
-        save_directive($conf,$o,\@v);
+        ETFW::Squid::Webmin::save_directive($conf,$o,\@v);
 
-        flush_file_lines();
+        ETFW::Squid::Webmin::flush_file_lines();
         $self->load_config(1);
     }
 }
@@ -284,10 +324,9 @@ sub set_config_option {
     my (%p) = @_;
 
     if( my $o = $p{'name'} ){
-
-        my $conf = $self->load_config();
-        my %ec = $self->get_enabled_config();
-        my $values = $p{'values'} || [ $p{'value'} ];
+        my $conf = $self->load_config(@_);
+        my %ec = $self->get_enabled_config(@_);
+        my $values = $p{'values'} || ( $p{'value'} ? [ $p{'value'} ] : [] );
 
         # get all values
         my @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
@@ -303,9 +342,51 @@ sub set_config_option {
 
         my @v = map { { name=>$o, 'values'=>[ $_ ] } } @oldv;
 
-        save_directive($conf,$o,\@v);
+        ETFW::Squid::Webmin::save_directive($conf,$o,\@v);
 
-        flush_file_lines();
+        ETFW::Squid::Webmin::flush_file_lines();
+        $self->load_config(1);
+    }
+}
+sub move_config_option {
+    my $self = shift;
+    my (%p) = @_;
+
+    if( my $o = $p{'name'} ){
+        my $conf = $self->load_config(@_);
+        my %ec = $self->get_enabled_config(@_);
+
+        # get all values
+        my @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
+
+        if( defined $p{'index'} ){
+
+            my $i = $p{'index'} || 0;
+            my $nl = scalar(@oldv);
+
+            if( $i >= 0 && $i < $nl ){
+                my $to = $p{'to'};
+                if( ! defined($to) ){
+                    if( $p{'up'} ){
+                        $to = $i > 0 ? $i - 1 : 0;
+                    } elsif( $p{'down'} ){
+                        $to = $i < int($nl - 1) ? $i + 1 : $nl - 1;
+                    }
+                }
+
+                if( defined $to &&
+                    ( $to >= 0 && $to < $nl ) ){
+                    my @lr = splice(@oldv,$i,1);
+                    splice(@oldv,$to,0,@lr);
+                }
+            }
+        }
+
+        my @v = map { { name=>$o, 'values'=>[ $_ ] } } @oldv;
+
+        ETFW::Squid::Webmin::save_directive($conf,$o,\@v);
+
+        ETFW::Squid::Webmin::flush_file_lines();
         $self->load_config(1);
     }
 }
@@ -315,7 +396,7 @@ sub get_config_option {
 
     if( my $o = $p{'name'} ){
 
-        my %ec = $self->get_enabled_config();
+        my %ec = $self->get_enabled_config(@_);
 
         # get all values
         my @oldv = ref($ec{"$o"}) eq "ARRAY" ? @{$ec{"$o"}} : ($ec{"$o"});
@@ -330,7 +411,7 @@ sub get_config_option {
     }
 }
 
-=item add_http_port / del_http_port / set_http_port
+=item add_http_port / del_http_port / set_http_port / get_http_port
 
 =cut
 
@@ -338,20 +419,104 @@ sub mkargs_http_port {
     my $self = shift;
     my (%p) = @_;
 
-    my %r = ();
+    my @v = ();
     if( my $port = $p{"port"} ){
         my $line = "$port";
         if( my $addr = $p{"addr"} ){
             $line = "$addr:$port";
         }
-        my @v = ( $line );
         if( my $opts = $p{"opts"} ){
-            push(@v,$opts);
+            $line .= " $opts";
         }
 
-        %r = ( %p, 'name'=>"http_port", 'values'=>[ @v ] );
+        @v = ( $line );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'http_port'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
     }
+
+    my %r = ( %p, 'name'=>"http_port", 'values'=>[ @v ] );
+
     return wantarray() ? %r : \%r;
+}
+
+sub mkget_http_port {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "http_port";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my (undef,$addr,$port,$opts) = ( $l =~ m/^((\S+):)?(\d+)\s*(.*)$/ );
+        my %c = ( 'value'=>$l );
+        $c{"addr"} = $addr if( defined $addr );
+        $c{"port"} = $port if( defined $port );
+        $c{"opts"} = $opts if( defined $opts );
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
+}
+
+=item add_https_port / del_https_port / set_https_port / get_https_port
+
+=cut
+
+sub mkargs_https_port {
+    my $self = shift;
+    my (%p) = @_;
+
+    my @v = ();
+    if( my $port = $p{"port"} ){
+        my $line = "$port";
+        if( my $addr = $p{"addr"} ){
+            $line = "$addr:$port";
+        }
+        if( my $opts = $p{"opts"} ){
+            $line .= " $opts";
+        }
+
+        @v = ( $line );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'https_port'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"https_port", 'values'=>[ @v ] );
+
+    return wantarray() ? %r : \%r;
+}
+
+sub mkget_https_port {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "https_port";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my (undef,$addr,$port,$opts) = ( $l =~ m/^((\S+):)?(\d+)\s*(.*)$/ );
+        my %c = ( 'value'=>$l );
+        $c{"addr"} = $addr if( defined $addr );
+        $c{"port"} = $port if( defined $port );
+        $c{"opts"} = $opts if( defined $opts );
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
 }
 
 =item add_acl / del_acl / set_acl 
@@ -366,11 +531,199 @@ sub mkargs_acl {
     my $self = shift;
     my (%p) = @_;
 
-    my $arg = $p{"arg"} =~ /\s/ ? '"'.$p{"arg"}.'"' : $p{"arg"};
+    my @v = ();
+    if( $p{'name'} ){
+        my $vals = $p{"vals"};
 
-    my %r = ( %p, 'name'=>"acl", 'values'=>[ "$p{'name'} $p{'type'} $arg" ] );
+        if( $p{'file'} ){
+            if( !$vals ){
+                $vals = "\"$p{'file'}\"";
+            }
+
+            if( $p{'filecontent'} ){
+                open(F,">$p{'file'}");
+                print F $p{'filecontent'};
+                close(F);
+            }
+        }
+
+        @v = ( "$p{'name'} $p{'type'} $vals" );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'acl'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"acl", 'values'=>[ @v ] );
 
     return wantarray() ? %r : \%r;
+}
+
+sub mkget_acl {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "acl";
+
+    my %res = ();
+
+    my %D = $self->get_deny_info();
+    my @denyl = $D{'deny_info'} ? @{$D{'deny_info'}} : ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @acl = split(/\s/,$l,3);
+        my %c = ( 'value'=>$l, 'name'=>$acl[0], 'type'=>$acl[1], 'vals'=>$acl[2] );
+
+        if( $c{'vals'} =~ m/"([^"]+)"/ ){
+            $c{'file'} = $1;
+            open(F,"$c{'file'}");
+            while(<F>){
+                $c{'filecontent'} .= $_;
+            }
+            close(F);
+        }
+
+        my @fdeny = grep { $_->{'acl'} eq $c{'name'} } @denyl;
+        if( @fdeny ){
+            $c{'deny_info'} = \@fdeny;
+        }
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
+}
+
+sub add_acl {
+    my $self = shift;
+    my %acl = my %p = @_;
+
+    %p = $self->mkargs_acl( %p );
+
+    if( %p && ! isError(%p) ){
+        my $R = $self->add_config_option( %p );
+        if( my $deny = $acl{'deny_info'} ){
+            my @ld = ref($deny) eq 'ARRAY' ? @$deny : ($deny);
+            for my $D (@ld){
+                # garantee no repeated
+                $self->del_deny_info( 'acl'=>$acl{'name'}, %$D );
+                $self->add_deny_info( 'acl'=>$acl{'name'}, %$D );
+            }
+        }
+
+        return $R;
+    }
+    return wantarray() ? %p : \%p;
+}
+sub del_acl {
+    my $self = shift;
+    my %acl = my %p = @_;
+
+    %p = $self->mkargs_acl( %p );
+
+    if( %p && ! isError(%p) ){
+        if( my $deny = $acl{'deny_info'} ){
+            my @ld = ref($deny) eq 'ARRAY' ? @$deny : ($deny);
+            for my $D (@ld){
+                $self->del_deny_info( 'acl'=>$acl{'name'}, %$D );
+            }
+        }
+        return $self->del_config_option( %p );
+    }
+    return wantarray() ? %p : \%p;
+}
+sub set_acl {
+    my $self = shift;
+    my %acl = my %p = @_;
+
+    %p = $self->mkargs_acl( %p );
+
+    if( %p && ! isError(%p) ){
+        my $R = $self->set_config_option( %p );
+        if( my $deny = $acl{'deny_info'} ){
+            my @ld = ref($deny) eq 'ARRAY' ? @$deny : ($deny);
+            for my $D (@ld){
+                # garantee no repeated
+                $self->del_deny_info( 'acl'=>$acl{'name'}, %$D );
+                $self->add_deny_info( 'acl'=>$acl{'name'}, %$D );
+            }
+        }
+
+        return $R;
+    }
+    return wantarray() ? %p : \%p;
+}
+
+=item get_uniq_acl
+    
+    return uniq acl rules names
+
+=cut
+
+sub get_uniq_acl {
+    my $self = shift;
+
+    my %r = ();
+    my %G = $self->get_acl();
+
+    if( my $acl = $G{'acl'} ){
+        my %dupa = ();  # duplicates
+        my @u_acl = ();
+        for my $A (@$acl){
+            my $name = $A->{'name'};
+            if( !$dupa{"$name"}++ ){
+                push( @u_acl, { 'name'=> $name } );
+            }
+        }
+        %r = ( 'uniq_acl'=> \@u_acl );
+    }
+    return wantarray() ? %r : \%r;
+}
+
+=item add_deny_info / del_deny_info / set_deny_info / get_deny_info
+
+=cut
+
+sub mkargs_deny_info {
+    my $self = shift;
+    my (%p) = @_;
+
+    my @v = ();
+    if( $p{'acl'} && $p{'val'} ){
+        @v = ( "$p{'val'} $p{'acl'}" );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'deny_info'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"deny_info", 'values'=>[ @v ] );
+
+    return wantarray() ? %r : \%r;
+}
+
+sub mkget_deny_info {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "deny_info";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @denyl = split(/\s/,$l);
+        my %c = ( 'value'=>$l, 'acl'=>pop(@denyl), 'val'=>join(" ",@denyl) );
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
 }
 
 =item add_http_access / del_http_access / set_http_access
@@ -385,13 +738,79 @@ sub mkargs_http_access {
     my $self = shift;
     my (%p) = @_;
 
-    my $action = $p{"allow"} ? "allow" : "deny";
-    my @acl = ref($p{"acl"}) eq "ARRAY" ? @{$p{"acl"}} : ($p{"acl"});
-    my $lacl = join(" ",@acl);
-    
-    my %r = ( %p, 'name'=>"http_access", 'values'=>[ "$action $lacl" ] );
+    my @v = ();
+
+    if( $p{'acl'} || $p{'match'} || $p{'dontmatch'} ){
+        my $action = $p{"action"} || ( $p{"allow"} ? "allow" : "deny" );
+        
+        my @acl = ();
+
+        if( $p{"acl"} ){
+            push( @acl, ref($p{"acl"}) eq "ARRAY" ? @{$p{"acl"}} : ($p{"acl"}) );
+        }
+
+        if( $p{"match"} ){
+            push( @acl, ref($p{"match"}) eq "ARRAY" ? @{$p{"match"}} : ($p{"match"}) );
+        }
+
+        if( $p{"dontmatch"} ){
+            push( @acl, map { !/^!/ ? "!$_" : $_ } ref($p{"dontmatch"}) eq "ARRAY" ? @{$p{"dontmatch"}} : ($p{"dontmatch"}) );
+        }
+
+        my $lacl = join(" ",@acl);
+        
+        @v = ( "$action $lacl" );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'http_access'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"http_access", 'values'=>[ @v ] );
 
     return wantarray() ? %r : \%r;
+}
+
+sub mkget_http_access {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "http_access";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @acl = split(/\s/,$l);
+        my %c = ( 'value'=>$l, 'action'=>shift(@acl), 'acl'=>\@acl );
+        if( $c{'action'} eq 'allow' ){
+            $c{'allow'} = 1;
+        } else {
+            $c{'deny'} = 1;
+        }
+
+        my @match = ();
+        for my $a (@acl){
+            if( $a !~ m/^!/ ){
+                push(@match,$a);
+            }
+        }
+        $c{'match'} = \@match;
+
+        my @dontmatch = ();
+        for my $a (@acl){
+            if( $a =~ m/^!(.*)/ ){
+                push(@dontmatch,$1);
+            }
+        }
+        $c{'dontmatch'} = \@dontmatch;
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
 }
 
 =item add_icp_access / del_icp_access / set_icp_access
@@ -407,13 +826,337 @@ sub mkargs_icp_access {
     my $self = shift;
     my (%p) = @_;
 
-    my $action = $p{"allow"} ? "allow" : "deny";
-    my @acl = ref($p{"acl"}) eq "ARRAY" ? @{$p{"acl"}} : ($p{"acl"});
-    my $lacl = join(" ",@acl);
-    
-    my %r = ( %p, 'name'=>"icp_access", 'values'=>[ "$action $lacl" ] );
+    my @v = ();
+
+    if( $p{'acl'} || $p{'match'} || $p{'dontmatch'} ){
+        my $action = $p{"allow"} ? "allow" : "deny";
+
+        my @acl = ();
+
+        if( $p{"acl"} ){
+            push( @acl, ref($p{"acl"}) eq "ARRAY" ? @{$p{"acl"}} : ($p{"acl"}) );
+        }
+
+        if( $p{"match"} ){
+            push( @acl, ref($p{"match"}) eq "ARRAY" ? @{$p{"match"}} : ($p{"match"}) );
+        }
+
+        if( $p{"dontmatch"} ){
+            push( @acl, map { !/^!/ ? "!$_" : $_ } ref($p{"dontmatch"}) eq "ARRAY" ? @{$p{"dontmatch"}} : ($p{"dontmatch"}) );
+        }
+
+        my $lacl = join(" ",@acl);
+
+        @v = ( "$action $lacl" );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'http_access'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"icp_access", 'values'=>[ @v ] );
 
     return wantarray() ? %r : \%r;
+}
+
+sub mkget_icp_access {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "icp_access";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @acl = split(/\s/,$l);
+        my %c = ( 'value'=>$l, 'action'=>shift(@acl), 'acl'=>\@acl );
+        if( $c{'action'} eq 'allow' ){
+            $c{'allow'} = 1;
+        } else {
+            $c{'deny'} = 1;
+        }
+
+        my @match = ();
+        for my $a (@acl){
+            if( $a !~ m/^!/ ){
+                push(@match,$a);
+            }
+        }
+        $c{'match'} = \@match;
+
+        my @dontmatch = ();
+        for my $a (@acl){
+            if( $a =~ m/^!(.*)/ ){
+                push(@dontmatch,$1);
+            }
+        }
+        $c{'dontmatch'} = \@dontmatch;
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
+}
+
+=item add_http_reply_access / del_http_reply_access / set_http_reply_access / get_http_reply_access
+
+       Allow replies to client requests. This is complementary to http_access.
+
+
+    ARGS: allow|deny acl
+
+=cut
+
+sub mkargs_http_reply_access {
+    my $self = shift;
+    my (%p) = @_;
+
+    my @v = ();
+
+    if( $p{'acl'} || $p{'match'} || $p{'dontmatch'} ){
+        my $action = $p{"action"} || ( $p{"allow"} ? "allow" : "deny" );
+        
+        my @acl = ();
+
+        if( $p{"acl"} ){
+            push( @acl, ref($p{"acl"}) eq "ARRAY" ? @{$p{"acl"}} : ($p{"acl"}) );
+        }
+
+        if( $p{"match"} ){
+            push( @acl, ref($p{"match"}) eq "ARRAY" ? @{$p{"match"}} : ($p{"match"}) );
+        }
+
+        if( $p{"dontmatch"} ){
+            push( @acl, map { !/^!/ ? "!$_" : $_ } ref($p{"dontmatch"}) eq "ARRAY" ? @{$p{"dontmatch"}} : ($p{"dontmatch"}) );
+        }
+
+        my $lacl = join(" ",@acl);
+        
+        @v = ( "$action $lacl" );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'http_reply_access'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"http_reply_access", 'values'=>[ @v ] );
+
+    return wantarray() ? %r : \%r;
+}
+
+sub mkget_http_reply_access {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "http_reply_access";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @acl = split(/\s/,$l);
+        my %c = ( 'value'=>$l, 'action'=>shift(@acl), 'acl'=>\@acl );
+        if( $c{'action'} eq 'allow' ){
+            $c{'allow'} = 1;
+        } else {
+            $c{'deny'} = 1;
+        }
+
+        my @match = ();
+        for my $a (@acl){
+            if( $a !~ m/^!/ ){
+                push(@match,$a);
+            }
+        }
+        $c{'match'} = \@match;
+
+        my @dontmatch = ();
+        for my $a (@acl){
+            if( $a =~ m/^!(.*)/ ){
+                push(@dontmatch,$1);
+            }
+        }
+        $c{'dontmatch'} = \@dontmatch;
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
+}
+
+=item add_always_direct / del_always_direct / set_always_direct / get_always_direct
+
+    ARGS: allow|deny aclname
+
+=cut
+
+sub mkargs_always_direct {
+    my $self = shift;
+    my (%p) = @_;
+
+    my @v = ();
+
+    if( $p{'acl'} || $p{'match'} || $p{'dontmatch'} ){
+        my $action = $p{"action"} || ( $p{"allow"} ? "allow" : "deny" );
+        
+        my @acl = ();
+
+        if( $p{"acl"} ){
+            push( @acl, ref($p{"acl"}) eq "ARRAY" ? @{$p{"acl"}} : ($p{"acl"}) );
+        }
+
+        if( $p{"match"} ){
+            push( @acl, ref($p{"match"}) eq "ARRAY" ? @{$p{"match"}} : ($p{"match"}) );
+        }
+
+        if( $p{"dontmatch"} ){
+            push( @acl, map { !/^!/ ? "!$_" : $_ } ref($p{"dontmatch"}) eq "ARRAY" ? @{$p{"dontmatch"}} : ($p{"dontmatch"}) );
+        }
+
+        my $lacl = join(" ",@acl);
+        
+        @v = ( "$action $lacl" );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'always_direct'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"always_direct", 'values'=>[ @v ] );
+
+    return wantarray() ? %r : \%r;
+}
+
+sub mkget_always_direct {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "always_direct";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @acl = split(/\s/,$l);
+        my %c = ( 'value'=>$l, 'action'=>shift(@acl), 'acl'=>\@acl );
+        if( $c{'action'} eq 'allow' ){
+            $c{'allow'} = 1;
+        } else {
+            $c{'deny'} = 1;
+        }
+
+        my @match = ();
+        for my $a (@acl){
+            if( $a !~ m/^!/ ){
+                push(@match,$a);
+            }
+        }
+        $c{'match'} = \@match;
+
+        my @dontmatch = ();
+        for my $a (@acl){
+            if( $a =~ m/^!(.*)/ ){
+                push(@dontmatch,$1);
+            }
+        }
+        $c{'dontmatch'} = \@dontmatch;
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
+}
+
+=item add_never_direct / del_never_direct / set_never_direct / get_never_direct
+
+    ARGS: allow|deny aclname
+
+=cut
+
+sub mkargs_never_direct {
+    my $self = shift;
+    my (%p) = @_;
+
+    my @v = ();
+
+    if( $p{'acl'} || $p{'match'} || $p{'dontmatch'} ){
+        my $action = $p{"action"} || ( $p{"allow"} ? "allow" : "deny" );
+        
+        my @acl = ();
+
+        if( $p{"acl"} ){
+            push( @acl, ref($p{"acl"}) eq "ARRAY" ? @{$p{"acl"}} : ($p{"acl"}) );
+        }
+
+        if( $p{"match"} ){
+            push( @acl, ref($p{"match"}) eq "ARRAY" ? @{$p{"match"}} : ($p{"match"}) );
+        }
+
+        if( $p{"dontmatch"} ){
+            push( @acl, map { !/^!/ ? "!$_" : $_ } ref($p{"dontmatch"}) eq "ARRAY" ? @{$p{"dontmatch"}} : ($p{"dontmatch"}) );
+        }
+
+        my $lacl = join(" ",@acl);
+        
+        @v = ( "$action $lacl" );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'never_direct'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"never_direct", 'values'=>[ @v ] );
+
+    return wantarray() ? %r : \%r;
+}
+
+sub mkget_never_direct {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "never_direct";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @acl = split(/\s/,$l);
+        my %c = ( 'value'=>$l, 'action'=>shift(@acl), 'acl'=>\@acl );
+        if( $c{'action'} eq 'allow' ){
+            $c{'allow'} = 1;
+        } else {
+            $c{'deny'} = 1;
+        }
+
+        my @match = ();
+        for my $a (@acl){
+            if( $a !~ m/^!/ ){
+                push(@match,$a);
+            }
+        }
+        $c{'match'} = \@match;
+
+        my @dontmatch = ();
+        for my $a (@acl){
+            if( $a =~ m/^!(.*)/ ){
+                push(@dontmatch,$1);
+            }
+        }
+        $c{'dontmatch'} = \@dontmatch;
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
 }
 
 =item add_external_acl_type / del_external_acl_type / set_external_acl_type
@@ -475,18 +1218,329 @@ sub mkargs_external_acl_type {
     my $self = shift;
     my (%p) = @_;
 
-    my @v = ( $p{"name"} );
-    my @options = ref($p{"options"}) eq "ARRAY" ? @{$p{"options"}} : ($p{"options"});
-    push(@v,@options) if( @options );
-    push(@v,$p{"format"});
-    push(@v,$p{"helper"});
-    my @args = ref($p{"args"}) eq "ARRAY" ? @{$p{"args"}} : ($p{"args"});
-    push(@v,@args) if( @args );
+    my @v = ();
 
-    my $sv = join(" ",@v);
-    my %r = ( %p, 'name'=>"external_acl_type", 'values'=>[ $sv ] );
+    if( $p{'name'} ){
+        my @acl = ( $p{"name"} );
+        
+        if( my $options = $p{'options'} ){
+            if( !ref($options) ){
+                push(@acl, $options);
+            } elsif( ref($options) eq 'ARRAY' ){
+                push(@acl, @$options);
+            } elsif( ref($options) ){
+                for my $o (keys %$options){
+                    if( my $v = $options->{"$o"} ){
+                        push(@acl, "$o=$v" );
+                    }
+                }
+            }
+        }
+
+        push(@acl,$p{"format"});
+        push(@acl,$p{"helper"});
+        my @args = ref($p{"args"}) eq "ARRAY" ? @{$p{"args"}} : ($p{"args"});
+        push(@acl,@args) if( @args );
+
+        my $sv = join(" ",@acl);
+
+        @v = ( $sv );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'external_acl_type'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"external_acl_type", 'values'=>[ @v ] );
 
     return wantarray() ? %r : \%r;
+}
+
+sub mkget_external_acl_type {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "external_acl_type";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @acl = split(/\s/,$l);
+
+        my %c = ( 'value'=>$l, 'name'=>shift(@acl) );
+        my @options = ();
+        my $i=0;
+        for(; $i<scalar(@acl); $i++){
+            if( $acl[$i] =~ m/([^=]+)=(\S+)/ ){
+                $c{'options'}{"$1"} = "$2";
+            } else {
+                last;
+            }
+        }
+        $c{'format'} = $acl[$i++];
+        $c{'helper'} = $acl[$i++];
+        for(; $i<scalar(@acl); $i++){
+            push(@{$c{'args'}}, $acl[$i] );
+        }
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
+}
+
+=item add_cache_peer / del_cache_peer / set_cache_peer
+
+    cache_peer hostname type http-port icp-port [options]
+
+=cut
+
+sub mkargs_cache_peer {
+    my $self = shift;
+    my (%p) = @_;
+
+    my @v = ();
+
+    if( $p{'hostname'} &&
+        $p{'type'} &&
+        defined($p{'http-port'}) &&
+        defined($p{'icp-port'}) ){
+
+        my @cache_peer = ( $p{'hostname'}, $p{'type'}, $p{'http-port'}, $p{'icp-port'} );
+        
+        if( my $options = $p{'options'} ){
+            if( !ref($options) ){
+                push(@cache_peer, $options);
+            } elsif( ref($options) eq 'ARRAY' ){
+                push(@cache_peer, @$options);
+            } elsif( ref($options) ){
+                for my $o (keys %$options){
+                    my $v = $options->{"$o"};
+                    push(@cache_peer, ( $v ? "$o=$v" : "$o" ) );
+                }
+            }
+        }
+
+        my $sv = join(" ",@cache_peer);
+
+        @v = ( $sv );
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'cache_peer'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"cache_peer", 'values'=>[ @v ] );
+
+    return wantarray() ? %r : \%r;
+}
+
+sub mkget_cache_peer {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "cache_peer";
+
+    my %res = ();
+
+    my %D = $self->get_cache_peer_domain();
+    my @cache_peer_domain = $D{'cache_peer_domain'} ? @{$D{'cache_peer_domain'}} : ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @cache_peer = split(/\s/,$l);
+
+        my %c = ( 'value'=>$l, 'hostname'=>shift(@cache_peer), 'type'=>shift(@cache_peer), 'http-port'=>shift(@cache_peer), 'icp-port'=>shift(@cache_peer) );
+        my @options = ();
+        my $i=0;
+        for(; $i<scalar(@cache_peer); $i++){
+            my ($o,$v) = split(/=/,$cache_peer[$i]);
+            $c{'options'}{"$o"} = $v ? "$v" : "";
+        }
+
+        $c{'index'} = scalar(@l);
+
+        my @fcache_peer_domain = grep { $_->{'host'} eq $c{'hostname'} } @cache_peer_domain;
+        if( @fcache_peer_domain ){
+            $c{'cache_peer_domain'} = \@fcache_peer_domain;
+        }
+
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
+}
+
+sub add_cache_peer {
+    my $self = shift;
+    my %cache_peer = my %p = @_;
+
+    %p = $self->mkargs_cache_peer( %p );
+
+    if( %p && ! isError(%p) ){
+        my $R = $self->add_config_option( %p );
+        if( my $cpd = $cache_peer{'cache_peer_domain'} ){
+            my @ld = ref($cpd) eq 'ARRAY' ? @$cpd : ($cpd);
+            for my $D (@ld){
+                # garantee no repeated
+                $self->del_cache_peer_domain( 'host'=>$cache_peer{'hostname'}, %$D );
+                $self->add_cache_peer_domain( 'host'=>$cache_peer{'hostname'}, %$D );
+            }
+        }
+
+        return $R;
+    }
+    return wantarray() ? %p : \%p;
+}
+sub del_cache_peer {
+    my $self = shift;
+    my %cache_peer = my %p = @_;
+
+    %p = $self->mkargs_cache_peer( %p );
+
+    if( %p && ! isError(%p) ){
+        if( my $cpd = $cache_peer{'cache_peer_domain'} ){
+            my @ld = ref($cpd) eq 'ARRAY' ? @$cpd : ($cpd);
+            for my $D (@ld){
+                $self->del_cache_peer_domain( 'host'=>$cache_peer{'hostname'}, %$D );
+            }
+        }
+        return $self->del_config_option( %p );
+    }
+    return wantarray() ? %p : \%p;
+}
+sub set_cache_peer {
+    my $self = shift;
+    my %cache_peer = my %p = @_;
+
+    %p = $self->mkargs_cache_peer( %p );
+
+    if( %p && ! isError(%p) ){
+        my $R = $self->set_config_option( %p );
+        if( my $cpd = $cache_peer{'cache_peer_domain'} ){
+            my @ld = ref($cpd) eq 'ARRAY' ? @$cpd : ($cpd);
+            for my $D (@ld){
+                # garantee no repeated
+                $self->del_cache_peer_domain( 'host'=>$cache_peer{'hostname'}, %$D );
+                $self->add_cache_peer_domain( 'host'=>$cache_peer{'hostname'}, %$D );
+            }
+        }
+
+        return $R;
+    }
+    return wantarray() ? %p : \%p;
+}
+
+=item add_cache_peer_domain / del_cache_peer_domain / set_cache_peer_domain
+
+    cache_peer_domain cache-host domain [domain ...]
+    cache_peer_domain cache-host !domain
+
+=cut
+
+sub mkargs_cache_peer_domain {
+    my $self = shift;
+    my (%p) = @_;
+
+    my @v = ();
+
+    if( $p{'host'} &&
+        ( $p{'domains'} ||
+            $p{'query'} ||
+            $p{'dontquery'} ) ){
+
+        my @domains = ();
+        if( $p{"domains"} ){
+            for my $d ( ref($p{"domains"}) eq "ARRAY" ? @{$p{"domains"}} : ($p{"domains"}) ){
+                next if( !$d );
+                push( @domains, $d );
+            }
+        }
+
+        if( $p{"query"} ){
+            for my $d ( ref($p{"query"}) eq "ARRAY" ? @{$p{"query"}} : ($p{"query"}) ){
+                next if( !$d );
+                push( @domains, $d );
+            }
+        }
+
+        if( $p{"dontquery"} ){
+            for my $d ( ref($p{"dontquery"}) eq "ARRAY" ? @{$p{"dontquery"}} : ($p{"dontquery"}) ){
+                next if( !$d );
+                push( @domains, ( !/^!/ ? "!$d" : $d ) );
+            }
+        }
+
+        if( @domains ){
+            my @cache_peer_domain = ( $p{'host'} );
+        
+            push( @cache_peer_domain, @domains );
+
+            my $sv = join(" ",@cache_peer_domain);
+
+            @v = ( $sv );
+        }
+    } elsif( my $value = $p{'value'} || $p{'values'} || $p{'cache_peer_domain'} ){
+        @v = ( ref($value) eq 'ARRAY' ? @$value : $value );
+    }
+
+    my %r = ( %p, 'name'=>"cache_peer_domain", 'values'=>[ @v ] );
+
+    return wantarray() ? %r : \%r;
+}
+
+sub mkget_cache_peer_domain {
+    my $self = shift;
+    my ($C) = @_;
+
+    my $a = "cache_peer_domain";
+
+    my %res = ();
+
+    my @l = ( );
+    for my $l ( ( ref($C) eq 'ARRAY' ? @$C : $C ) ){
+        next if( !$l );
+
+        my @cache_peer_domain = split(/\s/,$l);
+
+        my %c = ( 'value'=>$l, 'host'=>shift(@cache_peer_domain), 'domains'=>\@cache_peer_domain );
+
+        my @query = ();
+        for my $a (@cache_peer_domain){
+            if( $a !~ m/^!/ ){
+                push(@query,$a);
+            }
+        }
+        $c{'query'} = \@query;
+
+        my @dontquery = ();
+        for my $a (@cache_peer_domain){
+            if( $a =~ m/^!(.*)/ ){
+                push(@dontquery,$1);
+            }
+        }
+        $c{'dontquery'} = \@dontquery;
+
+        $c{'index'} = scalar(@l);
+        push( @l, \%c );
+    }
+
+    $res{"$a"} = \@l;
+    return wantarray() ? %res : \%res;
+}
+
+=item apply_config
+
+=cut
+
+sub apply_config {
+    my $self = shift;
+
+    return ETFW::Squid::Webmin->apply_config(@_);
 }
 
 =item set other attributes/configuration
@@ -776,18 +1830,28 @@ sub mkargs_external_acl_type {
 
 package ETFW::Squid::Webmin;
 
-no strict;
+use ETVA::Utils;
 
-use ETFW::Webmin;
+use Data::Dumper;
 
-my %WebminConf = ETFW::Webmin->get_config();
+sub startup_config {
+    my $self = shift;
+    my (%p) = @_;
 
-require "$WebminConf{root}/squid/parser-lib.pl";
-require "$WebminConf{root}/web-lib-funcs.pl";
+    no strict;
 
-%config = ( squid_conf=>'/etc/squid/squid.conf' );
+    use ETFW::Webmin;
 
-use strict;
+    my %WebminConf = ETFW::Webmin->get_config();
+
+    require "$WebminConf{root}/squid/parser-lib.pl";
+    require "$WebminConf{root}/web-lib-funcs.pl";
+
+    %config = $p{'squid_conf'} ? %p : ( squid_conf=>'/etc/squid/squid.conf' );
+
+    use strict;
+
+}
 
 sub load_config {
     my $self = shift;
@@ -799,5 +1863,36 @@ sub load_config {
     }
     return get_config();
 }
+
+sub apply_config {
+    my $self = shift;
+
+    my ($e,$m);
+    no strict;
+    if( $config{'squid_reload'} ){
+        ($e,$m) = cmd_exec("$config{'squid_reload'}");
+    }
+    unless( defined($e) && ( $e == 0 ) ){
+        if( $config{'squid_restart'} ){
+            ($e,$m) = cmd_exec("$config{'squid_restart'}");
+        } elsif( -x "/etc/init.d/squid" ){
+            ($e,$m) = cmd_exec("/etc/init.d/squid reload");
+            unless( $e == 0 ){
+                ($e,$m) = cmd_exec("/etc/init.d/squid stop");
+                ($e,$m) = cmd_exec("/etc/init.d/squid start");
+            }
+        } else {
+            ($e,$m) = cmd_exec("$config{'squid_path'} -f $config{'squid_conf'} -k reconfigure");
+        }
+    }
+    use strict;
+    
+    unless( $e == 0 ){
+        return retErr("_ERR_APPLY_CONFIG_","Error apply configuration: $m");
+    }
+    return retOk("_OK_APPLY_CONFIG_","Apply configuration ok.");
+}
+
+&startup_config();
 
 1;

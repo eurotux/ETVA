@@ -6,13 +6,31 @@
  * @package    centralM
  * @subpackage form
  * @author     Your name here
- * @version    SVN: $Id: sfPropelFormTemplate.php 10377 2008-07-21 07:10:32Z dwhittle $
  */
 class EtvaNodeForm extends BaseEtvaNodeForm
 {
   public function configure()
   {
       unset($this['created_at']);
-      unset($this['updated_at']);
-  }
+ 	  unset($this['updated_at']);
+
+
+      //prevent form save from deleting node current physical volumes
+      unset($this->widgetSchema['etva_node_physicalvolume_list']);
+      unset($this->validatorSchema['etva_node_physicalvolume_list']);
+
+      //prevent form save from deleting node current volume groups
+      unset($this->widgetSchema['etva_node_volumegroup_list']);
+      unset($this->validatorSchema['etva_node_volumegroup_list']);
+
+      //prevent form save from deleting node current logical volumes
+      unset($this->widgetSchema['etva_node_logicalvolume_list']);
+      unset($this->validatorSchema['etva_node_logicalvolume_list']);
+            
+
+ 	  $this->validatorSchema['memtotal'] = new sfValidatorNumber();
+ 	  $this->validatorSchema['memfree'] = new sfValidatorNumber();
+
+
+ }
 }

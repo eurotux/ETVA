@@ -1,0 +1,79 @@
+\makert - Coloca um capítulo inteiro a descrever o RT e como utiliza-lo.
+
+\makeconftext - Coloca um paragrafo a dizer que o documento é confidencial e da Eurotux.
+
+\makewatermark{arg1} - Coloca um texto passado como arg1 em watermark em todas as páginas
+
+\makeservice{arg1} - Coloca um texto relativo ao serviço arg1.
+	Por omissão a directória de serviços é a /srv, se se precisar mudar é com \renewcommand{\srv}{servicos} 
+	Serviços disponíveis: 
+		- apache
+		- arkeia
+		- bigbrother
+		- bind
+		- cluster
+		- courier-imap
+		- courier-imaps (é obrigatório incluir o  serviço courier-imap)
+		- courier-pop3
+		- dansguardian
+		- dhcpd
+		- djbdns (dns)
+		- dnscache
+		- ddclient
+		- horde
+			Usa \hordeurl. default: http://<IP_DO_SERVIDOR>/horde.
+			Para alterar este valor, \renewcommand{\hordeurl}{XPTO}.
+		- lam
+			Usa \lamurl. default: http://<IP_DO_SERVIDOR>/lam/.
+			Usa \lampassword. default: XXXXXXXX.
+			Para alterar estes valores, \renewcommand{\xxxxx}{zbr}
+		- ldap
+		- mysql
+		- nfs
+		- ntop
+		- ntpd
+		- outlook2007
+		- pgsql
+		- piranha - ainda não está acabado
+		- pptpd
+		- qmail-pop3s
+		- qmail-smtpd
+		- radius
+		- samba
+		- snmpd
+		- spamassassin
+		- sqlserver
+		- squid
+		- squid (adaptado da documentação do npf)
+		- squid+dansguardian+squidsaida
+		- zeo
+		- pound
+		- tomcat
+		- pure-ftpd
+
+- log - Regista os logs das alterações
+	\begin{log}
+	\LogEntry{Fernando Gomes}{fapg@eurotux.com}{2006-04-05}
+	Versão inicial
+	\end{Log}
+
+- output - Estilo verbatim mas com um tipo de letra mais pequeno
+	\begin{Output}
+	teste
+	\end{Output}
+
+- servicecommands - atalho para listar operações de start/stop/restart
+de um serviço
+
+	\ServiceCommands{ldap}
+
+é equivalente a
+
+	\begin{itemize}
+	\item Iniciar
+	\texttt{/etc/init.d/ldap start}
+	\item Desligar
+	\texttt{/etc/init.d/ldap stop}
+	\item Reiniciar
+	\texttt{/etc/init.d/ldap restart}
+	\end{itemize}

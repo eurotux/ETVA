@@ -1,0 +1,331 @@
+#!/usr/bin/perl
+
+use strict;
+
+use ETVA::Utils;
+use ETVA::Agent;
+use ETVA::Agent::SOAP;
+use ETVA::Client;
+
+use VirtAgentInterface;
+
+use POSIX qw/SIGHUP SIGTERM SIGKILL/;
+use POSIX ":sys_wait_h";
+use POSIX; 
+
+use Digest::MD5 qw(md5_hex md5_base64);
+
+use IO::Socket::INET;
+use IO::Socket::UNIX;
+use IO::Select;
+use IO::Socket;
+use Event::Lib;
+
+use Data::Dumper;
+
+# Config load from config file
+my $CONF = { "CFG_FILE"=>"/etc/sysconfig/etva-vdaemon/virtd.conf" };
+
+$| = 1;
+
+# Alarm ttl
+my $T_ALARM = 5 * 60;
+
+my $LOCK;
+my @QUEUE = ();
+my %CLIENTS = ();
+
+my $SPID;   # son pid
+my $srv_PID; # server pid
+
+my $debug = 0;
+
+# Invoked when a new client connects to us
+sub handle_incoming {
+    my $e = shift;
+    my $h = $e->fh;
+    
+    my $client = $h->accept or die "Should not happen";
+    $client->blocking(0);
+
+    # set up a new event that watches the client socket
+    my $event = event_new($client, EV_READ|EV_PERSIST, \&handle_client);
+    $event->add;
+
+    my $c_k = $client->peerhost . ":" . $client->peerport;
+    $CLIENTS{"$c_k"} = { 'client'=>$event, 'con'=>$client, 'id'=>$c_k };
+}
+
+# Invoked when the client's socket becomes readable
+sub handle_client {
+    my $e = shift;
+    my $h = $e->fh;
+    my ($peerhost,$peerport) = ($h->peerhost,$h->peerport);
+    my $c_k = "$peerhost:$peerport";
+    
+    plog "Handling ", $peerhost, ":", $peerport;
+    my $message=<$h>;
+    if( !$message ){
+        plog "Drop client $c_k";
+
+        # mark messages of this client with socket close flag
+        map { $_->{'_sock_close_'} = 1 if( $_->{'client_id'} eq $c_k ); } @QUEUE;
+
+        delete $CLIENTS{"$c_k"};
+        $e->remove;
+    } elsif( !isSetupMessage($CLIENTS{"$c_k"}, $message) ){ # regular message
+        plog "Client $c_k: Check message is valid...";
+        my $M = { 'MESSAGE'=>$message, 'CLIENT'=>$CLIENTS{"$c_k"}, 'client_id'=>$c_k, peerhost=>$peerhost, peerport=>$peerport };
+        my $mv = validMessage( $M );
+        plog "Client $c_k: ... ", (( $mv ) ? "ok!" : "nok!");
+        if( 1 || $mv ){
+            push(@QUEUE, $M);
+        }
+    }
+}
+
+sub validMessage {
+    my ($M) = @_;
+    
+    my ($message,$check) = ( $M->{'MESSAGE'} =~ m/(.+) checktok=(\w+)/ );
+    my $txt = "$message$M->{'CLIENT'}{'checksecret'}";
+    my $tokval = md5_hex($txt);
+
+    return ( ( $check eq $tokval ) ? 1 : 0 );
+}
+sub getAuthenticated {
+    my ($C,$message) = @_;
+    $message =~ s/\r?\n//gs;    # chomp \r\n
+    $C->{'authenticated'} = $message =~ /checkme/ ? 1 : 0;
+    $C->{'checksecret'} = $message;
+    return 1;
+}
+sub isSetupMessage {
+    my ($C,$message) = @_;
+
+    my $c_k = $C->{'id'};
+
+    if( 0 && !$C->{'authenticated'} ){
+        plog "Client $c_k: Try authenticate...";
+        my $A = getAuthenticated($CLIENTS{"$c_k"}, $message);
+
+        plog "Client $c_k: ... ", ( $CLIENTS{"$c_k"}{'authenticated'} ) ? "ok!" : "nok!";
+        return 1;
+    }
+
+    if( $message =~ m/(\w+):\s+(.+)$/ ){
+        my ($par,$val) = ($1,$2);
+        $C->{'SetParams'}{"$par"} = $val;
+
+        return 1;
+    }
+
+    return 0;
+}
+sub processRequest {
+    my ($M) = @_;
+    my $C = $M->{'CLIENT'};
+    my $message = $M->{'MESSAGE'};
+    my $sock_client = $C->{'con'};
+    my $e = $C->{'client'};
+    my $c_k = $C->{'id'};
+
+    chomp($message);
+
+    # TODO Message call back ??
+
+    plog "Client $c_k: socket close... dont write to this socket..." if( $debug && $M->{'_sock_close_'} );
+
+    my $sock_agent;
+    # check if address is socket UNIX or INET
+    if( $CONF->{'socket'} ){
+        $sock_agent = new ETVA::Client( path => $CONF->{'socket'} );
+    } else {
+        $sock_agent = new ETVA::Client( address => $CONF->{'LocalIP'},
+                                   port => $CONF->{'LocalPort'},
+                                   proto=> $CONF->{'Proto'} );
+    }
+
+    my $response = $sock_agent->send_receive( $message );
+
+    plog "Client $c_k: process result=$response" if( $debug );
+
+    plog "Client $c_k: socket close..." if( $debug && $M->{'_sock_close_'} );
+    plog "Client $c_k: no response to send" if( $debug && !$response );
+
+    # send response as it is
+    $sock_client->send( $response ) or plog "Client $c_k: error write socket..." if( !$M->{'_sock_close_'} && $response );
+    shutdown($sock_client,2) if( !$M->{'_sock_close_'} );
+
+    if( $M->{'_sock_close_'} ){
+        # TODO invoke call back
+        # call ( M, message, response )
+        my $callback_url = $C->{'SetParams'}{'CallBackURL'};
+        if( $callback_url ){
+            # TODO
+        }
+    }
+}
+
+my $timer;
+sub handle_time {
+    my $e = shift;
+
+    $timer++;  # just count
+    if( $timer == $T_ALARM ){
+        $timer = 0;
+        
+        plog("_alarm_ T_ALARM=$T_ALARM");
+    }
+
+    if( @QUEUE ){
+        if( !$LOCK ){
+            $LOCK = 1;  # get lock
+            $SPID = fork();
+            if( ! defined $SPID ){
+                plog "cant create process to treat queue";
+            } elsif( $SPID==0 ){
+                while(@QUEUE){
+                    my $M = shift @QUEUE;
+
+                    processRequest($M);
+                }
+                exit(-1);
+            } else {
+                # clean QUEUE messages
+                @QUEUE = ();
+            }
+        }
+    }
+    $e->add;
+}
+
+# Do somethin when receive SIGINT
+sub handle_sigint {
+    my $e = shift;
+    # a common thing to do would be
+    # re-reading a config-file or so
+    #...
+    plog "on_sigint: You want me to stop, eh!?n";
+    plog "disconnecting clients...\n";
+
+    for my $c_k (keys %CLIENTS){
+        my $C = $CLIENTS{"$c_k"};
+        my $h = $C->{'con'};
+
+        plog "bye bye $c_k" . "...";
+        print $h ">bye bye!\n";
+        close $C->{'con'};
+
+        $C->{'client'}->remove;
+        plog "OK\n";
+    }
+    sleep(2);
+    if( $SPID ){
+        plog "now shut down queue process ($SPID)...\n";
+        kill SIGHUP, $SPID;
+        sleep(2);
+        waitpid(-1,&WNOHANG);
+    }
+    if( $srv_PID ){
+        print STDERR "...and shut down server process ($srv_PID)...\n";
+        kill SIGHUP, $srv_PID;
+        sleep(2);
+        waitpid(-1,&WNOHANG);
+    }
+    exit(0);
+}
+
+sub sigchild {
+    # wait for die pid
+    my $dead_pid = waitpid(-1,&WNOHANG);
+
+    $SPID = undef;  # no SON pid
+    $LOCK = 0;      # unlock process messages
+}
+
+
+sub main {
+
+    $CONF->{"CFG_FILE"} = $ENV->{'CFG_FILE'} if( $ENV{'CFG_FILE'} );
+    $CONF = ETVA::Utils::get_conf(1,$CONF->{"CFG_FILE"});
+
+    plog "CONF=",Dumper($CONF),"\n";
+
+    $srv_PID = fork();
+
+    if( ! defined $srv_PID ){
+        die "cant create server process";
+    } elsif( $srv_PID == 0 ){
+
+        # call soap process
+        launch_agent();
+
+    } else {
+        # Create a listening socket
+        my $s_LocalPort = $CONF->{'LocalPort'} + 2000;
+        my $server = IO::Socket::INET->new(
+            LocalAddr   => $CONF->{'LocalIP'},
+            LocalPort   => $s_LocalPort,
+            Proto       => $CONF->{'Proto'} || 'tcp',
+            ReuseAddr   => 1 || SO_REUSEADDR,
+            Listen      => 1,
+            Blocking    => 0,
+        ) or die $@;
+
+        my $main  = event_new($server, EV_READ|EV_PERSIST, \&handle_incoming);
+        my $timer = timer_new(\&handle_time);
+        my $int   = signal_new(SIGINT, \&handle_sigint);
+
+        $SIG{CHLD} = \&sigchild;
+
+        $_->add for $main, $timer, $int;
+
+        event_mainloop;
+    }
+}
+
+sub launch_agent {
+    # default active SOAP 
+    my $class = 'ETVA::Agent::SOAP';
+
+    # TODO JSON requests not implemented 
+    # can answer to JSON request
+    #$class = 'ETVA::Agent::JSON' if( $CONF->{'JSON'} );
+
+    my $dispatcher = 'VirtAgentInterface';
+
+    eval "require $dispatcher;";
+    if( $@ ){
+        die "virtd: Cant launch agent with this dispatcher: $dispatcher\n";
+    }
+
+    my %C = %$CONF;
+    $C{'_dispatcher'} = $dispatcher;
+    my %SI = VirtAgentInterface->getsysinfo();
+    %C = (%SI,%C);
+
+    $C{'LocalIP'} = $C{'LocalAddr'} if( !$C{'LocalIP'} );
+
+    # register and keepalive func handlers
+    $C{'_register_handler'} = \&register_handler;
+    $C{'_alarmhandler_'} = $C{'_keepalive_handler'} = \&keepalive_handler;
+
+    # initialization agent
+	my $agent = $class->new( %C );
+	
+	if( $agent ){
+        # start loop
+		$agent->mainLoop();
+	}
+}
+
+sub register_handler {
+}
+
+sub keepalive_handler {
+}
+
+&main;
+
+1;

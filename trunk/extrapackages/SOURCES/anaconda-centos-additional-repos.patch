@@ -1,0 +1,21 @@
+diff -uNr anaconda-11.1.2.209__orig/installclasses/rhel.py anaconda-11.1.2.209/installclasses/rhel.py
+--- anaconda-11.1.2.209__orig/installclasses/rhel.py	2010-04-25 04:09:38.807535000 +0000
++++ anaconda-11.1.2.209/installclasses/rhel.py	2010-04-25 04:12:42.137535894 +0000
+@@ -14,6 +14,8 @@
+ import logging
+ log = logging.getLogger("anaconda")
+ 
++import rpmUtils.arch
++
+ # custom installs are easy :-)
+ class InstallClass(BaseInstallClass):
+     # name has underscore used for mnemonics, strip if you dont need it
+@@ -46,6 +48,8 @@
+                      "See http://www.redhat.com/InstNum/ for more information.")
+     skipkeytext = N_("If you cannot locate the Installation Number, consult "
+                      "http://www.redhat.com/InstNum/")
++    repos = { 
++             "Packages from CentOS Extras": (None, "http://mirrorlist.centos.org/?release=5&arch=%s&repo=extras" %(rpmUtils.arch.getBaseArch() )) }
+ 
+     def setInstallData(self, anaconda):
+ 	BaseInstallClass.setInstallData(self, anaconda)

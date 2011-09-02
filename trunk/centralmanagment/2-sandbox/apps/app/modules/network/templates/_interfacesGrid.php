@@ -23,223 +23,263 @@ $default_model_values = array('default'=>'name','items'=>
 
 ?>
 <script>
-
-
-
-    /*
-     * Partial networkGrid
-     */
-    // shorthand alias
-    Ext.namespace('Network');
-    Network.InterfacesGrid = function(){
-        var store;
-        var grid;
-        return{
-            init:function(){
-                Ext.QuickTips.init();
-               
-               
+    
+/*
+ * Partial networkGrid
+ */
+// shorthand alias
+Ext.namespace('Network');
+Network.InterfacesGrid = Ext.extend(Ext.grid.GridPanel, {            
+        border:false,
+        autoScroll:true,
+        stripeRows: true,
+        loadMask: {msg: <?php echo json_encode(__('Retrieving data...')) ?>},
+        initComponent:function(){
 
 <?php
 $url = json_encode(url_for('network/jsonGridNoPager',false));
 $store_id = json_encode($js_grid['pk']);
 ?>
 
-                // var gridUrl = ;
-                var store_id = <?php echo $store_id ?>;
-                var sort_field = store_id;
-                var url = <?php echo $url ?>;               
+            // var gridUrl = ;
+            var store_id = <?php echo $store_id ?>;
+            var sort_field = store_id;
+            var url = <?php echo $url ?>;
 
 
-                var cm = new Ext.grid.ColumnModel([
-                    {header:"Id",width:20,dataIndex:"Id",sortable:true},
-                    {header:"ServerId",dataIndex:"ServerId",sortable:true},
-                    {header:"ServerName",width:80,dataIndex:"ServerName",sortable:true},
-                    {header:"NodeName",width:80,dataIndex:"NodeName",sortable:true},
-                    {header:"Port",width:60,dataIndex:"Port",sortable:true},
-                    {header:"Ip",width:120,dataIndex:"Ip",sortable:true},
-                    {header:"Mask",width:120,dataIndex:"Mask",sortable:true},
-                    {header:"Mac",width:120,dataIndex:"Mac",sortable:true},
-                    {id:'Vlan',header:"Vlan",width:60,dataIndex:"Vlan",sortable:true}]);
+            this.cm = new Ext.grid.ColumnModel([
+                {header:"Id",width:20,dataIndex:"Id",sortable:true},
+                {header:"ServerId",dataIndex:"ServerId",sortable:true},
+                {header:"ServerName",width:80,dataIndex:"ServerName",sortable:true},
+                {header:"NodeName",width:80,dataIndex:"NodeName",sortable:true},
+                {header:"Port",width:60,dataIndex:"Port",sortable:true},
+                {header:"Ip",width:120,dataIndex:"Ip",sortable:true},
+                {header:"Mask",width:120,dataIndex:"Mask",sortable:true},
+                {header:"Mac",width:120,dataIndex:"Mac",sortable:true},
+                {id:'Network',header:"Network",width:60,dataIndex:"Network",sortable:true}]);
+
+            this.autoExpandColumn = 'Network';
+
+            this.view = new Ext.grid.GroupingView({
+                autoFill:true,
+                emptyText: __('Empty!'),  //  emptyText Message
+                forceFit:true,
+                groupTextTpl: '{text} ({[values.rs.length]} {[values.rs.length > 1 ? __("Items") : "Item"]})'
+            });
+
+            this.store = new Ext.data.GroupingStore({
+                url: url,
+                reader: new Ext.data.JsonReader({
+
+                    totalProperty: 'total',
+                    root: 'data',
+                    id: store_id,
+                    fields: [
+                        {name:"Id", mapping:'Id'},
+                        {name:"ServerId", mapping:'ServerId'},
+                        {name:"VmType", mapping:'VmType'},
+                        {name:"ServerName",mapping:'ServerName'},
+                        {name:"NodeId",mapping:'NodeId'},
+                        {name:"NodeName",mapping:'NodeName'},
+                        {name:"Port",mapping:'Port'},
+                        {name:"Ip",mapping:'Ip'},
+                        {name:"Mask",mapping:'Mask'},
+                        {name:"Mac",mapping:'Mac'},
+                        {name:"Network",mapping:'Vlan'}]
+
+                }),
+
+                sortInfo:{field: 'NodeName', direction: "DESC"},
+                remoteSort: false,
+                groupField:'NodeName'
+            });
 
 
-                store = new Ext.data.GroupingStore({
-                    url: url,
-                    reader: new Ext.data.JsonReader({
-
-                        totalProperty: 'total',
-                        root: 'data',
-                        id: store_id,
-                        fields: [
-                            {name:"Id", mapping:'Id'},
-                            {name:"ServerId", mapping:'ServerId'},
-                            {name:"ServerName",mapping:'ServerName'},
-                            {name:"NodeId",mapping:'NodeId'},
-                            {name:"NodeName",mapping:'NodeName'},
-                            {name:"Port",mapping:'Port'},
-                            {name:"Ip",mapping:'Ip'},
-                            {name:"Mask",mapping:'Mask'},
-                            {name:"Mac",mapping:'Mac'},
-                            {name:"Vlan",mapping:'Vlan'}]
-
-                    }),
-                    
-                    sortInfo:{field: 'NodeName', direction: "DESC"},
-                    remoteSort: false,
-                    groupField:'NodeName'
-                });
-
-                
-                store.load();
-                
-
-                grid = new Ext.grid.GridPanel({
-                    store: store,
-                    border:false,
-                    cm:cm,               
-                    autoScroll:true,
-                    autoExpandColumn: 'Vlan',
-                    view: new Ext.grid.GroupingView({
-                        autoFill:true,
-                        forceFit:true,
-                        groupTextTpl: '{text} ({[values.rs.length]} {[values.rs.length > 1 ? "Items" : "Item"]})'
-                    }),
-
-                    stripeRows: true,
-                    //    autoExpandColumn: 'Vlan',
-
-//                    layout:'fit',
-                    // items:[Network.Grid.init()],
-
-                    loadMask: {msg: 'Retrieving info...'},
-                    //  iconCls: 'icon-grid'
-                    // renderTo: document.body
-                    bbar:['->',{
-                            text: 'Refresh',
-                            xtype: 'button',
-                            tooltip: 'refresh',
-                            iconCls: 'x-tbar-loading',
-                            scope:this,
-                            handler: function(button,event)
-                            {
-                                button.addClass('x-item-disabled');
+            Network.InterfacesGrid.superclass.initComponent.call(this);
 
 
-                                store.reload({
-                                    callback:function(){button.removeClass('x-item-disabled');}});
-                            }
-                        }]
-                });
+
+            this.on({rowcontextmenu:this.onRowContextMenu,
+                        // load the store at the latest possible moment
+                        afterlayout:{scope:this, single:true, fn:function() {
+                        this.store.load();
+                    }}
+            });
 
 
-                grid.on('rowcontextmenu', this.onRowContextMenu,this);
+
+        //    grid.on({show:function(){store.load();}});
 
 
-                return grid;
-            }//Fim init
-            ,onRowContextMenu : function(grid,rowIndex, e){
+        }//Fim init
+        ,onRowContextMenu : function(grid,rowIndex, e){
 
 
-                if(this.ctxRow){
-                    // this.ctxNode.ui.removeClass('x-node-ctx');
-                    this.ctxRow = null;
-                }
-                grid.getSelectionModel().selectRow(rowIndex);
-                // e.stopEvent();
-                //               // if(node.isLeaf()){ //open context menu only if node is a leaf
-                this.ctxRow = grid.getView().getRow(rowIndex);
-                this.ctxRecord = grid.getSelectionModel().getSelected();
-                
-                // alert(this.ctxRecord.id);
-
-               // if(!this.menu){ // create context menu on first right click
-                    this.menu = new Ext.menu.Menu({                        
-                        items: [
-                            {
-                                iconCls:'go-action',
-                                text:'Manage interfaces',
-                                url:<?php echo(json_encode(url_for('network/interfacesWin?sid=')))?>+this.ctxRecord.get('ServerId'),
-                                handler:View.clickHandler
-                            },
-                            {                              
-                                iconCls:'go-action',
-                                text:'Remove interface',
-                                scope: this,                                
-                                handler:this.detachInterface
-                            }
-                        ]
-                    });
-
-                    this.menu.on('hide', this.onContextHide, this);
-
-                
-
-                // Stops the browser context menu from showing.
-                e.stopEvent();
-                this.menu.showAt(e.getXY());
-                
-                
-            },
-            onContextHide : function(){
-                // prevent browser default context menu
-                //          e.stopEvent();
-                if(this.ctxRow){
-                    //    this.ctxNode.ui.removeClass('x-node-ctx');
-                    this.ctxRow = null;
-                }
+            if(this.ctxRow){
+                // this.ctxNode.ui.removeClass('x-node-ctx');
+                this.ctxRow = null;
             }
-            ,load:function(vlanName){
-
-                var query = {'vlan':vlanName};
-                if(vlanName) store.baseParams = {'query': Ext.encode(query)};
-                else store.baseParams = null;
-
-                store.load();               
-
-                if(!vlanName) vlanName = 'All';                
-                Ext.getCmp('interfaces-grid').setTitle('Interfaces - '+vlanName);
-
-            },
-            reload:function(){
-                store.reload();
-            },
-            detachInterface:function(){
-
-                var ctxRecord = this.ctxRecord;
-                var node_id = ctxRecord.get('NodeId');
-                var serverName = ctxRecord.get('ServerName');
-                var macaddr = ctxRecord.get('Mac');
+            grid.getSelectionModel().selectRow(rowIndex);
+            // e.stopEvent();
+            //               // if(node.isLeaf()){ //open context menu only if node is a leaf
+            this.ctxRow = grid.getView().getRow(rowIndex);
+            this.ctxRecord = grid.getSelectionModel().getSelected();
 
 
+           // if(!this.menu){ // create context menu on first right click
+                this.menu = new Ext.menu.Menu({
+                    items: [
+                        {
+                            text:<?php echo json_encode(__('Manage network interfaces')) ?>
+                            ,iconCls:'go-action'
+                            ,url:<?php echo json_encode(url_for('network/Network_ManageInterfacesGrid')); ?>
+                            ,call:'Network.ManageInterfacesGrid'
+                            ,callback:function(item){
+                                
+                                var rec = grid.getSelectionModel().getSelected();
+                                var server_id = rec.get('ServerId');
+                                var server_name = rec.get('ServerName');
+                                var server_type = rec.get('VmType');
+                                
+                                var managegrid = new Network.ManageInterfacesGrid({vm_type:server_type,server_name:server_name,server_id:server_id,loadMask:true,border:false});
+                                managegrid.on('render',function(){this.store.load.defer(200,this.store);});
 
-                var conn = new Ext.data.Connection();
-                conn.request({
-                    url: <?php echo json_encode(url_for('network/jsonRemove'))?>,
-                    params: {'nid': node_id,'server':serverName,'macaddr':macaddr},
-                    scope:this,
-                    success: function(resp,opt) {
-                        var response = Ext.util.JSON.decode(resp.responseText);
 
-                        Ext.ux.Logger.info(response['response']);
-                        
-                    },
-                    failure: function(resp,opt) {
-                        var response = Ext.util.JSON.decode(resp.responseText);
+                                var win = new Ext.Window({
+                                                title: String.format(<?php echo json_encode(__('Attach/detach network interfaces for server {0}')) ?>,server_name),
+                                                width:700,
+                                                height:300,
+                                                iconCls: 'icon-window',
+                                                //bodyStyle: 'padding:10px;',
+                                                shim:false,
+                                                border:true,
+                                                //resizable:false,
+                                                //draggable:false,
+                                                constrainHeader:true,
+                                                layout: 'fit',
+                                                modal:true,
+                                                items:managegrid,
+                                                buttons: [{
+                                                        text: __('Save'),
+                                                        handler: function(){
 
-                        Ext.ux.Logger.error(response['error']);
+                                                            if(managegrid.isValid()) managegrid.save();
+                                                            else
+                                                                Ext.Msg.show({title: <?php echo json_encode(__('Error!')) ?>,
+                                                                    buttons: Ext.MessageBox.OK,
+                                                                    msg: <?php echo json_encode(__('Missing network interface data!')) ?>,
+                                                                    icon: Ext.MessageBox.INFO});
+                                                        }
+                                                    },
+                                                    {
+                                                        text: __('Cancel'),
+                                                        handler: function(){win.close();}
+                                                    }
+                                                ]// end buttons
+                                                ,listeners:{
+                                                    'onManageInterfacesSuccess':function(){
+                                                        win.close();
+                                                        grid.getStore().reload();
+                                                    }}
+                                            });
+                                            win.show();                                
+                            }
+                            ,handler:View.loadComponent                            
+                        },
+                        {
+                            iconCls:'go-action',
+                            text:<?php echo json_encode(__('Remove network interface')) ?>,
+                            scope: this,
+                            handler:this.detachInterface
+                        }
+                    ]
+                });
 
-                        Ext.Msg.show({title: 'Error',
-                            buttons: Ext.MessageBox.OK,
-                            msg: 'Unable to detach interface '+macaddr+' from '+serverName,
-                            icon: Ext.MessageBox.ERROR});
-                    }
-                });//END Ajax request
-                
-            }            
+                this.menu.on('hide', this.onContextHide, this);
 
+
+
+            // Stops the browser context menu from showing.
+            e.stopEvent();
+            this.menu.showAt(e.getXY());
+
+
+        },
+        onContextHide : function(){
+            // prevent browser default context menu
+            //          e.stopEvent();
+            if(this.ctxRow){
+                //    this.ctxNode.ui.removeClass('x-node-ctx');
+                this.ctxRow = null;
+            }
+        }
+        ,load:function(rec){
+            var vlanName = __('All');
+
+            if(rec){
+                var query = {'vlan_id':rec.get('id')};
+                vlanName = rec.get('name');
+                this.store.baseParams = {'query': Ext.encode(query)};
+                this.ownerCt.setTitle(String.format(<?php echo json_encode(__('List of {0} network interfaces')) ?>,vlanName));
+
+            }else{
+                this.store.baseParams = null;
+                this.ownerCt.setTitle(<?php echo json_encode(__('List all network interfaces')) ?>);
+            }
+            this.store.load();
+            
+
+        },
+        reload:function(){
+            this.store.reload();
+        },
+        detachInterface:function(){
+
+            var server_id = this.ctxRecord.get('ServerId');
+            var server_name = this.ctxRecord.get('ServerName');
+            var macaddr = this.ctxRecord.get('Mac');
+            
+            Ext.Msg.show({
+                title: <?php echo json_encode(__('Remove network interface')) ?>,
+                buttons: Ext.MessageBox.YESNOCANCEL,
+                icon: Ext.MessageBox.QUESTION,
+                msg: String.format(<?php echo json_encode(__('Remove network interface with mac {0} ?')) ?>,macaddr),
+                scope:this,
+                fn: function(btn){
+
+                    if (btn == 'yes'){
+
+                        var conn = new Ext.data.Connection();
+                        conn.request({
+                            url: <?php echo json_encode(url_for('network/jsonRemove'))?>,
+                            params: {'sid': server_id,'macaddr':macaddr},
+                            scope:this,
+                            success: function(resp,opt) {
+                                var response = Ext.util.JSON.decode(resp.responseText);
+                                Ext.ux.Logger.info(response['agent'],response['response']);
+                                this.store.reload();
+
+                            },
+                            failure: function(resp,opt) {
+                                var response = Ext.util.JSON.decode(resp.responseText);
+
+                                Ext.ux.Logger.error(response['agent'],response['error']);
+
+                                Ext.Msg.show({
+                                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                    buttons: Ext.MessageBox.OK,
+                                    msg: String.format(<?php echo json_encode(__('Unable to detach network interface {0} from {1}!')) ?>+'<br> {2}',macaddr,server_name,response['info']),
+                                    icon: Ext.MessageBox.ERROR});
+                            }
+                        });//END Ajax request
+
+                    }//END button==yes
+                }// END fn
+            }); //END Msg.show
 
         }
-    }();
+
+});
 
     // Ext.onReady(Network.Grid.init, Network.Grid);
 </script>

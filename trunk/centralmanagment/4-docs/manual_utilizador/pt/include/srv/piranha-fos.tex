@@ -1,0 +1,58 @@
+\subsection{Sistema de \emph{Failover}}
+
+O serviço de \emph{Failover} garante a redundancia dos servicos configurados e a elevada disponibilidade de si próprio garantindo a redundância dele próprio.
+
+O ficheiro de configuração deste serviço é:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/sysconfig/ha/lvs.cf
+\end{Verbatim}
+
+Como exemplo podemos ver o seguinte:
+
+Para iniciar a configuração de um novo serviço de balanceamento colocamos a seguinte directiva:
+
+\begin{verbatim}
+failover nome_do_serviço {
+\end{verbatim}
+
+A opção seguinte apenas nos diz se este novo serviço vai estar activo ou não (neste caso iria estar activo):
+
+\begin{verbatim}
+     active = 1
+\end{verbatim}
+
+Os seguintes parâmetros indicam o IP, o interface e a máscara de rede onde este serviço vai ficar atribuído:
+
+\begin{verbatim}
+     address = 10.10.10.143 eth0:143
+     pmask = 255.255.255.0
+\end{verbatim}
+
+Os parâmetros seguintes indicam qual a porta que se deverá verificar o estado do servidor e o tempo que devemos aguardar por uma resposta (no exemplo abaixo, verificamos a porta de \emph{ssh} do ip de balanceamento.
+
+\begin{verbatim}
+	port = 22
+	timeout = 10
+\end{verbatim}
+
+O \emph{start\_cmd} e \emph{stop\_cmd}, identificam os comandos que queremos executar para iniciar o serviço ou para-lo dependendo da verificação a cima explicada.
+
+\begin{verbatim}
+	start_cmd = "/etc/scripts/lvs-up-net.sh"
+	stop_cmd = "/etc/scripts/lvs-down-net.sh"
+\end{verbatim}
+
+Para terminar a configuração apenas colocamos o caracter:
+
+\begin{verbatim}
+}
+\end{verbatim}
+
+O comando para controlar este serviço (iniciar/parar) é o seguinte:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# /etc/rc.d/init.d/pulse start
+# /etc/rc.d/init.d/pulse stop
+\end{Verbatim}
+

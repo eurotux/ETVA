@@ -9,30 +9,55 @@ html, body {
 	height: 100%;
 }
 
-#header h1{
-    font-size:14px;
-    padding:5px;
+#header{
+    background-color:white;
+    
 }
 
+#header h1{
+    font-size:14px;
+    height:50px;
+    padding:5px;
+    text-align:right;
+    background: transparent url(../images/etx-virtual-appliance.jpg) no-repeat;
+}
+
+
+.x-form-display-field{
+    font-size:11px;
+    padding-top:2px;
+}
 
 /*
 * Icons
 */
-
+.icon-world-go{
+     background-image:url(../images/icons/world_go.png) !important;
+     /* background-position: center center; */
+}
 
 .icon-window{
 /* .x-tree-node-icon { */
 background-image:url(../images/icons/window.png) !important;
 }
 
+.icon-keyboard {
+    background-image:url(../images/icons/keyboard.png) !important;
+}
+
 /*
 * System popup
 *
 */
-.icon-info {
-    background-image:url(../images/icons/warning.gif) !important;
+
+.icon-warning {
+    background-image:url(../images/icons/icon-warning.gif) !important;
 }
 
+
+.icon-etva {
+    background-image:url(../images/icons/etva.png) !important;
+}
 
 .icon-add{
      background-image:url(../images/table_add.png) !important;
@@ -52,14 +77,26 @@ background-image:url(../images/icons/window.png) !important;
     background-image:url(../images/icons/user_add.gif) !important;
 }
 
+.icon-user-edit {
+    background-image:url(../images/icons/user_edit.png) !important;
+}
+
 .icon-user-delete {
     background-image:url(../images/icons/user_delete.gif) !important;
 }
 
+.wizard{
+     background-image:url(../images/icons/wand.png) !important;
+     /* background-position: center center; */
+}
 
 .add{
      background-image:url(../images/icons/add.gif) !important;
      /* background-position: center center; */
+}
+
+.page-save{
+	background-image:url(../images/icons/page_save.png) ! important;
 }
 
 .remove{
@@ -73,64 +110,14 @@ background-image:url(../images/icons/leaf.gif) !important;
 }
 
 
-
 /*
-* TreeColumn
+*
+*  Appliance
+*
 */
 
-.x-column-tree .x-tree-node {
-    zoom:1;
-}
-.x-column-tree .x-tree-node-el {
-    /*border-bottom:1px solid #eee; borders? */
-    zoom:1;
-}
-.x-column-tree .x-tree-selected {
-    background: #d9e8fb;
-}
-.x-column-tree  .x-tree-node a {
-    line-height:18px;
-    vertical-align:middle;
-
-}
-.x-column-tree  .x-tree-node a span{
-
-}
-.x-column-tree  .x-tree-node .x-tree-selected a span{
-	background:transparent;
-	/* color:#FFFFFF; */
-}
-.x-tree-col {
-    float:left;
-    overflow:hidden;
-    padding:0 1px;
-    zoom:1;
-
-}
-
-.x-tree-col-text, .x-tree-hd-text {
-    overflow:hidden;
-    -o-text-overflow: ellipsis;
-	text-overflow: ellipsis;
-    padding:3px 3px 3px 5px;
-    white-space: nowrap;
-    font:normal 11px arial, tahoma, helvetica, sans-serif;
-
-}
-
-.x-tree-headers {
-    background: #f9f9f9 url(../images/grid3-hrow.gif) repeat-x 0 bottom;
-	cursor:default;
-    zoom:1;
-
-}
-
-.x-tree-hd {
-    float:left;
-    overflow:hidden;
-    border-left:1px solid #eee;
-    border-right:1px solid #d0d0d0;
-
+.icon-restore-go {
+    background-image:url(../images/icons/package_go.png) !important;
 }
 
 
@@ -167,16 +154,15 @@ background-image:url(../images/icons/leaf.gif) !important;
 * Column layout (used in storages panel)
 */
 
- .x-panel-body p {
+.x-panel-body p {
         margin:5px;
-    }
-    .x-column-layout-ct .x-panel {
-        margin-bottom:5px;
-    }
-    .x-column-layout-ct .x-panel-dd-spacer {
-        margin-bottom:5px;
-    }
-
+}
+.x-column-layout-ct .x-panel {
+    margin-bottom:5px;
+}
+.x-column-layout-ct .x-panel-dd-spacer {
+    margin-bottom:5px;
+}
 
 /*
 * Log panel
@@ -224,28 +210,10 @@ background-image:url(../images/icons/leaf.gif) !important;
 .ux-mselect{
     overflow:auto;
     background:white;
-    position:relative; 
+    position:relative;
     zoom:1;
-    overflow:auto;   
-}
-
-/*
-.ux-mselect{
-
     overflow:auto;
-
-    background:white;
-
-    position:relative; 
-
-    zoom:1;
-
-    overflow:auto !important;
-
 }
-*/
-
-
 
 .ux-mselect-item{
     font:normal 11px tahoma, arial, helvetica, sans-serif;
@@ -331,7 +299,7 @@ background-image:url(../images/icons/leaf.gif) !important;
 	text-align:left;
 	padding:2px 4px 0px 0px;
     float:left;
-    
+
 }
 
 .ext-ux-wiz-West-step .ext-ux-wiz-West-stepText {
@@ -340,7 +308,7 @@ background-image:url(../images/icons/leaf.gif) !important;
 }
 
 .ext-ux-wiz-West-stepText{
-    
+
     margin-left:3px;
 	margin-top:0px;
 }
@@ -348,14 +316,6 @@ background-image:url(../images/icons/leaf.gif) !important;
 .ext-ux-wiz-West-stepText-active{
     font-weight:bold;
 }
-
-
-
-.wizard-network-grid{
-    padding-left:0px;
-    border:none;
-}
-
 
 /* css form box labels form */
 
@@ -367,22 +327,24 @@ background-image:url(../images/icons/leaf.gif) !important;
     font-size:11px;
 }
 
-.x-form-field, .x-form-item-label, .x-combo-list-item{
+.x-form-item-label, .x-combo-list-item{
+    font-size:11px;
+}
+
+.x-form-element input{
+    font-size:11px;
+}
+
+.x-form-field input{
     font-size:11px;
 }
 
 .x-form-item .x-form-element .nopad-border{
        /* width:21px ; */
-        
+
     border:0px;
-    background:none;    
+    background:none;
 }
-
-
-
-
-
-
 
 
 
@@ -458,12 +420,55 @@ background-image:url(../images/icons/leaf.gif) !important;
 	background-position: 2px -15px;
 }
 
-
-
-
-
-
 /*
+ *
+ *
+ * ONLINE HELP WINDOW CSS
+ */
+
+.online-help {
+    background-color:white;
+}
+
+.online-help ul {
+    list-style:disc;
+    margin-left:15px;
+}
+
+.online-help ul li {
+    margin:0 0 5px 3px;
+}
+
+.online-help p {
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+.online-help ol {
+    padding-left: 30px;
+    list-style-type:decimal;
+}
+
+.online-help em {
+    font-style:italic;
+}
+
+.online-help ul ul {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.online-help hr {
+    background-color: #99BBE8;
+    color: #99BBE8;
+    height: 3px;
+}
+
+.online-help a div {
+    text-align:right;
+}
+
+/*  
 *
 *
 * LEFT MENU
@@ -478,9 +483,30 @@ background-image:url(../images/icons/leaf.gif) !important;
     color: green;
 }
 
+.some-active a span{
+    color: orange;
+}
+
+.pending a span{
+    color: blue;
+}
+
+.deny a span{
+    color: gray;
+}
 
 
-
+.menu-title{
+    background: #D6E3F2;
+    border-style: solid;
+    border-color:#DAE6F4 #99bbe8 #99bbe8 #DAE6F4;
+    border-width: 1px;
+    margin:-2px -2px 0;
+    color:#15428b;
+    font: bold 11px tahoma, arial, verdana, sans-serif;
+    display:block;
+    padding:3px;
+}
 
 
     /*!
@@ -546,13 +572,6 @@ background-image:url(../images/icons/leaf.gif) !important;
 .gridWrap .x-grid3-cell-inner {
   white-space : normal;
 }
-
-
-
-
-
-
-
 
 /*
 *
@@ -999,6 +1018,17 @@ background-image:url(../images/icons/leaf.gif) !important;
 /*  Icon Classes end */
 
 
+/*
+* system event log grid
+*/
+
+.log-info {
+	background:url(../images/silk/icons/information.png) center no-repeat !important;
+}
+
+.log-error {
+	background:url(../images/silk/icons/cancel.png) center no-repeat !important;
+}
 
 
 /*!
@@ -1042,6 +1072,7 @@ background-image:url(../images/icons/leaf.gif) !important;
 }
 
 /* Temporary Patch for Bug ??? */
+/*
 .x-menu-list-item-indent .x-menu-item-icon {
 	position: relative;
     top: 3px;
@@ -1054,9 +1085,16 @@ li.x-menu-list-item-indent {
 li.x-menu-list-item div {
 	display: inline;
 }
+*/
 
 
+.vm-state-running{
+    color:green;
+}
 
+.vm-state-notrunning{
+    color:red;
+}
 
 
 
@@ -1069,3 +1107,72 @@ li.x-menu-list-item div {
 .etfw-grid-rules{
     margin-bottom:15px;
 }
+
+.etfw-only{
+    background-image:url(../images/network/etfw_only_tp.png) ! important;
+    width:200px;
+    height:200px;
+}
+
+.start{
+    background-image:url(../images/network/etfw_only_tp.png) ! important;
+    width:200px;
+    height:200px;
+}
+
+.etfw-network-wiz .x-panel-body{
+    background-color: #F6F6F6;
+    height: 20px;
+}
+
+
+
+/*
+*
+* grid hacks (used in squid server -> ports and network)
+*
+*/
+.x-selectable, .x-selectable * {
+        -moz-user-select: text!important;
+        -khtml-user-select: text!important;
+}
+
+
+#new-address_range-icon {
+ 	    width:16px;
+ 	    height:16px;
+ 	    margin-left:3px;
+ 	    background: transparent url(../images/edit.gif) no-repeat;
+}
+
+
+.header-login{
+    height:100px;
+    width:410px;
+    top:10px;
+    position:absolute;
+    right:0;    
+    background: transparent url(../images/etx-virtual-appliance_full.jpg) no-repeat;
+}
+
+.footer-login{
+    height:50px;
+    width:450px;
+    bottom:10px;
+    position:absolute;
+    right:0;
+    /* background-image:ur('../images/qren.jpg'); */
+    background: transparent url(../images/barra_qren.jpg) no-repeat;
+}
+
+
+/*
+ *
+ * ETVOIP
+ *
+*/
+.icon-status-warning {
+    padding-left: 20px !important;
+    background: transparent url(../images/icons/warning.gif) no-repeat;
+}
+

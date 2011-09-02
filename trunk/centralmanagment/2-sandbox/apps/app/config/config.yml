@@ -1,0 +1,5 @@
+all:
+  isos:
+    user: etva_ftp
+    password: ola123
+    dir: /usr/share/etva-isos
