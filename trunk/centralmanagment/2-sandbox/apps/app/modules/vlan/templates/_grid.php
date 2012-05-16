@@ -47,12 +47,12 @@ Vlan.Grid = Ext.extend(Ext.grid.GridPanel,{
                 checkColumn
                 ]);
         this.autoExpandColumn = 'name';
-                
 
         // create the Data Store
         this.store = new Ext.data.JsonStore({
             proxy: httpProxy,
             //id: store_id,
+            baseParams:{id:this.clusterId},
             totalProperty: 'total',
             root: 'data',
             fields: [<?php echo $js_grid['ds'] ?>],
@@ -65,39 +65,31 @@ Vlan.Grid = Ext.extend(Ext.grid.GridPanel,{
         <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
         this.tbar.push(
             {
+                scope:this,
                 text: <?php echo json_encode(__('Add network')) ?>,
                 iconCls: 'icon-add',
                 url: <?php echo json_encode(url_for('vlan/Vlan_CreateForm')); ?>,
                 call:'Vlan.Create',                
                 callback:function(item){
                     var grid = (item.ownerCt).ownerCt;
-                  
+
                     var win = new Vlan.Create({
-                                        title:item.text
-                                        ,tools: [{
-                                            id:'help',
-                                            qtip: __('Help'),
-                                            handler:function(){
-                                                View.showHelp({
-                                                    anchorid:'help-vlan-manage',
-                                                    autoLoad:{ params:'mod=vlan'},
-                                                    title: <?php echo json_encode(__('Add Network Help')) ?>
-                                                });
-                                            }
-                                        }]
-                                        ,listeners:{
-                                            onVlanCancel:function(){
-                                                win.close();                                             
-                                            }
-                                            ,onVlanSuccess:function(){
-                                                win.close();
-                                                grid.getStore().reload();
-                                            },
-                                            onVlanFailure:function(){
-                                                win.close();
-                                                grid.getStore().reload();
-                                            }
-                                        }});
+                        cluster_id:grid.clusterId,
+                        title:item.text
+                        ,listeners:{
+                            onVlanCancel:function(){
+                                win.close();
+                            }
+                            ,onVlanSuccess:function(){
+                                win.close();
+                                grid.getStore().reload();
+                            },
+                            onVlanFailure:function(){
+                                win.close();
+                                grid.getStore().reload();
+                            }
+                        }
+                    });
                     win.show();
                 },
                 handler:View.loadComponent                
@@ -144,7 +136,7 @@ Vlan.Grid = Ext.extend(Ext.grid.GridPanel,{
                                     });// end conn
                                     conn.request({
                                         url: <?php echo json_encode(url_for('vlan/jsonRemove'))?>,
-                                        params: {'name': sel.data['name']},
+                                        params: {'name': sel.data['name'], cluster_id:this.clusterId},
                                         scope:this,
                                         success: function(resp,opt) {
 
@@ -218,10 +210,9 @@ Vlan.Grid = Ext.extend(Ext.grid.GridPanel,{
             });
                                         
         <?php endif; ?>
-            
         this.tbar.push('->',
                     {text: <?php echo json_encode(__('MAC Pool Management')) ?>,
-                        url:'mac/createwin',
+                        url:'mac/createwin?cid='+this.clusterId,
                         handler: View.clickHandler
                     });
     

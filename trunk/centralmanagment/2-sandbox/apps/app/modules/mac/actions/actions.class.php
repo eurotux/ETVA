@@ -21,6 +21,16 @@ class macActions extends sfActions
     // no action to be performed
     public function executeCreatewin(sfWebRequest $request)
     {
+        $sid = $request->getParameter('sid');
+        if($sid){
+            $dc_c = new Criteria();             //convert server id in cluster id
+            $dc_c->addJoin(EtvaNodePeer::ID, EtvaServerPeer::NODE_ID);
+            $dc_c->add(EtvaServerPeer::ID, $sid, Criteria::EQUAL);
+            $node = EtvaNodePeer::doSelectOne($dc_c);
+            $this->cid = $node->getClusterId();
+        }else{
+            $this->cid = $request->getParameter('cid');
+        }
 
     }
 
@@ -77,7 +87,7 @@ class macActions extends sfActions
 
         if($mac === false){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaMacPeer::_ERR_NOMACS_);
-            $info = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+            $info = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
             $error = $this->setJsonError($info);
             return $this->renderText($error);
         }
@@ -109,7 +119,7 @@ class macActions extends sfActions
         $macs = $this->generateMacPool($request->getParameter('size'),$request->getParameter('octects'));
 
         if(!$macs){
-            $result = array('success'=>false,'agent'=>'ETVA','error'=>'No MACS generated!');
+            $result = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>'No MACS generated!','info'=>'No MACS generated!');
             $return = $this->setJsonError($result);
             return  $this->renderText($return);
         }
@@ -209,10 +219,73 @@ class macActions extends sfActions
             $criteria->add($column, $val);
         }
 
-
         $this->etva_mac_list = EtvaMacPeer::doSelect($criteria);
 
         foreach ($this->etva_mac_list as $etva_mac)
+        {
+            $macs[] = $etva_mac->toArray();
+        }
+
+
+        $final = array(
+                    'total' =>   count($macs),
+                    'data'  => $macs
+        );
+
+        $result = json_encode($final);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($result);
+
+    }
+
+    /**
+     * Returns pre-formated data for Extjs grid with mac information
+     *
+     * Request must be Ajax
+     *
+     * $request may contain the following keys:
+     * - query: json array (field name => value)
+     * - mac: string mac
+     * @return array json array('total'=>num elems, 'data'=>array(mac))
+     */
+    public function executeJsonGridQueryAll(sfWebRequest $request)
+    {
+
+        $isAjax = $request->isXmlHttpRequest();
+
+        if(!$isAjax) return $this->redirect('@homepage');
+        $macs = array();
+
+        $query = ($this->getRequestParameter('query'))? json_decode($this->getRequestParameter('query'),true) : array();
+
+
+        $criteria = new Criteria();
+
+        foreach($query as $key=>$val){
+
+            $column = EtvaMacPeer::translateFieldName(sfInflector::camelize($key), BasePeer::TYPE_PHPNAME, BasePeer::TYPE_COLNAME);
+            $criteria->add($column, $val);
+        }
+
+        // filter by mac
+        if( $this->getRequestParameter('mac') ){
+            $mac = $this->getRequestParameter('mac');
+            $newCriterion = $criteria->getNewCriterion(EtvaMacPeer::MAC,$mac.'%',Criteria::LIKE);
+            $criteria->add($newCriterion);
+        }
+
+
+        $mac_list = EtvaMacPeer::doSelect($criteria);
+
+        if(!$mac_list){
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaMacPeer::_ERR_NOMACS_);
+            $info = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            $error = $this->setJsonError($info);
+            return $this->renderText($error);
+        }
+
+
+        foreach ($mac_list as $etva_mac)
         {
             $macs[] = $etva_mac->toArray();
         }
@@ -238,11 +311,10 @@ class macActions extends sfActions
    */
     protected function setJsonError($info,$statusCode = 400){
 
+        if(isset($info['faultcode']) && $info['faultcode']=='TCP') $statusCode = 404;
         $this->getContext()->getResponse()->setStatusCode($statusCode);
         $error = json_encode($info);
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $error;
-
     }
-
 }

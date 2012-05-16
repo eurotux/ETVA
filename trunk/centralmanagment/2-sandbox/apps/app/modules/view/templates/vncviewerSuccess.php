@@ -7,7 +7,7 @@
 Java 1.5 or higher plugin required.
 <param name="SocketFactory" value="AuthHTTPConnectSocketFactory">
 <param name="PROXYHOST1" value="<?php echo $proxyhost1 ?>">
-<param name="PROXYPORT1" value="80">
+<param name="PROXYPORT1" value="<?php echo $proxyport1 ?>">
 <param name="PROXYUSERNAME" value="<?php echo($username); ?>">
 <param name="PROXYPASSWORD" value="<?php echo($token); ?>">
 </applet>

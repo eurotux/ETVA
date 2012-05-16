@@ -4,14 +4,27 @@
     Ext.ns("vgwin.createForm");
 
 
-    vgwin.createForm.Main = function(node_id) {
-                
-        this.node_id = node_id;
+    vgwin.createForm.Main = function(id, level) {
+               
+        var baseParams;
+        if(level == 'cluster'){
+            baseParams = {cid:id, level:level};
+            this.cluster_id = id;
+            this.level = level;
+        }else if(level == 'node'){
+            baseParams = {nid:id, level:level};
+            this.node_id = id;
+            this.level = level;
+        }else{
+            baseParams = {nid:id};            
+            this.node_id = id;
+        }
+ 
         this.fromStore = new Ext.data.Store({
             proxy: new Ext.data.HttpProxy({                
                         url: <?php echo json_encode(url_for('physicalvol/jsonListAllocatable'))?>
                    }),
-            baseParams:{'nid':node_id},
+            baseParams:baseParams,
             listeners:{
                 'beforeload':function(){                                    
                     this.ownerCt.body.mask(<?php echo json_encode(__('Please wait...')) ?>, 'x-mask-loading');
@@ -157,7 +170,36 @@
                 var pvs_string = this.pvs.getValue();
                 var pvs = pvs_string.split(',');             
                 //params: vgname, physical volume ID
-                var params = {'nid':this.node_id,'vg':vgname,'pvs':Ext.encode(pvs)};
+
+                // create parameters array to pass to soap request....
+                var params;
+   
+                if(this.level == 'cluster'){
+                    params = {
+                        'cid':this.cluster_id,
+                        'level':this.level,
+                        'vg':vgname,
+                        'pvs':Ext.encode(pvs)
+                    };
+                }else if(this.level == 'node'){
+                    params = {
+                        'nid':this.node_id,
+                        'level':this.level,
+                        'vg':vgname,
+                        'pvs':Ext.encode(pvs)
+                    };
+                }else{
+                    params = {
+                        'nid':this.node_id,
+                        'level':this.level,
+                        'vg':vgname,
+                        'pvs':Ext.encode(pvs)
+                        };
+                }
+
+
+                
+                //var params = {'nid':this.node_id,'vg':vgname,'pvs':Ext.encode(pvs)};
                 var conn = new Ext.data.Connection({
                     listeners:{
                         // wait message.....

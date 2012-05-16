@@ -80,24 +80,50 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
 
         if(!$isAjax) return $this->redirect('@homepage');
 
-
         $id = $request->getParameter('id');
-
         $group = sfGuardGroupPeer::retrieveByPK($id);
         if(!$group) $group_form = new sfGuardGroupForm();
         else $group_form = new sfGuardGroupForm($group);
 
         $result = $this->processForm($request, $group_form);
 
+        try{
+            
+            // remove existing permissions for the given group
+            $c = new Criteria();
+            $c->add(EtvaPermissionGroupPeer::GROUP_ID, $request->getParameter('id'), Criteria::EQUAL);
+            $g_p = EtvaPermissionGroupPeer::doSelect($c);   //filter group permissions
+
+            foreach ($g_p as $p){
+                $p->delete();
+            }
+
+            // add new permission set
+            $perm_list = $request->getParameter('sf_guard_group_permission_list');
+            $perm_list_dec = json_decode($perm_list);
+
+            foreach ($perm_list_dec as $object){
+                $g_p = new EtvaPermissionGroup();
+                $g_p->setGroupId($request->getParameter('id'));
+                $g_p->setEtvapermId($object);
+                $g_p->save();
+            }
+            
+        }catch(Exception $e){
+            $result = array('success' => false,
+                          'error'   => 'Could not perform operation',
+                          'agent'   =>sfConfig::get('config_acronym'),
+                          'info'    => 'Could not perform operation');
+        }
 
         if(!$result['success']){
             $error = $this->setJsonError($result);
             return $this->renderText($error);
         }
         $result = json_encode($result);
+
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
-
     }
 
     public function executeJsonUpdateField(sfWebRequest $request)
@@ -169,6 +195,8 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
         
     }
 
+
+    //TODO: change to adjusto to new permissions... items must be pre-selected...
     public function executeJsonGridWithPerms($request)
     {
         $isAjax = $request->isXmlHttpRequest();
@@ -197,17 +225,38 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
 
         $elements = array();
         $i = 0;
+
         # Get data from Pager
         foreach($this->pager->getResults() as $item){
             $elements[$i] = $item->toArray();
 
-            foreach ($item->getsfGuardGroupPermissionsJoinsfGuardPermission() as $gp)
-            {
-                $permission = $gp->getsfGuardPermission();
-                $elements[$i]['sf_guard_group_permission_list'][] = $permission->getId();
+            // for each group, fetch its permissions
+            $c = new Criteria();
+            $c->add(EtvaPermissionGroupPeer::GROUP_ID, $item->getId(), Criteria::EQUAL);
+            //$c->addJoin(EtvaPermissionPeer::ID, EtvaPermissionGroupPeer::ETVAPERM_ID);
+
+            $perms = EtvaPermissionGroupPeer::doSelect($c);
+
+            //error_log(print_r($perms, true));
+            foreach ($perms as $p){
+//                error_log("permissao".$p->getEtvaPermission()->getId());
+                $elements[$i]['sf_guard_group_permission_list'][] = $p->getEtvaPermission()->getId();
             }
+
+            //foreach ($item->getsfGuardGroupPermissionsJoinsfGuardPermission() as $gp)
+            //{
+                //$permission = $gp->getsfGuardPermission();
+                //$elements[$i]['sf_guard_group_permission_list'][] = $permission->getId();
+                //error_log("cicle");
+            //}
+
+//            error_log($item->getId());
+
+
             $i++;
         }
+
+//        error_log(print_r($elements, true));
 
         $final = array(
                         'total' => $this->pager->getNbResults(),
@@ -239,6 +288,9 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
         $params = array();
 
         foreach($widget->getFields() as $key => $object){
+            if($key == "sf_guard_group_permission_list"){
+                continue;
+            }
             $data = $request->getParameter($key);
             $data_dec = json_decode($data);
             $params[$key] = is_array($data_dec) ? $data_dec : $data;
@@ -253,7 +305,7 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
             }catch(Exception $e){
                 $response = array('success' => false,
                               'error'   => 'Could not perform operation',
-                              'agent'   =>'ETVA',
+                              'agent'   =>sfConfig::get('config_acronym'),
                               'info'    => 'Could not perform operation');
                 return $response;
             }
@@ -270,7 +322,7 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
             $info = implode('<br>',$errors);
             $response = array('success' => false,
                               'error'   => $error_msg,
-                              'agent'   =>'ETVA',
+                              'agent'   =>sfConfig::get('config_acronym'),
                               'info'    => $info);
             return $response;
         }

@@ -236,4 +236,80 @@ sub get_ip_conf {
     }
 }
 
+# get hosts list
+sub get_hosts_list {
+
+    my @l = ();
+    if( ! -x "/usr/sbin/system-config-network-cmd" ){
+        print STDERR "system-config-network-cmd tool doest exists!\n";
+    } else {
+        my %HostsList = ();
+        open(F,"/usr/sbin/system-config-network-cmd -e |");
+        while(<F>){
+            if( /ProfileList\.default\.HostsList\.(\d+)\.([^=]+)=(.+)/ ){
+                my ($n,$k,$v) = ($1,$2,$3);
+                $HostsList{"$n"} = { 'id'=>$n } if( !$HostsList{"$n"} );
+                $HostsList{"$n"}{"$k"} = $v;
+            }
+        }
+        close(F);
+
+        @l = sort { $a->{'id'} <=> $b->{'id'} } values %HostsList;
+    }
+
+    return wantarray() ? @l : \@l;
+}
+# set hosts list
+sub set_hosts_list {
+    my @l = @_;
+
+    if( ! -x "/usr/sbin/system-config-network-cmd" ){
+        print STDERR "system-config-network-cmd tool doest exists!\n";
+    } else {
+        my $c = 1;
+        open(P,"| /usr/sbin/system-config-network-cmd -i 2>/dev/null");
+        for my $H (@l){
+            for my $k (keys %$H){
+                next if( $k eq 'id' );  # ignore id key
+                my $v = $H->{"$k"};
+                print P "ProfileList.default.HostsList.$c.$k=$v","\n";
+            }
+            $c++;
+        }
+        close(P);
+    }
+}
+# add host to hosts list
+sub add_hosts_list {
+    my ($name,$ip,$comment,@alias) = @_;
+
+    my @l = &get_hosts_list();
+    my %Host = ( 'Hostname'=>$name, 'IP'=>$ip, 'Comment'=>$comment );
+    my $c = 1;
+    for my $a (@alias){
+        $Host{"AliasList.$c"} = $a;
+    }
+    push(@l, \%Host );
+
+    &set_hosts_list(@l);
+}
+# change host of hosts list
+sub change_hosts_list {
+    my ($name,$ip,$comment,@alias) = @_;
+
+    my @l = &get_hosts_list();
+
+    my %Host = ( 'Hostname'=>$name, 'IP'=>$ip, 'Comment'=>$comment );
+    my $c = 1;
+    for my $a (@alias){
+        $Host{"AliasList.$c"} = $a;
+    }
+    for(my $i=0; $i<scalar(@l); $i++){
+        if( $l[$i]{'Hostname'} eq $Host{'Hostname'} ){
+            $l[$i] = \%Host;
+        }
+    }
+    &set_hosts_list(@l);
+}
+
 1;

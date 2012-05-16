@@ -408,7 +408,7 @@ ETMS.MAILBOX.Edit.Main = Ext.extend(Ext.Panel,{
     layout:'fit',
     border:false,
     ref: '../mbpanel',
-    //defaults:{border:false},
+    defaults:{border:false},
     title:<?php echo json_encode(__('Main Options')) ?>
     ,initComponent: function(){
         //====================== DATA STORE =======================
@@ -843,7 +843,7 @@ ETMS.MAILBOX.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
             },
             success: function(resp,opt){
-                var msg = <?php echo json_encode(__('Client options edited successfully')) ?>;
+                var msg = <?php echo json_encode(__('Client options created successfully')) ?>;
                 Ext.ux.Logger.info(msg);
                 this.parent_grid.getStore().reload();
                 this.changeFreeMb(-1);    //actualiza o nr de mailboxs livres

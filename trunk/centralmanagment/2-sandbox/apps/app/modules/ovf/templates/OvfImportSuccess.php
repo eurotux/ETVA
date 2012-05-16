@@ -229,7 +229,14 @@ Ovf.ImportWizard.Cards = function(){
                         xtype:'textfield',
                         ref:'name',
                         fieldLabel: <?php echo json_encode(__('Virtual server name')) ?>,
-                        name:'name'
+                        name:'name',
+                        allowBlank : false,
+                        invalidText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed!')) ?>,
+                        validator  : function(v){
+                            var t = /^[a-zA-Z][a-zA-Z0-9\-\_]+$/;
+                            return t.test(v);
+                        }
+
                     },
                     {
                         xtype:'combo',ref:'nodes_cb',anchor:'90%',
@@ -237,7 +244,9 @@ Ovf.ImportWizard.Cards = function(){
                         selectOnFocus:true,forceSelection:true,editable:false,allowBlank:false,
                         name:'nodes_cb',hiddenName:'nodes_cb',valueField:'Id',displayField:'name',
                         store:new Ext.data.Store({
-                                proxy:new Ext.data.HttpProxy({url:'/app_dev.php/node/JsonListCluster'}),
+                                proxy:new Ext.data.HttpProxy({
+                                    url:'node/JsonListCluster?initialize=1' 
+                                }),
                                 reader: new Ext.data.JsonReader({
                                             root:'data',
                                             fields:['Id',{name:'memfree',mapping:'Memfree'},{name:'name',mapping:'Name'},{name:'hypervisor',mapping:'Hypervisor'}]})
@@ -253,9 +262,12 @@ Ovf.ImportWizard.Cards = function(){
                         })
                         ,listeners:{
                                 select:{scope:this, fn:function(combo, record, index) {                                    
+                                    var node_id = record.get('Id');
+                                    var conf = {'id':node_id, 'level':'node'};
+                                    Ext.getCmp('ovfnetwork_cardPanel').confGrid(conf);
 
                                     this.hypervisor.setValue(record.get('hypervisor'));
-                                    this.node_memory.setValue(record.get('memfree'));
+                                    this.node_memory.setValue(record.get('maxmem'));
 
                                     if(record.get('hypervisor')=='xen'){
                                         this.kvm_panel.hide();
@@ -429,7 +441,7 @@ Ovf.ImportWizard.Cards = function(){
                         if(!this.hasLoaded)
                         {
                             Ext.Msg.show({
-                                title: String.format(<?php echo json_encode(__('Error {0}')) ?>,'ETVA'),
+                                title: String.format(<?php echo json_encode(__('Error {0}')) ?>,'<?php echo sfConfig::get('config_acronym'); ?>'),
                                 buttons: Ext.MessageBox.OK,
                                 msg: msg+ <?php echo json_encode(__('Could not continue!')) ?>,
                                 icon: Ext.MessageBox.ERROR});
@@ -835,7 +847,7 @@ Ovf.ImportWizard.Cards = function(){
 
 
 
-    ovfnetwork_cardPanel = Ext.extend(Ext.ux.Wiz.Card, {
+    ovfnetwork_cardPanel = Ext.extend(Ext.ux.Wiz.Card, {id:'ovfnetwork_cardPanel',
         initComponent:function(){
 
            
@@ -870,29 +882,25 @@ Ovf.ImportWizard.Cards = function(){
 
 
             ovfnetwork_cardPanel.superclass.initComponent.call(this);
-                                  
-
-            this.ovfnetworks_panel.on({
+            
+            this.ovfnetworks_panel.on({                   
                 render:{scope:this,
                     fn:function(p){
-
                         if(typeof Network !='undefined' && typeof Network.ManageInterfacesGrid !='undefined'){
-                            
                             var grid = this.addGrid();
                             this.ovfnetworks_panel.add(grid);                            
 
                         }else{
-
                             this.ovfnetworks_panel.load({
                                 url:<?php echo json_encode(url_for('network/Network_ManageInterfacesGrid')); ?>
                                 ,scripts:true
                                 ,scope:this
                                 ,callback:function(){
 
-                                    var grid = this.addGrid();
+                                    //var grid = this.addGrid();
 
-                                    this.ovfnetworks_panel.add(grid);
-                                    this.ovfnetworks_panel.doLayout();
+                                    //this.ovfnetworks_panel.add(grid);
+                                    //this.ovfnetworks_panel.doLayout();
                                 }//end callback
                             });
                         }
@@ -900,9 +908,23 @@ Ovf.ImportWizard.Cards = function(){
             });// end on...
 
         }
-        ,addGrid:function(){
+        ,confGrid:function(conf){
+            var grid = this.addGrid(conf);
+            this.ovfnetworks_panel.add(grid);                                       
+            this.ovfnetworks_panel.doLayout();
 
-            var grid = new Network.ManageInterfacesGrid({ref:'../ovfnetworks_grid',vm_type:'pv',border:false});
+            (this.ovfnetworks_grid).getStore().loadData(this.nets);
+
+
+        }
+        ,addGrid:function(conf){
+            var gridConf = {ref:'../ovfnetworks_grid',vm_type:'pv',border:false};
+            if(conf){
+                gridConf.node_id = conf.id;
+                gridConf.level = conf.level;
+            }
+
+            var grid = new Network.ManageInterfacesGrid(gridConf);
 
             grid.addBtn.on('click',function(){grid.fireEvent('afteredit');},grid);            
 
@@ -974,15 +996,15 @@ Ovf.ImportWizard.Cards = function(){
             return {'networks':networks};
         }
         ,loadRecord:function(data){
-        
 
             var records = new Object();
             records.data = [];
 
             for(var i=0,len=data.length;i<len;i++)
                 records.data.push(data[i]);
+            this.nets = records;
                    
-            (this.ovfnetworks_grid).getStore().loadData(records);                       
+//            (this.ovfnetworks_grid).getStore().loadData(records);                       
         }
 
     });
@@ -1051,7 +1073,7 @@ Ovf.ImportWizard.Cards = function(){
         ,loadOvfDescriptor:function(url){
 
             this.form.load({
-                    url: '/app_dev.php/ovf/jsonLoadDescriptor'
+                    url: 'ovf/jsonLoadDescriptor'
                     ,params:{'ovf_location_url':url}
                     //,method:'POST'
                     ,scope:this

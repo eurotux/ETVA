@@ -298,16 +298,18 @@ class EtvaVolumegroup_VA
     }
 
 
-    private function assoc_pvs($etva_node, $pvs,$method)
+    private function assoc_pvs($etva_node, $pvs)
     {
         $etva_volgroup = $this->etva_vg;
+
 
         /*
          * associate pvs with vg and update info
          */
         $pvs = (array) $pvs;
-        foreach($pvs as $pvInfo)
+        foreach($pvs as $pv => $pvInfo)
         {
+
 
             $pv_info = (array) $pvInfo;
 
@@ -324,27 +326,54 @@ class EtvaVolumegroup_VA
             $etva_node_physical->setDevice($pv_device);
             $etva_node_physical->save();
 
-            if($method!=self::VGREMOVE)
-            {
-                $etva_volgroup_physical = EtvaVolumePhysicalPeer::retrieveByPK($etva_volgroup->getId(), $etva_physical->getId());
-
-                if($method==self::VGREDUCE)
-                {
-                    $etva_volgroup_physical->delete();
-
-                }else
-                {
-                    if(!$etva_volgroup_physical) $etva_volgroup_physical = new EtvaVolumePhysical();
-                    $etva_volgroup_physical->setEtvaPhysicalvolume($etva_physical);
-                    $etva_volgroup_physical->setEtvaVolumegroup($etva_volgroup);
-                    $etva_volgroup_physical->save();
-                }
-            }
+            if(!$etva_volgroup_physical) $etva_volgroup_physical = new EtvaVolumePhysical();
+            $etva_volgroup_physical->setEtvaPhysicalvolume($etva_physical);
+            $etva_volgroup_physical->setEtvaVolumegroup($etva_volgroup);
+            $etva_volgroup_physical->save();
 
         }
 
     }
 
+    /*
+     * lookup for physical volume in array
+     */
+    private function lookup_physicalvolume($etva_physical,$pvs){
+
+        $pvs_arr = (array) $pvs;
+
+        foreach($pvs_arr as $pv => $pvInfo){
+            $pv_info = (array) $pvInfo;
+
+            $pv_uuid = isset($pv_info[EtvaPhysicalvolume::UUID_MAP]) ? $pv_info[EtvaPhysicalvolume::UUID_MAP] : '';
+            $pv_device = $pv_info[EtvaPhysicalvolume::DEVICE_MAP];
+
+            if( !$pv_uuid && ($pv_device == $etva_physical->getDevice()) ){
+                return true;
+            } elseif( $etva_physical->getUuid() == $pv_uuid ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function deassoc_pvs($etva_node, $pvs)
+    {
+        $etva_volgroup = $this->etva_vg;
+
+        /*
+         * deassociate old pvs with vg and update info
+         */
+        $etva_volgroup_physical_list = EtvaVolumePhysicalPeer::getByEtvaVolumeGroupId($etva_volgroup->getId());
+        foreach( $etva_volgroup_physical_list as $etva_volgroup_physical ){
+            $etva_physical = $etva_volgroup_physical->getEtvaPhysicalvolume();
+
+            if( !$this->lookup_physicalvolume($etva_physical,$pvs) ){
+                $etva_volgroup_physical->delete();
+            }
+        }
+
+    }
     
 
     /*
@@ -354,15 +383,15 @@ class EtvaVolumegroup_VA
     {        
         
         switch($method){
-            case 'vgextend':
+            case self::VGEXTEND:
                             $msg_ok_type = EtvaVolumegroupPeer::_OK_EXTEND_;
                             $msg_err_type = EtvaVolumegroupPeer::_ERR_EXTEND_;
                             break;
-            case 'vgcreate':
+            case self::VGCREATE:
                             $msg_ok_type = EtvaVolumegroupPeer::_OK_CREATE_;
                             $msg_err_type = EtvaVolumegroupPeer::_ERR_CREATE_;
                             break;
-            case 'vgreduce':
+            case self::VGREDUCE:
                             $msg_ok_type = EtvaVolumegroupPeer::_OK_REDUCE_;
                             $msg_err_type = EtvaVolumegroupPeer::_ERR_REDUCE_;
                             break;
@@ -396,8 +425,8 @@ class EtvaVolumegroup_VA
              * associate pvs with vg
              */
             $pvs = (array) $returned_object[EtvaVolumegroup::PHYSICALVOLUMES_MAP];
-            $this->assoc_pvs($etva_node, $pvs, $method);
-                        
+            if( $method != self::VGREDUCE ) $this->assoc_pvs($etva_node, $pvs);
+            else  $this->deassoc_pvs($etva_node, $pvs);
 
             if($etva_volgroup->getStorageType()!=EtvaVolumegroup::STORAGE_TYPE_LOCAL_MAP)
             {
@@ -460,7 +489,7 @@ class EtvaVolumegroup_VA
                 $message = Etva::getLogMessage(array('info'=>implode(', ',$names)), EtvaVolumegroupPeer::_ERR_INCONSISTENT_);
                 sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(),'event.log',array('message' =>$message,'priority'=>EtvaEventLogger::ERR)));
 
-                return array('success'=>false,'agent'=>'ETVA','error'=>$message,'action'=>'reload','info'=>$message);
+                return array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$message,'action'=>'reload','info'=>$message);
 
 
             }else
@@ -500,7 +529,6 @@ class EtvaVolumegroup_VA
             $vg_type = $etva_volgroup->getStorageType();
 
             $pvs = (array) $returned_object[EtvaVolumegroup::PHYSICALVOLUMES_MAP];
-            $this->assoc_pvs($etva_node, $pvs,'vgremove');
 
             $etva_volgroup->delete();
 
@@ -560,7 +588,7 @@ class EtvaVolumegroup_VA
                 $message = Etva::getLogMessage(array('info'=>implode(', ',$names)), EtvaVolumegroupPeer::_ERR_INCONSISTENT_);
                 sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(),'event.log',array('message' =>$message,'priority'=>EtvaEventLogger::ERR)));
 
-                return array('success'=>false,'agent'=>'ETVA','error'=>$message,'action'=>'reload','info'=>$message);
+                return array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$message,'action'=>'reload','info'=>$message);
 
 
             }else

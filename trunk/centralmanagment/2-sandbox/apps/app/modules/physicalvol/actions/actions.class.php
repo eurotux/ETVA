@@ -33,18 +33,21 @@ class physicalvolActions extends sfActions
 
         $nid = $request->getParameter('nid');
         $dev = $request->getParameter('dev');        
+        $uuid = $request->getParameter('uuid');
 
-        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
 
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
 
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             //notify system log
             $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
             $message = Etva::getLogMessage(array('name'=>$dev,'info'=>$node_log), EtvaPhysicalvolumePeer::_ERR_INIT_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
@@ -56,16 +59,22 @@ class physicalvolActions extends sfActions
 
         }
       
-        // get DB info        
-        if(!$etva_pv = $etva_node->retrievePhysicalvolumeByDevice($dev)){
+        // get DB info       
+        if($uuid){
+            $etva_pv = $etva_node->retrievePhysicalvolumeByUuid($uuid);
+        }else{
+            $etva_pv = $etva_node->retrievePhysicalvolumeByDevice($dev);
+        }
+
+        if(!$etva_pv){
             $msg = Etva::getLogMessage(array('name'=>$etva_node->getName(),'dev'=>$dev), EtvaNodePeer::_ERR_NODEV_);
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NODEV_,array('%name%'=>$etva_node->getName(),'%dev%'=>$dev));
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n);
 
             //notify system log            
             $message = Etva::getLogMessage(array('name'=>$dev,'info'=>$msg), EtvaPhysicalvolumePeer::_ERR_INIT_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
@@ -122,18 +131,19 @@ class physicalvolActions extends sfActions
     {
         $nid = $request->getParameter('nid');
         $dev = $request->getParameter('dev');        
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
 
-        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+        if(!$etva_node){
 
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
 
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             //notify system log
             $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
             $message = Etva::getLogMessage(array('name'=>$dev,'info'=>$node_log), EtvaPhysicalvolumePeer::_ERR_UNINIT_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
@@ -150,12 +160,12 @@ class physicalvolActions extends sfActions
 
             $msg = Etva::getLogMessage(array('name'=>$etva_node->getName(),'dev'=>$dev), EtvaNodePeer::_ERR_NODEV_);
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NODEV_,array('%name%'=>$etva_node->getName(),'%dev%'=>$dev));
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             //notify system log
             $message = Etva::getLogMessage(array('name'=>$dev,'info'=>$msg), EtvaPhysicalvolumePeer::_ERR_UNINIT_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
@@ -252,7 +262,108 @@ class physicalvolActions extends sfActions
 
     }
 
+    /**
+     * Return pre-formatted data for tree-column extjs
+     *
+     * $request may contain the following keys:
+     * - cid: cid (Cluster ID)
+     * @return array json array
+     */
+    public function executeJsonClusterPhydiskTree(sfWebRequest $request)
+    {
+        /*
+         * criteria to select only cluster ID column matching with incoming parameter
+         *
+         */
+        $cluster_id = $request->getParameter('cid');
 
+        $criteria = new Criteria();
+        $criteria->add(EtvaPhysicalvolumePeer::CLUSTER_ID, $cluster_id, CRITERIA::EQUAL);
+        $criteria->addAnd(EtvaPhysicalvolumePeer::STORAGE_TYPE, EtvaPhysicalvolume::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
+//        $criteria->addAscendingOrderByColumn(EtvaPhysicalvolumePeer::STORAGE_TYPE);
+        $cluster_devs = EtvaPhysicalvolumePeer::doSelect($criteria);
+//return;
+
+        
+//        $node_devs = EtvaNodePhysicalVolumePeer::doSelectJoinEtvaPhysicalvolume($criteria);
+        $storages = array();
+        $storage_types = array();
+
+        foreach($cluster_devs as $dev){
+//            $dev = $data->getEtvaPhysicalvolume();
+            $storage_type = $dev->getStorageType();
+
+//            $dev = new EtvaPhysicalvolume();
+
+
+            $id = $dev->getId();
+            $device = $dev->getDevice();
+//            $device = $dev->get $data->getDevice();
+            $tag = $device;
+            $uuid = $dev->getUuid();
+            $qtip_i18n = $this->getContext()->getI18N()->__(EtvaPhysicalvolumePeer::_PVUNINIT_,array('%name%'=>$tag));
+            $qtip = $qtip_i18n;
+            $type = $cls = 'dev-pd';
+
+
+            $pvsize = $dev->getPvsize();
+            $pretty_pvsize = $dev->getPvsize();
+
+            $size = $dev->getDevsize();
+            $pretty_size = $dev->getDevsize();
+
+            $devicesize = $size;
+            $pretty_devicesize = $pretty_size;
+
+            if($dev->getPvinit())
+            {
+                $qtip_i18n = $this->getContext()->getI18N()->__(EtvaPhysicalvolumePeer::_PVINIT_,array('%name%'=>$tag));
+                $qtip = $qtip_i18n;
+                $type = 'dev-pv';
+                $cls = 'dev-pv';
+
+                $devicesize = $pvsize;
+                $pretty_devicesize = $pretty_pvsize;
+            }
+
+            $qtip .= '<br>'.$uuid;
+
+
+            if(sfConfig::get('sf_environment') == 'soap'){
+                $children = array('device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'leaf'=>true);
+            }else
+            {
+                $children = array('id'=>$id,'device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'uuid'=>$uuid,'leaf'=>true);
+
+            }
+
+            $storage_types[$storage_type][] = $children;
+
+        }
+
+
+        foreach($storage_types as $type=>$data)
+        {
+            $storages[] = array('id'=>$type,'iconCls'=>'devices-folder','text'=>$type,'expanded'=>true, 'singleClickExpand'=>true,'children'=>$data);
+
+        }
+
+
+        if(empty($storages)){
+            $msg_i18n = $this->getContext()->getI18N()->__('No data found');
+            $storages[] = array('expanded'=>true,'text'=>$msg_i18n,'qtip'=>$msg_i18n,'leaf'=>true);
+        }
+        $return = json_encode($storages);
+
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
+        else{
+
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+            return $this->renderText($return);
+
+        }
+
+    }
 
 
     /**
@@ -268,7 +379,6 @@ class physicalvolActions extends sfActions
          * criteria to select only node ID column matching with nid 
          * 
          */
-
         $criteria = new Criteria();
         
         $criteria->add(EtvaNodePhysicalVolumePeer::NODE_ID,$request->getParameter('nid'));
@@ -281,7 +391,6 @@ class physicalvolActions extends sfActions
         foreach($node_devs as $data){
             $dev = $data->getEtvaPhysicalvolume();
             $storage_type = $dev->getStorageType();
-
 
             $id = $dev->getId();            
             $device = $data->getDevice();
@@ -298,22 +407,28 @@ class physicalvolActions extends sfActions
             $size = $dev->getDevsize();
             $pretty_size = $dev->getDevsize();            
 
+            $devicesize = $size;
+            $pretty_devicesize = $pretty_size;
+
             if($dev->getPvinit())
             {
                 $qtip_i18n = $this->getContext()->getI18N()->__(EtvaPhysicalvolumePeer::_PVINIT_,array('%name%'=>$tag));                
                 $qtip = $qtip_i18n;
                 $type = 'dev-pv';
                 $cls = 'dev-pv';
+
+                $devicesize = $pvsize;
+                $pretty_devicesize = $pretty_pvsize;
             }
 
             $qtip .= '<br>'.$uuid;
 
 
             if(sfConfig::get('sf_environment') == 'soap'){
-                    $children = array('device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'leaf'=>true);
+                $children = array('device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'leaf'=>true);
             }else
             {
-                $children = array('id'=>$id,'device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'uuid'=>$uuid,'leaf'=>true);
+                $children = array('id'=>$id,'device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'uuid'=>$uuid,'leaf'=>true);
 
             }
 
@@ -364,12 +479,16 @@ class physicalvolActions extends sfActions
 
         $elements = array();
 
+        //adding cluster id filter
+        $cid = $request->getParameter('cid');
         $nid = $request->getParameter('nid');
+        $level = $request->getParameter('level');
 
-        $filter = json_decode($request->getParameter('filter'),true);        
+        if(!$level)
+            $level = 'node';
 
-        $etva_node = EtvaNodePeer::retrieveByPK($nid);
-
+        //get the
+        $filter = json_decode($request->getParameter('filter'),true);
         $criteria = new Criteria();
         $criteria->add(EtvaPhysicalvolumePeer::ALLOCATABLE, 1);
         $criteria->add(EtvaPhysicalvolumePeer::PVINIT, 1);
@@ -380,18 +499,26 @@ class physicalvolActions extends sfActions
             $criteria->add($column, $value);
         }
 
-        $etva_pvs = $etva_node->getEtvaNodePhysicalVolumesJoinEtvaPhysicalvolume($criteria);        
+        if($level == 'cluster'){
+            error_log("treated as a cluster");
+            $etva_cluster = EtvaClusterPeer::retrieveByPK($cid);
+            $etva_pvs = $etva_cluster->getEtvaPhysicalvolumes($criteria);
+        }elseif($level == 'node'){
+            error_log("treated as a node");
+            $etva_node = EtvaNodePeer::retrieveByPK($nid);
+            $etva_pvs = $etva_node->getEtvaNodePhysicalVolumesJoinEtvaPhysicalvolume($criteria);
+        }else{
+            return;
+        }
 
         if(!$etva_pvs){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaPhysicalvolumePeer::_NONE_AVAILABLE_);
-            $info = array('success'=>false,'agent'=>'ETVA','info'=>$msg_i18n,'error'=>$msg_i18n);
+            $info = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>$msg_i18n,'error'=>$msg_i18n);
 
             if(sfConfig::get('sf_environment') == 'soap') return json_encode($info);
 
             $error = $this->setJsonError($info);
             return $this->renderText($error);
-
-
         }
 
         if(sfConfig::get('sf_environment') == 'soap'){
@@ -405,8 +532,13 @@ class physicalvolActions extends sfActions
         }else{
 
             foreach ($etva_pvs as $elem){
-                $etva_pv = $elem->getEtvaPhysicalVolume();
+                if($level == 'node'){
+                    $etva_pv = $elem->getEtvaPhysicalVolume();
+                }elseif($level == 'cluster'){
+                    $etva_pv = $elem;
+                }
                 // $id = $elem->getId();
+                //error_log(print_r($etva_pv, true));
                 $name = $etva_pv->getName();
                 $pv = $etva_pv->getPv();                
                 $elements[] = array('id'=>$pv,'name'=>$name);
@@ -426,8 +558,6 @@ class physicalvolActions extends sfActions
 
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($return);
-
-
     }
 
 
@@ -525,7 +655,7 @@ class physicalvolActions extends sfActions
                 $node_message = Etva::getLogMessage(array('name'=>$request->getParameter('uuid')), EtvaNodePeer::_ERR_NOTFOUND_UUID_);
                 $message = Etva::getLogMessage(array('info'=>$node_message), EtvaPhysicalvolumePeer::_ERR_SOAPUPDATE_);
                 $this->dispatcher->notify(
-                    new sfEvent('ETVA',
+                    new sfEvent(sfConfig::get('config_acronym'),
                             'event.log',
                             array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
                 ));
@@ -555,7 +685,7 @@ class physicalvolActions extends sfActions
                 $cluster_message = Etva::getLogMessage(array('info'=>$error_msg), EtvaClusterPeer::_ERR_CLUSTER_);
                 $message = Etva::getLogMessage(array('info'=>$cluster_message), EtvaPhysicalvolumePeer::_ERR_SOAPUPDATE_);
                 $this->dispatcher->notify(
-                    new sfEvent('ETVA',
+                    new sfEvent(sfConfig::get('config_acronym'),
                             'event.log',
                             array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
                 ));

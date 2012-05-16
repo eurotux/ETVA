@@ -4,14 +4,25 @@
  * Updates servers vmState
  */
 
-class serverCheckvmsstateTask extends sfBaseTask
+class serverCheckvmsstateTask extends etvaBaseTask
 {
+
+    /**
+      * Overrides default timeout
+      **/
+    protected function getSigAlarmTimeout(){
+        return 290; // less than 5 minutes 
+    }
+
+
   protected function configure()
   {
     // // add your own arguments here
     // $this->addArguments(array(
     //   new sfCommandArgument('my_arg', sfCommandArgument::REQUIRED, 'My argument'),
     // ));
+
+    parent::configure();
 
     $this->addOptions(array(
       new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name'),
@@ -35,14 +46,17 @@ EOF;
 
   protected function execute($arguments = array(), $options = array())
   {
+
     $context = sfContext::createInstance(sfProjectConfiguration::getApplicationConfiguration('app',$options['env'],true));
+    parent::execute($arguments, $options);
+
     // initialize the database connection
     $databaseManager = new sfDatabaseManager($this->configuration);
     $con = $databaseManager->getDatabase($options['connection'])->getConnection();
 
     // add your code here
 
-    $this->log('Checking node(s) virtual machines state...'."\n");
+    $this->log('[INFO]Checking node(s) virtual machines state...'."\n");
 
     $nodes = EtvaNodePeer::doSelect(new Criteria());
 
@@ -77,13 +91,13 @@ EOF;
 
         if($affected > 0)
             $context->getEventDispatcher()->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
     }
 
 
     if(!empty($errors))
-        $this->log( $message);
+        $this->log('[INFO]'.$message);
 
 
     $logger = new sfFileLogger($context->getEventDispatcher(), array('file' => sfConfig::get("sf_log_dir").'/cron_status.log'));

@@ -23,16 +23,16 @@ all:
   # disks drivers hypervisor => driver supported
     disks:
       pv:
-       - ide
        - xen
+       - ide
        - scsi
       hvm:
-       - ide
        - xen
+       - ide
        - scsi
       kvm:
-       - ide
        - virtio
+       - ide
        - scsi
       
   mac:
@@ -55,6 +55,15 @@ all:
     dir: '%SF_DATA_DIR%/rra' 
   sf_guard_plugin:
     import_encrypted_passwords: true
+  dbrequired: 1.0
+  cron:
+    alert_dir: '/var/run/etva_etvm'
+    log_dir: '/var/log/etva_etvm'
+  remote_log:
+    file: '%SF_DATA_DIR%/diagnostic_ball.tgz'           # Diagnostic file
+    script: '%SF_ROOT_DIR%/utils/diagnostic_ball.sh'    # Script that generates the file
+    mailscript: '%SF_ROOT_DIR%/utils/pl/EmailLogs.pl'   # Script responsible for sending emails (with the diagnostic file attached)
+    toemail: 'etva@suporte.eurotux.com' #etva@eurotux.com # rcpt to
 
 extdirect:
   ds_ext_direct_plugin:

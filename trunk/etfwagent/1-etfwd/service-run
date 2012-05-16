@@ -1,7 +1,11 @@
 #!/bin/bash
 
-cd /srv/etva-etfw
-exec > /var/log/etva-etfw/etfwd.log 2>&1
-exec /usr/bin/perl -I./lib etfwd
+VM=`dmesg | egrep "(QEMU|VBOX)"`
 
-
+if [ "$VM" != "" ]; then
+    cd /srv/etva-etfw
+    exec > /var/log/etva-etfw/etfwd.log 2>&1
+    exec /usr/bin/perl -I./lib etfwd
+else
+    touch /service/etva-etfw/down && svc -dk /service/etva-etfw
+fi

@@ -1,7 +1,0 @@
-EtvaVlan:
-  net1:
-    name: Management
-  net2:
-    name: Operation
-    
-

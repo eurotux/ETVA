@@ -16,6 +16,33 @@ class sfGuardUserActions extends basesfGuardUserActions
 
     }
 
+    /*
+     *
+     * list all users
+     *
+     * return json array response
+     * TODO: Melhorar implementação
+     */
+    public function executeJsonList(sfWebRequest $request)
+    {
+        $isAjax = $request->isXmlHttpRequest();
+        //if(!$isAjax) return $this->redirect('@homepage')
+
+        $c = new Criteria();
+        $users = sfGuardUserPeer::doSelect($c);
+        $elements = array();
+        foreach ($users as $user){
+            $elements[] = $user->toArray();
+        }
+
+        $return = array('data'  => $elements);
+
+        $result=json_encode($return);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($result);
+    }
+
+
     public function executeJsonDelete(sfWebRequest $request)
     {
         $request->checkCSRFProtection();
@@ -27,7 +54,7 @@ class sfGuardUserActions extends basesfGuardUserActions
         {
             $msg_i18n = $this->getContext()->getI18N()->__(sfGuardUserPeer::_ERR_CANNOT_DELETE_,array('%id%'=>$id));
 
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             // if is browser request return text renderer
             $error = $this->setJsonError($error);
@@ -37,7 +64,7 @@ class sfGuardUserActions extends basesfGuardUserActions
         if(!$sf_user = sfGuardUserPeer::retrieveByPK($id)){
             $msg_i18n = $this->getContext()->getI18N()->__(sfGuardUserPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$id));
 
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             // if is browser request return text renderer
             $error = $this->setJsonError($error);
@@ -67,6 +94,34 @@ class sfGuardUserActions extends basesfGuardUserActions
                 
         $result = $this->processForm($request, $user_form);
 
+        try{
+
+            // remove existing permissions for the given user
+            $c = new Criteria();
+            $c->add(EtvaPermissionUserPeer::USER_ID, $request->getParameter('id'), Criteria::EQUAL);
+            $g_p = EtvaPermissionUserPeer::doSelect($c);   //filter user permissions
+
+            foreach ($g_p as $p){
+                $p->delete();
+            }
+
+            // add new permission set
+            $perm_list = $request->getParameter('sf_guard_user_permission_list');
+            $perm_list_dec = json_decode($perm_list);
+
+            foreach ($perm_list_dec as $object){
+                $g_p = new EtvaPermissionUser();
+                $g_p->setUserId($request->getParameter('id'));
+                $g_p->setEtvapermId($object);
+                $g_p->save();
+            }
+
+        }catch(Exception $e){
+            $result = array('success' => false,
+                          'error'   => 'Could not perform operation',
+                          'agent'   =>sfConfig::get('config_acronym'),
+                          'info'    => 'Could not perform operation');
+        }
 
         if(!$result['success']){
             $error = $this->setJsonError($result);
@@ -77,8 +132,6 @@ class sfGuardUserActions extends basesfGuardUserActions
         return $this->renderText($result);
 
     }
-
-
 
   public function executeJsonGridInfo(sfWebRequest $request)
   {
@@ -101,10 +154,25 @@ class sfGuardUserActions extends basesfGuardUserActions
         $group_ids[] = $group->getId();
 
     //user permissions
-    $permissions = $this->sfGuardUser->getPermissions();
+    $id = $request->getParameter('id');
+    $c = new Criteria();
+    $c->add(EtvaPermissionUserPeer::USER_ID, $id, Criteria::EQUAL);
+    //$c->addJoin(EtvaPermissionPeer::ID, EtvaPermissionUserPeer::ETVAPERM_ID);
+    $perms = EtvaPermissionUserPeer::doSelect($c);
+
+    //error_log(print_r($perms, true));
     $permission_ids = array();
-    foreach($permissions as $permission)
-        $permission_ids[] = $permission->getId();
+    foreach ($perms as $p){
+        $permission_ids[] = $p->getEtvaPermission()->getId();
+    }
+
+    error_log(print_r($permission_ids, true));
+    
+
+//    $permissions = $this->sfGuardUser->getPermissions();
+//    $permission_ids = array();
+//    foreach($permissions as $permission)
+//        $permission_ids[] = $permission->getId();
     
     
     $elements = array_merge($user_info,$profile_info,
@@ -236,6 +304,9 @@ class sfGuardUserActions extends basesfGuardUserActions
         $params = array();        
 
         foreach($widget->getFields() as $key => $object){
+            if($key == "sf_guard_user_permission_list"){
+                continue;
+            }
             $data = $request->getParameter($key);
             $data_dec = json_decode($data);
             $params[$key] = is_array($data_dec) ? $data_dec : $data;
@@ -250,7 +321,7 @@ class sfGuardUserActions extends basesfGuardUserActions
             }catch(Exception $e){
                 $response = array('success' => false,
                               'error'   => 'Could not perform operation',
-                              'agent'   =>'ETVA',
+                              'agent'   =>sfConfig::get('config_acronym'),
                               'info'    => 'Could not perform operation');
                 return $response;
             }
@@ -267,7 +338,7 @@ class sfGuardUserActions extends basesfGuardUserActions
             $info = implode('<br>',$errors);
             $response = array('success' => false,
                               'error'   => $error_msg,
-                              'agent'   =>'ETVA',
+                              'agent'   =>sfConfig::get('config_acronym'),
                               'info'    => $info);
             return $response;
         }

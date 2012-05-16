@@ -14,6 +14,108 @@ class eventActions extends sfActions
     {
     }
 
+    private function updateSetting($param, $value){
+        $c = new Criteria();
+        $c->add(EtvaSettingPeer::PARAM, $param);
+        $obj = EtvaSettingPeer::doSelectOne($c);
+        if($obj === null){
+            $obj = new EtvaSetting();           
+            $obj->setParam($param);
+        }
+        $obj->setValue($value);
+        $obj->save();
+    }
+
+    public function executeJsonDiagnostic(sfWebRequest $request)
+    {
+        $method     = $request->getParameter('method');
+        if($method == 'diagnostic'){
+            $this->updateSetting(EtvaSettingPeer::_SMTP_SERVER_, $request->getParameter('smtpserver'));
+            $this->updateSetting(EtvaSettingPeer::_SMTP_PORT_, $request->getParameter('port'));
+            $this->updateSetting(EtvaSettingPeer::_SMTP_USE_AUTH_ ,$request->getParameter('useauth'));
+            $this->updateSetting(EtvaSettingPeer::_SMTP_USERNAME_ ,$request->getParameter('username'));
+            $this->updateSetting(EtvaSettingPeer::_SMTP_KEY_ , $request->getParameter('key'));
+            $this->updateSetting(EtvaSettingPeer::_SMTP_SECURITY_ ,$request->getParameter('security_type'));
+
+        }
+
+        error_log("[METHOD] $method");
+        $result = diagnostic::getAgentFiles($method);
+
+        if(!$result['success'])
+        {
+            $error = $this->setJsonError($result);
+            return $this->renderText($error);
+        }
+
+        $json_encoded = json_encode($result);
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return  $this->renderText($json_encoded);       
+    }
+
+    public function executeJsonGetSMTPConf($request){
+        error_log(sfConfig::get("app_remote_smtpserver"));
+
+        $c = new Criteria();
+        $settings = EtvaSettingPeer::doSelect($c);
+
+        foreach($settings as $set){
+            switch($set->getParam()){
+                case EtvaSettingPeer::_SMTP_SERVER_:
+                    $addr = $set->getValue();
+                    break;
+                case EtvaSettingPeer::_SMTP_PORT_:
+                    $port = $set->getValue();
+                    break;
+                case EtvaSettingPeer::_SMTP_USE_AUTH_:
+                    $useauth = $set->getValue();
+                    break;
+                case EtvaSettingPeer::_SMTP_USERNAME_:
+                    $username = $set->getValue();
+                    break;
+                case EtvaSettingPeer::_SMTP_KEY_:
+                    $key = $set->getValue();
+                    break;
+                case EtvaSettingPeer::_SMTP_SECURITY_:
+                    $security = $set->getValue();
+                    break;
+            }
+        }
+
+
+        $final = array(
+            'addr'      => $addr,
+            'port'      => $port,
+            'useauth'   => $useauth,
+            'username'  => $username,
+            'key'       => $key,
+            'security'  => $security
+        );
+
+        $result = $final;
+        $result = json_encode($final);
+ 
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($result);
+    }
+
+    public function executeLogDownload($request)
+    {
+        $filepath = sfConfig::get("app_remote_log_file");
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setHttpHeader('Content-Length', sprintf("%u",filesize($filepath)));
+        $response->setContentType('application/x-download');
+        $response->setHttpHeader('Content-Disposition',
+                        'attachment; filename="'.
+                        $filepath.'"');
+        $response->sendHttpHeaders();
+        ob_end_clean();
+    
+        $this->getResponse()->setContent(IOFile::readfile_chunked($filepath));    
+        return sfView::NONE;
+    }
 
     public function executeJsonGrid($request)
     {
@@ -137,4 +239,13 @@ class eventActions extends sfActions
            }
         }
     } 
+
+    protected function setJsonError($info,$statusCode = 400){
+
+        if(isset($info['faultcode']) && $info['faultcode']=='TCP') $statusCode = 404;
+        $this->getContext()->getResponse()->setStatusCode($statusCode);
+        $error = json_encode($info);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $error;
+    }
 }

@@ -238,7 +238,7 @@ drange = function(config) {
                     var date_end = new Date(cur_year,cur_month,m_total_days,23,59,59);
 
                     var start_unix_time = parseInt(date_start.getTime().toString().substring(0, 10));
-                    alert(start_unix_time);
+//                    alert(start_unix_time);
                     var end_unix_time = parseInt(date_end.getTime().toString().substring(0, 10));
                     //var new_date = new Date(string);
                     //  alert(end_unix_time);
@@ -382,6 +382,7 @@ mainChartContainer = function(config) {
                 autoScroll:false,
                 height: 72,
                 items:[datarange],
+                tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-stats-filter',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Data filter Help')) ?>});}}],
                 margins: '5 5 0 5',
                 cmargins: '5 5 5 5'
             }
@@ -574,8 +575,9 @@ Server.Stats_NodeLoad = Ext.extend(mainChartContainer, {
             bodyStyle:'background:white;',
             items:[chart],
             plugins:Ext.isIE ? [] : V,
-            task:task,
-            bbar:
+            task:task
+            ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-stats-server-load',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Server load Help')) ?>});}}]
+            ,bbar:
                 [{
 
                     text:          <?php echo json_encode(__('START / STOP Polling')) ?>,
@@ -696,7 +698,7 @@ Server.Stats_Disk = Ext.extend(mainChartContainer, {
             successProperty:'success',
             record: 'row', // records will have an "Item" tag
             fields: [{name:'time', mapping:'t'},
-                {name:'reads',mapping:'v-1',type:'float'},
+                {name:'reads',mapping:'v0',type:'float'},
                 {name:'writes',mapping:'v1',type:'float'}]
             ,listeners: {
                 exception: function(dataProxy, type) {
@@ -826,8 +828,9 @@ Server.Stats_Disk = Ext.extend(mainChartContainer, {
             items:[chart],
             plugins:Ext.isIE ? [] : V,
             //plugins: V,
-            task:task,
-            bbar:
+            task:task
+            ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-stats-server-disk',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Server disk Help')) ?>});}}]
+            ,bbar:
                 [{
 
                     text:          <?php echo json_encode(__('START / STOP Polling')) ?>,
@@ -980,8 +983,9 @@ Server.Stats_Memory = Ext.extend(mainChartContainer, {
             collapsible:true,
             bodyStyle:'background:white;',
             plugins:Ext.isIE ? [] : V,
-            task:task,
-            items:[chart],
+            task:task
+            ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-stats-server-mem',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Server memory Help')) ?>});}}]
+            ,items:[chart],
             bbar:
                 [{
 
@@ -1322,7 +1326,7 @@ Server.Stats_Cpu_per = Ext.extend(mainChartContainer, {
             plugins:Ext.isIE ? [] : V,
             //plugins: V,
             task:task
-            ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-appliance-backup',autoLoad:{ params:'mod=appliance'},title: <?php echo json_encode(__('Appliance Backup Help')) ?>});}}]
+            ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-stats-server-load',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Server load Help')) ?>});}}]
             ,bbar:
                 [{
 
@@ -1390,10 +1394,9 @@ Server.Stats_Network = Ext.extend(mainChartContainer, {
         var query = {'server_id':this.server_id};
         this.items.get(1).removeAll(true);
 
-
         var networks = new Ext.data.JsonStore({
             url: <?php echo json_encode(url_for('network/jsonGridNoPager')) ?>,
-            baseParams:{'query': Ext.encode(query)},
+            baseParams:{'query': Ext.encode(query), 'sort':'port', 'dir':'asc'},
             root: 'data',
             fields: [
                 {name: 'network_id', mapping: 'Id'}
@@ -1569,8 +1572,9 @@ Server.Stats_Network = Ext.extend(mainChartContainer, {
             bodyStyle:'background:white;',
             items:[chart],
             plugins:Ext.isIE ? [] : V,
-            task:task,
-            bbar:
+            task:task
+            ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-stats-server-interface',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Server load Help')) ?>});}}]
+            ,bbar:
                 [{
 
                     text:          <?php echo json_encode(__('START / STOP Polling')) ?>,

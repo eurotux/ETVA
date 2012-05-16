@@ -1,6 +1,7 @@
+<div class="help">
 <a id="help-sfguard-permission-main"><h1>Gestão de permissões</h1></a>
 <p>Neste separador encontram-se as opções de gestão de permissões. A listagem (em baixo sobre a esquerda) indica os
-permisões existentes no sistema. As linhas da listagem podem ser selecionadas sempre que se pretender efectuar alterações.</p>
+permissões existentes no sistema. As linhas da listagem podem ser seleccionadas sempre que se pretender efectuar alterações.</p>
 <p>Estão disponíveis as seguintes operações:</p>
 <ul>
     <li><a href="#help-sfguard-permission-add">Adicionar permissão</a></li>
@@ -14,7 +15,7 @@ permisões existentes no sistema. As linhas da listagem podem ser selecionadas s
 <a id="help-sfguard-permission-add"><h2>Adicionar Permissão:</h2></a>
 <p>Para adicionar uma permissão, seleccionar a opção <em>Adicionar Permissão</em>.</p>
 <p>Sob o lado direito (<a href="#help-sfguard-permission-details"><em>Detalhes da permissão</em></a>) devem ser preenchidos os campos que caracterizam a permissão,
-    sendo os seguintes de <b>carácter obrigatório</b>: <em>Nome</em>; <em>Descrição</em>.
+    sendo os seguintes de <b>carácter obrigatório</b>: <em>Nome</em>; <em>Descrição</em>.</p>
 <a href="#help-sfguard-permission-main"><div>Início</div></a>
 <hr/>
 
@@ -46,5 +47,5 @@ permisões existentes no sistema. As linhas da listagem podem ser selecionadas s
 
 <a href="#help-sfguard-permission-main"><div>Início</div></a>
 <hr/>
-
+</div>
 

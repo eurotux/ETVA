@@ -35,6 +35,7 @@ Server.View.Main = function(config) {
 
     server_info.on({
         'updateNodeState':{fn:function(node_attrs,data){this.fireEvent('updateNodeCss',node_attrs,data);},scope:this}
+        ,'reloadTree': { fn: function(attrs){ this.fireEvent('reloadTree',attrs); }, scope:this}
     });
 
     items.push(server_info);
@@ -43,13 +44,15 @@ Server.View.Main = function(config) {
     //var network_grid = new Network.Grid.init({server_id:this.server['id']});
     //items.push(network_grid);
 
-    var server_stats = new Server.Stats({node_id:this.node_id,server_id:this.server['id']});
-    items.push(server_stats);
+    if( !this.server.data.unassigned ){ // show stats only if server is assigned to node
+        var server_stats = new Server.Stats({node_id:this.node_id,server_id:this.server['id']});
+        items.push(server_stats);
+    }
 
     if(!Ext.isEmpty(this.server['agent_tmpl']))
     {
         var services_disabled = this.server['state'] ? false : true;
-        var services_tabTip = this.server['state'] ? '' : 'Disabled....hihihihi! Management agent should be running';
+        var services_tabTip = this.server['state'] ? '' : 'Disabled.... Management agent should be running';
         //var server_services = new Server.View.Services({server_id:this.server['id'],disable_panels:services_disabled,tabTip:services_tabTip});
         var server_services = new Server.View.Services({server:this.server,disable_panels:services_disabled,tabTip:services_tabTip});
         items.push(server_services);

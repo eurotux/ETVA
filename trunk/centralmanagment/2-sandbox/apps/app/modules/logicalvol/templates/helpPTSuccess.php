@@ -1,3 +1,4 @@
+<div class="help">
 <a id="help-lvol"><h1>Logical Volumes</h1></a>
 <p>As operações disponíveis sobre os <em>logical volumes</em> são as seguintes:</p>
 
@@ -5,6 +6,7 @@
     <li><a href="#help-lvol-add">Criar</a></li>
     <li><a href="#help-lvol-rs">Redimensionar</a></li>
     <li><a href="#help-lvol-rm">Remover</a></li>
+    <li><a href="#help-lvol-clone">Clonar</a></li>
 </ul>
 
 <br/>
@@ -17,10 +19,6 @@ selecciona-se <em>Adicionar logical volume</em>.</p>
 <p>Na janela de criação deverá ser introduzido o nome pretendido,
 o <em>volume group</em> a partir do qual se criará, e o tamanho que não
 deverá exceder o tamanho disponível no <em>volume group</em>.
-</p>
-<p>
-Um <em>physical volume</em> está disponível quando não está alocado a nenhum <em>volume group</em> e
-encontra-se inicializado.
 </p>
 <a href="#help-lvol"><div>Início</div></a>
 <hr/>
@@ -45,3 +43,14 @@ a informação contida no <em>tooltip</em> que aparece.</p>
 <a href="#help-lvol"><div>Início</div></a>
 <hr/>
 
+<a id="help-lvol-clone"><h1>Clonar <em><b>Logical Volumes</b></em></h1></a>
+<p>Esta opção cria um novo volume com a dimensão do volume que se pretende clonar.</p>
+<p>Apenas está disponível caso o <em>logical volume</em> não esteja em uso. Para além desta condição, é também necessário que exista pelo menos um <em>volume group</em> que tenha espaço suficiente para receber o novo volume. 
+</p>
+<p>
+Se o <em>volume group</em> de destino for um volume partilhado, as alterações serão propagadas para os restantes nós do datacenter.
+</p>
+<a href="#help-lvol"><div>Início</div></a>
+<hr/>
+
+</div>

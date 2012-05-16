@@ -45,6 +45,13 @@ class viewActions extends sfActions
 
   public function executeIndex(sfWebRequest $request)
   {            
+//    if(update::checkDbVersion() == 0){
+//
+//    }else{
+//        
+//    }
+
+
     $this->node_list = EtvaNodePeer::doSelect(new Criteria());
     $this->node_form = new EtvaNodeForm();
     $etva_data = Etva::getEtvaModelFile();
@@ -162,7 +169,7 @@ class viewActions extends sfActions
             case 'vnc_keymap' : if($etva_setting->saveVNCkeymap()){
                                     //notify system log
                                     $this->dispatcher->notify(
-                                        new sfEvent('ETVA',
+                                        new sfEvent(sfConfig::get('config_acronym'),
                                                     'event.log',
                                                      array('message' => Etva::getLogMessage(array('name'=>$etva_setting->getValue()), EtvaSettingPeer::_OK_VNCKEYMAP_CHANGE_))
                                         ));
@@ -170,7 +177,7 @@ class viewActions extends sfActions
                                 }else{
                                     //notify system log
                                     $this->dispatcher->notify(
-                                        new sfEvent('ETVA',
+                                        new sfEvent(sfConfig::get('config_acronym'),
                                                     'event.log',
                                                     array('message' => Etva::getLogMessage(array('name'=>$request->getParameter('value')), EtvaSettingPeer::_ERR_VNCKEYMAP_CHANGE_),'priority'=>EtvaEventLogger::ERR)));
                                 }
@@ -181,7 +188,7 @@ class viewActions extends sfActions
         }
         
 
-        $result = array('success'=>true,'agent'=>'ETVA','info'=>'ETVA');
+        $result = array('success'=>true,'agent'=>sfConfig::get('config_acronym'),'info'=>sfConfig::get('config_acronym'));
         $result = json_encode($result);
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
@@ -194,7 +201,7 @@ class viewActions extends sfActions
   public function executeJupload(sfWebRequest $request)
   {
       $response = $this->getResponse();
-      $response->setTitle('ETVA :: ISO Upload');
+      $response->setTitle(sfConfig::get('config_acronym').' :: ISO Upload');
       $this->lang = $this->getUser()->getCulture();
       $this->postUrl = 'ftp://'.
                        sfConfig::get("config_isos_user").':'.sfConfig::get("config_isos_password").'@'.
@@ -217,10 +224,15 @@ class viewActions extends sfActions
       $this->token = $tokens[0]->getToken();
 
       $proxyhost1 = $request->getHost();
-      $proxyhost1 = split(':',$proxyhost1);
-      $proxyhost1 = $proxyhost1[0];
+      $proxyhost1_arr = split(':',$proxyhost1);
+      $proxyhost1 = $proxyhost1_arr[0];
+
+      $proxyport1 = 80;
+      if( $proxyhost1_arr[1] ) $proxyport1 = $proxyhost1_arr[1];
 
       $this->proxyhost1 = $proxyhost1;
+      $this->proxyport1 = $proxyport1;
+
       $this->host = $etva_node->getIp();
 
       //if host is localhost address then is the same machine
@@ -359,7 +371,7 @@ class viewActions extends sfActions
 
         $info_message = Etva::getLogMessage(array('name'=>$file,'info'=>ETVA::_CDROM_INUSE_), ETVA::_ERR_ISO_INUSE_);
         $message = Etva::getLogMessage(array('info'=>$info_message), ETVA::_ERR_ISO_RENAME_);
-        $this->dispatcher->notify(new sfEvent('ETVA', 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+        $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
         $i18n_br_sep = implode('<br>',$errors);
         $i18n_sp_sep = implode(' ',$errors);
@@ -369,7 +381,7 @@ class viewActions extends sfActions
 
         $message_i18n = $this->getContext()->getI18N()->__(ETVA::_ERR_ISO_PROBLEM_,array('%name%'=>$file,'%info%'=>''));
 
-        $msg = array('success'=>false,'agent'=>'ETVA','message'=>$message_i18n,'info'=>$i18n_iso_br_msg,'error'=>$i18n_iso_sp_msg);
+        $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'message'=>$message_i18n,'info'=>$i18n_iso_br_msg,'error'=>$i18n_iso_sp_msg);
         $error = $this->setJsonError($msg);
         return $this->renderText($error);
     }
@@ -404,7 +416,7 @@ class viewActions extends sfActions
     if($dir===false){
         $data['success'] = false;        
 
-        $data['agent'] = 'ETVA';
+        $data['agent'] = sfConfig::get('config_acronym');
         $data['error'] = 'Cannot open '.$directory;
 
         $response = json_encode($data);
@@ -491,7 +503,7 @@ class viewActions extends sfActions
 
         $info_message = Etva::getLogMessage(array('name'=>$file,'info'=>ETVA::_CDROM_INUSE_), ETVA::_ERR_ISO_INUSE_);
         $message = Etva::getLogMessage(array('info'=>$info_message), ETVA::_ERR_ISO_DELETE_);
-        $this->dispatcher->notify(new sfEvent('ETVA', 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+        $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
         $i18n_br_sep = implode('<br>',$errors);
         $i18n_sp_sep = implode(' ',$errors);
@@ -501,7 +513,7 @@ class viewActions extends sfActions
 
         $message_i18n = $this->getContext()->getI18N()->__(ETVA::_ERR_ISO_PROBLEM_,array('%name%'=>$file,'%info%'=>''));
 
-        $msg = array('success'=>false,'agent'=>'ETVA','message'=>$message_i18n,'info'=>$i18n_iso_br_msg,'error'=>$i18n_iso_sp_msg);
+        $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'message'=>$message_i18n,'info'=>$i18n_iso_br_msg,'error'=>$i18n_iso_sp_msg);
         $error = $this->setJsonError($msg);
         return $this->renderText($error);
     }

@@ -1,3 +1,4 @@
+<div class="help">
 <a id="help-settings-main"><h1>Preferências</h1></a>
 <p>O menu de preferências é apresentado em dois separadores, que possibilitam a definição de diversas opções de configuração do <em>Central Management</em> e de servidores.
 <p>Os separadores referidos são:</p>
@@ -25,3 +26,4 @@ virtuais.</p>
 <p><b>Nota: </b>na versão <em>ETVA Enterprise</em> apenas é possível configurar o IP do CM.</p>
 <a href="#help-settings-main"><div>Início</div></a>
 <hr/>
+</div>

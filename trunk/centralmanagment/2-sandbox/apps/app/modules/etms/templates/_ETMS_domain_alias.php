@@ -188,7 +188,6 @@ ETMS.DOMAIN.AliasPanel = Ext.extend(Ext.Panel,{
                 }}
                 ]
             ,hideRemove:function(a){
-                alert(a);
                 //this.tbar.get(1).hidden = true;
             },
             selModel: new Ext.grid.RowSelectionModel({	//deixa seleccionar apenas uma linha

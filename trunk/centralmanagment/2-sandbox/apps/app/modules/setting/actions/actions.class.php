@@ -208,7 +208,7 @@ class settingActions extends sfActions
 
                 if($remote_errors && !$force){
 
-                    $msg = array('success'=>false,'agent'=>'ETVA','action'=>'check_nodes','info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
+                    $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'action'=>'check_nodes','info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
                     $error = $this->setJsonError($msg);
                     return $this->renderText($error);
 
@@ -238,7 +238,7 @@ class settingActions extends sfActions
                 if($remote_errors){
 
                     $message = Etva::getLogMessage(array('info'=>ETVA::_CDROM_INUSE_), ETVA::_ERR_ISODIR_INUSE_);
-                    $this->dispatcher->notify(new sfEvent('ETVA', 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+                    $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
                     $i18n_br_sep = implode('<br>',$remote_errors);
                     $i18n_sp_sep = implode(' ',$remote_errors);
@@ -248,7 +248,7 @@ class settingActions extends sfActions
                     //$iso_sp_msg = Etva::getLogMessage(array('info'=>$sp_sep), ETVA::_ERR_ISODIR_INUSE_);
                     $i18n_iso_sp_msg = $this->getContext()->getI18N()->__(ETVA::_ERR_ISODIR_INUSE_,array('%info%'=>$i18n_sp_sep));
 
-                    $msg = array('success'=>false,'agent'=>'ETVA','info'=>$i18n_iso_br_msg,'error'=>$i18n_iso_sp_msg);
+                    $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>$i18n_iso_br_msg,'error'=>$i18n_iso_sp_msg);
                     $error = $this->setJsonError($msg);
                     return $this->renderText($error);
                 }                
@@ -272,13 +272,13 @@ class settingActions extends sfActions
                         $remote_errors[] = $node_msg;
 
                         $message = Etva::getLogMessage(array('info'=>$node_msg), EtvaSettingPeer::_ERR_SETTING_REMOTE_CONNECTIVITY_SAVE_);
-                        $this->dispatcher->notify(new sfEvent('ETVA', 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));                        
+                        $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));                        
                     }
                     
                 }
 
                 if(!empty($remote_errors)){
-                    $msg = array('success'=>false,'agent'=>'ETVA','info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
+                    $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
                     $error = $this->setJsonError($msg);
                     return $this->renderText($error);
                 }
@@ -294,7 +294,7 @@ class settingActions extends sfActions
 
                     $intf = $local['if'];
                     $msg_i18n = $this->getContext()->getI18N()->__(SystemNetwork::_ERR_NOTFOUND_INTF_,array('%name%'=>$intf,'%info%'=>''));
-                    $info = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+                    $info = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n);
                     $error = $this->setJsonError($info);
 
                     return $this->renderText($error);
@@ -317,13 +317,13 @@ class settingActions extends sfActions
                                 $intf = $remote['intf'];
                                 $msg_i18n = $this->getContext()->getI18N()->__(SystemNetwork::_ERR_NOTFOUND_INTF_,array('%name%'=>$intf,'%info%'=>''));
                                 $remote_errors[] = $msg_i18n;
-                                //$error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+                                //$error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n);
 
                             }else{
 
                                 $agent_msg = Etva::getLogMessage(array('agent'=>$remote_updated['agent'],'msg'=>$remote_updated['error']), Etva::_AGENT_MSG_);
                                 $message = Etva::getLogMessage(array('info'=>$agent_msg), EtvaSettingPeer::_ERR_SETTING_REMOTE_CONNECTIVITY_SAVE_);
-                                $this->dispatcher->notify(new sfEvent('ETVA', 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+                                $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
                                 $remote_errors[] = $agent_msg;
                             }
                         }
@@ -350,13 +350,13 @@ class settingActions extends sfActions
                                     $intf = $remote['intf'];
                                     $msg_i18n = $this->getContext()->getI18N()->__(SystemNetwork::_ERR_NOTFOUND_INTF_,array('%name%'=>$intf,'%info%'=>''));
                                     $remote_errors[] = $msg_i18n;
-                                    //$error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+                                    //$error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n);
 
                                 }else{
 
                                     $agent_msg = Etva::getLogMessage(array('agent'=>$remote_updated['agent'],'msg'=>$remote_updated['error']), Etva::_AGENT_MSG_);
                                     $message = Etva::getLogMessage(array('info'=>$agent_msg), EtvaSettingPeer::_ERR_SETTING_REMOTE_CONNECTIVITY_SAVE_);
-                                    $this->dispatcher->notify(new sfEvent('ETVA', 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+                                    $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
                                     $remote_errors[] = $agent_msg;
                                 }
                             }
@@ -367,7 +367,7 @@ class settingActions extends sfActions
                 }
 
                 if(!empty($remote_errors)){
-                    $msg = array('success'=>false,'agent'=>'ETVA','info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
+                    $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
                     $error = $this->setJsonError($msg);
                     return $this->renderText($error);
                 }
@@ -394,7 +394,7 @@ class settingActions extends sfActions
                 case 'vnc_keymap' : if($etva_setting->saveVNCkeymap()){
                                         //notify system log
                                         $this->dispatcher->notify(
-                                            new sfEvent('ETVA',
+                                            new sfEvent(sfConfig::get('config_acronym'),
                                                     'event.log',
                                                      array('message' => Etva::getLogMessage(array('name'=>$etva_setting->getValue()), EtvaSettingPeer::_OK_VNCKEYMAP_CHANGE_))
                                         ));
@@ -402,7 +402,7 @@ class settingActions extends sfActions
                                     }else{
                                         //notify system log
                                         $this->dispatcher->notify(
-                                            new sfEvent('ETVA',
+                                            new sfEvent(sfConfig::get('config_acronym'),
                                                     'event.log',
                                                     array('message' => Etva::getLogMessage(array('name'=>$value), EtvaSettingPeer::_ERR_VNCKEYMAP_CHANGE_),'priority'=>EtvaEventLogger::ERR)));
                                     }
@@ -412,14 +412,14 @@ class settingActions extends sfActions
                                         $etva_setting->save();
                                         //notify system log
                                         $this->dispatcher->notify(
-                                            new sfEvent('ETVA',
+                                            new sfEvent(sfConfig::get('config_acronym'),
                                                     'event.log',
                                                      array('message' => Etva::getLogMessage(array('name'=>$etva_setting->getParam(),'value'=>$etva_setting->getValue()), EtvaSettingPeer::_OK_SETTING_CHANGE_))
                                         ));
                                     }catch(Exception $e){
                                         //notify system log
                                         $this->dispatcher->notify(
-                                            new sfEvent('ETVA',
+                                            new sfEvent(sfConfig::get('config_acronym'),
                                                     'event.log',
                                                     array('message' => Etva::getLogMessage(array('name'=>$value), EtvaSettingPeer::_ERR_SETTING_CHANGE_),'priority'=>EtvaEventLogger::ERR)));
                                     }
@@ -431,9 +431,9 @@ class settingActions extends sfActions
 
         $msg_i18n = $this->getContext()->getI18N()->__(EtvaSettingPeer::_OK_SETTING_CONNECTIVITY_SAVE_);
         $message = EtvaSettingPeer::_OK_SETTING_CONNECTIVITY_SAVE_;
-        $this->dispatcher->notify(new sfEvent('ETVA', 'event.log', array('message' => $message)));
+        $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log', array('message' => $message)));
 
-        $info = array('success'=>true,'agent'=>'ETVA','response'=>$msg_i18n);
+        $info = array('success'=>true,'agent'=>sfConfig::get('config_acronym'),'response'=>$msg_i18n);
         return $this->renderText(json_encode($info));
 
   }

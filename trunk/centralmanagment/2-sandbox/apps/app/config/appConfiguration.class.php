@@ -1,6 +1,7 @@
 <?php
 //require_once dirname(__FILE__).'/../../../lib/EtvaEventLogger.class.php';
 //require_once dirname(__FILE__).'/../../../lib/SoapFileLogger.class.php';
+//require_once dirname(__FILE__).'/config.yml';
 
 class appConfiguration extends sfApplicationConfiguration
 {

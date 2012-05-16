@@ -33,7 +33,7 @@ use FileFuncs;
 use LWP::Simple;
 
 # Default Active modules
-my %DefMod = ( 'network'=>'ETFW::Network', 'firewall'=>'ETFW::Firewall', 'webmin'=>'ETFW::Webmin', 'wizard'=>'ETFWWizard' );
+my %DefMod = ( 'network'=>'ETFW::Network', 'firewall'=>'ETFW::Firewall', 'webmin'=>'ETFW::Webmin', 'wizard'=>'ETFWWizard', 'dhcp'=>'ETFW::DHCP', 'squid'=>'ETFW::Squid' );
 
 # ETFW/Perl modules match
 my %ModMatch = ();

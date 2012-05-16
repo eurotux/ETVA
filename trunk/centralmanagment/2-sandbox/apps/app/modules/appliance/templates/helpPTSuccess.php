@@ -1,3 +1,4 @@
+<div class="help">
 <a id="help-appliance-main"><h1>Appliance</h1></a>
 <p>O menu appliance está disponível no menu de ferramentas, e contém as seguintes operações de manutenção:</p>
 <ul>
@@ -25,7 +26,7 @@
 <hr/>
 
 <a id="help-appliance-restore"><h2>Restore da Appliance</h2></a>
-<p>A janela de restauro da <em>Appliance</em> é constituida por um painel com lista de <em>backups</em> realizados,
+<p>A janela de restauro da <em>Appliance</em> é constituída por um painel com lista de <em>backups</em> realizados,
     seguido por um painel que mostra a informação relativa ao <em>backup</em> seleccionado. O restauro repõe as configurações no agente de virtualização.</p>
 
 <p>O processo de restauro da appliance consiste nas seguintes etapas: </p>
@@ -42,3 +43,4 @@
 <p><b>Nota 4: </b>No processo de restauro poderá ser necessário associar manualmente as unidades de armazenamento.</p>
 <a href="#help-appliance-main"><div>Início</div></a>
 <hr/>
+</div>

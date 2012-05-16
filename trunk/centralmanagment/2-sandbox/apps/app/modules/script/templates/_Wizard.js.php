@@ -54,7 +54,7 @@ Ext.ux.Wiz = Ext.extend(Ext.Window, {
 <pre><code>
 this.loadMaskConfig = {
     default    : 'Saving...',
-    validating : 'Please wait, validating input...',
+    validating : 'Please wait, validating input...'
 };
 // loadMask will be shown, displaying the message 'Please wait, validating input...'
 this.showLoadMask(true, 'validating');

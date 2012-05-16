@@ -142,6 +142,10 @@ sub xml_storage_pool_parser {
             }
         }
     }
+
+    # Avoid memory leaks - cleanup circular references for garbage collection
+    $doc->dispose;
+
     return wantarray() ? %SP : \%SP;
 }
 
@@ -283,7 +287,7 @@ sub xml_storage_volume_parser {
                 if( $tn eq 'path' ){
                     $SV{'backingStore_path'} = $SV{'backingStore'}{'path'} = $cs->getFirstChild->toString();
                 } elsif( $tn eq 'format' ){
-                    my $at &xml_parser_get_attr($cs);
+                    my $at = &xml_parser_get_attr($cs);
                     $SV{'backingStore'}{'format'} = $at;
                     $SV{'backingStore_format'} = $at->{'type'};
                 } elsif( $tn eq 'permissions' ){
@@ -302,6 +306,10 @@ sub xml_storage_volume_parser {
             }
         }
     }
+
+    # Avoid memory leaks - cleanup circular references for garbage collection
+    $doc->dispose;
+
     return wantarray() ? %SV : \%SV;
 }
 

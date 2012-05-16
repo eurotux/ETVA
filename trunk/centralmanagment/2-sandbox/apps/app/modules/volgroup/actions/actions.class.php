@@ -34,6 +34,9 @@ class volgroupActions extends sfActions
 
     public function executeJsonUpdate(sfWebRequest $request){
 
+        $cid = $request->getParameter('cid');
+        $level = $request->getParameter('level');
+
         $nid = $request->getParameter('nid');
         // volume group name to create...
         $vg = $request->getParameter('vg');                
@@ -47,9 +50,10 @@ class volgroupActions extends sfActions
         $params = array();
         $etva_pvs = array();
         $i = 0;
-        
-        
-        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
 
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
             $error = array('success'=>false,'error'=>$msg_i18n);
@@ -58,7 +62,7 @@ class volgroupActions extends sfActions
             $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
             $message = Etva::getLogMessage(array('name'=>$vg,'info'=>$node_log), EtvaVolumegroupPeer::_ERR_CREATE_EXTEND_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
@@ -120,17 +124,18 @@ class volgroupActions extends sfActions
     {
         $nid = $request->getParameter('nid');
         $vg = $request->getParameter('vg');
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
 
-        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+        if(!$etva_node){
 
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n);
 
             //notify event log
             $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
             $message = Etva::getLogMessage(array('name'=>$vg,'info'=>$node_log), EtvaVolumegroupPeer::_ERR_REMOVE_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
@@ -207,23 +212,27 @@ class volgroupActions extends sfActions
     public function executeJsonReduce(sfWebRequest $request)
     {
         
-        $nid = $request->getParameter('nid');
+        $cid = $request->getParameter('cid');
+        $level = $request->getParameter('level');
 
+        $nid = $request->getParameter('nid');
         $vg = $request->getParameter('vg');
+
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
 
         // physical volume id
         $pvs = json_decode($request->getParameter('pvs'),true);       
 
-        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+        if(!$etva_node){
 
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n);
 
             //notify event log
             $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
             $message = Etva::getLogMessage(array('name'=>$vg,'info'=>$node_log), EtvaVolumegroupPeer::_ERR_REDUCE_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));                
 
             // if is a CLI soap request return json encoded data
@@ -301,22 +310,38 @@ class volgroupActions extends sfActions
    */
     public function executeJsonListFree(sfWebRequest $request)
     {
+        $cid = $request->getParameter('cid');
+        $level = $request->getParameter('level');
+        $nid = $request->getParameter('nid');
+        $gtMB = $request->getParameter('gtMB');
+
+        if(!$level)    //back compatibility
+            $level = 'node';
 
         $elements = array();
-
+     
         $criteria = new Criteria();
-        $criteria->add(EtvaNodeVolumegroupPeer::NODE_ID,$request->getParameter('nid'));
-        $criteria->addJoin(EtvaNodeVolumegroupPeer::VOLUMEGROUP_ID, EtvaVolumegroupPeer::ID);        
+        if($level == 'node'){
+            $criteria->add(EtvaNodeVolumegroupPeer::NODE_ID,$nid);
+            $criteria->addJoin(EtvaNodeVolumegroupPeer::VOLUMEGROUP_ID, EtvaVolumegroupPeer::ID);
+        }elseif($level == 'cluster'){
+            $criteria->add(EtvaVolumegroupPeer::CLUSTER_ID, $cid);
+            $criteria->addAnd(EtvaVolumeGroupPeer::STORAGE_TYPE, EtvaVolumeGroup::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
+        }else{
+            return;
+        }
+
         $criteria->add(EtvaVolumegroupPeer::FREESIZE,0,Criteria::NOT_EQUAL);
 
+        if($gtMB)
+            $criteria->addAnd(EtvaVolumegroupPeer::FREESIZE, intval($gtMB)*1024*1024, Criteria::GREATER_THAN);
+        
         $nodisk = $request->getParameter('nodisk');
         if($nodisk)
             $criteria->add(EtvaVolumegroupPeer::VG, sfConfig::get('app_volgroup_disk_flag'),Criteria::NOT_EQUAL);
-
-
         $etva_vgs = EtvaVolumegroupPeer::doSelect($criteria);
 
-        if(!$etva_vgs){
+        if(!$etva_vgs && !$gtMD){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaVolumegroupPeer::_NOTAVAILABLE_);
 
             $info = array('success'=>false,'error'=>$msg_i18n);
@@ -331,10 +356,86 @@ class volgroupActions extends sfActions
             $elements[] = array('id'=>$id,'name'=>$txt,'value'=>$size);
 
         }
-
         $result = array('total' =>   count($elements),'data'  => $elements);
 
         $return = json_encode($result);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+
+        return $this->renderText($return);
+    }
+
+   /**
+   * Return pre-formatted data for tree-column extjs
+   *
+   * $request may contain the following keys:
+   * - nid: nid (virtAgent node ID)
+   * @return array json array
+   */
+    public function executeJsonClusterVgsTree(sfWebRequest $request)
+    {
+
+        $cluster_id = $request->getParameter('cid');
+
+        $criteria = new Criteria();
+        $criteria->add(EtvaVolumeGroupPeer::CLUSTER_ID, $cluster_id);
+        $criteria->addAnd(EtvaVolumeGroupPeer::STORAGE_TYPE, EtvaVolumeGroup::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
+        $cluster_vgs = EtvaVolumeGroupPeer::doSelect($criteria);
+
+//        $criteria->add(EtvaNodeVolumeGroupPeer::NODE_ID,$request->getParameter('nid'));
+//        $node_vgs = EtvaNodeVolumeGroupPeer::doSelectJoinEtvaVolumegroup($criteria);
+
+        $volumes = array();
+
+        foreach ($cluster_vgs as $vg){
+
+//            $node_id = $data->getNodeId();
+//            $vg = $data->getEtvaVolumegroup();
+            $pvs_tree = array();
+            $etva_vp = $vg->getEtvaVolumePhysicals();
+
+            foreach($etva_vp as $vp)
+            {
+
+                $pv = $vp->getEtvaPhysicalvolume();
+                if($pv)
+                {
+                    $id = $pv->getId();
+
+                    $c_criteria = new Criteria();
+                    $c_criteria->add(EtvaPhysicalvolumePeer::ID, $id);
+                    $c_criteria->add(EtvaPhysicalvolumePeer::CLUSTER_ID, $cluster_id);
+                    $np = EtvaPhysicalvolumePeer::doSelectOne($c_criteria);
+
+//                    $np = EtvaNodePhysicalvolumePeer::retrieveByPK($node_id, $id);
+//AKII
+                    $elem = $np->getDevice();
+                    $pvdevice = $pv->getPv();
+                    $pretty_size = $size = $pv->getPvsize();
+                    $qtip = '';
+                    $cls = 'dev-pv';
+                    $pvs_tree[] = array('id'=>$id,'cls'=>$cls,'iconCls'=>'task','text'=>$elem,'pv'=>$pvdevice,'size'=>$size,'prettysize'=>$pretty_size,'singleClickExpand'=>true,'type'=>'dev-pv','qtip'=>$qtip,'leaf'=>true);
+                }
+            }
+
+            $id = $vg->getVg();
+            $vgid = $vg->getId();
+            $qtip = '';
+            $cls = 'vg';
+            $pretty_size = $size = $vg->getSize();
+            $free_size = $vg->getFreesize();
+            $expanded = empty($pvs_tree) ? true: false;
+            $type = $vg->getStorageType();
+            $is_DiskVG = ($id == sfConfig::get('app_volgroup_disk_flag')) ? 1:0;
+            if($is_DiskVG) $type = 'file';
+
+            $volumes[] = array('id'=>$id,'expanded'=>$expanded,'vgid'=>$vgid,'iconCls'=>'devices-folder','cls'=>$cls,'text'=>$id,'type'=>$type,'size'=>$size,'prettysize'=>$pretty_size, 'freesize'=>$free_size, 'singleClickExpand'=>true,'qtip'=>$qtip,'children'=>$pvs_tree);
+        }
+
+        if(empty($volumes)){
+            $msg_i18n = $this->getContext()->getI18N()->__('No data found');
+            $volumes[] = array('expanded'=>true,'text'=>$msg_i18n,'qtip'=>$msg_i18n,'leaf'=>true);
+        }
+        $return = json_encode($volumes);
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
 
         return $this->renderText($return);
@@ -465,7 +566,7 @@ class volgroupActions extends sfActions
                 $node_message = Etva::getLogMessage(array('name'=>$request->getParameter('uuid')), EtvaNodePeer::_ERR_NOTFOUND_UUID_);
                 $message = Etva::getLogMessage(array('info'=>$node_message), EtvaVolumegroupPeer::_ERR_SOAPUPDATE_);
                 $this->dispatcher->notify(
-                    new sfEvent('ETVA',
+                    new sfEvent(sfConfig::get('config_acronym'),
                             'event.log',
                             array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
                 ));
@@ -495,7 +596,7 @@ class volgroupActions extends sfActions
                 $cluster_message = Etva::getLogMessage(array('info'=>$error_msg), EtvaClusterPeer::_ERR_CLUSTER_);
                 $message = Etva::getLogMessage(array('info'=>$cluster_message), EtvaVolumegroupPeer::_ERR_SOAPUPDATE_);
                 $this->dispatcher->notify(
-                    new sfEvent('ETVA',
+                    new sfEvent(sfConfig::get('config_acronym'),
                             'event.log',
                             array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
                 ));

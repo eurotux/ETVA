@@ -1,5 +1,7 @@
+%{!?rhel:%define rhel   %(cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//')}
+
 Name:           virtagent
-Version:        0.1
+Version:        1.0.1
 Release: 4149
 Summary:        Virtualization Agent
 License:        GPL
@@ -33,6 +35,11 @@ Requires:  device-mapper-multipath
 Requires:  system-config-network-tui
 Requires:  avahi-tools
 Requires:  gnutls-utils
+Requires:  gpg
+Requires:  perl-Mail-Sender
+%if 0%{?rhel} == 6
+Requires: perl-Class-Inspector
+%endif
 
 Requires:  logrotate
 
@@ -51,6 +58,8 @@ Requires:  perl-SOAP-Lite
 Requires:  perl-MIME-tools
 Requires:  perl-Package-Constants
 Requires:  perl-Archive-Tar
+
+Requires:  perl-Crypt-SSLeay
 
 Requires:  perl(JSON)
 Requires:  perl(JSON::XS)

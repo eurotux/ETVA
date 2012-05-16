@@ -12,7 +12,9 @@ signout:
   url:   /logout
   param: { module: sfGuardAuth, action: signout }
 
-
+updatesys:
+  url: /updatesys
+  module: { module: sfGuardAuth, action: updatesys }
 
 default_index:
   url:   /:module

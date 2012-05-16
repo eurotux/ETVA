@@ -114,6 +114,7 @@ Appliance.Register.Form = Ext.extend(Ext.form.FormPanel, {
             var send_data = new Object();
             var send_data = alldata;
             send_data['method'] = 'register';
+            var mymsg = 'Registering '+'<?php echo sfConfig::get('config_acronym'); ?>'+'...';
 
             var conn = new Ext.data.Connection({
                 listeners:{
@@ -121,7 +122,7 @@ Appliance.Register.Form = Ext.extend(Ext.form.FormPanel, {
                     beforerequest:function(){
                         Ext.MessageBox.show({
                             title: <?php echo json_encode(__('Please wait...')) ?>,
-                            msg: <?php echo json_encode(__('Registering ETVA...')) ?>,
+                            msg: mymsg,
                             width:300,
                             wait:true,
                             modal: false
@@ -139,10 +140,17 @@ Appliance.Register.Form = Ext.extend(Ext.form.FormPanel, {
                 // everything ok...
                 failure:function(response){
                     var resp = Ext.decode(response.responseText);
-                    
+                    var acronym = '<?php echo sfConfig::get('config_acronym'); ?>';
+                    var mmsg;
+                    if(acronym == 'ETVA'){
+                        mmsg = <?php echo json_encode(__('Could not register ETVA.<br> {0}')) ?>;
+                    }else{
+                        mmsg = <?php echo json_encode(__('Could not register ETVM.<br> {0}')) ?>
+                    }
+
                     Ext.MessageBox.show({
                             title: String.format(<?php echo json_encode(__('Error {0}')) ?>,resp['agent']),
-                            msg: String.format(<?php echo json_encode(__('Could not register ETVA.<br> {0}')) ?>,resp['info']),
+                            msg: String.format(mmsg,resp['info']),
                             buttons: Ext.MessageBox.OK,                            
                             icon: Ext.MessageBox.ERROR
                         });

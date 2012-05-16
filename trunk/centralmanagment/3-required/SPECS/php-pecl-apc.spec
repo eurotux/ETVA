@@ -5,6 +5,7 @@ Summary: PECL package for APC
 Name: php-pecl-apc
 Version: 3.1.9
 Release: 1
+Epoch: 1
 License: PHP
 Group: Development/Languages
 URL: http://pecl.php.net/package/apc
@@ -33,6 +34,7 @@ optimizing PHP intermediate code.
 %{__make} install INSTALL_ROOT=%{buildroot}
 
 # Drop in the bit of configuration
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/php.d
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/php.mod.d/extensions
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/php.cgi.d/extensions
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/php.cli.d/extensions
@@ -49,6 +51,10 @@ EOF
 ; Enable apc extension
 extension=apc.so
 EOF
+%{__cat} > %{buildroot}%{_sysconfdir}/php.d/apc.ini << 'EOF'
+; Enable apc extension
+extension=apc.so
+EOF
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -60,6 +66,7 @@ EOF
 %config(noreplace) %{_sysconfdir}/php.mod.d/extensions/apc.ini
 %config(noreplace) %{_sysconfdir}/php.cli.d/extensions/apc.ini
 %config(noreplace) %{_sysconfdir}/php.cgi.d/extensions/apc.ini
+%config(noreplace) %{_sysconfdir}/php.d/apc.ini
 %{php_extdir}/apc.so
 
 %changelog

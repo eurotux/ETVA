@@ -513,6 +513,7 @@ ETMS.DOMAIN.Add = Ext.extend(Ext.Window, {
                 padding: '10 20 10 20',
                 labelWidth: 200,
                 labelPad: 10,
+                defaults:{border:false},
                 //Campos do formulário
                 items: [{
                         xtype: 'textfield',

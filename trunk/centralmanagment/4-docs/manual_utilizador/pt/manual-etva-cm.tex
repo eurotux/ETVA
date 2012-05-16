@@ -6,12 +6,18 @@
 \usepackage{footmisc}
 \usepackage{include/eurotux}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\acronym}{ETVA }
+\ifx\UseOption\undefined
+\def\UseOption{etva}
+\fi
+\usepackage{optional}
+
 % forçar numeração nas secções
 \setcounter{secnumdepth}{5}
 \setcounter{tocdepth}{5}
 
 \author{Eurotux Informática, S.A.}
-\title{Manual ETVA Central Management}
+\title{Manual ETVA\\ Central Management v1.0.1}
 \subtitle{Eurotux Informática, S.A.}
 \date{\today}
 %\date{Fevereiro de 2006}
@@ -21,6 +27,14 @@
 \maketitle
 
 \begin{Log}
+\LogEntry{Carlos Rodrigues}{cmar@eurotux.com}{2012-04-20}
+Alteração da versão
+\LogEntry{Manuel Dias}{mfd@eurotux.com}{2011-11-30}
+Sub-secção \textit{Drivers virtio} da secção \textit{Máquina virtual}
+\LogEntry{Manuel Dias}{mfd@eurotux.com}{2011-11-21}
+Sub-secção \textit{Gestão de Datacenters Virtuais} da secção \textit{Administração do sistema}
+\LogEntry{Manuel Dias}{mfd@eurotux.com}{2011-10-13}
+Sub-secção Administração de utilizadores, grupos e permissões da secção \textit{Administração do sistema}
 \LogEntry{Carlos Rodrigues}{cmar@eurotux.com}{2011-07-13}
 Sub-secção \textit{ETFW} da secção \textit{ETVA Management Agents}
 \LogEntry{Carlos Rodrigues}{cmar@eurotux.com}{2011-07-01}
@@ -37,5 +51,7 @@ Versão inicial.
 %\input{modulos_etfw}
 %\makertchapter
 %\input{serviços}
+\input{chap-cm}
+\input{chap-agents}
 
 \end{document}

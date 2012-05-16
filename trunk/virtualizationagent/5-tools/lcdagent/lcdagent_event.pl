@@ -280,16 +280,16 @@ sub opMEM {
 #SwapFree:      1044208 kB
     my %h = ();
     if( $lbuf =~ m/MemTotal:\s+(\d+)\s+kB/s ){
-        $h{'MemTotal'} = ETVA::Utils::roundsize("$1K");
+        $h{'MemTotal'} = ETVA::Utils::roundconvertsize("$1K");
     }
     if( $lbuf =~ m/MemFree:\s+(\d+)\s+kB/s ){
-        $h{'MemFree'} = ETVA::Utils::roundsize("$1K");
+        $h{'MemFree'} = ETVA::Utils::roundconvertsize("$1K");
     }
     if( $lbuf =~ m/SwapTotal:\s+(\d+)\s+kB/s ){
-        $h{'SwapTotal'} = ETVA::Utils::roundsize("$1K");
+        $h{'SwapTotal'} = ETVA::Utils::roundconvertsize("$1K");
     }
     if( $lbuf =~ m/SwapFree:\s+(\d+)\s+kB/s ){
-        $h{'SwapFree'} = ETVA::Utils::roundsize("$1K");
+        $h{'SwapFree'} = ETVA::Utils::roundconvertsize("$1K");
     }
     if( %h ){
         $mem = "M $h{'MemFree'}/$h{'MemTotal'}; S $h{'SwapFree'}/$h{'SwapTotal'}";
@@ -373,7 +373,7 @@ sub opDF {
         my $size = $blocks * $bsize;
         my $free = $bavail * $bsize;
         my $per_used = 100 * ($blocks - $bfree) / $blocks;
-        return sprintf('/ %s/%s %d%%',ETVA::Utils::roundsize($free),ETVA::Utils::roundsize($size),$per_used);
+        return sprintf('/ %s/%s %d%%',ETVA::Utils::roundconvertsize($free),ETVA::Utils::roundconvertsize($size),$per_used);
     }
     return;
 }
@@ -414,7 +414,7 @@ sub get_if_stats {
 sub opNET {
     my %st = get_if_stats("eth0");
     if( %st && ($st{'status'} eq 'up') ){
-        return sprintf('U: %s D: %s',ETVA::Utils::roundsize($st{'tx_br'}),ETVA::Utils::roundsize($st{'rx_br'}));
+        return sprintf('U: %s D: %s',ETVA::Utils::roundconvertsize($st{'tx_br'}),ETVA::Utils::roundconvertsize($st{'rx_br'}));
     } elsif( $st{'status'} eq 'down' ){
         return "Down";
     }

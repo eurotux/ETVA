@@ -57,7 +57,7 @@ sub disconnect {
     $self->vmDisconnect();
 }
 
-my ($last_sec,$last_min,$last_hour,$last_day,$last_day,$last_time);
+my ($last_sec,$last_min,$last_hour,$last_day,$last_time);
 sub _idle_ {
     my $self = shift;
 
@@ -97,19 +97,35 @@ sub opPeriodic5Secs {
                             'vms'=>$vms
                         );
     }
+
+    my $restart = 0;
+    my $max_mem = $self->{'proc_maxmem'} || 512 * 1024 * 1024; # process max memory 512Mb
+    my $cur_mem = ETVA::Utils::process_mem_size($$);
+    if( $cur_mem > $max_mem ){
+        plog("process max memory exceeded $cur_mem > $max_mem.");
+        $restart = 1;
+    }
+
+    my $max_childs = ETVA::Utils::process_max_childs();
+    if( $max_childs ){
+        my $num_childs = $self->get_number_childs();
+        plog("process number of childs: $num_childs") if( &debug_level() > 7 );
+        if( $num_childs > $max_childs ){
+            plog("number of childs process exceeded $num_childs > $max_childs.");
+        }
+    }
+
+    if( $restart ){
+        plog("process going restart. Killing process...");
+        $self->set_runout();   # set to run out
+        $self->terminate_agent(); # go to the end
+    }
 }
 
 sub terminate_agent {
     my $self = shift;
     ETVA::Agent::SOAPFork->terminate_agent();
     VirtAgentInterface->exit_handler();
-}
-
-sub set_imchild {
-    my $self = shift;
-    plog("VirtAgentSOAP set_imchild") if( &debug_level() > 7 );
-    ETVA::Agent::SOAPFork->set_imchild();
-    VirtAgentInterface->set_imchild();
 }
 
 sub set_imparent {

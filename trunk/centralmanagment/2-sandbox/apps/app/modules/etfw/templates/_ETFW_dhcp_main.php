@@ -3777,6 +3777,8 @@ ETFW.DHCP.Bbar = function(service_id,network_dispatcher) {
     this.service_id = service_id;
     this.network_dispatcher = network_dispatcher;
 
+    this.url = <?php echo json_encode(url_for('etfw/json'))?>;
+
     ETFW.DHCP.Bbar.superclass.constructor.call(this, {
         items:[
             {
@@ -3913,7 +3915,7 @@ ETFW.DHCP.Bbar = function(service_id,network_dispatcher) {
                             win.show();
                     },scope:this
 
-                }]},{
+                }]}/*,{
             xtype: 'buttongroup',
             title:'Start the DHCP server,<br> using the current configuration',
             columns: 1,
@@ -3924,6 +3926,23 @@ ETFW.DHCP.Bbar = function(service_id,network_dispatcher) {
             items: [{
                     text: 'Start server',
                     tooltip:'Click this button to start the DHCP server on your system, using the current configuration'
+                }]}*/,{
+            xtype: 'buttongroup',
+            title:'Apply current configuration',
+            columns: 1,
+            height:60,
+            defaults: {
+                scale: 'small', width:170
+            },
+            items: [{
+                    text: 'Apply configuration',
+                    tooltip:'Click this button to apply current changes configuration on the DHCP server'
+                    ,action:'apply_config'
+                    ,handler:this.applyConfiguration
+                    ,scope: this
+                    /*,handler: function(){
+                                alert('Start');
+                    }*/
                 }]}
                 ]
     });
@@ -3954,6 +3973,51 @@ Ext.extend(ETFW.DHCP.Bbar, Ext.Toolbar,{
                     baseParams:{id:this.service_id,method:'list_leases',params:Ext.encode(params)},xtype:'etfw_dhcp_leasesgrid'
                     };
         return item;
+    }
+    ,applyConfiguration:function(b,e){
+        var conn = new Ext.data.Connection({
+            listeners:{
+                // wait message.....
+                beforerequest:function(){
+                    Ext.MessageBox.show({
+                        title: 'Please wait',
+                        msg: 'Applying...',
+                        width:300,
+                        wait:true,
+                        modal: false
+                    });
+                },// on request complete hide message
+                requestcomplete:function(){Ext.MessageBox.hide();}
+            }
+        });// end conn
+        conn.request({
+            url: this.url,
+            params:{id:this.service_id,method:b.action},
+            failure: function(resp,opt){
+
+                if(!resp.responseText){
+                    Ext.ux.Logger.error(resp.statusText);
+                    return;
+                }
+
+                var response = Ext.util.JSON.decode(resp.responseText);
+                Ext.MessageBox.alert('Error Message', response['info']);
+                Ext.ux.Logger.error(response['error']);
+
+            },
+            // everything ok...
+            success: function(resp,opt){
+
+                var msg = b.text+' successfully';
+                Ext.ux.Logger.info(msg);
+                View.notify({html:msg});
+                if(b.action=='revert_config' || b.action=='reset_config' || b.action=='activate_onboot' || b.action=='deactivate_onboot'){
+
+                    this.reload();                    
+                }
+
+            },scope:this
+        });// END Ajax request
     }
 
 });

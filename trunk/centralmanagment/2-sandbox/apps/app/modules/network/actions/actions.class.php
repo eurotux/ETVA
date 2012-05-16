@@ -31,20 +31,27 @@ class networkActions extends sfActions
 
         $sid = $request->getParameter('sid');
 
+        //convert server id in cluster id
+        $dc_c = new Criteria();         
+        $dc_c->addJoin(EtvaNodePeer::ID, EtvaServerPeer::NODE_ID);
+        $dc_c->add(EtvaServerPeer::ID, $sid, Criteria::EQUAL);
+        $node = EtvaNodePeer::doSelectOne($dc_c);
+        $cluster_id = $node->getClusterId();
+
         $networks = json_decode($request->getParameter('networks'),true);
         
 
         if(!$etva_server = EtvaServerPeer::retrieveByPK($sid)){
 
                 $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$sid));
-                $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+                $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
                 //notify system log
                 $server_log = Etva::getLogMessage(array('id'=>$sid), EtvaServerPeer::_ERR_NOTFOUND_ID_);
                 $message = Etva::getLogMessage(array('info'=>$server_log), EtvaNetworkPeer::_ERR_REMOVEALL_);
 
                 $this->dispatcher->notify(
-                    new sfEvent('ETVA', 'event.log',
+                    new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                         array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
                 // if is a CLI soap request return json encoded data
@@ -125,7 +132,10 @@ class networkActions extends sfActions
             $returned_status = $response_decoded['_okmsg_'];
 
             foreach ($networks as $network){
-                $etva_vlan = EtvaVlanPeer::retrieveByName($network['vlan']);
+                $c_dc_nm = new Criteria();
+                $c_dc_nm->addAnd(EtvaVlanPeer::CLUSTER_ID, $cluster_id);  
+
+                $etva_vlan = EtvaVlanPeer::retrieveByName($network['vlan'], $c_dc_nm);
                 $etva_network = new EtvaNetwork();
                 $etva_network->fromArray($network,BasePeer::TYPE_FIELDNAME);
                 $etva_network->setEtvaServer($etva_server);
@@ -194,14 +204,14 @@ class networkActions extends sfActions
         if(!$etva_server = EtvaServerPeer::retrieveByPK($sid)){
                 $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$sid));
 
-                $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+                $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
                 //notify system log
                 $server_log = Etva::getLogMessage(array('id'=>$sid), EtvaServerPeer::_ERR_NOTFOUND_ID_);
                 $message = Etva::getLogMessage(array('name'=>$mac,'info'=>$server_log), EtvaNetworkPeer::_ERR_REMOVE_);
 
                 $this->dispatcher->notify(
-                    new sfEvent('ETVA', 'event.log',
+                    new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                         array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
                 // if is a CLI soap request return json encoded data
@@ -282,7 +292,7 @@ class networkActions extends sfActions
     {
         $etva_network = EtvaNetworkPeer::retrieveByPK($request->getParameter('id'));
         if(!$etva_network){
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>'Network not found');
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>'Network not found');
             $error = $this->setJsonError($error);
             return $this->renderText($error);
         }
@@ -390,20 +400,65 @@ class networkActions extends sfActions
 
         if(!$isAjax) return $this->redirect('@homepage');
 
+        $sid = $this->getRequestParameter('sid');
+        if($sid){
+            $dc_c = new Criteria();             //convert server id in cluster id
+            $dc_c->addJoin(EtvaNodePeer::ID, EtvaServerPeer::NODE_ID);
+            $dc_c->add(EtvaServerPeer::ID, $sid, Criteria::EQUAL);
+            $node = EtvaNodePeer::doSelectOne($dc_c);
+            $cid = $node->getClusterId();
+        }else{
+
+            // get cluster id
+            $cid = $this->getRequestParameter('cid');
+            if(!$cid){
+                $etva_cluster = EtvaClusterPeer::retrieveDefaultCluster();
+                $cid = $etva_cluster->getId();
+            }
+        }
+        
+        //Get networks from cluster
+        $c_vlan = new Criteria();
+        $c_vlan->add(EtvaVlanPeer::CLUSTER_ID, $cid);
+        $etva_vlans = EtvaVlanPeer::doSelect($c_vlan);
+
+        //get networks with server
+        $c = new Criteria();        
+        $vlan_flag = false;
+        $server_flag = false;
 
         $query = ($this->getRequestParameter('query'))? json_decode($this->getRequestParameter('query'),true) : array();
-
-
-        
-        $c = new Criteria();        
-
         foreach($query as $key=>$val){
-
             $column = EtvaNetworkPeer::translateFieldName(sfInflector::camelize($key), BasePeer::TYPE_PHPNAME, BasePeer::TYPE_COLNAME);
-            $c->add($column, $val);
-        }
-       
+            if($key == 'vlan_id')
+                $vlan_flag = true;            
 
+            if($key == 'server_id')
+                $server_flag = true;
+
+            $c->add($column, $val);
+        }  
+
+        error_log($c->toString());
+
+        //get vlans from cluster
+        if(!$vlan_flag && !$server_flag){// && !$server_flag && $cid){
+            error_log('!(!$vlan_flag && !$server_flag)');
+            foreach($etva_vlans as $etva_vlan){
+                if($this->getRequestParameter('query')){
+                    $c->addOr(EtvaNetworkPeer::VLAN_ID, $etva_vlan->getId());
+                }else{
+                    $c->addAnd(EtvaNetworkPeer::VLAN_ID, $etva_vlan->getId());
+                }
+            }
+        }
+
+        // add sort criteria to sort elements
+        $this->addSortCriteria($c);
+        // add server criteria
+        $this->addServerCriteria($c);
+
+        error_log($c->toString());
         $etva_network_list = EtvaNetworkPeer::doSelectJoinEtvaServer($c);
 
 
@@ -417,6 +472,7 @@ class networkActions extends sfActions
             if($etva_server && $etva_vlan){
                 $etva_server_name = $etva_server->getName();
                 $etva_server_type = $etva_server->getVmType();
+                $etva_vm_state = $etva_server->getVmState();
                 $etva_node = $etva_server->getEtvaNode();                
                 $etva_node_name = $etva_node->getName();                
                 $etva_vlan_name = $etva_vlan->getName();
@@ -427,6 +483,7 @@ class networkActions extends sfActions
                 $elements[$i]['NodeId'] = $etva_node->getId();
                 $elements[$i]['NodeName'] = $etva_node_name;
                 $elements[$i]['Vlan'] = $etva_vlan_name;
+                $elements[$i]['Vm_state'] = $etva_vm_state;
 
                 $i++;
             }

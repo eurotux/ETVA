@@ -1,3 +1,7 @@
+
+<?php
+include_partial('event/Event_download');
+?>
 <script>
 Ext.ns("Event");
 Event.GridFilter = function(app) {
@@ -83,20 +87,44 @@ Event.GridFilter = function(app) {
                     pageSize:10,
                     plugins: [new Ext.ux.Andrie.pPageSize({comboCfg: {width: 50}}), filters]
             })]
-            ,tbar:[filterLevelCmb,{xtype:'button',
-                             text: <?php echo json_encode(__('Filter by log level')) ?>,
-                             handler:function(){
-                                var filter = filters.getFilter('level');
-                                var selLevel = filterLevelCmb.getValue().split(',');
+            ,tbar:[filterLevelCmb,
+                {
+                    xtype:'button',
+                    text: <?php echo json_encode(__('Filter by log level')) ?>,
+                    handler:function(){
+                       var filter = filters.getFilter('level');
+                       var selLevel = filterLevelCmb.getValue().split(',');
 
-                                if(selLevel){
-                                    filter.setValue(selLevel);
-                                    filter.setActive(true);
-                                }else{
-                                    filter.setActive(false);
-                                }
-                            }
-                            }]
+                       if(selLevel){
+                           filter.setValue(selLevel);
+                           filter.setActive(true);
+                       }else{
+                           filter.setActive(false);
+                       }
+                   }
+                },'->',{
+                    xtype:'button',
+                    text: <?php echo json_encode(__('Diagnose')) ?>,
+                    handler:function(){
+                        var diagnostic_win = new Event.Diagnostic.Main({title: <?php echo json_encode(__('Diagnostic window')) ?> });
+
+                        // open register window
+                        //diagnostic_win.on('showRegister',function(){
+                        //    var regist_ = Ext.getCmp('view-index-register-appliance');
+                        //    regist_.fireEvent('click',regist_);
+                        //});
+                        diagnostic_win.show();
+                       }
+                }
+//                ,{
+//                    xtype:'button',
+//                    text: <?php echo json_encode(__('Download Log')) ?>,
+//                    handler:function(){
+//                        self.location = <?php echo json_encode(url_for('event/logDownload'))?>; // + '?file=a';
+//                    }
+//                }
+                
+            ]
             ,plugins:filters
     });
 

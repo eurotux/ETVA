@@ -981,6 +981,13 @@ ETFW.Firewall.Form = Ext.extend(Ext.form.FormPanel, {
 
         //comment
         if(form_values['cmt']) send_data.cmt = form_values['cmt'];
+        /*
+	 * TODO testing comments type
+	if(form_values['comment']){
+            send_data.comment = '"' + form_values['comment'] + '"';
+            if( send_data.m ) send_data.m += ' comment';
+            else send_data.m = 'comment';
+	}*/
         //action to take
         switch(form_values['j']){
                     case '*' :
@@ -1169,6 +1176,10 @@ ETFW.Firewall.Form = Ext.extend(Ext.form.FormPanel, {
             default:break;
         }
 
+        if( send_data.dports || send_data.sports || send_data.ports )
+            if( send_data.m ) send_data.m += ' multiport';
+            else send_data.m = 'multiport';
+
 
         //tcp_flags
 
@@ -1219,7 +1230,9 @@ ETFW.Firewall.Form = Ext.extend(Ext.form.FormPanel, {
             default:break;
         }
 
-
+        if( send_data['mac-source'] )
+            if( send_data.m ) send_data.m += ' mac';
+            else send_data.m = 'mac';
 
         //packet flow rate
         switch(form_values['limit-c']){
@@ -1243,6 +1256,10 @@ ETFW.Firewall.Form = Ext.extend(Ext.form.FormPanel, {
             default:break;
         }
 
+        if( send_data['limit'] || send_data['limit-burst'] )
+            if( send_data.m ) send_data.m += ' limit';
+            else send_data.m = 'limit';
+
         //connection states
         switch(form_values['state-c']){
             case '=' :
@@ -1254,6 +1271,10 @@ ETFW.Firewall.Form = Ext.extend(Ext.form.FormPanel, {
             default:break;
         }
 
+        if( send_data['state'] )
+            if( send_data.m ) send_data.m += ' state';
+            else send_data.m = 'state';
+
         //type of service
         switch(form_values['tos-c']){
             case '=' :
@@ -1264,6 +1285,10 @@ ETFW.Firewall.Form = Ext.extend(Ext.form.FormPanel, {
                 break;
             default:break;
         }
+
+        if( send_data['tos'] )
+            if( send_data.m ) send_data.m += ' tos';
+            else send_data.m = 'tos';
 
         //additional params
         if(form_values['args']) send_data['args'] = form_values['args'];
@@ -2033,7 +2058,7 @@ Ext.extend(ETFW.Firewall.Main, Ext.TabPanel,{
                             break;
             case 'nat' :    table_string = 'Network address translation ('+table+')';
                             break;
-            default:        table_string = 'Not implemented yet!';
+            default:        table_string = table;
         }
         
 

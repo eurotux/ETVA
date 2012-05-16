@@ -1,160 +1,197 @@
-<a id="help-left-panel-main"><h1><em><b>Nodes</b></em> (painel esquerdo)</h1></a>
-
-<p>O painel <em>Nodes</em> pertence à tela principal do <em>Central Management</em> e lista as máquinas reais/servidores de virtualização
-(as máquinas associadas a cada <em>node</em>).</p>
-
-<p>O primeiro <em>node</em> visível é o <b><em>Main</em></b>, sob o qual se encontram os vários servidores de virtualização registados no <em>CM</em>.</p>
-
-<p>Ao seleccinar um <em>node</em> (servidor de virtualização) é carregada a informação correspondente no painel principal (painel da direita).</p>
-
-<p>Ao clicar com o botão direito do rato sobre o <em>node</em> acede-se ao menu de opções, onde é possível seleccionar efectuar as seguintes operações:</p>
-
-<ul>
-    <li>Inicializar</li>
+<div class="help">
+<div class="help-section">
+    <a id="help-firttimeW-main"><h1>One-Time Setup Wizard</h1></a>
+    <p>The initial setup wizard, guides you through the following steps:</p>
     <ul>
-        <li><a href="#help-left-panel-authorize">Autorizar <em>node</em></a></li>
-        <li><a href="#help-left-panel-restart">Re-inicializar <em>node</em></a></li>
+        <li><a href="#help-firttimeW-password">Default password change</a></li>
+        <li><a href="#help-firttimeW-mac">MAC pool generation</a></li>
+        <li><a href="#help-firttimeW-net">System preferences</a></li>
     </ul>
-    <li>Node</li>
+    <br/>
+    <hr/>
+
+    <a id="help-firttimeW-password"><h2>Default password change</h2></a>
+    <p>For security reasons, on the first time the password should be changed. Fill in the fields and press <em>Set new password!</em>.</p>
+    <p>Note that the <em>next</em> button is only available after you change the password.</p>
+    <a href="#help-firttimeW-main"><div>Index</div></a>
+    <hr/>
+
+    <a id="help-firttimeW-mac"><h2>MAC pool generation</h2></a>
+    <p>In this step we can generate a pool of MAC addresses to be assigned to machines' network interfaces.
+    Use an approximate value, since it is possible to add addresses later.
+    </p>
+    <a href="#help-firttimeW-main"><div>Index</div></a>
+    <hr/>
+
+    <a id="help-firttimeW-net"><h2>System preferences</h2></a>
+    <p>In step <em>System preferences</em> we can change some system preferences such as network management, remote connection, and the system event log.
+    </p>
+    <p>To change these options press <em>Manage Preferences</em>.
+    </p>
+    <a href="#help-firttimeW-main"><div>Index</div></a>
+    <hr/>
+</div>
+
+<div class="help-section">
+    <a id="help-left-panel-main"><h1><em><b>Nodes</b></em> (left panel)</h1></a>
+
+    <p>The nodes' panel belongs to the main panel and lists the real machines and virtualization servers (machines associated on each node).</p>
+     <p>When selecting a node (virtualization server) the corresponding information is loaded in the main panel (right panel).</p>
+     <p>Clicking on the right mouse button over the node brings up the options menu (context menu), where we can to do the following operations: </p>
+
     <ul>
-        <li><a href="#help-left-panel-loadnode">Carregar <em>node</em</a></li>
-        <li><a href="#help-left-panel-hostname">Alterar <em>Hostname</em></a></li>
-        <li><a href="#help-left-panel-connectivity">Opções de conectividade</a></li>
-        <li><a href="#help-left-panel-keymap">Alterar <em>keymap</em></a></li>
-        <li><a href="#help-left-panel-status">Verificar o estado do <em>node</em></a></li>
-        <li><a href="#help-left-panel-remove">Remover <em>node</em></a></li>
+        <li>Initialization</li>
+        <ul>
+            <li><a href="#help-left-panel-authorize">Authorize</a></li>
+            <li><a href="#help-left-panel-restart">Re-initialize</a></li>
+        </ul>
+        <li>Node</li>
+        <ul>
+            <li><a href="#help-left-panel-loadnode">Load node</a></li>
+            <li><a href="#help-left-panel-hostname">Change hostname</a></li>
+            <li><a href="#help-left-panel-connectivity">Connectivity settings</a></li>
+            <li><a href="#help-left-panel-keymap">Set keymap</a></li>
+            <li><a href="#help-left-panel-addperm">Set permissions</a></li>
+            <li><a href="#help-left-panel-status">Check node status</a></li>
+            <li><a href="#help-left-panel-remove">Remove node</a></li>            
+        </ul>
+        <li>Server</li>
+        <ul>
+            <li><a href="#help-left-panel-keymap">Alterar keymap</a></li>
+            <li><a href="#help-left-panel-addperm">Set permissions</a></li>
+        </ul>
     </ul>
-</ul>
-<p><b>Nota: </b><!--A lista de operações correspondentes aos pontos <em>Inicializar</em> e <em>Node</em>, são referentes ao <em>Node</em> onde foi solicitado o menu.-->
-Caso tenha sido seleccionado um servidor ao invés de um <em>node</em>, todas as operações são referentes ao <b><em>node</em> pai</b>, com excepção da opção <em>Alterar keymap</em>.
-</p>
-<br/>
-<hr/>
+    <br/>
+    <hr/>
 
-<a id="help-left-panel-authorize"><h1>Autorizar <em><b>node</b></em></h1></a>
-<p>Quando um <em>node</em>, com o agente de virtualização instalado, é adicionado à rede, o cental management é notificado da sua existência.
-Caso a afirmação anterior se verifique, o <em>node</em> aparece listado na árvore de nodes.</p>
-<p>Para tornar possível a gestão do <em>node</em> é necessário seleccionar a opção <em>Autorizar node</em>.</p>
-<a href="#help-left-panel-main"><div>Início</div></a>
-<hr/>
+    <a id="help-left-panel-authorize"><h1>Authorize</h1></a>
+    <p></p>
+    <p>When a node, with the agent virtualization agent installed, is added to the network, the central management is notified of its existence, and the node is listed on the tree node.
+    </p>
+    <p>Its necessary to authorize the node in order to access the management options.
+    </p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
 
-<a id="help-left-panel-restart"><h1>Re-inicializar <em><b>node</b></em></h1></a>
-<p>A opção <em>Re-inicializar node</em> faz restart ao agente de virtualização do node (não reinicia o seu sistema operativo).
-<p><b>Nota: </b>Nos servidores existentes sob o <em>node</em>, não há qualquer tipo de modificação.</p>
-<a href="#help-left-panel-main"><div>Início</div></a>
-<hr/>
+    <a id="help-left-panel-restart"><h1>Re-initialize</h1></a>
+    <p>The option <em>Re-initialize</em> restarts the node's virtualization agent.</p>
+    <p><b>Note: </b>On existing servers of the node, there are not any kind of modification. </p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
 
-<a id="help-left-panel-loadnode"><h1>Carregar <em><b>node</b></em></h1></a>
-<p>Ao seleccionar esta opção é enviado um pedido ao <em>Central Management</em> para que o estado do <em>node</em> em questão seja actualizado.</p>
-<a href="#help-left-panel-main"><div>Início</div></a>
-<hr/>
+    <a id="help-left-panel-loadnode"><h1>Load node</h1></a>
+    <p>By selecting this option a request is sent to Central Management in order to update the node state.
+    </p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
 
-<a id="help-left-panel-hostname"><h1>Alterar <em><b>Hostname</b></em></h1></a>
-<p>A opção <em>Alterar Hostname</em> possibilita alterar o nome do servidor de virtualização.</p>
-<p><b>Nota: </b>Esta opção apenas é disponibilizada para os servidores de virtualização, e não nas máquinas virtuais criadas nos <em>Nodes</em>.</p>
-<a href="#help-left-panel-main"><div>Início</div></a>
-<hr/>
+    <a id="help-left-panel-hostname"><h1>Change hostname</h1></a>
+    <p>The <em>Change hostname</em> option allow us change the name of the virtualization server (nodes).</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
 
-<a id="help-left-panel-connectivity"><h1>Opções de conectividade</h1></a>
-<p>Em <em>Opções de conectividade</em>, é possível editar a configuração da interface de gestão (<em>Management(</em>) ao
-qual se encontra ligado o agente de virtualização.</p>
-<p>É possível definir o endereço IP e o servidor de DNS.</p>
-<p><b>Nota: </b>Esta opção apenas está disponível na versão <em>ETVA Enterprise</em>.</p>
-<a href="#help-left-panel-main"><div>Início</div></a>
-<hr/>
+    <a id="help-left-panel-connectivity"><h1>Connectivity settings</h1></a>
+    <p>In <em>Connectivity settings</em>, we can configure the management interface.</p>
+    <p>Here its possible to define the IP address and DNS server.</p>
+    <p><b>Note: </b>This option is only available on <em>ETVM</em> version.</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
 
-<a id="help-left-panel-keymap"><h1>Alterar <em><b>keymap</b></em></h1></a>
-<p>Permite alterar a definição do <em>layout</em> do teclado, no <em>node</em> ou servidor seleccionado.</p>
-<a href="#help-left-panel-main"><div>Início</div></a>
-<hr/>
+    <a id="help-left-panel-keymap"><h1>Set keymap</h1></a>
+    <p>Allow us to change the keyboard layout, on selected node/server.</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
 
-<a id="help-left-panel-status"><h1>Verificar o estado do <em>node</em></h1></a>
-<p>Permite alterar a definição do <em>layout</em> do teclado, no servidor seleccionado.</p>
-<a href="#help-left-panel-main"><div>Início</div></a>
-<hr/>
+    <a id="help-left-panel-addperm"><h1>Set permissions</h1></a>
+    <p>Allow us to setup who has access on the server or to the cluster (if you right click over a node).</p>  
+    <p>In the window that appears, select the users/groups you want to give access.</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr />
 
-<a id="help-left-panel-remove"><h1>Remover <em><b>node</b></em></h1></a>
-<p>A opção <em>Remover node</em> remove um Node. Para concluir a opção basta responder afirmativamente à mensgem de confirmação.</p>
-<p>Esta opção não remove o agente de virtualização</p>
+    <a id="help-left-panel-status"><h1>Check node status</h1></a>
+    <p>Force to fetch the node status on the selected node.</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
 
-<p><b>Nota 1: </b>Esta opção apenas remove o servidor de virtualização do <em>Central Management</em>,
-eliminado a informação que este retém sobre ele.</p>
-<p><b>Nota 2: </b>Nenhum volume de armazenamento é apagado.</p>
-<a href="#help-left-panel-main"><div>Início</div></a>
-<hr/>
+    <a id="help-left-panel-remove"><h1>Remove</h1></a>
+    <p>
+    To remove a node, choose the option <em>Remove node</em> and answer yes to the confirmation question.
+    </p>
+    <p>This option does not remove the virtualization agent</p>
 
+    <p><b>Note 1: </b>This option only removes the virtualization server from the central management.</p>
+    <p><b>Note 2: </b>None of the storage devices (volumes) are erased.</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
+</div>
 
 
 <!-- ISO MANAGER -->
+<div class="help-section">
+    <a id="help-iso-main"><h1>ISO Manager</h1></a>
+    <p>
+        The ISOs manager is a tool that allows you to manage the images to use when creating new virtual machines.
+    </p>
+    <p>
+        The <em>ISO Manager</em> panel consists of a central grid, which contains the images already loaded, and the options bar (above).
+        The available options are:
+    </p>
 
-<a id="help-iso-main"><h1>Gestor de ISOs</h1></a>
+    <ul>
+        <li><a href="#help-iso-upload"><em>Upload applet (FTP mode)</a></li>
+        <li><a href="#help-iso-download"><em>Download</em></a></li>
+        <li><a href="#help-iso-rename">Rename</a></li>
+        <li><a href="#help-iso-remove">Remove</a></li>
+    </ul>
+    <p><b>Note: </b>The maximum number of allowed images is limited by the available space in the central management.
+    </p>
+    <br/>
+    <hr/>
 
-<p>O gestor de ISOs é uma ferramenta que permite fazer a gestão das imagens a utilizar na criação de novas máquinas virtuais.
-    No momento da criação das máquinas virtuais é possível seleccionar uma das imagens carregadas.</p>
+    <a id="help-iso-upload"><h1>Upload applet (FTP mode)</a></h1></a>
+    <p>
+    To send images to the Central Management, we should follow the following steps:
+    </p>
+    <ol>
+        <li>Select the option <em>Upload applet (FTP mode)</em>;</li>
+        <li>Select the desired image(s) by pressing the <em>Search</em> button, and then <em>Open</em>;</li>
+        <li>Check the list of images to be sent (if you want you can use the buttons to remove undesired files);</li>
+        <li>Press send</li>
+    </ol>
 
-<p>
-O painel <em>Gestor de ISOs</em> é constituido por uma grelha central, que contém as imagens já carregadas, e pela barra de opções (acima).
-As opções disponíveis são as seguintes:
-</p>
+    <p><b>Note 1: </b>After sending, the images should appear in the list.</p>
+    <p><b>Note 2: </b>To run the applet you must have the Java plug-in installed.</p>
+    <a href="#help-iso-main"><div>Index</div></a>
+    <hr/>
 
-<ul>
-    <li><a href="#help-iso-upload"><em>Applet</em> de <em>Upload</em> (modo FTP)</a></li>
-    <li><a href="#help-iso-download"><em>Download</em></a></li>
-    <li><a href="#help-iso-rename">Renomear</a></li>
-    <li><a href="#help-iso-remove">Apagar</a></li>
-</ul>
+    <a id="help-iso-download"><h1>Download</h1></a>
+    <p>
+    We can download any of the central management images, just click on the desired line (image) and press the <em>download</em> button.
+    </p>
+    <a href="#help-iso-main"><div>Index</div></a>
+    <hr/>
 
+    <a id="help-iso-rename"><h1>Rename</h1></a>
+    <p>
+    To change the name of an image that is in the Central Management, select the desired line and press the <em>Rename</em> button.
+    A window shall appear where you can enter the new name. After editing press <em> Save</em>.
+    </p>
+    <a href="#help-iso-main"><div>Index</div></a>
+    <hr/>
 
-<p><b>Nota: </b>O número de imagens admitido é limitado pelo espaço disponível no <em>Central Management</em>.</p>
-<br/>
-<hr/>
+    <a id="help-iso-remove"><h1>Remove</h1></a>
+    <p>
+    To delete an image select the desired line and press <em>Remove</em>, then answer yes to the confirmation question.
+    </p>
+    <a href="#help-iso-main"><div>Index</div></a>
+    <hr/>
+</div>
 
-<a id="help-iso-upload"><h1><em><b>Applet</b></em> de <em><b>Upload</b></em> (modo FTP)</h1></a>
-<p>
-Para efectuar o envio de imagens para o <em>Central Management</em> deve seguir os seguintes passos:
-</p>
-
-<ol>
-    <li>Seleccionar na barra superior, a opção <em>Applet de Upload (modo FTP)</em>;</li>
-    <li>No aviso de seguranção seleccionar <em>Run</em>;</li>
-    <li>Seleccionar a(s) imagem(ns) através da opção <em>Procurar</em>, encontrar os ficheiros, e de seguida carregar em <em>Open</em>;</li>
-    <li>Conferir a lista de imagens a enviar (caso pretenda pode utilizar os botões de remoção para retirar ficheiros indesejados);</li>
-    <li>Seleccionar a opção enviar (as imagens são copiadas para o <em>Central Management</em>).</li>
-</ol>
-
-<p><b>Nota 1: </b>Após o envio, as imagens aparecem listadas no painel <em>Gestor de ISOs</em>.</p>
-<p><b>Nota 2: </b>Para executar a <em>applet</em> de envio é necessário ter instalado o <em>Java plug-in</em>.</p>
-<a href="#help-iso-main"><div>Início</div></a>
-<hr/>
-
-<a id="help-iso-download"><h1><em><b>Download</b></em></h1></a>
-<p>
-A opção de <em>download</em> possibilita descarregar uma das imagens que se encontram no <em>Central Management</em>,
-basta seleccionar a linha correspondente à imagem pretendida e seleccionar a opção de <em>download</em>.
-</p>
-<a href="#help-iso-main"><div>Início</div></a>
-<hr/>
-
-<a id="help-iso-rename"><h1>Renomear</h1></a>
-<p>
-Para modificar o nome de uma imagem que esteja no <em>Central Management</em>
-selecciona-se a linha correspondente à imagem, e escolhe-se a opção <em>Renomear</em>.
-De seguida surge uma janela onde é possível introduzir o novo nome. Proceder à alteração e <em>Guardar</em>.
-</p>
-<a href="#help-iso-main"><div>Início</div></a>
-<hr/>
-
-<a id="help-iso-remove"><h1>Apagar</h1></a>
-<p>
-Para apagar uma imagem que esteja no <em>Central Management</em>
-selecciona-se a linha correspondente à imagem, e escolhe-se a opção <em>Apagar</em>.
-Responder afirmativamente à mensagem de confirmação.
-</p>
-<a href="#help-iso-main"><div>Início</div></a>
-<hr/>
-
-<a id="help-bottom-panel-main"><h1>Painel de Informação</h1></a>
-<p>O painel de informação pertence à tela principal do <em>Central Management</em> e
-mostra o sucesso dos eventos de sistema.</p>
-
-<hr/>
+<div class="help-section">
+    <a id="help-bottom-panel-main"><h1>Info Panel</h1></a>
+    <p>
+    The information panel belongs to the main panel and shows the success of system changes.
+    </p>
+    <hr/>
+</div>
+</div>

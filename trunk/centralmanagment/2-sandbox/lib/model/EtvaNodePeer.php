@@ -78,4 +78,57 @@ class EtvaNodePeer extends BaseEtvaNodePeer
       
   }
 
+  /**
+    * Used for compatibility of the previous version, where requests only contains the "nid". Needed since the implementation of clusters.
+    */
+  public static function getOrElectNode(sfWebRequest $request){
+
+     // get parameters
+     $nid = $request->getParameter('nid');
+     $cid = $request->getParameter('cid');
+     $level = $request->getParameter('level');
+     $vg = $request->getParameter('vg');
+     $dev = $request->getParameter('dev');
+     $lv = $request->getParameter('lv');
+
+     // check level - back compatibility
+     if(!$level)
+         $level = 'node';
+
+     if($level == 'cluster'){
+         $etva_cluster = EtvaClusterPeer::retrieveByPK($cid);
+        return EtvaNode::getFirstActiveNode($etva_cluster);
+     }elseif($level == 'node'){
+        $etva_node = EtvaNodePeer::retrieveByPK($nid); 
+
+        if($lv){
+            $c = new Criteria();
+            $c->add(EtvaLogicalvolumePeer::STORAGE_TYPE, EtvaLogicalvolume::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
+            $etva_lv = EtvaLogicalvolumePeer::retrieveByLv($vg, $c);
+            return ($etva_lv) ? EtvaNodePeer::ElectNode($etva_node): $etva_node;
+        }elseif($dev){
+            $c = new Criteria();
+            $c->add(EtvaPhysicalvolumePeer::STORAGE_TYPE, EtvaPhysicalvolume::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
+            $etva_pv = EtvaPhysicalvolumePeer::retrieveByDevice($vg, $c);
+            return ($etva_pv) ? EtvaNodePeer::ElectNode($etva_node): $etva_node;            
+        }elseif($vg){
+             $c = new Criteria();
+             $c->add(EtvaVolumeGroupPeer::STORAGE_TYPE, EtvaVolumeGroup::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
+             $etva_vg = EtvaVolumegroupPeer::retrieveByVg($vg, $c);
+             return ($etva_vg) ? EtvaNodePeer::ElectNode($etva_node): $etva_node;                     
+        }
+//        }else{
+//            return $etva_node;
+//            $etva_node = EtvaNodePeer::retrieveByPK($nid);
+//            $cluster_id = $etva_node->getClusterId();
+//            $etva_cluster = EtvaClusterPeer::retrieveByPK($cluster_id);
+//            $etva_node = EtvaNode::getFirstActiveNode($etva_cluster);
+//        }
+     }
+  }
+  private static function ElectNode(EtvaNode $etva_node){
+        $cluster_id = $etva_node->getClusterId();
+        $etva_cluster = EtvaClusterPeer::retrieveByPK($cluster_id);
+        return EtvaNode::getFirstActiveNode($etva_cluster);
+  }
 }

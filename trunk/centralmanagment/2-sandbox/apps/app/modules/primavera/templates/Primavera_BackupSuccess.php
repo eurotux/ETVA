@@ -57,8 +57,8 @@ Primavera.Backup.TabPanel = new Ext.extend( Ext.TabPanel, {
                                 {header: __('Databases'), dataIndex: 'companies', width:200},
                                 {header: __('Verify'), dataIndex: 'verify', width:60, renderer:function(v){return __(v);}},
                                 {header: __('Overwrite'), dataIndex: 'overwrite', width:60, renderer:function(v){return __(v);}},
-                                {header: __('Incremental'), dataIndex: 'incremental', width:60, renderer:function(v){return __(v);}},
-                            ],
+                                {header: __('Incremental'), dataIndex: 'incremental', width:60, renderer:function(v){return __(v);}}
+                            ]
                         }),
                         sm: new Ext.grid.RowSelectionModel({ singleSelect:true,
                                                                 'listeners': {

@@ -1184,7 +1184,7 @@ ETVOIP.PBX.Extensions.Main = Ext.extend(Ext.Panel, {
                                 title = String.format(title,'VIRTUAL');
                                 dev_label = '';
 
-                                Ext.Msg.show({title: String.format(<?php echo json_encode(__('Error {0}')) ?>,'ETVA'),
+                                Ext.Msg.show({title: String.format(<?php echo json_encode(__('Error {0}')) ?>,'<?php echo sfConfig::get('config_acronym'); ?>'),
                                     buttons: Ext.MessageBox.OK,
                                     msg: <?php echo json_encode(__('DEVICE TYPE OPERATION NOT YET SUPPORTED!')) ?>,
                                     icon: Ext.MessageBox.ERROR});

@@ -20,13 +20,15 @@ require 'lib/model/om/BaseEtvaCluster.php';
  */
 class EtvaCluster extends BaseEtvaCluster {
 
+
     /*
      * sends soap to cluster nodes....
      */
-    public function soapSend($method, $params = null, EtvaNode $except_node = null,$forceRequest = false)
+    public function soapSend($method, $params = null, EtvaNode $except_node = null,$forceRequest = false, $rcv_timeout = 0, $all = false)
     {
         $c = new Criteria();
         if($except_node) $c->add(EtvaNodePeer::UUID ,$except_node->getUuid(),Criteria::ALT_NOT_EQUAL);
+        if( !$all ) $c->add(EtvaNodePeer::INITIALIZE, EtvaNode::INITIALIZE_OK, Criteria::EQUAL );
         $c->add(EtvaNodePeer::CLUSTER_ID, $this->getId());
 
         $all_nodes = EtvaNodePeer::doSelect($c);
@@ -34,13 +36,13 @@ class EtvaCluster extends BaseEtvaCluster {
 
         foreach($all_nodes as $node){
 
-            $responses[$node->getId()] = $node->soapSend($method,$params,$forceRequest);
+            $responses[$node->getId()] = $node->soapSend($method,$params,$forceRequest,$rcv_timeout);
 
         }
 
         return $responses;
     }
-
+  
     public function getSharedPvs()
     {
 

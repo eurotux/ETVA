@@ -4,7 +4,11 @@ security: ~
 # insert your own filters here
 myUser: # filter that updates vnc token
   class: myUserFilter
+
 cache:     ~
+myVersion:
+  class: myVersionFilter
+
 common:
   class: sfCommonFilter
 execution: ~

@@ -125,6 +125,7 @@ class EtvaServer extends BaseEtvaServer
   public function networks_VA()
   {
 
+      // fix order of networks
       $server_networks = $this->getEtvaNetworks();
       $networks = array();
       
@@ -141,6 +142,7 @@ class EtvaServer extends BaseEtvaServer
   public function disks_VA()
   {
 
+      // fix order of disks
       $server_disks = $this->getEtvaServerLogicals();
       if(!$server_disks) $server_disks = array();
       $disks = array();
@@ -193,10 +195,8 @@ class EtvaServer extends BaseEtvaServer
                          'vnc_port'=>$this->getVncPort(),
                          'vm_type' => $this->getVmType(),
                          'vnc_listen'=>'any',
-                         'vnc_keymap'=>$this->getVncKeymap()
-                                    
-
-
+                         'vnc_keymap'=>$this->getVncKeymap(),
+                         'autostart'=>$this->getAutostart(),
       );
 
 
@@ -253,6 +253,25 @@ class EtvaServer extends BaseEtvaServer
 
 
       return $has_shared;
+  }
+
+  /*
+   * checks if at least one lv has snapshots
+   */
+  public function hasLogicalvolumeSnapshots()
+  {
+      $lvs = $this->getEtvaLogicalvolumes();
+      $has_snapshots = false;
+
+      foreach($lvs as $lv){
+          if($lv->getEtvaLogicalVolumesSnapshots()){
+              $has_snapshots = true;
+              break;
+          }
+      }
+
+
+      return $has_snapshots;
   }
 
        
@@ -439,5 +458,34 @@ class EtvaServer extends BaseEtvaServer
         return parent::setVmState($v);
 	} 
   
+    /*
+     * getEtvaNetworks: redefined parent method for correct order (EtvaNetworkPeer::PORT)
+     */
+	public function getEtvaNetworks($criteria = null, PropelPDO $con = null)
+	{
+		if(null === $this->collEtvaNetworks || null !== $criteria) {
+            if( null === $criteria ){
+              $criteria = new Criteria();
+              $criteria->addAscendingOrderByColumn(EtvaNetworkPeer::PORT);
+            }
+            $this->collEtvaNetworks = parent::getEtvaNetworks($criteria,$con);
+        }
+		return $this->collEtvaNetworks;
+	}
+
+    /*
+     * getEtvaServerLogicals: redefined parent method for correct order (EtvaServerLogicalPeer::BOOT_DISK)
+     */
+	public function getEtvaServerLogicals($criteria = null, PropelPDO $con = null)
+	{
+		if(null === $this->collEtvaServerLogicals || null !== $criteria) {
+            if(null === $criteria) {
+                $criteria = new Criteria();
+                $criteria->addAscendingOrderByColumn(EtvaServerLogicalPeer::BOOT_DISK);
+            }
+            $this->collEtvaServerLogicals = parent::getEtvaServerLogicals($criteria,$con);
+		}
+		return $this->collEtvaServerLogicals;
+	}
 
 }

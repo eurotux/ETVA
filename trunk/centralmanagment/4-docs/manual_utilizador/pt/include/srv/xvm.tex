@@ -24,6 +24,12 @@ arrancar uma máquina virtual:
 # xvm --start tmp1
 \end{Verbatim}
 
+terminar uma máquina virtual:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+# xvm --stop tmp1
+\end{Verbatim}
+
 terminar forçadamente uma máquina virtual:
 
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -129,9 +135,9 @@ Para migrar uma máquina virtual entre dois nós é necessário que a máquina v
 # xm migrate --live tmp1 xen3
 \end{Verbatim}
 
-Se o live não funcionar deverá ser efectuado o migrate normal.
+Se o live migrate não funcionar deverá ser efectuado o migrate normal.
 
-A responsabilidade de arranque das máquinas virtuais de uma blade é do daemon xvmd que as iniciará no seu arranque.
+A responsabilidade de arranque das máquinas virtuais de um servidor é do daemon xvmd que as iniciará no seu arranque.
 
 É extremamente importante que não seja arrancada a mesma máquina virtual em
 máquinas reais diferentes, uma vez que isso causaria corrupção do filesystem.

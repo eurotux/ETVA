@@ -113,7 +113,7 @@ ETVOIP.PBX.Main = function(config){
          ]
          ,listeners:{
             'reload':function(){
-                alert('ETVOIP.PBX.Main reload');
+                //alert('ETVOIP.PBX.Main reload');
                 var modulesPanel = this.items.get(0);
                 modulesPanel.fireEvent('reload');
             }

@@ -104,6 +104,11 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
         var fieldset_items = 
                         [
                             {
+                                boxLabel: <?php echo json_encode(__('Auto-start')) ?>,
+                                xtype:'checkbox', checked: (data['autostart']) ? true : false,
+                                name:'autostart',inputValue:'1',ref:'autostart'
+                            },
+                            {
                                 boxLabel: <?php echo json_encode(__('VM Filesystem')) ?>,
                                 xtype:'radio', checked: (data['boot']=='filesystem') ? true : false,
                                 name:'boot_from',inputValue:'filesystem',ref:'boot_filesystem'
@@ -127,7 +132,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                                 var cdrom_field = this.form.findField('cdrom_cb');
                                 boot_location_field.setDisabled(!check);
                                 boot_location_field.clearInvalid();
-                                cdrom_field.setDisabled(check);
+                                //cdrom_field.setDisabled(check);
 
                                 if(check) boot_location_field.focus();
 
@@ -216,13 +221,17 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                             title: <?php echo json_encode(__('Boot options')) ?>,
                             labelWidth:10,                            
                             items:fieldset_items
-                        },
-                        {
-                            xtype:'fieldset',
-                            title: <?php echo json_encode(__('Removable media')) ?>,
-                            items:[cdromcombo]
                         }
                     ];
+        if(data['vm_type']!='pv'){
+            fieldset.push(
+                                {
+                                    xtype:'fieldset',
+                                    title: <?php echo json_encode(__('Removable media')) ?>,
+                                    items:[cdromcombo]
+                                }
+                            );
+        }
                     
         return fieldset;
         
@@ -254,7 +263,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                             allowBlank : false,
                             invalidText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed!')) ?>,
                             validator  : function(v){
-                                var t = /^[a-zA-Z0-9]+$/;
+                                var t = /^[a-zA-Z][a-zA-Z0-9\-\_]+$/;
                                 return t.test(v);
                             }
                         },
@@ -267,6 +276,14 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                             xtype:'numberfield',
                             name       : 'maxmemory',
                             fieldLabel : <?php echo json_encode(__('Max allocatable memory (MB)')) ?>,
+                            allowBlank : false,
+                            disabled:true,
+                            readOnly:true
+                        }
+                        ,{
+                            xtype:'numberfield',
+                            name       : 'freememory',
+                            fieldLabel : <?php echo json_encode(__('Free memory (MB)')) ?>,
                             allowBlank : false,
                             disabled:true,
                             readOnly:true
@@ -364,7 +381,8 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                 fn:function(p){
 
                     if(typeof Network !='undefined' && typeof Network.ManageInterfacesGrid !='undefined'){
-                        var grid = new Network.ManageInterfacesGrid({id:'server-edit-networks-grid',vm_type:p.vmType,server_id:this.server_id,loadMask:true,border:false});
+//                        alert("constroi "+this.server_id);
+                        var grid = new Network.ManageInterfacesGrid({id:'server-edit-networks-grid',vm_type:p.vmType,server_id:this.server_id,level:'server',loadMask:true,border:false});
                         grid.on('render',function(){
                             this.store.load.defer(200,this.store);
                             Ext.getBody().unmask();
@@ -379,7 +397,8 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                             ,scripts:true
                             ,scope:this
                             ,callback:function(){
-                                var grid = new Network.ManageInterfacesGrid({id:'server-edit-networks-grid',vm_type:p.vmType,server_id:this.server_id,loadMask:true,border:false});
+//                                alert("constroi "+this.server_id);
+                                var grid = new Network.ManageInterfacesGrid({id:'server-edit-networks-grid',vm_type:p.vmType,server_id:this.server_id,level:'server', loadMask:true,border:false});
                                 grid.on('render',function(){
                                     this.store.load.defer(200,this.store);
                                     Ext.getBody().unmask();
@@ -444,7 +463,11 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                  */
                 var maxmemory = form.findField('maxmemory');
                 if(data['node_maxmemory']){                    
-                    maxmemory.setValue(parseInt(data['mem'])+parseInt(byte_to_MBconvert(data['node_maxmemory'],0,'floor')));
+                    maxmemory.setValue(parseInt(byte_to_MBconvert(data['node_maxmemory'],0,'floor')));
+                }
+                var freememory = form.findField('freememory');
+                if(data['node_freememory']){                    
+                    freememory.setValue(parseInt(byte_to_MBconvert(data['node_freememory'],0,'floor')));
                 }
                     
 
@@ -480,6 +503,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
          *
          */
 
+        send_data['autostart'] = form_values['autostart'] ? true : false;
         send_data['boot'] = form_values['boot_from'];
         send_data['cdrom'] = 0;
         send_data['location'] = '';
@@ -567,7 +591,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
             if(Ext.isEmpty(disks)){
                 Ext.Msg.show({
-                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,'ETVA'),
+                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,'<?php echo sfConfig::get('config_acronym'); ?>'),
                     buttons: Ext.MessageBox.OK,
                     msg: String.format(<?php echo json_encode(__('Unable to edit virtual server {0}!')) ?>,form_values['name'])+'<br>'+<?php echo json_encode(__('At least one disk is required!')) ?>,
                     icon: Ext.MessageBox.ERROR});

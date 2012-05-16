@@ -14,6 +14,10 @@ class EtvaLogicalvolume extends BaseEtvaLogicalvolume
     const TARGET_MAP = 'target';
     const PATH_MAP = 'path';
     const MOUNTED_MAP = 'mounted';
+    const SNAPSHOT_MAP = 'snapshot';
+    const ORIGIN_MAP = 'origin';
+    const FORMAT_MAP = 'format';
+    const HAVESNAPSHOTS_MAP = 'havesnapshots';
 
     const STORAGE_TYPE_MAP = 'type';
     const STORAGE_TYPE_LOCAL_MAP = 'local';
@@ -35,6 +39,10 @@ class EtvaLogicalvolume extends BaseEtvaLogicalvolume
         if(array_key_exists(self::TARGET_MAP, $arr)) $this->setTarget($arr[self::TARGET_MAP]);
 
         if(array_key_exists(self::MOUNTED_MAP, $arr)) $this->setMounted($arr[self::MOUNTED_MAP]);
+        if(array_key_exists(self::SNAPSHOT_MAP, $arr)) $this->setSnapshot($arr[self::SNAPSHOT_MAP]);
+        if(array_key_exists(self::ORIGIN_MAP, $arr)) $this->setOrigin($arr[self::ORIGIN_MAP]);
+        if(array_key_exists(self::FORMAT_MAP, $arr)) $this->setFormat($arr[self::FORMAT_MAP]);
+        if(array_key_exists(self::HAVESNAPSHOTS_MAP, $arr)) $this->setHaveSnapshots($arr[self::HAVESNAPSHOTS_MAP]);
 
 //        if (array_key_exists(self::VOLUMEGROUP_MAP, $arr)) $this->setVolumegroup($arr[self::VOLUMEGROUP_MAP]);
 
@@ -110,6 +118,15 @@ class EtvaLogicalvolume extends BaseEtvaLogicalvolume
       return EtvaServerPeer::doSelectOne($criteria, $con);
 
 	}
+
+    public function getEtvaLogicalvolumesSnapshots(Criteria $criteria = null)
+    {
+        if(!$criteria) $criteria = new Criteria();
+        $criteria->add(EtvaLogicalvolumePeer::VOLUMEGROUP_ID, $this->getVolumegroupId());
+        $criteria->add(EtvaLogicalvolumePeer::ORIGIN, $this->getLv());
+        $criteria->add(EtvaLogicalvolumePeer::SNAPSHOT, 1);
+        return EtvaLogicalvolumePeer::doSelect($criteria);
+    }
 
     /*
      * checks if new size is valid

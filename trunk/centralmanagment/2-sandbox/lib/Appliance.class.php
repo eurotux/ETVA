@@ -50,9 +50,9 @@ class Appliance
      * if serial_number passed use it, otherwise get from DB
      */
     public function Appliance($sn = null)
-    {                
+    {
         $etva_data = Etva::getEtvaModelFile();
-
+	
         isset($etva_data[self::CONF_SITE_NAME]) ? $this->site_url = $etva_data[self::CONF_SITE_NAME]: $this->site_url = '';
 
         // set temporary DB dump to fixtures/backup/DB_FILE
@@ -71,7 +71,7 @@ class Appliance
             $pk = 'serial_number';
             $sn_setting = EtvaSettingPeer::retrieveByPk($pk);
             if(!$sn_setting) $sn_setting = new EtvaSetting();
-            $this->serial_number = $sn_setting->getValue();
+           $this->serial_number = $sn_setting->getValue();
         }
         
     }
@@ -649,7 +649,7 @@ class Appliance
      *  returns path to stored backup file
      * 
      */
-    public function get_backupconf($name, $ip,$port,$path_to_store)
+    public function get_backupconf($name, $ip,$port,$path_to_store, $diagnostic = false)    
     {
         $serial_number = $this->serial_number;
 
@@ -664,7 +664,7 @@ class Appliance
         }
                                            
         $curl_req = new cURL($url);
-        $curl_req->post();
+        $curl_req->post("diagnostic=$diagnostic");
         $curl_req->progress($serial_number);
         $curl_req->setopt(CURLOPT_FILE,$fp);
         $curl_req->exec();
@@ -701,14 +701,18 @@ class Appliance
     /*
      * performs Appliance Backup
      */
-    public function backup($force)
+    public function backup($force, $diagnostic = false)
     {
-        $serial_number = $this->serial_number;
-
-        //clear stage cache
-        $this->delStage(self::BACKUP_STAGE);
-        $this->delStage(self::MA_BACKUP);
-
+        if(!$diagnostic){
+            $serial_number = $this->serial_number;
+    
+            //clear stage cache
+            $this->delStage(self::BACKUP_STAGE);
+            $this->delStage(self::MA_BACKUP);
+        }else{
+            $response_msg = '';
+            $va_down = array();
+        }
 
         /*
          * VIRT AGENTS
@@ -716,13 +720,15 @@ class Appliance
 
         $node_list = EtvaNodePeer::getWithServers();
         $node_num = count($node_list);
-        if($node_num != 1){
-            /*
-             * ERROR should be only one element (standard ETVA release only)
-             */
-            $msg = "Sould only be one Virtualization Agent! $node_num found!";
-            $data = array('success'=>false,'agent'=>'ETVA','info'=>$msg,'error'=>$msg);
-            return $data;
+        if(!$diagnostic){
+            if($node_num != 1){
+                /*
+                 * ERROR should be only one element (standard ETVA release only)
+                 */
+                $msg = "Sould only be one Virtualization Agent! $node_num found!";
+                $data = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>$msg,'error'=>$msg);
+                return $data;
+            }
         }
 
         $archive_files = array();
@@ -731,85 +737,103 @@ class Appliance
             /*
              * check node state ok to comm with agent
              */
-            if(!$node->getState()){
-                $node_name = $node->getName();
-                $msg = sfContext::getInstance()->getI18N()->__(EtvaNodePeer::_STATE_DOWN_,array('%name%'=>$node_name));
-                $data = array('success'=>false,'agent'=>'ETVA','info'=>$msg,'error'=>$msg);
-                return $data;
-            }
-            
-            $servers_list = $node->getEtvaServers();
-            $servers_down = array();
-
-
-            /*
-             * Firs pass, check for servers down...
-             */
-            foreach($servers_list as $server)
-            {
-                $server_name =$server->getName();
-                $server_state =$server->getState();
-                $server_vm =$server->getVmState();
-                $server_ma =$server->getAgentTmpl();
-
-                /*
-                 * if there's an agent in VM and if vm not running or agent is down add to servers down
-                 */
-                if($server_ma && !$server_state){
-                    $servers_down[] = Etva::getLogMessage(array('agent'=>$server->getName(),'msg'=>'Down'), Etva::_AGENT_MSG_);
-                }                                
-            }
-
-            /*
-             * First pass return errors found
-             */
-            if(!empty($servers_down) && !$force)
-            {
-                $data = array('success'=>false,'agent'=>'ETVA','action'=>self::MA_BACKUP,'info'=>implode('<br>',$servers_down),'error'=>implode(' ',$servers_down));
-                return $data;
-            }
-            
-
-
-            /*
-             * Second pass...user has been warn
-             */
-            
-            $servers_error = array();
-            $this->setStage(self::BACKUP_STAGE,self::MA_BACKUP);
-            foreach($servers_list as $server)
-            {
-                $server_name =$server->getName();
-                $server_state =$server->getState();
-                $server_vm =$server->getVmState();
-                $server_ma =$server->getAgentTmpl();
-                $server_uuid =$server->getUuid();
-
-                /*
-                 * if there's an agent in VM send backup command
-                 */
-                if($server_ma && $server_state){
-                    /*
-                     * take care of MA backup stuff here....
-                     */                   
-                    $this->setStage(self::MA_BACKUP,$server_ma);
-                    
-                    $ma_filename = sprintf(self::MA_ARCHIVE_FILE, $server_uuid, $server_ma);
-
-                    // filename path without extension yet. it will be given by get_backupconf result
-                    $full_path = $this->archive_base_dir.'/'.$ma_filename; 
-
-                    $ma_backup = $this->get_backupconf($server_name, $server->getIp(), $server->getAgentPort(), $full_path);
-                                        
-                    if(!$ma_backup['success']){
-                        $servers_error[] = $ma_backup['error'];
-                        continue;
-                    }                    
-                    
-                    $archive_files[] = $ma_backup['path'];
-
+            if(!$diagnostic){
+                if(!$node->getState()){
+                    $node_name = $node->getName();
+                    $msg = sfContext::getInstance()->getI18N()->__(EtvaNodePeer::_STATE_DOWN_,array('%name%'=>$node_name));
+                    $data = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>$msg,'error'=>$msg);
+                    return $data;
                 }
-            }// end servers backup agents
+            }else{
+                if($node->getInitialize() == EtvaNodePeer::_INITIALIZE_PENDING_){
+                    continue;
+                }
+                if(!$node->getState()){
+                    $response_msg .= $node->getName();
+                    $response_msg .= ', ';
+                    $va_down[] = $node->getName();
+                    $command = "touch ";
+                    $command .= $this->archive_base_dir."/";
+                    $command .= $node->getName()."_down";
+                    exec($command);
+                    continue;
+                }
+            }
+            
+
+            if(!$diagnostic){
+                $servers_list = $node->getEtvaServers();
+                $servers_down = array();
+
+                /*
+                 * Firs pass, check for servers down...
+                 */
+                foreach($servers_list as $server)
+                {
+                    $server_name =$server->getName();
+                    $server_state =$server->getState();
+                    $server_vm =$server->getVmState();
+                    $server_ma =$server->getAgentTmpl();
+    
+                    /*
+                     * if there's an agent in VM and if vm not running or agent is down add to servers down
+                     */
+                    if($server_ma && !$server_state){
+                        $servers_down[] = Etva::getLogMessage(array('agent'=>$server->getName(),'msg'=>'Down'), Etva::_AGENT_MSG_);
+                    }                                
+                }
+
+                /*
+                 * First pass return errors found
+                 */
+                if(!empty($servers_down) && !$force)
+                {
+                    $data = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'action'=>self::MA_BACKUP,'info'=>implode('<br>',$servers_down),'error'=>implode(' ',$servers_down));
+                    return $data;
+                }
+            
+
+
+                /*
+                 * Second pass...user has been warn
+                 */
+                
+                $servers_error = array();
+                $this->setStage(self::BACKUP_STAGE,self::MA_BACKUP);
+                foreach($servers_list as $server)
+                {
+                    $server_name =$server->getName();
+                    $server_state =$server->getState();
+                    $server_vm =$server->getVmState();
+                    $server_ma =$server->getAgentTmpl();
+                    $server_uuid =$server->getUuid();
+    
+                    /*
+                     * if there's an agent in VM send backup command
+                     */
+                    if($server_ma && $server_state){
+                        /*
+                         * take care of MA backup stuff here....
+                         */                   
+                        $this->setStage(self::MA_BACKUP,$server_ma);
+                        
+                        $ma_filename = sprintf(self::MA_ARCHIVE_FILE, $server_uuid, $server_ma);
+    
+                        // filename path without extension yet. it will be given by get_backupconf result
+                        $full_path = $this->archive_base_dir.'/'.$ma_filename; 
+    
+                        $ma_backup = $this->get_backupconf($server_name, $server->getIp(), $server->getAgentPort(), $full_path);
+                                            
+                        if(!$ma_backup['success']){
+                            $servers_error[] = $ma_backup['error'];
+                            continue;
+                        }                    
+                        
+                        $archive_files[] = $ma_backup['path'];
+    
+                    }
+                }// end servers backup agents
+            }
 
 
             /*
@@ -822,14 +846,16 @@ class Appliance
 
             // filename path without extension yet. it will be given by get_backupconf result
             $full_path = $this->archive_base_dir.'/'.$va_filename;            
-            $va_backup = $this->get_backupconf($node_name, $node->getIp(), $node->getPort(), $full_path);
+            $va_backup = $this->get_backupconf($node_name, $node->getIp(), $node->getPort(), $full_path, $diagnostic);
             if($va_backup['success']) $archive_files[] = $va_backup['path'];
 
         }
 
-        if(!empty($servers_error)){
-            $data = array('success'=>false,'agent'=>'ETVA','action'=>self::MA_BACKUP,'info'=>implode('<br>',$servers_error),'error'=>implode(' ',$servers_error));
-            return $data;
+        if(!$diagnostic){
+            if(!empty($servers_error)){
+                $data = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'action'=>self::MA_BACKUP,'info'=>implode('<br>',$servers_error),'error'=>implode(' ',$servers_error));
+                return $data;
+            }
         }
  
 
@@ -847,11 +873,17 @@ class Appliance
         $data = new MyPropelData();
         $data->dumpData($db_filename, 'all',array('Sessions'),null);        
         $archive_files[] = $db_filename;
-        
-        $response = $this->uploadApplianceBackup($archive_files);
-
-        if(!empty($servers_error)){
-            $response['errors'] = implode('<br>',$servers_error);            
+        error_log('CM BACKUP');
+        error_log($db_filename);
+       
+        if(!$diagnostic){
+            $response = $this->uploadApplianceBackup($archive_files);
+            if(!empty($servers_error)){
+                $response['errors'] = implode('<br>',$servers_error);            
+            }
+        }else{
+            $response_msg .= ' reported down. Their state was not included.';
+            $response = array('success'=>true,'agent'=>sfConfig::get('config_acronym'), 'info'=>$response_msg, 'va_down'=>$va_down);
         }
         
         return $response;
@@ -893,7 +925,7 @@ class Appliance
              * ERROR should be only one element (standard ETVA release only)
              */
             $msg = "Sould only be one Virtualization Agent! $node_num found!";
-            $data = array('success'=>false,'agent'=>'ETVA','info'=>$msg,'error'=>$msg);
+            $data = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>$msg,'error'=>$msg);
             return $data;
         }
 
@@ -905,7 +937,7 @@ class Appliance
         if(!$node->getState()){
             $node_name = $node->getName();
             $msg = sfContext::getInstance()->getI18N()->__(EtvaNodePeer::_STATE_DOWN_,array('%name%'=>$node_name));
-            $data = array('success'=>false,'agent'=>'ETVA','action'=>'check_nodes','info'=>$msg,'error'=>$msg);
+            $data = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'action'=>'check_nodes','info'=>$msg,'error'=>$msg);
             return $data;
         }
                         
@@ -973,7 +1005,7 @@ class Appliance
 
         if($result!=0 || $return!=0){
             $msg = 'An error occurred while deleting DB. Aborted!'.$status;
-            $data = array('success'=>false,'agent'=>'ETVA','action'=>self::DB_RESTORE,'info'=>$msg,'error'=>$msg);
+            $data = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'action'=>self::DB_RESTORE,'info'=>$msg,'error'=>$msg);
             return $data;
         }
         
@@ -1000,7 +1032,7 @@ class Appliance
         if($status != 0){
             // aconteceu erro
             $msg = 'An error occurred while generating DB dump. Aborted!'.$status;
-            $data = array('success'=>false,'agent'=>'ETVA','action'=>self::DB_RESTORE,'info'=>$msg,'error'=>$msg);
+            $data = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'action'=>self::DB_RESTORE,'info'=>$msg,'error'=>$msg);
             return $data;
         }  
 

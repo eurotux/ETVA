@@ -41,6 +41,11 @@ use Filesys::DiskFree;
 use File::PathConvert qw(realpath);
 use Data::Dumper;
 
+use Cwd qw(abs_path);
+
+# libparted required for get partitions info
+require parted;
+
 my $CONF;
 
 use constant MINOR_MASK     => 037774000377;
@@ -51,6 +56,8 @@ use constant MAJOR_SHIFT    => 0000010;
 my $MIN_SIZE_DISK = 1024 * 1024;    # min disk size 1M
 
 my $LIMIT_SIZE_DISK_PERC = 0.999;    # limit size disk percentage of disk free
+
+my $san_config_file = $ENV{'san_conf_file'} || "/etc/sysconfig/etva-vdaemon/san_file.conf";
 
 # Disk Devices
 #   name => { info }
@@ -76,6 +83,9 @@ my %PathMaps = ();
 # Mounted Devices
 #   device => { info }
 my %MountDev = ();
+
+# SAN Devices information
+my %SANDev = ();
 
 # All Disk Devices info
 my %AllDiskDevices = ();
@@ -189,6 +199,8 @@ sub getphydev {
         ($PD) = grep { $_->{'loopfile'} eq "$lf" } values %PhyDevices;
     } elsif( my $name = $p{'name'} ){
         $PD = $PhyDevices{"$name"};
+    } elsif( defined($p{'major'}) && defined($p{'minor'}) ){
+        ($PD) = grep { ( $_->{'major'} == $p{'major'} ) && ( $_->{'minor'} == $p{'minor'} ) } values %PhyDevices;
     }
     return $PD;
 }
@@ -297,7 +309,7 @@ sub loaddiskdev {
 
     # get logical volumes 
     if( $force || !%LVInfo ){
-        lvinfo();
+        #lvinfo();
         # activate inactive logical volumes
         activate_lvs();
         # update LV info
@@ -306,6 +318,8 @@ sub loaddiskdev {
 
     # multipath map info
     if( $force || !%PathMaps ){ pathmapsinfo(); }
+
+    if( $force || !%SANDev ){ sandevconf(); }
 
     if( $force || !%MountDev ){ mountdev(); }
 
@@ -391,9 +405,6 @@ sub phydev {
 
 sub libparted_phydevinfo {
 
-    # libparted required
-    require parted;
-
     if( -e "/proc/partitions" &&
         %PhyDevices ){
         # probe all device from /proc/partitions
@@ -419,6 +430,7 @@ sub libparted_phydevinfo {
         while( $dev = $dev->get_next() ){
             libparted_updatedevinfo( $dev );
         }
+        parted::device_free_all();
     }
 }
 sub libparted_updatedevinfo {
@@ -585,13 +597,78 @@ sub pathmapsinfo {
     }
     return wantarray() ? %PathMaps : \%PathMaps;
 }
+
+# aux func for get block device info
+sub info_majorminor {
+    my ($major,$minor) = @_;
+
+    if( -r "/proc/partitions" ){
+        open(PF,"/proc/partitions");
+        while(<PF>){
+            if( /^\s+$major\s+$minor\s+(\d+)\s+(\S+)$/ ){
+                my ($blockn,$name) = ($1,$2);
+                my $size = $blockn * 1024; # in bytes
+                return ($major,$minor,$blockn,$name,$size);
+            }
+        }
+        close(PF);
+    }
+    return;
+}
+sub info_blockdev {
+    my ($dev) = @_;
+    if( -l "$dev" ){
+        $dev = abs_path($dev);
+    }
+    if( -b "$dev" ){
+        my ($rdev) = (lstat $dev)[6];
+        my $major = ( $rdev & MAJOR_MASK ) >> MAJOR_SHIFT;
+        my $minor = ( $rdev & MINOR_MASK ) >> MINOR_SHIFT;
+        if( my @info = &info_majorminor($major,$minor) ){
+            return ($dev,@info);
+        }
+    }
+    return;
+}
+
+sub sandevconf {
+    %SANDev = ();
+
+    if( -e "$san_config_file" ){
+        open(SCF,"$san_config_file");
+        while(<SCF>){
+            chomp;
+            if( /^(\S+)/ ){
+                my ($dev) = ($1);
+                if( my @dc = &info_blockdev($dev) ){   # get device info from /proc/partitions
+                    my %D = ( 'device'=>$dc[0], 'major'=>$dc[1], 'minor'=>$dc[2], 'blocks'=>$dc[3], 'name'=>$dc[4], 'size'=>$dc[5], 'type'=>'SAN' );
+                    $D{'alias'} = $dev if( $dev ne $D{'device'} );
+                    $SANDev{"$D{'name'}"} = \%D;
+                }
+            }
+        }
+        close(SCF);
+    }
+
+    return wantarray() ? %SANDev : \%SANDev;
+}
+
 # Physical volumes info
 sub pvinfo {
+    my ($force) = @_;
+
+    if( $force || !%PVInfo ){
+        my $debug_opt = ""; # debug option
+        $debug_opt = " -v" if( &debug_level > 9 );
+
+        # force update pvs info
+        cmd_exec("pvscan $debug_opt");
+    }
 
     %PVInfo = ( );
 
     my $opts = "pv_fmt,pv_uuid,pv_size,dev_size,pv_free,pv_used,pv_name,pv_attr,pv_pe_count,pv_pe_alloc_count,pv_tags,vg_name";
-    open(I,"/usr/sbin/pvs --separator=';' --units=b --noheadings --options=$opts 2>/dev/null|");
+    open(I,"pvs --separator=';' --units=b --noheadings --options=$opts 2>/dev/null|");
 
     my @hf = split(/,/,$opts);
     while(<I>){
@@ -615,7 +692,8 @@ sub pvinfo {
 
         next if( $device eq "unknown device" );
 
-        my @p = split(/\//,$device);
+        my @p = ( $device =~ m/\/mapper\// ) ? split(/\//,$device)
+						:split(/\//,$device,3);
         my $pv = $H{'name'} = pop @p;   # write right name
         $H{"device"} = $device;
 
@@ -646,10 +724,20 @@ sub pvinfo {
 }
 # Volume groups info
 sub vginfo {
+    my ($force) = @_;
+
+    if( $force || !%VGInfo ){
+        my $debug_opt = ""; # debug option
+        $debug_opt = " -v" if( &debug_level > 9 );
+
+        # force update vgs info
+        cmd_exec("vgscan $debug_opt");
+    }
+
     %VGInfo = ();
 
     my $opts = "vg_fmt,vg_uuid,vg_name,vg_attr,vg_size,vg_free,vg_sysid,vg_extent_size,vg_extent_count,vg_free_count,max_lv,max_pv,pv_count,lv_count,snap_count,vg_seqno,vg_tags";
-    open(I,"/usr/sbin/vgs --separator=';' --units=b --noheadings --options=$opts 2>/dev/null|");
+    open(I,"vgs --separator=';' --units=b --noheadings --options=$opts 2>/dev/null|");
 
     my @hf = split(/,/,$opts);
     while(<I>){
@@ -715,16 +803,37 @@ sub vginfo {
             # pretty string for size field
             $H{"pretty_${k}"} = prettysize($H{"$k"});
         }
+
+        # fix freesize
+        if( %LVInfo ){
+            my $new_vgfreesize = $vgfreesize;
+            my @storageDir_lvs = grep { $_->{'vg'} eq $vg } values %LVInfo;
+            for my $LV (@storageDir_lvs){
+                $new_vgfreesize -= $LV->{'size'};
+            }
+            $H{"lfree"} = $H{"freesize"} = $new_vgfreesize;
+            $H{"pretty_freesize"} = prettysize($new_vgfreesize);
+        }
     }
 
     return wantarray() ? %VGInfo : \%VGInfo;
 }
 # Logical volumes info
 sub lvinfo {
+    my ($force) = @_;
+
+    if( $force || !%LVInfo ){
+        my $debug_opt = ""; # debug option
+        $debug_opt = " -v" if( &debug_level > 3 );
+
+        # force update lvs info
+        cmd_exec("lvscan $debug_opt");
+    }
+
     %LVInfo = ( );
 
     my $opts = "lv_uuid,lv_name,lv_attr,lv_major,lv_minor,lv_kernel_major,lv_kernel_minor,lv_size,seg_count,origin,snap_percent,copy_percent,move_pv,lv_tags,segtype,stripes,stripesize,chunksize,seg_start,seg_size,seg_tags,devices,regionsize,mirror_log,modules,convert_lv,vg_name";
-    open(I,"/usr/sbin/lvs --separator=';' --units=b --noheadings --options=$opts 2>/dev/null|");
+    open(I,"lvs --separator=';' --units=b --noheadings --options=$opts 2>/dev/null|");
 
     my @hf = split(/,/,$opts);
     while(<I>){
@@ -745,7 +854,7 @@ sub lvinfo {
         my $vg = $H{"vg"} ||= $H{"vg_name"};
         $H{"lvdevice"} = $H{"aliasdevice"} = $H{"device"} = "/dev/$vg/$lv";
         # for symbolic links resolve them
-        $H{"device"} = readlink($H{"device"}) if( -l $H{"device"} );
+        $H{"device"} = abs_path($H{"device"}) if( -l $H{"device"} );
 
         # grant this fields
         $H{"lsize"} ||= $H{"lv_size"} || 0;
@@ -762,12 +871,13 @@ sub lvinfo {
 		$H{'volumetype'} = 'mirrored  without  initial  sync' if( $v eq 'M' );
 		$H{'volumetype'} = 'origin' if( $v eq 'o' );
 		$H{'volumetype'} = 'pvmove' if( $v eq 'p' );
-		$H{'volumetype'} = 'snapshot' if( $v eq 's' );
 		$H{'volumetype'} = 'invalid   snapshot' if( $v eq 'S' );
 		$H{'volumetype'} = 'virtual' if( $v eq 'v' );
 		$H{'volumetype'} = 'mirror image' if( $v eq 'i' );
 		$H{'volumetype'} = 'mirror image out-of-sync' if( $v eq 'I' );
 		$H{'volumetype'} = 'under conversion' if( $v eq 'c' );
+		$H{'volumetype'} = 'snapshot' if( $v eq 's' );
+		$H{'snapshot'} = 1 if( $v eq 's' );
         $H{'readonly'} = 1 if( $pe eq 'r' );
         $H{'writeable'} = 1 if( $pe eq 'w' );
         $H{'policy'} = 'contiguous' if( $ap eq 'c' );
@@ -783,6 +893,7 @@ sub lvinfo {
 		$H{'state_dscr'} = 'invalid Suspended snapshot' if( $s eq 'S' );
 		$H{'state_dscr'} = 'mapped device present without tables' if( $s eq 'd' );
 		$H{'state_dscr'} = 'mapped device present with inactive table' if( $s eq 'i' );
+        $H{'format'} = 'lvm';
 
         $H{'deviceopen'} = 1 if( $d eq 'o' );
 
@@ -797,6 +908,8 @@ sub lvinfo {
     close(I);
 
     if( $CONF->{'storagedir'} ){
+        my $DISKDevices = [];
+
         opendir(D,$CONF->{'storagedir'});
         my @l = readdir(D);
         for my $f (@l){
@@ -811,10 +924,10 @@ sub lvinfo {
 
                 my $vg = $H{"vg"} = $H{"vg_name"} = '__DISK__';
                 my $lv = $H{"name"} = $H{"lv"} = $H{"lv_name"} = $f;
-                my $vg = $H{"vg"} ||= $H{"vg_name"};
+
                 $H{"lvdevice"} = $H{"aliasdevice"} = $H{"device"} = $path;
                 # for symbolic links resolve them
-                $H{"device"} = readlink($H{"device"}) if( -l $H{"device"} );
+                $H{"device"} = abs_path($H{"device"}) if( -l $H{"device"} );
                 $H{'writeable'} = 1;
 
                 $H{"logical"} = $H{"logicalvolume"} = 1;          # mark as logical volume
@@ -825,32 +938,179 @@ sub lvinfo {
                     $H{'devicename'} = $PD->{'name'};
                 }
 
-                my $usize = get_sparsefiles_usagesize( $path );
-                my $asize = get_sparsefiles_apparentsize( $path );
-                $H{"lsize"} = $H{"size"} = $asize;
-                $H{"lfree"} = $H{"freesize"} = $asize - $usize;
-                for my $k (qw(size freesize)){
-                    # pretty string for size field
-                    $H{"pretty_${k}"} = prettysize($H{"$k"});
-                }
-                $LVInfo{"$lv"} = \%H;
+                my $rH = \%H;
+                push(@$DISKDevices,$rH);
+                $LVInfo{"$lv"} = $rH;
+                # TODO list snapshots
             }
         }
         closedir(D);
+
+        $DISKDevices = &lvinfo_files_size_bulk($DISKDevices);
+        $DISKDevices = &qemu_img_info_bulk($DISKDevices);
     }
 
     return wantarray() ? %LVInfo: \%LVInfo;
 }
 
+# qemu_img_cmd : return qemu-img command path
+sub qemu_img_cmd {
+    return "/usr/bin/qemu-img";
+}
+# have_qemu_img : check if qemu-img command available
+sub have_qemu_img {
+    return ( -x &qemu_img_cmd() ) ? 1 : 0;
+}
+# have_qemu_img_resize_support : check if qemu-img support resize disks
+my $have_qemu_img_resize_support;
+sub have_qemu_img_resize_support {
+    my ($force) = @_;
+    if( $force || !defined($have_qemu_img_resize_support) ){
+        my $qemu_img_cmd = &qemu_img_cmd();
+        my ($e,$m) = cmd_exec("$qemu_img_cmd");
+        $have_qemu_img_resize_support = ( $m =~ m/resize/gs ) ? 1 : 0;
+    }
+    return $have_qemu_img_resize_support;
+}
+
+# qemu_img_info : get disk info from qemu-img
+sub qemu_img_info {
+    my ($D) = @_;
+    ($D) = &qemu_img_info_bulk([ $D ]);
+    return $D;
+}
+
+sub qemu_img_info_parseline {
+    my ($l,$D) = @_;
+
+    my ($k,$v) = split(/:/,$l,2);
+    my $nk = $k;
+    my $nv = trim($v);
+    $nk =~ s/\s/_/g;
+    if( $nk eq 'file_format' ){
+        $D->{"format"} = $nv;
+    } elsif( $nk eq 'virtual_size' ){
+        my ($ps,$s,$ts) = ( $nv =~ m/(\S+) \((\S+) (\w+)\)/ );
+        # fix size calc for all disk formats
+        $D->{'pretty_size'} = $D->{'pretty_virtual_size'} = $ps;
+        $D->{'lsize'} = $D->{'size'} = $D->{'virtual_size'} = str2size("$s$ts");
+    } elsif( $nk eq 'disk_size' ){
+        $D->{'pretty_disk_size'} = $nv;
+        $D->{'disk_size'} = str2size($nv);
+    }
+    $D->{"$nk"} ||= $nv;
+
+    return $D;
+}
+sub qemu_img_info_formatsize {
+    my ($D) = @_;
+    if( $D->{'disk_size'} && $D->{'virtual_size'} ){
+        $D->{'lfree'} = $D->{'freesize'} = $D->{'virtual_size'} - $D->{'disk_size'};
+        $D->{"pretty_freesize"} = prettysize($D->{'freesize'});
+    }
+    return $D;
+}
+
+sub qemu_img_info_bulk_cmd {
+    my ($L) = @_;
+    my $blk_cmd = "";
+    for my $D (@$L){
+        $blk_cmd .= &qemu_img_cmd() . " info $D->{'device'};" . "\n";
+    }
+    plog( " qemu_img_info_bulkc_cmd=$blk_cmd ") if( &debug_level > 7 );
+    my @lines = ();
+    if( $blk_cmd ){
+        open(P,"( $blk_cmd )|");
+        @lines = <P>;
+        close(P);
+    }
+
+    return wantarray() ? @lines : \@lines;
+}
+
+sub qemu_img_info_bulk {
+    my ($L) = @_;
+    if( &have_qemu_img() ){
+        my @lines = &qemu_img_info_bulk_cmd($L);
+        for my $D (@$L){
+            my $go_process = 0;
+            for (@lines){
+                if( m#image: $D->{'device'}# ){
+                    $go_process = 1;
+                    next;
+                }
+                if( $go_process ){
+                    last if( /image:/ );             # is next image
+                    plog($_) if( &debug_level > 9 );
+                    last if( /Snapshot list:/ );     # go to snapshot list
+                        # TODO process snapshots list
+                    $D = &qemu_img_info_parseline($_,$D);
+                }
+            }
+            $D = &qemu_img_info_formatsize($D);
+        }
+    }
+    return wantarray() ? @$L : $L;
+}
+
+# lvinfo_files_size_bulk: get size info for list of lv files
+sub lvinfo_files_size_bulk_cmd {
+    my ($L) = @_;
+
+    my $blk_cmd = "";
+    for my $D (@$L){
+        $blk_cmd .= "echo -n \"usagesize=\"; /usr/bin/du -s -B1 $D->{'device'} 2>/dev/null;" . "\n";
+        $blk_cmd .= "echo -n \"apparentsize=\"; /usr/bin/du -s -B1 --apparent-size $D->{'device'} 2>/dev/null;"."\n";
+    }
+    plog( "lvinfo_files_size_bulk_cmd=$blk_cmd" ) if( &debug_level > 7 );
+    my %devs = ();
+    if( $blk_cmd ){
+        open(P,"( $blk_cmd )|");
+        while(<P>){
+            chomp;
+            my ($ts,$p) = split(/\s+/,$_);
+            my ($t,$s) = split(/=/,$ts);
+            $devs{"$p"}{'device'} = $p;
+            $devs{"$p"}{"$t"} = $s;
+        }
+        close(P);
+    }
+
+    my @lines = values %devs;
+    return wantarray() ? @lines : \@lines;
+}
+
+sub lvinfo_files_size_bulk {
+    my ($L) = @_;
+
+    my @lines = &lvinfo_files_size_bulk_cmd($L);
+    for my $D (@$L){
+        my ($SD) = grep { $_->{'device'} eq $D->{'device'} } @lines;
+        if( $SD ){
+            my $usize = $SD->{'usagesize'};
+            my $asize = $SD->{'apparentsize'};
+            $D->{"lsize"} = $D->{"size"} = $asize;
+            $D->{"lfree"} = $D->{"freesize"} = $asize - $usize;
+            for my $k (qw(size freesize)){
+                # pretty string for size field
+                $D->{"pretty_${k}"} = prettysize($D->{"$k"});
+            }
+        }
+    }
+
+    return wantarray() ? @$L : $L;
+}
+
 sub activate_lvs {
-    # force update lvs info
-    cmd_exec("/usr/sbin/lvscan");
+
+    # update LV info
+    lvinfo(1);
 
     # activate all lvs
     for my $L (values %LVInfo){
         if( $L->{'state'} eq '-' ){
             # if not active then activate it
-            my ($e,$m) = cmd_exec("/usr/sbin/lvchange","-ay",$L->{'device'});
+            my ($e,$m) = cmd_exec("lvchange","-ay",$L->{'device'});
         }
     }
 }
@@ -915,23 +1175,9 @@ sub chk_path_mount {
 
 sub size_blockdev {
     my ($dev) = @_;
-    if( -l "$dev" ){
-        $dev = readlink $dev;
-    }
-    if( -b "$dev" ){
-        my ($rdev) = (lstat $dev)[6];
-        my $major = ( $rdev & MAJOR_MASK ) >> MAJOR_SHIFT;
-        my $minor = ( $rdev & MINOR_MASK ) >> MINOR_SHIFT;
-        if( -r "/proc/partitions" ){
-            open(F,"/proc/partitions");
-            while(<F>){
-                if( /^\s+$major\s+$minor\s+(\d+)\s+.+$/ ){
-                    my $blockn = $1;
-                    return ($blockn * 1024); # in bytes
-                }
-            }
-            close(F);
-        }
+
+    if( my @dc = &info_blockdev($dev) ){   # get device info from /proc/partitions
+        return $dc[5];
     }
     return 0;
 }
@@ -1070,28 +1316,41 @@ sub update_devices {
             $AllDiskDevices{"$dn"}{"vg"} = $PVInfo{"$dn"}{'vg'};
             $AllDiskDevices{"$dn"}{"pvsize"} = $PVInfo{"$dn"}{'size'};
             $AllDiskDevices{"$dn"}{"pvfreesize"} = $PVInfo{"$dn"}{'freesize'};
+            $AllDiskDevices{"$dn"}{"lvm"} = 1;
         }
         my $dev = $AllDiskDevices{"$dn"}{'device'};
         if( $MountDev{"$dev"} ){
             $AllDiskDevices{"$dn"}{"mounted"} = 1;
             $AllDiskDevices{"$dn"}{"mountpoint"} = $MountDev{"$dev"}{'mountpoint'};
+            $AllDiskDevices{"$dn"}{"fs"} = $MountDev{"$dev"}{'fs'};
         }
 
-        my $blockdir = "/sys/block/$dn";
+        my $cdn = $dn;
+        $cdn =~ s/\//!/g;
+        my $blockdir = "/sys/block/$cdn";
         if( -d "$blockdir" ){
             opendir(D,$blockdir);
-            my @dparts = grep { /$dn/ } readdir(D);
+            my @dparts = grep { /$cdn/ } readdir(D);
             close(D);
             if( scalar(@dparts) ){
                 # have partitions
                 $AllDiskDevices{"$dn"}{'partitioned'} = 1;
                 my $alsize = 0;
                 for my $par (@dparts){
-                    $AllDiskDevices{"$par"}{"partition"} = 1;
-                    $alsize += $AllDiskDevices{"$par"}{'size'};
+                    my $cpar = $par;
+                    $cpar =~ s/!/\//g;
+                    $AllDiskDevices{"$cpar"}{"partition"} = 1;
+                    $alsize += $AllDiskDevices{"$cpar"}{'size'};
                 }
                 $AllDiskDevices{"$dn"}{'freesize'} = $AllDiskDevices{"$dn"}{'size'} - $alsize;
                 $AllDiskDevices{"$dn"}{'freesize'} = 0 if( $AllDiskDevices{"$dn"}{'freesize'} < 0 );
+            }
+
+            if( -e "$blockdir/ro" ){
+                open(FRO,"$blockdir/ro");
+                my $ro = <FRO>;
+                $AllDiskDevices{"$dn"}{'readonly'} = $ro ? 1 : 0;
+                close(FRO);
             }
         }
 
@@ -1136,6 +1395,7 @@ sub update_devices {
             $AllDiskDevices{"$name"}{"pvfreesize"} = $PVInfo{"$name"}{'freesize'};
 
             $AllDiskDevices{"$name"}{"uuid"} = $PVInfo{"$name"}{'uuid'} = $muid;
+            $AllDiskDevices{"$name"}{"lvm"} = 1;
         } else {
             $AllDiskDevices{"$name"}{'isalias'} = 1;
             $AllDiskDevices{"$phydevm"}{'aliasdevice'} = $AllDiskDevices{"$name"}{"device"};
@@ -1145,7 +1405,64 @@ sub update_devices {
                     $VGInfo{"$vg"}{'type'} = "SAN";
                 }
                 $AllDiskDevices{"$phydevm"}{"uuid"} = $PVInfo{"$phydevm"}{'uuid'} = $muid;
+                $AllDiskDevices{"$phydevm"}{"lvm"} = 1;
                 $PVInfo{"$phydevm"}{'aliasdevice'} = $AllDiskDevices{"$phydevm"}{'aliasdevice'} = $AllDiskDevices{"$name"}{"device"};
+            }
+        }
+    }
+
+    # mark devices with type SAN
+    for my $sd (keys %SANDev){
+        my $name = $SANDev{"$sd"}{'name'};
+        my $alias = $SANDev{"$sd"}{'alias'};
+
+        $AllDiskDevices{"$name"}{"type"} = "SAN";    # type SAN
+
+        my $sandevice = $AllDiskDevices{"$name"}{"device"} = $SANDev{"$sd"}{'device'};
+
+        if( $alias ){
+            $AllDiskDevices{"$alias"}{"type"} = "SAN";    # type SAN
+            $AllDiskDevices{"$alias"}{'uuid'} = $AllDiskDevices{"$name"}{"uuid"};
+
+            $AllDiskDevices{"$name"} = { %{$AllDiskDevices{"$alias"}}, %{$AllDiskDevices{"$name"}} };
+        }
+
+        my $PV = $PVInfo{"$name"};
+        ($PV) = grep { $_->{'device'} eq $sandevice } values %PVInfo;
+        if( $PV ){
+            if( $alias ){
+                $AllDiskDevices{"$alias"}{'isalias'} = 1;
+                $PV->{'aliasdevice'} = $AllDiskDevices{"$name"}{'aliasdevice'} = $AllDiskDevices{"$alias"}{"device"};
+            }
+
+            $PV->{"pvinit"} = 1;    # initialized
+
+            $PV->{"type"} = "SAN";
+            if( my $vg = $PV->{'vg_name'} ){
+                $VGInfo{"$vg"}{'type'} = "SAN";
+            }
+
+            $PhyDevices{"$name"}{"pvinit"} = 1;    # initialized
+            $AllDiskDevices{"$name"}{"pvinit"} = 1;    # initialized
+            $AllDiskDevices{"$name"}{"allocatable"} = $PV->{"allocatable"} if( defined $PV->{"allocatable"} );
+            $AllDiskDevices{"$name"}{"exported"} = $PV->{"exported"} if( defined $PV->{"exported"} );
+            $AllDiskDevices{"$name"}{"pv_uuid"} = $PV->{'pv_uuid'};
+            $AllDiskDevices{"$name"}{"pv"} = $PV->{'pv'};
+            $AllDiskDevices{"$name"}{"vg"} = $PV->{'vg'};
+            $AllDiskDevices{"$name"}{"pvsize"} = $PV->{'size'};
+            $AllDiskDevices{"$name"}{"pvfreesize"} = $PV->{'freesize'};
+
+            $AllDiskDevices{"$name"}{"uuid"} = $PV->{'uuid'};
+        } elsif( $alias ){
+            $AllDiskDevices{"$name"}{'isalias'} = 1;
+            $AllDiskDevices{"$alias"}{'aliasdevice'} = $AllDiskDevices{"$name"}{"device"};
+            if( $PVInfo{"$alias"} ){
+                $PVInfo{"$alias"}{"type"} = "SAN";
+                if( my $vg = $PVInfo{"$alias"}{'vg_name'} ){
+                    $VGInfo{"$vg"}{'type'} = "SAN";
+                }
+                $AllDiskDevices{"$alias"}{"uuid"} = $PVInfo{"$alias"}{'uuid'};
+                $PVInfo{"$alias"}{'aliasdevice'} = $AllDiskDevices{"$alias"}{'aliasdevice'} = $AllDiskDevices{"$name"}{"device"};
             }
         }
     }
@@ -1173,11 +1490,29 @@ sub update_devices {
 
         my $dev = $AllDiskDevices{"$lv"}{'device'};
         my $adev = $AllDiskDevices{"$lv"}{'aliasdevice'};
-        if( $MountDev{"$dev"} ||
-             $MountDev{"$adev"} ){
+        my $cdev = "/dev/$vg/$lv";
+        my $slv = $lv;
+        $slv =~ s/-/--/gs;
+        my $svg = $vg;
+        $svg =~ s/-/--/gs;
+        my $cadev = "/dev/mapper/$svg-$slv";
+        if( ($dev && $MountDev{"$dev"}) ||
+             ($adev && $MountDev{"$adev"}) ||
+             $MountDev{"$cdev"} ||
+             $MountDev{"$cadev"} ){
+
+            plog("mounted lv=$lv($dev,$adev,$cdev,$cadev) $MountDev{$dev} || $MountDev{$adev} || $MountDev{$cdev} || $MountDev{$cadev}") if( &debug_level > 3 );
+
             $AllDiskDevices{"$lv"}{'mounted'} = 1;
             
-            $AllDiskDevices{"$lv"}{'mountpoint'} = $MountDev{"$dev"} ? $MountDev{"$dev"}{'mountpoint'} : $MountDev{"$adev"}{'mountpoint'};
+            $AllDiskDevices{"$lv"}{'mountpoint'} = $MountDev{"$dev"}{'mountpoint'} ||
+                                                     $MountDev{"$adev"}{'mountpoint'} ||
+                                                     $MountDev{"$cdev"}{'mountpoint'} ||
+                                                     $MountDev{"$cadev"}{'mountpoint'};
+            $AllDiskDevices{"$lv"}{'fs'} = $MountDev{"$dev"}{'fs'} ||
+                                                     $MountDev{"$adev"}{'fs'} ||
+                                                     $MountDev{"$cdev"}{'fs'} ||
+                                                     $MountDev{"$cadev"}{'fs'};
         }
     }
 
@@ -1196,10 +1531,14 @@ sub update_devices {
 
         my $dev = $D->{'device'};
         my $adev = $D->{'aliasdevice'};
-        if( $MountDev{"$dev"} ||
-                $MountDev{"$adev"} ){
+        if( ($dev && $MountDev{"$dev"} ) ||
+             ($adev && $MountDev{"$adev"} ) ){
+
+            plog("mounted device=$dev($adev) $MountDev{$dev} || $MountDev{$adev} ") if( &debug_level > 3 );
+
             $D->{"mounted"} = 1;
-            $D->{"mountpoint"} = $MountDev{"$dev"} ? $MountDev{"$dev"}{'mountpoint'} : $MountDev{"$adev"}{'mountpoint'};
+            $D->{"mountpoint"} = $MountDev{"$dev"}{'mountpoint'} || $MountDev{"$adev"}{'mountpoint'};
+            $D->{"fs"} = $MountDev{"$dev"}{'fs'} || $MountDev{"$adev"}{'fs'};
         }
 
         if( $D->{'mpathsysdev'} ){
@@ -1215,9 +1554,11 @@ sub update_devices {
 
         $D->{"type"} = "local" if( !$D->{'type'} ); # type as local by default
 
-        if( $D->{'mounted'} ){
-            $D->{'size'} = $hdf->total($D->{'device'});
-            $D->{'freesize'} = $hdf->avail($D->{'device'});
+        if( $D->{'mounted'} && ( $D->{'fs'} ne 'swap' ) ){
+            $D->{'size'} = $D->{'mountpoint'} ? $hdf->total($D->{'mountpoint'})
+						    : $hdf->total($D->{'device'});
+            $D->{'freesize'} = $D->{'mountpoint'} ? $hdf->avail($D->{'mountpoint'})
+						    : $hdf->avail($D->{'device'});
             for my $k (qw(size freesize)){
                 # pretty string for size field
                 $D->{"pretty_${k}"} = prettysize($D->{"$k"});
@@ -1230,6 +1571,8 @@ sub update_devices {
             if( my $vg = $PVInfo{"$kn"}{'vg_name'} ){
                 $VGInfo{"$vg"}{'type'} = $D->{'type'};
             }
+
+            $D->{'lvm'} = 1;
         }
 
         if( !$D->{'uuid'} ){
@@ -1287,7 +1630,7 @@ sub insert_disk {
 sub cp_devicehash {
     my ($D,@fields) = @_;
     if( !@fields ){
-        @fields = qw( pvinit size freesize logical device allocatable exported mounted mountpoint partition partitioned uuid pv_uuid mp_uuid pv pvsize pvfreesize vg vgsize vgfreesize lv type lvm swap nopartitions fs_type dtype type diskdevice );  
+        @fields = qw( pvinit size freesize logical device allocatable exported mounted mountpoint partition partitioned uuid pv_uuid mp_uuid pv pvsize pvfreesize vg vgsize vgfreesize lv type lvm swap nopartitions fs_type dtype type diskdevice major minor);  
     }
     my %H = ();
     for my $k (@fields){
@@ -1347,6 +1690,11 @@ sub ignore_diskdevice {
         $ignore = 1;
     }
 
+    # ignore readonly device
+    if( $D->{'readonly'} ){
+        $ignore = 9;
+    }
+
     return $ignore;
 }
 
@@ -1376,7 +1724,7 @@ sub pvcreate {
         if( !$self->getpv(%p, 'name'=>$dn) ){
             $device = $PD->{'device'};
 
-            my ($e,$m) = cmd_exec("/usr/sbin/pvcreate $device");
+            my ($e,$m) = cmd_exec("pvcreate $device");
 
             $self->loaddiskdev(1);  # update disk device info
             unless( $e == 0 ){
@@ -1417,7 +1765,7 @@ sub pvremove {
 
     if( my $PV = $self->getpv(%p, 'name'=>"$dn") ){
         $device = $PV->{'device'};
-        my ($e,$m) = cmd_exec("/usr/sbin/pvremove",$device);
+        my ($e,$m) = cmd_exec("pvremove",$device);
         $self->loaddiskdev(1);  # update disk device info
         unless( $e == 0 ){
             return retErr("_ERR_DISK_PVREMOVE_","Error remove physical volume: $m");
@@ -1460,7 +1808,7 @@ sub pvresize {
 
     if( my $PV = $self->getpv(%p, 'name'=>"$dn") ){
         $device = $PV->{'device'};
-        my ($e,$m) = cmd_exec("/usr/sbin/pvresize","--setphysicalvolumesize",$size,$device);
+        my ($e,$m) = cmd_exec("pvresize","--setphysicalvolumesize",$size,$device);
         $self->loaddiskdev(1);  # update disk device info
         unless( $e == 0 ){
             return retErr("_ERR_DISK_PVRESIZE_","Error resizing physical volume.");
@@ -1504,7 +1852,7 @@ sub vgcreate {
         }
     }
     if( !$self->getvg( %p, 'name'=>$vgname ) ){
-        my ($e,$m) = cmd_exec("/usr/sbin/vgcreate",$vgname,@lpv);
+        my ($e,$m) = cmd_exec("vgcreate",$vgname,@lpv);
 
         $self->loaddiskdev(1);  # update disk device info
 		unless( $e == 0 ){
@@ -1540,7 +1888,7 @@ sub vgremove {
 
     if( my $VG = $self->getvg( %p, 'name'=>$vgname ) ){
         $vgname = $VG->{'vg_name'};
-        my ($e,$m) = cmd_exec("/usr/sbin/vgremove",$vgname);
+        my ($e,$m) = cmd_exec("vgremove",$vgname);
 
         $self->loaddiskdev(1);  # update disk device info
         unless( $e == 0 ){
@@ -1598,7 +1946,7 @@ sub vgextend {
     }
     if( my $VG = $self->getvg( %p, 'name'=>$vgname ) ){
         $vgname = $VG->{'vg_name'};
-        my ($e,$m) = cmd_exec("/usr/sbin/vgextend",$vgname,@lpv);
+        my ($e,$m) = cmd_exec("vgextend",$vgname,@lpv);
 
         $self->loaddiskdev(1);  # update disk device info
         unless( $e == 0 ){
@@ -1645,7 +1993,7 @@ sub vgreduce {
     }
     if( my $VG = $self->getvg( %p, 'name'=>$vgname ) ){
         $vgname = $VG->{'vg_name'};
-        my ($e,$m) = cmd_exec("/usr/sbin/vgreduce",$vgname,@lpv);
+        my ($e,$m) = cmd_exec("vgreduce",$vgname,@lpv);
 
         $self->loaddiskdev(1);  # update disk device info
         unless( $e == 0 ){
@@ -1692,7 +2040,7 @@ sub vgpvremove {
 
         if( $PV ){
             $pv = $PV->{'device'};
-            my ($e,$m) = cmd_exec("/usr/sbin/vgreduce",$vgname,$pv);
+            my ($e,$m) = cmd_exec("vgreduce",$vgname,$pv);
 
             $self->loaddiskdev(1);  # update disk device info
             unless( $e == 0 ){
@@ -1819,14 +2167,99 @@ sub ddremove {
     }
 }
 
+# qemu_img_create : create disk from qemu-img
+sub qemu_img_create {
+    my $self = shift;
+    my (%p) = @_;
+
+    if( ! -e "$p{'path'}" ){
+        my $size = ETVA::Utils::roundedsize($p{'size'});   # get rounded size
+        if( $size ){
+            my $fmt = $p{'format'} || "raw";
+            my $qemu_img_cmd = &qemu_img_cmd();
+
+            # create disk 
+            my ($e,$m) = cmd_exec("$qemu_img_cmd create -f $fmt $p{'path'} $size");
+            # TODO testing error cmd
+            unless( $e == 0 || $e == -1 ){
+                return retErr('_ERR_QEMU_IMG_CREATE_', " Error create file disk: " . $m);
+            }
+            return retOk('_OK_QEMU_IMG_CREATE_',"Disk created successfully.");
+        } else {
+            return retErr('_ERROR_QEMU_IMG_CREATE_',"No valid size.");
+        }
+    } else {
+        return retErr('_ERROR_QEMU_IMG_CREATE_',"Disk already exists.");
+    }
+}
+# qemu_img_resize : resize disk with qemu-img
+sub qemu_img_resize {
+    my $self = shift;
+    my (%p) = @_;
+
+    if( -e "$p{'path'}" ){
+        $self->loaddiskdev(1);
+        # testing if file is in use
+        if( $self->getphydev( 'loopfile'=>$p{'path'} ) ){
+            return retErr('_ERROR_QEMU_IMG_RESIZE_',"Disk is in use.");
+        } else {
+            my $size = ETVA::Utils::roundedsize($p{'size'});   # get rounded size
+            if( $size ){
+                my $qemu_img_cmd = &qemu_img_cmd();
+                # resize for both cases: increase and decrease (WARN)
+                if( &have_qemu_img_resize_support() ){
+                    my ($e,$m) = cmd_exec_errh("$qemu_img_cmd resize $p{'path'} $size");
+                    # TODO testing error cmd
+                    unless( $e == 0 ){
+                        return retErr('_ERR_QEMU_IMG_RESIZE_', " Error resizing file disk: " . $m);
+                    }
+                } else {
+                    my $fmt = $p{'format'};
+                    my $opath = my $rpath = $p{'path'};
+
+                    if( $fmt && $fmt ne 'raw' ){    # if not in raw format we need to convert
+                        $rpath = "${opath}.raw";
+                        # convert to raw
+                        my ($e1,$m1) = cmd_exec_errh("$qemu_img_cmd convert $opath -O raw $rpath");
+                        unless( $e1 == 0 ){
+                            unlink("$rpath") if( -e "$rpath" );
+                            return retErr('_ERR_QEMU_IMG_RESIZE_', " Error resizing file disk: cant convert to raw format - " . $m1);
+                        }
+                    }
+                    # resize raw
+                    my ($e2,$m2) = cmd_exec_errh("/bin/dd if=/dev/zero of=$rpath bs=1 count=0 seek=$size");
+
+                    if( $fmt && $fmt ne 'raw' ){    # if not in raw format
+                        # convert to original
+                        my ($e3,$m3) = cmd_exec_errh("$qemu_img_cmd convert $rpath -O $fmt $opath");
+                        unlink("$rpath");
+                        unless( $e3 == 0 ){
+                            return retErr('_ERR_QEMU_IMG_RESIZE_', " Error resizing file disk: cant convert to original format ('$fmt') - " . $m3);
+                        }
+                    }
+                }
+                return retOk('_OK_QEMU_IMG_RESIZE_',"Disk resized successfully.");
+            } else {
+                return retErr('_ERROR_QEMU_IMG_RESIZE_',"No valid size.");
+            }
+        }
+    } else {
+        return retErr('_ERROR_QEMU_IMG_RESIZE_',"Disk does not exists.");
+    }
+}
+
 sub lvcreate {
     my $self = shift;
-    my ($lv,$vg,$size) = my %p = @_;
-    if( $p{'lv'} || $p{"vg"} || $p{"size"} ){
+    my ($lv,$vg,$size,$format) = my %p = @_;
+    if( $p{'lv'} || $p{"vg"} || $p{"size"} || $p{'format'} ){
         $lv = $p{"lv"};
         $vg = $p{"vg"};
         $size = $p{"size"};
+        $format = $p{"format"};
     }
+
+    $size = "${size}M" if( $size =~ m/^[0-9.]+$/ ); # size in Mb by default
+
     my @lvp = split(/\//,$lv);
     my $lvn = pop @lvp;
 
@@ -1851,9 +2284,16 @@ sub lvcreate {
                 return retErr("_ERR_DISK_LVCREATE_","Volume group dont have free size available.");
             }
 
-            # CMAR 02/03/2010
-            #   special case for create by dd 
-            my $E = $self->ddcreate( 'path'=>$lv, 'size'=>$size );
+            my $E;
+            if( &have_qemu_img() ){
+                $E = $self->qemu_img_create( 'path'=>$lv, 'size'=>$size, 'format'=>$format );
+            } elsif( $format && ( $format ne 'raw' ) ){
+                return retErr("_ERR_DISK_LVCREATE_","Dont have support for disk file format: '$format'");
+            } else {
+                # CMAR 02/03/2010
+                #   special case for create by dd 
+                $E = $self->ddcreate( 'path'=>$lv, 'size'=>$size );
+            }
 
             $self->loaddiskdev(1);  # update disk device info
 
@@ -1869,7 +2309,7 @@ sub lvcreate {
         }
     } elsif( my $VG = $self->getvg( %p, 'name'=>$vg ) ){
         $vg = $VG->{'vg_name'};
-        my ($e,$m) = cmd_exec("/usr/sbin/lvcreate","-L",$size,"-n",$lv,$vg);
+        my ($e,$m) = cmd_exec("lvcreate","-L",$size,"-n",$lv,$vg);
 
         $self->loaddiskdev(1);  # update disk device info
         unless( $e == 0 ){
@@ -1912,13 +2352,18 @@ sub lvremove {
     $self->loaddiskdev();
 
     if( my $LV = $self->getlv(%p, 'name'=>"$lvn" ) ){
-        if( $LV->{'lv_name'} ne "$lvn" ){   # when name not equal... something goes wrong
-            $lvn = $LV->{'lv_name'};        # ... fix it...
-            $vg = $LV->{'vg_name'};
-            $lv = $LV->{'device'};
-        }
+        $lvn = $LV->{'lv_name'};        # ... fix it...
+        $vg = $LV->{'vg_name'};
+        $lv = $LV->{'device'};
+
         my $VG = $self->getvg(%p, 'name'=>$vg);
-        $vg = $VG->{'vg_name'};
+
+        my $SNAPSHOTS;
+        if( $LV->{'volumetype'} eq 'origin' ){
+            $SNAPSHOTS = [ grep { $_->{'snapshot'} && ( $_->{'vg'} eq $LV->{'vg'} ) && ( $_->{'origin'} eq $LV->{'lv'} ) } values %LVInfo ];
+        }
+
+        my $_ok_msg_;
 
         if( $vg eq '__DISK__' ){
             # CMAR 04/03/2010
@@ -1927,52 +2372,39 @@ sub lvremove {
 
             $self->loaddiskdev(1);  # update disk device info
 
-            $VG = $self->getvg(%p, 'name'=>$vg);
-            $vg = $VG->{'vg_name'};
-
-            # send update vg freesize
-            $LV->{"vgfreesize"} = $VG->{"freesize"} || 0;
-
-            # reference to updated volume group
-            $LV->{"volumegroup"} = $VG;
-
             if( isError($E) ){
                 return retErr("_ERR_DISK_LVREMOVE_","Error remove logical volume: ".$E->{'_errordetail_'});
             }
-            return retOk("_OK_LVREMOVE_","Special logical volume successfully removed.","_RET_OBJ_",$LV);
+
+            $_ok_msg_ ||= "Special logical volume successfully removed.";
         } else {
-            my $tlv = $lv;
-            if( $vg ){
-                $tlv = "${vg}/${lvn}";
-            } else {
-                $vg = $LV->{"vg_name"};  # set vg
-            }
-            if( !$tlv ){
-                $lv = $tlv = $LV->{'device'};
-                $lvn = $LV->{'lv_name'};
-                $vg = $LV->{'vg_name'};
-            }
-            my ($e,$m) = cmd_exec("/usr/sbin/lvremove","-f",$tlv);
+            my ($e,$m) = cmd_exec("lvremove","-f",$LV->{'device'});
 
             $self->loaddiskdev(1);  # update disk device info
             unless( $e == 0 ){
                 # send error if LV remove not successful
-                unless( !$self->getlv( 'device'=>$tlv, %p ) ){
+                unless( !$self->getlv( 'device'=>$LV->{'device'}, %p ) ){
                     return retErr("_ERR_DISK_LVREMOVE_","Error remove logical volume.");
                 }
             }
-
-            $VG = $self->getvg(%p, 'name'=>$vg);
-            $vg = $VG->{'vg_name'};
-
-            # send update vg freesize
-            $LV->{"vgfreesize"} = $VG->{"freesize"} || 0;
-
-            # reference to updated volume group
-            $LV->{"volumegroup"} = $VG;
-
-            return retOk("_OK_LVREMOVE_","Logical volume successfully removed.","_RET_OBJ_",$LV);
         }
+
+        $VG = $self->getvg(%p, 'name'=>$vg);
+
+        # send update vg freesize
+        $LV->{"vgfreesize"} = $VG->{"freesize"} || 0;
+
+        # reference to updated volume group
+        $LV->{"volumegroup"} = $VG;
+
+        my %_RET_OBJ_ = ( %$LV );
+        if( $SNAPSHOTS && @$SNAPSHOTS ){
+            $_RET_OBJ_{'SNAPSHOTS'} = $SNAPSHOTS;
+        }
+
+        $_ok_msg_ ||= "Logical volume successfully removed.";
+        return retOk("_OK_LVREMOVE_","$_ok_msg_","_RET_OBJ_",\%_RET_OBJ_);
+
     } else {
         return retErr("_INVALID_LV_","Invalid logical volume");
     }
@@ -1998,6 +2430,7 @@ sub lvresize {
         $lv = $p{"lv"};
         $size = $p{"size"};
     }
+    $size = "${size}M" if( $size =~ m/^[0-9.]+$/ ); # size in Mb by default
 
     $self->loaddiskdev();
 
@@ -2020,9 +2453,18 @@ sub lvresize {
                 return retErr("_ERR_DISK_LVRESIZE_","Volume group dont have free size available.");
             }
 
-            # CMAR 04/03/2010
-            #   special case for resize file disks
-            my $E = $self->ddresize( 'path'=>$lv, 'size'=>$size );
+            my $format = $LV->{'format'};
+
+            my $E;
+            if( &have_qemu_img() ){
+                $E = $self->qemu_img_resize( 'path'=>$lv, 'size'=>$size, 'format'=>$format );
+            } elsif( $format && ( $format ne 'raw' ) ){
+                return retErr("_ERR_DISK_LVRESIZE_","Dont have support for resize disk file format: '$format'");
+            } else {
+                # CMAR 04/03/2010
+                #   special case for resize file disks
+                my $E = $self->ddresize( 'path'=>$lv, 'size'=>$size );
+            }
 
             $self->loaddiskdev(1);  # update disk device info
 
@@ -2034,7 +2476,7 @@ sub lvresize {
             return retOk("_OK_LVRESIZE_","Special logical volume successfully resized.","_RET_OBJ_",$LV);
         } else {
             $lv = $LV->{'device'} if( !$lv );
-            my ($e,$m) = cmd_exec("/usr/sbin/lvresize","-f","-L",$size,$lv);
+            my ($e,$m) = cmd_exec("lvresize","-f","-L",$size,$lv);
 
             $self->loaddiskdev(1);  # update disk device info
             unless( $e == 0 ){
@@ -2063,34 +2505,68 @@ create snapshot of logical volume
 #
 #   args: olv,slv,size
 #   res: ok || Error
-# e.g. lvcreate --size 100m --snapshot --name snap /dev/vg00/lvol1
+# e.g. lvcreate --size 100m --name snap --snapshot /dev/vg00/lvol1
 sub createsnapshot {
     my $self = shift;
-    my ($olv,$slv,$size) = my %p = @_;
+    my ($olv,$slv,$size,$extents,$tag) = my %p = @_;
 
-    if( $p{'olv'} || $p{'slv'} || $p{'size'} ){
+    if( $p{'olv'} || $p{'slv'} || $p{'size'} || $p{'extents'} || $p{'tag'} ){
         $olv = $p{'olv'};
         $slv = $p{'slv'};
         $size = $p{'size'};
+        $extents = $p{'extents'};
+        $tag = $p{'tag'};
     }
+    $size = "${size}M" if( $size =~ m/^[0-9.]+$/ ); # size in Mb by default
 
     $self->loaddiskdev();
 
     if( my $LV = $self->getlv( 'device'=>$olv, %p ) ){
         $olv = $LV->{'device'};
-        # TODO
-        #   this can block process...
-        my ($e,$m);
-        unless( ( ($e,$m) = cmd_exec("/usr/sbin/lvcreate","--size",$size,"--snapshot","--name",$slv,$olv) ) && ( $e == 0 ) ){
-            return retErr("_ERR_CREATE_SNAPSHOT_","Error creating snapshot: $m");
+        if( $LV->{'vg'} eq '__DISK__' ){
+            # do this usign qemu-img if available
+            if( &have_qemu_img() ){
+                if( $LV->{'format'} eq 'qcow2' ){   # only qcow2 format support snapshots
+                    if( !$slv ){
+                        $slv = $tag;
+                    }
+                    my $qemu_img_cmd = &qemu_img_cmd();
+                    my ($e,$m) = cmd_exec("$qemu_img_cmd snapshot -c $slv $olv");
+                    unless( $e == 0 ){
+                        return retErr("_ERR_CREATE_SNAPSHOT_","Error creating snapshot: $m");
+                    }
+                } else {
+                    return retErr('_ERR_CREATE_SNAPSHOT_',"Cant create snapshot: the volume format does not support snapshots.");
+                }
+            } else {
+                return retErr('_ERR_CREATE_SNAPSHOT_',"Cant create snapshot: not qemu-img available.");
+            }
+        } else {
+            # TODO
+            #   this can block process...
+            my ($e,$m);
+            my @extra = ();
+            if( $extents ){
+                push(@extra,"--extents",$extents),
+            } else {
+                push(@extra,"--size",$size),
+            }
+            if( !$slv ){
+                $slv = "$LV->{'name'}-$tag";
+            }
+            unless( ( ($e,$m) = cmd_exec("lvcreate",@extra,"--snapshot",$LV->{'lvdevice'},"--name",$slv) ) && ( $e == 0 ) ){
+                return retErr("_ERR_CREATE_SNAPSHOT_","Error creating snapshot: $m");
+            }
         }
-
-        $self->loaddiskdev(1);  # update disk device info
     } else {
         return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $olv");
     }
-    # TODO change this
-    return retOk("_OK_","ok");
+
+    $self->loaddiskdev(1);  # update disk device info
+
+    # Get last snapshot created
+    my $SLV = $self->getlv('name'=>$slv);
+    return retOk("_OK_CREATESNAPSHOT_","Snapshot successfully created.","_RET_OBJ_",$SLV);
 }
 
 =item convertsnapshot
@@ -2109,28 +2585,109 @@ convert to a snapshot
 # e.g. lvconvert -s vg00/lvol1 vg00/lvol2
 sub convertsnapshot {
     my $self = shift;
-    my ($olv,$slv) = my %p = @_;
+    my ($olv,$slv,$tag) = my %p = @_;
 
-    if( $p{'olv'} || $p{'slv'} ){
+    if( $p{'olv'} || $p{'slv'} || $p{'tag'} ){
         $olv = $p{'olv'};
         $slv = $p{'slv'};
+        $tag = $p{'tag'};
     }
 
     $self->loaddiskdev();
 
     if( my $LV = $self->getlv( 'device'=>$olv, %p ) ){
         $olv = $LV->{'device'};
-        # TODO
-        #   this can block process...
-        my ($e,$m);
-        unless( ( ($e,$m) = cmd_exec("/usr/sbin/lvconvert --snapshot",$olv,$slv) ) && ( $e == 0 ) ){
-            return retErr("_ERR_CONVERT_SNAPSHOT_","Error convert snapshot: $m");
+        if( $LV->{'vg'} eq '__DISK__' ){
+            # do this usign qemu-img if available
+            if( &have_qemu_img() ){
+                if( $LV->{'format'} eq 'qcow2' ){   # only qcow2 format support snapshots
+                    if( !$slv ){
+                        $slv = $tag;
+                    }
+                    my $qemu_img_cmd = &qemu_img_cmd();
+                    my ($e,$m) = cmd_exec("$qemu_img_cmd snapshot -a $slv $olv");
+                    unless( $e == 0 ){
+                        return retErr("_ERR_CONVERT_SNAPSHOT_","Error converting snapshot: $m");
+                    }
+                } else {
+                    return retErr('_ERR_CONVERT_SNAPSHOT_',"Cant convert snapshot: the volume format does not support snapshots.");
+                }
+            } else {
+                return retErr('_ERR_CONVERT_SNAPSHOT_',"Cant convert snapshot: not qemu-img available.");
+            }
+        } else {
+            if( !$slv ){
+                $slv = "$LV->{'name'}-$tag";
+            }
+            # TODO
+            #   this can block process...
+            my ($e,$m);
+            unless( ( ($e,$m) = cmd_exec("lvconvert --snapshot",$LV->{'lvdevice'},$slv) ) && ( $e == 0 ) ){
+                return retErr("_ERR_CONVERT_SNAPSHOT_","Error convert snapshot: $m");
+            }
         }
-
-        $self->loaddiskdev(1);  # update disk device info
     } else {
         return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $olv");
     }
+
+    $self->loaddiskdev(1);  # update disk device info
+
+    # TODO change this
+    return retOk("_OK_","ok");
+}
+
+=item lvconvert
+
+convert volume to specific format
+
+    my $OK = VirtAgent::Disk->lvconvert( olv=>$lv, dlv=>$newlv, format=>$format );
+
+=cut
+
+# lvconvert
+#   convert volume to specific format
+#
+#   args: olv,dlv,format
+#   res: ok || Error
+#
+sub lvconvert {
+    my $self = shift;
+    my ($olv,$dlv,$format) = my %p = @_;
+
+    if( $p{'olv'} || $p{'dlv'} ){
+        $olv = $p{'olv'};
+        $dlv = $p{'dlv'};
+        $format = $p{'format'};
+    }
+
+    $self->loaddiskdev();
+
+    if( my $LV = $self->getlv( 'device'=>$olv, %p ) ){
+        $olv = $LV->{'device'};
+
+        if( $LV->{'format'} eq $format ){
+            return retErr('_ERR_LVCONVERT_',"Volume already in this format: $format.");
+        }
+
+        if( $LV->{'vg'} eq '__DISK__' ){
+            # do this usign qemu-img if available
+            if( &have_qemu_img() ){
+                my $qemu_img_cmd = &qemu_img_cmd();
+                my ($e,$m) = cmd_exec("$qemu_img_cmd convert -O $format $olv $dlv");
+                unless( $e == 0 ){
+                    return retErr("_ERR_LVCONVERT_","Error converting volume: $m");
+                }
+            } else {
+                return retErr('_ERR_LVCONVERT_',"Cant convert volume: not qemu-img available.");
+            }
+        } else {
+            # TODO convert LVM to other formats
+            return retErr('_ERR_LVCONVERT_',"Cant convert LVM volume.");
+        }
+    } else {
+        return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $olv");
+    }
+    $self->loaddiskdev(1);  # update disk device info
     # TODO change this
     return retOk("_OK_","ok");
 }
@@ -2148,6 +2705,271 @@ sub havemultipath {
         }
     }
     return $HAVEMULTIPATH;
+}
+
+# lvclone
+#   clone logical volumes
+#
+#   args: olv,clv
+#   res: ok || Error
+# e.g. 
+sub lvclone {
+    my $self = shift;
+    my ($olv,$clv) = my %p = @_;
+
+    if( $p{'olv'} || $p{'clv'} ){
+        $olv = $p{'olv'};
+        $clv = $p{'clv'};
+    }
+
+    $self->loaddiskdev();
+
+    # TODO testing clone device too
+    if( my $LV = $self->getlv( 'device'=>$olv, %p ) ){
+        $olv = $LV->{'device'};
+
+        my $bs = "512";
+        $bs = "10M" if( $LV->{'size'} > (10 * 1024 * 1024) ); # if greater then 10Mb
+        my ($e,$m) = cmd_exec("/bin/dd if=$olv of=$clv bs=$bs");
+
+        # TODO testing error cmd
+        unless( $e == 0 || $e == -1 ){
+            return retErr('_ERR_LVCLONE_', " Error clone logical volume: " . $m);
+        }
+    } else {
+        return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $olv");
+    }
+
+    $self->loaddiskdev(1);  # update disk device info
+
+    # Get cloned logical volume
+    my $CLV = $self->getlv('device'=>$clv);
+    return retOk("_OK_LVCLONE_","Clone of logical volume successfully created.","_RET_OBJ_",$CLV);
+}
+
+sub clonedisk {
+    my $self = shift;
+    my %p = @_;
+
+    # create new logical volume to be a clone
+    my $E = $self->lvcreate(@_);
+
+    if( !isError($E) ){
+        my $CLV = $E->{'_obj_'};
+        # clone volumes
+        $E = $self->lvclone( 'olv'=>$p{'original_lv'}, 'clv'=>$CLV->{'device'} );
+    }
+
+    if( isError($E) ){  # if error roll-back
+        #$self->lvremove(@_);
+    }
+    return wantarray() ? %$E : $E;
+}
+
+# dmsetup_cmd : return dmsetup command path
+sub dmsetup_cmd {
+    return "/sbin/dmsetup";
+}
+# have_dmsetup : check if dmsetup command available
+sub have_dmsetup {
+    return ( -x &dmsetup_cmd() ) ? 1 : 0;
+}
+
+# device_table: output table for device
+sub device_table {
+    my $self = shift;
+    my %p = @_;
+
+    my $device = $p{'device'} || "";
+
+    my $op_target = "";
+    $op_target = "--target $p{'target'}" if( $p{'target'} );
+
+    my $dmsetup_cmd = &dmsetup_cmd();
+    open(C,"$dmsetup_cmd table $op_target $device 2>/dev/null|");
+    my @table = ();
+    while(<C>){
+        my $nl = $_;
+        chomp($nl);
+        if( !$p{'nouuid'} ){
+            # resolve major:minor to device/uuid
+            while( my ($major,$minor) = ( $nl =~ m/(\d+):(\d+)/ ) ){
+                if( my $PD = $self->getphydev( 'major'=>$major, 'minor'=>$minor ) ){ 
+                    my $tokid = $PD->{'uuid'} ? "$PD->{'uuid'}" : "$PD->{'device'}";
+                    $nl =~ s/${major}:${minor}/{$tokid}/;
+                }
+            }
+        }
+        push(@table,$nl);
+    }
+    close(C);
+
+    return wantarray() ? @table : \@table;
+}
+
+sub device_table_w_device_trans {
+    my $self = shift;
+    my @table = $self->device_table(@_, 'nouuid'=>1 );
+
+    my @n_table = ();
+    for my $l (@table){
+        my $nl = $l;
+        chomp($nl);
+        while( my ($major,$minor) = ( $nl =~ m/(\d+):(\d+)/ ) ){ # resolve major:minor to device/uuid
+            if( my $PD = $self->getphydev( 'major'=>$major, 'minor'=>$minor ) ){ 
+                my $tokid = $PD->{'uuid'} ? "$PD->{'uuid'}" : "$PD->{'device'}";
+                $nl =~ s/${major}:${minor}/{$tokid}/;
+            }
+        }
+        my ($id_device) = ( $nl =~ m/^(\S+):/ );
+        if( my @lAD = grep { ($_->{'device'} =~ m#/${id_device}$#) || ($_->{'aliasdevice'} =~ m#/${id_device}$#) } values %AllDiskDevices ){
+            # we have duplicated devices with diferent fields/values
+
+            my $tokid;
+            if( my ($AD) = grep { $_->{'uuid'} } @lAD ){    # get device with uuid 
+                $tokid = $AD->{'uuid'};
+            } else {                                        # or else get device
+                my ($AD) = @lAD;
+                $tokid = $AD->{'device'};
+            }
+
+            $nl =~ s#^${id_device}:#${tokid}:#; # replace by uuid/device
+        }
+        
+        push(@n_table, [ $nl, $l ] );
+    }
+    return wantarray() ? @n_table : \@n_table;
+}
+
+sub get_lvs_devicetable {
+    my $self = shift;
+    my %lvs = $self->getlvs(@_);
+    my @table = $self->device_table(@_, 'nouuid'=>1 );
+
+    my @n_lvs = ();
+    for my $LV (values %lvs){
+        my ($lv,$vg) = ($LV->{'lv'},$LV->{'vg'});
+        my $alv = $lv;
+        $alv =~ s/-/--/gs;
+        my $re_vglv = "${vg}-${alv}";
+        my @lv_tbl = ();
+        for my $el (@table){
+            chomp($el);
+            if( $el =~ m/^${re_vglv}(-real)?:\s+(\d+)\s+(\d+)\s+linear\s+(\d+):(\d+)\s+(\d+)$/ ){
+                my ($snapshot,$start,$end,$major,$minor,$size) = ($1,$2,$3,$4,$5,$6);
+                my %L = ( 'snapshot'=>$snapshot, 'start'=>$start, 'end'=>$end, 'major'=>$major, 'minor'=>$minor, 'size'=>$size );
+                if( my $PD = $self->getphydev( 'major'=>$major, 'minor'=>$minor ) ){ 
+                    $L{'physicaldevice'} = { 'uuid'=>$PD->{'uuid'}, 'device'=>$PD->{'device'} };
+                }
+                push(@lv_tbl, \%L);
+            }
+        }
+        my %lv = ( 'lv'=>$LV->{'lv'}, 'uuid'=>$LV->{'uuid'}, 'device'=>$LV->{'device'}
+                        ,'vg'=>$LV->{'vg'}, 'vg_uuid'=>$LV->{'volumegroup'}{'vg_uuid'}
+                        ,'table'=>\@lv_tbl );
+        push(@n_lvs, \%lv);
+    }
+
+    return wantarray() ? @n_lvs : \@n_lvs;
+}
+
+sub device_loadtable {
+    my $self = shift;
+    my %p = @_;
+
+    my $device = $p{'device'};
+    if( !$device ){
+        return retErr("_ERR_DEVICE_LOADTABLE_","Error load device table: no device specified");
+    }
+
+    my $table = [];
+    if( $table = $p{'table'} ){
+        my $dmsetup_cmd = &dmsetup_cmd();
+        open(C,"| $dmsetup_cmd load $device 2>/dev/null");
+        for my $l (@$table){
+            while( my ($tok) = ( $l =~ m/{(.+)}/ ) ){ # resolve major:minor to device/uuid
+                my %q = ( $tok =~ m/\/dev\// ) ? ('device'=>$tok) : ('uuid'=>$tok);
+                if( my $PD = $self->getphydev(%q) ){ 
+                    my ($major,$minor) = ($PD->{'major'},$PD->{'minor'});
+                    $l =~ s/{$tok}/${major}:${minor}/;
+                }
+            }
+            plog("device_loadtable: $l") if( &debug_level > 3 );
+            print C $l,$/;
+        }
+        close(C);
+    } else {
+        return retErr("_ERR_DEVICE_LOADTABLE_","Error load device table: no table specified");
+    }
+}
+
+# device_resume: device resume
+sub device_resume {
+    my $self = shift;
+    my %p = @_;
+
+    my $device = $p{'device'};
+    if( !$device ){
+        return retErr("_ERR_DEVICE_RESUME_","Error resume device: no device specified");
+    }
+
+    my $dmsetup_cmd = &dmsetup_cmd();
+    my ($e,$m) = cmd_exec("$dmsetup_cmd resume $device");
+    unless( $e == 0 ){
+        return retErr("_ERR_DEVICE_RESUME_","Error resume device: $m");
+    }
+
+    return retOk("_OK_DEVICE_RESUME_","Device successfully resumed.");
+}
+
+# device_suspend: device suspend
+sub device_suspend {
+    my $self = shift;
+    my %p = @_;
+
+    my $device = $p{'device'};
+    if( !$device ){
+        return retErr("_ERR_DEVICE_SUSPEND_","Error suspend device: no device specified");
+    }
+
+    my $dmsetup_cmd = &dmsetup_cmd();
+    my ($e,$m) = cmd_exec("$dmsetup_cmd suspend $device");
+    unless( $e == 0 ){
+        return retErr("_ERR_DEVICE_SUSPEND_","Error suspend device: $m");
+    }
+
+    return retOk("_OK_DEVICE_SUSPEND_","Device successfully suspended.");
+}
+
+# device_remove: device remove
+sub device_remove {
+    my $self = shift;
+    my %p = @_;
+
+    my $device = $p{'device'};
+    if( !$device ){
+        return retErr("_ERR_DEVICE_REMOVE_","Error remove device: no device specified");
+    }
+
+    my $dmsetup_cmd = &dmsetup_cmd();
+    my ($e,$m) = cmd_exec("$dmsetup_cmd remove $device");
+    unless( $e == 0 ){
+        return retErr("_ERR_DEVICE_REMOVE_","Error remove device: $m");
+    }
+
+    # remove symbolic links
+    if( -l "$device" ){
+        unlink $device;
+    } elsif( $device =~ m/(^\/dev\/mapper\/)?(.+)$/ ){
+        (undef, my $dn) = ($1,$2);
+        $dn =~ s#-#/#;
+        my $ndn = "/dev/$dn";
+        if( -l "$ndn" ){
+            unlink $ndn;
+        }
+    }
+
+    return retOk("_OK_DEVICE_REMOVE_","Device successfully removed.");
 }
 
 1;

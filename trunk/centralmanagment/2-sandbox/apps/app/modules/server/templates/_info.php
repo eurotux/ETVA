@@ -134,6 +134,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         text: <?php echo json_encode(__('Add server wizard')) ?>,
                         ref: '../addwizardBtn',
                         disabled:true,
+                        hidden:true,
                         iconCls: 'icon-add',
                         handler: View.clickHandler
                     },
@@ -141,6 +142,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         text: <?php echo json_encode(__('Open console')) ?>,
                         ref: '../consoleBtn',
                         disabled:false,scope:this,
+                        hidden:true,
                         handler:function(){
 
                             var server_id = this.form.findField('id').getValue();
@@ -214,6 +216,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         xtype:'splitbutton',
                         ref: '../startBtn',
                         disabled: true,
+                        hidden:true,
                         scope:this,
                         text: <?php echo json_encode(__('Start server')) ?>,
                         menu: [
@@ -311,7 +314,8 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
                                                 var response = Ext.util.JSON.decode(resp.responseText);
                                                 Ext.ux.Logger.info(response['agent'], response['response']);
-                                                this.loadRecord({id:server_id});                                                
+                                                var parentCmp = Ext.getCmp((item.scope).id);
+                                                parentCmp.fireEvent('refresh',parentCmp);
 
                                             }
                                             ,failure: function(resp,opt) {
@@ -331,9 +335,11 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         }//END handler
                     },
                     {
+                        xtype:'splitbutton',
                         text: <?php echo json_encode(__('Stop server')) ?>,
                         ref: '../stopBtn',
                         disabled:false,
+                        hidden:true,
                         scope:this,
                         handler: function(item) {
 
@@ -341,6 +347,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                             var server_name = this.form.findField('name').getValue();
                             var server_vm_state = this.form.findField('vm_state').getValue();
                             var node_id = this.form.findField('node_id').getValue();
+                            var forcestop = ( item.menu.stop_force.checked ) ? 1 : 0;
 
                             Ext.Msg.show({
                                 title: item.text,
@@ -373,12 +380,13 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                                         });// end conn
                                         conn.request({
                                             url: <?php echo json_encode(url_for('server/jsonStop'))?>,
-                                            params: {'nid':node_id,'server': server_name},
+                                            params: {'nid':node_id,'server': server_name, 'force': forcestop, 'destroy': forcestop },
                                             scope:this,
                                             success: function(resp,opt) {
                                                 var response = Ext.util.JSON.decode(resp.responseText);
                                                 Ext.ux.Logger.info(response['agent'],response['response']);
-                                                this.loadRecord({id:server_id});                                                
+                                                var parentCmp = Ext.getCmp((item.scope).id);
+                                                parentCmp.fireEvent('refresh',parentCmp);
 
                                             },
                                             failure: function(resp,opt) {
@@ -398,13 +406,29 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                                 }// END fn
                             }); //END Msg.show
 
-                        }//END handler Remove
-                    }
-                    ,'-',
+                        }//END handler Stop
+                        ,menu: [
+                                {
+                                    text: <?php echo json_encode(__('Normal stop')) ?>
+                                    ,name:'normalstop',xtype:'menucheckitem',ref:'stop_normal'
+                                    ,checked: true
+                                    ,group: 'stop_type'
+                                    ,scope:this
+                                },
+                                {
+                                    text: <?php echo json_encode(__('Force stop')) ?>
+                                    ,name:'forcestop',xtype:'menucheckitem',ref:'stop_force'
+                                    ,group: 'stop_type'
+                                    ,scope:this
+                                }
+                        ]
+                    },
+                    '-',
                     {
                         text: <?php echo json_encode(__('Edit server')) ?>,
                         ref: '../editBtn',
                         disabled:false,
+                        hidden:true,
                         iconCls:'icon-edit-record',
                         url:<?php echo(json_encode(url_for('server/Server_Edit')))?>,
                         call:'Server.Edit',
@@ -437,6 +461,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     {
                         ref: '../migrateBtn',
                         disabled:false,
+                        hidden:true,
                         url:<?php echo(json_encode(url_for('server/Server_Migrate')))?>,
                         call:'Server.Migrate',
                         scope:this,
@@ -459,6 +484,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         text: <?php echo json_encode(__('Remove server')) ?>,
                         ref: '../removeBtn',
                         disabled:false,
+                        hidden:true,
                         iconCls:'icon-remove',
                         url:<?php echo(json_encode(url_for('server/Server_Remove')))?>,
                         call:'Server.Remove',
@@ -480,9 +506,10 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
                         },
                         handler: function(btn){View.loadComponent(btn);}
-                    }
-                    ,'->'
-                    ,{
+                    },
+//                    <#?php endif; ?>
+                    '->',
+                    {
                         text: __('Refresh'),
                         xtype: 'button',
                         ref:'../btn_refresh',
@@ -491,9 +518,11 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         scope:this,
                         handler: function(button,event)
                         {                            
-                            this.loadRecord({id:this.server_id});
+                            var parentCmp = Ext.getCmp((button.scope).id);
+                            parentCmp.fireEvent('refresh',parentCmp);
                         }
-                    },{
+                    },
+                    {
                         xtype: 'panel',
                         baseCls: '',
                         tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-vmachine-main',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Server Info Help')) ?>});}}]
@@ -522,28 +551,32 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
             new Ext.grid.RowNumberer(),
             {
                 id:'mac',
-                header: "MAC Address",
+                header: <?php echo json_encode(__('MAC Address')) ?>,
                 dataIndex: 'mac',
-                fixed:true,
                 allowBlank: false,
-                width: 120
+                width: 75
             },
             {
-                header: "Network",
+                header: <?php echo json_encode(__('Network')) ?>,
                 dataIndex: 'vlan',
-                width: 130
+                width: 75
+            },
+            {
+                header: <?php echo json_encode(__('Model')) ?>,
+                dataIndex: 'IntfModel',
+                width: 50
             }
-
         ]);
 
         var nic_store = new Ext.data.JsonStore({
                         proxy: new Ext.data.HttpProxy({url:<?php echo json_encode(url_for('network/jsonGridNoPager')); ?>}),
-                        baseParams: {'query': Ext.encode({'server_id':this.server_id})},
+                        baseParams: {'query': Ext.encode({'server_id':this.server_id}), 'sort':'port', 'dir':'asc'},
                         totalProperty: 'total',
                         root: 'data',
                         fields: [
                                 {name:'vlan',mapping:'Vlan'},
-                                {name:'mac',mapping:'Mac'}],
+                                {name:'mac',mapping:'Mac'},
+                                {name:'IntfModel',mapping:'IntfModel'}],
                         remoteSort: false});
 
 
@@ -577,12 +610,13 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                             fields:[
                                 {name:'lv', type:'string'}
                                 ,{name:'size', type:'int'}
-                                ,{name:'pos', type:'int'}],
+                                ,{name:'pos', type:'int'}
+                                ,{name:'disk_type', type:'string'}
+                                ,{name:'storage_type', type:'string'}],
                             totalProperty: 'total',
                             root: 'data',
                             listeners:{
                                 load:{scope:this,fn:function(){
-
                                     /*
                                      * on store reload make sort by pos
                                      */
@@ -595,8 +629,10 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
         var disk_cols = [
                 new Ext.grid.RowNumberer(),
-                {id:'lv', header: "Name", width: 150, sortable: false, dataIndex: 'lv'},
-                {header: "Size", width: 150, sortable: true, dataIndex: 'size',renderer:function(v){return Ext.util.Format.fileSize(v);}}
+                {id:'lv', header: <?php echo json_encode(__('Name')) ?>, sortable: false, dataIndex: 'lv'},
+                {header: <?php echo json_encode(__('Size')) ?>, sortable: true, dataIndex: 'size',renderer:function(v){return Ext.util.Format.fileSize(v);}}
+                ,{header: <?php echo json_encode(__('Type')) ?>,dataIndex: 'disk_type'}
+                ,{header: <?php echo json_encode(__('Storage type')) ?>,dataIndex: 'storage_type'}
         ];
 
 
@@ -678,8 +714,9 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
         Server.View.Info.superclass.initComponent.call(this);
 
-        this.on({refresh:{scope:this,fn:function(){                    
+        this.on({refresh:{scope:this,fn:function(e){                    
                     this.loadRecord({id:this.server_id});
+                    this.fireEvent('reloadTree',{ 'server_id': 's' + this.server_id });
                 }}
         });
 
@@ -692,8 +729,91 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
         // set wait message target
         //this.getForm().waitMsgTarget = this.getEl();
     }
+    ,hasPerm:function(data){
+
+        var record = new Object();
+        record.data = new Object();
+        record.data['id'] = data['id'];
+        record.data['level'] = 'server';
+
+        var conn = new Ext.data.Connection({
+//            listeners:{
+//                // wait message.....
+//                beforerequest:function(){
+//                    Ext.MessageBox.show({
+//                        title: <#?php echo json_encode(__('Please wait...')) ?>,
+//                        msg: <#?php echo json_encode(__('Please wait...')) ?>,
+//                        width:300,
+//                        wait:true,
+//                        modal: false
+//                    });
+//                },// on request complete hide message
+//                requestcomplete:function(){Ext.MessageBox.hide();}
+//                ,requestexception:function(c,r,o){
+//                        Ext.MessageBox.hide();
+//                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+//            }
+        });// end conn
+
+        conn.request({
+            url: <?php echo json_encode(url_for('sfGuardPermission/jsonHasPermission')) ?>,
+            scope:this,
+            params:record.data,
+            success: function(resp,opt) {
+//                this.loadData();
+//                var response = Ext.util.JSON.decode(resp.responseText);
+                var response = Ext.decode(resp.responseText);
+                
+                if(response['datacenter']){
+                    this.addwizardBtn.show();
+                    this.editBtn.show();
+                    if(this.migrateBtn){
+                        this.migrateBtn.show();
+                    }
+                    this.removeBtn.show();
+                    this.consoleBtn.show();
+                    this.startBtn.show();
+                    this.stopBtn.show();
+                }else{
+                    if(response['server']){
+                        this.consoleBtn.show();
+                        this.startBtn.show();
+                        this.stopBtn.show();
+
+                    }else{
+                        this.addwizardBtn.hide();
+                        this.editBtn.hide();
+                        if(this.migrateBtn){
+                            this.migrateBtn.hide();
+                        }
+                        this.removeBtn.hide();
+                        this.consoleBtn.hide();
+                        this.startBtn.hide();
+                        this.stopBtn.hide();
+                    }
+                }
+
+                
+                
+//                Ext.ux.Logger.info(response['agent'],response['response']);
+//                View.notify({html:response['response']});
+            },
+            failure: function(resp,opt) {
+
+                var response = Ext.util.JSON.decode(resp.responseText);
+                Ext.ux.Logger.error(response['agent'],response['error']);
+
+                Ext.Msg.show({
+//                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                    buttons: Ext.MessageBox.OK,
+                    msg: response['info'],
+                    icon: Ext.MessageBox.ERROR});
+
+            }
+        });
+    }
     ,loadRecord:function(data){
-        
+        this.hasPerm(data);
         this.btn_refresh.addClass('x-item-disabled');
         this.disk_grid.getStore().load.defer(100,this.disk_grid.getStore());
         this.nic_grid.getStore().load.defer(100,this.nic_grid.getStore());
@@ -716,18 +836,20 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                 var node_state = data.node_state;
                 var not_running_msg = <?php echo json_encode(__('VirtAgent should be running to enable this menu')) ?>;
 
-                this.addwizardBtn.setDisabled(!node_state);
-                this.addwizardBtn.url = <?php echo(json_encode(url_for('server/wizard?nid=')))?>+node_id;
+                if( !data.unassigned ){
+                    this.addwizardBtn.setDisabled(!node_state);
+                    this.addwizardBtn.url = <?php echo(json_encode(url_for('server/wizard?nid=')))?>+node_id;
 
 
-                if(node_state)
-                {
-                    this.addwizardBtn.el.child('button:first').dom.qtip = <?php echo json_encode(__('Click to open new server wizard')) ?>;
+                    if(node_state)
+                    {
+                        this.addwizardBtn.el.child('button:first').dom.qtip = <?php echo json_encode(__('Click to open new server wizard')) ?>;
+                    }
+                    else
+                    {
+                        this.addwizardBtn.el.child('button:first').dom.qtip = not_running_msg;
+                    }                
                 }
-                else
-                {
-                    this.addwizardBtn.el.child('button:first').dom.qtip = not_running_msg;
-                }                
 
                 /*
                  * check vm state
@@ -750,10 +872,12 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     *
                     * check migrate/move button
                     */
-                     this.migrateBtn.type = 'migrate';
-                     this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate the server must be stopped!')); ?>);
-                     this.migrateBtn.setText(<?php echo json_encode(__('Migrate server')) ?>);
-                     this.migrateBtn.setDisabled(false);                     
+                    if( !data.unassigned ){
+                        this.migrateBtn.type = 'migrate';
+                        this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate the server must be stopped!')); ?>);
+                        this.migrateBtn.setText(<?php echo json_encode(__('Migrate server')) ?>);
+                        this.migrateBtn.setDisabled(false);                     
+                    }
 
 
                    <?php endif; ?>
@@ -771,21 +895,36 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                       *
                       * check migrate/move button
                       */
-                     this.migrateBtn.type = 'move';
-                     this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move the server must be running!')); ?>);
-                     this.migrateBtn.setText(<?php echo json_encode(__('Move server')) ?>);
-                     this.migrateBtn.setDisabled(false);
+                    if( !data.unassigned ){
+                        this.migrateBtn.type = 'move';
+                        this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move the server must be running!')); ?>);
+                        this.migrateBtn.setText(<?php echo json_encode(__('Move server')) ?>);
+                        this.migrateBtn.setDisabled(false);
+                    }
                      <?php endif; ?>
                  }
 
-                 if(this.migrateBtn && !data['all_shared_disks'])
+                 if(this.migrateBtn && !data['all_shared_disks'] )
                  {
                          this.migrateBtn.setTooltip(<?php echo json_encode(__(EtvaLogicalvolumePeer::_NOTALLSHARED_)); ?>);
                          this.migrateBtn.setDisabled(true);
                  }
                  
-                 this.startBtn.setDisabled(data['vm_state']=='running');
-
+                 if(this.migrateBtn && data['has_snapshots_disks'] )
+                 {
+                         this.migrateBtn.setTooltip(<?php echo json_encode(__(EtvaLogicalvolumePeer::_HASSNAPSHOTS_)); ?>);
+                         this.migrateBtn.setDisabled(true);
+                 }
+                 
+                 if( !data.unassigned ){
+                     this.startBtn.setDisabled(data['vm_state']=='running');
+                     this.stopBtn.menu.stop_normal.setChecked(true);
+                     this.stopBtn.menu.stop_force.setChecked(false);
+                 } else {
+                     this.startBtn.setDisabled(true);
+                     this.stopBtn.setDisabled(true);
+                     this.consoleBtn.setDisabled(true);
+                 }
             }
         });
     }

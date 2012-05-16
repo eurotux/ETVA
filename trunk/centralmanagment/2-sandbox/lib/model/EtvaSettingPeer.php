@@ -32,6 +32,13 @@ class EtvaSettingPeer extends BaseEtvaSettingPeer {
 
     const _ERR_NOTFOUND_PARAM_   = 'Setting with name %id% could not be found';
 
+    const _SMTP_SERVER_     = 'smtpserver';
+    const _SMTP_PORT_       = 'smtpport';
+    const _SMTP_USE_AUTH_   = 'smtpuseauth';
+    const _SMTP_USERNAME_   = 'smtpusername';
+    const _SMTP_KEY_        = 'smtpkey';
+    const _SMTP_SECURITY_   = 'smtpsecurity_type';
+
     public static function addDefault($param){
         $default = sfConfig::get('app_setting_'.$param);
         if(isset($default)){
@@ -53,9 +60,24 @@ class EtvaSettingPeer extends BaseEtvaSettingPeer {
         if(!$etva_setting)
             $etva_setting = self::addDefault($pk);
         return $etva_setting;
-		
 	}
     
-    
+    public static function retrieveByParam($param , PropelPDO $con = null)
+    {
+        $c  = new Criteria();
+        $c->add(EtvaSettingPeer::PARAM, $param);
+        return EtvaSettingPeer::doSelectOne($c);
+    }
 
+    public function updateSetting($param, $value){
+        $c = new Criteria();
+        $c->add(EtvaSettingPeer::PARAM, $param);
+        $obj = EtvaSettingPeer::doSelectOne($c);
+        if($obj === null){
+            $obj = new EtvaSetting();
+            $obj->setParam($param);
+        }
+        $obj->setValue($value);
+        $obj->save();
+    }
 } // EtvaSettingPeer

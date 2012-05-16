@@ -20,11 +20,12 @@ Ext.apply(Ext.form.VTypes, {
 
 Ext.ns("lvwin.createForm");
 
-lvwin.createForm.Main = function(node_id) {
+lvwin.createForm.Main = function(node_id, level) {
 
     Ext.QuickTips.init();   	
 
-    this.node_id = node_id;
+    this.level = level;
+    this.node_id = node_id;    
 
     this.totalvgsize = new Ext.form.Hidden({
    //     id: 'total-vg-size',
@@ -52,6 +53,16 @@ lvwin.createForm.Main = function(node_id) {
         //'total-vg-size',
 	    anchor: '90%'
     });
+
+    var baseParams;
+    if(level == 'cluster'){
+        baseParams = {'cid':node_id,'level':level};
+    }else if(level == 'node'){
+        baseParams = {'nid':node_id,'level':level};
+    }else{
+        baseParams = {'nid':node_id};
+    }
+
 
     this.vg = new Ext.form.ComboBox({
                 
@@ -91,7 +102,7 @@ lvwin.createForm.Main = function(node_id) {
                 ,{name:'size', mapping:'value', type:'string'}
             ]
             ,url:<?php echo json_encode(url_for('volgroup/jsonListFree'))?>
-            ,baseParams:{'nid':node_id}
+            ,baseParams:baseParams
             ,listeners:{
                 'loadexception':function(store,options,resp,error){
                     
@@ -195,11 +206,29 @@ Ext.extend(lvwin.createForm.Main, Ext.form.FormPanel, {
             var lvname = this.lvname.getValue();                        
 
             // create parameters array to pass to soap request....
-            var params = {
+            var params;
+    
+            if(this.level == 'cluster'){
+                params = {
+                          'cid':this.node_id,
+                          'level':this.level,
+                          'lv':lvname,
+                          'vg':this.vg.getValue(),
+                          'size':this.lvsize.getValue()+'M'};
+            }else if(this.level == 'node'){
+                params = {
+                          'nid':this.node_id,
+                          'level':this.level,
+                          'lv':lvname,
+                          'vg':this.vg.getValue(),
+                          'size':this.lvsize.getValue()+'M'};
+            }else{
+                params = {
                           'nid':this.node_id,
                           'lv':lvname,
                           'vg':this.vg.getValue(),
                           'size':this.lvsize.getValue()+'M'};
+            }
 
             var conn = new Ext.data.Connection({
                             listeners:{
@@ -210,8 +239,7 @@ Ext.extend(lvwin.createForm.Main, Ext.form.FormPanel, {
                                         title: <?php echo json_encode(__('Please wait...')) ?>,
                                         msg: <?php echo json_encode(__('Creating logical volume...')) ?>,
                                         width:300,
-                                        wait:true,
-                                        modal: false
+                                        wait:true
                                     });
 
                                 },// on request complete hide message

@@ -37,6 +37,7 @@ class SystemNetwork
         if(!$port) $port = $_SERVER['SERVER_PORT'];        
     
         if($port == 80 ) $this->set(self::CM_URI, 'http://'.$ip.'/soapapi.php');
+        else if($port == 443 ) $this->set(self::CM_URI, 'https://'.$ip.'/soapapi.php');
         else $this->set(self::CM_URI, 'http://'.$ip.':'.$port.'/soapapi.php');
     }
 

@@ -203,7 +203,7 @@ class EtvaPhysicalvolume_VA
                 $message = Etva::getLogMessage(array('info'=>implode(', ',$names)), EtvaPhysicalvolumePeer::_ERR_INCONSISTENT_);
                 sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(),'event.log',array('message' =>$message,'priority'=>EtvaEventLogger::ERR)));
 
-                return array('success'=>false,'agent'=>'ETVA','error'=>$message,'action'=>'reload','info'=>$message);
+                return array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$message,'action'=>'reload','info'=>$message);
 
 
             }else
@@ -262,8 +262,13 @@ class EtvaPhysicalvolume_VA
             if($dev_type == EtvaPhysicalvolume::STORAGE_TYPE_LOCAL_MAP){
                 $etva_physicalvol = EtvaPhysicalvolumePeer::retrieveByNodeTypeDevice($etva_node->getId(), $dev_type, $dev_device);
             }else{
-                $dev_uuid = $dev_info[EtvaPhysicalvolume::UUID_MAP];
-                $etva_physicalvol = EtvaPhysicalvolumePeer::retrieveByUUID($dev_uuid);
+                if( isset($dev_info[EtvaPhysicalvolume::UUID_MAP]) ){
+                    $dev_uuid = $dev_info[EtvaPhysicalvolume::UUID_MAP];
+                    $etva_physicalvol = EtvaPhysicalvolumePeer::retrieveByUUID($dev_uuid);
+                } else 
+                    $etva_physicalvol = EtvaPhysicalvolumePeer::retrieveByNodeTypeDevice($etva_node->getId(), $dev_type, $dev_device);
+                if( !$etva_physicalvol )
+                    $etva_physicalvol = EtvaPhysicalvolumePeer::retrieveByNodeTypeDevice($etva_node->getId(), $dev_type, $dev_device);
             }
                         
 
@@ -323,6 +328,8 @@ class EtvaPhysicalvolume_VA
         //build uuid array from DB where vgs are type 'storage'
         foreach($db_ as $data){
             $data_uuid = $data->getUuid();
+            if( !$data_uuid )
+                $data_uuid = $data->getDevice();
             $db_uuids[$data_uuid] = $data;
         }
 
@@ -336,7 +343,12 @@ class EtvaPhysicalvolume_VA
         // build uuid array from soap response with type 'shared'
         foreach($in_resp as $data_info){
             $info = (array) $data_info;            
-            if($info[EtvaPhysicalvolume::STORAGE_TYPE_MAP]!=EtvaPhysicalvolume::STORAGE_TYPE_LOCAL_MAP) $in_resp_arr[] = $info[EtvaPhysicalvolume::UUID_MAP];
+            if($info[EtvaPhysicalvolume::STORAGE_TYPE_MAP]!=EtvaPhysicalvolume::STORAGE_TYPE_LOCAL_MAP){
+                if( isset($info[EtvaPhysicalvolume::UUID_MAP]) )
+                    $in_resp_arr[] = $info[EtvaPhysicalvolume::UUID_MAP];
+                else
+                    $in_resp_arr[] = $info[EtvaPhysicalvolume::DEVICE_MAP];
+            }
         }
 
         $consistent = 1;

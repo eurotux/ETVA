@@ -105,7 +105,8 @@ class soapController extends sfController {
          */
         $this->__dispatch_map['updateVirtAgentLvs'] = array(
                                                         'in'    => array('uuid'=>'string',
-                                                                        'lvs'=>'{urn:soapController}ArrayOfStrings'),
+                                                                        'lvs'=>'{urn:soapController}ArrayOfStrings',
+                                                                        'devicetable'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
@@ -477,10 +478,11 @@ class soapController extends sfController {
 
 
 
-    function updateVirtAgentLvs($node_uuid, $lvs)
+    function updateVirtAgentLvs($node_uuid, $lvs, $devicetable)
     {
         $this->request->setParameter('uuid', $node_uuid);
         $this->request->setParameter('lvs',$lvs);
+        $this->request->setParameter('devicetable',$devicetable);
 
         $data = $this->request->getParameterHolder();
         $all_data = $data->getAll();

@@ -50,7 +50,8 @@ use_javascript("ux/treegrid/TreeGridNodeUI.js");
 use_javascript("ux/treegrid/TreeGridLoader.js");
 use_javascript("ux/treegrid/TreeGridColumns.js");
 use_javascript("ux/treegrid/TreeGrid.js");
-
+include_partial('node/storage');
+include_partial('cluster/changename');
 
 /*
  * check if file locale exist and load
@@ -80,10 +81,16 @@ $sfExtjs3Plugin->end();
  * Include form and soap window info
  */
 include_partial('node/NodeWindowSoap',array());
+
+//include_partial('node/storage');
+
 /*
  * include vnc combo
  */
 include_partial('setting/Setting_VNC_keymapCombo');
+
+if($sf_user->getAttribute('etvamodel')!='standard')
+    include_partial('server/migrate');
 
 ?>
 <script type='text/javascript'>
@@ -91,7 +98,6 @@ include_partial('setting/Setting_VNC_keymapCombo');
     //Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 
     Ext.namespace('View');    
-
     View = function(){
 
         return{
@@ -102,21 +108,21 @@ include_partial('setting/Setting_VNC_keymapCombo');
 
                 if((data['vm_state']=='running' && (data['agent_port'] && data['state'])) ||
                    (data['vm_state']=='running' && !data['agent_port']) ){
-                   new_css_state = 'active';
-                   remove_css_state = ['some-active','no-active'];
+                   new_css_state = ['active','icon-vm-stat-ok'];
+                   remove_css_state = ['some-active','no-active','icon-vm-stat-nok'];
                 }
 
                 if((data['vm_state']=='running' && (data['agent_port'] && !data['state'])) ||
                    (data['vm_state']!='running' && (data['agent_port'] && data['state'])) ){
-                   new_css_state = 'some-active';
-                   remove_css_state = ['active','no-active'];
+                   new_css_state = ['some-active','icon-vm-stat-ok'];
+                   remove_css_state = ['active','no-active','icon-vm-stat-nok'];
                 }
                 
 
                 if((data['vm_state']!='running' && (data['agent_port'] && !data['state'])) ||
                    (data['vm_state']!='running' && !data['agent_port']) ){
-                   new_css_state = 'no-active';
-                   remove_css_state = ['active','some-active'];
+                   new_css_state = ['no-active','icon-vm-stat-nok'];
+                   remove_css_state = ['active','some-active','icon-vm-stat-ok'];
                 }                
                 
                 return {old_css:remove_css_state,new_css:new_css_state};
@@ -141,6 +147,17 @@ include_partial('setting/Setting_VNC_keymapCombo');
                     handler: function(){
                         window.location.href=<?php  echo json_encode(url_for('@signout',true)); ?>;}});
 
+                // Cluster name vtype
+                //Ext.apply(Ext.form.VTypes, {
+                //    clusternameVal: /^(1|2)\d{3}/,
+                //    clusternameMask: /\d/,
+                //    clusternameText: 'Incorrect year format',
+                //    clustername: function(v){
+                //        return this.yearVal.test(v);
+                //    }
+                //});
+
+
                 var adminMenu = new Ext.menu.Menu({
                     id: 'adminMenu', // the menu's id we use later to assign as submenu
                     items: [
@@ -154,16 +171,40 @@ include_partial('setting/Setting_VNC_keymapCombo');
                                 }
                                 ,handler:this.loadComponent
                                 ,scope:this
-                            },                            
-                            {
+                            }
+                            <?php if($etvamodel=='enterprise'):?>
+                            ,{
+                                text:<?php echo json_encode(__('Cluster Setup Wizard')) ?>
+                                ,id:'clusterwizardBtn'
+                                ,url:<?php echo json_encode(url_for('cluster/View_ClusterWizard')); ?>
+//                                ,call:'View.FirstTimeWizard'
+                                ,call:'Cluster.Create'
+                                ,callback:function(item){
+//                                    alert("click");
+                                    new Cluster.Create.Main();
+                                    //new View.FirstTimeWizard.Main();
+                                }
+                                ,handler:this.loadComponent
+                                ,scope:this
+                            }
+                            <?php endif ?>
+                            ,{
                                 text:<?php echo json_encode(__('System preferences')) ?>
                                 ,url:<?php echo json_encode(url_for('setting/view')); ?>
                                 ,call:'Setting.Main'
                                 ,callback:function(item){
-                                    new Setting.Main({title:item.text});
+                                    var main = new Setting.Main({title:item.text});
+                                    var win = Ext.getCmp('setting-main');
+                                    win.on('beforeclose', function(){
+                                        var ftw_pref = Ext.getCmp('ft-wiz-preferences');     //notify first time wizard preferences card
+                                        if(ftw_pref){
+                                            ftw_pref.fireEvent('reloadData', ftw_pref);
+                                        }
+                                    });
                                 }
                                 ,handler:this.loadComponent
                                 ,scope:this
+                                ,id: 'menuitm-settings'
                             },
                             {
                                 text: <?php echo json_encode(__('Users and permissions administration')) ?>
@@ -182,7 +223,8 @@ include_partial('setting/Setting_VNC_keymapCombo');
                     menu: 'adminMenu' // assign the object by id
                 });
 
-                var toolsMenu = new Ext.menu.Menu({
+                //var toolsMenu = new Ext.menu.Menu({
+                var toolsMenu = new Ext.ux.TooltipMenu({
                     id: 'toolsMenu', // the menu's id we use later to assign as submenu
                     items: [
                             {
@@ -221,8 +263,9 @@ include_partial('setting/Setting_VNC_keymapCombo');
                                 text: <?php echo json_encode(__('Nodes Agent Monitor keepalive')) ?>,
                                 // url:'sfGuardGroup/view',
                                 scope:this,
-                                tooltip: <?php echo json_encode(__('Increases the frequency of the nodes status verification')) ?>,
-                                handler: function(){View.monitorAlive();}
+                                tooltip: {text: <?php echo json_encode(__('Increases the frequency of the nodes status verification')) ?>}
+                                //tooltip: {text: <?php echo json_encode(__('Increases the frequency of the nodes status verification')) ?>}
+                                ,handler: function(){View.monitorAlive();}
 //                                ,onRender: function(container){
 //                                    this.el = Ext.get(this.el);
 //                                    container.dom.appendChild(this.el.dom);
@@ -305,15 +348,21 @@ include_partial('setting/Setting_VNC_keymapCombo');
 
                 var admintoolsMenu = new Ext.Action({text: <?php echo json_encode(__('Tools')) ?>, menu: 'toolsMenu'});
 
+                
                 var topBar = new Ext.Toolbar({
                     renderTo:'topBar',
-                    buttons: [systemAdminMenu,
+                    buttons: [
+                        <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
+                        systemAdminMenu,
                         admintoolsMenu,//one to N left buttons
+                        <?php endif; ?>
+                            
                         new Ext.Toolbar.Fill(),
                         buttonHi,
                         buttonLogout //one to N right buttons
                     ]
                 });
+
                 //      var topBar = new Ext.Toolbar('topBar');
                 // add your left aligned buttons here
                 //    topBar.addButton(buttonUser);
@@ -351,17 +400,240 @@ include_partial('setting/Setting_VNC_keymapCombo');
                         minSize: 175,
                         maxSize: 400,
                         collapsible: true,
-                        rootVisible:true,
-                        animate:false,
-                        enableDD:false,
+                        rootVisible:false,
+
+                        animate:true,
                         lines:false,
                         autoScroll:true,
+                        enableDD:true,
+                        listeners: {
+                            nodedragover: function(e){
+                                            <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
+
+                                                //unaccepted node move between clusters
+                                                if( e.point=='append' && e.dropNode.attributes.initialize == 'pending' && e.target.attributes.type == 'cluster'
+                                                        && e.dropNode.parentNode.parentNode.attributes.id != e.target.attributes.id)
+                                                    return true;
+
+                                               //live migrate
+                                                if( e.point=='append' && e.target.attributes.type == 'node' && e.target.attributes.state == 1
+                                                        && e.target.attributes.contextmenu
+                                                        && e.dropNode.attributes.all_shared && !e.dropNode.attributes.has_snapshots
+                                                        && e.dropNode.parentNode.attributes.id != e.target.attributes.id
+                                                        && e.dropNode.parentNode.attributes.cluster_id == e.target.attributes.cluster_id )
+                                                    return true;
+
+                                            <?php endif; ?>
+
+                                                // unassign
+                                                if( e.point=='append' && e.dropNode.parentNode.attributes.type == 'node' && e.target.attributes.type == 'unassignednode'
+                                                        && e.target.attributes.state == 1 && e.target.attributes.contextmenu
+                                                        && e.dropNode.parentNode.attributes.id != e.target.attributes.id
+                                                        && e.dropNode.parentNode.attributes.cluster_id == e.target.attributes.cluster_id )
+                                                    return true;
+
+                                                // assign
+                                                if( e.point=='append' && e.dropNode.parentNode.attributes.type == 'unassignednode' && e.target.attributes.type == 'node'
+                                                        && e.target.attributes.state == 1 && e.target.attributes.contextmenu
+                                                        && ( (e.dropNode.attributes.all_shared && !e.dropNode.attributes.has_snapshots) ||
+                                                                (e.dropNode.attributes.node_id == e.target.attributes.id) )
+                                                        && e.dropNode.parentNode.attributes.id != e.target.attributes.id
+                                                        && e.dropNode.parentNode.attributes.cluster_id == e.target.attributes.cluster_id )
+                                                    return true;
+
+                                                return false;
+                                            }
+                            ,nodedrop: function(e){
+                                            var type = e.dropNode.attributes.type;
+
+                                            if(type == 'node'){
+                                                //unaccepted node move between clusters
+                                                this.moveUnacceptedNode(e);
+                                            }else if(type == 'server'){
+                                                
+                                                if( e.target.attributes.type == 'unassignednode' ){
+                                                    var sId = e.dropNode.id;
+                                                    var server_id = sId.replace('s','');
+                                                    var server_name = e.dropNode.text;
+                                                    Ext.Msg.show({
+                                                        title: <?php echo json_encode(__('Unassign server')) ?>,
+                                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                                        msg: String.format(<?php echo json_encode(__('Unassign server {0} ?')) ?>,server_name),
+                                                        icon: Ext.MessageBox.WARNING,
+                                                        fn: function(btn){
+                                                            if (btn == 'yes'){
+                                                                var conn = new Ext.data.Connection({
+                                                                    listeners:{
+                                                                        // wait message.....
+                                                                        beforerequest:function(){
+                                                                            Ext.MessageBox.show({
+                                                                                title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                                                msg: <?php echo json_encode(__('Unassigning server...')) ?>,
+                                                                                width:300,
+                                                                                wait:true,
+                                                                                modal: false
+                                                                            });
+                                                                        },// on request complete hide message
+                                                                        requestcomplete:function(){Ext.MessageBox.hide();}
+                                                                        ,requestexception:function(c,r,o){
+                                                                            Ext.MessageBox.hide();
+                                                                            Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                                                    }
+                                                                });// end conn
+
+                                                                conn.request({
+                                                                    url: <?php echo json_encode(url_for('server/jsonUnassign')) ?>,
+                                                                    params: {id: server_id},
+                                                                    success: function(resp,opt) {
+                                                                        Ext.getCmp('view-nodes-panel').removeNode(server_id);
+                                                                        Ext.getCmp('view-main-panel').remove('view-center-panel-'+server_id);                 
+
+                                                                    },
+                                                                    failure: function(resp,opt) {
+                                                                        Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Unable to unassign server!')) ?>);
+                                                                        Ext.getCmp('view-nodes-panel').reload();
+                                                                    }
+                                                                });// END Ajax request
+                                                            } else {//END button==yes
+                                                                Ext.getCmp('view-nodes-panel').reload();
+                                                            }
+                                                        }// END fn
+                                                    }); //END Msg.show
+                                                } else if( e.dropNode.attributes.unassigned ){
+                                                    var sId = e.dropNode.id;
+                                                    var server_id = sId.replace('s','');
+                                                    var server_name = e.dropNode.text;
+
+                                                    Ext.Msg.show({
+                                                        title: <?php echo json_encode(__('Assign server')) ?>,
+                                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                                        msg: String.format(<?php echo json_encode(__('Assign server {0} ?')) ?>,server_name),
+                                                        icon: Ext.MessageBox.WARNING,
+                                                        fn: function(btn){
+                                                            if (btn == 'yes'){
+
+                                                                var conn = new Ext.data.Connection({
+                                                                    listeners:{
+                                                                        // wait message.....
+                                                                        beforerequest:function(){
+                                                                            Ext.MessageBox.show({
+                                                                                title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                                                msg: <?php echo json_encode(__('Assigning server...')) ?>,
+                                                                                width:300,
+                                                                                wait:true,
+                                                                                modal: false
+                                                                            });
+                                                                        },// on request complete hide message
+                                                                        requestcomplete:function(){Ext.MessageBox.hide();}
+                                                                        ,requestexception:function(c,r,o){
+                                                                            Ext.MessageBox.hide();
+                                                                            Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                                                    }
+                                                                });// end conn
+
+                                                                conn.request({
+                                                                    url: <?php echo json_encode(url_for('server/jsonAssign')) ?>,
+                                                                    params: {id: server_id, 'nid': e.target.attributes.id},
+                                                                    success: function(resp,opt) {
+                                                                        Ext.getCmp('view-nodes-panel').removeNode(server_id);
+                                                                        Ext.getCmp('view-main-panel').remove('view-center-panel-'+server_id);                 
+
+                                                                    },
+                                                                    failure: function(resp,opt) {
+                                                                        Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Unable to assign server!')) ?>);
+                                                                        Ext.getCmp('view-nodes-panel').reload();
+                                                                    }
+                                                                });// END Ajax request
+                                                            } else {//END button==yes
+                                                                Ext.getCmp('view-nodes-panel').reload();
+                                                            }
+                                                        }// END fn
+                                                    }); //END Msg.show
+                                                } else {
+                                                    //live migrate
+                                                    this.migrateServer(e);
+                                                }
+                                            }
+                                            
+
+                                            
+                                        }
+                            ,refresh: function(){
+                                            this.root.reload();
+                                        }
+                        },
+                        migrateServer: function(e){
+                            var sId = e.dropNode.id;
+                            var server_id = sId.replace('s','');
+                            var server_name = e.dropNode.text;
+                            var record = {data:{'id':server_id,'name':server_name, 'nodes_cb': e.target.text , 'target_name': e.target.text , 'target_id': e.target.attributes.id}};
+
+                            var type = (e.dropNode.attributes.vm_state == 'running') ? 'migrate' : 'move';
+                            var text = (e.dropNode.attributes.vm_state == 'running') ?
+                                            <?php echo json_encode(__('Migrate server')) ?>
+                                            : <?php echo json_encode(__('Move server')) ?>;
+
+                            var window = new Server.Migrate.Window({title:text,type:type, parent:NodePanel.id});
+                            window.on('close',function(){
+                                                            Ext.getCmp('view-nodes-panel').reload();
+                                                    });
+                            window.show();
+                            window.loadData(record);
+                        },
+                        moveUnacceptedNode: function(e){
+                            var node_id = e.dropNode.id;
+                            var cluster_id = e.target.id;
+                            cluster_id = cluster_id.replace('d','');
+
+                            var send_data = {'to_cluster_id': cluster_id, 'node_id': node_id};
+                            
+                            var conn = new Ext.data.Connection({
+                                listeners:{
+                                    // wait message.....
+                                    beforerequest:function(){
+                                        Ext.MessageBox.show({
+                                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                                            msg: <?php echo json_encode(__('Moving node...')) ?>,
+                                            width:300,
+                                            wait:true,
+                                            modal: false
+                                        });
+                                    },// on request complete hide message
+                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                    ,requestexception:function(c,r,o){
+                                        Ext.MessageBox.hide();
+                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                }
+                            });// end conn
+
+                            conn.request({
+                                url:<?php echo json_encode(url_for('cluster/jsonMoveNode')) ?>,
+                                params:send_data,
+                                // everything ok...
+                                success: function(resp,opt){
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.ux.Logger.info(response['agent'],response['info']);
+                                    Ext.getCmp('view-nodes-panel').reload();
+                                },scope:this
+                                ,failure: function(o) {
+                                    var response = Ext.util.JSON.decode(o.responseText);
+
+
+                                    Ext.getCmp('view-nodes-panel').reload();
+                               }
+                            });// END Ajax request
+                        },
+
                         loader: new Ext.tree.TreeLoader({
                             clearOnLoad:true,
                             dataUrl: <?php echo json_encode(url_for('server/jsonTree',false)); ?>,
                             listeners:{
                                 beforeload:function(){
                                      //View.checkState();
+                                }
+                                ,load:function(obj, node, resp ){
+                                    var response = Ext.decode(resp.responseText);
+
                                 }
                             }
                         }),
@@ -378,7 +650,25 @@ include_partial('setting/Setting_VNC_keymapCombo');
                         tools:[{
                                 id:'refresh',
                                 on:{
-                                    click: function(){this.root.reload();}
+                                    click: function(){
+                                                var attrs;
+                                                var currentNode = nodesPanel.getSelectionModel().getSelectedNode();
+                                                if( currentNode ){
+                                                    attrs = new Object();
+                                                    if( currentNode.attributes.type == 'server' )
+                                                        attrs.server_id = currentNode.attributes.id;
+                                                    else if( currentNode.attributes.type == 'node' )
+                                                        attrs.node_id = currentNode.attributes.id;
+                                                    else if( currentNode.attributes.type == 'cluster' )
+                                                        attrs.cluster_id = currentNode.attributes.id;
+                                                    else if( currentNode.attributes.type == 'unassignednode' )
+                                                        attrs.cluster_id = currentNode.parentNode.attributes.id;
+
+                                                    attrs.select = true;
+                                                }
+                                                this.reload(attrs);
+                                                //this.root.reload(attrs);
+                                            }
                                     ,scope:this
                                 }
                             },{
@@ -400,6 +690,7 @@ include_partial('setting/Setting_VNC_keymapCombo');
                     this.getSelectionModel().on({
                         'beforeselect' : function(sm, node){return true;},
                         'selectionchange' : function(sm, node){
+//                            alert(sm.getSelectedNode());
                             if(node) this.fireEvent('nodeselect', node.attributes);
                         },scope:this
                     });
@@ -415,20 +706,136 @@ include_partial('setting/Setting_VNC_keymapCombo');
                  * Extend NodePanel
                  *
                  */
-
                 Ext.extend(NodePanel, Ext.tree.TreePanel,{
+                    //scope:this,
+                    bbar: [
+                    '->',
+                    {   
+                        cls: 'version_box',
+                        xtype: 'tbtext',
+                        text: <?php echo json_encode(__('Search')) ?>
+                    },{                    
+                        xtype: 'textfield',
+                        fieldLabel: <?php echo json_encode(__('Search')) ?>,
+                        //name: id+'_primarydns',
+                        maxLength: 15,
+                        //vtype:'ip_addr',
+                        //allowBlank:false,
+                        disabled:false,
+                        width:100,
+                        scope:this,
+                        listeners:{
+                            specialkey:{scope:this,fn:function(field,e){
+                                if(e.getKey()==e.ENTER){
+                                    var nodesPanel = Ext.getCmp('view-nodes-panel');
+                                    var no_name = field.getValue(); // Treenode name =P
+
+                                    if(no_name == ''){
+                                        nodesPanel.fireEvent('refresh');                                     
+                                    }else{
+                                        var root = nodesPanel.getRootNode();
+                    
+                                        var search_node = function(node, name){
+                                           
+                                            // Leaf nodes
+                                            if(!node.hasChildNodes()){
+                                                var patt=new RegExp(name,'ig');
+                                                if(node.attributes['text'].match(patt) != null){
+                                                    node.ensureVisible();
+                                                    node.ui.addClass('RedText');
+                                                    node.attributes.cls = 'RedText';
+                                                    return false;
+                                                }else{
+                                                    node.ui.removeClass('RedText');
+                                                    return true;
+                                                }
+                                            }else{
+                                                var childs = node.childNodes;
+                                                var collapse = true;
+
+                                                for(idx in childs){
+                                                    if(typeof(childs[idx]) == 'function'){
+                                                        break;
+                                                    }
+
+                                                    var child = childs[idx];
+                                                    child.expand();
+                                                    var res = search_node(childs[idx], name);
+                                                    collapse = (collapse && res);                                                    
+                                                }
+                                                
+                                                if(collapse)//{
+                                                    node.collapse();
+                                                
+                                                var patt=new RegExp(name,'ig');
+                                            
+                                                if(node.attributes['text'].match(patt) != null){
+                                                    node.ensureVisible();
+                                                    node.ui.addClass('RedText');
+                                                    node.attributes.cls = 'RedText';
+                                                    return false;
+                                                }else{
+                                                    node.ui.removeClass('RedText');
+                                                    return collapse;
+                                                }
+                                            }
+                                            
+                                            return collapse;
+                                            
+                                        }
+                                        search_node(root, no_name);
+                                    }
+                                }
+
+                            }}                     
+                            ,
+                            render: function(c) {
+                                Ext.QuickTips.register({
+                                target: c.getEl(),
+                                    text: <?php echo json_encode(__('Press enter to search')) ?>
+                                });
+                            }
+                        }
+//                            keypress: {buffer:100, fn:function(textfield, evtobj) {
+//                                   alert(textfield.getValue());
+//                                }
+//                            }
+                    }],
                     /*
                      * Create context menu
                      */
                     onContextMenu : function(node, e){
-
+                        if( node.attributes.type == 'unassignednode' ) // no context menu for unassigned node
+                            return false;
+                        
                         var items = [
-                                    '<b class="menu-title">'+<?php echo json_encode(__('Initialization')) ?>+'</b>'
-                                    ,{
+                                    {
+                                        html: '<b class="menu-title">'+<?php echo json_encode(__('Cluster')) ?>+'</b>',
+                                        ref:'ttl_cluster',
+                                        border: false,
+                                        xtype: "panel"
+                                    },{
+                                        text: <?php echo json_encode(__('Rename cluster')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('This will change the cluster name. "Default" cluster name cannot be changed.')) ?>},
+                                        ref:'btn_rename_cluster',
+                                        disabled:false,
+                                        hidden: true,
+                                        scope:this,
+                                        handler:function(btn,e){
+                                            this.setClusterName(btn,this.ctxNode);
+                                        }
+                                    },
+//                                    '<b class="menu-title">'+<?php echo json_encode(__('Initialization')) ?>+'</b>'
+                                    {
+                                        html: '<b class="menu-title">'+<?php echo json_encode(__('Initialization')) ?>+'</b>',
+                                        border: false,
+                                        ref:'ttl_initialization',
+                                        xtype: "panel"
+                                    },{
                                         text: <?php echo json_encode(__('Authorize')) ?>,
                                         ref:'btn_authorize',
                                         scope: this,
-                                        disabled:true,
+                                        disabled:false,
                                         cmd: <?php echo json_encode(EtvaNode_VA::INITIALIZE_CMD_AUTHORIZE) ?>,
                                         handler:function(btn,e){
                                             this.setInitialize(btn,this.ctxNode);
@@ -444,10 +851,20 @@ include_partial('setting/Setting_VNC_keymapCombo');
                                             this.setInitialize(btn,this.ctxNode);
                                         }
                                     }
-                                    ,'-'
-                                    ,'<b class="menu-title">Node</b>'
+//                                    ,'-'
+//                                    ,{
+//                                        xtype: 'tbseparator'    //separador
+//                                    }
+//                                    ,'<b class="menu-title">Node</b>'
+                                    ,{
+                                        html: '<b class="menu-title">Node</b>',
+                                        border: false,
+                                        ref:'ttl_node',
+                                        xtype: "panel"
+                                    }
                                     ,{
                                         id:'load-node',
+                                        ref:'btn_loadnode',
                                         iconCls:'load-icon',
                                         text: <?php echo json_encode(__('Load node')) ?>,
                                         scope: this,
@@ -489,10 +906,24 @@ include_partial('setting/Setting_VNC_keymapCombo');
                                         handler:function(btn,e){                                            
                                             this.setKeymap(btn,this.ctxNode);
                                         }
-                                    },
-                                    {
+                                    }
+                                    <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
+                                    ,{
+                                        text: <?php echo json_encode(__('Set permissions')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__("This will change permissions for the node's parent (cluster)")) ?>},
+                                        ref:'btn_permission',
+                                        disabled:false,
+                                        scope:this,
+                                        iconCls: 'icon-lockedit',
+                                        handler:function(btn,e){
+                                            this.changePerms(btn,this.ctxNode);
+                                        }
+                                    }
+                                    <?php endif; ?>
+                                    ,{
                                         text :<?php echo json_encode(__('Node status')) ?>,
                                         param:'listDomains',
+                                        ref:'btn_listdomains',
                                         menu:[
                                             //{text:'listDomains',param:'listDomains&id='+node.id,handler: this.showNodeWindowSoap},
                                             //{text:'getphydisk',param:'getphydisk_as_xml&id='+node.id,handler: this.showNodeWindowSoap},
@@ -518,117 +949,236 @@ include_partial('setting/Setting_VNC_keymapCombo');
                                             this.deleteNode(btn,this.ctxNode);
                                         }
                                     }
-                                    ,'-'
-                                    
+//                                    ,'-'
+
+
+                                    ,{
+                                        html: '<b class="menu-title">'+<?php echo json_encode(__('Server')) ?>+'</b>',
+                                        ref:'ttl_server',
+                                        border: false,
+                                        xtype: "panel"
+                                    },{
+                                        iconCls:'icon-keyboard',
+                                        ref:'btn_keymap_server',
+                                        text: <?php echo json_encode(__('Set keymap')) ?>,
+                                        disabled:true,
+//                                        hidden: true,
+                                        scope: this,
+                                        handler:function(btn,e){
+                                            this.setKeymap(btn,this.ctxNode);
+                                        }
+                                    },{
+                                        text: <?php echo json_encode(__('Set permissions')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('This will change permissions for this server')) ?>},
+                                        ref:'btn_permission_server',
+                                        disabled:false,
+                                        hidden: true,
+                                        scope:this,
+                                        iconCls: 'icon-lockedit',
+                                        handler:function(btn,e){
+                                            this.changePerms(btn,this.ctxNode);
+                                        }
+                                    }
                                 ];//end contextmenu items
 
-                        if(!this.menu){ // create context menu on first right click                                                        
+                        
+                        if(node.attributes.contextmenu){
+                            if(!this.menu){ // create context menu on first right click
+                                this.menu = new Ext.ux.TooltipMenu({
+                                    items: items
+                                }); //end this.menu
+                                this.menu.on('hide', this.onContextHide, this);
+                            }
+                            //end if create menu
 
-                            this.menu = new Ext.ux.TooltipMenu({
-                                items: items
-                            }); //end this.menu
+                            if(this.ctxNode){
+                                this.ctxNode.ui.removeClass('x-node-ctx');
+                                this.ctxNode = null;
+                            }
 
-                            this.menu.on('hide', this.onContextHide, this);
-                        } //end if create menu                                               
+                            this.ctxNode = node;
+                            this.ctxNode.ui.addClass('x-node-ctx');
 
-                        if(this.ctxNode){
-                            this.ctxNode.ui.removeClass('x-node-ctx');
-                            this.ctxNode = null;
-                        }
+    //                        if(!node.isLeaf()){ //open context menu only if node is not a leaf
+    //                            this.menu.items.get('load-node').setDisabled(node.isSelected());
+    //                            //this.menu.items.get('remove-node').setDisabled(node.id==0);
+    //                        }
 
-                        this.ctxNode = node;
-                        this.ctxNode.ui.addClass('x-node-ctx');
+                            var node_state_msg = <?php echo json_encode(__('VirtAgent should be running to enable this menu')) ?>;
 
-//                        if(!node.isLeaf()){ //open context menu only if node is not a leaf
-//                            this.menu.items.get('load-node').setDisabled(node.isSelected());
-//                            //this.menu.items.get('remove-node').setDisabled(node.id==0);
-//                        }
 
-                        var node_state_msg = <?php echo json_encode(__('VirtAgent should be running to enable this menu')) ?>;
+                            if(node.attributes.type == 'cluster'){
 
-                        if(node.attributes.type=='node')
-                        {
-                            this.menu.btn_remove.setDisabled(false);
-                            this.menu.btn_keymap.setDisabled(false);
-                            this.menu.btn_keymap.clearTooltip();
+                                //enable/disable cluster rename button (in the case of default cluster)
+                                if(node.text == 'Default' && node.id.toString().substring(0,1) == 'd'){
+                                    this.menu.btn_rename_cluster.setDisabled(true);
+                                }else{
+                                    this.menu.btn_rename_cluster.setDisabled(false);
+                                }
 
-                            if(node.attributes.state==0)
-                            {                                
+                                //enable cluster items
+                                this.menu.ttl_cluster.show();
+                                this.menu.btn_rename_cluster.show();
 
-                                this.menu.btn_authorize.setDisabled(true);
-                                this.menu.btn_authorize.setTooltip({text: node_state_msg});
+                                //enable node items
+                                this.menu.ttl_node.hide();
+                                this.menu.btn_remove.hide();
+                                if(this.menu.btn_permission)
+                                    this.menu.btn_permission.hide();
+                                this.menu.btn_hostname.hide();
+                                this.menu.btn_keymap.hide();
+                                this.menu.ttl_initialization.hide();
+                                this.menu.btn_authorize.hide();
+                                this.menu.btn_reinitialize.hide();
+                                this.menu.ttl_node.hide();
+                                this.menu.btn_loadnode.hide();
+                                this.menu.btn_listdomains.hide();
+                                if(this.menu.btn_connectivity)
+                                    this.menu.btn_connectivity.hide();
 
-                                this.menu.btn_reinitialize.setDisabled(true);
-                                this.menu.btn_reinitialize.setTooltip({text: node_state_msg});
+                                //hide server specific items
+                                this.menu.btn_keymap_server.hide();
+                                this.menu.ttl_server.hide();
+                                this.menu.btn_permission_server.hide();
 
+                                this.menu.btn_remove.setDisabled(false);
+                                this.menu.btn_keymap.setDisabled(false);
+                                this.menu.btn_keymap.clearTooltip();
+
+                            }else if(node.attributes.type=='node')
+                            {
+                                //hide cluster items
+                                this.menu.ttl_cluster.hide();
+                                this.menu.btn_rename_cluster.hide();
+                                
+                                //enable node items
+                                this.menu.ttl_node.show();
+                                this.menu.btn_remove.show();
+                                if(this.menu.btn_permission)
+                                    this.menu.btn_permission.show();
+                                this.menu.btn_hostname.show();
+                                this.menu.btn_keymap.show();
+                                this.menu.ttl_initialization.show();
+                                this.menu.btn_authorize.show();
+                                this.menu.btn_reinitialize.show();
+                                this.menu.ttl_node.show();
+                                this.menu.btn_loadnode.show();
+                                this.menu.btn_listdomains.show();
+
+                                //hide server specific items
+                                this.menu.btn_keymap_server.hide();
+                                this.menu.ttl_server.hide();
+                                this.menu.btn_permission_server.hide();
+
+                                this.menu.btn_remove.setDisabled(false);
+                                this.menu.btn_keymap.setDisabled(false);
+                                this.menu.btn_keymap.clearTooltip();
+
+                                if(node.attributes.state==0)
+                                {
+
+                                    this.menu.btn_authorize.setDisabled(true);
+                                    this.menu.btn_authorize.setTooltip({text: node_state_msg});
+
+                                    this.menu.btn_reinitialize.setDisabled(true);
+                                    this.menu.btn_reinitialize.setTooltip({text: node_state_msg});
+
+                                    this.menu.btn_hostname.setDisabled(true);
+                                    this.menu.btn_hostname.setTooltip({text: node_state_msg});
+
+
+                                    if(this.menu.btn_connectivity)
+                                    {
+                                        this.menu.btn_connectivity.setDisabled(true);
+                                        this.menu.btn_connectivity.setTooltip({text: node_state_msg});
+                                    }
+
+                                }else
+                                {
+
+                                    this.menu.btn_authorize.setDisabled(node.attributes.initialize==<?php echo json_encode(EtvaNode_VA::INITIALIZE_OK) ?>);
+                                    this.menu.btn_authorize.clearTooltip();
+
+                                    this.menu.btn_reinitialize.setDisabled(false);
+                                    this.menu.btn_reinitialize.setTooltip({text:<?php echo json_encode(__('Re-initialize')) ?>});
+
+                                    this.menu.btn_hostname.setDisabled(false);
+                                    this.menu.btn_hostname.clearTooltip();
+
+
+                                    if(this.menu.btn_connectivity){
+                                        if(node.attributes.initialize!=<?php echo json_encode(EtvaNode_VA::INITIALIZE_OK) ?>){
+                                            this.menu.btn_connectivity.setDisabled(true);
+                                            this.menu.btn_connectivity.setTooltip({text: <?php echo json_encode(__('Needs to be initialized')) ?>});
+                                        }
+                                        else{
+                                            this.menu.btn_connectivity.setDisabled(false);
+                                            this.menu.btn_connectivity.clearTooltip();
+                                        }
+                                        this.menu.btn_connectivity.show();
+                                    }
+                                }
+
+
+
+                            }else
+                            {
+                                //show server items
+                                this.menu.btn_keymap_server.show();
+                                this.menu.ttl_server.show();
+                                this.menu.btn_permission_server.show();
+
+                                //enable cluster items
+                                this.menu.ttl_cluster.hide();
+                                this.menu.btn_rename_cluster.hide();
+
+                                //hide node items
+                                this.menu.ttl_node.hide();
+                                this.menu.btn_remove.hide();
+                                if(this.menu.btn_permission)
+                                    this.menu.btn_permission.hide();
+                                this.menu.btn_hostname.hide();
+                                this.menu.btn_keymap.hide();
+                                this.menu.ttl_initialization.hide();
+                                this.menu.btn_authorize.hide();
+                                this.menu.btn_reinitialize.hide();
+                                this.menu.ttl_node.hide();
+                                this.menu.btn_loadnode.hide();
+                                this.menu.btn_listdomains.hide();
+
+//
+
+//                                this.menu.btn_connectivity.hide();
+
+
+                                this.menu.btn_remove.setDisabled(true);
                                 this.menu.btn_hostname.setDisabled(true);
-                                this.menu.btn_hostname.setTooltip({text: node_state_msg});
+                                this.menu.btn_hostname.clearTooltip();
+
+                                if(node.attributes.node_state==0)
+                                {
+                                    this.menu.btn_keymap.setDisabled(true);
+                                    this.menu.btn_keymap.setTooltip({text: node_state_msg});
+
+                                }else
+                                {
+                                    this.menu.btn_keymap.setDisabled(false);
+                                    this.menu.btn_keymap.clearTooltip();
+                                }
 
 
                                 if(this.menu.btn_connectivity)
                                 {
                                     this.menu.btn_connectivity.setDisabled(true);
-                                    this.menu.btn_connectivity.setTooltip({text: node_state_msg});
+                                    this.menu.btn_connectivity.clearTooltip();
+                                    this.menu.btn_connectivity.hide();
                                 }
 
-                            }else
-                            {
 
-                                this.menu.btn_authorize.setDisabled(node.attributes.initialize==<?php echo json_encode(EtvaNode_VA::INITIALIZE_OK) ?>);
-                                this.menu.btn_authorize.clearTooltip();
-
-                                this.menu.btn_reinitialize.setDisabled(false);
-                                this.menu.btn_reinitialize.setTooltip({text:<?php echo json_encode(__('Re-initialize')) ?>});
-
-                                this.menu.btn_hostname.setDisabled(false);
-                                this.menu.btn_hostname.clearTooltip();
-
-
-                                if(this.menu.btn_connectivity)
-                                    if(node.attributes.initialize!=<?php echo json_encode(EtvaNode_VA::INITIALIZE_OK) ?>)
-                                    {
-                                        this.menu.btn_connectivity.setDisabled(true);
-                                        this.menu.btn_connectivity.setTooltip({text: <?php echo json_encode(__('Needs to be initialized')) ?>});
-                                    }
-                                    else
-                                    {
-                                        this.menu.btn_connectivity.setDisabled(false);
-                                        this.menu.btn_connectivity.clearTooltip();
-                                    }
                             }
-                        
-                            
-                            
-                        }else
-                        {
-                            this.menu.btn_remove.setDisabled(true);
-                            this.menu.btn_hostname.setDisabled(true);
-                            this.menu.btn_hostname.clearTooltip();
 
-                            if(node.attributes.node_state==0)
-                            {
-                                this.menu.btn_keymap.setDisabled(true);
-                                this.menu.btn_keymap.setTooltip({text: node_state_msg});
-
-                            }else
-                            {
-                                this.menu.btn_keymap.setDisabled(false);
-                                this.menu.btn_keymap.clearTooltip();
-                            }
-                            
-
-                            if(this.menu.btn_connectivity)
-                            {
-                                this.menu.btn_connectivity.setDisabled(true);
-                                this.menu.btn_connectivity.clearTooltip();
-                            }
-                            
-
+                            if(node.attributes.type) this.menu.showAt(e.getXY());
                         }
-                        
-
-                        if(node.attributes.type) this.menu.showAt(e.getXY());
-
                     },
                     /*
                      * end onContextMenu
@@ -648,6 +1198,142 @@ include_partial('setting/Setting_VNC_keymapCombo');
                             this.win.on('validnode', this.addNode, this);
                         }
                         this.win.show(btn);
+                    },
+                    setClusterName: function(btn,node){
+                        var cluster_id = node.id;
+                        cluster_id = cluster_id.replace(/^d/,'');
+
+                        var title = String.format(<?php echo json_encode(__('Change {0} name')) ?>,node.attributes.text);
+//                        var hostnameForm = new View.HostName();
+
+                        var cluster_name_form = new Cluster.ChangeName();
+                        
+                        var window = new Ext.Window({
+                            title: title,
+                            autoHeight: true,
+                            width: 350,
+                            resizable: false,
+                            border:false,
+                            plain:true,
+                            modal: true,
+                            loadMask:true,
+                            defaultButton:cluster_name_form.getForm().findField('name'),
+                            items:cluster_name_form
+                            ,tools:[{
+                                id:'help',
+                                qtip: __('Help'),
+                                handler:function(){View.showHelp({anchorid:'help-left-panel-hostname',autoLoad:{ params:'mod=view'},
+                                title: <?php echo json_encode(__('Hostname Help')) ?>});}
+                            }]
+
+                        });
+
+
+                        cluster_name_form.on({
+                            'onCancel':function(){window.close();}
+                            ,'onSave':function(){window.close();
+
+                                this.getRootNode().reload(function(){
+                                    var centerElem = Ext.getCmp('view-main-panel').findById('view-center-panel-'+cluster_id);
+                                    if(centerElem && centerElem.isVisible())
+                                    {
+
+                                        this.selectNode(cluster_id);
+                                        centerElem.fireEvent('beforeshow');
+                                    }
+
+
+                                },this);
+
+                            }
+                            ,scope:this
+                        });
+
+                        window.on('show',function(){
+                            cluster_name_form.loadData(cluster_id);
+                        });
+
+                        window.show(btn.id);
+
+                    }
+                    ,changePerms: function(btn,node){
+
+                        var title = <?php echo json_encode(__('Set permissions')) ?>;
+
+//                        var url = <#?php echo json_encode(url_for('setting/jsonSetting'))?>;
+                        var isLeaf = false;
+                        var p_id;
+                        var p_level;
+                        var p_permtype;
+                        var msg = <?php echo json_encode(__('Set {0} permissions')) ?>;
+
+                        if(node.isLeaf()){
+                            isLeaf = true;
+                            title = String.format(msg, node.attributes.text);
+                            var sId = node.id;
+                            sId = sId.replace(/^s/,'');
+                            p_id = sId;
+                            p_level = 'server';
+                            p_permtype = 'op'
+//                            url = <#?php echo json_encode(url_for('server/jsonKeymap?id='))?>+sId;
+                        }else{
+                            p_id = node.id;
+                            p_level = 'node';
+                            p_permtype = 'admin';
+                        }
+
+                        //var keyMapForm = new View.KeyMap({url:url,isLeaf:isLeaf});
+                        var permsForm = new View.PermForm({id: p_id, level: p_level, permtype: p_permtype});
+                        var windowPerms = new Ext.Window({
+                            title: title,
+                            autoHeight: true,
+//                            height: 400,
+                            width: 500,
+                            resizable: false,
+                            border:false,
+                            plain:true,
+                            modal: true,
+                            loadMask:true,
+                            iconCls:'icon-lockedit',
+                            buttons:[
+                                {
+                                    text: __('Change'),
+                                    handler:function(rec){
+                                        permsForm.onSave(rec);
+                                        windowPerms.close();
+                                    }
+                                },
+                                {
+                                    text: __('Cancel'),
+                                    handler:function(){
+                                        windowPerms.close();
+                                    }
+                             }]
+                            , items:permsForm
+                            ,tools:[{
+                                id:'help',
+                                qtip: __('Help'),
+                                handler:function(){View.showHelp({anchorid:'help-left-panel-addperm',autoLoad:{ params:'mod=view'},
+                                title: <?php echo json_encode(__('Default keymap Help')) ?>});}
+                            }]
+                        });
+
+                        windowPerms.on('show',function(){
+                            permsForm.loadData();
+                        });
+
+                        windowPerms.show(btn.id);
+
+
+
+//                        windowPerms.on({'keymapSave':function(resp){
+//                            var response = Ext.decode(resp.responseText);
+//                            var msg = String.format(<#?php echo json_encode(__('Updated VNC keymap ({0})')) ?#>,node.attributes.text);
+//                            windowPerms.close();
+//                            Ext.ux.Logger.info(response['agent'],msg);
+//                            View.notify({html:msg});
+//                        }});
+
                     }
                     ,deleteNode: function(btn,node){                                                
 
@@ -897,20 +1583,83 @@ include_partial('setting/Setting_VNC_keymapCombo');
                         this.winSoap.show(btn);
                     },
                     selectNode: function(id){this.getNodeById(id).select();},
-                    reload:function(){
-                        this.getRootNode().reload();
+                    selectTreeNode: function(ctx){
+                        var expand_dcNode = this.getNodeById(ctx.dc_id);
+                        if(expand_dcNode && !expand_dcNode.expanded) expand_dcNode.expand();
+
+                        if( ctx.node_id ){
+                            var expand_node = this.getNodeById(ctx.node_id);
+                            if(expand_node && !expand_node.expanded) expand_node.expand();
+
+                            if( ctx.srv_id ){
+                                var expand_srv = this.getNodeById(ctx.srv_id);
+                                if(expand_srv && !expand_srv.expanded) expand_srv.select();
+                            } else {
+                                expand_node.select();
+                            }
+                        } else {
+                            expand_dcNode.select();
+                        }
                     },
-                    removeNode: function(id){                                                
-                        var node = this.getNodeById(id);                        
+                    expandNode: function(ctx){
+                        var expand_dcNode = this.getNodeById(ctx.dc_id);
+                        if(expand_dcNode && !expand_dcNode.expanded) expand_dcNode.expand();
+
+                        if( ctx.node_id ){
+                            var expand_node = this.getNodeById(ctx.node_id);
+                            if(expand_node && !expand_node.expanded) expand_node.expand();
+
+                            if( ctx.srv_id ){
+                                var expand_srv = this.getNodeById(ctx.srv_id);
+                                if(expand_srv && !expand_srv.expanded) expand_srv.expand();
+                            }
+                        }
+                    },
+                    getCtxNode: function(id){
+                        var ctx;
+
+                        var treeNode = this.getNodeById(id);
+                        if( treeNode ){
+                            ctx = new Object();
+                            if( treeNode.attributes.type == 'cluster' ){
+                                ctx.dc_id = treeNode.id;
+                            } else if( treeNode.attributes.type == 'node' ){
+                                ctx.node_id = treeNode.id;
+                                ctx.dc_id = treeNode.parentNode.id;
+                            } else if( treeNode.attributes.type == 'server' ){
+                                ctx.node_id = treeNode.parentNode.id;
+                                ctx.dc_id = treeNode.parentNode.parentNode.id;
+                                ctx.srv_id = treeNode.id;
+                            }
+                        }
+                        return ctx;
+                    },
+                    reload:function(attrs){
+                        var ctx;
+                        if( attrs )
+                            if( attrs.cluster_id )
+                                ctx = this.getCtxNode(attrs.cluster_id);
+                            else if( attrs.node_id )
+                                ctx = this.getCtxNode(attrs.node_id);
+                            else if( attrs.server_id )
+                                ctx = this.getCtxNode(attrs.server_id);
+                        if( ctx )
+                            this.getRootNode().reload(function(){
+                                                                if( attrs && attrs.select )
+                                                                    this.selectTreeNode(ctx);
+                                                                else 
+                                                                    this.expandNode(ctx);
+                                                        },this);
+                        else
+                            this.getRootNode().reload();
+                    },
+                    reloadExpandNode: function(id){
+                        var node = this.getNodeById(id);
                         var gotoNode = this.getRootNode();
                         if(node){                            
                             gotoNode = (node.isLeaf())? node.parentNode: this.getRootNode();                            
                             node.unselect();
-                            node.remove();
-                            //this.getSelectionModel().select(gotoNode);
-
                         }
-
                         this.getRootNode().reload(function(){
                             //gotoNode.select();                            
                             this.selectNode(gotoNode.id);
@@ -918,7 +1667,26 @@ include_partial('setting/Setting_VNC_keymapCombo');
                             if(!expand_node.expanded) expand_node.expand();
 
                         },this);
+                    },
+                    removeNode: function(id){
+                        var node_id;
+                        var node = this.getNodeById(id);                        
 
+                        if( node.attributes.type == 'server' )
+                            node_id = node.parentNode.id;
+
+                        if(node){
+                            node.unselect();
+                            node.remove();
+                        }
+                        if( node_id ){
+                            var ctx = this.getCtxNode( node_id );
+                            this.getRootNode().reload(function(){
+                                                                this.selectTreeNode(ctx);
+                                                        },this);
+                        } else {
+                            this.reload( );
+                        }
                     },
                     updateNode: function(attrs){
                         var exists = this.getNodeById(attrs.id);
@@ -934,8 +1702,9 @@ include_partial('setting/Setting_VNC_keymapCombo');
                     //updates node css
                     updateNodeCss: function(attrs,css_old, css_new){
                         
-                        var parent = this.getNodeById(attrs.parentNode);
-                        if(!parent.expanded) parent.expand();
+                        /*var ctx = this.getCtxNode(attrs.parentNode);
+                        if( ctx )
+                            this.expandNode(ctx);*/
 
                         var exists = this.getNodeById(attrs.node);
                                                 
@@ -948,38 +1717,12 @@ include_partial('setting/Setting_VNC_keymapCombo');
                     },                    
                     addNode : function(attrs){
                         
+                        var ctx = this.getCtxNode( attrs.parentNode );
+                        ctx.srv_id = attrs.id;
+
                         this.getRootNode().reload(function(){
-                            
-                            //var s = this.getSelectionModel().getSelectedNode();
-                            var appendTo = this.getNodeById(attrs.parentNode);
-                            if(!appendTo.expanded) appendTo.expand();
-
-                            var exists = this.getNodeById(attrs.id);
-
-                            if(exists){
-
-                            //   this.fireEvent('nodeselect', attrs);
-
-                                exists.select();
-                                exists.ui.highlight();
-                                return;
-                            }
-
-                            if(!attrs.leaf)
-                                Ext.apply(attrs, {
-                                    //  iconCls: 'node-icon',
-                                    // leaf:true,
-                                    //  cls:'node',
-                                    children: [],
-                                    expanded: true,
-                                    cls: 'x-tree-node-collapsed'});
-
-                            var node = new Ext.tree.AsyncTreeNode(attrs);
-                            appendTo.appendChild(node);
-                            node.select();
-                            return node;
-
-                        },this);
+                                                            this.selectTreeNode(ctx);
+                                                    },this);
                         
                     },
                     // prevent the default context menu when you miss the node
@@ -993,7 +1736,6 @@ include_partial('setting/Setting_VNC_keymapCombo');
                  * end Extend NodePanel
                  *
                  */
-
 
                 /*
                  *
@@ -1010,6 +1752,16 @@ include_partial('setting/Setting_VNC_keymapCombo');
                         "{0:capitalize}</div><span class='x-log-time'>{3:date('H:i:s')}</span>" +
                         "<span class='x-log-message'><b>{1}: </b>{2}</span></div>");
 
+                    var version_text = ''; //'<span style="color:#15428B; padding-left:3px; font-size:10px">';
+                    <?php if (sfConfig::get('config_version')): ?>;
+                        version_text += 'Ver. '+'<?php echo sfConfig::get('config_version'); ?>';
+                    <?php endif ?>
+                    
+                    <?php if (sfConfig::get('config_release')): ?>;
+                        version_text += ' Rel. '+'<?php echo sfConfig::get('config_release'); ?>';
+                    <?php endif ?>
+                    // version_text += '</span>';
+
                     return Ext.apply(new Ext.Panel({
                         region:'south',
                         // region:'center',
@@ -1022,7 +1774,15 @@ include_partial('setting/Setting_VNC_keymapCombo');
                         height: 90,
                         autoScroll: true
                         ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-bottom-panel-main',autoLoad:{ params:'mod=view'},title: <?php echo json_encode(__('Info panel Help')) ?>});}}]
-                        ,bbar:['->',{
+                        ,bbar:[{   
+                                    cls: 'version_box',
+                                    xtype: 'tbtext',
+                                    text: version_text
+//                                },
+//                                {
+//                                    html: version_text
+                                    
+                                },'->',{
                                 text: __('Clear'),
                                 handler: function() {
                                     Ext.ux.Logger.body.update('');
@@ -1122,80 +1882,103 @@ include_partial('setting/Setting_VNC_keymapCombo');
                 nodesPanel.on('click' ,function(node){if(!node.isLeaf()) node.expand();});
 
                 nodesPanel.on('nodeselect', function(node){
-                             
-                    var centerElem = mainPanel.findById('view-center-panel-'+node.id);
-                    var node_class = 'View.Main';
-                    var component = '';
-                    if(node.type=='server') node_class = 'Server.View';
-                    if(node.type=='node') node_class = 'Node.View';
-                    
-                    if(!centerElem)
-                    /*
-                     * create item component and add to mainPanel
-                     */
-                    {
-                        var item = {
-                                    url:node.url,
-                                    call: node_class,
-                                    callback:function(){
+                    if( node.type=='unassignednode'){
+                            var item = {
+                                            url: node.url,
+                                            call: 'Node.ViewUnassigned',
+                                            callback: function(){
+                                                var centerElem = mainPanel.add(
+                                                        {
+                                                            id: 'view-center-panel-unassigned'+node.cluster_id,
+                                                            title: <?php echo json_encode(__('Unassigned')) ?>,
+                                                            items: new Node.ViewUnassigned.Main({}),
+                                                            layout:'fit',
+                                                            bodyStyle:'padding:0px;',
+                                                            defaults:{border:false},
+                                                            scripts:true
+                                                });
 
-                                        if(node.type=='server'){
-
-                                            var treenode_ = nodesPanel.getNodeById(node.id);
-                                            var nid = (treenode_.isLeaf())? treenode_.parentNode: nodesPanel.getRootNode();
-                                            var sid = node.id.replace('s','');
-                                            var agent_tmpl = node.agent_tmpl;
-                                            var state = node.state;
-                                            component = new Server.View.Main({node_id:nid.id,server:{id:sid,agent_tmpl:agent_tmpl,state:state}});
-                                            
-                                        }else{
-
-                                            if(node.type=='node') component = new Node.View.Main({node_id:node.id});
-                                            else component = new View.Main();
-                                            
-                                        }
-
-                                        component.on('updateNodeCss',function(node_attrs,data){
-                                                                   
-                                                var css_ = View.getNodeCssState(data)                                            
-                                                Ext.getCmp('view-nodes-panel').updateNodeCss(node_attrs,css_.old_css,css_.new_css);
-                                            
-                                        });
-
-                                        centerElem = mainPanel.add(
-                                                {
-                                                    id: 'view-center-panel-'+node.id,
-                                                    title: node.text,                                                    
-                                                    items:component,
-                                                    layout:'fit',
-                                                    bodyStyle:'padding:0px;',
-                                                    defaults:{border:false},
-                                                    listeners:{
-                                                        'beforehide':function(){
-                                                            // Ext.TaskMgr.stopAll();
-                                                        }
-                                                        ,'beforeshow':function(){
-//                                           
-                                                            if(centerElem.rendered){
-                                                            for(var i = 0,limit = centerElem.items.length; i < limit; i++)
-                                                                centerElem.get(i).fireEvent('reload');
-                                                            }
-                                                        }
-                                                    },
-                                                    scripts:true
-                                        });
-
-                                        mainPanel.layout.setActiveItem(centerElem);                                        
-
-                                    }// end callback
-                        };// end item to process
+                                                mainPanel.layout.setActiveItem(centerElem);
+                                            }
+                                        };
+                            View.loadComponent(item);
+                    } else {
+                        var centerElem = mainPanel.findById('view-center-panel-'+node.id);
+                        var node_class = 'View.Main';
+                        var component = '';
+                        if(node.type=='server') node_class = 'Server.View';
+                        if(node.type=='node') node_class = 'Node.View';
                         
-                        View.loadComponent(item);
+    //                    if(!centerElem)
+    //                    /*
+    //                     * create item component and add to mainPanel
+    //                     */
+    //                    {
+                            var item = {
+                                        url:node.url,
+                                        call: node_class,
+                                        callback:function(){
 
-                    }//end if
-                    else{
-                        centerElem.setTitle(node.text);
-                        mainPanel.layout.setActiveItem(centerElem);
+                                            if(node.type=='server'){
+
+                                                var treenode_ = nodesPanel.getNodeById(node.id);
+                                                var nid = (treenode_.isLeaf())? treenode_.parentNode: nodesPanel.getRootNode();
+                                                var sid = node.id.replace('s','');
+                                                var agent_tmpl = node.agent_tmpl;
+                                                var state = node.state;
+                                                component = new Server.View.Main({node_id:nid.id,server:{id:sid,agent_tmpl:agent_tmpl,state:state, data:node}});
+                                                
+                                            }else{
+
+                                                if(node.type=='node') component = new Node.View.Main({node_id:node.id});
+                                                else component = new View.Main({aaa:node.id.replace('d','')});
+                                                
+                                            }
+
+                                            component.on( { 'updateNodeCss': function(node_attrs,data){
+                                                                    var css_ = View.getNodeCssState(data);
+                                                                    Ext.getCmp('view-nodes-panel').updateNodeCss(node_attrs,css_.old_css,css_.new_css);
+                                                            },
+                                                            'reloadTree': function(attrs){
+                                                                    Ext.getCmp('view-nodes-panel').reload(attrs);
+                                                                }
+                                                            });
+
+                                            centerElem = mainPanel.add(
+                                                    {
+                                                        id: 'view-center-panel-'+node.id,
+                                                        title: node.text,                                                    
+                                                        items:component,
+                                                        layout:'fit',
+                                                        bodyStyle:'padding:0px;',
+                                                        defaults:{border:false},
+                                                        listeners:{
+                                                            'beforehide':function(){
+                                                                // Ext.TaskMgr.stopAll();
+                                                            }
+                                                            ,'beforeshow':function(){
+    //                                           
+                                                                if(centerElem.rendered){
+                                                                for(var i = 0,limit = centerElem.items.length; i < limit; i++)
+                                                                    centerElem.get(i).fireEvent('reload');
+                                                                }
+                                                            }
+                                                        },
+                                                        scripts:true
+                                            });
+
+                                            mainPanel.layout.setActiveItem(centerElem);                                        
+
+                                        }// end callback
+                            };// end item to process
+                            
+                            View.loadComponent(item);
+
+    //                    }//end if
+    //                    else{
+    //                        centerElem.setTitle(node.text);
+    //                        mainPanel.layout.setActiveItem(centerElem);
+    //                    }
                     }
                     
                     
@@ -1379,12 +2162,12 @@ include_partial('setting/Setting_VNC_keymapCombo');
                     {
                         var html = oElement.dom.innerHTML;
                         Ext.get(target).update(html, true, function (){
-                            alert("Dynamic loading completed");
+                           // alert("Dynamic loading completed");
                         });
                     }
                     else
                     {
-                        alert("Failed to load Page. Please check the URL or try again later.");
+                        //alert("Failed to load Page. Please check the URL or try again later.");
                     }
                 }.createDelegate(null, [target], true));
             },
@@ -1483,7 +2266,7 @@ include_partial('setting/Setting_VNC_keymapCombo');
 
                     if(resp.responseText)
                         response = (Ext.util.JSON.decode(resp.responseText))['error'];
-                    else response = 'Erro';
+                    else response = <?php echo json_encode(__('Error')) ?>;
                     View.notify({html:response});
 
                 });
@@ -1491,7 +2274,10 @@ include_partial('setting/Setting_VNC_keymapCombo');
                 mgr.on('update',function(el,resp){
 
                     var agent = (Ext.util.JSON.decode(resp.responseText))['agent'];
-                    Ext.ux.Logger.info(agent, 'System check');
+                    var message = (Ext.util.JSON.decode(resp.responseText))['response'];
+                    if( !message )
+                        message = <?php echo json_encode(__('System check')) ?>;
+                    Ext.ux.Logger.info(agent, message);
 
                 });
 
@@ -1578,7 +2364,6 @@ include_partial('setting/Setting_VNC_keymapCombo');
             },
             //load webpage component once...
             loadComponent:function(item,e){                
-                
                 var class_load = item.call.split('.');
                 var evaluated = true;
                 var func_eval = [];
@@ -1724,7 +2509,7 @@ include_partial('setting/Setting_VNC_keymapCombo');
             border: false,
             listeners: {
                 'rowClick': function () {
-                    alert('cli');
+                    //alert('cli');
                     //do_buttons();
                 }
                 ,show:function(){ds.load();
@@ -2354,6 +3139,256 @@ include_partial('setting/Setting_VNC_keymapCombo');
 
 <?php endif; ?>
 
+    View.PermForm = Ext.extend(Ext.form.FormPanel, {
+        border:false
+//        ,height: 350
+        ,labelWidth:100
+        ,scope:this
+        ,labelAlign:'right'
+        ,initComponent:function() {
+
+            // MULTISELECT FIELDS
+            // users
+            var user_store
+                = new Ext.data.Store({
+                    proxy: new Ext.data.HttpProxy({
+                        url: <?php echo json_encode(url_for('sfGuardUser/JsonList')); ?>,
+                        method:'POST'}),
+                        reader: new Ext.data.JsonReader({
+                            root: 'data',
+                            fields:['Id','Username']})
+            });
+
+            this.users = new Ext.ux.Multiselect({
+                fieldLabel: <?php echo json_encode(__('Users')) ?>,
+                valueField:"Id",
+                displayField:"Username",
+                height:250,
+                name:'etva_permission_user_list',
+                allowBlank:true,
+                store:user_store
+            });
+
+            // Groups
+            var groups_store
+                    = new Ext.data.Store({
+                            proxy: new Ext.data.HttpProxy({
+                                url: <?php echo json_encode(url_for('sfGuardGroup/jsonList')); ?>,
+                                method:'POST'}),
+                                reader: new Ext.data.JsonReader({
+                                    root: 'data',
+                                    fields:['Id','Name']})
+            });
+
+            this.groups = new Ext.ux.Multiselect({
+                fieldLabel: <?php echo json_encode(__('Groups')) ?>,
+                valueField:"Id",
+                displayField:"Name",
+                height:250,
+                name:'etva_permission_group_list',
+                allowBlank:true,
+                store:groups_store
+            });
+
+            this.usrGrpStore = new Ext.data.JsonStore({
+                proxy: new Ext.data.HttpProxy({url: 'sfGuardPermission/JsonPermsWithGroupsUsers/action' }), //<php echo json_encode(url_for('sfGuardPermission/jsonGridWithGroups')) //'sfGuardPermission/JsonGridGroupsClustersVms ?>'
+                id: 'id',
+                totalProperty: 'total',
+                root: 'data',
+                    baseParams: {id: this.id, permtype: this.permtype, level: this.level},
+                fields: [
+                    {name:'id',type:'int'}
+                    ,'etva_permission_group_list'
+                    ,'etva_permission_user_list'
+                ]
+//                ,sortInfo: { field: 'name',
+//                ,direction: 'DESC' }
+                ,remoteSort: false
+            });
+
+//            usrGrpStore.on('beforeload', function(store){
+//                store.baseParams = {id: 1, type: 'op', level: 'server'};
+//            });
+
+            this.usrGrpStore.on({
+                'load':{
+                    fn: function(store, records, options){
+                        //store is loaded, now you can work with it's records, etc.
+//                        console.info('store load, arguments:', arguments);
+//                        console.info('Store count = ', store.getCount());
+
+                        var rec = this.usrGrpStore.getAt(0);
+
+                        this.getForm().loadRecord(rec);
+//                        this.fireEvent('rowdblclick',this,0);
+                        //createEdit.loadRecord(rec);
+                    },
+                    scope:this
+                }
+//                ,'loadexception':{
+//                    //consult the API for the proxy used for the actual arguments
+//                    fn: function(obj, options, response, e){
+//                        console.info('store loadexception, arguments:', arguments);
+//                        console.info('error = ', e);
+//                    },
+//                    scope:this
+//                }
+            });
+
+            //{id: p_id, level: p_level, permtype: p_permtype}
+            var perm_title = <?php echo json_encode(__('Select users and/or groups that must have permissions in this {0}.')) ?>;
+            if(this.level == 'server'){
+                perm_title = String.format(perm_title, <?php echo json_encode(__('server')) ?>);
+            }else{
+                perm_title = String.format(perm_title, this.level);
+            }
+            
+            var config = {
+                defaults:{
+                    border: false,
+                    frame : true
+                }
+                
+                ,items:[
+                    {
+                        xtype:'panel',
+//                        border: false,
+                        layout:'form',
+                        padding:10,
+                        items:[{
+                            html: perm_title
+                        }]
+                        
+                    },
+                    {
+                    layout:'column',
+                    style:'padding:10px;',
+                    height:270,
+                    layoutConfig: {fitHeight: true},
+                    items:[{
+                        columnWidth:.50,
+                        name:'etva_permission_user_list',
+                        layout: 'form',
+                        labelWidth:60,
+                        items: [this.users]
+                    },{
+                        columnWidth:.50,
+                        layout: 'form',
+                        name:'etva_permission_group_list',
+                        labelWidth:60,
+                        items: [this.groups]
+                    }]
+                }]
+            }
+
+            // apply config
+            Ext.apply(this, Ext.apply(this.initialConfig, config));
+
+            // call parent
+            View.PermForm.superclass.initComponent.apply(this, arguments);
+        }
+//        ,selectUserRow:function(var idx){
+//
+//
+//        }
+        ,loadData:function(){
+            this.groups.store.reload();
+            this.groups.store.on('load',function(){
+                this.users.store.reload();
+                this.users.store.on('load',function(){
+                    this.usrGrpStore.reload();
+                }, this);
+            }, this);   
+        }
+        ,onSave:function(rec){
+//            alert('onsave'+rec);
+            var allvals = this.getForm().getValues();
+            var groups = [];
+            var users = [];
+            var to_numbers = [];
+            var users_numbers = [];
+
+            var record = new Object();
+            record.data = new Object();
+            
+            if(allvals['etva_permission_group_list'])
+                groups = allvals['etva_permission_group_list'].split(',');
+
+            if(allvals['etva_permission_user_list'])
+                users = allvals['etva_permission_user_list'].split(',');
+
+            for(var i=0,len=groups.length; i<len;i++)
+                to_numbers.push(parseInt(groups[i]));
+
+            for(var i=0,len=users.length; i<len;i++)
+                users_numbers.push(parseInt(users[i]));
+
+//id: p_id, level: p_level, permtype: p_permtype
+
+            record.data['etva_permission_group_list'] = Ext.encode(to_numbers);
+            record.data['etva_permission_user_list'] = Ext.encode(users_numbers);
+            
+            record.data['id'] = this.id;
+            record.data['level'] = this.level;
+            record.data['permtype'] = this.permtype;
+           
+//            this.fireEvent('onSave',record);
+
+            //update record
+//            var store = permsGrid.getStore();
+
+            var conn = new Ext.data.Connection({
+                listeners:{
+                    // wait message.....
+                    beforerequest:function(){
+                        Ext.MessageBox.show({
+                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                            msg: <?php echo json_encode(__('Saving...')) ?>,
+                            width:300,
+                            wait:true,
+                            modal: false
+                        });
+                    },// on request complete hide message
+                    requestcomplete:function(){Ext.MessageBox.hide();}
+                    ,requestexception:function(c,r,o){
+                                            Ext.MessageBox.hide();
+                                            Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                }
+            });// end conn
+
+            conn.request({
+
+                url: <?php echo json_encode(url_for('sfGuardPermission/jsonUpdateSpecific')) ?>,
+//                url: 'sfGuardPermission/jsonUpdateSpecific',
+                scope:this,
+                params:record.data,
+                success: function(resp,opt) {
+                    this.loadData();
+                    var response = Ext.util.JSON.decode(resp.responseText);
+                    var response = Ext.decode(resp.responseText);
+                    Ext.ux.Logger.info(response['agent'],response['response']);
+                    View.notify({html:response['response']});
+//                    if(rec.data['id']==null) this.fireEvent('onAdd');
+                },
+                failure: function(resp,opt) {
+
+                    var response = Ext.util.JSON.decode(resp.responseText);
+                    Ext.ux.Logger.error(response['agent'],response['error']);
+
+                    Ext.Msg.show({
+//                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                        buttons: Ext.MessageBox.OK,
+                        msg: response['info'],
+                        icon: Ext.MessageBox.ERROR});
+
+                }
+            });//END Ajax request
+
+        }
+
+
+    });
+
 
     View.KeyMap = Ext.extend(Ext.form.FormPanel, {
 
@@ -2562,19 +3597,18 @@ include_partial('setting/Setting_VNC_keymapCombo');
 
         } // eo function onRender
         ,loadData:function(id){
-
-
             this.load({
                 url:<?php echo json_encode(url_for('node/jsonHostname')) ?>,
                 waitMsg: <?php echo json_encode(__('Please wait...')) ?>,
-                params:{id:id},
+                params:{
+                    id:id
+                },
                 success: function ( form, action ) {
                     var name = form.findField('name');
                     name.focus(true,20);
                     
                 },scope:this
             });
-
         }
         ,onSave:function(){
 
@@ -2652,7 +3686,7 @@ include_partial('setting/Setting_VNC_keymapCombo');
         var responseText = new Object();        
 
         if(response.responseText) responseText = Ext.util.JSON.decode(response.responseText);
-        if(!responseText['agent']) responseText['agent'] = 'ETVA';
+        if(!responseText['agent']) responseText['agent'] = '<?php echo sfConfig::get('config_acronym'); ?>';
         if(!responseText['error']) responseText['error'] = 'Error!';
         if(!responseText['info']) responseText['info'] = 'Error!';
 
@@ -2705,11 +3739,9 @@ include_partial('setting/Setting_VNC_keymapCombo');
 
             if(response.status==400){
                 
-                if(!responseText['info']) responseText['info'] = responseText['error'];
-
                 Ext.MessageBox.show({
                     title: String.format(<?php echo json_encode(__('Error {0}')) ?>,agent),
-                    msg: responseText['info'],
+                    msg: responseText['error'],
                     buttons: Ext.MessageBox.OK,
                     icon: Ext.MessageBox.ERROR
                 });
@@ -2727,7 +3759,7 @@ include_partial('setting/Setting_VNC_keymapCombo');
 </script>
 
 <div id="header">
-    <h1>Central Management - ETVA</h1>
+    <h1 class="<?php echo sfConfig::get('config_acronym'); ?>">Central Management - <?php echo sfConfig::get('config_acronym'); ?></h1>
     <div id="topBar"></div>
 </div>
 <div id="dynPageContainer"></div>

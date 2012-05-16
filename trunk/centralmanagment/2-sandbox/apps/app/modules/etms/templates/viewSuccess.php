@@ -51,7 +51,6 @@ ETMS.View = function(config) {
 
     this.on({
             'reload':function(){
-                alert('reload');
                 var active = this.getActiveTab();
                 //active.fireEvent('refresh');
             }

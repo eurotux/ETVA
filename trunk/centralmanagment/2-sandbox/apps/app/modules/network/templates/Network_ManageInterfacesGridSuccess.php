@@ -10,20 +10,35 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
         var mac_vlan_record = Ext.data.Record.create([{name: 'mac', type: 'string'},
                                                       {name: 'vlan'},{name:'intf_model'}]);
 
+        if(!this.level){
+            this.level = 'server';
+            this.treenode_id = this.server_id;
+        }else if(this.level == 'node'){
+            this.treenode_id = this.node_id;
+        }else if(this.level == 'server'){
+            this.treenode_id = this.server_id;
+
+
+        }else if(this.level == 'cluster'){      //changed from this.cluster
+            this.treenode_id = this.cluster_id;
+        }
+
 
         var storeVlansCombo = new Ext.data.JsonStore({
                                 root:'data'
                                 ,totalProperty:'total'
+                                ,baseParams:{id:this.treenode_id, level:this.level}
                                 ,fields:[
                                     {name:'id', type:'string'}
                                     ,{name:'name', type:'string'}]
                                 ,url:<?php echo json_encode(url_for('vlan/jsonList'))?>});
 
+
         var queryServer = {'server_id':this.server_id};
         // create the data store to retrieve network data
         var store_networks = new Ext.data.JsonStore({
                         proxy: new Ext.data.HttpProxy({url:<?php echo json_encode(url_for('network/jsonGridNoPager')); ?>}),
-                        baseParams: {'query': Ext.encode(queryServer)},
+                        baseParams: {'query': Ext.encode(queryServer), 'sort':'port', 'dir':'asc'},
                         totalProperty: 'total',
                         root: 'data',
                         fields: [
@@ -61,6 +76,17 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                 
         model_cb.getStore().filter('type',this.vm_type);
                 
+        var queryMacNotInUse = {'in_use':0};
+
+        var storeMacNoInUse = new Ext.data.JsonStore({
+                                    url:<?php echo json_encode(url_for('mac/jsonGridQueryAll'))?>,
+                                    baseParams: {'query': Ext.encode(queryMacNotInUse)},
+                                    totalProperty: 'total',
+                                    root: 'data',
+                                    fields: [{name:'mac',mapping:'Mac'}],
+                                    remoteSort: false
+                                });
+
         var mac_vlan_cm = new Ext.grid.ColumnModel([
             new Ext.grid.RowNumberer(),
             {
@@ -68,6 +94,32 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                 header: "MAC Address",
                 dataIndex: 'mac',
                 fixed:true,
+                editable: true,
+                renderer:function(value,meta,rec){
+                    if(!value){ return String.format('<b>{0}</b>',<?php echo json_encode(__('Select network...')) ?>);}
+                    else{ rec.commit(true); return value;}
+                },
+                editor: new Ext.form.ComboBox({
+                    //editable:true,
+                    typeAhead: true,
+                    selectOnFocus: true,
+                    triggerAction:'all',
+                    forceSelection:true,
+                    enableKeyEvents:true,
+                    displayField:'mac',
+                    lazyRender:true,
+                    listClass: 'x-combo-list-small',
+                    //allQuery: Ext.encode(queryMacNotInUse),     // default all query
+                    queryParam: 'mac',
+                    listeners: {
+                        select:{scope:this,fn:function(combo,record,index){
+                            var record_ = this.getSelectionModel().getSelected();                            
+                            record_.set('mac', record.data['mac']);
+
+                        }}
+                    },// end listeners
+                    store: storeMacNoInUse
+                }),
                 allowBlank: false,
                 width: 120,
                 renderer: function(val){return '<span ext:qtip="'+__('Drag and Drop to reorder')+'">' + val + '</span>';}
@@ -123,6 +175,7 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
 
         // hard coded - cannot be changed from outsid
         var config = {
+                scope:this,
                 store:store_networks,
               //  autoScroll: true,
                // layout:'fit',
@@ -236,9 +289,13 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                 ]
                 ,bbar:['->',
                     {text: <?php echo json_encode(__('MAC Pool Management')) ?>,
-                        url:'mac/createwin',
+                        url:'mac/createwin?sid='+this.server_id,
                         handler: View.clickHandler
-                    },'-',
+                        ,scope:this
+//                        params: {'cid': this.treenode_id}
+                    }
+                    <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
+                    ,'-',
                     {
                         text: <?php echo json_encode(__('Add network')) ?>,
                         iconCls: 'icon-add',
@@ -246,9 +303,24 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                         call:'Vlan.Create',
                         callback:function(item){
                             var grid = (item.ownerCt).ownerCt;
+//                            ,baseParams:{id:this.server_id, level:'server'}
 
-                            var win = new Vlan.Create({
+                            // get cluster id to manage networks
+                            var send_data = {'level':'server', 'id':grid.server_id};
+                            var conn = new Ext.data.Connection();// end conn
+
+                            conn.request({
+                                    url: <?php echo json_encode(url_for('cluster/jsonGetId'))?>,
+                                    params: send_data,
+                                    scope:this,
+                                    success: function(resp,opt) {
+
+                                        var response = Ext.util.JSON.decode(resp.responseText);
+                                        var txt = response['cluster_id'];
+
+                                        var win = new Vlan.Create({
                                                 title:item.text
+                                                ,cluster_id:txt
                                                 ,listeners:{
                                                     onVlanCancel:function(){
                                                         win.close();
@@ -260,10 +332,17 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                                                         win.close();
                                                     }
                                                 }});
-                            win.show();
+                                        win.show();
+
+                                    },
+                                    failure: function(resp,opt) {
+                                    }
+                                });// END Ajax request
+
                         },
                         handler:View.loadComponent
                     }// END Add button
+                    <?php endif; ?>
                   ]
 //                ,listeners:{
 //                    beforerender:function(){

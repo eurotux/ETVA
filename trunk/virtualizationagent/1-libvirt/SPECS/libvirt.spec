@@ -4,12 +4,19 @@
 # the generic RPC driver, and test driver and no libvirtd
 # Default to a full server + client build
 %define client_only        0
-%define rhel               5
+%{!?rhel:%define rhel   %(cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//')}
 
 # Now turn off server build in certain cases
 
 # RHEL-5 builds are client-only for s390, ppc
 %if 0%{?rhel} == 5
+%ifnarch i386 i586 i686 x86_64 ia64
+%define client_only        1
+%endif
+%endif
+
+# RHEL-6 builds are client-only for s390, ppc
+%if 0%{?rhel} == 6
 %ifnarch i386 i586 i686 x86_64 ia64
 %define client_only        1
 %endif
@@ -102,13 +109,11 @@
 %define with_lxc 0
 %endif
 
-# RHEL-6 has restricted QEMU to x86_64 only, stopped including Xen
-# on all archs. Other archs all have LXC available though
+# RHEL-6 has restricted QEMU to x86_64 only
 %if 0%{?rhel} >= 6
 %ifnarch x86_64
 %define with_qemu 0
 %endif
-%define with_xen 0
 %endif
 
 # If Xen isn't turned on, we shouldn't build the xen proxy either
@@ -191,7 +196,7 @@ Group: Development/Libraries
 Source: http://libvirt.org/sources/libvirt-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 URL: http://libvirt.org/
-BuildRequires: python-devel
+BuildRequires: python-devel redhat-release
 
 # The client side, i.e. shared libs and virsh are in a subpackage
 Requires: %{name}-client = %{version}-%{release}
@@ -366,10 +371,10 @@ BuildRequires: libssh2-devel
 BuildRequires: netcf-devel >= 0.1.4
 %endif
 %if %{with_esx}
-%if 0%{?rhel} == 5
-BuildRequires: curl-devel
-%else
+%if 0%{?rhel} == 6
 BuildRequires: libcurl-devel
+%else
+BuildRequires: curl-devel
 %endif
 %endif
 

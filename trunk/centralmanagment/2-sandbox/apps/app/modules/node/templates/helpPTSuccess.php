@@ -1,3 +1,4 @@
+<div class="help">
 <a id="help-vmachine-main"><h1>Opções para a gestão de servidores</h1></a>
 <p>Estão disponíveis as seguintes opções para a gestão de servidores virtuais</p>
 <ul>
@@ -14,7 +15,7 @@
 
 <a id="help_virtual_machine_add"><h1>Assistente de criação de servidor</h1></a>
 <p>O assistente de criação de servidor possibilita a criação de máquinas virtuais.
-É constituido pelas seguintes etapas:</p>
+É constituído pelas seguintes etapas:</p>
 
 <ul>
     <li><a href="#help-virtial-machine-name">Nome</a></li>
@@ -70,7 +71,7 @@ As opções do sistema operativo variam consoante a especificação do node:</p>
 <hr/>
 
 <a id="help-virtial-machine-storage"><h2>Armazenamento:</h2></a>
-<p>Nesta etapa define-se o número de processadores a usar.</p>
+<p>Nesta etapa define-se o tipo de armazenamento a usar.</p>
 
 <ul>
     <li>usar um logical volume/ficheiro já existente - <em>Logical volume existente</em></li>
@@ -82,7 +83,7 @@ As opções do sistema operativo variam consoante a especificação do node:</p>
 </ul>
 
 <p><b>Nota </b>Se o node não suportar <em>physical volumes</em> a opção Logical volume existente
-será desabilitada, uma vez que não é possivel criar <em>logical volumes</em>, mas
+será desabilitada, uma vez que não é possível criar <em>logical volumes</em>, mas
 sim apenas ficheiros.</p>
 
 <a href="#help_virtual_machine_add"><div>Início</div></a>
@@ -156,7 +157,7 @@ máquina virtual.</p>
 <hr/>
 
 <a id="help-vmachine-disks"><h2>Discos:</h2></a>
-<p>Adicionar/remover interfaces. É possível alterar o tipo de driver a usar (se a máquina virtual for HVM ou KVM).</p>
+<p>Adicionar/remover discos. É possível alterar o tipo de driver a usar (se a máquina virtual for HVM ou KVM).</p>
 <p><b>Nota: </b>O disco de boot da máquina é o disco que se encontra na primeira posição da tabela.</p>
 <a href="#help_vmachine_edit"><div>Início</div></a>
 <hr/>
@@ -194,8 +195,8 @@ virtuais.
 <p>
 Seleccionando um servidor e de seguida clicando em <em>Migrar servidor</em> é possível migrar uma máquina de um <em>node</em> para outro desde que partilhem o mesmo armazenamento. A migração de uma máquina virtual é efectuada no modo <em>offline</em>.
 </p>
-<p><b>Nota: </b>Esta opção só está disponível no modelo <em>ETVA Enterprise</em>.
+<p><b>Nota: </b>Esta opção só está disponível no modelo <em>ETVM</em>.
 </p>
 <a href="#help-vmachine-main"><div>Início</div></a>
 <hr/>
-
+</div>

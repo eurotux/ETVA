@@ -845,14 +845,10 @@ sub get_ipaddr {
     while(<F>){
         if( /inet (\S+)/ ){
             my $ipaddr = $1;
-            my ($ip,$n) = split(/\//,$ipaddr);
 
-            my $netmask = '255.255.255.255';
-            $netmask = '255.0.0.0'     if( $n == 8 );
-            $netmask = '255.255.0.0'   if( $n == 16 );
-            $netmask = '255.255.255.0' if( $n == 24 );
+            my ($ip,$netmask) = &get_netmask($ipaddr);
 
-            my $network = make_netaddr( $ip,$netmask );
+            my $network = &make_netaddr( $ip,$netmask );
         
             return ($ip,$netmask,$network,$gateway);
         } 
@@ -862,6 +858,28 @@ sub get_ipaddr {
     return;
 }
 
+sub get_netmask {
+    my ($ipaddr) = @_;
+    my ($ip,$n) = split(/\//,$ipaddr);
+
+    my @lmask = ();
+
+    my $c = $n;
+    while( $c > 0 ){
+        if( $c >= 8 ){
+            push(@lmask,255);   # 
+        } else {
+            # fill $c left bits
+            push(@lmask, ((0xff00>>$c)&0xff) );
+        }
+        $c -= 8;
+    }
+    while( scalar(@lmask) < 4 ){
+        push(@lmask,0); # put 0 in others
+    }
+    my $netmask = join('.',@lmask);
+    return ($ip,$netmask);
+}
 sub make_netaddr {
     my ($addr,$mask) = @_;
 
@@ -913,6 +931,134 @@ sub boot_chgipaddr {
         return retErr("_ERR_CHANGE_IPADDR_","Error change ip address");
     }
     return retOk("_OK_CHANGE_IPADDR_","Change ip address ok.");
+}
+
+=item addgateway
+
+add gateway to interface
+
+    my $OK = VirtAgent::Network->addgateway( if=>$if, gateway=>$gw );
+
+=cut
+
+sub boot_addgateway {
+    my $self = shift;
+    my ($if,$gw) = my %p = @_;
+    if( $p{'gw'} || $p{'if'} ){
+        $if = $p{'if'};
+        $gw = $p{'gw'};
+    }
+
+    my $cf_if = "$net_scripts_dir/ifcfg-$if";
+    if( -e "$cf_if" ){
+        open(R,"$cf_if");
+        my @l = <R>;
+        close(R);
+
+        # replace or add new line
+        if( !grep { s/^GATEWAY\s*=.*/GATEWAY=$gw/ } @l ){
+            push(@l, "GATEWAY=$gw\n");
+        }
+
+        open(W,">$cf_if");
+        print W @l;
+        close(W)
+    }
+
+    my $s = cmd_exec("/sbin/route","add","default","gw",$gw,"dev",$if);
+    unless( $s == 0 || $s == -1 ){
+        return retErr("_ERR_ADDGATEWAY_","Error add gateway to interface");
+    }
+    return retOk("_OK_ADDGATEWAY_","Add gateway to interface ok.");
+}
+
+sub addgateway {
+    my $self = shift;
+    my ($if,$gw) = my %p = @_;
+    if( $p{'gw'} || $p{'if'} ){
+        $gw = $p{'gw'};
+        $if= $p{'if'};
+    }
+
+    # load devices created
+    if( !%NetDevices ){
+        $self->loadnetinfo(1);
+    }
+
+    # if interface doenst exists!
+    if( $NetDevices{"$if"} ){
+        my %E = $self->boot_addgateway( $if, $gw );
+        unless( !isError(%E) ){
+            return wantarray() ? %E : \%E;
+        }
+        $self->loadnetinfo(1);
+        return retOk("_OK_ADDGATEWAY_","Add gateway to interface ok.","_RET_OBJ_",$NetDevices{"$if"});
+    } else {
+        return retErr("_ERR_ADDGATEWAY_","Interface doenst exists!");
+    }
+}
+
+=item delgateway
+
+del gateway from intrface
+
+    my $OK = VirtAgent::Network->delgateway( if=>$if, gw=>$gw );
+
+=cut
+
+sub boot_delgateway {
+    my $self = shift;
+    my ($if,$gw) = my %p = @_;
+    if( $p{'gw'} || $p{'if'} ){
+        $gw = $p{'gw'};
+        $if = $p{'if'}
+    }
+
+    my $cf_if = "$net_scripts_dir/ifcfg-$if";
+    if( -e "$cf_if" ){
+        open(R,"$cf_if");
+        my @l = <R>;
+        close(R);
+
+        # replace or add new line
+        @l = grep { !/^GATEWAY\s*=.*/ } @l;
+
+        open(W,">$cf_if");
+        print W @l;
+        close(W)
+    }
+
+    my $s = cmd_exec("/sbin/route","del","default","gw",$gw,"dev",$if);
+    unless( $s == 0 || $s == -1 ){
+        return retErr("_ERR_DELGATEWAY_","Error de gateway from interface.");
+    }
+    return retOk("_OK_DELGATEWAY_","Del gateway from this interface ok.");
+}
+
+sub delgateway {
+    my $self = shift;
+    my ($if,$gw) = my %p = @_;
+    if( $p{'gw'} || $p{'if'} ){
+        $gw = $p{'gw'};
+        $if= $p{'if'};
+    }
+
+    # load devices created
+    if( !%NetDevices ){
+        $self->loadnetinfo(1);
+    }
+
+    # if interface doenst exists!
+    if( $NetDevices{"$if"} ){
+        my %E = $self->boot_delgateway( $if, $gw );
+        unless( !isError(%E) ){
+            return wantarray() ? %E : \%E;
+        }
+        $self->loadnetinfo(1);
+        return retOk("_OK_DELGATEWAY_","Del gateway from tnterface ok.","_RET_OBJ_",$NetDevices{"$if"});
+    } else {
+        return retErr("_ERR_DELGATEWAY_","Interface doenst exists!");
+    }
 }
 
 sub save_boot_interface {
@@ -1100,7 +1246,7 @@ sub add_if_toscript {
     my $upconfig = <<__UPCONFIG__;
 #!/bin/sh
 
-/sbin/ifup $if
+/sbin/ifup $if >/dev/null 2>&1
 __UPCONFIG__
 
     my $downconfig = <<_DOWNCONFIG__;
@@ -1110,47 +1256,47 @@ _DOWNCONFIG__
 
     if( $p{'ipaddr'} && $p{'netmask'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/ifconfig $if $p{'ipaddr'} netmask $p{'netmask'} up
+/sbin/ifconfig $if $p{'ipaddr'} netmask $p{'netmask'} up >/dev/null 2>&1
 __UPCONFIG__
     } else {
         $upconfig .= <<__UPCONFIG__;
-/sbin/ifconfig $if $p{'ipaddr'} up
+/sbin/ifconfig $if $p{'ipaddr'} up >/dev/null 2>&1
 __UPCONFIG__
     }
 
     if( $p{'bridge'} ){
         $upconfig .= <<__UPCONFIG__;
-/usr/sbin/brctl addif $p{'bridge'} $if
+/usr/sbin/brctl addif $p{'bridge'} $if >/dev/null 2>&1
 __UPCONFIG__
 
         $downconfig .= <<_DOWNCONFIG__;
-/usr/sbin/brctl delif $p{'bridge'} $if
+/usr/sbin/brctl delif $p{'bridge'} $if >/dev/null 2>&1
 _DOWNCONFIG__
     }
 
     if( $p{'dhcp'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/dhclient $if
+/sbin/dhclient $if >/dev/null 2>&1
 __UPCONFIG__
 
         $downconfig .= <<_DOWNCONFIG__;
-killall /sbin/dhclient $if
+killall /sbin/dhclient >/dev/null 2>&1
 _DOWNCONFIG__
     }
 
     if( $p{'gateway'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/route add default gw $p{'gateway'} dev $if
+/sbin/route add default gw $p{'gateway'} dev $if >/dev/null 2>&1
 __UPCONFIG__
 
         $downconfig .= <<_DOWNCONFIG__;
-/sbin/route del default gw $p{'gateway'} dev $if
+/sbin/route del default gw $p{'gateway'} dev $if >/dev/null 2>&1
 _DOWNCONFIG__
     }
 
     $downconfig .= <<_DOWNCONFIG__;
-/sbin/ifdown $if
-/sbin/ifconfig $if down
+/sbin/ifdown $if >/dev/null 2>&1
+/sbin/ifconfig $if down >/dev/null 2>&1
 _DOWNCONFIG__
 
     $self->add_conf_toscript( 'if'=>$if,
@@ -1167,7 +1313,7 @@ sub add_br_toscript {
     my $upconfig = <<__UPCONFIG__;
 #!/bin/sh
 
-/usr/sbin/brctl addbr $br
+/usr/sbin/brctl addbr $br >/dev/null 2>&1
 __UPCONFIG__
 
     my $downconfig = <<_DOWNCONFIG__;
@@ -1183,51 +1329,55 @@ _DOWNCONFIG__
         
         my $stp = ( $p{'stp'} && ( $p{'stp'} ne 'off' ) )? "on": "off";
         $upconfig .= <<__UPCONFIG__;
-/usr/sbin/brctl stp $br $stp
+/usr/sbin/brctl stp $br $stp >/dev/null 2>&1
 __UPCONFIG__
     }
 
     if( defined($p{'fd'}) || defined($p{'delay'}) ){
         my $fd = $p{'fd'} || $p{'delay'}; 
         $upconfig .= <<__UPCONFIG__;
-/usr/sbin/brctl setfd $br $fd
+/usr/sbin/brctl setfd $br $fd >/dev/null 2>&1
 __UPCONFIG__
     }
 
     if( $p{'ipaddr'} && $p{'netmask'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/ifconfig $br $p{'ipaddr'} netmask $p{'netmask'} up
+/sbin/ifconfig $br $p{'ipaddr'} netmask $p{'netmask'} up >/dev/null 2>&1
 __UPCONFIG__
     } elsif( $p{'ipaddr'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/ifconfig $br $p{'ipaddr'} up
+/sbin/ifconfig $br $p{'ipaddr'} up >/dev/null 2>&1
+__UPCONFIG__
+    } else {
+        $upconfig .= <<__UPCONFIG__;
+/sbin/ifconfig $br up >/dev/null 2>&1
 __UPCONFIG__
     }
 
     if( $p{'dhcp'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/dhclient $br
+/sbin/dhclient $br >/dev/null 2>&1
 __UPCONFIG__
 
         $downconfig .= <<_DOWNCONFIG__;
-killall /sbin/dhclient $br
+killall /sbin/dhclient >/dev/null 2>&1
 _DOWNCONFIG__
     }
 
     if( $p{'gateway'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/route add default gw $p{'gateway'} dev $br
+/sbin/route add default gw $p{'gateway'} dev $br >/dev/null 2>&1
 __UPCONFIG__
 
         $downconfig .= <<_DOWNCONFIG__;
-/sbin/route del default gw $p{'gateway'} dev $br
+/sbin/route del default gw $p{'gateway'} dev $br >/dev/null 2>&1
 _DOWNCONFIG__
     }
 
     $downconfig .= <<_DOWNCONFIG__;
-/sbin/ifdown $br
-/sbin/ifconfig $br down
-/usr/sbin/brctl delbr $br
+/sbin/ifdown $br >/dev/null 2>&1
+/sbin/ifconfig $br down >/dev/null 2>&1
+/usr/sbin/brctl delbr $br >/dev/null 2>&1
 _DOWNCONFIG__
 
     $self->add_conf_toscript( 'if'=>$br,
@@ -1246,7 +1396,7 @@ sub add_vlan_toscript {
     my $upconfig = <<__UPCONFIG__;
 #!/bin/sh
 
-/sbin/vconfig add $if $id
+/sbin/vconfig add $if $id >/dev/null 2>&1
 __UPCONFIG__
 
     my $downconfig = <<_DOWNCONFIG__;
@@ -1256,48 +1406,52 @@ _DOWNCONFIG__
 
     if( $p{'ipaddr'} && $p{'netmask'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/ifconfig $vlan $p{'ipaddr'} netmask $p{'netmask'} up
+/sbin/ifconfig $vlan $p{'ipaddr'} netmask $p{'netmask'} up >/dev/null 2>&1
 __UPCONFIG__
     } elsif( $p{'ipaddr'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/ifconfig $vlan $p{'ipaddr'} up
+/sbin/ifconfig $vlan $p{'ipaddr'} up >/dev/null 2>&1
+__UPCONFIG__
+    } else {
+        $upconfig .= <<__UPCONFIG__;
+/sbin/ifconfig $vlan up >/dev/null 2>&1
 __UPCONFIG__
     }
 
     if( $p{'bridge'} ){
         $upconfig .= <<__UPCONFIG__;
-/usr/sbin/brctl addif $p{'bridge'} $vlan
+/usr/sbin/brctl addif $p{'bridge'} $vlan >/dev/null 2>&1
 __UPCONFIG__
 
         $downconfig .= <<_DOWNCONFIG__;
-/usr/sbin/brctl delif $p{'bridge'} $vlan
+/usr/sbin/brctl delif $p{'bridge'} $vlan >/dev/null 2>&1
 _DOWNCONFIG__
     }
 
     if( $p{'dhcp'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/dhclient $vlan
+/sbin/dhclient $vlan >/dev/null 2>&1
 __UPCONFIG__
 
         $downconfig .= <<_DOWNCONFIG__;
-killall /sbin/dhclient $vlan
+killall /sbin/dhclient >/dev/null 2>&1
 _DOWNCONFIG__
     }
 
     if( $p{'gateway'} ){
         $upconfig .= <<__UPCONFIG__;
-/sbin/route add default gw $p{'gateway'} dev $vlan
+/sbin/route add default gw $p{'gateway'} dev $vlan >/dev/null 2>&1
 __UPCONFIG__
 
         $downconfig .= <<_DOWNCONFIG__;
-/sbin/route del default gw $p{'gateway'} dev $vlan
+/sbin/route del default gw $p{'gateway'} dev $vlan >/dev/null 2>&1
 _DOWNCONFIG__
     }
 
     $downconfig .= <<_DOWNCONFIG__;
-/sbin/ifdown $vlan
-/sbin/ifconfig $vlan down
-/sbin/vconfig rem $vlan
+/sbin/ifdown $vlan >/dev/null 2>&1
+/sbin/ifconfig $vlan down >/dev/null 2>&1
+/sbin/vconfig rem $vlan >/dev/null 2>&1
 _DOWNCONFIG__
 
     $self->add_conf_toscript( 'if'=>$vlan,

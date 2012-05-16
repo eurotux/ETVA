@@ -10,6 +10,7 @@ ETFW.Main = Ext.extend(Ext.Panel,{
 
         var webmin_url = this.webmin_service['params']['url'];
 
+	var server_id = this.server_id;
         this.items = [{
                 layout:'vbox',
                 layoutConfig:{
@@ -26,6 +27,49 @@ ETFW.Main = Ext.extend(Ext.Panel,{
                             text:'Webmin',
                             handler: function(b,e){
                                 window.open(webmin_url,'_blank');
+                            }
+                        }
+                        ,{
+                            xtype:'button',
+                            text: <?php echo json_encode(__('Save configuration')) ?>,
+                            handler: function(b,e){
+				var conn = new Ext.data.Connection({
+				    listeners:{
+					// wait message.....
+					beforerequest:function(){
+					    Ext.MessageBox.show({
+						title: 'Please wait',
+						msg: <?php echo json_encode(__('Saving configuration...')) ?>,
+						width:300,
+						wait:true,
+						modal: false
+					    });
+					},// on request complete hide message
+					requestcomplete:function(){Ext.MessageBox.hide();}
+				    }
+				});// end conn
+				conn.request({
+				    url: <?php echo json_encode(url_for('etfw/jsonMainETFW'))?>,
+				    params:{sid:server_id,method:'etfw_save'},
+				    failure: function(resp,opt){
+                        if(!resp.responseText){
+                            Ext.ux.Logger.error(resp.statusText);
+                            return;
+                        }
+
+                        var response = Ext.util.JSON.decode(resp.responseText);
+                        Ext.MessageBox.alert('Error Message', response['info']);
+                        Ext.ux.Logger.error(response['error']);
+				    },
+				    // everything ok...
+				    success: function(resp,opt){
+
+                        var msg = <?php echo json_encode(__('ETFW save configuration successfully')) ?>;
+                        Ext.ux.Logger.info(msg);
+                        View.notify({html:msg});
+
+				    },scope:this
+				});// END Ajax request
                             }
                         }
                 ]

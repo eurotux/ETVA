@@ -43,8 +43,8 @@ Vlan.CreateForm = Ext.extend(Ext.form.FormPanel,{
                         invalidText : <?php echo json_encode(__(EtvaVlanPeer::_ERR_NAME_)) ?>,
                         allowBlank : false,
                         validator  : function(v){
-                            var t = /^((?!vlan|eth|bond)[a-zA-Z0-9_]+)$/;
-                            return t.test(v);
+                            var t = <?php echo EtvaVlanPeer::_REGEXP_INVALID_NAME_; ?>;
+                            return !t.test(v);
                         }
                     },
                     {
@@ -129,13 +129,16 @@ Vlan.CreateForm = Ext.extend(Ext.form.FormPanel,{
     }
     ,submit:function(){
 
+//        console.log(this);
         if(this.form.isValid()) {
 
             var alldata = this.form.getValues();
             var name = alldata['vlan_name'];
             var vlan_id = alldata['vlan_id'];
             var vlan_tagged = this.getForm().findField('vlan_tagged').getValue();
-            var send_data = {'name':name};
+
+
+            var send_data = {'name':name, 'cluster_id':this.cluster_id};
 
             if(vlan_tagged){
                 send_data['vlan_tagged'] = 1;
@@ -258,12 +261,12 @@ Vlan.Create = Ext.extend(Ext.Window,{
     layout:'fit',
     border:false,
     defaults:{autoScroll: true},
-    iconCls:'icon-window',    
-    initComponent:function(){
-
-        this.items = new Vlan.CreateForm();
+    iconCls:'icon-window'
+    ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-vlan-manage-add',autoLoad:{ params:'mod=vlan'},title: <?php echo json_encode(__('Manage network interfaces Help')) ?>});}}]
+    ,initComponent:function(){
+        //alert("vlan create : "+this.cluster_id);
+        this.items = new Vlan.CreateForm({cluster_id:this.cluster_id});
         this.defaultButton = this.items.getForm().findField('vlan_name');
-
         Vlan.Create.superclass.initComponent.apply(this, arguments);
 
     }

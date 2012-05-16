@@ -119,6 +119,32 @@ class etfwActions extends sfActions
 
     }
 
+    public function executeJsonMainETFW( sfWebRequest $request )
+    {
+        $etva_server = EtvaServerPeer::retrieveByPK($request->getParameter('sid'));
+
+        $method = $request->getParameter('method');
+        $mode = $request->getParameter('mode');
+        $params = json_decode($request->getParameter('params'),true);
+
+        if(!$params) $params = array();
+
+	$ret = $this->ETFW_main($etva_server, $method, $params, $mode);
+
+	if($ret['success'])
+            $result = json_encode($ret);
+        else
+            $result = $this->setJsonError($ret);
+
+	$result = array();
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json; charset=utf-8');
+        $this->getResponse()->setHttpHeader("X-JSON", '()');
+
+        return $this->renderText($result);
+
+    }
+
     /*
      * ETFW network dispatcher...
      */
@@ -1035,6 +1061,9 @@ class etfwActions extends sfActions
                 case 'del_pool' :
                 case 'del_leases' :
                 case 'del_declarations' :
+                case 'apply_config' :
+                case 'start_service' :
+                case 'stop_service' :
                 case 'save_configfile_content':
                                 $return = array('success' => true);
                                 break;
@@ -1427,7 +1456,46 @@ class etfwActions extends sfActions
         }
     }
 
+    public function ETFW_main(EtvaServer $etva_server, $method, $params,$mode)
+    {
 
+        // prepare soap info....
+        $initial_params = array(
+                        'dispatcher'=>'ETFW'
+        );
+
+        $call_params = array_merge($initial_params,$params);
+
+        // send soap request
+        $response = $etva_server->soapSend($method,$call_params);        
+
+        // if soap response is ok
+        if($response['success']){
+            $response_decoded = (array) $response['response'];
+
+            if($mode) $method = $mode;
+
+            switch($method){
+                    case 'etfw_save':
+                                $return = $response;
+                                break;
+                    default:
+                                $return = array('success' => false,
+                                                'error'=>'No action \''.$method.'\' defined yet',
+                                                'info'=>'No action \''.$method.'\' implemented yet');
+            }
+            return $return;
+
+        }else{
+
+            $error_details = $response['info'];
+            $error_details = nl2br($error_details);
+            $error = $response['error'];
+
+            $result = array('success'=>false,'error'=>$error,'info'=>$error_details,'faultcode'=>$response['faultcode']);
+            return $result;
+        }
+    }
 
     public function validateFields($tmpl,$action,$params){
 

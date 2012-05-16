@@ -14,11 +14,14 @@ View.Networks.Main = function(config) {
 
     Ext.apply(this,config);
 
-    var interfaces_grid = new Network.InterfacesGrid();
-    var vlan_grid = new Vlan.Grid();
+    var interfaces_grid = new Network.InterfacesGrid({cluster_id: this.clusterId});
+//    alert("new vlan grid"+this.clusterId);
+    var vlan_grid = new Vlan.Grid({clusterId:this.clusterId});
 
     vlan_grid.on({'rowmousedown':function(grid,rowIndex,e){
+                            //alert('mousedown');
                             var rec = grid.store.getAt(rowIndex);
+                            console.log(rec);
                             if(grid.getSelectionModel().isSelected(rowIndex)){
                                 grid.getSelectionModel().clearSelections();
                                 interfaces_grid.load(null);
@@ -34,7 +37,15 @@ View.Networks.Main = function(config) {
                  }
     });
 
-        
+    vlan_grid.store.on({'load': function(store, records, options){
+
+            // load interfaces from first record
+            vlan_grid.getSelectionModel().selectRow(0);
+            vlan_grid.fireEvent('rowclick', vlan_grid, 0);
+            var rec = vlan_grid.store.getAt(0);
+            interfaces_grid.load(rec);
+        }
+    });
      
     View.Networks.Main.superclass.constructor.call(this, {
         // passed arguments:
@@ -56,6 +67,7 @@ View.Networks.Main = function(config) {
                     layout:'fit',
                     items:interfaces_grid,
                     cmargins: '5 0 0 0'
+                    ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-network-list-main',autoLoad:{ params:'mod=network'},title: <?php echo json_encode(__('Manage network interfaces Help')) ?>});}}]
                     ,listeners:{
                         'reload': function(){this.items.get(0).reload();}
                     }

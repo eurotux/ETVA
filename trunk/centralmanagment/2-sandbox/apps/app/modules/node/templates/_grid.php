@@ -88,6 +88,12 @@ Ext.namespace('Node');
     });
 
 
+//    this.changeAAA = function(id){
+//        this.aaa = id;
+//        alert(this.aaa);
+//    }
+
+
     var bpaging = new Ext.PagingToolbar({
             store: store,
             displayInfo:true,
@@ -99,167 +105,166 @@ Ext.namespace('Node');
             
 
 
-    // create the editor grid
-    var nodeGrid = new Ext.grid.EditorGridPanel({
-        store: store,
-        cm: cm,
-        border: false,
-        loadMask: {msg: <?php echo json_encode(__('Retrieving data...')) ?>},
-        viewConfig:{
-            emptyText: __('Empty!'),  //  emptyText Message
-            forceFit:true
-        },
-        layout:'fit',        
-        autoScroll:true,
-        title: grid_title,
-        stripeRows:true,
-        clicksToEdit:1,
-        plugins:expander,
-//        tbar: [
-//              {
-//            text: 'Add node',
-//            iconCls: 'icon-add',
-//            handler: function() {
-//                var insert_model = <?php // echo json_encode($insert_model['db']); ?>;
-//
-//                var conn = new Ext.data.Connection();
-//                conn.request({
-//                    url: 'node/jsonCreate',
-//                    params: insert_model,
-//                    title: insert_model[<?php // echo $insert_model['title']; ?>],
-//                    scope: this,
-//                    success: function(resp,options) {
-//                        var insert_id = Ext.util.JSON.decode(resp.responseText).insert_id;
-//                        var title = options.title;
-//
-////                        ds_model_insert[store_id] = insert_id;
-////                        nodeGrid.getStore().insert(0,
-////                            new ds_model(ds_model_insert,insert_id));
-////                        nodeGrid.startEditing(0,1);
-//                          nodesPanel.addNode({id: insert_id,text: title,url: 'node/view?id='+insert_id});
-////                        nodesPanel.fireEvent('addNode', {
-////                            id: insert_id,
-////                            text: title,
-////                            url: 'node/view?id='+insert_id});
-//                    },
-//                    failure: function(resp,opt) {
-//                        Ext.Msg.alert('Error','Unable to add node');
-//                    }
-//                }); // END Ajax request
-//            }// END Add handler
-//           }// END Add button
-//           ,
-//           {
-//            text: <?php //echo json_encode(__('Remove Node'))?>,
-//            iconCls: 'icon-remove',
-//            hidden:true,
-//            tooltip: <?php //echo json_encode(__('Disabled in this version')) ?>,
-//            //cls: 'x-btn-text-icon',
-//            handler: function() {
-//                var sm = nodeGrid.getSelectionModel();
-//                var sel = sm.getSelected();
-//                if (sm.hasSelection()){
-//                    Ext.Msg.show({
-//                        title: <?php //echo json_encode(__('Remove Node'))?>,
-//                        buttons: Ext.MessageBox.YESNOCANCEL,
-//                        msg: String.format(<?php //echo json_encode(__('Remove Node {0} ?')) ?>,sel.data.Name),
-//                        fn: function(btn){
-//                            if (btn == 'yess'){
-//                                var conn = new Ext.data.Connection();
-//                                conn.request({
-//                                    url: 'node/jsonDelete',
-//                                    params: {
-//                                        'sf_method':'delete',
-//                                        id: sel.id
-//                                    },
-//                                    success: function(resp,opt) {
-//                                        nodeGrid.getStore().remove(sel);
-//                                        nodesPanel.removeNode(sel.id);
-//                                        //nodes.fireEvent('removeNode',sel.id);
-//
-//                                    },
-//                                    failure: function(resp,opt) {
-//                                        Ext.Msg.alert(<?php //echo json_encode(__('Error!')) ?>, <?php //echo json_encode(__('Unable to delete node!')) ?>);
-//                                    }
-//                                });// END Ajax request
-//                            }//END button==yes
-//                        }// END fn
-//                    }); //END Msg.show
-//                };//END if
-//            }//END handler Remove
-//           }// END Remove button
-//    ],// END tbar
-    bbar : bpaging,
-  //  bbar : new Ext.PagingToolbar({
-    //        store: store,
-      //      displayInfo:true,
-        //    pageSize:10
-          //  ,
-         //   plugins:new Ext.ux.Andrie.pPageSize({comboCfg: {width: 50}})
-   //  }),
-    sm: new Ext.grid.RowSelectionModel({
-            singleSelect: true,
-            moveEditorOnEnter:false
+        // create the editor grid
+        var nodeGrid = new Ext.grid.EditorGridPanel({
+            store: store,
+            cm: cm,
+            border: false,
+            loadMask: {msg: <?php echo json_encode(__('Retrieving data...')) ?>},
+            viewConfig:{
+                emptyText: __('Empty!'),  //  emptyText Message
+                forceFit:true
+            },
+            layout:'fit',
+            autoScroll:true,
+            title: grid_title,
+            stripeRows:true,
+            clicksToEdit:1,
+            plugins:expander,
+    //        tbar: [
+    //              {
+    //            text: 'Add node',
+    //            iconCls: 'icon-add',
+    //            handler: function() {
+    //                var insert_model = <?php // echo json_encode($insert_model['db']); ?>;
+    //
+    //                var conn = new Ext.data.Connection();
+    //                conn.request({
+    //                    url: 'node/jsonCreate',
+    //                    params: insert_model,
+    //                    title: insert_model[<?php // echo $insert_model['title']; ?>],
+    //                    scope: this,
+    //                    success: function(resp,options) {
+    //                        var insert_id = Ext.util.JSON.decode(resp.responseText).insert_id;
+    //                        var title = options.title;
+    //
+    ////                        ds_model_insert[store_id] = insert_id;
+    ////                        nodeGrid.getStore().insert(0,
+    ////                            new ds_model(ds_model_insert,insert_id));
+    ////                        nodeGrid.startEditing(0,1);
+    //                          nodesPanel.addNode({id: insert_id,text: title,url: 'node/view?id='+insert_id});
+    ////                        nodesPanel.fireEvent('addNode', {
+    ////                            id: insert_id,
+    ////                            text: title,
+    ////                            url: 'node/view?id='+insert_id});
+    //                    },
+    //                    failure: function(resp,opt) {
+    //                        Ext.Msg.alert('Error','Unable to add node');
+    //                    }
+    //                }); // END Ajax request
+    //            }// END Add handler
+    //           }// END Add button
+    //           ,
+    //           {
+    //            text: <?php //echo json_encode(__('Remove Node'))?>,
+    //            iconCls: 'icon-remove',
+    //            hidden:true,
+    //            tooltip: <?php //echo json_encode(__('Disabled in this version')) ?>,
+    //            //cls: 'x-btn-text-icon',
+    //            handler: function() {
+    //                var sm = nodeGrid.getSelectionModel();
+    //                var sel = sm.getSelected();
+    //                if (sm.hasSelection()){
+    //                    Ext.Msg.show({
+    //                        title: <?php //echo json_encode(__('Remove Node'))?>,
+    //                        buttons: Ext.MessageBox.YESNOCANCEL,
+    //                        msg: String.format(<?php //echo json_encode(__('Remove Node {0} ?')) ?>,sel.data.Name),
+    //                        fn: function(btn){
+    //                            if (btn == 'yess'){
+    //                                var conn = new Ext.data.Connection();
+    //                                conn.request({
+    //                                    url: 'node/jsonDelete',
+    //                                    params: {
+    //                                        'sf_method':'delete',
+    //                                        id: sel.id
+    //                                    },
+    //                                    success: function(resp,opt) {
+    //                                        nodeGrid.getStore().remove(sel);
+    //                                        nodesPanel.removeNode(sel.id);
+    //                                        //nodes.fireEvent('removeNode',sel.id);
+    //
+    //                                    },
+    //                                    failure: function(resp,opt) {
+    //                                        Ext.Msg.alert(<?php //echo json_encode(__('Error!')) ?>, <?php //echo json_encode(__('Unable to delete node!')) ?>);
+    //                                    }
+    //                                });// END Ajax request
+    //                            }//END button==yes
+    //                        }// END fn
+    //                    }); //END Msg.show
+    //                };//END if
+    //            }//END handler Remove
+    //           }// END Remove button
+    //    ],// END tbar
+        bbar : bpaging,
+      //  bbar : new Ext.PagingToolbar({
+        //        store: store,
+          //      displayInfo:true,
+            //    pageSize:10
+              //  ,
+             //   plugins:new Ext.ux.Andrie.pPageSize({comboCfg: {width: 50}})
+       //  }),
+        sm: new Ext.grid.RowSelectionModel({
+                singleSelect: true,
+                moveEditorOnEnter:false
 
-    }),
-    listeners: {
-            afteredit: function(e){
-                var conn = new Ext.data.Connection();
-                conn.request({
-                    url: 'node/jsonUpdate',
-                    params: {
-                        action: 'update',
-                        id: e.record.id,
-                        field: e.field,
-                        value: e.value
-                    },
-                    success: function(resp,opt) {
+        }),
+        listeners: {
+                afteredit: function(e){
+                    var conn = new Ext.data.Connection();
+                    conn.request({
+                        url: 'node/jsonUpdate',
+                        params: {
+                            action: 'update',
+                            id: e.record.id,
+                            field: e.field,
+                            value: e.value
+                        },
+                        success: function(resp,opt) {
 
-                        if(e.field=='Name'){
+                            if(e.field=='Name'){
 
-                            var currentNode = nodesPanel.getSelectionModel().getSelectedNode();
-                            var updateNodeId = currentNode.id;
+                                var currentNode = nodesPanel.getSelectionModel().getSelectedNode();
+                                var updateNodeId = currentNode.id;
 
-                            if(currentNode.id==0){ //root Node
-                                updateNodeId = e.record.id;
-                            }else if(currentNode.isLeaf()){
-                                updateNodeId = 's'+e.record.id;
+                                if(currentNode.id==0){ //root Node
+                                    updateNodeId = e.record.id;
+                                }else if(currentNode.isLeaf()){
+                                    updateNodeId = 's'+e.record.id;
+                                }
+
+
+                                nodesPanel.updateNode({
+                                id: updateNodeId,
+                                text: e.value});
                             }
 
-
-                            nodesPanel.updateNode({
-                            id: updateNodeId,
-                            text: e.value});
+                            var colCount = nodeGrid.colModel.getColumnCount();
+                            e.record.commit();
+                            if(e.column < (colCount - 1))
+                                nodeGrid.startEditing(e.row,e.column+1);
+                        },
+                        failure: function(resp,opt) {
+                            Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Could not save changes!')) ?>);
+                            //e.record.reject();
                         }
-
-                        var colCount = nodeGrid.colModel.getColumnCount();
-                        e.record.commit();
-                        if(e.column < (colCount - 1))
-                            nodeGrid.startEditing(e.row,e.column+1);
-                    },
-                    failure: function(resp,opt) {
-                        Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Could not save changes!')) ?>);
-                        //e.record.reject();
-                    }
-                });//END Ajax request
-            }//END afteredit
+                    });//END Ajax request
+                }//END afteredit
 
 
 
-    }
-});//END nodeGrid
+        }
+    });//END nodeGrid
  
- nodeGrid.on({
-    activate:{scope:this,fn:function() {
-    
-        if(this.type=='info') store.load.defer(100,store);
-        else store.load.defer(100,store,[{params:{start:0, limit:10}}]);
-    }}
- });
- 
- return nodeGrid;
-     }//Fim init
+     nodeGrid.on({
+        activate:{scope:this,fn:function() {
 
+            if(this.type=='info') store.load.defer(100,store);
+            else store.load.defer(100,store,[{params:{start:0, limit:10, id:this.aaa}}]);
+        }}
+     });
+ 
+        return nodeGrid;
+    }//Fim init    
 }
   }();
 

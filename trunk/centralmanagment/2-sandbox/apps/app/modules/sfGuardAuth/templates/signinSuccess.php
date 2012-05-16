@@ -126,7 +126,7 @@ Ext.namespace('Login');
          * Place where the login Form will be placed
          */
         loginWindow = new Ext.Window({
-            title: 'ETVA - Central Management',
+            title: '<?php echo sfConfig::get('config_acronym'); ?> - Central Management', //'ETVA - Central Management',
             width: 350,
             height:200,
             layout: 'fit',
@@ -246,5 +246,6 @@ Ext.namespace('Login');
   }();
 Ext.onReady(Login.init, Login, true);
 </script>
-<div class="header-login"></div>
+<div class="header-login <?php echo sfConfig::get('config_acronym'); ?>">
+</div>
 <div class="footer-login"></div>

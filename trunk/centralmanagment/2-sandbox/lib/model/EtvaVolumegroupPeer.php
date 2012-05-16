@@ -32,6 +32,9 @@ class EtvaVolumegroupPeer extends BaseEtvaVolumegroupPeer
 
   const _ERR_INCONSISTENT_ = 'Shared volume groups info reported inconsistent. %info%';
 
+  const _ERR_INIT_OTHER_CLUSTER_ = 'Node has some volume group that exists on cluster %name%.';
+
+
     public static function retrieveByVg($name, Criteria $criteria = null)
   {
     if(is_null($criteria )) $criteria = new Criteria();

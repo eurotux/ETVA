@@ -4,6 +4,14 @@
   <file source-language="EN" target-language="pt" datatype="plaintext" original="messages" date="2010-08-17T11:55:18Z" product-name="messages">
     <header/>
     <body>
+      <trans-unit id="search">
+        <source>Search</source>
+        <target>Pesquisar</target>
+      </trans-unit>
+      <trans-unit id="enter_search">
+        <source>Press enter to search</source>
+        <target>Pressione enter para pesquisar</target>
+      </trans-unit>
       <trans-unit id="modules">
         <source>Modules</source>
         <target>Módulos</target>
@@ -118,9 +126,19 @@
         <source>System preferences</source>
         <target>Preferências</target>
       </trans-unit>
+      <trans-unit id="change_default_preferences">
+        <source>Change default system preferences</source>
+        <target>Alterar as definições gerais do sistema</target>
+      </trans-unit>
+      <trans-unit id="change_cm_addr">
+        <source>Some nodes reported down. If you proceed, the node(s) connection settings to CM will be outdated. Remember to verify node(s) connectivity to Central Management</source>
+        <target>Não é possível comunicar com alguns dos nodes. Se continuar com a operação as configurações não serão propagadas. Verifique a comunicação entre os nodes e o Central Management</target>
+      </trans-unit>
+
+
       <trans-unit id="welcome_msg">
         <source>Welcome. Choose from left</source>
-        <target>Bem-vindo. Seleccione a partir do painel esquerdo</target>
+        <target>Bem-vindo. Selecione a partir do painel esquerdo</target>
       </trans-unit>
       <trans-unit id="remove_node_question">
         <source>Remove node {0} ?</source>
@@ -259,6 +277,11 @@
         <source>Unable to remove permission</source>
         <target>Não foi possível remover a permissão</target>
       </trans-unit>
+      <trans-unit id="permissions_added">
+        <source>User/groups permissions edited successfully</source>
+        <target>Permissões alteradas com sucesso (utilizadores/grupos)</target>
+      </trans-unit>
+
       <trans-unit id="add_group">
         <source>Add group</source>
         <target>Adicionar grupo</target>
@@ -383,15 +406,131 @@
         <source>Please provide correct email address</source>
         <target>P.f. introduza um endereço de email válido</target>
       </trans-unit>
-
-
+      <trans-unit id="type">
+        <source>Type</source>
+        <target>Tipo</target>
+      </trans-unit>
+      <trans-unit id="clusters">
+        <source>Clusters</source>
+        <target>Datacenters</target>
+      </trans-unit>
+      <trans-unit id="err_init_vg_cluster">
+        <source>Node has some volume group that exists on cluster %name%.</source>
+        <target>O node contém volume groups que existem no datacenter %name%.</target>
+      </trans-unit>    
+      <trans-unit id="err_init_lv_cluster">
+        <source>Node has some logical volumes that exists on cluster %name%.</source>
+        <target>O node contém logical volumes que existem no datacenter %name%.</target>
+      </trans-unit>    
+      <trans-unit id="err_init_pv_cluster">
+        <source>Node has some physical volumes that exists on cluster %name%.</source>
+        <target>O node contém physical volumes que existem no datacenter %name%.</target>
+      </trans-unit>
+      <trans-unit id="cluster_wz_help">
+        <source>Cluster Setup Wizard Help</source>
+        <target>Assistente de criação de datacenter - Ajuda</target>
+      </trans-unit>
       <trans-unit id="list_users">
         <source>List users</source>
         <target>Lista Utilizadores</target>
       </trans-unit>
-
-
-
+      <!-- Cluster wizard -->
+      <trans-unit id="finish_cluster_wiz">
+        <source>Thank you! New cluster setup has be done!</source>
+        <target>Obrigado! A configuração do datacenter virtual foi efectuada.</target>
+      </trans-unit>
+      <trans-unit id="welcome_cluster_wiz">
+        <source>Welcome to the cluster configuration utility.&lt;br&gt;Follow the steps to create a new cluster.</source>
+        <target>Bem-vindo ao assistente de criação de um datacenter virtual.&lt;br&gt;Siga os próximos passos para configurar um novo datacenter.</target>
+      </trans-unit>
+      <trans-unit id="cluster_name_setup">
+        <source>Cluster name setup</source>
+        <target>Nome do datacenter</target>
+      </trans-unit>
+      <trans-unit id="cluster_attributes">
+        <source>Cluster Attributes</source>
+        <target>Atributos do datacenter</target>
+      </trans-unit>
+      <trans-unit id="default_wz_msg">
+        <source>Please, answer the following form.</source>
+        <target>Por favor, preencha os seguintes campos.</target>
+      </trans-unit>
+      <trans-unit id="cluster_not_created">
+        <source>Cluster not created.</source>
+        <target>O datacenter ainda não foi criado.</target>
+      </trans-unit>
+      <trans-unit id="cluster_not">
+        <source>Cluster not created.</source>
+        <target>O datacenter ainda não foi criado.</target>
+      </trans-unit>
+      <trans-unit id="cluster_setup">
+       <source>Cluster setup</source>
+       <target>Configuração de datacenter</target>
+      </trans-unit>
+      <trans-unit id="cluster">
+       <source>Cluster</source>
+       <target>Datacenter</target>
+      </trans-unit>
+      <trans-unit id="cluster_rename">
+        <source>Rename cluster</source>
+        <target>Renomear datacenter</target>
+      </trans-unit>
+      <trans-unit id="cluster_setup_wz">
+        <source>Cluster Setup Wizard</source>
+        <target>Assistente de configuração de datacenter virtual</target>
+      </trans-unit>
+      <trans-unit id="cluster_change_name">
+        <source>This will change the cluster name. "Default" cluster name cannot be changed.</source>
+        <target>Esta opção altera o nome do datacenter. O nome do datacenter "Default" não pode ser alterado.</target>
+      </trans-unit>
+      <trans-unit id="creating_cluster">
+       <source>Creating cluster...</source>
+       <target>A definir o novo datacenter...</target>
+      </trans-unit> 
+      <trans-unit id="cluster_added">
+       <source>Cluster added to the system!</source>
+       <target>Datacenter criado</target>
+      </trans-unit>
+      <trans-unit id="cluster_could_not_created">
+       <source>Cluster could not be created!</source>
+       <target>Não foi possível criar o datacenter pretendido.</target>
+      </trans-unit>
+      <trans-unit id="error_creating_cluster">
+       <source>Error! Cluster not created.</source>
+       <target>Erro! Não foi possível criar o datacenter.</target>
+      </trans-unit>
+      <trans-unit id="created_successfully">
+       <source>Created successfully.</source>
+       <target>Criado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="creating_cluster">
+       <source>Created successfully.</source>
+       <target>Criado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="cluster_not_created">
+       <source>Cluster not created.</source>
+       <target>Datacenter ainda não foi criado.</target>
+      </trans-unit>
+      <trans-unit id="updating_cluster_name">
+       <source>Updating cluster name...</source>
+       <target>A alterar o nome do datacenter...</target>
+      </trans-unit>
+      <trans-unit id="change_cluster_name">
+       <source>Change {0} name</source>
+       <target>Alterar o nome do datacenter "{0}"</target>
+      </trans-unit>
+      <trans-unit id="change_cluster_name_successfully">
+       <source>Cluster name changed successfully</source>
+       <target>O nome do datacenter foi alterado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="cluster_name_validator">
+       <source>No spaces and only alpha-numeric characters allowed! "Default" not availalable.</source>
+       <target>O nome não deve conter espaços, e deverá conter caracteres alfanuméricos. O nome "Default" não pode ser utilizado.</target>
+      </trans-unit>
+      <trans-unit id="cluster_name_already_exists">
+       <source>Cluster with the same name already exists</source>
+       <target>Já existe um datacenter com o nome especificado</target>
+      </trans-unit>
       <!--                                  -->
 
       <!-- MAIN -->
@@ -440,7 +579,38 @@
         <source>Storage</source>
         <target>Armazenamento</target>
       </trans-unit>
-
+      <trans-unit id="clone_tooltip">
+        <source>Enabled if virtual server is not running and if any volume groups have enouf space.</source>
+        <target>Opção habilitada se o servidor virtual que utiliza o volume estiver parado, e exister algum volume group com espaço suficiente para alojar o novo volume.</target>
+      </trans-unit>
+      <trans-unit id="clone_err">
+        <source>Could not create clone %name%.</source>
+        <target>Não foi possível criar o clone %name%.</target>
+      </trans-unit>
+      <trans-unit id="clone_ok">
+        <source>Clone %name% was successfully created.</source>
+        <target>Clone %name% foi criado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="clone_ttl">
+        <source>Clone logical volume</source>
+        <target>Clonar logical volume</target>
+      </trans-unit>
+      <trans-unit id="src_volume_sp">
+        <source>Source volume size (MB)</source>
+        <target>Tamanho do volume de origem (MB)</target>
+      </trans-unit>
+      <trans-unit id="src_vol_name">
+        <source>Source volume name</source>
+        <target>Nome do volume de origem</target>
+      </trans-unit>
+      <trans-unit id="add_ph_vol">
+        <source>Add physical volume to volume group</source>
+        <target>Adicionar volume físico ao volume group</target>
+      </trans-unit>
+      <trans-unit id="add_ph_vol_1">
+        <source>Add physical volume {0} to volume group {1} ?</source>
+        <target>Adicionar o volume físico {0} ao volume group {1} ?</target>
+      </trans-unit>
 
       <!-- NETWORKS -->
       <!--          -->
@@ -609,7 +779,22 @@
         <source>Unable to detach network interface {0} from {1}!</source>
         <target>Não foi possivel remover do servidor {1} a interface de rede com o mac {0}!</target>
       </trans-unit>      
-
+      <trans-unit id="change_server_perm">
+        <source>This will change permissions for this server</source>
+        <target>Altera as permissões do servidor</target>
+      </trans-unit>
+      <trans-unit id="change_cluster_perm">
+        <source>This will change permissions for the node's parent (cluster)</source>
+        <target>Altera as permissões do data center a que pertence o node</target>
+      </trans-unit>
+      <trans-unit id="change_ug_perm">
+        <source>Select users and/or groups that must have permissions in this {0}.</source>
+        <target>Selecione os utilizadores e/ou grupos que devem ter permissão neste {0}.</target>
+      </trans-unit>
+      <trans-unit id="server">
+        <source>server</source>
+        <target>servidor</target>
+      </trans-unit>
       <trans-unit id="add_interface">
         <source>Add interface</source>
         <target>Adicionar interface</target>
@@ -658,7 +843,14 @@
         <source>Remove network interface with mac {0} ?</source>
         <target>Remover a interface de rede com o mac {0} ?</target>
       </trans-unit>
-
+      <trans-unit id="m_permissions">
+        <source>Set {0} permissions</source>
+        <target>Atribuir permissões ao servidor {0}</target>
+      </trans-unit>
+      <trans-unit id="escacar_pedra">
+        <source>Node %name% moved successfully</source>
+        <target>O node %name% foi movido com sucesso</target>
+      </trans-unit>
 
       <!-- DEVICES RELATED -->
       <!--                 -->
@@ -693,6 +885,14 @@
       <trans-unit id="pv_notavailable">
         <source>Physical volume %name% not available</source>
         <target>Physical volume não disponivel</target>
+      </trans-unit>
+      <trans-unit id="pvs_err_soapupdate">
+        <source>Physical volumes info could not be updated. %info%</source>
+        <target>Informação dos physical volumes não pôde ser actualizada. %info%</target>
+      </trans-unit>
+      <trans-unit id="pvs_ok_soapupdate">
+        <source>Physical volumes %info% updated</source>
+        <target>Physical volumes actualizados</target>
       </trans-unit>
       <trans-unit id="pvs_notavailable">
         <source>No physical volumes available</source>
@@ -749,6 +949,10 @@
       <trans-unit id="pv_resize">
         <source>Resize physical volume {0}</source>
         <target>Redimensionar physical volume {0}</target>
+      </trans-unit>
+      <trans-unit id="pv_err_inconsistent">
+        <source>Shared physical volumes info reported inconsistent. %info%</source>
+        <target>Inconsistência encontrada nos physical volumes partilhados. %info%</target>
       </trans-unit>
 
 
@@ -849,6 +1053,10 @@
       <trans-unit id="err_remove_vg">
         <source>Unable to remove volume group {0}</source>
         <target>Não foi possivel remover o volume group {0}</target>
+      </trans-unit>
+      <trans-unit id="vg_err_inconsistent">
+        <source>Shared volume groups info reported inconsistent. %info%</source>
+        <target>Inconsistência encontrada nos volume groups partilhados. %info%</target>
       </trans-unit>
 
 
@@ -974,6 +1182,90 @@
         <source>Unable to create logical volume {0}!</source>
         <target>Não foi possivel criar o logical volume {0}!</target>
       </trans-unit>
+      <trans-unit id="lv_has_snapshots">
+        <source>The logical volumes has snapshots</source>
+        <target>Os logical volumes têm snapshots</target>
+      </trans-unit>
+      <trans-unit id="lv_is_snapshot">
+        <source>Volume %name% is a snapshot.</source>
+        <target>O volume %name% é um snapshot.</target>
+      </trans-unit>
+      <trans-unit id="err_lv_create_snapshot">
+        <source>Snapshot %name% could not be created. %info%</source>
+        <target>Não é possível criar o snapshot %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_lv_create_snapshot">
+        <source>Snapshot %name% created successfully</source>
+        <target>Snapshot %name% criado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_lv_snapshot_in_other_node">
+        <source>Volume %name% is a snapshot in other node.</source>
+        <target>O volume %name% é um snapshot criado noutro nó.</target>
+      </trans-unit>
+      <trans-unit id="dc_err_lv_snapshot_in_other_node">
+        <source>Volume %name% is a snapshot and cannot be changed in cluster context. Please select the corresponding the node.</source>
+        <target>O volume %name% é um snapshot criado noutro nó, e não pode ser gerido no contexto do datacenter. Selecione o node correspondente.</target>
+      </trans-unit>
+      <trans-unit id="dc_err_lv_have_snapshot_in_other_node">
+        <source>Volume %name% have snapshots in node context.</source>
+        <target>O volume %name% é um snapshot criado num dos nodes disponíveis, e não pode ser gerido no contexto do datacenter. Selecione o node correspondente.</target>
+      </trans-unit>
+      <trans-unit id="err_lv_have_snapshot_in_other_node">
+        <source>Volume %name% have snapshots in other node.</source>
+        <target>O volume %name% tem snapshots noutro nó.</target>
+      </trans-unit>
+      <trans-unit id="lv_create_snapshot">
+        <source>Take snapshot</source>
+        <target>Criar snapshot</target>
+      </trans-unit>
+      <trans-unit id="err_lv_remove_with_snapshot">
+        <source>Can\'t remove logical volume with snapshots in use by any virtual server</source>
+        <target>Não é possível remover um logical volume com snapshots em uso num servidor virtual</target>
+      </trans-unit>
+      <trans-unit id="err_lv_resize_with_snapshots">
+        <source>Can\'t resize volumes if snapshots</source>
+        <target>Não é possível redimensionar logical volumes com snapshots</target>
+      </trans-unit>
+      <trans-unit id="enabled_if_not_snapshot">
+        <source>Enabled if volume is not snapshot.</source>
+        <target>Habilitado se não for snapshot</target>
+      </trans-unit>
+      <trans-unit id="enabled_if_support_snapshot">
+        <source>Enabled if volume support snapshot.</source>
+        <target>Habilitado apenas para volumes com suporte a snapshot.</target>
+      </trans-unit>
+      <trans-unit id="max_snapshot_size">
+        <source>Maximum snapshot size (MB)</source>
+        <target>Tamanho máximo do snapshot (MB)</target>
+      </trans-unit>
+      <trans-unit id="snapshot_size">
+        <source>Snapshot size (MB)</source>
+        <target>Tamanho do snapshot (MB)</target>
+      </trans-unit>
+      <trans-unit id="snapshot_name">
+        <source>Snapshot name</source>
+        <target>Nome snapshot</target>
+      </trans-unit>
+      <trans-unit id="creating_lv_snapshot">
+        <source>Creating logical volume snapshot...</source>
+        <target>A criar snapshot...</target>
+      </trans-unit>
+      <trans-unit id="err_create_snapshot">
+        <source>Unable to create logical volume {0} snapshot!</source>
+        <target>Não foi possivel criar snapshot do logical volume {0}!</target>
+      </trans-unit>
+      <trans-unit id="warn_cluster_snapshot">
+        <source>Snapshots not supported in cluster context.</source>
+        <target>Não é possível fazer snapshots no contexto do datacenter. Seleccione um node.</target>
+      </trans-unit>
+      <trans-unit id="warn_sharedstorage_snapshot">
+        <source>Snapshots not supported in shared storage.</source>
+        <target>Não é possível fazer snapshots em storage partilhada.</target>
+      </trans-unit>
+      <trans-unit id="lv_err_inconsistent">
+        <source>Shared logical volumes info reported inconsistent. %info%</source>
+        <target>Inconsistência encontrada nos logical volumes partilhados. %info%</target>
+      </trans-unit>
 
       <!-- NODE RELATED -->
       <!--              -->
@@ -981,6 +1273,11 @@
         <source>Some errors occurred. See events log!</source>
         <target>Ocorreram alguns erros. Ver registo de eventos do sistema!</target>
       </trans-unit>
+      <trans-unit id="download_logs">
+        <source>Download Logs</source>
+        <target>Descarregar Logs</target>
+      </trans-unit>
+      
       <trans-unit id="remove_cm">
         <source>This will only remove data from Central Management</source>
         <target>Apenas será removido do Central Management</target>
@@ -1163,7 +1460,7 @@
         <target>Servidores</target>
       </trans-unit>
       <trans-unit id="instead_perform_migrate">
-        <source>To perform a migrate instead of a move the server must be running!</source>
+        <source>To perform a migrate instead of a move, the server must be running!</source>
         <target>Para efectuar uma migração em vez de mover, a máquina virtual necessita estar a correr!</target>
       </trans-unit>
       <trans-unit id="err_migrate_fromto">
@@ -1186,6 +1483,14 @@
         <source>Unable to migrate virtual server {0}!</source>
         <target>Não foi possivel migrar a máquina virtual {0}!</target>
       </trans-unit>      
+      <trans-unit id="lv_not_all_shared">
+        <source>All logical volumes needs to be shared.</source>
+        <target>Todos os logical volumes têm que estar partilhados.</target>
+      </trans-unit>
+      <trans-unit id="lv_has_snapshots">
+        <source>The logical volumes has snapshots.</source>
+        <target>Os logical volumes têm snapshots.</target>
+      </trans-unit>
       <trans-unit id="migrating_server">
         <source>Migrating virtual server...</source>
         <target>A migrar máquina virtual...</target>
@@ -1207,12 +1512,61 @@
         <target>Mover servidor</target>
       </trans-unit>
        <trans-unit id="instead_perform_move">
-        <source>To perform a move instead of a migrate the server must be stopped!</source>
+        <source>To perform a move instead of a migrate, the server must be stopped!</source>
         <target>Para mover em vez de migrar, a máquina virtual necessita estar parada!</target>
       </trans-unit>
       <trans-unit id="err_create_vm_interfaces">
         <source>Server name %name% networks info problem. %info%</source>
         <target>Problema com as NIC'S da máquina virtual %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="server">
+        <source>Server</source>
+        <target>Servidor</target>
+      </trans-unit>
+
+      <trans-unit id="assign_server">
+        <source>Assign server</source>
+        <target>Associar servidor</target>
+      </trans-unit>
+      <trans-unit id="assign_server_x">
+        <source>Assign server {0} ?</source>
+        <target>Pretende associar servidor {0} ?</target>
+      </trans-unit>
+      <trans-unit id="assigning_server">
+        <source>Assigning server...</source>
+        <target>A associar servidor...</target>
+      </trans-unit>
+      <trans-unit id="unable_assign_server">
+        <source>Unable to assign server!</source>
+        <target>Não foi possível associar o servidor!</target>
+      </trans-unit>
+      <trans-unit id="unassign_server">
+        <source>Unassign server</source>
+        <target>Desassociar servidor</target>
+      </trans-unit>
+      <trans-unit id="unassign_server_x">
+        <source>Unassign server {0} ?</source>
+        <target>Pretende desassociar servidor {0} ?</target>
+      </trans-unit>
+      <trans-unit id="unassigning_server">
+        <source>Unassigning server...</source>
+        <target>A desassociar servidor...</target>
+      </trans-unit>
+      <trans-unit id="err_unassigned">
+        <source>Could not unassign server %name% from %node%. %info%</source>
+        <target>Não foi possível desassociar o servidor %name% do nó %node%. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_unassigned">
+        <source>Server %name% unassigned from %node% successfully</source>
+        <target>Servidor %name% desassociado do nó %node% com successo</target>
+      </trans-unit>
+      <trans-unit id="err_assigned">
+        <source>Could not assign server %name% to %node%. %info%</source>
+        <target>Não foi possível associar o servidor %name% ao nó %node%. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_assigned">
+        <source>Server %name% assigned to %node% successfully</source>
+        <target>Servidor %name% associado ao nó %node% com successo</target>
       </trans-unit>
 
 
@@ -1267,6 +1621,10 @@
       <trans-unit id="location_options">
         <source>Location options</source>
         <target>Opções de location</target>
+      </trans-unit>
+      <trans-unit id="location_none">
+        <source>None</source>
+        <target>Nenhum</target>
       </trans-unit>
       <trans-unit id="choose_iso">
         <source>Choose iso to load</source>
@@ -1445,6 +1803,14 @@
       <trans-unit id="stop_server">
         <source>Stop server</source>
         <target>Parar servidor</target>
+      </trans-unit>
+      <trans-unit id="stop_server_normal">
+        <source>Normal stop</source>
+        <target>Normal</target>
+      </trans-unit>
+      <trans-unit id="stop_server_force">
+        <source>Force stop</source>
+        <target>Forçado</target>
       </trans-unit>
       <trans-unit id="stop_server_question">
         <source>Stop server {0} ?</source>
@@ -1748,6 +2114,30 @@
         <source>Check status</source>
         <target>Verificar estado</target>
       </trans-unit>
+      <trans-unit id="server_ok_soapstate">
+        <source>Server %name% state has been checked</source>
+        <target>O estado do servidor %name% foi verificado.</target>
+      </trans-unit>
+      <trans-unit id="node_ok_soapstate">
+        <source>Node %name% state has been checked</source>
+        <target>O estado do nó %name% foi verificado.</target>
+      </trans-unit>
+      <trans-unit id="node_err_soapstate">
+        <source>Node %name% state could not be checked. %info%</source>
+        <target>O estado do nó %name% não pôde ser verificado.</target>
+      </trans-unit>
+      <trans-unit id="server_err_soapstate">
+        <source>Server %name% state could not be checked. %info%</source>
+        <target>O estado do servidor %name% não pôde ser verificado.</target>
+      </trans-unit>
+      <trans-unit id="virtagent_down_request_not_sent">
+        <source>VirtAgent down! Request not sent!</source>
+        <target>VirtAgent em baixo! O pedido não foi enviado!</target>
+      </trans-unit>
+      <trans-unit id="virtagent_down">
+        <source>VirtAgent down</source>
+        <target>VirtAgent em baixo</target>
+      </trans-unit>
       <trans-unit id="load_node">
         <source>Load node</source>
         <target>Carregar node</target>
@@ -1815,6 +2205,18 @@
       <trans-unit id="edit_disk_type">
         <source>Edit disk type</source>
         <target>Editar tipo do disco</target>
+      </trans-unit>
+      <trans-unit id="add_server_in_use">
+        <source>The server {0} is using this disk.</source>
+        <target>O servidor {0} está a usar este disco.</target>
+      </trans-unit>
+      <trans-unit id="do_you_want_add_it_any_way">
+        <source>Do you want add it any way?</source>
+        <target>Pretende adiciona-lo mesmo assim?</target>
+      </trans-unit>
+      <trans-unit id="disk_in_use">
+        <source>Disk {0} in use</source>
+        <target>Disco {0} em uso</target>
       </trans-unit>
       <trans-unit id="edit_type">
         <source>Edit {0} type</source>
@@ -1956,8 +2358,16 @@
         <source>Boot From</source>
         <target>Definir arranque</target>
       </trans-unit>
+      <trans-unit id="vm_autostart">
+        <source>Auto-start</source>
+        <target>Arranque auto.</target>
+      </trans-unit>
       <trans-unit id="vm_filesystem">
         <source>VM Filesystem</source>
+        <target>Disco</target>
+      </trans-unit>
+      <trans-unit id="vm_boot_disk">
+        <source>Disk</source>
         <target>Disco</target>
       </trans-unit>
       <trans-unit id="cur_state">
@@ -1975,6 +2385,10 @@
       <trans-unit id="virtagent_init_menu">
         <source>VirtAgent should be initialized to enable this menu</source>
         <target>Habilitado apenas se o agente de virtualização estiver inicializado</target>
+      </trans-unit>
+      <trans-unit id="communication_failure">
+        <source>Communication Failure</source>
+        <target>Falha na comunicação</target>
       </trans-unit>
       
       <!-- MISC -->
@@ -2019,9 +2433,17 @@
         <source>Registering ETVA...</source>
         <target>A registar ETVA...</target>
       </trans-unit>
+      <trans-unit id="registering_etvm">
+        <source>Registering ETVM...</source>
+        <target>A registar ETVM...</target>
+      </trans-unit>
       <trans-unit id="could_not_register">        
         <source>Could not register ETVA.&lt;br&gt; {0}</source>
         <target>Não foi possível registar ETVA.&lt;br&gt; {0}</target>
+      </trans-unit>
+      <trans-unit id="could_not_register_etvm">        
+        <source>Could not register ETVM.&lt;br&gt; {0}</source>
+        <target>Não foi possível registar ETVM.&lt;br&gt; {0}</target>
       </trans-unit>
       <trans-unit id="register_ok">
         <source>Register OK with serial number &lt;b&gt;{0}&lt;/b&gt;</source>
@@ -2034,6 +2456,10 @@
       <trans-unit id="backup_appliance_notice">
         <source>An appliance backup will save all ETVA settings. &lt;br&gt; If a virtual machine as an agent running, actual configuration/settings of that service will also be saved.&lt;br&gt;&lt;br&gt;IT DOES NOT BACKUP DISK DATA!!! ONLY CURRENT CONFIGURATION!</source>
         <target>O backup da appliance irá guardar todas as configurações do ETVA. &lt;br&gt; Se uma máquina virtual tiver um agente a correr, a configuração do serviço desse agente será guardada.&lt;br&gt;&lt;br&gt;NÃO REALIZA BACKUP DA INFORMAÇÂO DOS DISCOS!!! APENAS CONFIGURAÇÃO ACTUAL!</target>
+      </trans-unit>
+      <trans-unit id="backup_appliance_notice_etvm">
+        <source>An appliance backup will save all ETVM settings. &lt;br&gt; If a virtual machine as an agent running, actual configuration/settings of that service will also be saved.&lt;br&gt;&lt;br&gt;IT DOES NOT BACKUP DISK DATA!!! ONLY CURRENT CONFIGURATION!</source>
+        <target>O backup da appliance irá guardar todas as configurações do ETVM. &lt;br&gt; Se uma máquina virtual tiver um agente a correr, a configuração do serviço desse agente será guardada.&lt;br&gt;&lt;br&gt;NÃO REALIZA BACKUP DA INFORMAÇÂO DOS DISCOS!!! APENAS CONFIGURAÇÃO ACTUAL!</target>
       </trans-unit>
       <trans-unit id="backup_now">
         <source>BACKUP NOW!</source>
@@ -2075,6 +2501,10 @@
         <source>Could not perform ETVA BACKUP.&lt;br&gt; {0}</source>
         <target>Não foi possível efectuar o BACKUP da ETVA.&lt;br&gt; {0}</target>
       </trans-unit>
+      <trans-unit id="err_backup">
+        <source>Could not perform ETVM BACKUP.&lt;br&gt; {0}</source>
+        <target>Não foi possível efectuar o BACKUP da ETVM.&lt;br&gt; {0}</target>
+      </trans-unit>
       <trans-unit id="ok_backup">
         <source>Appliance Backup success!</source>
         <target>Backup da Appliance com sucesso!</target>
@@ -2102,6 +2532,10 @@
       <trans-unit id="err_restore">
         <source>Could not perform ETVA RESTORE.&lt;br&gt; {0}</source>
         <target>Não foi possível efectuar o RESTAURO da ETVA.&lt;br&gt; {0}</target>
+      </trans-unit>
+      <trans-unit id="err_restore_etvm">
+        <source>Could not perform ETVM RESTORE.&lt;br&gt; {0}</source>
+        <target>Não foi possível efectuar o RESTAURO da ETVM.&lt;br&gt; {0}</target>
       </trans-unit>
       <trans-unit id="removing_backup">
         <source>Removing backup...</source>
@@ -2170,6 +2604,10 @@
       <trans-unit id="delete_user_question">
         <source>Are you sure you want delete user {0}?</source>
         <target>Tem a certeza que pretende apagar o utilizador {0}?</target>
+      </trans-unit>
+      <trans-unit id="manage_preferences">
+        <source>Manage Preferences</source>
+        <target>Gerir Preferências</target>
       </trans-unit>
 
       <!-- HELP -->
@@ -2270,6 +2708,101 @@
         <source>Info panel Help</source>
         <target>Painel de Informação - Ajuda</target>
       </trans-unit>
+      <trans-unit id="manage_networks_help">
+        <source>Manage networks Help</source>
+        <target>Gestão das redes - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="manage_interfaces_help">
+        <source>Manage network interfaces Help</source>
+        <target>Gestão de interfaces de rede - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="change_interfaces_help">
+        <source>Manage network interfaces Help</source>
+        <target>Gerir interfaces de rede do servidor - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="change_interfaces_help">
+        <source>Date filter Help</source>
+        <target>Filtrar data - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="server_load_help">
+        <source>Server load Help</source>
+        <target>Carga do servidor - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="server_mem_help">
+        <source>Server memory Help</source>
+        <target>Memória do servidor - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="server_disk_help">
+        <source>Server disk Help</source>
+        <target>Disco do servidor - Ajuda</target>
+      </trans-unit>
+      <!-- Help -->
+      <trans-unit id="on_setup_wizard">
+        <source>One-Time Setup Wizard Help</source>
+        <target>Assistente de configuração inicial - Ajuda</target>
+      </trans-unit>
+      <trans-unit id="connection_settings">
+        <source>Connection settings</source>
+        <target>Opções de conectividade</target>
+      </trans-unit>
+
+    <trans-unit id="set_permissions">
+        <source>Set permissions</source>
+        <target>Atribuir permissões</target>
+      </trans-unit>
+
+    <trans-unit id="location_url">
+        <source>Could not validate the location URL!</source>
+        <target>Não foi possível validar o URL inserido (Localização). Verifique se existe.</target>
+      </trans-unit>
+
+
+
+    <!-- Diagnostic section -->
+        <trans-unit id="diagnostics_window">
+            <source>Diagnostic window</source>
+            <target>Janela de diagnóstico</target>
+        </trans-unit>
+        <trans-unit id="state">
+            <source>State</source>
+            <target>Estado</target>
+        </trans-unit>
+      <trans-unit id="diagnostic_msg">
+        <source>&lt;p&gt;The diagnostic process aggreates all information required for debug, such as logs and current configuration.&lt;/p&gt;&lt;p&gt;If some nodes are running, their's information will also be included.&lt;/p&gt;&lt;p&gt;At last, an email is sent to Eurotux with the data.&lt;/p&gt;</source>
+        <target>&lt;p&gt;O processo de diagnóstico agrega as informações necessárias para a depuração de erros.&lt;/p&gt;&lt;p&gt;As informações relativas aos agentes virtualização em funcionamento também serão guardadas.&lt;/p&gt;&lt;p&gt;Na conclusão do processo, os dados são cifrados e enviados para a Eurotux via email.&lt;/p&gt;</target>
+      </trans-unit>
+        <trans-unit id="diagnostics_gen_file1">
+            <source>Generate  file</source>
+            <target>Gerar ficheiro</target>
+        </trans-unit>
+        <trans-unit id="diagnostics_down_file">
+            <source>Download file</source>
+            <target> Descarregar </target>
+        </trans-unit>
+        <trans-unit id="diagnostics_gen_file">
+            <source>Generating diagnostic file</source>
+            <target>A gerar ficheiro de diagnóstico</target>
+        </trans-unit>
+        <trans-unit id="diagnostics_file_gen">
+            <source>File generated successfully</source>
+            <target>Ficheiro gerado com sucesso</target>
+        </trans-unit>
+        <trans-unit id="diagnostics_btn">
+            <source>Diagnose</source>
+            <target>Diagnosticar</target>
+        </trans-unit>
+        <trans-unit id="diagnostics_send">
+            <source>Send</source>
+            <target>Enviar</target>
+        </trans-unit>
+        <trans-unit id="diagnostics_send_email_msg">
+            <source>Email sent successfully</source>
+            <target>Email enviado com sucesso</target>
+        </trans-unit>
+        <trans-unit id="however_mail_unsuccessful">
+            <source>However, the email message could not be sent.</source>
+            <target>No entanto, o email não foi enviado.</target>
+        </trans-unit>
     </body>
   </file>
 </xliff>

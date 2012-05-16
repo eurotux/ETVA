@@ -1,6 +1,7 @@
+<div class="help">
 <a id="help-sfguard-group-main"><h1>Gestão de grupos de permissões</h1></a>
 <p>Neste separador encontram-se as opções de gestão de grupos. A listagem (em baixo sobre a esquerda) indica os
-grupos existentes no sistema. As linhas da listagem podem ser selecionadas sempre que se pretender efectuar alterações.</p>
+grupos existentes no sistema. As linhas da listagem podem ser seleccionadas sempre que se pretender efectuar alterações.</p>
 <p>Estão disponíveis as seguintes operações:</p>
 <ul>
     <li><a href="#help-sfguard-group-add">Adicionar Grupo</a></li>
@@ -14,7 +15,7 @@ grupos existentes no sistema. As linhas da listagem podem ser selecionadas sempr
 <a id="help-sfguard-group-add"><h2>Adicionar Grupo:</h2></a>
 <p>Para adicionar um grupo, seleccionar a opção <em>Adicionar grupo</em>.</p>
 <p>Sob o lado direito (<a href="#help-sfguard-group-details"><em>Detalhes da Grupo</em></a>) devem ser preenchidos os campos que caracterizam o grupo,
-    sendo os seguintes de <b>carácter obrigatório</b>: <em>Nome</em>; <em>Descrição</em>.
+    sendo os seguintes de <b>carácter obrigatório</b>: <em>Nome</em>; <em>Descrição</em>.</p>
 <a href="#help-sfguard-group-main"><div>Início</div></a>
 <hr/>
 
@@ -46,5 +47,5 @@ grupos existentes no sistema. As linhas da listagem podem ser selecionadas sempr
 
 <a href="#help-sfguard-group-main"><div>Início</div></a>
 <hr/>
-
+</div>
 

@@ -72,11 +72,13 @@ var i18n = {
     'All'                       : 'Todas',
     'Items'                     : 'Itens',
     'Name'                      : 'Nome',
+    'Create'                    : 'Criar',
     'Name...'                   : 'Nome...',
     'Cancel'                    : 'Cancelar',
     'Close'                     : 'Fechar',
     'Drag and Drop to reorder'  : 'Arrastar e largar para re-ordenar',
     'Save'                      : 'Guardar',
+    'Change'                    : 'Alterar',
     'Update'                    : 'Atualizar',
     'Move up'                   : 'Mover para cima',
     'Move down'                 : 'Mover para baixo',
@@ -101,6 +103,5 @@ var i18n = {
     'IP address'                : 'Endereço IP',
     'Netmask'                   : 'Máscara de rede',
     'Full backup'               : 'Backup integral',
-    'Full restore'              : 'Restauro integral',
-
+    'Full restore'              : 'Restauro integral'
 };

@@ -3,7 +3,7 @@
  * Use Extjs helper to dynamic create data store and column model javascript
  */
 // use_helper('Extjs');
-$extraDSfields = array('vnc_port','SfGuardGroupName','all_shared_disks');
+$extraDSfields = array('vnc_port','SfGuardGroupName','all_shared_disks','has_snapshots_disks');
 
 $extraCMAttrs = array(
                         'Boot'=> array('editor'=>"bootCmb",
@@ -115,6 +115,8 @@ Server.Grid = function(){
 $store_id = json_encode($js_grid['pk']);
 ?>
 
+            var node_id = this.node_id;
+
             var grid_title = this.title;
             var gridUrl = this.url;
             var store_id = <?php echo $store_id ?>;
@@ -129,6 +131,7 @@ $store_id = json_encode($js_grid['pk']);
                 id: store_id,
                 totalProperty: 'total',
                 root: 'data',
+                baseParams: { 'assigned': true },
                 fields: [<?php echo $js_grid['ds'] ?>],
                 sortInfo: { field: 'name',
                     direction: 'ASC' },
@@ -174,6 +177,7 @@ $store_id = json_encode($js_grid['pk']);
 
                         //serverGrid.getSelectionModel().fireEvent('selectionchange',serverGrid.getSelectionModel());
 
+                        serverGrid.fireEvent('reloadTree', { 'node_id': node_id });
                     }
                 }
             });
@@ -565,6 +569,7 @@ $store_id = json_encode($js_grid['pk']);
                         }//END handler
                     },
                     {
+                        xtype:'splitbutton',
                         text: <?php echo json_encode(__('Stop server')) ?>,
                         ref: '../stopBtn',
                         disabled:true,
@@ -572,6 +577,7 @@ $store_id = json_encode($js_grid['pk']);
                         handler: function(item) {
                             var sm = serverGrid.getSelectionModel();
                             var sel = sm.getSelected();
+                            var forcestop = ( item.menu.stop_force.checked ) ? 1 : 0;
 
                             if (sm.hasSelection()){
                                 Ext.Msg.show({
@@ -605,7 +611,7 @@ $store_id = json_encode($js_grid['pk']);
                                             });// end conn
                                             conn.request({
                                                 url: <?php echo json_encode(url_for('server/jsonStop'))?>,
-                                                params: {'nid':this.node_id,'server': sel.data['name']},
+                                                params: {'nid':this.node_id,'server': sel.data['name'], 'force': forcestop, 'destroy': forcestop},
                                                 scope:this,
                                                 success: function(resp,opt) {
                                                     var response = Ext.util.JSON.decode(resp.responseText);
@@ -647,7 +653,22 @@ $store_id = json_encode($js_grid['pk']);
                                     icon: Ext.MessageBox.INFO,
                                     msg: item.el.child('button:first').dom.qtip});
                             }
-                        }//END handler Remove
+                        }//END handler Stop
+                        ,menu: [
+                                {
+                                    text: <?php echo json_encode(__('Normal stop')) ?>
+                                    ,name:'normalstop',xtype:'menucheckitem',ref:'stop_normal'
+                                    ,checked: true
+                                    ,group: 'stop_type'
+                                    ,scope:this
+                                },
+                                {
+                                    text: <?php echo json_encode(__('Force stop')) ?>
+                                    ,name:'forcestop',xtype:'menucheckitem',ref:'stop_force'
+                                    ,group: 'stop_type'
+                                    ,scope:this
+                                }
+                        ]
                     }
                     ,'-',
                     {
@@ -815,8 +836,11 @@ $store_id = json_encode($js_grid['pk']);
 
                 serverGrid.removeBtn.setDisabled(btnState);
                 serverGrid.consoleBtn.setDisabled(btnState);
+                serverGrid.editBtn.setDisabled(btnState);
                 
                 serverGrid.stopBtn.setDisabled(btnState);
+                serverGrid.stopBtn.menu.stop_normal.setChecked(true);
+                serverGrid.stopBtn.menu.stop_force.setChecked(false);
                 if(serverGrid.migrateBtn) serverGrid.migrateBtn.setDisabled(btnState);
                 
                 if(selected){
@@ -840,7 +864,7 @@ $store_id = json_encode($js_grid['pk']);
                         * check migrate/move button
                         */
                          serverGrid.migrateBtn.type = 'migrate';
-                         serverGrid.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate the server must be stopped!')); ?>);
+                         serverGrid.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate, the server must be stopped!')); ?>);
                          serverGrid.migrateBtn.setText(<?php echo json_encode(__('Migrate server')) ?>);
 
                        <?php endif; ?>
@@ -858,7 +882,7 @@ $store_id = json_encode($js_grid['pk']);
                           * check migrate/move button
                           */
                          serverGrid.migrateBtn.type = 'move';
-                         serverGrid.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move the server must be running!')); ?>);
+                         serverGrid.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move, the server must be running!')); ?>);
                          serverGrid.migrateBtn.setText(<?php echo json_encode(__('Move server')) ?>);
 
                          <?php endif; ?>
@@ -869,6 +893,13 @@ $store_id = json_encode($js_grid['pk']);
                              serverGrid.migrateBtn.setTooltip(<?php echo json_encode(__(EtvaLogicalvolumePeer::_NOTALLSHARED_)); ?>);
                              serverGrid.migrateBtn.setDisabled(true);
                      }
+
+                     if(serverGrid.migrateBtn && selected.data['has_snapshots_disks'] )
+                     {
+                             serverGrid.migrateBtn.setTooltip(<?php echo json_encode(__(EtvaLogicalvolumePeer::_HASSNAPSHOTS_)); ?>);
+                             serverGrid.migrateBtn.setDisabled(true);
+                     }
+                     
                 }
 
 

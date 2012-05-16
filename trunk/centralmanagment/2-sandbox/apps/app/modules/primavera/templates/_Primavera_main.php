@@ -34,7 +34,7 @@ Primavera.Main.Form = new Ext.extend( Ext.form.FormPanel, {
                                             new Ext.chart.PieChart({ 
                                                             id: 'space-piechart',
                                                             store: new Ext.data.ArrayStore({  
-                                                                            fields:[{name:'type'},{name:'space', type:'float'}],
+                                                                            fields:[{name:'type'},{name:'space', type:'float'}]
                                                                         }),
                                                             dataField: 'space',
                                                             categoryField: 'type'

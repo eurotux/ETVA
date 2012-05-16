@@ -31,28 +31,34 @@ SfGuardPermission.Grid = Ext.extend(Ext.grid.GridPanel,{
 
         this.cm = new Ext.grid.ColumnModel([
                     {header: "Id", dataIndex: 'id',width:40},
-                    {header: "Name", width: 200, sortable: true, dataIndex: 'name',renderer: function (value, metadata, record, rowIndex, colIndex, store) {
+                    {header: "Name", width: 150, sortable: true, dataIndex: 'name',renderer: function (value, metadata, record, rowIndex, colIndex, store) {
                                 metadata.attr = String.format('ext:qtip="{0}"',<?php echo json_encode(__('Right-click to open sub-menu or double-click to edit')) ?>);
                                 return value;
                             }},
-                    {header: "Description", id:'description', dataIndex: 'description', width: 160, sortable: true}
+                    {header: "Description", id:'description', dataIndex: 'description', width: 120, sortable: true},
+                    {header: "Type", id:'perm_type', dataIndex: 'perm_type', width: 90, sortable: true}
         ]);
         
         this.autoExpandColumn = 'description';
 
         this.store = new Ext.data.JsonStore({
-            proxy: new Ext.data.HttpProxy({url: <?php echo json_encode(url_for('sfGuardPermission/jsonGridWithGroups'));?>}),
+            proxy: new Ext.data.HttpProxy({url: 'sfGuardPermission/JsonGridGroupsClustersVms/action' }), //<php echo json_encode(url_for('sfGuardPermission/jsonGridWithGroups')) //'sfGuardPermission/JsonGridGroupsClustersVms ?>'
             id: 'Id',
             totalProperty: 'total',
             root: 'data',
             fields: [{name:'id',type:'int',mapping:'Id'}
                 ,{name:'name',mapping:'Name'},
                 ,{name:'description',mapping:'Description'}
-                ,'sf_guard_group_permission_list'
-            ],
-            sortInfo: { field: 'name',
+                ,{name:'permission_id',mapping:'PermissionId'}
+                ,{name:'perm_type',mapping:'PermType'}
+                ,'etva_permission_group_list'
+                ,'etva_permission_server_list'
+                ,'etva_permission_cluster_list'
+                ,'etva_permission_user_list'
+            ]
+            ,sortInfo: { field: 'name',
             direction: 'DESC' },
-            remoteSort: true            
+            remoteSort: false
         });
 
         this.bbar = new Ext.PagingToolbar({

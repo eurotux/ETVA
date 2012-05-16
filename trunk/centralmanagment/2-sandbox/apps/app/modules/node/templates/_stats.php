@@ -138,7 +138,7 @@ Node.Stats_Load = Ext.extend(mainChartContainer, {
             items:[chart],
             plugins:Ext.isIE ? [] : V,
             task:task,
-            tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-appliance-backup',autoLoad:{ params:'mod=node'},title: <?php echo json_encode(__('Node Load Help')) ?>});}}]
+            tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-stats-nodeload',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Node Load Help')) ?>});}}]
             ,bbar:
                 [{
 

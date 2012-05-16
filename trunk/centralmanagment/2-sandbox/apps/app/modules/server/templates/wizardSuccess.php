@@ -25,7 +25,12 @@
 
             return true;
         },
-        vm_lv_newsizeText : <?php echo json_encode(__('Cannot exceed total volume group size')) ?>
+        vm_lv_newsizeText : <?php echo json_encode(__('Cannot exceed total volume group size')) ?>,
+        vm_name : function(val, field){
+            var t = /^[a-zA-Z][a-zA-Z0-9\-\_]+$/;
+            return t.test(val);
+        },
+        vm_nameText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed!')) ?>,
     });
 
 
@@ -46,13 +51,9 @@
                             name       : 'vm_name',
                             fieldLabel : <?php echo json_encode(__('Virtual server name')) ?>,
                             emptyText : __('Name...'),
-                            invalidText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed!')) ?>,
+                            vtype : 'vm_name',
                             allowBlank : false,
-                            validator  : function(v){
-                                var t = /^[a-zA-Z0-9]+$/;
-                                return t.test(v);                                
-                            }
-                            ,listeners:{
+                            listeners:{
                                 specialkey:{scope:this,fn:function(field,e){
 
                                     if(e.getKey()==e.ENTER)
@@ -181,13 +182,9 @@
                             name       : 'vm_name',
                             fieldLabel : <?php echo json_encode(__('Virtual server name')) ?>,
                             emptyText : __('Name...'),
-                            invalidText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed!')) ?>,
+                            vtype : 'vm_name',
                             allowBlank : false,
-                            validator  : function(v){
-                                var t = /^[a-zA-Z0-9]+$/;
-                                return t.test(v);
-                            }
-                            ,listeners:{
+                            listeners:{
                                 specialkey:{scope:this,fn:function(field,e){
 
                                     if(e.getKey()==e.ENTER)
@@ -282,16 +279,17 @@
                         },
                         {
                             xtype:'numberfield',
-                            name       : 'vm_totalmemory',
-                            fieldLabel : <?php echo json_encode(__('Total system memory (MB)')) ?>,
+                            name       : 'vm_maxmemory',
+                            id         : 'vm_maxmemory',
+                            fieldLabel : <?php echo json_encode(__('Max allocatable memory (MB)')) ?>,
                             allowBlank : false,
                             readOnly:true
                         },
                         {
                             xtype:'numberfield',
-                            name       : 'vm_maxmemory',
-                            id         : 'vm_maxmemory',
-                            fieldLabel : <?php echo json_encode(__('Memory available (MB)')) ?>,
+                            name       : 'vm_freememory',
+                            id         : 'vm_freememory',
+                            fieldLabel : <?php echo json_encode(__('Free memory (MB)')) ?>,
                             allowBlank : false,
                             readOnly:true
                         },
@@ -328,8 +326,8 @@
             if(data['vm_maxmemory'])
                 data['vm_maxmemory'] = byte_to_MBconvert(data['vm_maxmemory'],0,'floor');
 
-            if(data['vm_totalmemory'])
-                data['vm_totalmemory'] = byte_to_MBconvert(data['vm_totalmemory'],0,'floor');
+            if(data['vm_freememory'])
+                data['vm_freememory'] = byte_to_MBconvert(data['vm_freememory'],0,'floor');
 
             var form = this.getForm();
             var rec = new Object();
@@ -431,7 +429,9 @@
             });
 
             var lvcombo = new Ext.form.ComboBox({
-                editable:false
+                //editable:false
+                typeAhead: true
+                ,selectOnFocus: true
                 ,valueField:'id'
                 ,hiddenName:'vm_lv'
                 ,displayField:'lv'
@@ -439,6 +439,7 @@
                 ,forceSelection:true
                 ,enableKeyEvents:true
                 ,resizable:true
+                ,minChars:1
                 ,minListWidth:250
                 ,width:200
                 //,maxHeight:150
@@ -580,7 +581,8 @@
                                     fieldLabel: <?php echo json_encode(__('Logical volume size (MB)')) ?>,
                                     name: 'vm_lvsize',
                                     maxLength: 50,
-                                    allowBlank: false
+                                    allowBlank: false,
+                                    disabled:true
                                   }
                             ]//end fieldset items
                             ,listeners:{
@@ -760,7 +762,10 @@
                     xtype:'combo',
                     ref:'disk_type',
                     name:'disk_type',
-                    fieldLabel: <?php echo json_encode(__('Disk type')) ?>,
+                    id:'vm_disk_type'
+                    ,editable: false
+                    ,typeAhead: false
+                    ,fieldLabel: <?php echo json_encode(__('Disk type')) ?>,
                     width:150,hiddenName:'disk_type'
                     ,valueField: 'value',displayField: 'name',forceSelection: true,emptyText: <?php echo json_encode(__('Select type...')) ?>
                     ,store: new Ext.data.ArrayStore({
@@ -923,9 +928,8 @@
             });// end on...
 
         }
-        ,addGrid:function(type){
-
-            var grid = new Network.ManageInterfacesGrid({ref:'../hostnetworks_grid',vm_type:type,border:false});
+        ,addGrid:function(type, server_id){
+            var grid = new Network.ManageInterfacesGrid({node_id:config.nodeId, level:'node' , ref:'../hostnetworks_grid',vm_type:type,border:false});
 
             grid.addBtn.on('click',function(){grid.fireEvent('afteredit');},grid);
 
@@ -977,10 +981,8 @@
 
         }
         ,loadRecord:function(data){
-
-
             this.hostnetworks_panel.removeAll();
-            var grid = this.addGrid(data['vm_type']);
+            var grid = this.addGrid(data['vm_type'],data['server_id']);
             this.hostnetworks_panel.add(grid);
             this.hostnetworks_panel.doLayout();
 
@@ -1086,29 +1088,15 @@
                             bodyStyle : 'background:none;padding-bottom:20px;',
                             html      : <?php echo json_encode(__('Specify the installation source.')) ?>
                         },
-//                        {
-//                            checked: true,
-//                            hideLabel:true,
-//                            boxLabel: 'Local install path image (iso,...)',
-//                            name: 'vm_location',
-//                            inputValue: 'local',
-//                            scope:this,
-//                            handler:function(box,check){
-//                                var local_field = this.form.findField('vm_location_local');
-//                                local_field.setDisabled(!check);
-//                                local_field.clearInvalid();}
-//                        },
-//                        {
-//                            xtype: 'textfield',
-//                            name: 'vm_location_local',
-//                            allowBlank:false,
-//                            anchor:'90%',
-//                            emptyText : '/path/to/image',
-//                            labelStyle : 'font-size:11px;width:25px;'
-//                        },
                         {
-                            boxLabel: <?php echo json_encode(__('Network install (http,ftp,...)')) ?>,
+                            boxLabel: <?php echo json_encode(__('None')) ?>,
                             name: 'vm_location',checked: true,
+                            hideLabel:true,
+                            inputValue: 'none',
+                            scope:this
+                        },{
+                            boxLabel: <?php echo json_encode(__('Network install (http,ftp,...)')) ?>,
+                            name: 'vm_location',
                             hideLabel:true,
                             inputValue: 'remote',
                             scope:this,
@@ -1119,18 +1107,34 @@
                         },{
                             xtype: 'textfield',
                             name: 'vm_location_remote',
-                            //disabled:true,
+                            disabled:true,
                             anchor:'90%',
                             allowBlank:false,
                             emptyText : 'url://path/to/image kernel',
-                            labelStyle : 'font-size:11px;width:25px;'
+                            labelStyle : 'font-size:11px;width:25px;',
+                            enableKeyEvents: false,
+                            locationValid: false
+                            ,validator: function(v){
+                                return this.locationValid;
+                            }
                             ,listeners:{
                                 specialkey:{scope:this,fn:function(field,e){
 
-                                    if(e.getKey()==e.ENTER)
+                                    if(e.getKey()==e.ENTER){
                                         if(!this.wizard.nextButton.disabled) this.wizard.nextButton.focus();
-                                        
+                                        checkLocation(field.getValue(), field);
+                                    }
+                                    
+                                    if(e.getKey() == e.BACKSPACE){
+                                        field.locationValid = false;
+                                    }
 
+                                }}
+                                ,focus:{scope:this, fn:function(field,e){
+                                    field.locationValid = false;
+                                }}
+                                ,blur:{scope:this, fn:function(field,e){
+                                    checkLocation(field.getValue(), field);           
                                 }}
                             }
                         }
@@ -1138,25 +1142,6 @@
                     });
             }
             item_Location.show();
-
-//            var values = this.form.getValues();
-//
-//            if(values['vm_location']){
-//                var location = values['vm_location'];
-//
-//                if(location == 'remote' ){
-//                    var remote_field = this.form.findField('vm_location_remote');
-//                    remote_field.setDisabled(false);
-//                }
-//
-//                if(location == 'local' ){
-//                    var local_field = this.form.findField('vm_location_local');
-//                    local_field.setDisabled(false);
-//                }
-//            }
-
-
-
         }
         ,setBoot:function(){
             var item_Boot = Ext.getCmp('server-wiz-startup-boot');
@@ -1189,7 +1174,14 @@
                                     html      : <?php echo json_encode(__('Specify boot device.')) ?>
                                 },
                                 {
+                                    boxLabel: <?php echo json_encode(__('Disk')) ?>,
+                                    name: 'vm_boot',
                                     checked: true,
+                                    hideLabel:true,
+                                    inputValue: 'filesystem',
+                                    scope:this
+                                },
+                                {
                                     boxLabel: <?php echo json_encode(__('Network boot (PXE)')) ?>,
                                     name: 'vm_boot',
                                     hideLabel:true,
@@ -1206,15 +1198,6 @@
                                         boot_cdrom_field.setDisabled(!check);
                                         boot_cdrom_field.clearInvalid();}
                                 },this.cdromcombo
-//                                {
-//                                    xtype: 'textfield',
-//                                    name: 'vm_boot_cdrom',
-//                                    disabled:true,
-//                                    anchor:'90%',
-//                                    allowBlank:false,
-//                                    emptyText : 'url://path/to/image',
-//                                    labelStyle : 'font-size:11px;width:25px;'
-//                                }
                             ]
                     });
             }
@@ -1296,7 +1279,7 @@
     }
 
     memCard.on('afterlayout',function(){
-                                memCard.loadRecord({'vm_totalmemory':<?php echo($etva_node->getMemtotal()); ?>,'vm_maxmemory':<?php echo($etva_node->getMemfree()); ?>});
+                                memCard.loadRecord({'vm_freememory':<?php echo($etva_node->getMemfree()); ?>,'vm_maxmemory':<?php echo($etva_node->getMaxMem()); ?>});
                             },this,{single:true});
 
     cpuCard.on('afterlayout',function(){
@@ -1409,6 +1392,26 @@
             }
         });// END Ajax request
 
+    }
+    
+    function checkLocation(url, field){
+        var conn = new Ext.data.Connection({
+        });// end conn
+
+        conn.request({
+            url: <?php echo json_encode(url_for('server/jsonCheckUrl',false)); ?>,
+            params: {'url':url},
+            scope: this,
+            success: function(resp,opt) {
+                var response = Ext.decode(resp.responseText);
+                if(response['success']){
+                    field.locationValid = true;
+                }else{
+                    field.locationValid = false;
+                }
+
+            }
+        }); // END Ajax request
     }
 
     function vmcreate(send_data)
@@ -1542,7 +1545,7 @@
                                 }
 
                                 send_data['location'] = location;
-                                send_data['boot'] = 'location';
+                                send_data['boot'] = location ? 'location' : 'filesystem';
                                 //send_data['vm_type'] = 'pv';
                                 break;                                            
             default:
@@ -1562,6 +1565,10 @@
 
                                  if(boot_data == 'network'){
                                     send_data['boot'] = 'pxe';
+                                }
+
+                                if(boot_data == 'filesystem'){
+                                    send_data['boot'] = 'filesystem';
                                 }
 
                                 break;

@@ -22,7 +22,9 @@ class EtvaClusterPeer extends BaseEtvaClusterPeer {
     const _DEFAULT_CLUSTER_ = 'Default';
     const _ERR_DEFAULT_CLUSTER_ = 'Could not find default cluster. %info%';
     const _ERR_CLUSTER_ = 'Could not find cluster. %info%';
-
+    const _ERR_CREATE_   = 'Cluster %name% could not be created. %info%';
+    const _OK_CREATE_   = 'Cluster %name% created successfully';
+    
     public static function retrieveDefaultCluster()
     {
         $c = new Criteria();

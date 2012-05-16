@@ -1,6 +1,7 @@
+<div class="help">
 <a id="help-physical-vol"><h1>Devices</h1></a>
 <p>Informação relativa aos <em>physical volumes</em> e seu estado (Um <em>physical volume</em> é um dispositivo físico, como por exemplo um disco). 
-    Nesta grelha é possível fazer a administração de <em>physical volumes</em> do <em>node</em>, nomeadamente as seguintes operações:</p>
+    Nesta grelha é possível fazer a administração de <em>physical volumes</em>, nomeadamente as seguintes operações:</p>
 
 <ul>
     <li><a href="#help-physical-vol-start">Iniciar <em>physical volume</em>;</a></li>
@@ -11,7 +12,7 @@
 <hr/>
 
 <a id="help-physical-vol-start"><h1>Iniciar <em><b>Physical Volume</b></em></h1></a>
-<p>Para <b>inicializar</b> um <em>physical volume</em> aceder ao sub-menu de contexto do device pretendido,
+<p>Para <b>inicializar</b> um <em>physical volume</em> aceder ao sub-menu de contexto do dispositivo pretendido,
     e seleccionar <em>Inicializar physical volume</em>.</p>
 
 <a href="#help-physical-vol"><div>Início</div></a>
@@ -25,3 +26,4 @@
 <p><b>Nota </b>Só é permitido remover um <em>physical volume</em> se este não pertencer a nenhum <em>volume group</em>.</p>
 <a href="#help-physical-vol"><div>Início</div></a>
 <hr/>
+</div>

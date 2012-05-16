@@ -25,10 +25,10 @@ sub loadfunc {
 }
 sub launch_agent {
 
-    # get default network interface to initialize agent with macaddress
-    my %If = ETVA::Utils::get_defaultinterface();
+    # get network interface to initialize agent with macaddress
+    $CONF{'macaddr'} = ETVA::Utils::getmacaddr();
         
-    my $macaddr = $CONF{'macaddr'} = lc $If{'macaddress'};
+    my $macaddr = $CONF{'macaddr'} = lc $CONF{'macaddr'};
     
     # register func handlers
     $CONF{'_register_handler'} = \&register_handler;

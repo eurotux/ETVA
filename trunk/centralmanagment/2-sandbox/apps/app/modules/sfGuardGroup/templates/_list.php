@@ -4,7 +4,6 @@
 </style>
 <script>
 Ext.onReady(function() {
-alert('aki');
     var btn = Ext.get("create-grid");
   btn.on("click", function(){
     btn.dom.disabled = true;

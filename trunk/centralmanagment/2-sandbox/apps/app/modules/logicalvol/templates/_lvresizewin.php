@@ -2,11 +2,13 @@
     
 Ext.ns("lvwin.resizeForm");
 
-lvwin.resizeForm.Main = function(node_id) {
+lvwin.resizeForm.Main = function(node_id, level) {
 
     Ext.QuickTips.init();
+
+    this.level = level;
+    this.node_id = node_id;   
     
-    this.node_id = node_id;
     this.lv = '';
 
     this.vg_free_size = new Ext.form.NumberField({
@@ -157,6 +159,32 @@ Ext.extend(lvwin.resizeForm.Main, Ext.form.FormPanel, {
      * on success store returned object in DB (lvStoreDB)
      */
     ,sendRequest:function(size){
+
+        // create parameters array to pass to soap request....
+        var params;
+
+        if(this.level == 'cluster'){
+            params = {
+                        'cid':this.node_id,
+                        'level':this.level,
+                        'lv':this.lv,
+                        'size': size + 'M'
+                    }
+        }else if(this.level == 'node'){
+            params = {
+                        'nid':this.node_id,
+                        'level':this.level,
+                        'lv':this.lv,
+                        'size': size + 'M'
+                    }
+        }else{
+            params = {
+                        'nid':this.node_id,
+                        'lv':this.lv,
+                        'size': size + 'M'
+                    }
+        }
+
         var conn = new Ext.data.Connection({
             listeners:{
                 // wait message.....
@@ -165,8 +193,7 @@ Ext.extend(lvwin.resizeForm.Main, Ext.form.FormPanel, {
                         title: <?php echo json_encode(__('Please wait...')) ?>,
                         msg: <?php echo json_encode(__('Resizing logical volume...')) ?>,
                         width:300,
-                        wait:true,
-                        modal: false
+                        wait:true
                     });
                 },// on request complete hide message
                 requestcomplete:function(){Ext.MessageBox.hide();}
@@ -179,7 +206,7 @@ Ext.extend(lvwin.resizeForm.Main, Ext.form.FormPanel, {
 
         conn.request({
             url: <?php echo json_encode(url_for('logicalvol/jsonResize'))?>,
-            params: {'nid':this.node_id,'lv':this.lv,'size': size},
+            params: params, 
             scope:this,
             success: function(resp,opt){
                 var response = Ext.util.JSON.decode(resp.responseText);

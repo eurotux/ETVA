@@ -30,7 +30,6 @@ Server.View.Services = Ext.extend(Ext.Panel,{
 
                 if(eval("typeof "+server_tmpl+"!='undefined'") && eval("typeof Service."+server_tmpl+"!='undefined'")){
 
-                    alert('existe');
                     //panel.add(eval("new "+server_tmpl+".View({server:this.server})"));
                     panel.add(eval("new Service."+server_tmpl+"({server:this.server})"));
 

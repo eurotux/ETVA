@@ -228,7 +228,7 @@ sub set_backupconf {
     my %init_res = $self->initialize();
     #if( isOk($init_res) ){
     my $i = $init_res{'_okmsg_'};
-    unless($i =~ /ETMS is already initialized/){
+    unless($i =~ /already initialized/i){
         unless(-d $statePath){
             `mkdir -p $statePath`;
         }
@@ -891,12 +891,15 @@ sub create_user{
 	return retErr('user', 'Password error', 1) unless(defined $params{'password'} && $params{'password'} ne '');
 	
 	my $cmd = "perl $webminScripts/create-user.pl --domain '$params{'domain'}' --user '$params{'user_name'}' --pass '$params{'password'}' --qmail-quota $params{'mailbox_quota'}"; # --real $real --qmail-quota $quota ";
-	print "$cmd\n";
-	my $res = `$cmd 2>&1`;        
-	print $res;
-	print "Exit code: $?\n";
-	if($? != 0){
-		return retErr("create_user", $res, 1);
+	plog "$cmd\n";
+	#my $res = `$cmd 2>&1`;        
+    my ($e,$res) = cmd_exec($cmd);
+	plog $res;
+	plog "Exit code: $e\n";
+	unless($e == 0){
+        if( $res !~ m/User \S+ created successfully/ ){
+            return retErr("create_user", $res, 1);
+        }
 	}
 
 	if($res =~ /(error.*)/i){
@@ -905,7 +908,7 @@ sub create_user{
 	
 #	print Dumper %params;
 	
-	print "Edit User \n\n";
+	plog "Edit User \n\n";
 
 #	my $user_name = $params{'user_name'}.'@'.$params{'domain'};
 #	print $user_name."\n";

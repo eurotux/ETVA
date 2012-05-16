@@ -19,9 +19,18 @@ html, body {
     height:50px;
     padding:5px;
     text-align:right;
-    background: transparent url(../images/etx-virtual-appliance.jpg) no-repeat;
+    margin-left: 5px;
+/*    background: transparent url(../images/etx-virtual-appliance.jpg) no-repeat;*/
 }
 
+#header h1.ETVA{
+    background: transparent url(../images/etva_205.png) no-repeat;
+}
+
+#header h1.ETVM{
+    background: transparent url(../images/etvm_205.png) no-repeat;
+
+}
 
 .x-form-display-field{
     font-size:11px;
@@ -45,6 +54,9 @@ background-image:url(../images/icons/window.png) !important;
     background-image:url(../images/icons/keyboard.png) !important;
 }
 
+.icon-lockedit {
+    background-image:url(../images/icons/lock_edit.png) !important;
+}
 /*
 * System popup
 *
@@ -422,9 +434,12 @@ background-image:url(../images/icons/leaf.gif) !important;
 
 /*
  *
- *
  * ONLINE HELP WINDOW CSS
  */
+
+ .help-section{
+     margin-bottom: 2000px;
+}
 
 .online-help {
     background-color:white;
@@ -996,6 +1011,12 @@ background-image:url(../images/icons/leaf.gif) !important;
 .icon-stat-cat {
 	background-image:url(../img/icons/stat-cat_16.png) ! important;
 }
+.icon-vm-stat-ok .x-tree-node-icon{
+	background-image:url(../images/silk/icons/tick.png) ! important;
+}
+.icon-vm-stat-nok .x-tree-node-icon{
+	background-image:url(../images/silk/icons/stop.png) ! important;
+}
 .x-form-field-wrap .trigger-tag-add {
 	background-image: url(../img/trigger-tag-add.png);
 	cursor:pointer;
@@ -1152,7 +1173,15 @@ li.x-menu-list-item div {
     top:10px;
     position:absolute;
     right:0;    
-    background: transparent url(../images/etx-virtual-appliance_full.jpg) no-repeat;
+/*    background: transparent url(../images/etva_410.jpg) no-repeat;  */
+}
+
+.header-login.ETVA{
+    background: transparent url(../images/etva_410.png) no-repeat;
+}
+
+.header-login.ETVM{
+    background: transparent url(../images/etvm_410.png) no-repeat;
 }
 
 .footer-login{
@@ -1176,3 +1205,14 @@ li.x-menu-list-item div {
     background: transparent url(../images/icons/warning.gif) no-repeat;
 }
 
+/* version - revision */
+.version_box {
+   color:#15428B; 
+   padding-left:3px !important; 
+   font-size:10px !important; 
+}
+
+.RedText a span
+{
+    background-color: #D9E8FB;
+}

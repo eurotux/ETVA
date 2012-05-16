@@ -8,6 +8,9 @@ Logicalvol.ManageDisksGrid = function(config) {
 	var fields_available = [
                 {name:'id', type:'int'}
                 ,{name:'lv', type:'string'}
+                ,{name:'server_id', type:'int'}
+                ,{name:'vm_name', type:'string'}
+                ,{name:'in_use', type:'int'}
                 ,{name:'size', type:'int'}];
 
     var fields_selected = [
@@ -19,7 +22,7 @@ Logicalvol.ManageDisksGrid = function(config) {
 
     // create the data store
     var availableGridStore = new Ext.data.JsonStore({
-            proxy: new Ext.data.HttpProxy({url:<?php echo json_encode(url_for('logicalvol/jsonGetAvailable')); ?>}),
+            proxy: new Ext.data.HttpProxy({url:<?php echo json_encode(url_for('logicalvol/jsonGetAll')); ?>}),
             baseParams: {'nid': this.node_id},
             fields:fields_available,
             totalProperty: 'total',
@@ -32,15 +35,20 @@ Logicalvol.ManageDisksGrid = function(config) {
                 ,load:{scope:this,fn:function(){
                     var tBar = this.getTopToolbar();
                     tBar.refreshBtn.removeClass('x-item-disabled');
+                    availableGridStore.filter([ {
+                                            fn: function(record){
+                                                return record.get('server_id') != this.server_id;
+                                            }, scope: this
+                                        } ]);
                 }}
             }
         });
-          
 
 	// Column Model shortcut array
 	var cols_available = [
 		{header: "ID", width: 40, sortable: true, dataIndex: 'id'},
 		{id:'lv', header: "Name", width: 150, sortable: true, dataIndex: 'lv'},
+		{header: "Server", width: 150, sortable: true, dataIndex: 'vm_name'},
 		{header: "Size", width: 150, sortable: true, dataIndex: 'size',renderer:function(v){
                 return Ext.util.Format.fileSize(v);
         }}
@@ -73,6 +81,8 @@ Logicalvol.ManageDisksGrid = function(config) {
     });
   
     disk_cb.getStore().filter('type',this.vm_type);
+    // default disk type 
+    var default_disk_type = disk_cb.getStore().getAt(0).data['value'];
     
     var cols_selected = [
         new Ext.grid.RowNumberer(),
@@ -346,8 +356,33 @@ Logicalvol.ManageDisksGrid = function(config) {
                 ddGroup    : 'selectedDiskGridDDGroup',
                 notifyDrop : function(ddSource, e, data){
                         var records =  ddSource.dragData.selections;
-                        Ext.each(records, ddSource.grid.store.remove, ddSource.grid.store);
-                        selectedGrid.store.add(records);
+                        //Ext.each(records, ddSource.grid.store.remove, ddSource.grid.store);
+                        Ext.each(records,function(f){
+                            var data = f.data;
+
+                            if( !f.data['disk_type'] )  // set default disk type
+                                f.data['disk_type'] = default_disk_type;
+
+                            if( f.data['in_use'] )
+                                Ext.Msg.show({
+                                    title: String.format(<?php echo json_encode(__('Disk {0} in use')) ?>, f.data['lv']),
+                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                    scope:this,
+                                    msg: String.format(<?php echo json_encode(__('The server {0} is using this disk.')) ?>,f.data['vm_name'])+'<br>'
+                                         +String.format(<?php echo json_encode(__('Do you want add it any way?')) ?>),
+                                    fn: function(btn){
+                                        if (btn == 'yes'){
+                                            ddSource.grid.store.remove(f);
+                                            selectedGrid.store.add(f);
+                                        }
+                                    }
+                                });
+                            else {
+                                ddSource.grid.store.remove(f);
+                                selectedGrid.store.add(f);
+                            }
+                        });
+                        //selectedGrid.store.add(records);
                         //selectedGrid.store.sort('lv', 'ASC');
                         return true
                 }

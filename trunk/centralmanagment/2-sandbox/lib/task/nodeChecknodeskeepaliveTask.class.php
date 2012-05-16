@@ -2,10 +2,19 @@
 /*
  * Task to perform state nodes check
  */
-class nodeChecknodeskeepaliveTask extends sfBaseTask
+class nodeChecknodeskeepaliveTask extends etvaBaseTask
 {
+  /**
+    * Overrides default timeout
+    **/
+    protected function getSigAlarmTimeout(){
+        return 170; // less than 3 minutes 
+    }
+
   protected function configure()
   {
+
+    parent::configure();
     // // add your own arguments here
     // $this->addArguments(array(
     //   new sfCommandArgument('my_arg', sfCommandArgument::REQUIRED, 'My argument'),
@@ -32,13 +41,14 @@ EOF;
   protected function execute($arguments = array(), $options = array())
   {
     $context = sfContext::createInstance(sfProjectConfiguration::getApplicationConfiguration('app','dev',true));
+    parent::execute($arguments, $options);
     // initialize the database connection
     $databaseManager = new sfDatabaseManager($this->configuration);
     $con = $databaseManager->getDatabase($options['connection'])->getConnection();
 
     // add your code here
 
-    $this->log('Checking VirtAgents state...'."\n");
+    $this->log('[INFO] Checking VirtAgents state...'."\n");
 
     $offset = sfConfig::get('app_node_keepalive_update') + sfConfig::get('app_node_keepalive_update_offset');
     $total_nodes = EtvaNodePeer::doCount(new Criteria());
@@ -71,11 +81,11 @@ EOF;
 
             if($affected > 0){
                 $context->getEventDispatcher()->notify(
-                    new sfEvent('ETVA', 'event.log',
+                    new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                         array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
             }
 
-            $this->log($message);
+            $this->log('[INFO]'.$message);
 
         } catch (PropelException $e) {
             $con->rollBack();
@@ -87,7 +97,7 @@ EOF;
     $logger = new sfFileLogger($context->getEventDispatcher(), array('file' => sfConfig::get("sf_log_dir").'/cron_status.log'));
 
     // log the message!
-    $logger->log("The check virtAgents task ran!", 6);
+    $logger->log("[INFO] The check virtAgents task ran!", 6);
 
 
 

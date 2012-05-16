@@ -15,7 +15,9 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
         // get default Group ID to mark as cannot delete
         $this->defaultGroupID = sfGuardGroupPeer::getDefaultGroup()->getId();
     }
-    
+    public function executeUpdatesys($request){ 
+    } 
+
     public function executeSignin($request)
     {
         $user = $this->getUser();
@@ -98,7 +100,7 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
         $user = $this->getUser();
 
         if($pwd!==$pwd_again){
-            $response = array('success' => false, 'agent'=>'ETVA','info'=>$this->getContext()->getI18N()->__('Passwords do not match'));
+            $response = array('success' => false, 'agent'=>sfConfig::get('config_acronym'),'info'=>$this->getContext()->getI18N()->__('Passwords do not match'));
             $result = json_encode($response);
 
             return $this->renderText($result);
@@ -107,9 +109,9 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
         if($user->checkPassword($cur_pwd)){
             $user->setPassword($pwd);
 
-            $response = array('success' => true,'agent'=>'ETVA','response'=>$this->getContext()->getI18N()->__('New password saved!'));
+            $response = array('success' => true,'agent'=>sfConfig::get('config_acronym'),'response'=>$this->getContext()->getI18N()->__('New password saved!'));
         }
-        else $response = array('success' => false, 'agent'=>'ETVA','info'=>$this->getContext()->getI18N()->__('Wrong user password'));
+        else $response = array('success' => false, 'agent'=>sfConfig::get('config_acronym'),'info'=>$this->getContext()->getI18N()->__('Wrong user password'));
 
         $result = json_encode($response);
 

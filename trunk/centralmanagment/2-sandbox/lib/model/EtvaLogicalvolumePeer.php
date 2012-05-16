@@ -33,12 +33,29 @@ class EtvaLogicalvolumePeer extends BaseEtvaLogicalvolumePeer
 
   const _NOTAVAILABLE_ = 'No logical volumes available';
 
-  const _NOTALLSHARED_ = 'All logical volumes needs to be shared';
+  const _NOTALLSHARED_ = 'All logical volumes needs to be shared.';
+
+  const _HASSNAPSHOTS_ = 'The logical volumes has snapshots.';
 
   const _ERR_INVALIDSIZE_ = 'Invalid logical volume size';
 
   const _ERR_INCONSISTENT_ = 'Shared logical volumes info reported inconsistent. %info%';
+
+  const _SNAPSHOT_LV_   = 'Volume %name% is a snapshot.';
     
+  const _ERR_CREATESNAPSHOT_   = 'Snapshot %name% could not be created. %info%';
+  const _OK_CREATESNAPSHOT_   = 'Snapshot %name% created successfully';
+
+  const _SNAPSHOT_INOTHERNODE_   = 'Volume %name% is a snapshot in other node.';
+  const _SNAPSHOT_CLUSTER_CONTEXT_ = 'Volume %name% is a snapshot and cannot be changed in cluster context. Please select the corresponding the node.';
+  const _LV_HAVESNAPSHOTS_INOTHERNODE_   = 'Volume %name% have snapshots in other node.';
+  const _LV_HAVESNAPSHOTS_INNODE_CONTEXT_   = 'Volume %name% have snapshots in node context.';
+
+  const _ERR_INIT_OTHER_CLUSTER_ = 'Node has some logical volumes that exists on cluster %name%.';
+
+  const _OK_CREATECLONE_    = 'Clone %name% was successfully created.';
+  const _ERR_CREATECLONE_   = 'Could not create clone %name%.';
+
   public static function retrieveByLvDevice($name, Criteria $criteria = null)
   {
     if(is_null($criteria )) $criteria = new Criteria();

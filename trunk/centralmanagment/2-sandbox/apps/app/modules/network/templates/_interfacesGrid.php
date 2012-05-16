@@ -32,11 +32,12 @@ Ext.namespace('Network');
 Network.InterfacesGrid = Ext.extend(Ext.grid.GridPanel, {            
         border:false,
         autoScroll:true,
-        stripeRows: true,
-        loadMask: {msg: <?php echo json_encode(__('Retrieving data...')) ?>},
-        initComponent:function(){
+        stripeRows: true
+        ,loadMask: {msg: <?php echo json_encode(__('Retrieving data...')) ?>}
+        ,initComponent:function(){
 
 <?php
+
 $url = json_encode(url_for('network/jsonGridNoPager',false));
 $store_id = json_encode($js_grid['pk']);
 ?>
@@ -45,7 +46,6 @@ $store_id = json_encode($js_grid['pk']);
             var store_id = <?php echo $store_id ?>;
             var sort_field = store_id;
             var url = <?php echo $url ?>;
-
 
             this.cm = new Ext.grid.ColumnModel([
                 {header:"Id",width:20,dataIndex:"Id",sortable:true},
@@ -69,6 +69,8 @@ $store_id = json_encode($js_grid['pk']);
 
             this.store = new Ext.data.GroupingStore({
                 url: url,
+                method:'POST',
+                baseParams: {'cid': this.cluster_id},
                 reader: new Ext.data.JsonReader({
 
                     totalProperty: 'total',
@@ -85,8 +87,8 @@ $store_id = json_encode($js_grid['pk']);
                         {name:"Ip",mapping:'Ip'},
                         {name:"Mask",mapping:'Mask'},
                         {name:"Mac",mapping:'Mac'},
-                        {name:"Network",mapping:'Vlan'}]
-
+                        {name:"Network",mapping:'Vlan'},
+                        {name:"Vm_state", mapping:'Vm_state'}]
                 }),
 
                 sortInfo:{field: 'NodeName', direction: "DESC"},
@@ -124,7 +126,7 @@ $store_id = json_encode($js_grid['pk']);
             //               // if(node.isLeaf()){ //open context menu only if node is a leaf
             this.ctxRow = grid.getView().getRow(rowIndex);
             this.ctxRecord = grid.getSelectionModel().getSelected();
-
+            //alert("aki");
 
            // if(!this.menu){ // create context menu on first right click
                 this.menu = new Ext.menu.Menu({
@@ -134,6 +136,7 @@ $store_id = json_encode($js_grid['pk']);
                             ,iconCls:'go-action'
                             ,url:<?php echo json_encode(url_for('network/Network_ManageInterfacesGrid')); ?>
                             ,call:'Network.ManageInterfacesGrid'
+                            ,ref:'manageNet'
                             ,callback:function(item){
                                 
                                 var rec = grid.getSelectionModel().getSelected();
@@ -152,10 +155,21 @@ $store_id = json_encode($js_grid['pk']);
                                                 iconCls: 'icon-window',
                                                 //bodyStyle: 'padding:10px;',
                                                 shim:false,
-                                                border:true,
+                                                border:true
+                                                ,tools: [{
+                                                    id:'help',
+                                                    qtip: __('Help'),
+                                                    handler:function(){
+                                                        View.showHelp({
+                                                            anchorid:'help-network-main',
+                                                            autoLoad:{ params:'mod=network'},
+                                                            title: <?php echo json_encode(__('Manage network interfaces Help')) ?>
+                                                        });
+                                                    }
+                                                }]
                                                 //resizable:false,
                                                 //draggable:false,
-                                                constrainHeader:true,
+                                                ,constrainHeader:true,
                                                 layout: 'fit',
                                                 modal:true,
                                                 items:managegrid,
@@ -190,14 +204,19 @@ $store_id = json_encode($js_grid['pk']);
                             iconCls:'go-action',
                             text:<?php echo json_encode(__('Remove network interface')) ?>,
                             scope: this,
+                            ref:'rmIf',
                             handler:this.detachInterface
                         }
                     ]
                 });
 
                 this.menu.on('hide', this.onContextHide, this);
-
-
+            if(this.ctxRecord.get('VmType')!='pv' && this.ctxRecord.get('Vm_state')=='running'){
+                this.menu.manageNet.setDisabled(true);
+                this.menu.manageNet.setTooltip({text: <?php echo json_encode(__('Server need to be stop to edit!')) ?>});
+                this.menu.rmIf.setDisabled(true);
+                this.menu.rmIf.setTooltip({text: <?php echo json_encode(__('Server need to be stop to edit!')) ?>});
+            }
 
             // Stops the browser context menu from showing.
             e.stopEvent();
@@ -219,7 +238,7 @@ $store_id = json_encode($js_grid['pk']);
             if(rec){
                 var query = {'vlan_id':rec.get('id')};
                 vlanName = rec.get('name');
-                this.store.baseParams = {'query': Ext.encode(query)};
+                this.store.baseParams = {'query': Ext.encode(query), 'cid': this.cluster_id};
                 this.ownerCt.setTitle(String.format(<?php echo json_encode(__('List of {0} network interfaces')) ?>,vlanName));
 
             }else{

@@ -189,13 +189,12 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
 
     } // eo function onRender
     ,loadData:function(){
-
+        //alert(this.fetch);
         this.load({
             url:this.url,
             waitMsg: <?php echo json_encode(__('Retrieving data...')) ?>,
             params:{params:Ext.encode(this.fetch)},
             failure:function(){
-                alert('falhou');
                 this.disable();
             },
             success: function ( form, action ) {
@@ -311,7 +310,7 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
                         Ext.MessageBox.show({
                             title: <?php echo json_encode(__('Node(s) connectivity')) ?>,
                             msg: String.format('{0}<br><br>{1}<br><br>{2}'
-                                    ,<?php echo json_encode(__('Some nodes reported down. If you proceed the node(s) connection to CM will be outdated. Remember to verify node(s) connectivity to Central Management')) ?>
+                                    ,<?php echo json_encode(__('Some nodes reported down. If you proceed, the node(s) connection settings to CM will be outdated. Remember to verify node(s) connectivity to Central Management')) ?>
                                     ,resp['info']
                                     ,<?php echo json_encode(__('Are you sure you want to do this?')) ?>),
                             buttons: Ext.MessageBox.YESNOCANCEL,

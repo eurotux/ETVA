@@ -84,7 +84,7 @@ class ovfActions extends sfActions
         if(!$imported){
             $parse_err = $this->getContext()->getI18N()->__(OvfEnvelope_VA::_ERR_PARSING_,array('%url%'=>$url));
             $msg_ = $this->getContext()->getI18N()->__(OvfEnvelope_VA::_ERR_IMPORT_,array('%info%'=>$parse_err));
-            $error = $this->setJsonError(array('success'=>false,'agent'=>'ETVA','error'=>$msg_,'info'=>$msg_));
+            $error = $this->setJsonError(array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_,'info'=>$msg_));
             return $this->renderText($error);            
         }
 
@@ -140,7 +140,7 @@ class ovfActions extends sfActions
                 $msg_i18n = $this->getContext()->getI18N()->__(EtvaMacPeer::_ERR_AT_LEAST_MACS_,array('%num%'=>$total_networks));
 
                 // if is browser request return text renderer
-                $error = $this->setJsonError(array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n));
+                $error = $this->setJsonError(array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n));
                 return $this->renderText($error);
             }            
 
@@ -188,13 +188,13 @@ class ovfActions extends sfActions
 
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
 
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             //notify event log
             $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
             $message = Etva::getLogMessage(array('info'=>$node_log), OvfEnvelope_VA::_ERR_IMPORT_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
@@ -214,13 +214,13 @@ class ovfActions extends sfActions
 
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_EXIST_,array('%name%'=>$server['name']));
 
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n,'info'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             //notify event log
             $server_log = Etva::getLogMessage(array('name'=>$server['name']), EtvaServerPeer::_ERR_EXIST_);
             $message = Etva::getLogMessage(array('info'=>$server_log), OvfEnvelope_VA::_ERR_IMPORT_);
             $this->dispatcher->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
@@ -470,7 +470,7 @@ class ovfActions extends sfActions
         }
         catch(Exception $e){
             $msg = $e->getMessage();
-            $result = array('success'=>false,'agent'=>'ETVA','error'=>$msg,'info'=>$msg);
+            $result = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg,'info'=>$msg);
             $return = $this->setJsonError($result);
             return  $this->renderText($return);
         }

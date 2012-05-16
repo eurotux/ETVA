@@ -51,7 +51,7 @@ Ovf.Export.Form = Ext.extend(Ext.form.FormPanel, {
                 displayField:'name',
                 pageSize:10,
                 store:new Ext.data.Store({
-                        proxy:new Ext.data.HttpProxy({url:'/app_dev.php/server/JsonListAll'}),
+                        proxy:new Ext.data.HttpProxy({url:'server/JsonListAll'}),
                         baseParams:{'sort':Ext.encode([{field: 'node_name',direction: 'ASC'},{field: 'name',direction: 'ASC'}])},
                         remoteSort: true,
                         reader: new Ext.data.JsonReader({

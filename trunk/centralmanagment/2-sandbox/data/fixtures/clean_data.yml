@@ -7,9 +7,9 @@ sfGuardUser:
 sfGuardUserProfile:
   admin:
     user_id: admin
-    first_name: Ricardo
-    last_name: Gomes
-    email: rjg@eurotux.com
+    first_name: Admin
+    last_name: 
+    email: tec@eurotux.com
 
 sfGuardPermission:
   admin:

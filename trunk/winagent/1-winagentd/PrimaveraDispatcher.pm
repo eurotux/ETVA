@@ -373,7 +373,7 @@ sub primavera_insertbackupplan {
     my $companiesByComma = $p{'companiesByComma'};
     if( ref($p{'companies'}) ){
         my $lcompanies = $p{'companies'};
-	for my $C (@$lcompanies){
+        for my $C (@$lcompanies){
             $companiesByComma .= ";" if( $companiesByComma );
             $companiesByComma .= "$C->{'key'},$C->{'name'}";
     	}
@@ -823,7 +823,7 @@ sub set_backupconf {
     my $self = shift;
     my (%p) = @_;
 
-    my $tmpbf = tmpfile("${TMPDIR}\\primaveraagentd-setbkpconf-tmpfile");
+    my $tmpbf = ETVA::Utils::rand_tmpfile("${TMPDIR}\\primaveraagentd-setbkpconf-tmpfile");
     if( $p{'_url'} ){
 	my $rc = LWP::Simple::getstore("$p{'_url'}","$tmpbf");
 	if( is_error($rc) || ! -e "$tmpbf" ){
@@ -844,7 +844,7 @@ sub set_backupconf {
 
     my ($INSTALLDIR,$BACKUPSDIR) = ($CONF{'INSTALLDIR'},$CONF{'BACKUPSDIR'});
 
-    my $tmpdir = tmpdir("$TMPDIR\\primaveraagentd-setbkpconf-tmpdir");
+    my $tmpdir = ETVA::Utils::rand_tmpdir("$TMPDIR\\primaveraagentd-setbkpconf-tmpdir");
     my $tmpfn = $tmpbf;
     $tmpfn =~ s/^.+(primaveraagentd-setbkpconf-tmpfile\.\w+)$/$1/g;
 

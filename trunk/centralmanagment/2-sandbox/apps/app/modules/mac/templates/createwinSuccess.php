@@ -9,13 +9,10 @@
         //Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 
         Ext.QuickTips.init();
-
-
-
-
+        this.cid = <?php echo $cid ?>;
         // create the data store to retrieve network data
         var store_networks_created = new Ext.data.JsonStore({
-            proxy: new Ext.data.HttpProxy({url:'network/jsonGridNoPager'}),
+            proxy: new Ext.data.HttpProxy({url:'network/jsonGridNoPager?cid='+this.cid+'&query=""'}),
             totalProperty: 'total',
             root: 'data',
             fields: [{name:'vlan',mapping:'Vlan'},{name:'mac',mapping:'Mac'}],            
@@ -173,7 +170,8 @@
                         {xtype:'numberfield',
                             name       : 'pool_size',                            
                             fieldLabel : <?php echo json_encode(__('MAC pool size')) ?>,
-                            minValue:1,                            
+                            minValue:1,                          
+                            maxValue: 1000,
                             width:30,
                             allowBlank : false,
                             vtype:'pool_valid',

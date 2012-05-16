@@ -245,8 +245,8 @@ SfGuardGroup.Main = function(app) {
                 }
         }});
                 
-        alert('nao existe');
-    }else alert('ja existe');
+        //alert('nao existe');
+    }//else alert('ja existe');
 
     win.show();
 

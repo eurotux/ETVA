@@ -56,6 +56,7 @@ my %MEMInfo = ();
 
 my $VMConnection;
 
+my $node_arch;      # default node arch
 my $have_kqemu;
 my $have_kvm;
 my $have_hvm;
@@ -170,6 +171,29 @@ sub loadsysinfo {
     if( $force || !$CONF ){ loadconf(); }
     if( $force || !%MEMInfo ){ loadmeminfo(); }
     if( $force || !%CPUInfo ){ loadcpuinfo(); }
+
+    if( $VMConnection ){
+        my $NodeInfo;
+        eval {
+            $NodeInfo = $VMConnection->get_node_info();
+        };
+        if( $@ ){
+            plog( "VirtAgent hypervisor does not support get_node_info" );
+        } elsif( $NodeInfo ){
+            my $old_MemTotal = $MEMInfo{'MemTotal'};
+            my $old_MemFree = $MEMInfo{'MemFree'};
+            $MAXMEM = $MEMInfo{'MemTotal'} = $NodeInfo->{'memory'} * 1024;
+            my $MemFree;
+            eval {
+                $MemFree = $VMConnection->get_node_free_memory();
+            };
+            if( $@ ){
+                plog( "VirtAgent hypervisor does not support get_node_free_memory" );
+            } else {
+                $MEMInfo{'MemFree'} = $MemFree;
+            }
+        }
+    }
 }
 
 =item getsysinfo
@@ -806,17 +830,17 @@ sub setMemory {
         return wantarray() ? %$dom : $dom;
     } 
 
-    if( $mem < $dom->get_max_memory() ){
-        eval {
-            $dom->set_memory($mem);
-        };
-        if( $@ ){
-            return retErr('_SET_MEMORY_DOMAIN_',"Can't set memory for domain: $@");
-        }
-        return retDomainInfo($dom);
-    } else {
+    if( $mem > $dom->get_max_memory() ){
         return retErr('_MEMORY_LIMIT_EXCEEDED_',"Memory limit exceeded!");
     }
+
+    eval {
+        $dom->set_memory($mem);
+    };
+    if( $@ ){
+        return retErr('_SET_MEMORY_DOMAIN_',"Can't set memory for domain: $@");
+    }
+    return retDomainInfo($dom);
 }
 
 =item setMaxMemory
@@ -876,7 +900,7 @@ sub setVCPUS {
         return wantarray() ? %$dom : $dom;
     } 
 
-    if( $vcpus <= $dom->get_max_vcpus() ){
+    if( $vcpus <= $MAXNCPU ){
         eval {
             $dom->set_vcpus($vcpus);
         };
@@ -1070,6 +1094,58 @@ sub vmMigrate {
     my $ID = retDomainInfo($ddom);
     return retOk("_OK_MIGRATE_","Domain successful migrated","_RET_OBJ_",$ID)
     
+}
+
+# saveDomain: save VM state to file
+sub saveDomain {
+    my $self = shift;
+
+    my %p = @_;
+
+    # get source host connection
+    my $vm = $self->vmConnect();
+
+    # get domain
+    my $dom = $self->getDomain(%p);
+
+    if( isError($dom) ){
+        return wantarray() ? %$dom : $dom;
+    } 
+
+    my $file = $p{'file'};
+
+    eval {
+        $dom->save($file);
+    };
+    if( $@ ){
+        return retErr('_SAVE_ERROR_',"Something wrong saving to file: $@");
+    }
+
+    # return domain info
+    my $ID = retDomainInfo($dom);
+    return retOk("_OK_SAVE_","Domain successful saved","_RET_OBJ_",$ID);
+}
+
+# restoreDomain: restore domain from saved file
+sub restoreDomain {
+    my $self = shift;
+
+    my %p = @_;
+
+    # get source host connection
+    my $vm = $self->vmConnect();
+
+    my $file = $p{'file'};
+
+    eval {
+        $vm->restore_domain($file);
+    };
+    if( $@ ){
+        return retErr('_Restore_ERROR_',"Something wrong with restore domain: $@");
+    }
+
+    # return domain info
+    return retOk("_OK_RESTORE_","Domain successful restored");
 }
 
 sub vmIsRunning {
@@ -1688,8 +1764,8 @@ sub get_kernel {
 
     my ($kernelfn,$initrdfn,$args);
 
-    my $kernel_file = tmpfile("$TMP_DIR/vmlinuz");
-    my $initrd_file = tmpfile("$TMP_DIR/initrd.img");
+    my $kernel_file = ETVA::Utils::rand_tmpfile("$TMP_DIR/vmlinuz");
+    my $initrd_file = ETVA::Utils::rand_tmpfile("$TMP_DIR/initrd.img");
     my $extras = "";
 
     if( $location =~ m/^http:/ ||
@@ -1702,7 +1778,7 @@ sub get_kernel {
         $extras = "text method=$location";
     } elsif( $location =~ m/^nfs:/ ){
         # nfs source
-        my $tmpdir = tmpdir("$TMP_DIR/virtagent-tmpdir");
+        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
         my $ofs = ($location =~ m/nfs:\/\//)? 6: 4;
         my $nl = substr($location,$ofs);
         cmd_exec("mount","-o","ro",$nl,$tmpdir);
@@ -1718,7 +1794,7 @@ sub get_kernel {
         $extras = "text method=$location";
     } elsif( -b $location ){
         # is block device
-        my $tmpdir = tmpdir("$TMP_DIR/virtagent-tmpdir");
+        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
         cmd_exec("mount","-o","ro",$location,$tmpdir);
         copy("$tmpdir/$kernelpath",$kernel_file);
         copy("$tmpdir/$initrdpath",$initrd_file);
@@ -1727,7 +1803,7 @@ sub get_kernel {
         $extras = "text method=$location";
     } elsif( -e $location ){ 
         # is file
-        my $tmpdir = tmpdir("$TMP_DIR/virtagent-tmpdir");
+        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
         cmd_exec("mount","-o","ro,loop",$location,$tmpdir);
         copy("$tmpdir/$kernelpath",$kernel_file);
         copy("$tmpdir/$initrdpath",$initrd_file);
@@ -1753,12 +1829,12 @@ sub get_bootdisk {
 
     my ($bootpath) = $self->get_bootpath_ditro($distro,$type,$arch);
 
-    my $bootdisk = tmpfile("$TMP_DIR/boot.iso");
+    my $bootdisk = ETVA::Utils::rand_tmpfile("$TMP_DIR/boot.iso");
     if( $location =~ m/http:/ || $location =~ m/ftp:/ ){
         my $child;
         LWP::Simple::getstore("$location/$bootpath",$bootdisk);
     } elsif( $location =~ m/nfs:/ ){
-        my $tmpdir = tmpdir("$TMP_DIR/virtagent-tmpdir");
+        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
         my $ofs = ($location =~ m/nfs:\/\//)? 6: 4;
         my $nl = substr($location,$ofs);
         cmd_exec("mount","-o","ro",$nl,$tmpdir);
@@ -1768,13 +1844,13 @@ sub get_bootdisk {
     } elsif( -d "$location" ){
         copy("$location/$bootpath",$bootdisk);
     } elsif( -b "$location" ){   # block device
-        my $tmpdir = tmpdir("$TMP_DIR/virtagent-tmpdir");
+        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
         cmd_exec("mount","-o","ro",$location,$tmpdir);
         copy("$tmpdir/$bootpath",$bootdisk);
         cmd_exec("umount",$tmpdir);
         rmdir($tmpdir);
     } elsif( -e "$location" ){   # file
-        my $tmpdir = tmpdir("$TMP_DIR/virtagent-tmpdir");
+        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
         cmd_exec("mount","-o","ro,loop",$location,$tmpdir);
         copy("$tmpdir/$bootpath",$bootdisk);
         cmd_exec("umount",$tmpdir);
@@ -1836,15 +1912,20 @@ sub get_arch {
     my %params = @_;
     my $arch = $params{'arch'};
     if( !$arch ){
-        open(A,"/bin/uname -p|");
-        $arch = <A>;
-        chomp $arch;
-        close(A);
-        if( !$arch or ( $arch eq "unknown" ) ){
-            open(A,"/bin/uname -i|");
+        if( !$node_arch ){
+            open(A,"/bin/uname -p|");
             $arch = <A>;
             chomp $arch;
             close(A);
+            if( !$arch or ( $arch eq "unknown" ) ){
+                open(A,"/bin/uname -i|");
+                $arch = <A>;
+                chomp $arch;
+                close(A);
+            }
+            $node_arch = $arch; # sync
+        } else {
+            $arch = $node_arch;
         }
     }
     return $arch;
@@ -1973,6 +2054,10 @@ sub domain_xml_parser {
     my $doc = $parser->parse($xml);
     my $root = $doc->getDocumentElement();
     my %D = domain_xml_parser_rec($root);
+
+    # Avoid memory leaks - cleanup circular references for garbage collection
+    $doc->dispose;
+
     return wantarray() ? %D : \%D;
 }
 sub domainXML {

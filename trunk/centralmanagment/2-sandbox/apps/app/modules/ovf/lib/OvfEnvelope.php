@@ -97,12 +97,17 @@ class OvfEnvelope
 
         $disk_nodes = $xpath->query('//envl:DiskSection'); // selects all name element        
 
-        $this->buildReferences($refs_nodes->item(0));
-        $this->buildDiskSection($disk_nodes->item(0));
-        $this->buildVirtualSystem($vs_nodes->item(0));
+        $refs_nodes_0 = $refs_nodes->item(0);
+        $disk_nodes_0 = $disk_nodes->item(0);
+        $vs_nodes_0 = $vs_nodes->item(0);
 
-        return true;
+        if( $refs_nodes_0 && $disk_nodes_0 && $vs_nodes_0 ){
+            $this->buildReferences($refs_nodes_0);
+            $this->buildDiskSection($disk_nodes_0);
+            $this->buildVirtualSystem($vs_nodes_0);
 
+            return true;
+        } else return false;
     }
 
     /*

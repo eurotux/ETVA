@@ -3,3 +3,6 @@ all:
     user: etva_ftp
     password: ola123
     dir: /usr/share/etva-isos
+  version: 1.0
+  release: 5104
+  acronym: ETVM

@@ -30,7 +30,7 @@ BEGIN {
                     plog now nowStr retErr retOk isError isOk
                     cmd_exec cmd_exec_errh backquote_exec
                     loadconfigfile saveconfigfile random_uuid
-                    get_conf set_conf random_mac tmpfile tmpdir
+                    get_conf set_conf random_mac rand_tmpfile rand_tmpdir
                     fieldsAsString
                     decode_content encode_content
                     make_soap make_soap_args
@@ -128,7 +128,7 @@ sub cmd_exec {
     IO::Handle->autoflush(1);
 
     my $tmpdir = $CONF{'tmpdir'} || "/tmp";
-    my $fptmpfile = tmpfile("${tmpdir}/cmd_exec") . ".log";
+    my $fptmpfile = rand_tmpfile("${tmpdir}/cmd_exec") . ".log";
     push(@cmds,">$fptmpfile","2>&1");
     my $cmd_str = join(" ",@cmds);
 
@@ -154,7 +154,7 @@ sub cmd_exec_errh {
     IO::Handle->autoflush(1);
 
     my $tmpdir = $CONF{'tmpdir'} || "/tmp";
-    my $fptmpfile = tmpfile("${tmpdir}/cmd_exec") . ".log";
+    my $fptmpfile = rand_tmpfile("${tmpdir}/cmd_exec") . ".log";
     push(@cmds,"2>$fptmpfile");
     my $cmd_str = join(" ",@cmds);
 
@@ -427,9 +427,9 @@ sub get_conf {
             $UC{'cm_uri'} = $CONF{'cm_uri'} = get_cmuri() if( !$CONF{'cm_uri'} || $CONF{'cm_uri'} =~ m/http:\/\/localhost/ );
 
             # IP
-            $UC{'IP'} = $CONF{'IP'} = $CONF{'LocalIP'} = get_ip(%CONF) if( !$CONF{'IP'} && !$CONF{'LocalIP'} );
+            $UC{'IP'} = $UC{'LocalIP'} = $CONF{'IP'} = $CONF{'LocalIP'} = get_ip(%CONF);
             $UC{'IP'} = $CONF{'IP'} = $CONF{'LocalIP'} if( !$CONF{'IP'} );
-            $CONF{'LocalIP'} = $CONF{'IP'} if( !$CONF{'LocalIP'} );
+            $UC{'LocalIP'} = $CONF{'LocalIP'} = $CONF{'IP'} if( !$CONF{'LocalIP'} );
 
             # Port
             $UC{'Port'} = $CONF{'Port'} = $CONF{'LocalPort'} = get_port() if( !$CONF{'Port'} && !$CONF{'LocalPort'} );
@@ -531,18 +531,13 @@ sub get_ip {
     # try get from previous call
     my $ip = $H{'IP'} || $H{'LocalIP'} || $CONF{'IP'} || $CONF{'LocalIP'} || "";
 
-    # return ip if set and dont have force to reload flag
-    if( !$H{'force'} && $ip ){
-        return $ip;
-    }
-
     my $cm_uri = $H{'cm_uri'} || $CONF{'cm_uri'};
 
     # get ip from route to cm_uri
     if( $cm_uri && ($cm_uri !~ m/localhost/) &&
         ($cm_uri !~ m/127\.0\.0\.1/) &&
-        ( $cm_uri =~ m/^http:\/\/([^\/]+)\// ) ){
-        my ($cm_ip) = ($1);
+        ( $cm_uri =~ m/^(http|https):\/\/([^\/]+)\// ) ){
+        my ($cm_ip) = ($2);
         # convert to ip
         $cm_ip = inet_ntoa(inet_aton($cm_ip)) if( $cm_ip !~ m/\d+\.\d+\.\d+\.\d+/ );
         my ($e,$m) = cmd_exec("ip route get $cm_ip");
@@ -550,10 +545,15 @@ sub get_ip {
 
         if( $if ){
             my %If = get_interface($if);
-            if( $ip = $If{"address"} ){
-                return $ip;
+            if( $If{"address"} ){
+                return $ip = $If{"address"};
             }
         }
+    }
+
+    # return ip if set and dont have force to reload flag
+    if( !$H{'force'} && $ip ){
+        return $ip;
     }
 
     my $name = $H{'name'};
@@ -737,12 +737,12 @@ sub isNameValid {
     if( $name eq 'localhost.localdomain' ){ $v = 0; }
     return $v;
 }
-sub tmpfile {
+sub rand_tmpfile {
     my ($pr) = @_;
     my $randtok = substr(md5_hex( rand(time()) ),0,5);
     return $pr ? "$pr.$randtok" : $randtok ;
 }
-sub tmpdir {
+sub rand_tmpdir {
     my ($pr) = @_;
     my $randtok = substr(md5_hex( rand(time()) ),0,5);
     my $dir = $pr ? "$pr.$randtok" : $randtok ;
@@ -944,9 +944,16 @@ sub prettysize {
     return $spsize;
 }
 
-sub roundsize {
-    my ($s) = @_;
-    return prettysize(str2size($s));
+sub roundconvertsize { 
+    my ($s) = @_; 
+    return prettysize(str2size($s)); 
+}
+
+sub roundedsize {
+    my ($str) = @_;
+    my ($size,$t) = ($str =~ m/([0-9.]+)([bBKkMmGg])?/);
+    my $r_size = int($size) . "$t";
+    return $r_size;
 }
 
 # list_processes
@@ -1005,15 +1012,15 @@ sub gencerts {
     }
 
     my $ca_topdir = "/etc/pki/CA";
-    if( !-d "$ca_topdir" ){
-        mkpath( "$ca_topdir" );
+    if( !-d "$ca_topdir/private" ){
+        mkpath( "$ca_topdir/private" );
     }
     my $topdir = "/etc/pki/libvirt";
     if( !-d "$topdir/private" ){
         mkpath( "$topdir/private" );
     }
 
-    my $ca_keyfile = "$ca_topdir/cakey.pem";
+    my $ca_keyfile = "$ca_topdir/private/cakey.pem";
     my $ca_certfile = "$ca_topdir/cacert.pem";
     my $srv_keyfile = "$topdir/private/serverkey.pem";
     my $srv_certfile = "$topdir/servercert.pem";
@@ -1068,6 +1075,63 @@ __SRVINFO__
         unlink("$srv_tmpinfo");
     }
     return 1;
+}
+
+sub getmacaddr {
+    my $if;
+    my $cm_uri = $CONF{'cm_uri'};
+    if( $cm_uri =~ m/^(http|https):\/\/([^\/]+)\// ){
+        my ($cm_ip) = ($2);
+        # convert to ip
+        $cm_ip = inet_ntoa(inet_aton($cm_ip)) if( $cm_ip !~ m/\d+\.\d+\.\d+\.\d+/ );
+        my ($e,$m) = cmd_exec("ip route get $cm_ip");
+        ($if) = ( $m =~ m/^\S+\s+\S+\s+(\S+)/gs );
+    }
+    my %If = $if ? get_interface($if)
+                    : get_defaultinterface();
+    my $old_macaddr = $CONF{'macaddr'};
+    $CONF{'macaddr'} = lc $If{'macaddress'} if( $If{'macaddress'} );
+
+    if( $old_macaddr ne $CONF{'macaddr'} ){
+        # write to config file
+        set_conf($CONF{'CFG_FILE'},%CONF);
+    }
+    return $CONF{'macaddr'};
+}
+
+# process_mem_size: get process memory size
+sub process_mem_size {
+    my ($pid) = @_;
+    $pid = $$ if( !$pid );
+
+    my $pagesize = 4096; # page size FIXME
+
+    open(SM,"/proc/$pid/statm");
+    my $line = <SM>;
+    close(SM);
+    
+    my ($pages) = split(/\s+/,$line);
+    return $pages*$pagesize;
+}
+
+# process_max_childs: get max of childs process
+sub process_max_childs {
+    my ($pid) = @_;
+    $pid = $$ if( !$pid );
+
+    my $max_childs = 0;
+    open(SL,"/proc/$pid/limits");
+    while( <SL> ){
+        if( /^Max processes\s+(\w+)\s+(\w+)\s+\w+\s*$/ ){
+            my ($soft,$hard) = ($1,$2);
+            if( $soft =~ m/\d+/ ){
+                $max_childs = int($soft);
+            }
+            last;
+        }
+    }
+    close(SL);
+    return $max_childs;
 }
 
 1;

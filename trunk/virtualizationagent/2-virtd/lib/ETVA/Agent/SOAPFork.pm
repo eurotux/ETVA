@@ -155,6 +155,8 @@ sub processdata {
     my $self = shift;
     my ($fh) = @_;
 
+    my $bef_cur_mem = ETVA::Utils::process_mem_size($$);
+
     plog("processing data") if(&debug_level);
 
     # Get data
@@ -198,6 +200,14 @@ sub processdata {
             POSIX::_exit(0);
         }
     }
+
+    my $aft_cur_mem = ETVA::Utils::process_mem_size($$);
+
+    my $diff_cur_mem = $aft_cur_mem - $bef_cur_mem;
+    my $diff_cur_mem_ps = ETVA::Utils::prettysize($diff_cur_mem);
+    my $aft_cur_mem_ps = ETVA::Utils::prettysize($aft_cur_mem);
+
+    plog(sprintf('%s: MEMORY_LEAK ETVA::Agent::SOAPFork::processdata method=%s memory detect cur_mem=%s (diff=%s)',ETVA::Utils::nowStr(0),$method,$aft_cur_mem_ps,$diff_cur_mem_ps)) if(&debug_level > 9);
 }
 
 sub parse_request {
@@ -343,6 +353,10 @@ sub reinitialize {
     plog "register ... restarting for register..." if(&debug_level);
     $self->set_runout();
     return retOk("_OK_","ok");
+}
+
+sub get_number_childs {
+    return int(@CHILD_PIDS);
 }
 
 1;

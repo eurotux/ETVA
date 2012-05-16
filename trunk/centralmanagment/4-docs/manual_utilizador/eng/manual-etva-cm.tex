@@ -1,16 +1,25 @@
-\documentclass[12pt,a4paper,portuges]{scrreprt}
+\documentclass[12pt,a4paper,english]{scrreprt}
 %not free anymore, is this really neaded?
 %\usepackage{floatflt}
+%\usepackage[english]{babel}
 \usepackage{varioref}
 \usepackage{shadow}
+\usepackage{footmisc}
 \usepackage{include/eurotux}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand\contentsname{Table of Contents}
+\newcommand{\acronym}{ETVA }
+\ifx\UseOption\undefined
+\def\UseOption{etva}
+\fi
+\usepackage{optional}
+
 % forçar numeração nas secções
 \setcounter{secnumdepth}{5}
 \setcounter{tocdepth}{5}
 
 \author{Eurotux Informática, S.A.}
-\title{Manual ETVA Central Management}
+\title{ETVA Manual\\Central Management v1.0.1}
 \subtitle{Eurotux Informática, S.A.}
 \date{\today}
 %\date{Fevereiro de 2006}
@@ -20,8 +29,22 @@
 \maketitle
 
 \begin{Log}
+\LogEntry{Carlos Rodrigues}{cmar@eurotux.com}{2012-04-20}
+Version change
+\LogEntry{Manuel Dias}{mfd@eurotux.com}{2011-12-19}
+English version of the manual
+\LogEntry{Manuel Dias}{mfd@eurotux.com}{2011-11-30}
+Sub-section \textit{Drivers virtio} of Section \textit{Virtual machine}
+\LogEntry{Manuel Dias}{mfd@eurotux.com}{2011-11-21}
+Sub-section \textit{Virtual cluster management} of Section \textit{System administration}
+\LogEntry{Manuel Dias}{mfd@eurotux.com}{2011-10-13}
+Sub-section \textit{User, groups and permission administration} of Section \textit{System administration}
+\LogEntry{Carlos Rodrigues}{cmar@eurotux.com}{2011-07-13}
+Sub-section \textit{ETFW} of Section \textit{ETVA Management Agents}
+\LogEntry{Carlos Rodrigues}{cmar@eurotux.com}{2011-07-01}
+Sub-section \textit{Primavera} of Section \textit{ETVA Management Agents}
 \LogEntry{Ricardo Gomes}{rjg@eurotux.com}{2010-08-06}
-Versão inicial.
+Initial version.
 \end{Log}
 
 \tableofcontents
@@ -32,5 +55,7 @@ Versão inicial.
 %\input{modulos_etfw}
 %\makertchapter
 %\input{serviços}
+\input{chap-cm}
+\input{chap-agents}
 
 \end{document}

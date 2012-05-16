@@ -57,13 +57,13 @@ class EtvaNode_VA
 
             //notify event log
             $node_log = Etva::getLogMessage(array('name'=>$intf,'info'=>''), SystemNetwork::_ERR_NOTFOUND_INTF_);
-            $message = Etva::getLogMessage(array('name'=>'ETVA','info'=>$node_log), EtvaNodePeer::_ERR_CHANGEIP_ );
+            $message = Etva::getLogMessage(array('name'=>sfConfig::get('config_acronym'),'info'=>$node_log), EtvaNodePeer::_ERR_CHANGEIP_ );
             sfContext::getInstance()->getEventDispatcher()->notify(
-                new sfEvent('ETVA', 'event.log',
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
 
-            $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n);
             return $error;
         }
 
@@ -80,11 +80,11 @@ class EtvaNode_VA
                 $msg_i18n = sfContext::getInstance()->getI18N()->__(SystemNetwork::_ERR_IP_INUSE_,array('%ip%'=>$node_ip,'%name%'=>$node_name));
                 $msg = Etva::getLogMessage(array('ip'=>$node_ip,'name'=>$node_name), SystemNetwork::_ERR_IP_INUSE_);
 
-                $message = Etva::getLogMessage(array('name'=>'ETVA','info'=>$msg), EtvaNodePeer::_ERR_CHANGEIP_ );
+                $message = Etva::getLogMessage(array('name'=>sfConfig::get('config_acronym'),'info'=>$msg), EtvaNodePeer::_ERR_CHANGEIP_ );
                 sfContext::getInstance()->getEventDispatcher()->notify(
-                    new sfEvent('ETVA', 'event.log', array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+                    new sfEvent(sfConfig::get('config_acronym'), 'event.log', array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
                 
-                $error = array('success'=>false,'agent'=>'ETVA','error'=>$msg_i18n);
+                $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n);
                 return $error;                
             }
         }
@@ -136,7 +136,7 @@ class EtvaNode_VA
                 $result['error'] = $msg_i18n;
 
                 sfContext::getInstance()->getEventDispatcher()->notify(
-                    new sfEvent('ETVA', 'event.log',
+                    new sfEvent(sfConfig::get('config_acronym'), 'event.log',
                         array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
 
                 $info = array('success'=>false,'agent'=>$response['agent'],'error'=>$response['info'],'info'=>$response['info']);
@@ -360,7 +360,7 @@ class EtvaNode_VA
             //notify system log
             $message = Etva::getLogMessage(array('name'=>$data['name'],'info'=>$error_msg), EtvaNodePeer::_ERR_SOAPINIT_);
             sfContext::getInstance()->getEventDispatcher()->notify(
-                new sfEvent('ETVA',
+                new sfEvent(sfConfig::get('config_acronym'),
                         'event.log',
                         array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
             ));
@@ -370,26 +370,26 @@ class EtvaNode_VA
 
         $etvamodel = $etva_data['model'];
 
-        /*
-         * add default cluster ID to node
-         */
-        if(!$default_cluster = EtvaClusterPeer::retrieveDefaultCluster()){
-            $error_msg = sprintf('Default Object etva_cluster does not exist ');
-            $error = array('success'=>false,'error'=>$error_msg);
-
-            //notify system log
-            $cluster_message = Etva::getLogMessage(array('info'=>$error_msg), EtvaClusterPeer::_ERR_DEFAULT_CLUSTER_);
-            $message = Etva::getLogMessage(array('name'=>$data['name'],'info'=>$cluster_message), EtvaNodePeer::_ERR_SOAPINIT_);
-            sfContext::getInstance()->getEventDispatcher()->notify(
-                new sfEvent('ETVA',
-                        'event.log',
-                        array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
-            ));
-
-            return $error;
-        }
-
-        $data['cluster_id'] = $default_cluster->getId();        
+//        /*
+//         * add default cluster ID to node
+//         */
+//        if(!$default_cluster = EtvaClusterPeer::retrieveDefaultCluster()){
+//            $error_msg = sprintf('Default Object etva_cluster does not exist ');
+//            $error = array('success'=>false,'error'=>$error_msg);
+//
+//            //notify system log
+//            $cluster_message = Etva::getLogMessage(array('info'=>$error_msg), EtvaClusterPeer::_ERR_DEFAULT_CLUSTER_);
+//            $message = Etva::getLogMessage(array('name'=>$data['name'],'info'=>$cluster_message), EtvaNodePeer::_ERR_SOAPINIT_);
+//            sfContext::getInstance()->getEventDispatcher()->notify(
+//                new sfEvent(sfConfig::get('config_acronym'),
+//                        'event.log',
+//                        array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
+//            ));
+//
+//            return $error;
+//        }
+//
+//        $data['cluster_id'] = $default_cluster->getId();        
 
         $c = new Criteria();
         $c->add(EtvaNodePeer::UUID,$uuid);        
@@ -397,6 +397,7 @@ class EtvaNode_VA
 
         if($etva_node)
         {
+            $data['cluster_id'] = $etva_node->getClusterId();
             $node_initialize = $etva_node->getInitialize();
             $data['initialize'] = $node_initialize;
             if(empty($node_initialize)) $data['initialize'] = self::INITIALIZE_PENDING;
@@ -409,6 +410,7 @@ class EtvaNode_VA
             /*
              * calculate free mem
              */
+            $etva_node->setMemtotal($data['memtotal']);
             $etva_node->updateMemFree();
             $data['memfree'] = $etva_node->getMemfree();
 
@@ -417,7 +419,27 @@ class EtvaNode_VA
             
         }else
         {
+            /*
+             * add default cluster ID to node
+             */
+            if(!$default_cluster = EtvaClusterPeer::retrieveDefaultCluster()){
+                $error_msg = sprintf('Default Object etva_cluster does not exist ');
+                $error = array('success'=>false,'error'=>$error_msg);
+    
+                //notify system log
+                $cluster_message = Etva::getLogMessage(array('info'=>$error_msg), EtvaClusterPeer::_ERR_DEFAULT_CLUSTER_);
+                $message = Etva::getLogMessage(array('name'=>$data['name'],'info'=>$cluster_message), EtvaNodePeer::_ERR_SOAPINIT_);
+                sfContext::getInstance()->getEventDispatcher()->notify(
+                    new sfEvent(sfConfig::get('config_acronym'),
+                            'event.log',
+                            array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
+                ));
+    
+                return $error;
+            }
+    
 
+            $data['cluster_id'] = $default_cluster->getId();
             $form = new EtvaNodeForm();
             $uuid = EtvaNodePeer::generateUUID();
             $data['initialize'] = self::INITIALIZE_PENDING;
@@ -430,6 +452,7 @@ class EtvaNode_VA
             $etva_node = new EtvaNode();
             $etva_node->setMemtotal($data['memtotal']);
             $etva_node->updateMemFree();
+            $etva_node->setClusterId($default_cluster->getId());
             $data['memfree'] = $etva_node->getMemfree();
             $data['uuid'] = $uuid;
 
@@ -518,7 +541,7 @@ class EtvaNode_VA
                       'uuid'=>$uuid,
                       'keepalive_update'=>$result['keepalive_update']), $msg_type);
             sfContext::getInstance()->getEventDispatcher()->notify(
-                new sfEvent('ETVA',
+                new sfEvent(sfConfig::get('config_acronym'),
                         'event.log',
                         array('message' =>$message,'priority'=>EtvaEventLogger::INFO)
             ));
@@ -537,7 +560,7 @@ class EtvaNode_VA
                 array('name'=>$data['name'],
                       'uuid'=>$uuid), EtvaNodePeer::_ERR_SOAPINIT_);
             sfContext::getInstance()->getEventDispatcher()->notify(
-                new sfEvent('ETVA',
+                new sfEvent(sfConfig::get('config_acronym'),
                         'event.log',
                         array('message' =>$message,'priority'=>EtvaEventLogger::ERR)
             ));

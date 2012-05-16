@@ -33,7 +33,7 @@ class soapClient_ extends SOAP_CLient
 
             $info = array();            
             
-            if($faultcode && $faultcode=='TCP') $info[] = 'Communication Failure';
+            if($faultcode && $faultcode=='TCP') $info[] = sfContext::getInstance()->getI18N()->__('Communication Failure');
             if($error_detail) $info[] = $error_detail;
 
             $info = join(': ',$info);

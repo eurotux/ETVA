@@ -1,4 +1,11 @@
-#!/bin/bash
+#!/bin/bash -eu
+# -e: Exit immediately if a command exits with a non-zero status.
+# -u: Treat unset variables as an error when substituting.
+
+CENTOSVER=`cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//'`
+if [ "$CENTOSVER" == "6" ]; then
+	exit 0
+fi
 
 if [ "`whoami`" != "mock" ]; then
 		echo "You must run the program with user mock"
@@ -24,23 +31,28 @@ rpm -q createrepo > /dev/null 2>&1
 if [ "$?" != "0" ]; then
 	sudo yum -y install createrepo
 fi
-rpm -q squashfs-tools > /dev/null 2>&1
-if [ "$?" != "0" ]; then
-	sudo yum -y install squashfs-tools
+if [ "$CENTOSVER" == "5" ]; then
+	rpm -q squashfs-tools > /dev/null 2>&1
+	if [ "$?" != "0" ]; then
+		sudo yum -y install squashfs-tools
+	fi
+	rpm -q revisor > /dev/null 2>&1
+	if [ "$?" != "0" ]; then
+			sudo yum --enablerepo=epel -y install revisor mock rpm-build
+	fi
+	rpm -q popt.i386 > /dev/null 2>&1
+	if [ "$?" != "0" ]; then
+			sudo yum -y install popt.i386 popt
+	fi
+	rpm -q bzip2-libs.i386 > /dev/null 2>&1
+	if [ "$?" != "0" ]; then
+			sudo yum -y install bzip2-libs.i386 bzip2-libs
+	fi
+	sudo cp etc/revisor/conf.d/* /etc/revisor/conf.d/
+	sudo su - -c "/usr/bin/system-config-securitylevel-tui -q --disabled --selinux='disabled'"
 fi
-rpm -q revisor > /dev/null 2>&1
-if [ "$?" != "0" ]; then
-		sudo yum --enablerepo=epel -y install revisor mock rpm-build
-fi
-rpm -q popt.i386 > /dev/null 2>&1
-if [ "$?" != "0" ]; then
-		sudo yum -y install popt.i386 popt
-fi
-rpm -q bzip2-libs.i386 > /dev/null 2>&1
-if [ "$?" != "0" ]; then
-		sudo yum -y install bzip2-libs.i386 bzip2-libs
-fi
-sudo cp etc/revisor/conf.d/* /etc/revisor/conf.d/
+
+perl -pi -e "s/etva-build/$JOB_NAME/" etc/mock/etva-* etc/revisor/conf.d/revisor-*
+perl -pi -e "s/etva6-build/$JOB_NAME/" etc/mock/etva-* etc/revisor/conf.d/revisor-*
 
 sudo /sbin/service iptables stop > /dev/null 2>&1
-sudo su - -c "/usr/bin/system-config-securitylevel-tui -q --disabled --selinux='disabled'"

@@ -25,7 +25,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 URL: http://pear.symfony-project.com/package/symfony
 BuildRequires: php-pear-channel-symfony
 PreReq: php-pear-channel-symfony
-Requires: php-gettext php-xsl php-tidy php-posix php-mbstring php-ctype php-tokenizer php-iconv php-sqlite
+Requires: php-gettext php-xsl php-tidy php-posix php-mbstring php-ctype php-tokenizer php-iconv php-mysql
 %if 0%{?suse_version} > 1000
 Recommends: php-xcache php-syck php-json
 %endif

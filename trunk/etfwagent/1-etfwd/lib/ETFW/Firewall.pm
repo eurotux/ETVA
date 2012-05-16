@@ -685,8 +685,13 @@ sub save_table {
                 my $v = $R->{"$ca"};
                 if( defined $v ){
                     $args .= " " if( $args );
-                    my @la = ( $v =~ s/^\s*!\s*// )? ("!",$a) : ($a);
-                    push(@la,$v) if( $v );
+                    my @la = ();
+                    if( $ca eq 'm' ){
+                        push(@la,(map { "$a $_" } grep { $_ } split(/\s+/,$v))) if( $v );
+                    } else {
+                        @la = ( $v =~ s/^\s*!\s*// )? ("!",$a) : ($a);
+                        push(@la,$v) if( $v );
+                    }
                     $args .= join(" ",@la);
                 }
             }

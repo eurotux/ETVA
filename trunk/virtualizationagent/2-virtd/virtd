@@ -336,7 +336,7 @@ sub register_handler {
     my $port = $agent->{'LocalPort'};
     my $proto = $agent->{'Proto'};
 
-    plog("agent initialized listen in addr=$laddr ip=$agent->{'LocalIP'} memtotal=>$agent->{'maxmem'} cputotal=>$agent->{'maxncpu'} port=$port proto=$proto uuid=$agent->{'uuid'}");
+    plog("agent initialized listen in addr=$laddr ip=$agent->{'LocalIP'} memtotal=>$agent->{'maxmem'} memfree=>$agent->{'meminfo'}{'MemFree'} cputotal=>$agent->{'maxncpu'} port=$port proto=$proto uuid=$agent->{'uuid'}");
     plog("CM info cm_uri=> $agent->{'cm_uri'}, cm_namespace=$agent->{'cm_namespace'}\n");
 
 #    return;
@@ -369,6 +369,9 @@ sub register_handler {
             if( &debug_level && !$R->{'return'}{'success'} && $R->{'return'}{'error'} ){
                 plog("\tReason: ",Dumper($R->{'return'}{'error'}));
             }
+
+            plog(" Agent going down!");
+            $agent->set_runout();
         } else {
             if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
                 $agent->{'_cm_insert_id'} = $R->{'return'}{'insert_id'};
@@ -501,7 +504,7 @@ sub register_handler {
                 }
 
                 # try send list of networks
-                my $networks = VirtAgentInterface->list_networks();
+                my $networks = VirtAgentInterface->list_networks(1);
                 plog "networks=",Dumper($networks) if( &debug_level );
                 my $networks_arr = [];
                 if( $networks ){
@@ -590,11 +593,14 @@ sub register_handler {
                 plog "lvs=",Dumper($lvs) if( &debug_level );
                 my @a_lvs = values %$lvs;   # convert to array
 
+                my @dtable = VirtAgentInterface->device_table();
+
                 my $RL = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
                         -> call( $agent->{'cm_namespace'},
                                     'updateVirtAgentLvs',
                                     uuid=>$agent->{'uuid'},
-                                    lvs => \@a_lvs
+                                    lvs => \@a_lvs,
+                                    'devicetable' => \@dtable
                                 );
                 plog "LOGICAL VOLUMES=",Dumper($RL) if( &debug_level );
 
@@ -639,9 +645,9 @@ sub register_handler {
                                 }
 
                                 # previous state is runnig: start it
-                                if( $state eq "running" ){
-                                    plog "starting name=",$vm->{"name"},"\n";
-                                    VirtAgentInterface->start_vm( name=>$vm->{"name"} );
+                                if( $state eq "running" || $vm->{'autostart'} ){
+                                    plog "starting name=",$vm->{"name"}," boot=",$vm->{'boot'},"\n";
+                                    VirtAgentInterface->start_vm( name=>$vm->{"name"}, boot=>$vm->{'boot'} );
                                 } 
                             } 
                         }
@@ -714,7 +720,15 @@ sub keepalive_handler {
             }
         }
 
+        my $bef_cur_mem = ETVA::Utils::process_mem_size($$);
         my $stats = send_stats();
+        my $aft_cur_mem = ETVA::Utils::process_mem_size($$);
+
+        my $diff_cur_mem = $aft_cur_mem - $bef_cur_mem;
+        my $diff_cur_mem_ps = ETVA::Utils::prettysize($diff_cur_mem);
+        my $aft_cur_mem_ps = ETVA::Utils::prettysize($aft_cur_mem);
+
+        plog(sprintf('%s: MEMORY_LEAK virtd method=send_stats memory detect cur_mem=%s (diff=%s)',ETVA::Utils::nowStr(0),$aft_cur_mem_ps,$diff_cur_mem_ps)) if(&debug_level > 9);
 
         if( $CONF->{'cm_uri'} ){
             # update state

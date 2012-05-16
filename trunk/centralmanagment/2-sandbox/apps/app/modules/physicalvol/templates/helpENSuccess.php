@@ -1,27 +1,32 @@
+<div class="help">
 <a id="help-physical-vol"><h1>Devices</h1></a>
-<p>Informação relativa aos <em>physical volumes</em> e seu estado (Um <em>physical volume</em> é um dispositivo físico, como por exemplo um disco).
-    Nesta grelha é possível fazer a administração de <em>physical volumes</em> do <em>node</em>, nomeadamente as seguintes operações:</p>
+<p>
+Information about physical volumes and its state (A physical volume is a physical device such as a disk).
+In this grid is possible to make the physical volumes' administration, including the following operations:
+</p>
 
 <ul>
-    <li>Inicialização de um <em>physical volume</em>;</li>
-    <li>Remoção da inicialização de um <em>physical volume</em>.</li>
+    <li><a href="#help-physical-vol-start">Initialize physical volume</a></li>
+    <li><a href="#help-physical-vol-stop">Uninitialize physical volume</a></li>
 </ul>
 
 <br/>
 <hr/>
 
-<a id="help-physical-vol-start"><h1>Iniciar <em><b>Physical Volume</b></em></h1></a>
-<p>Para <b>inicializar</b> um <em>physical volume</em> aceder ao sub-menu de contexto do device pretendido,
-    e seleccionar <em>Inicializar physical volume</em>.</p>
-
-<a href="#help-physical-vol"><div>Início</div></a>
-<hr/>
-
-
-<a id="help-physical-vol-stop"><h1>Remover <em><b>Physical Volume</b></em></h1></a>
-<p>Para <b>remover</b> um <em>physical volume</em> a operação é análoga,
-    bastando seleccionar a opção <em>Remover inicialização do physical volume</em> no sub-menu de contexto do <em>physical volume</em>.
+<a id="help-physical-vol-start"><h1>Initialize physical volume</b></em></h1></a>
+<p>
+To initialize a physical volume, access the sub-context menu of the device and select <em>Initialize physical volume option</em>.
 </p>
-<p><b>Nota </b>Só é permitido remover um <em>physical volume</em> se este não pertencer a nenhum <em>volume group</em>.</p>
-<a href="#help-physical-vol"><div>Início</div></a>
+
+<a href="#help-physical-vol"><div>Index</div></a>
 <hr/>
+
+
+<a id="help-physical-vol-stop"><h1>Uninitialize physical volume</h1></a>
+<p>
+To remove a physical volume, access the sub-context menu of the device and select <em>Uninitialize physical volume option</em>.
+</p>
+<p><b>Note: </b>To remove a physical volume it must not belong to any volume group.</p>
+<a href="#help-physical-vol"><div>Index</div></a>
+<hr/>
+</div>

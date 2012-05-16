@@ -51,6 +51,12 @@ class EtvaServerPeer extends BaseEtvaServerPeer
     const _ERR_RELOAD_   = 'Could not reload server %name% from %node%. %info%';
     const _OK_RELOAD_   = 'Server %name% from %node% reload successfully';
 
+    const _ERR_UNASSIGNED_ = 'Could not unassign server %name% from %node%. %info%';
+    const _OK_UNASSIGNED_ = 'Server %name% unassigned from %node% successfully';
+
+    const _ERR_ASSIGNED_ = 'Could not assign server %name% to %node%. %info%';
+    const _OK_ASSIGNED_ = 'Server %name% assigned to %node% successfully';
+
     const _MSG_   = 'Server %name% : %info%';
 
     const _CDROM_INUSE_ = 'Server %name% has ISO mounted in CD-ROM';

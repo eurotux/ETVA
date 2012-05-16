@@ -52,6 +52,16 @@ use XML::DOM;
 use XML::Generator;
 use LWP::Simple;
 
+use constant {
+    DEVICE_CPU => 3,
+    DEVICE_MEMORY => 4,
+    DEVICE_IDE_BUS => 5,
+    DEVICE_SCSI_BUS => 6,
+    DEVICE_ETHERNET => 10,
+    DEVICE_DISK => 17,
+    DEVICE_GRAPHICS => 24
+};
+
 =item new
 
     my $VM = VirtMachine->new( name=>$name, uuid=>$uuid, ... );
@@ -539,7 +549,7 @@ sub todomain {
     my $self = shift;
 
     my %D = ();
-    for my $f (qw( name uuid description memory vcpu cpuset on_reboot on_poweroff on_crash features )){
+    for my $f (qw( name uuid description memory vcpu cpuset on_reboot on_poweroff on_crash features arch )){
         $D{"$f"} = $self->{"$f"};
     }
     if( $self->{'kernel'} ){
@@ -768,6 +778,8 @@ sub xml_domain_parser {
                 } elsif( $tn eq "type" ){
                     eval{ $D{"os_type"} = $cdev->getFirstChild->toString(); };
                     if( $@ ){ $D{"os_type"} = ""; }
+                    my %A = $self->xml_domain_parser_get_attr($cdev);
+                    $D{'arch'} = $A{'arch'} if( $A{'arch'} );
                 }
             }
         } elsif( $nname eq 'clock' ){
@@ -893,6 +905,10 @@ sub xml_domain_parser {
             }
         }
     }
+
+    # Avoid memory leaks - cleanup circular references for garbage collection
+    $doc->dispose;
+
     return wantarray() ? %D : \%D;
 }
 
@@ -967,16 +983,6 @@ sub ovf_import {
     my $env_ovf_url;
 
     sub ovf_xml_parser {
-
-        use constant {
-            DEVICE_CPU => 3,
-            DEVICE_MEMORY => 4,
-            DEVICE_IDE_BUS => 5,
-            DEVICE_SCSI_BUS => 6,
-            DEVICE_ETHERNET => 10,
-            DEVICE_DISK => 17,
-            DEVICE_GRAPHICS => 24
-        };
 
         my ($xml,$url,$dir,$lDisks,$lNetwork) = @_;
 
@@ -1216,6 +1222,9 @@ sub ovf_import {
             }   # else ignore
         }
 
+        # Avoid memory leaks - cleanup circular references for garbage collection
+        $doc->dispose;
+
         # get extra Network info
         if( my $nn = scalar(@$lNetwork) ){
             my $i = scalar(@{$VM{"_network_"}});
@@ -1325,16 +1334,6 @@ sub convert_alloc_val_tomegas {
 sub ovf_export {
 
     sub gen_ovf_xml {
-        use constant {
-            DEVICE_CPU => 3,
-            DEVICE_MEMORY => 4,
-            DEVICE_IDE_BUS => 5,
-            DEVICE_SCSI_BUS => 6,
-            DEVICE_ETHERNET => 10,
-            DEVICE_DISK => 17,
-            DEVICE_GRAPHICS => 24
-        };
-
         sub genFiles {
             my (%p) = @_;
 

@@ -21,5 +21,14 @@ class EtvaVolumePhysicalPeer extends BaseEtvaVolumePhysicalPeer
     return self::doSelectOne($criteria);
   }
 
+  public static function getByEtvaVolumeGroupId($vgid)
+  {
+    $criteria = new Criteria();
+
+    $criteria->add(self::VOLUMEGROUP_ID, $vgid);
+
+    return self::doSelect($criteria);
+  }
+
 
 }

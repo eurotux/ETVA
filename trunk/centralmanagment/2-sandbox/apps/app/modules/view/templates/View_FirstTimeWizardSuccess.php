@@ -241,6 +241,7 @@ View.FirstTimeWizard.Main = function() {
                             name       : 'pool_size',
                             fieldLabel : <?php echo json_encode(__('MAC pool size')) ?>,
                             minValue:1,
+                            maxValue:1000 ,
                             width:30,
                             allowBlank : false,scope:this,
                             vtype:'pool_valid',
@@ -350,6 +351,148 @@ View.FirstTimeWizard.Main = function() {
         }
 
     });
+
+    /*
+     *
+     * CONNECTIVITY panel
+     *
+     */
+
+     connectivity_cardPanel = Ext.extend(Ext.ux.Wiz.Card, {
+        title: <?php echo json_encode(__('System preferences')) ?>
+        ,url:<?php echo json_encode(url_for('setting/jsonSetting'))?>
+        ,initComponent: function(){
+
+            // card components
+            var name_tpl = [
+                {
+                    xtype:'fieldset',
+                    labelWidth: 80,
+                    title: <?php echo json_encode(__('Central Management IP')) ?>,
+                    autoHeight:true,
+                    defaults     : {
+                        width: 385,
+                       // labelStyle : 'width:100px;',
+                        border:false,
+                        bodyStyle:'background:transparent;'
+                    }
+                    ,collapsed:false
+                            ,items:[
+                            {
+                                fieldLabel: <?php echo json_encode(__('IP address')) ?>,
+                                labelStyle:'width:130px;',
+                                width:100,
+                                //disabled:true,
+                                xtype: 'textfield',
+                                readOnly:true
+                                ,name: 'network_cm_management_ip'
+                                ,ref: 'network_cm_management_ip'
+                                //name: 'fs-ip-addr'
+
+                            },{
+                                fieldLabel: <?php echo json_encode(__('Subnet mask')) ?>,
+                                labelStyle:'width:130px;',
+                                width:100,
+                                readOnly:true,
+                                xtype: 'textfield',
+                                name: 'fs_ip_addr',
+                                ref: 'fs_ip_addr'
+                            },{
+                                fieldLabel: <?php echo json_encode(__('Default gateway')) ?>,
+                                labelStyle:'width:130px;',
+                                width:100,
+                                readOnly:true,
+                                xtype: 'textfield',
+                                name: 'fs_gw_addr'
+                                ,ref: 'fs_gw_addr'
+                                }]
+//                        }
+//                    ]
+                }
+            ];
+
+            var card_msg = "<div><p><b>"+<?php echo json_encode(__('Change default system preferences'))?>;
+            card_msg += "</b></p><ul><li>"+<?php echo json_encode(__('VNC options'))?>;
+            card_msg += "</li><li>"+<?php echo json_encode(__('Connection settings'))?>;
+            card_msg += "</li></ul></div><br/><br/>";
+
+            // apply card items
+            Ext.apply(this, {
+                monitorValid : true
+                ,items : [{
+                        border    : false,
+                        bodyStyle : 'background:none;padding-bottom:20px;',
+                        ctCls     : 'online-help',
+                        html      : card_msg
+                    },{
+                        xtype:'button',
+                        ref:'btnOpenPref',
+                        url:<?php echo json_encode(url_for('setting/view')); ?>,
+                        text: <?php echo json_encode(__('Manage Preferences')) ?>,
+                        name:'btnOpenPref',
+                        disabled:false,
+                        isFormField:true,
+                        style:'position:relative; right: 104px; bottom: 38px;',  // z-index:-10;',
+                        scope:this,
+                        width:30,
+                        labelSeparator: ''
+                        ,handler: function(){
+                            var settings = Ext.getCmp('menuitm-settings');
+                            settings.fireEvent('click',settings);
+                        }
+                    },
+                    name_tpl
+                    //Setting.Main({title:'item.text'})
+                ]
+                ,listeners: {
+                    reloadData: function(panel) {
+                        //alert("reloadData");
+                        this.loadData();
+                    }
+                }
+            });
+
+            connectivity_cardPanel.superclass.initComponent.call(this);
+            Ext.Component.superclass.constructor.call(this);
+            this.loadData();
+        }
+        ,loadData: function(){
+            var ip_fields = this.items.get(2);
+           
+            var conn = new Ext.data.Connection();
+            conn.request({
+                scope:this,
+                url: this.url,
+                waitMsg: <?php echo json_encode(__('Retrieving data...')) ?>,
+                params:{params:Ext.encode(["networks"])},
+                failure: function(resp,opt){
+//                    domainObj = new Object();
+//                    domainObj.name = field.getValue();
+//                        //this.loadData(domainObj);
+//
+//                    if(!resp.responseText){
+//                        Ext.ux.Logger.error(resp.statusText);
+//                        return;
+//                    }
+//
+//                    var response = Ext.util.JSON.decode(resp.responseText);
+//                    Ext.MessageBox.alert(<?php echo json_encode(__('Error Message'))?>, response['info']);
+//                    Ext.ux.Logger.error(response['error']);
+                },
+                success: function(response,opt){
+                    var decoded_data = Ext.decode(response.responseText);
+                    var data = decoded_data['data'];
+                    //data['network_cm_management_ip'] = "10.10.0.1";
+                    //data['network_cm_management_netmask'] = "255.255.255.0";
+                    //data['network_cm_management_gateway'] = "10.10.0.254";
+
+                    ip_fields.network_cm_management_ip.setValue(data['network_cm_management_ip']);
+                    ip_fields.fs_ip_addr.setValue(data['network_cm_management_netmask']);
+                    ip_fields.fs_gw_addr.setValue(data['network_cm_management_gateway']);
+                }
+            });
+        }
+     });
 
 
     /*
@@ -813,10 +956,6 @@ View.FirstTimeWizard.Main = function() {
     });
 
 
-
-
-
-
     //xen name cardPanel
 
     var viewerSize = Ext.getBody().getViewSize();
@@ -837,14 +976,19 @@ View.FirstTimeWizard.Main = function() {
                         }]
                 })
                 ,new password_cardPanel({id:'ft-wiz-password'})
+                <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
                 ,new macPool_cardPanel({id:'ft-wiz-macpool'})
+                ,new connectivity_cardPanel({id:'ft-wiz-preferences'})
+                <?php endif; ?>
                 ];
 
     //var startupCard = new startup_cardPanel({id:'server-wiz-startup'});
     var config = {etvamodel:<?php echo json_encode($sf_user->getAttribute('etvamodel')); ?>};
     switch(config.etvamodel){
         case 'enterprise' :
+                        <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
                         cards.push(new network_cardPanel({id:'ft-wiz-network'}));
+                        <?php endif; ?>
                         break;
         default           :
                         break;
@@ -864,6 +1008,7 @@ View.FirstTimeWizard.Main = function() {
     var wizard = new Ext.ux.Wiz({
         border:true,
         title : <?php echo json_encode(__('One-Time Setup Wizard',null,'first_time_wizard')) ?>,
+        tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-firttimeW-main',autoLoad:{ params:'mod=view'},title: <?php echo json_encode(__('One-Time Setup Wizard Help')) ?>});}}],
         headerConfig : {
             title : <?php echo json_encode(__('One-Time setup',null,'first_time_wizard')) ?>
         },

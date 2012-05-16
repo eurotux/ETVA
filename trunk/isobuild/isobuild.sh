@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/bash -eu
+# -e: Exit immediately if a command exits with a non-zero status.
+# -u: Treat unset variables as an error when substituting.
 
 # first create iso using
 # sudo /usr/sbin/revisor --cli --yes --kickstart-default --kickstart-include --install-dvd --kickstart=/home/mock/etva-ks.cfg
@@ -39,8 +41,8 @@ ISOFILE=$DIR/etva.iso
 ############################ FUNCAO DE TRAP
 function limpa() {
 	if [ -d $DIRSOURCE ]; then
-		sudo fuser -k $DIRSOURCE 2> /dev/null
-		sudo umount $DIRSOURCE 2> /dev/null
+		sudo fuser -k $DIRSOURCE 2> /dev/null || :
+		sudo umount $DIRSOURCE 2> /dev/null || :
 		rmdir $DIRSOURCE 2> /dev/null
 	fi
 }
@@ -58,8 +60,8 @@ sudo mount -t iso9660 -o loop $1 $DIRSOURCE
 # Copia conteudo para disco
 cd $DIRSOURCE
 	tar -cf - . | ( cd $DIRDEST ; tar -xpf - )
-	sudo umount $DIRSOURCE
 cd - > /dev/null
+sudo umount $DIRSOURCE
 
 #ADICIONAR PACOTES
 # nao e' necessa'rio uma vez que ja' foi feito pelo revisor
@@ -85,8 +87,11 @@ cd $DIRDEST
 	createrepo -g repodata/comps.xml .
 cd - > /dev/null
 
+if [ -d squashfs-root ]; then
+	sudo rm -rf squashfs-root
+fi
 # modifica o stage2 para mudar algumas strings
-sudo /usr/sbin/unsquashfs $DIRDEST/images/stage2.img
+sudo /usr/sbin/unsquashfs $DIRDEST/images/stage2.img || :
 cd squashfs-root
 	sudo patch -p1 < ../trunk/isobuild/stage2/rebrand.diff
 cd - > /dev/null
@@ -94,13 +99,13 @@ sudo /sbin/mksquashfs squashfs-root/ $DIRDEST/images/stage2.img -noappend
 sudo rm -rf squashfs-root
 
 # cria o ks de enterprise
-cat $DIRDEST/ks.cfg | sed -e 's/^# interactive/interactive/g' |egrep -v "^(virtagent|etva-centralmanagement|xen|kernel-xen|etva-smb|kvm|ignoredisk|clearpart|part|raid|volgroup|logvol)" > $DIRDEST/ks.ent.cfg
+cat $DIRDEST/ks.cfg | sed -e 's/^# interactive/interactive/g' |egrep -v "^(virtagent|etva-centralmanagement|etva-virtio-win|xen|kernel-xen|etva-smb|kvm|ignoredisk|clearpart|part|raid|volgroup|logvol)" > $DIRDEST/ks.ent.cfg
 # cria o ks de smb
-cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent)"> $DIRDEST/ks.smb.kvm.cfg
-cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent)"> $DIRDEST/ks.smb.xen.cfg
+cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe)"> $DIRDEST/ks.smb.kvm.cfg
+cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-virtio-win)"> $DIRDEST/ks.smb.xen.cfg
 # cria o ks de smb-usb
-cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.kvm.usb.cfg
-cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.xen.usb.cfg
+cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.kvm.usb.cfg
+cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-virtio-win)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.xen.usb.cfg
 
 # Cria o iso
 mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table \

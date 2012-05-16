@@ -2,7 +2,6 @@
 
 class EtvaPhysicalvolume extends BaseEtvaPhysicalvolume
 {
-
     const UUID_MAP = 'uuid';
     const NAME_MAP = 'device';
     const DEVICE_MAP = 'device';
