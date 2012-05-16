@@ -1,0 +1,43 @@
+\BOOKMARK [0][]{chapter.1}{1 ETVM }{}
+\BOOKMARK [0][]{chapter.2}{2 Central Management}{}
+\BOOKMARK [1][]{section.2.1}{2.1 Primeiro acesso}{chapter.2}
+\BOOKMARK [1][]{section.2.2}{2.2 Main}{chapter.2}
+\BOOKMARK [2][]{subsection.2.2.1}{2.2.1 Nodes}{section.2.2}
+\BOOKMARK [2][]{subsection.2.2.2}{2.2.2 Redes}{section.2.2}
+\BOOKMARK [3][]{subsubsection.2.2.2.1}{2.2.2.1 Administra\347\343o das redes}{subsection.2.2.2}
+\BOOKMARK [3][]{subsubsection.2.2.2.2}{2.2.2.2 Gest\343o da pool de endere\347os MAC}{subsection.2.2.2}
+\BOOKMARK [3][]{subsubsection.2.2.2.3}{2.2.2.3 Gest\343o das interfaces de rede das m\341quinas virtuais}{subsection.2.2.2}
+\BOOKMARK [1][]{section.2.3}{2.3 Servidor de virtualiza\347\343o}{chapter.2}
+\BOOKMARK [2][]{subsection.2.3.1}{2.3.1 Informa\347\343o do node}{section.2.3}
+\BOOKMARK [2][]{subsection.2.3.2}{2.3.2 Servidores}{section.2.3}
+\BOOKMARK [3][]{subsubsection.2.3.2.1}{2.3.2.1 Adicionar m\341quina virtual}{subsection.2.3.2}
+\BOOKMARK [3][]{subsubsection.2.3.2.2}{2.3.2.2 Editar m\341quina virtual}{subsection.2.3.2}
+\BOOKMARK [3][]{subsubsection.2.3.2.3}{2.3.2.3 Remover m\341quina virtual}{subsection.2.3.2}
+\BOOKMARK [3][]{subsubsection.2.3.2.4}{2.3.2.4 Abrir m\341quina virtual numa consola VNC}{subsection.2.3.2}
+\BOOKMARK [3][]{subsubsection.2.3.2.5}{2.3.2.5 Iniciar/parar m\341quina virtual}{subsection.2.3.2}
+\BOOKMARK [3][]{subsubsection.2.3.2.6}{2.3.2.6 Migrar m\341quina virtual}{subsection.2.3.2}
+\BOOKMARK [2][]{subsection.2.3.3}{2.3.3 Armazenamento}{section.2.3}
+\BOOKMARK [3][]{subsubsection.2.3.3.1}{2.3.3.1 Administra\347\343o de Physical Volumes}{subsection.2.3.3}
+\BOOKMARK [3][]{subsubsection.2.3.3.2}{2.3.3.2 Administra\347\343o de Volume Groups}{subsection.2.3.3}
+\BOOKMARK [3][]{subsubsection.2.3.3.3}{2.3.3.3 Administra\347\343o de Logical Volumes}{subsection.2.3.3}
+\BOOKMARK [2][]{subsection.2.3.4}{2.3.4 Desligar node}{section.2.3}
+\BOOKMARK [1][]{section.2.4}{2.4 M\341quina virtual}{chapter.2}
+\BOOKMARK [2][]{subsection.2.4.1}{2.4.1 Informa\347\343o do servidor}{section.2.4}
+\BOOKMARK [2][]{subsection.2.4.2}{2.4.2 Estat\355sticas}{section.2.4}
+\BOOKMARK [2][]{subsection.2.4.3}{2.4.3 Servi\347os}{section.2.4}
+\BOOKMARK [2][]{subsection.2.4.4}{2.4.4 Drivers Virtio}{section.2.4}
+\BOOKMARK [1][]{section.2.5}{2.5 Ferramentas}{chapter.2}
+\BOOKMARK [2][]{subsection.2.5.1}{2.5.1 Importar OVF}{section.2.5}
+\BOOKMARK [2][]{subsection.2.5.2}{2.5.2 Exportar OVF}{section.2.5}
+\BOOKMARK [2][]{subsection.2.5.3}{2.5.3 Gestor de ISOs}{section.2.5}
+\BOOKMARK [2][]{subsection.2.5.4}{2.5.4 Monitoriza\347\343o do agente dos nodes}{section.2.5}
+\BOOKMARK [2][]{subsection.2.5.5}{2.5.5 Registo de eventos do sistema}{section.2.5}
+\BOOKMARK [1][]{section.2.6}{2.6 Administra\347\343o do sistema}{chapter.2}
+\BOOKMARK [2][]{subsection.2.6.1}{2.6.1 Assistente de configura\347\343o inicial}{section.2.6}
+\BOOKMARK [2][]{subsection.2.6.2}{2.6.2 Gest\343o de Datacenters Virtuais}{section.2.6}
+\BOOKMARK [3][]{subsubsection.2.6.2.1}{2.6.2.1 Assistente de cria\347\343o de datacenter}{subsection.2.6.2}
+\BOOKMARK [3][]{subsubsection.2.6.2.2}{2.6.2.2 Mover node entre datacenters}{subsection.2.6.2}
+\BOOKMARK [3][]{subsubsection.2.6.2.3}{2.6.2.3 Aceitar node}{subsection.2.6.2}
+\BOOKMARK [2][]{subsection.2.6.3}{2.6.3 Alterar prefer\352ncias}{section.2.6}
+\BOOKMARK [2][]{subsection.2.6.4}{2.6.4 Administra\347\343o de utilizadores, grupos e permiss\365es}{section.2.6}
+\BOOKMARK [2][]{subsection.2.6.5}{2.6.5 Desligar o Central Management}{section.2.6}

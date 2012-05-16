@@ -1,0 +1,55 @@
+
+################
+#     ETVM     #
+################
+pdflatex manual-etvm-cm.tex     # Compila o documento
+\acronym                        # Em qualquer parte do documento é substituído por ETVM
+
+\opt{etvm}{
+    ###
+    # O tex dentro deste bloco apenas é apresentado no manual do ETVM
+    ###
+}
+
+####### ESTRUTURA #######
+
+manual-etvm-cm.tex
+    |
+    -----> etvm-cm.tex          # (Introdução e Instalação)
+    |
+    -----> chap-cm.tex
+
+
+#=====================================================================================================
+
+
+################
+#     ETVA     #
+################
+pdflatex manual-etva-cm.tex     # Compila o documento
+
+\acronym                        # Em qualquer parte do documento é substituído por ETVA
+
+\opt{etva}{
+    ###
+    # O tex dentro deste bloco apenas é apresentado no manual do ETVA
+    ###
+}
+
+####### ESTRUTURA #######
+
+manual-etva-cm.tex
+    |
+    -----> etva-cm.tex
+    |
+    -----> chap-cm.tex
+    |
+    -----> chap-agents.tex
+        |
+        -----> ETFW.tex
+        |
+        -----> ETMS.tex
+        |
+        -----> etva-etvoip.tex
+
+

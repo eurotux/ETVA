@@ -1,0 +1,276 @@
+% idioma e codificação
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+\usepackage[pdftex]{color,graphicx}
+\usepackage{a4wide}
+
+% Arial && Times New Roman
+\usepackage{txfonts}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% definição de cabeçalho e rodapé
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% redifinir plain (usado nas primeiras 
+\fancypagestyle{plain}{%
+\fancyhf{}
+\fancyhead[L]{\slshape \nouppercase{\leftmark}}
+\fancyhead[R]{\includegraphics[height=0.6cm]{include/img/logo}}
+\fancyfoot[R]{Pág. \thepage/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.5pt}%
+\renewcommand{\footrulewidth}{0pt}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\includegraphics[height=0.6cm]{include/img/logo}}
+\fancyhead[L]{\slshape \nouppercase{\leftmark}}
+\fancyfoot[R]{Pág. \thepage/\pageref{LastPage}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% variaveis
+\input{include/vars}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ambiente Output
+\usepackage{fancyvrb}
+
+\DefineVerbatimEnvironment%
+{Output}%
+{Verbatim}%
+{xleftmargin=5mm,xrightmargin=5mm,fontsize=\scriptsize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% definir posicao fixa para imagens e tabelas [H]
+\usepackage{float}
+
+\floatstyle{plain}
+\restylefloat{table}
+\restylefloat{figure}
+\floatplacement{table}{H}
+\floatplacement{figure}{H}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% comando subtitle
+\newcommand{\subtitlevar}{}
+\providecommand{\subtitle}[1]{\renewcommand{\subtitlevar}{#1}}
+\newcommand{\subtitulo}[1]{\renewcommand{\subtitlevar}{#1}}
+
+% pagina de titulo
+\def\maketitle{
+	\thispagestyle{empty}
+	\setlength{\unitlength}{1cm}
+	\begin{picture}(0,0)
+		\linethickness{3.5cm}
+		\put(0,1.5){\color{lightgrey}\line(0,-1){25.5}}
+		\linethickness{0.15cm}
+		\put(2.6,-20.1){\color{grey}\line(1,0){14}}
+		\put(2.5,-20){\color{greentux}\line(1,0){14}}
+		%\put(1,2){\color{greentux}\line(0,-1){25.5}}
+		\put(2.5,-2.5){\begin{minipage}[t]{14cm}
+		%\begin{center}
+			{\includegraphics[width=5cm]{include/img/logo}\par}
+			%{\Large \sf \textbf \@author\par}
+		%\end{center}
+		\end{minipage}}
+		\put(2.5,-10){\begin{minipage}[t]{14cm}
+		%\begin{center}
+			{\sf \Huge \@title\par}
+			\vspace{1cm}
+			{\sf \Large \textit \subtitlevar\par}
+		%\end{center}
+		\end{minipage}}
+		\put(2.5,-19){\begin{minipage}[t]{14cm}
+		%\begin{center}
+			{\sf \Large \@date\par}
+		%\end{center}
+		\end{minipage}}
+		\put(2.5,-21.1){\begin{minipage}[t]{14cm}
+		%\begin{center}
+			{\sf \large
+			Rua Irmãs Missionárias do Espírito Santo, 27\\
+			4715-340 Braga\\
+			Portugal
+			\begin{tabbing}
+			Tel: \= +351 \= 253 \= 680 \= 300\\
+			Fax: \> +351 \> 253 \> 680 \> 319
+			\end{tabbing}
+			%\end{right}
+			}
+		%\end{center}
+		\end{minipage}}
+		\put(14.5,-24.1){\begin{minipage}[t]{14cm}
+			\includegraphics[width=2cm]{include/img/logo_PME_excelencia_11}\par
+		\end{minipage}}
+	\end{picture}
+	\null
+	\cleardoublepage
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% forçar a aparecer título no abstract
+\makeatletter
+\@abstrttrue
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% draft -- comando \makedraft
+\usepackage{eso-pic}
+
+\newcommand{\makewatermark}[1]{
+	\ClearShipoutPicture\AddToShipoutPicture{
+		\begin{minipage}[b][\paperheight][t]{\paperwidth}
+			\vfill
+			\centering
+			\resizebox{.75\paperwidth}{!}{\rotatebox{60}{
+			\textcolor[gray]{0.85}{
+				\renewcommand{\baselinestretch}{1.0}\normalsize
+				\textsf{#1}
+			}}}
+			\vfill
+			\vspace{1cm}
+		\end{minipage}
+	}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% definições de estilo relacionadas com tabelas
+\usepackage{tabularx}
+
+\newenvironment{eurotuxtabularx}[2]{%
+  \newcommand{\cellhead}[1]{%
+    \textcolor{white}{\em ##1}%
+  }%
+  \rowcolors{2}{tablerowcolor}{eurotuxsuperlight}%
+  \arrayrulecolor{red!75!gray}%
+  \extrarowheight2pt%
+  \tabularx{#1}{#2}%
+  \rowcolor{tableheadcolor}
+}{%
+  \endtabularx%
+}
+
+\newenvironment{eurotuxrevisionlog}{%
+  \extrarowheight2pt%
+  \tabularx{\linewidth}{@{}llllX@{}}%
+  {\em VersÃ£o} & {\em ReferÃªncia} & {\em Autor} &%
+    {\em Data} & {\em ComentÃ¡rios} \\%
+  \hline%
+}{%
+  \endtabularx%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% acrescentar . nos capítulos -- mesmo sem appendix
+\makeatletter
+\@altsecnumformattrue
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ambiente para changelog
+\newcommand{\LogName}{Change Log}
+\newcommand{\LogEntry}[3]{\item[\emph{#3} -- #1 <\texttt{\href{mailto:#2}{#2}}>]~\\}
+\newenvironment{Log}%
+{
+	\pagestyle{empty}
+	%\null\vfill
+	\section*{\LogName}
+	\begin{list}{}{}
+}%
+{
+	\end{list}
+	\newpage
+	\pagestyle{fancy}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% capitulo sobre RT
+\newcommand{\makertchapter}{\input{include/rt}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% nao numerar section e niveis inferiores
+\setcounter{secnumdepth}{0}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% definir espacamento
+\parindent=0pt
+\parskip=1ex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% texto de confidencialidade
+\newcommand{\makeconftext}{\input{include/conftext}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% color-related definitions - importado do eurotux.sty udp
+\usepackage[dvipsnames,table]{xcolor}
+
+\definecolor{eurotux}{cmyk}{0, 0.98, 0.85, 0.10}
+\definecolor{eurotuxlight}{cmyk}{0, 0.17, 0.46, 0.46}
+\definecolor{eurotuxsec}{cmyk}{0, 0.86, 0.65, 0.74}
+\colorlet{lightgray}{gray!25}
+
+\colorlet{eurotuxsuperlight}{red!5}
+%\pagecolor{eurotuxsuperlight}
+\pagecolor{white}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+%\colorlet{tableheadcolor}{gray!25}
+%\colorlet{tablerowcolor}{gray!12.5}
+\colorlet{tableheadcolor}{eurotuxsec}
+\colorlet{tablerowcolor}{white}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% definições para PDF
+\usepackage[pdftex,
+	colorlinks=true,
+	urlcolor=heavygrey,
+	filecolor=heavygrey,
+	linkcolor=heavygrey,
+	linkcolor=heavygrey,
+	linktocpage=true,
+	pdfauthor={Eurotux Informática, S.A.},
+	pdfproducer={pdfLaTeX},
+	pdfpagemode=UseThumbs,
+	bookmarks=true,
+	bookmarksopen=true,
+	bookmarksnumbered=true]{hyperref}
+\definecolor{greentux}{rgb}{0.83,0.04,0.12}
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{lightgrey}{rgb}{0.9,0.9,0.9}
+\definecolor{heavygrey}{rgb}{0.3,0.3,0.3}
+
+\pdfpagewidth=\paperwidth
+\pdfpageheight=\paperheight
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Serviços
+\newcommand{\makeservice}[1]{\input{include/srv/#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% comando para listar operações num serviço
+\newcommand{\ServiceCommands}[1]{%
+\begin{itemize}
+\item Iniciar
+
+\texttt{/etc/init.d/#1 start}
+
+\item Desligar
+
+\texttt{/etc/init.d/#1 stop}
+
+\item Reiniciar
+
+\texttt{/etc/init.d/#1 restart}
+\end{itemize}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Opção de configuração
+\newcommand{\confoption}[1]{\paragraph{\textcolor{greentux}{#1}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Opção de configuração
+\newcommand{\bladecenterip}{127.0.0.1}

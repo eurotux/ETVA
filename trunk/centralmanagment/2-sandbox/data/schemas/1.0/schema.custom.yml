@@ -1,0 +1,12 @@
+# custom schema. here are dined dependency between fabforce generated schema.yml
+# and foreign keys relations with other fields
+propel:
+  _attributes:
+    defaultIdMethod: native
+    package: lib.model
+  server:
+    _attributes: { phpName: EtvaServer }
+    sf_guard_group_id: { type: INTEGER, required: true, foreignTable: sf_guard_group, foreignReference: id }
+  vnc_token:
+    _attributes: { phpName: EtvaVncToken }    
+    user_id:     { type: integer, foreignTable: sf_guard_user, foreignReference: id, required: true, onDelete: cascade }

@@ -1,0 +1,45 @@
+\select@language {portuges}
+\contentsline {chapter}{\numberline {1}\textsf {ETVM }}{7}{chapter.1}
+\contentsline {chapter}{\numberline {2}\textsf {Central Management}}{9}{chapter.2}
+\contentsline {section}{\numberline {2.1}First access}{10}{section.2.1}
+\contentsline {section}{\numberline {2.2}Default cluster}{11}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Nodes}{11}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Networks}{11}{subsection.2.2.2}
+\contentsline {subsubsection}{\numberline {2.2.2.1}Network administration}{12}{subsubsection.2.2.2.1}
+\contentsline {subsubsection}{\numberline {2.2.2.2}MAC address pool management}{13}{subsubsection.2.2.2.2}
+\contentsline {subsubsection}{\numberline {2.2.2.3}Virtual machines' network interfaces management}{13}{subsubsection.2.2.2.3}
+\contentsline {section}{\numberline {2.3}Virtualization server}{14}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Node information}{15}{subsection.2.3.1}
+\contentsline {subsection}{\numberline {2.3.2}Servers}{16}{subsection.2.3.2}
+\contentsline {subsubsection}{\numberline {2.3.2.1}Add virtual machine}{17}{subsubsection.2.3.2.1}
+\contentsline {subsubsection}{\numberline {2.3.2.2}Edit virtual machine}{23}{subsubsection.2.3.2.2}
+\contentsline {subsubsection}{\numberline {2.3.2.3}Remove virtual machine}{25}{subsubsection.2.3.2.3}
+\contentsline {subsubsection}{\numberline {2.3.2.4}Connect to a virtual machine over VNC}{25}{subsubsection.2.3.2.4}
+\contentsline {subsubsection}{\numberline {2.3.2.5}Start/stop virtual machine}{25}{subsubsection.2.3.2.5}
+\contentsline {subsubsection}{\numberline {2.3.2.6}Migrate virtual machine}{26}{subsubsection.2.3.2.6}
+\contentsline {subsection}{\numberline {2.3.3}Storage}{27}{subsection.2.3.3}
+\contentsline {subsubsection}{\numberline {2.3.3.1}Physical Volumes administration}{28}{subsubsection.2.3.3.1}
+\contentsline {subsubsection}{\numberline {2.3.3.2}Volume groups administration}{28}{subsubsection.2.3.3.2}
+\contentsline {subsubsection}{\numberline {2.3.3.3}Logical volumes administration}{30}{subsubsection.2.3.3.3}
+\contentsline {subsection}{\numberline {2.3.4}Node Load}{32}{subsection.2.3.4}
+\contentsline {subsection}{\numberline {2.3.5}Shutdown node}{33}{subsection.2.3.5}
+\contentsline {section}{\numberline {2.4}Virtual machine}{35}{section.2.4}
+\contentsline {subsection}{\numberline {2.4.1}Server information}{35}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}Statistics}{36}{subsection.2.4.2}
+\contentsline {subsection}{\numberline {2.4.3}Services}{37}{subsection.2.4.3}
+\contentsline {subsection}{\numberline {2.4.4}Virtio drivers}{38}{subsection.2.4.4}
+\contentsline {section}{\numberline {2.5}Tools}{42}{section.2.5}
+\contentsline {subsection}{\numberline {2.5.1}Import OVF}{42}{subsection.2.5.1}
+\contentsline {subsection}{\numberline {2.5.2}Export OVF}{47}{subsection.2.5.2}
+\contentsline {subsection}{\numberline {2.5.3}ISO manager}{47}{subsection.2.5.3}
+\contentsline {subsection}{\numberline {2.5.4}Nodes' agent monitor}{48}{subsection.2.5.4}
+\contentsline {subsection}{\numberline {2.5.5}System events log}{49}{subsection.2.5.5}
+\contentsline {section}{\numberline {2.6}System administration}{49}{section.2.6}
+\contentsline {subsection}{\numberline {2.6.1}One time set wizard}{49}{subsection.2.6.1}
+\contentsline {subsection}{\numberline {2.6.2}Virtual cluster management}{50}{subsection.2.6.2}
+\contentsline {subsubsection}{\numberline {2.6.2.1}Virtual cluster setup wizard}{51}{subsubsection.2.6.2.1}
+\contentsline {subsubsection}{\numberline {2.6.2.2}Moving a node between datacenters}{52}{subsubsection.2.6.2.2}
+\contentsline {subsubsection}{\numberline {2.6.2.3}Authorize node}{53}{subsubsection.2.6.2.3}
+\contentsline {subsection}{\numberline {2.6.3}System Preferences}{54}{subsection.2.6.3}
+\contentsline {subsection}{\numberline {2.6.4}Users, groups and permission administration}{55}{subsection.2.6.4}
+\contentsline {subsection}{\numberline {2.6.5}Shutdown Central Management}{58}{subsection.2.6.5}

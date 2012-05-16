@@ -1,0 +1,13 @@
+rendering: ~
+security: ~
+
+# insert your own filters here
+myUser: # filter that updates vnc token
+  class: myUserFilter
+secure:
+  class: MySecureFilter
+cache:     ~
+common:
+  class: sfCommonFilter
+execution: ~
+

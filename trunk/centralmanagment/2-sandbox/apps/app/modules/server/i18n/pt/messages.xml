@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file source-language="EN" target-language="pt" datatype="plaintext" original="messages" date="2010-08-16T12:09:30Z" product-name="messages">
+    <header/>
+    <body>      
+      <trans-unit id="move_dragdrop_instead_perform_migrate">
+        <source>Can move this server with drag and drop into other node. To perform a migrate instead of a move, the server must be running!</source>
+        <target>É possível mover a máquina virtual arrastando-a para outro nó. Para efectuar uma migração em vez de mover, a máquina virtual necessita estar a correr!</target>
+      </trans-unit>
+      <trans-unit id="migrate_dragdrop_instead_perform_move">
+        <source>Can migrate this server with drag and drop into other node. To perform a move instead of a migrate, the server must be stopped!</source>
+        <target>É possível migrar a máquina virtual arrastando-a para outro nó. Para mover em vez de migrar, a máquina virtual necessita estar parada!</target>
+      </trans-unit>
+
+      <trans-unit id="cant_move_not_all_shared">
+        <source>Can't performe move. All logical volumes needs to be shared.</source>
+        <target>Não é possível mover. Todos os logical volumes têm que estar partilhados.</target>
+      </trans-unit>
+
+      <trans-unit id="cant_move_has_snapshots">
+        <source>Can't performe move. The logical volumes has snapshots.</source>
+        <target>Não é possível mover. Os logical volumes têm snapshots.</target>
+      </trans-unit>
+
+      <trans-unit id="cant_migrate_not_all_shared">
+        <source>Can't performe migrate. All logical volumes needs to be shared.</source>
+        <target>Não é possível migrar. Todos os logical volumes têm que estar partilhados.</target>
+      </trans-unit>
+
+      <trans-unit id="cant_migrate_has_snapshots">
+        <source>Can't performe migrate. The logical volumes has snapshots.</source>
+        <target>Não é possível migrar. Os logical volumes têm snapshots.</target>
+      </trans-unit>
+
+      <trans-unit id="max_allocatable_memory">
+        <source>Max allocatable memory (MB)</source>
+        <target>Memória máx. disponível (MB)</target>
+      </trans-unit>
+      <trans-unit id="free_memory">
+        <source>Free memory (MB)</source>
+        <target>Memória disponível (MB)</target>
+      </trans-unit>
+
+    </body>
+  </file>
+</xliff>

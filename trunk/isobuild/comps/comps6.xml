@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE newcomps PUBLIC "-//CentOS//DTD Comps info//EN" "comps.dtd">
+<comps>
+
+  <group>
+    <id>core</id>
+    <name>Core</name>
+    <description>Smallest possible installation</description>
+    <default>true</default>
+    <uservisible>false</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">acl</packagereq>
+      <packagereq type="mandatory">aic94xx-firmware</packagereq>
+      <packagereq type="mandatory">atmel-firmware</packagereq>
+      <packagereq type="mandatory">attr</packagereq>
+      <packagereq type="mandatory">audit</packagereq>
+      <packagereq type="mandatory">b43-openfwwf</packagereq>
+      <packagereq type="mandatory">basesystem</packagereq>
+      <packagereq type="mandatory">bash</packagereq>
+      <packagereq type="mandatory">bfa-firmware</packagereq>
+      <packagereq type="mandatory">coreutils</packagereq>
+      <packagereq type="mandatory">cpio</packagereq>
+      <packagereq type="mandatory">cronie</packagereq>
+      <packagereq type="mandatory">dhclient</packagereq>
+      <packagereq type="mandatory">e2fsprogs</packagereq>
+      <packagereq type="mandatory">filesystem</packagereq>
+      <packagereq type="mandatory">glibc</packagereq>
+      <packagereq type="mandatory">initscripts</packagereq>
+      <packagereq type="mandatory">iproute</packagereq>
+      <packagereq type="mandatory">iptables</packagereq>
+      <packagereq type="mandatory">iptables-ipv6</packagereq>
+      <packagereq type="mandatory">iputils</packagereq>
+      <packagereq type="mandatory">ipw2100-firmware</packagereq>
+      <packagereq type="mandatory">ipw2200-firmware</packagereq>
+      <packagereq type="mandatory">ivtv-firmware</packagereq>
+      <packagereq type="mandatory">iwl1000-firmware</packagereq>
+      <packagereq type="mandatory">iwl3945-firmware</packagereq>
+      <packagereq type="mandatory">iwl4965-firmware</packagereq>
+      <packagereq type="mandatory">iwl5000-firmware</packagereq>
+      <packagereq type="mandatory">iwl5150-firmware</packagereq>
+      <packagereq type="mandatory">iwl6000-firmware</packagereq>
+      <packagereq type="mandatory">iwl6050-firmware</packagereq>
+      <packagereq type="mandatory">kbd</packagereq>
+      <packagereq type="mandatory">kernel-firmware</packagereq>
+      <packagereq type="mandatory">libertas-usb8388-firmware</packagereq>
+      <packagereq type="mandatory">ncurses</packagereq>
+      <packagereq type="mandatory">openssh-server</packagereq>
+      <packagereq type="mandatory">passwd</packagereq>
+      <packagereq type="mandatory">policycoreutils</packagereq>
+      <packagereq type="mandatory">postfix</packagereq>
+      <packagereq type="mandatory">procps</packagereq>
+      <packagereq type="mandatory">ql2100-firmware</packagereq>
+      <packagereq type="mandatory">ql2200-firmware</packagereq>
+      <packagereq type="mandatory">ql23xx-firmware</packagereq>
+      <packagereq type="mandatory">ql2400-firmware</packagereq>
+      <packagereq type="mandatory">ql2500-firmware</packagereq>
+      <packagereq type="mandatory">rootfiles</packagereq>
+      <packagereq type="mandatory">rpm</packagereq>
+      <packagereq type="mandatory">rsyslog</packagereq>
+      <packagereq type="mandatory">rt61pci-firmware</packagereq>
+      <packagereq type="mandatory">rt73usb-firmware</packagereq>
+      <packagereq type="mandatory">selinux-policy-targeted</packagereq>
+      <packagereq type="mandatory">setup</packagereq>
+      <packagereq type="mandatory">shadow-utils</packagereq>
+      <packagereq type="mandatory">sudo</packagereq>
+      <packagereq type="mandatory">util-linux-ng</packagereq>
+      <packagereq type="mandatory">vim-minimal</packagereq>
+      <packagereq type="mandatory">xorg-x11-drv-ati-firmware</packagereq>
+      <packagereq type="mandatory">yum</packagereq>
+      <packagereq type="mandatory">zd1211-firmware</packagereq>
+      <packagereq type="default">efibootmgr</packagereq>
+      <packagereq type="default">grub</packagereq>
+      <packagereq type="optional">dracut-fips</packagereq>
+      <packagereq type="optional">dracut-network</packagereq>
+    </packagelist>
+  </group>
+
+  <group>
+    <id>centralmanagement</id>
+    <name>ETVA Central Management</name>
+    <description>ETVA Central Management.</description>
+    <default>true</default>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">etva-centralmanagement-ent</packagereq>
+      <packagereq type="mandatory">etva-centralmanagement-nrpe</packagereq>
+      <packagereq type="mandatory">etva-virtio-win</packagereq>
+    </packagelist>
+  </group>
+  <group>
+    <id>kvm</id>
+    <name>ETVA Kernel Virtual Machine</name>
+    <description>ETVA Kernel Virtual Machine.</description>
+    <default>true</default>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">qemu-kvm</packagereq>
+      <packagereq type="mandatory">virtagent</packagereq>
+      <packagereq type="mandatory">etva-enterprise</packagereq>
+    </packagelist>
+  </group>
+  <group>
+    <id>xen</id>
+    <name>ETVA Xen Virtual Machine</name>
+    <description>ETVA Xen Virtual Machine.</description>
+    <default>true</default>
+    <uservisible>true</uservisible>
+    <packagelist>
+      <packagereq type="mandatory">kernel-xen</packagereq>
+      <packagereq type="mandatory">xen</packagereq>
+      <packagereq type="mandatory">virtagent</packagereq>
+      <packagereq type="mandatory">etva-enterprise</packagereq>
+    </packagelist>
+  </group>
+
+ <category>
+    <id>core-system</id>
+    <name>Core System</name>
+    <description>Various core pieces of the system.</description>
+    <display_order>1</display_order>
+    <grouplist>
+      <groupid>core</groupid>
+    </grouplist>
+  </category>
+  <category>
+    <id>centralmanagement</id>
+    <name>ETVA Central Management</name>
+    <description>Packages that are from ETVA Central Management</description>
+    <display_order>95</display_order>
+    <grouplist>
+      <groupid>centralmanagement</groupid>
+    </grouplist>
+  </category>
+  <category>
+    <id>kvm</id>
+    <name>ETVA Kernel Virtual Machine</name>
+    <description>Packages that are from ETVA KVM</description>
+    <display_order>96</display_order>
+    <grouplist>
+      <groupid>kvm</groupid>
+    </grouplist>
+  </category>
+  <category>
+    <id>xen</id>
+    <name>ETVA Xen Virtual Machine</name>
+    <description>Packages that are from ETVA Xen</description>
+    <display_order>97</display_order>
+    <grouplist>
+      <groupid>xen</groupid>
+    </grouplist>
+  </category>
+</comps>

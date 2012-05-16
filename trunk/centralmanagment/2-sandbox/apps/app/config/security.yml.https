@@ -1,0 +1,10 @@
+default:
+  is_secure: true
+
+# for the whole module
+all:
+  is_ssl: true
+
+# just one action
+login:
+  is_ssl: true

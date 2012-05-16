@@ -1,0 +1,6 @@
+model=enterprise
+mastersite=http://etva-reg.eurotux.com/services
+dbversion=1.0
+
+[networks]
+bond0=Management
