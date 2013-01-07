@@ -368,8 +368,12 @@ class OvfVirtualHardwareSection
                                         break;
             case self::DEVICE_ETHERNET :
                                         $type = $xpath->query('./envl:ResourceSubType')->item(0)->nodeValue; //should be one item only
+                                        $address = $xpath->query('./envl:Address')->item(0)->nodeValue; //should be one item only
+                                        $network = $xpath->query('./envl:Connection')->item(0)->nodeValue; //should be one item only
                                         $ovf_ether = new OvfItemEthernet();
                                         $ovf_ether->setType(strtolower($type));
+                                        $ovf_ether->setAddress($address);
+                                        $ovf_ether->setNetwork($network);
                                         $this->items[self::DEVICE_ETHERNET][] = $ovf_ether;
                                         break;
 
@@ -420,15 +424,33 @@ class OvfVirtualHardwareSection
 class OvfItemEthernet
 {
     private $type; //model type of interface
+    private $address; // static address
 
     function setType($type)
     {
         $this->type = $type;
     }
 
+    function setAddress($address)
+    {
+        $this->address = $address;
+    }
+
+    function setNetwork($network)
+    {
+        $this->network = $network;
+    }
+
     function toArray()
     {
-		$result = array('IntfModel' => $this->type);
+		$result = array('IntfModel' => $this->type );
+        if( $this->address )
+            $result['Mac'] = $this->address;
+        if( $this->network ){
+            $etva_vlan = EtvaVlanPeer::retrieveByName($this->network);
+            $result['Vlan'] = $etva_vlan->getName();
+            $result['VlanId'] = $etva_vlan->getId();
+        }
 		return $result;
     }
 }

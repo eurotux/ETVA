@@ -24,6 +24,10 @@ class EtvaClusterPeer extends BaseEtvaClusterPeer {
     const _ERR_CLUSTER_ = 'Could not find cluster. %info%';
     const _ERR_CREATE_   = 'Cluster %name% could not be created. %info%';
     const _OK_CREATE_   = 'Cluster %name% created successfully';
+    const _ERR_UPDATE_   = 'Cluster %name% could not be updated. %info%';
+    const _OK_UPDATE_   = 'Cluster %name% updated successfully';
+
+    const _ERR_ADMISSION_GATE_FAIL_  = 'Admission policy fail when try start server %name%. %info%';
     
     public static function retrieveDefaultCluster()
     {

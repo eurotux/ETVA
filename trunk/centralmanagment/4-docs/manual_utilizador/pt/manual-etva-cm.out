@@ -9,36 +9,38 @@
 \BOOKMARK [3][]{subsubsection.3.2.2.1}{3.2.2.1 Administra\347\343o das redes}{subsection.3.2.2}
 \BOOKMARK [3][]{subsubsection.3.2.2.2}{3.2.2.2 Gest\343o da pool de endere\347os MAC}{subsection.3.2.2}
 \BOOKMARK [3][]{subsubsection.3.2.2.3}{3.2.2.3 Gest\343o das interfaces de rede das m\341quinas virtuais}{subsection.3.2.2}
-\BOOKMARK [1][]{section.3.3}{3.3 Servidor de virtualiza\347\343o}{chapter.3}
-\BOOKMARK [2][]{subsection.3.3.1}{3.3.1 Informa\347\343o do node}{section.3.3}
-\BOOKMARK [2][]{subsection.3.3.2}{3.3.2 Servidores}{section.3.3}
-\BOOKMARK [3][]{subsubsection.3.3.2.1}{3.3.2.1 Adicionar m\341quina virtual}{subsection.3.3.2}
-\BOOKMARK [3][]{subsubsection.3.3.2.2}{3.3.2.2 Editar m\341quina virtual}{subsection.3.3.2}
-\BOOKMARK [3][]{subsubsection.3.3.2.3}{3.3.2.3 Remover m\341quina virtual}{subsection.3.3.2}
-\BOOKMARK [3][]{subsubsection.3.3.2.4}{3.3.2.4 Abrir m\341quina virtual numa consola VNC}{subsection.3.3.2}
-\BOOKMARK [3][]{subsubsection.3.3.2.5}{3.3.2.5 Iniciar/parar m\341quina virtual}{subsection.3.3.2}
-\BOOKMARK [3][]{subsubsection.3.3.2.6}{3.3.2.6 Migrar m\341quina virtual}{subsection.3.3.2}
-\BOOKMARK [2][]{subsection.3.3.3}{3.3.3 Armazenamento}{section.3.3}
-\BOOKMARK [3][]{subsubsection.3.3.3.1}{3.3.3.1 Administra\347\343o de Physical Volumes}{subsection.3.3.3}
-\BOOKMARK [3][]{subsubsection.3.3.3.2}{3.3.3.2 Administra\347\343o de Volume Groups}{subsection.3.3.3}
-\BOOKMARK [3][]{subsubsection.3.3.3.3}{3.3.3.3 Administra\347\343o de Logical Volumes}{subsection.3.3.3}
-\BOOKMARK [2][]{subsection.3.3.4}{3.3.4 Desligar node}{section.3.3}
-\BOOKMARK [1][]{section.3.4}{3.4 M\341quina virtual}{chapter.3}
-\BOOKMARK [2][]{subsection.3.4.1}{3.4.1 Informa\347\343o do servidor}{section.3.4}
-\BOOKMARK [2][]{subsection.3.4.2}{3.4.2 Estat\355sticas}{section.3.4}
-\BOOKMARK [2][]{subsection.3.4.3}{3.4.3 Servi\347os}{section.3.4}
-\BOOKMARK [2][]{subsection.3.4.4}{3.4.4 Drivers Virtio}{section.3.4}
-\BOOKMARK [1][]{section.3.5}{3.5 Ferramentas}{chapter.3}
-\BOOKMARK [2][]{subsection.3.5.1}{3.5.1 Importar OVF}{section.3.5}
-\BOOKMARK [2][]{subsection.3.5.2}{3.5.2 Exportar OVF}{section.3.5}
-\BOOKMARK [2][]{subsection.3.5.3}{3.5.3 Gestor de ISOs}{section.3.5}
-\BOOKMARK [2][]{subsection.3.5.4}{3.5.4 Monitoriza\347\343o do agente dos nodes}{section.3.5}
-\BOOKMARK [2][]{subsection.3.5.5}{3.5.5 Registo de eventos do sistema}{section.3.5}
-\BOOKMARK [1][]{section.3.6}{3.6 Administra\347\343o do sistema}{chapter.3}
-\BOOKMARK [2][]{subsection.3.6.1}{3.6.1 Assistente de configura\347\343o inicial}{section.3.6}
-\BOOKMARK [2][]{subsection.3.6.2}{3.6.2 Alterar prefer\352ncias}{section.3.6}
-\BOOKMARK [2][]{subsection.3.6.3}{3.6.3 Administra\347\343o de utilizadores, grupos e permiss\365es}{section.3.6}
-\BOOKMARK [2][]{subsection.3.6.4}{3.6.4 Desligar a appliance}{section.3.6}
+\BOOKMARK [1][]{section.3.3}{3.3 Datacenter virtual}{chapter.3}
+\BOOKMARK [1][]{section.3.4}{3.4 Servidor de virtualiza\347\343o}{chapter.3}
+\BOOKMARK [2][]{subsection.3.4.1}{3.4.1 Informa\347\343o do n\363}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.2}{3.4.2 Servidores}{section.3.4}
+\BOOKMARK [3][]{subsubsection.3.4.2.1}{3.4.2.1 Adicionar m\341quina virtual}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.2}{3.4.2.2 Editar m\341quina virtual}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.3}{3.4.2.3 Remover m\341quina virtual}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.4}{3.4.2.4 Abrir m\341quina virtual numa consola VNC}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.5}{3.4.2.5 Iniciar/parar m\341quina virtual}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.6}{3.4.2.6 Migrar m\341quina virtual}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.7}{3.4.2.7 Snapshots}{subsection.3.4.2}
+\BOOKMARK [2][]{subsection.3.4.3}{3.4.3 Armazenamento}{section.3.4}
+\BOOKMARK [3][]{subsubsection.3.4.3.1}{3.4.3.1 Administra\347\343o de Physical Volumes}{subsection.3.4.3}
+\BOOKMARK [3][]{subsubsection.3.4.3.2}{3.4.3.2 Administra\347\343o de Volume Groups}{subsection.3.4.3}
+\BOOKMARK [3][]{subsubsection.3.4.3.3}{3.4.3.3 Administra\347\343o de Logical Volumes}{subsection.3.4.3}
+\BOOKMARK [2][]{subsection.3.4.4}{3.4.4 Desligar n\363}{section.3.4}
+\BOOKMARK [1][]{section.3.5}{3.5 M\341quina virtual}{chapter.3}
+\BOOKMARK [2][]{subsection.3.5.1}{3.5.1 Informa\347\343o do servidor}{section.3.5}
+\BOOKMARK [2][]{subsection.3.5.2}{3.5.2 Estat\355sticas}{section.3.5}
+\BOOKMARK [2][]{subsection.3.5.3}{3.5.3 Servi\347os}{section.3.5}
+\BOOKMARK [2][]{subsection.3.5.4}{3.5.4 Drivers Virtio}{section.3.5}
+\BOOKMARK [1][]{section.3.6}{3.6 Ferramentas}{chapter.3}
+\BOOKMARK [2][]{subsection.3.6.1}{3.6.1 Importar OVF}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.2}{3.6.2 Exportar OVF}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.3}{3.6.3 Gestor de ISOs}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.4}{3.6.4 Monitoriza\347\343o do agente dos nodes}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.5}{3.6.5 Registo de eventos do sistema}{section.3.6}
+\BOOKMARK [1][]{section.3.7}{3.7 Administra\347\343o do sistema}{chapter.3}
+\BOOKMARK [2][]{subsection.3.7.1}{3.7.1 Assistente de configura\347\343o inicial}{section.3.7}
+\BOOKMARK [2][]{subsection.3.7.2}{3.7.2 Alterar prefer\352ncias}{section.3.7}
+\BOOKMARK [2][]{subsection.3.7.3}{3.7.3 Administra\347\343o de utilizadores, grupos e permiss\365es}{section.3.7}
+\BOOKMARK [2][]{subsection.3.7.4}{3.7.4 Desligar a appliance}{section.3.7}
 \BOOKMARK [0][]{chapter.4}{4 Management Agents}{}
 \BOOKMARK [1][]{section.4.1}{4.1 ETFW}{chapter.4}
 \BOOKMARK [2][]{subsection.4.1.1}{4.1.1 Network setup Wizard}{section.4.1}

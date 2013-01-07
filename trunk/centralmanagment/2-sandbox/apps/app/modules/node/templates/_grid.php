@@ -212,7 +212,7 @@ Ext.namespace('Node');
                 afteredit: function(e){
                     var conn = new Ext.data.Connection();
                     conn.request({
-                        url: 'node/jsonUpdate',
+                        url: 'node/jsonGridUpdate',
                         params: {
                             action: 'update',
                             id: e.record.id,

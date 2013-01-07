@@ -109,6 +109,52 @@ cd trunk/etvoipagent/
 	rpmbuild --nodeps -ts --define "_topdir $DIR/._RPM_" --define "_srcrpmdir $DIR/SRPMS" $_SOURCE.tar.gz > /dev/null
 cd - > /dev/null
 
+# build do etmsagent
+cd trunk/etmsagent/
+	if [ -d *-etmsd ]; then
+		_VERSION=`head *-etmsd/*.spec|egrep -i "^Version:"|awk {' print $2'}`
+		_SOURCE=`head *-etmsd/*.spec|egrep -i "^Source:"|awk {' print $2'}|sed -e 's/-%.*//'`
+		_SOURCE=$_SOURCE-${_VERSION}-$VERSION
+		cat *-etmsd/*.spec | sed -e "s/^Release:.*/Release: $VERSION/g" > _tmp
+		mv _tmp *-etmsd/*.spec
+		mv *-etmsd $_SOURCE
+	else
+		_VERSION=`head *$VERSION/*.spec|egrep -i "^Version:"|awk {' print $2'}`
+		_SOURCE=`head *$VERSION/*.spec|egrep -i "^Source:"|awk {' print $2'}|sed -e 's/-%.*//'`
+		_SOURCE=$_SOURCE-$_VERSION-$VERSION
+	fi
+	rm -f $_SOURCE.tar.gz
+	tar zcf $_SOURCE.tar.gz $_SOURCE
+	rpmbuild --nodeps -ts --define "_topdir $DIR/._RPM_" --define "_srcrpmdir $DIR/SRPMS" $_SOURCE.tar.gz > /dev/null
+cd - > /dev/null
+
+# build dos pacotes do etaspagent
+#cd trunk/etaspagent/*-requires
+#	for spec in SPECS/*; do
+#		rpmbuild --nodeps -bs --define "_topdir $PWD" $spec > /dev/null
+#	done
+#	mv SRPMS/* $DIR/SRPMS/
+#cd - > /dev/null
+
+# build do etaspagent
+cd trunk/etaspagent/
+	if [ -d *-etaspd ]; then
+		_VERSION=`head *-etaspd/*.spec|egrep -i "^Version:"|awk {' print $2'}`
+		_SOURCE=`head *-etaspd/*.spec|egrep -i "^Source:"|awk {' print $2'}|sed -e 's/-%.*//'`
+		_SOURCE=$_SOURCE-${_VERSION}-$VERSION
+		cat *-etaspd/*.spec | sed -e "s/^Release:.*/Release: $VERSION/g" > _tmp
+		mv _tmp *-etaspd/*.spec
+		mv *-etaspd $_SOURCE
+	else
+		_VERSION=`head *$VERSION/*.spec|egrep -i "^Version:"|awk {' print $2'}`
+		_SOURCE=`head *$VERSION/*.spec|egrep -i "^Source:"|awk {' print $2'}|sed -e 's/-%.*//'`
+		_SOURCE=$_SOURCE-$_VERSION-$VERSION
+	fi
+	rm -f $_SOURCE.tar.gz
+	tar zcf $_SOURCE.tar.gz $_SOURCE
+	rpmbuild --nodeps -ts --define "_topdir $DIR/._RPM_" --define "_srcrpmdir $DIR/SRPMS" $_SOURCE.tar.gz > /dev/null
+cd - > /dev/null
+
 # build dos pacotes do etfwagent
 cd trunk/etfwagent/*-requires || exit -1
 	for spec in SPECS/*; do
@@ -174,10 +220,12 @@ cd trunk/centralmanagment/
 cd - > /dev/null
 
 # revert das alteracoes
-rm -f trunk/centralmanagment/etva-centralmanagement*tar.gz trunk/virtualizationagent/virtagent-*.tar.gz trunk/etvoipagent/etva-etvoip-*tar.gz trunk/etfwagent/etva-etfw-*tar.gz && \
+rm -f trunk/centralmanagment/etva-centralmanagement*tar.gz trunk/virtualizationagent/virtagent-*.tar.gz trunk/etvoipagent/etva-etvoip-*tar.gz trunk/etmsagent/etva-etms-*tar.gz trunk/etaspagent/etva-etasp-*tar.gz trunk/etfwagent/etva-etfw-*tar.gz && \
 mv trunk/centralmanagment/etva-centralmanagement-* trunk/centralmanagment/2-sandbox && \
 mv trunk/virtualizationagent/virtagent-* trunk/virtualizationagent/2-virtd && \
 mv trunk/etvoipagent/etva-etvoip-* trunk/etvoipagent/1-etvoipd && \
+mv trunk/etmsagent/etva-etms-* trunk/etmsagent/1-etmsd && \
+mv trunk/etaspagent/etva-etasp-* trunk/etaspagent/1-etaspd && \
 mv trunk/etfwagent/etva-etfw-* trunk/etfwagent/1-etfwd && \
 (cd trunk && svn revert centralmanagment/2-sandbox/etva-centralmanagement.spec virtualizationagent/2-virtd/virtagent.spec)
 

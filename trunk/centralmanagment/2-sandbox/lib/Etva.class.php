@@ -122,16 +122,35 @@ class Etva
     /*
      * parses $params array in $code message format
      */
-    static function getLogMessage($params,$code){
+    function getMessageParams($params){
         $parse_params = array();
 
         foreach($params as $param_k => $param_v)
             $parse_params['%'.$param_k.'%'] = $param_v;
 
-        $msg = strtr($code, $parse_params);
+        return $parse_params;
+    }
+    static function getLogMessage($params,$code){
+
+        $msg = strtr($code, self::getMessageParams($params));
 
         return $msg;
 
+    }
+
+    static public function makeNotifyLogMessage($agent,$msg,$args=array(),$msg_log=null,$args_l=array(),$priority=EtvaEventLogger::ERR){
+        $notify_msg = sfContext::getInstance()->getI18N()->__($msg,self::getMessageParams($args));
+
+        if( $msg_log ){
+            $args_l['info'] = $notify_msg;
+            $notify_msg = sfContext::getInstance()->getI18N()->__($msg_log,self::getMessageParams($args_l));
+        }
+
+        sfContext::getInstance()->getEventDispatcher()->notify(
+            new sfEvent($agent, 'event.log',
+                            array('message' => $notify_msg,'priority'=>$priority)));
+
+        return $notify_msg;
     }
 
     /*

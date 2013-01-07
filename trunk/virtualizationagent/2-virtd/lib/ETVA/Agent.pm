@@ -224,7 +224,7 @@ sub mainLoop {
             foreach my $client (@ready) {
                 if($client == $server) {
                     # Create a new socket
-                    plog('accept');
+                    plog( nowStr(), " ", "accept"); 
                     my $new = $server->accept();
                     # Set REUSEADDR flag
                     $new->sockopt(SO_REUSEADDR,1) or die("can't sockop!");

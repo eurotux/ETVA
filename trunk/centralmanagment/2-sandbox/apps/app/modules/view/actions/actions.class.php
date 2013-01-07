@@ -211,6 +211,12 @@ class viewActions extends sfActions
 
   public function executeVncviewer(sfWebRequest $request)
   {
+
+      if( $request->getParameter('sleep') ){
+          $tsleep = $request->getParameter('sleep');
+          sleep($tsleep);
+      }
+
       $etva_server = EtvaServerPeer::retrieveByPk($request->getParameter('id'));
 
       if(!$etva_server) return sfView::NONE;            

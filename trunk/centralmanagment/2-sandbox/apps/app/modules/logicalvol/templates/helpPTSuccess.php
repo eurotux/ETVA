@@ -7,6 +7,8 @@
     <li><a href="#help-lvol-rs">Redimensionar</a></li>
     <li><a href="#help-lvol-rm">Remover</a></li>
     <li><a href="#help-lvol-clone">Clonar</a></li>
+    <li><a href="#help-lvol-convert">Converter</a></li>
+    <li><a href="#help-lvol-scan">Procurar <em>logical volumes</em></a></li>
 </ul>
 
 <br/>
@@ -20,6 +22,7 @@ selecciona-se <em>Adicionar logical volume</em>.</p>
 o <em>volume group</em> a partir do qual se criará, e o tamanho que não
 deverá exceder o tamanho disponível no <em>volume group</em>.
 </p>
+<p>É ainda possível definir o formato do disco de um dos possíveis (raw, qcow2, qcow, cow e vmdk - por omissão raw) e indicar a percentagem de espaço a ser usada para <em>snapshots</em></p>
 <a href="#help-lvol"><div>Início</div></a>
 <hr/>
 
@@ -50,6 +53,16 @@ a informação contida no <em>tooltip</em> que aparece.</p>
 <p>
 Se o <em>volume group</em> de destino for um volume partilhado, as alterações serão propagadas para os restantes nós do datacenter.
 </p>
+<a href="#help-lvol"><div>Início</div></a>
+
+<a id="help-lvol-convert"><h1>Converter <em><b>Logical Volumes</b></em></h1></a>
+<p>Ao escolher esta opção é possível converter o disco para um dos formatos indicados (raw, qcow2, qcow, cow e vmdk).</p>
+<a href="#help-lvol"><div>Início</div></a>
+
+<a id="help-lvol-scan"><h1>Procurar <em><b>Logical Volumes</b></em></h1></a>
+<p>Em <em>Procurar logical volumes</em> sincroniza os <em>logical volumes</em> que se encontram do lado do agente de virtualização e não estão registados no <em>Central Management</em>.
+É possível também que existam <em>logical volumes</em> que se encontram registados no <em>Central Management</em> mas não existam físicamente por alguma razão alheia ao sistema.
+Nestes casos, é possível remover o registo do sistema e voltar a sincronizar os <em>logical volumes</em> com a funcionalidade <em>Procurar logical volumes</em>.</p>
 <a href="#help-lvol"><div>Início</div></a>
 <hr/>
 

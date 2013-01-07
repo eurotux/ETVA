@@ -34,30 +34,11 @@ EOF;
     // initialize the database connection
     $databaseManager = new sfDatabaseManager($this->configuration);
     $con = $databaseManager->getDatabase($options['connection'])->getConnection();
+    $this->log("[INFO] ".date("d/m/y : H:i:s",time()));
 
     $context = sfContext::createInstance(sfProjectConfiguration::getApplicationConfiguration('app','dev',true));
-
     $response = diagnostic::getAgentFiles('diagnostic');
-    
-//    $sfaction = $context->getController()->getAction('event', 'jsonDiagnostic');    
-//    $sfaction = $context->getController()->forward('event', 'jsonDiagnostic');    
-//    if($sfaction){
-//        print_r($sfaction);
-//    }else{
-//        print "action empty";
-//    }
-
-//    $configuration = ProjectConfiguration::getApplicationConfiguration('photos', 'dev', true);
-//    $context = sfContext::createInstance($configuration);
-//    $context->getController()->forward('frontend', 'my_action');
-
-
-//    $action = new eventActions();
-//    $sfRequest = new sfWebRequest();
-//    $sfRequest->setParameter('method', 'diagnostic');
-//    $action->executeJsonDiagnostic($sfRequest);
-    
-        
+    $this->log("[INFO] ".date("d/m/y : H:i:s",time()));
     return;
   }
 }

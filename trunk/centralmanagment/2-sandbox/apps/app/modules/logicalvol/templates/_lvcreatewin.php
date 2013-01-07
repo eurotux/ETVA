@@ -63,6 +63,46 @@ lvwin.createForm.Main = function(node_id, level) {
         baseParams = {'nid':node_id};
     }
 
+    this.lvsnapshotusage = new Ext.form.SliderField({
+                                ref: 'lvsnapshotusage',
+                                id: 'lvsnapshotusage',
+                                name: 'snapshotusage',
+                                anchor: '95%',
+                                tipText: function(thumb){
+                                            return String(thumb.value) + '%';
+                                },
+                                value: 20,
+                                fieldLabel: <?php echo json_encode(__('Snapshot usage (%)')) ?>,
+                            });
+
+    this.lvformat = new Ext.form.ComboBox({
+                    ref:'lvformat',
+                    name:'format',
+                    id:'lvformat'
+                    ,editable: false
+                    ,typeAhead: false
+                    ,fieldLabel: <?php echo json_encode(__('Format')) ?>,
+                    width:150,hiddenName:'format'
+                    ,valueField: 'format',displayField: 'format',forceSelection: true,emptyText: <?php echo json_encode(__('Select format...')) ?>
+                    ,store: new Ext.data.ArrayStore({
+                            fields: ['format'],
+                            data : <?php
+                                        /*
+                                         * build interfaces model dynamic
+                                         */
+                                        $disk_formats = sfConfig::get('app_disk_formats');
+                                        $disk_format_elem = array();
+
+                                        foreach($disk_formats as $eformat)
+                                            $disk_format_elem[] = '['.json_encode($eformat).']';
+                                        echo '['.implode(',',$disk_format_elem).']'."\n";
+                                    ?>
+                            })
+                    ,mode: 'local'
+                    ,lastQuery:''
+                    //,allowBlank:false
+                    ,triggerAction: 'all'
+    });
 
     this.vg = new Ext.form.ComboBox({
                 
@@ -165,7 +205,7 @@ lvwin.createForm.Main = function(node_id, level) {
         autoHeight:true,
         border:false,
         labelWidth:160,defaults:{msgTarget: 'side'},
-        items: [this.lvname, this.vg, this.lvsize]
+        items: [this.lvname, this.vg, this.lvsize, this.lvformat, this.lvsnapshotusage]
     });
 
     // define window and pop-up - render formPanel
@@ -214,20 +254,26 @@ Ext.extend(lvwin.createForm.Main, Ext.form.FormPanel, {
                           'level':this.level,
                           'lv':lvname,
                           'vg':this.vg.getValue(),
-                          'size':this.lvsize.getValue()+'M'};
+                          'size':this.lvsize.getValue()+'M',
+                          'persnapshotusage':this.lvsnapshotusage.getValue(),
+                          'format':this.lvformat.getValue()};
             }else if(this.level == 'node'){
                 params = {
                           'nid':this.node_id,
                           'level':this.level,
                           'lv':lvname,
                           'vg':this.vg.getValue(),
-                          'size':this.lvsize.getValue()+'M'};
+                          'size':this.lvsize.getValue()+'M',
+                          'persnapshotusage':this.lvsnapshotusage.getValue(),
+                          'format':this.lvformat.getValue()};
             }else{
                 params = {
                           'nid':this.node_id,
                           'lv':lvname,
                           'vg':this.vg.getValue(),
-                          'size':this.lvsize.getValue()+'M'};
+                          'size':this.lvsize.getValue()+'M',
+                          'persnapshotusage':this.lvsnapshotusage.getValue(),
+                          'format':this.lvformat.getValue()};
             }
 
             var conn = new Ext.data.Connection({

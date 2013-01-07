@@ -6,9 +6,10 @@ fi
 
 /usr/bin/certtool --generate-privkey > /etc/pki/CA/cakey.pem
 
-echo "organization = Eurotux
+echo "cn = Eurotux
 ca
-cert_signing_key" >/var/tmp/ca.info
+cert_signing_key
+expiration_days = 730" >/var/tmp/ca.info
 
 /usr/bin/certtool --generate-self-signed --load-privkey /etc/pki/CA/cakey.pem --template /var/tmp/ca.info --outfile /etc/pki/CA/cacert.pem
 
@@ -21,8 +22,10 @@ fi
 echo "organization = Eurotux
 cn = `hostname`
 tls_www_server
+tls_www_client
 encryption_key
-signing_key" > /var/tmp/server.info
+signing_key
+expiration_days = 730" > /var/tmp/server.info
 
 /usr/bin/certtool --generate-certificate --load-ca-privkey /etc/pki/CA/cakey.pem --load-ca-certificate /etc/pki/CA/cacert.pem --load-privkey /etc/pki/libvirt/private/serverkey.pem --template /var/tmp/server.info --outfile /etc/pki/libvirt/servercert.pem
 

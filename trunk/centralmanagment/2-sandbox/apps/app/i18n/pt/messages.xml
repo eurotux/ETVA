@@ -142,18 +142,16 @@
       </trans-unit>
       <trans-unit id="remove_node_question">
         <source>Remove node {0} ?</source>
-        <target>Remover node {0} ?</target>
+        <target>Remover nó {0} ?</target>
       </trans-unit>
       <trans-unit id="removing_node">
         <source>Removing node...</source>
-        <target>A remover node...</target>
+        <target>A remover nó...</target>
       </trans-unit>
       <trans-unit id="err_remove_node">
         <source>Unable to delete node!</source>
-        <target>Não foi possivel remover o node!</target>
+        <target>Não foi possível remover o nó!</target>
       </trans-unit>
-
-
 
       <trans-unit id="available_macs">
         <source>Available MAC Addresses</source>
@@ -471,6 +469,26 @@
        <source>Cluster</source>
        <target>Datacenter</target>
       </trans-unit>
+      <trans-unit id="cluster_info">
+       <source>Cluster info</source>
+       <target>Informação Datacenter</target>
+      </trans-unit>
+      <trans-unit id="cluster_name">
+       <source>Cluster name</source>
+       <target>Nome Datacenter</target>
+      </trans-unit>
+      <trans-unit id="cluster_memory">
+       <source>Memory (MB)</source>
+       <target>Memória (MB)</target>
+      </trans-unit>
+      <trans-unit id="cluster_nodes">
+       <source>Nodes (up/down)</source>
+       <target>Nós (up/down)</target>
+      </trans-unit>
+      <trans-unit id="cluster_servers">
+       <source>Servers (assign/unassign)</source>
+       <target>Servidores (assign/unassign)</target>
+      </trans-unit>
       <trans-unit id="cluster_rename">
         <source>Rename cluster</source>
         <target>Renomear datacenter</target>
@@ -531,6 +549,79 @@
        <source>Cluster with the same name already exists</source>
        <target>Já existe um datacenter com o nome especificado</target>
       </trans-unit>
+      <trans-unit id="cluster_edit_tit">
+       <source>Edit cluster {0}</source>
+       <target>Editar datacenter {0}</target>
+      </trans-unit>
+      <trans-unit id="cluster_edit">
+       <source>Edit cluster</source>
+       <target>Editar datacenter</target>
+      </trans-unit>
+      <trans-unit id="cluster_remove">
+       <source>Remove cluster</source>
+       <target>Remover datacenter</target>
+      </trans-unit>
+      <trans-unit id="cluster_node_high_availability">
+       <source>Node High availability</source>
+       <target>Nó com alta disponibilidade</target>
+      </trans-unit>
+      <trans-unit id="cluster_node_high_availability_msg_fencing_conf">
+       <source> - configuration for fencing device needed</source>
+       <target> - é necessário configuração fencing device</target>
+      </trans-unit>
+      <trans-unit id="cluster_node_enable_fencing_conf">
+       <source>Enable fencing configuration</source>
+       <target>Activar configuração fencing</target>
+      </trans-unit>
+      <trans-unit id="cluster_host_failures_tolerates">
+       <source>Host failures tolerates</source>
+       <target>Tolerância de hosts a falha</target>
+      </trans-unit>
+      <trans-unit id="cluster_per_resources">
+       <source>Percentage of resources reserved to failover</source>
+       <target>Percentagem de recursos reservada a failover</target>
+      </trans-unit>
+      <trans-unit id="cluster_spare_node">
+       <source>Spare node</source>
+       <target>Nó suplente</target>
+      </trans-unit>
+      <trans-unit id="err_cluster_admission_gate_fail">
+       <source>Admission policy fail when try start server %name%. %info%</source>
+       <target>Política de admissão falha ao tentar iniciar o servidor %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_cluster_admission_fail_n_hosts_tolerate">
+       <source>Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate.</source>
+       <target>Não foi cumprida a política para tolerância de (%n_hosts_tolerate_value%) host(s) a falha.</target>
+      </trans-unit>
+      <trans-unit id="err_cluster_admission_fail_per_resources">
+       <source>Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover.</source>
+       <target>Não foi cumprida a política para (%per_resources_value%) percentagem de recursos reservada a ''failover''.</target>
+      </trans-unit>
+      <trans-unit id="err_cluster_admission_fail_max_cpu">
+       <source>Number max. of cpus (%max_cpu_Nodes%) exceeded.</source>
+       <target>Número máx. de cpus (%max_cpu_Nodes%) excedido.</target>
+      </trans-unit>
+      <trans-unit id="node_fencing_test_error">
+       <source>You get an error executing fencing test with output: %debug%.</source>
+       <target>Obteve um error na execução do teste de fencing com output: %debug%.</target>
+      </trans-unit>
+      <trans-unit id="node_fencing_test_ok">
+       <source>Node %name% successfully tested.</source>
+       <target>Nó %name% testado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="node_fencing_testing_config">
+       <source>Testing fencing configuration...</source>
+       <target>A testar a configuração de fencing...</target>
+      </trans-unit>
+      <trans-unit id="node_fencing_unable_test_fencing">
+       <source>Unable to test fencing configuration of node {0}!</source>
+       <target>Não foi possível fazer o teste à configuração do fencing do nó {0}!</target>
+      </trans-unit>
+      <trans-unit id="node_fencing_test_ok_title">
+       <source>Test OK!</source>
+       <target>Teste OK!</target>
+      </trans-unit>
+
       <!--                                  -->
 
       <!-- MAIN -->
@@ -549,11 +640,11 @@
       </trans-unit>
       <trans-unit id="node_monitor">
         <source>Nodes Agent Monitor keepalive</source>
-        <target>Monitorização do agente dos nodes</target>
+        <target>Monitorização do agente dos nós</target>
       </trans-unit>
       <trans-unit id="change_to_agressive">
         <source>Increases the frequency of the nodes status verification</source>
-        <target>Aumenta a frequência com que o estado dos nodes é verificada</target>
+        <target>Aumenta a frequência com que o estado dos nós é verificada</target>
       </trans-unit>
       <trans-unit id="events_log">
         <source>System events log</source>
@@ -580,7 +671,7 @@
         <target>Armazenamento</target>
       </trans-unit>
       <trans-unit id="clone_tooltip">
-        <source>Enabled if virtual server is not running and if any volume groups have enouf space.</source>
+        <source>Enabled if virtual server is not running and if any volume groups have enough space.</source>
         <target>Opção habilitada se o servidor virtual que utiliza o volume estiver parado, e exister algum volume group com espaço suficiente para alojar o novo volume.</target>
       </trans-unit>
       <trans-unit id="clone_err">
@@ -592,8 +683,8 @@
         <target>Clone %name% foi criado com sucesso.</target>
       </trans-unit>
       <trans-unit id="clone_ttl">
-        <source>Clone logical volume</source>
-        <target>Clonar logical volume</target>
+        <source>Clone logical volume {0}</source>
+        <target>Clonar logical volume {0}</target>
       </trans-unit>
       <trans-unit id="src_volume_sp">
         <source>Source volume size (MB)</source>
@@ -610,6 +701,34 @@
       <trans-unit id="add_ph_vol_1">
         <source>Add physical volume {0} to volume group {1} ?</source>
         <target>Adicionar o volume físico {0} ao volume group {1} ?</target>
+      </trans-unit>
+      <trans-unit id="lv_snapshot_create_title">
+        <source>Create snapshot for logical volume {0}</source>
+        <target>Criar snapshot para o logical volume {0}</target>
+      </trans-unit>
+      <trans-unit id="lv_convert_title">
+        <source>Convert logical volume {0}</source>
+        <target>Converter logical volume {0}</target>
+      </trans-unit>
+      <trans-unit id="lv_to_convert">
+        <source>Convert</source>
+        <target>Converter</target>
+      </trans-unit>
+      <trans-unit id="lv_converting">
+        <source>Converting logical volume...</source>
+        <target>A converter logical volume...</target>
+      </trans-unit>
+      <trans-unit id="lv_convert_err_msgbox">
+        <source>Unable to convert logical volume {0}!</source>
+        <target>Não foi possível converter o logical volume {0}!</target>
+      </trans-unit>
+      <trans-unit id="lv_convert_err_msg">
+        <source>Logical volume %name% could not be converted. %info%</source>
+        <target>Logical volume %name% não pôde ser convertido. %info%</target>
+      </trans-unit>
+      <trans-unit id="lv_convert_ok_msg">
+        <source>Logical volume %name% converted successfully.</source>
+        <target>Logical volume %name% convertido com sucesso.</target>
       </trans-unit>
 
       <!-- NETWORKS -->
@@ -737,7 +856,7 @@
       </trans-unit>
       <trans-unit id="err_nics_saveall">
         <source>Could not save all network interfaces. Interface with mac address %name% problem.</source>
-        <target>Não foi possivel guardar todas as interfaces de rede. Problema com a interface com o mac %name%.</target>
+        <target>Não foi possível guardar todas as interfaces de rede. Problema com a interface com o mac %name%.</target>
       </trans-unit>
       <trans-unit id="mac_assinged">
         <source>Mac address %name% already assigned</source>
@@ -773,11 +892,11 @@
       </trans-unit>
       <trans-unit id="err_attach_detach_interfaces">
         <source>Unable to attach/detach interfaces for server {0}!</source>
-        <target>Não foi possivel alterar as interfaces de rede do servidor {0}!</target>
+        <target>Não foi possível alterar as interfaces de rede do servidor {0}!</target>
       </trans-unit>
       <trans-unit id="err_detach_interface">
         <source>Unable to detach network interface {0} from {1}!</source>
-        <target>Não foi possivel remover do servidor {1} a interface de rede com o mac {0}!</target>
+        <target>Não foi possível remover do servidor {1} a interface de rede com o mac {0}!</target>
       </trans-unit>      
       <trans-unit id="change_server_perm">
         <source>This will change permissions for this server</source>
@@ -785,7 +904,7 @@
       </trans-unit>
       <trans-unit id="change_cluster_perm">
         <source>This will change permissions for the node's parent (cluster)</source>
-        <target>Altera as permissões do data center a que pertence o node</target>
+        <target>Altera as permissões do data center a que pertence o nó</target>
       </trans-unit>
       <trans-unit id="change_ug_perm">
         <source>Select users and/or groups that must have permissions in this {0}.</source>
@@ -817,7 +936,7 @@
       </trans-unit>
       <trans-unit id="err_interfaces_create">
         <source>Network interfaces could not be created. %info%</source>
-        <target>Não foi possivel criar as interfaces de rede. %info%</target>
+        <target>Não foi possível criar as interfaces de rede. %info%</target>
       </trans-unit>
       <trans-unit id="interface_remove">
         <source>Network interface %name% of server %server% removed successfully</source>
@@ -825,11 +944,11 @@
       </trans-unit>
       <trans-unit id="err_interface_remove">
         <source>Network interface %name% could not be removed. %info%</source>
-        <target>Não foi possivel remover a interface de rede com o mac %name%. %info%</target>
+        <target>Não foi possível remover a interface de rede com o mac %name%. %info%</target>
       </trans-unit>
       <trans-unit id="err_interfaces_remove">
         <source>Network interfaces could not be removed. %info%</source>
-        <target>Não foi possivel remover as interfaces de rede. %info%</target>
+        <target>Não foi possível remover as interfaces de rede. %info%</target>
       </trans-unit>
       <trans-unit id="remove__network_interface">
         <source>Remove network interface</source>
@@ -847,13 +966,26 @@
         <source>Set {0} permissions</source>
         <target>Atribuir permissões ao servidor {0}</target>
       </trans-unit>
-      <trans-unit id="escacar_pedra">
+      <trans-unit id="node_moved_successfully">
         <source>Node %name% moved successfully</source>
-        <target>O node %name% foi movido com sucesso</target>
+        <target>O nó %name% foi movido com sucesso</target>
+      </trans-unit>
+      <trans-unit id="node_edit">
+        <source>Edit node</source>
+        <target>Editar nó</target>
+      </trans-unit>
+      <trans-unit id="node_edit_title">
+        <source>Edit node {0}</source>
+        <target>Editar nó {0}</target>
       </trans-unit>
 
       <!-- DEVICES RELATED -->
       <!--                 -->
+      <trans-unit id="dev_already_attached">
+        <source>The device %dev% is already attached to another virtual server. Please dettach the device before proceed.</source>
+        <target>O dispositivo %dev% já está associado a outra máquina virtual. Para poder prosseguir remova o dispositivo da máquina em questão..</target>
+      </trans-unit>
+      
       <trans-unit id="pv_uninit_ok">
         <source>Device %name% uninitialized successfully</source>
         <target>Removida a inicialização com sucesso do device %name%</target>
@@ -880,7 +1012,7 @@
       </trans-unit>
       <trans-unit id="pv_notfound">
         <source>Physical volume %name% could not be found</source>
-        <target>Não foi possivel encontrar o physical volume %name%</target>
+        <target>Não foi possível encontrar o physical volume %name%</target>
       </trans-unit>
       <trans-unit id="pv_notavailable">
         <source>Physical volume %name% not available</source>
@@ -940,7 +1072,7 @@
       </trans-unit>
       <trans-unit id="err_pv_init">
         <source>Unable to initialize {0}!</source>
-        <target>Não foi possivel inicializar {0}!</target>
+        <target>Não foi possível inicializar {0}!</target>
       </trans-unit>
       <trans-unit id="err_pv_uninit">
         <source>Unable to uninitialize {0}!</source>
@@ -953,6 +1085,66 @@
       <trans-unit id="pv_err_inconsistent">
         <source>Shared physical volumes info reported inconsistent. %info%</source>
         <target>Inconsistência encontrada nos physical volumes partilhados. %info%</target>
+      </trans-unit>
+      <trans-unit id="pv_register_err">
+        <source>Physical device %name% could not be registered. %info%</source>
+        <target>Erro ao registar o physical device %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="pv_register_ok">
+        <source>Physical device %name% registered successfully</source>
+        <target>Physical device %name% registado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="pv_unregister_err">
+        <source>Physical device %name% could not be unregistered. %info%</source>
+        <target>Erro ao desregistar o physical device %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="pv_unregister_ok">
+        <source>Physical device %name% unregistered successfully</source>
+        <target>Physical device %name% desregistado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="add_physicaldevice">
+        <source>Add physical device</source>
+        <target>Adicionar physical device</target>
+      </trans-unit>
+      <trans-unit id="register_physicaldevice">
+        <source>Register physical device...</source>
+        <target>A registar physical device...</target>
+      </trans-unit>
+      <trans-unit id="rem_physicaldevice">
+        <source>Remove physical device</source>
+        <target>Remover physical device</target>
+      </trans-unit>
+      <trans-unit id="unregister_physicaldevice">
+        <source>Unregister physical device...</source>
+        <target>A desregistar physical device...</target>
+      </trans-unit>
+      <trans-unit id="register_physicaldevice">
+        <source>Register physical device</source>
+        <target>Registar physical device</target>
+      </trans-unit>
+      <trans-unit id="unregister_physicaldevice">
+        <source>Unregister physical device</source>
+        <target>Desregistar physical device</target>
+      </trans-unit>
+      <trans-unit id="scan_physicaldevices">
+        <source>Scan physical devices</source>
+        <target>Procurar physical devices</target>
+      </trans-unit>
+      <trans-unit id="scanning_physicaldevices">
+        <source>Scan physical devices...</source>
+        <target>A procurar physical devices...</target>
+      </trans-unit>
+      <trans-unit id="unable_registe_physicaldevice">
+        <source>Unable to registe physical device {0}!</source>
+    <target>Não foi possível registar o physical device {0}</target>
+      </trans-unit>
+      <trans-unit id="unable_unregiste_physicaldevice">
+        <source>Unable to unregiste physical device {0}!</source>
+        <target>Não foi possível desregistar o physical device {0}</target>
+      </trans-unit>
+      <trans-unit id="unable_scan_physicaldevices">
+        <source>Unable to scan physical device</source>
+        <target>Não foi possível procurar physical devices</target>
       </trans-unit>
 
 
@@ -984,7 +1176,7 @@
       </trans-unit>
       <trans-unit id="vg_notfound">
         <source>Volume group %name% could not be found</source>
-        <target>Não foi possivel encontrar o volume group %name%</target>
+        <target>Não foi possível encontrar o volume group %name%</target>
       </trans-unit>      
       <trans-unit id="vg_create_ok">
         <source>Volume group %name%  created successfully with %pvs%</source>
@@ -996,11 +1188,11 @@
       </trans-unit>
       <trans-unit id="vg_create_error">
         <source>Volume group %name% could not be created. %info%</source>
-        <target>Não foi possivel criar o volume group %name%. %info%</target>
+        <target>Não foi possível criar o volume group %name%. %info%</target>
       </trans-unit>
       <trans-unit id="vg_extend_error">
         <source>Volume group %name% could not be extended. %info%</source>
-        <target>Não foi possivel extender o volume group %name%. %info%</target>
+        <target>Não foi possível extender o volume group %name%. %info%</target>
       </trans-unit>      
       <trans-unit id="vg_size">
         <source>Volume group available size (MB)</source>
@@ -1012,7 +1204,7 @@
       </trans-unit>
       <trans-unit id="err_remove_pv_vg">
         <source>Unable to remove {0} from volume group {1}</source>
-        <target>Não foi possivel remover {0} do volume group {1}</target>
+        <target>Não foi possível remover {0} do volume group {1}</target>
       </trans-unit>
       <trans-unit id="add_vg">
         <source>Add volume group</source>
@@ -1044,21 +1236,80 @@
       </trans-unit>
       <trans-unit id="err_vg_extend">
         <source>Unable to extend {0}!</source>
-        <target>Não foi possivel extender {0}!</target>
+        <target>Não foi possível extender {0}!</target>
       </trans-unit>
       <trans-unit id="err_add_vg">
         <source>Unable to create volume group {0}</source>
-        <target>Não foi possivel criar o volume group {0}</target>
+        <target>Não foi possível criar o volume group {0}</target>
       </trans-unit>
       <trans-unit id="err_remove_vg">
         <source>Unable to remove volume group {0}</source>
-        <target>Não foi possivel remover o volume group {0}</target>
+        <target>Não foi possível remover o volume group {0}</target>
       </trans-unit>
       <trans-unit id="vg_err_inconsistent">
         <source>Shared volume groups info reported inconsistent. %info%</source>
         <target>Inconsistência encontrada nos volume groups partilhados. %info%</target>
       </trans-unit>
-
+      <trans-unit id="vg_register_err">
+        <source>Volume group %name% could not be registered. %info%</source>
+        <target>Erro ao registar o volume group %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="vg_register_ok">
+        <source>Volume group %name% registered successfully</source>
+        <target>Volume group %name% registado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="vg_unregister_err">
+        <source>Volume group %name% could not be unregistered. %info%</source>
+        <target>Erro ao desregistar o volume group %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="vg_unregister_ok">
+        <source>Volume group %name% unregistered successfully</source>
+        <target>Volume group %name% desregistado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="register_volumegroup">
+        <source>Register volume group</source>
+        <target>Registar volume group</target>
+      </trans-unit>
+      <trans-unit id="unregister_volumegroup">
+        <source>Unregister volume group</source>
+        <target>Desregistar volume group</target>
+      </trans-unit>
+      <trans-unit id="registering_volumegroup_">
+        <source>Registering volume group...</source>
+        <target>A registar volume group...</target>
+      </trans-unit>
+      <trans-unit id="unregistering_volumegroup_">
+        <source>Unregistering volume group...</source>
+        <target>A desregistar volume group...</target>
+      </trans-unit>
+      <trans-unit id="register_volumegroup_ask">
+        <source>Register volume group {0} ?</source>
+        <target>Registar volume group {0} ?</target>
+      </trans-unit>
+      <trans-unit id="unregister_volumegroup_ask">
+        <source>Unregister volume group {0} ?</source>
+        <target>Desregistar volume group {0} ?</target>
+      </trans-unit>
+      <trans-unit id="unable_registe_volumegroup">
+        <source>Unable to registe volume group {0}</source>
+        <target>Não foi possível registar o volume group {0}</target>
+      </trans-unit>
+      <trans-unit id="unable_unregiste_volumegroup">
+        <source>Unable to unregiste volume group {0}</source>
+        <target>Não foi possível desregistar o volume group {0}</target>
+      </trans-unit>
+      <trans-unit id="disable_unregist_volumegroup">
+        <source>Cannot unregister the volume group with logical volumes in use by virtual server</source>
+        <target>Não é possível desregistar o volume group com logical volumes em uso por uma máquina virtual </target>
+      </trans-unit>
+      <trans-unit id="scan_volumegroups">
+        <source>Scan volume groups</source>
+        <target>Procurar volume groups</target>
+      </trans-unit>
+      <trans-unit id="vg_exist">
+        <source>Volume group %name% already exist</source>
+        <target>Volume group %name% já existe</target>
+      </trans-unit>
 
       <!-- LOGICAL VOLUME RELATED -->
       <!--                        -->
@@ -1067,16 +1318,16 @@
         <target>Não é possível usar o logical volume %name%. LV DE SISTEMA</target>
       </trans-unit>
       <trans-unit id="lv_resize_ok">
-        <source>Logical volume %name% resized to %size%MB successfully</source>
-        <target>Logical volume %name% redimensionado com sucesso</target>
+        <source>Logical volume %name% resized to %size%MB successfully.</source>
+        <target>Logical volume %name% redimensionado com sucesso.</target>
       </trans-unit>
       <trans-unit id="lv_remove_ok">
-        <source>Logical volume %name% removed successfully</source>
-        <target>Logical volume %name% removido com sucesso</target>
+        <source>Logical volume %name% removed successfully.</source>
+        <target>Logical volume %name% removido com sucesso.</target>
       </trans-unit>
       <trans-unit id="lv_create_ok">
-        <source>Logical volume %name% created successfully</source>
-        <target>Logical volume %name% criado com sucesso</target>
+        <source>Logical volume %name% created successfully.</source>
+        <target>Logical volume %name% criado com sucesso.</target>
       </trans-unit>
       <trans-unit id="lv_diskfile_exist">
         <source>Disk file %name% already exist</source>
@@ -1138,13 +1389,21 @@
         <source>Remove logical volume {0} ?</source>
         <target>Remover logical volume {0} ?</target>
       </trans-unit>
+      <trans-unit id="register_logicalvolume">
+        <source>Register logical volume</source>
+        <target>Registar logical volume</target>
+      </trans-unit>
+      <trans-unit id="unregister_logicalvolume">
+        <source>Unregister logical volume</source>
+        <target>Desregistar logical volume</target>
+      </trans-unit>
       <trans-unit id="err_remove_lv">
         <source>Unable to remove logical volume {0}</source>
-        <target>Não foi possivel remover o logical volume {0}</target>
+        <target>Não foi possível remover o logical volume {0}</target>
       </trans-unit>
       <trans-unit id="err_resize_lv">
         <source>Unable to resize logical volume {0}!</source>
-        <target>Não foi possivel redimensionar o logical volume {0}!</target>
+        <target>Não foi possível redimensionar o logical volume {0}!</target>
       </trans-unit>
       <trans-unit id="err_invalid_lvsize">
         <source>Invalid logical volume size</source>
@@ -1166,21 +1425,29 @@
         <source>Logical volume %name% not in use</source>
         <target>Logical volume %name% não está em uso</target>
       </trans-unit>
+      <trans-unit id="lv_soapupdate">
+        <source>Logical volumes info could not be updated. %info%</source>
+        <target>Não foi possível actualizar informação dos logical volumes. %info%</target>
+      </trans-unit>
       <trans-unit id="lv_inconsistent">
         <source>Logical volumes info reported inconsistent. %info%</source>
         <target>Informação dos logical volumes inconsistente. %info%</target>
       </trans-unit>
       <trans-unit id="lv_notfound">
         <source>Logical volume %name% could not be found</source>
-        <target>Não foi possivel encontrar o logical volume %name%</target>
+        <target>Não foi possível encontrar o logical volume %name%</target>
       </trans-unit>
       <trans-unit id="lv_notfound_id">
         <source>Logical volume with ID %id% could not be found</source>
         <target>Não foi possível encontrar o logical volume com ID %id%</target>
       </trans-unit>
+      <trans-unit id="err_reload_lv">
+        <source>Error reloading logical volume {0}!</source>
+        <target>Não foi possível actualizar o logical volume {0}!</target>
+      </trans-unit>
       <trans-unit id="err_add_lv">
         <source>Unable to create logical volume {0}!</source>
-        <target>Não foi possivel criar o logical volume {0}!</target>
+        <target>Não foi possível criar o logical volume {0}!</target>
       </trans-unit>
       <trans-unit id="lv_has_snapshots">
         <source>The logical volumes has snapshots</source>
@@ -1190,13 +1457,37 @@
         <source>Volume %name% is a snapshot.</source>
         <target>O volume %name% é um snapshot.</target>
       </trans-unit>
-      <trans-unit id="err_lv_create_snapshot">
+      <trans-unit id="err_lv_created_snapshot">
         <source>Snapshot %name% could not be created. %info%</source>
         <target>Não é possível criar o snapshot %name%. %info%</target>
       </trans-unit>
-      <trans-unit id="ok_lv_create_snapshot">
-        <source>Snapshot %name% created successfully</source>
-        <target>Snapshot %name% criado com sucesso</target>
+      <trans-unit id="ok_lv_created_snapshot">
+        <source>Snapshot %name% created successfully.</source>
+        <target>Snapshot %name% criado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="lv_revert_snapshot">
+        <source>Revert snapshot</source>
+        <target>Reverter snapshot</target>
+      </trans-unit>
+      <trans-unit id="lv_revert_snapshot_ask">
+        <source>Revert snapshot {0}?</source>
+        <target>Reverter snapshot {0}?</target>
+      </trans-unit>
+      <trans-unit id="lv_snapshot_reverting">
+        <source>Reverting snapshot...</source>
+        <target>A reverter snapshot...</target>
+      </trans-unit>
+      <trans-unit id="lv_snapshot_err_msg">
+        <source>Snapshot %name% could not be reverted. %info%</source>
+        <target>Snapshot %name% não pôde ser revertido. %info%</target>
+      </trans-unit>
+      <trans-unit id="lv_snapshot_ok_msg">
+        <source>Snapshot %name% reverted successfully.</source>
+        <target>Snapshot %name% revertido com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="lv_snapshot_err_msgbox">
+        <source>Unable to revert snapshot {0}</source>
+        <target>Não foi possível revert o snapshot {0}</target>
       </trans-unit>
       <trans-unit id="err_lv_snapshot_in_other_node">
         <source>Volume %name% is a snapshot in other node.</source>
@@ -1252,7 +1543,7 @@
       </trans-unit>
       <trans-unit id="err_create_snapshot">
         <source>Unable to create logical volume {0} snapshot!</source>
-        <target>Não foi possivel criar snapshot do logical volume {0}!</target>
+        <target>Não foi possível criar snapshot do logical volume {0}!</target>
       </trans-unit>
       <trans-unit id="warn_cluster_snapshot">
         <source>Snapshots not supported in cluster context.</source>
@@ -1265,6 +1556,42 @@
       <trans-unit id="lv_err_inconsistent">
         <source>Shared logical volumes info reported inconsistent. %info%</source>
         <target>Inconsistência encontrada nos logical volumes partilhados. %info%</target>
+      </trans-unit>
+      <trans-unit id="lv_ok_soaprefresh">
+        <source>Logical volumes info reloaded successfully</source>
+        <target>Informação dos logical volumes actualizada com sucesso</target>
+      </trans-unit>
+      <trans-unit id="lv_err_soaprefresh">
+        <source>Logical volumes info could not be reloaded. %info%</source>
+        <target>Não foi possível actualizar a informação dos logical volumes</target>
+      </trans-unit>
+      <trans-unit id="lv_unregister_err">
+        <source>Logical volume %name% could not be unregistered. %info%</source>
+        <target>Erro ao desregistar o logical volume %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="lv_unregister_ok">
+        <source>Logical volume %name% unregistered successfully.</source>
+        <target>Logical volume %name% desregistado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="unable_scan_logicalvolumes">
+        <source>Unable to scan logical volumes</source>
+        <target>Não foi possível fazer a procurar logical volumes</target>
+      </trans-unit>
+      <trans-unit id="unable_unregiste_logicalvolume">
+        <source>Unable to unregiste logical volume {0}</source>
+        <target>Não foi possível desregistar o logical volume {0}</target>
+      </trans-unit>
+      <trans-unit id="scan_logicalvolumes">
+        <source>Scan logical volumes</source>
+        <target>Procurar logical volumes</target>
+      </trans-unit>
+      <trans-unit id="scan_logicalvolumes_ask">
+        <source>Scan logical volumes?</source>
+        <target>Procurar logical volumes?</target>
+      </trans-unit>
+      <trans-unit id="scanning_logicalvolumes">
+        <source>Scan logical volumes...</source>
+        <target>A procurar logical volumes...</target>
       </trans-unit>
 
       <!-- NODE RELATED -->
@@ -1369,11 +1696,11 @@
       </trans-unit>
       <trans-unit id="remove_node">
         <source>Remove node</source>
-        <target>Remover node</target>
+        <target>Remover nó</target>
       </trans-unit>
       <trans-unit id="node_info">
         <source>Node info</source>
-        <target>Informação do node</target>
+        <target>Informação do nó</target>
       </trans-unit>
       <trans-unit id="node_notfound">
         <source>Node with ID %id% could not be found</source>
@@ -1387,7 +1714,110 @@
         <source>Node %name% does not have device %dev%</source>
         <target>Node %name% não possui o device %dev%</target>
       </trans-unit>
-
+      <trans-unit id="err_node_putmaintenance">
+        <source>Could not put the node %name% in maintenance mode. %info%</source>
+        <target>Não foi possível colocar o nó %name% em modo de manutenção. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_node_putmaintenance">
+        <source>Node %name% marked in maintenance mode successfully</source>
+        <target>Nó %name% colocado em modo de manutenção com successo</target>
+      </trans-unit>
+      <trans-unit id="node_boxtitle_putmaintenance">
+        <source>Put node {0} in maintenance</source>
+        <target>Colocar nó {0} em manutenção</target>
+      </trans-unit>
+      <trans-unit id="node_ask_putmaintenance">
+        <source>Do you want put node {0} in maintenance? This will also migrate all virtual servers.</source>
+        <target>Pretende colocar o nó {0} em manutenção? Isto efectuará a migração de todos os servidores virtuais.</target>
+      </trans-unit>
+      <trans-unit id="node_moving_to_maintenance_mode">
+        <source>Node is moving to maintenance mode...</source>
+        <target>O nó está sendo colocado em manutenção...</target>
+      </trans-unit>
+      <trans-unit id="node_maintenance">
+        <source>Maintenance</source>
+        <target>Manutenção</target>
+      </trans-unit>
+      <trans-unit id="node_fail">
+        <source>Fail</source>
+        <target>Falha</target>
+      </trans-unit>
+      <!--trans-unit id="node_up">
+        <source>Up</source>
+        <target>Em cima</target>
+      </trans-unit>
+      <trans-unit id="node_down">
+        <source>Down</source>
+        <target>Em baixo</target>
+      </trans-unit-->
+      <trans-unit id="node_maintenance_tooltip">
+        <source>This will put in maintenance the selected node</source>
+        <target>Coloca o nó seleccionado em manutenção</target>
+      </trans-unit>
+      <trans-unit id="node_system_check">
+        <source>System check</source>
+        <target>Verificar sistema</target>
+      </trans-unit>
+      <trans-unit id="node_recover">
+        <source>Recover</source>
+        <target>Recuperar</target>
+      </trans-unit>
+      <trans-unit id="node_system_check_tooltip">
+        <source>This will execute system check on selected node and recover it.</source>
+        <target>Permite verificar o sistema no nó seleccionado e recuperá-lo.</target>
+      </trans-unit>
+      <trans-unit id="node_shutdown_tooltip">
+        <source>This will shutdown the selected node</source>
+        <target>Desliga o nó seleccionado</target>
+      </trans-unit>
+      <trans-unit id="node_system_check_titlebox">
+        <source>System check on node {0}</source>
+        <target>Verificar sistema no nó {0}</target>
+      </trans-unit>
+      <trans-unit id="node_system_check_questionbox">
+        <source>Do you like execute system check on node {0}?</source>
+        <target>Pretende verificar o sistema no nó {0}?</target>
+      </trans-unit>
+      <trans-unit id="node_executing_system_check">
+        <source>Executing system check...</source>
+        <target>A verificar o sistema...</target>
+      </trans-unit>
+      <trans-unit id="node_maintenance_titlebox">
+        <source>Put node {0} in maintenance</source>
+        <target>Colocar o nó {0} em manutenção</target>
+      </trans-unit>
+      <trans-unit id="node_maintenance_questionbox">
+        <source>Do you want put node {0} in maintenance? This will also migrate all virtual servers.</source>
+        <target>Pretende colocar o nó {0} em manutenção? Isto efectuará a migração de todos os servidores virtuais.</target>
+      </trans-unit>
+      <trans-unit id="node_moving_to_maintenance">
+        <source>Node is moving to maintenance mode...</source>
+        <target>O nó está a ser movido para modo de manutenção...</target>
+      </trans-unit>
+      <trans-unit id="node_maintenance_disable_tooltip">
+        <source>This cluster doesn't have free spare node configured.</source>
+        <target>Este datacenter não tem nenhum nó de spare livre configurado.</target>
+      </trans-unit>
+      <trans-unit id="err_node_putmaintenance">
+        <source>Could not put the node %name% in maintenance mode. %info%</source>
+        <target>Não foi possível colocar o nó %name% em modo de manutenção. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_node_putmaintenance">
+        <source>Node %name% marked in maintenance mode successfully</source>
+        <target>Nó %name% marcado em manutenção com sucesso</target>
+      </trans-unit>
+      <trans-unit id="err_node_systemcheck">
+        <source>Node %name% could not execute system check. %info%</source>
+        <target>Nó %name% não pode executar verificação de sistema. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_node_systemcheck">
+        <source>Node %name% execute system check successfully.</source>
+        <target>Nó %name% executou a verificação de sistema com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="edit_node">
+        <source>This will change the node settings.</source>
+        <target>Esta opção permite alterar as configurações do nó.</target>
+      </trans-unit>
 
       <!-- VLAN STUFF     -->
       <!--                -->
@@ -1465,7 +1895,7 @@
       </trans-unit>
       <trans-unit id="err_migrate_fromto">
         <source>Could not migrate %name% from %from% to %to%. %info%</source>
-        <target>Não é possivel migrar %name% de %from% para %to%. %info%</target>
+        <target>Não é possível migrar %name% de %from% para %to%. %info%</target>
       </trans-unit>
       <trans-unit id="ok_migrate_fromto">
         <source>Server %name% migrated successfully from %from% to %to%. %info%</source>
@@ -1473,15 +1903,15 @@
       </trans-unit>
       <trans-unit id="err_migrate_cond">
         <source>Could not migrate %name% between different clusters and/or same node</source>
-        <target>Não é possivel migrar %name% para o mesmo node e/ou entre nodes de clusters diferentes</target>
+        <target>Não é possível migrar %name% para o mesmo nó e/ou entre nós de clusters diferentes</target>
       </trans-unit>
       <trans-unit id="cannot_migrate_cond">
         <source>Cannot migrate %name% between different clusters and/or same node</source>
-        <target>Não é possivel migrar %name% para o mesmo node e/ou entre nodes de clusters diferentes</target>
+        <target>Não é possível migrar %name% para o mesmo nó e/ou entre nós de clusters diferentes</target>
       </trans-unit>      
       <trans-unit id="unable_migrate_server">
         <source>Unable to migrate virtual server {0}!</source>
-        <target>Não foi possivel migrar a máquina virtual {0}!</target>
+        <target>Não foi possível migrar a máquina virtual {0}!</target>
       </trans-unit>      
       <trans-unit id="lv_not_all_shared">
         <source>All logical volumes needs to be shared.</source>
@@ -1497,11 +1927,11 @@
       </trans-unit>
       <trans-unit id="destination_node">
         <source>Destination node</source>
-        <target>Node de destino</target>
+        <target>Nó de destino</target>
       </trans-unit>
       <trans-unit id="no_destination_node">
         <source>No destination nodes available</source>
-        <target>Não existem nodes de destino disponíveis</target>
+        <target>Não existem nós de destino disponíveis</target>
       </trans-unit>
       <trans-unit id="server_migrate">
         <source>Migrate server</source>
@@ -1580,11 +2010,11 @@
       </trans-unit>
       <trans-unit id="err_add_vm">
         <source>Unable to create virtual server {0}!</source>
-        <target>Não foi possivel criar a máquina virtual {0}!</target>
+        <target>Não foi possível criar a máquina virtual {0}!</target>
       </trans-unit>
       <trans-unit id="unable_edit_server">
         <source>Unable to edit virtual server {0}!</source>
-        <target>Não foi possivel editar a máquina virtual {0}!</target>
+        <target>Não foi possível editar a máquina virtual {0}!</target>
       </trans-unit>
       <trans-unit id="adding_lv">
         <source>Creating logical volume...</source>
@@ -1666,6 +2096,14 @@
         <source>Logical volume name</source>
         <target>Nome do logical volume</target>
       </trans-unit>
+      <trans-unit id="lv_format">
+        <source>Format</source>
+        <target>Formato</target>
+      </trans-unit>
+      <trans-unit id="lv_snapshotusage">
+        <source>Snapshot usage (%)</source>
+        <target>Utilização snapshot (%)</target>
+      </trans-unit>
       <trans-unit id="new_file">
         <source>New disk file</source>
         <target>Novo ficheiro</target>
@@ -1721,6 +2159,22 @@
       <trans-unit id="amount_memory_size">
         <source>Memory size (MB)</source>
         <target>Tamanho da memória (MB)</target>
+      </trans-unit>
+      <trans-unit id="node_name">
+        <source>Node name</source>
+        <target>Nome do nó</target>
+      </trans-unit>
+      <trans-unit id="node_virtagent_state">
+        <source>VirtAgent state</source>
+        <target>Estado do agente</target>
+      </trans-unit>
+      <trans-unit id="node_servers">
+        <source>Servers (up/down)</source>
+        <target>Servidores (up/down)</target>
+      </trans-unit>
+      <trans-unit id="node_network_cards">
+        <source>Network cards</source>
+        <target>Interfaces de rede</target>
       </trans-unit>
       <trans-unit id="enter_name_os">
         <source>Please enter a name and choose operating system.</source>
@@ -1782,11 +2236,19 @@
       </trans-unit>
       <trans-unit id="err_open_console">
         <source>Cannot open console. Maybe server not running!</source>
-        <target>Não foi possivel abrir a consola. Servidor pode não estar a correr!</target>
+        <target>Não foi possível abrir a consola. Servidor pode não estar a correr!</target>
       </trans-unit>      
       <trans-unit id="start_server">
         <source>Start server</source>
         <target>Iniciar servidor</target>
+      </trans-unit>
+      <trans-unit id="start_with_console_title">
+        <source>Start server with console</source>
+        <target>Iniciar server com consola</target>
+      </trans-unit>
+      <trans-unit id="start_with_console">
+        <source>With console</source>
+        <target>Com consola</target>
       </trans-unit>
       <trans-unit id="start_server_question">
         <source>Start server {0} ?</source>
@@ -1794,7 +2256,7 @@
       </trans-unit>
       <trans-unit id="err_start_server">
         <source>Unable to start virtual server {0}!</source>
-        <target>Não foi possivel iniciar a máquina virtual {0}!</target>
+        <target>Não foi possível iniciar a máquina virtual {0}!</target>
       </trans-unit>
       <trans-unit id="server_starting">
         <source>Starting virtual server...</source>
@@ -1818,7 +2280,11 @@
       </trans-unit>
       <trans-unit id="err_stop_server">
         <source>Unable to stop virtual server {0}!</source>
-        <target>Não foi possivel parar a máquina virtual {0}!</target>
+        <target>Não foi possível parar a máquina virtual {0}!</target>
+      </trans-unit>
+      <trans-unit id="server_stop_tooltip">
+        <source>Stops the selected server</source>
+        <target>Pára o servidor seleccionado</target>
       </trans-unit>
       <trans-unit id="server_stoping">
         <source>Stoping virtual server...</source>
@@ -1866,11 +2332,11 @@
       </trans-unit>
       <trans-unit id="err_removed_server">
         <source>Server with name %name% could not be removed. %info%</source>
-        <target>Não foi possivel remover o servidor %name%. %info%</target>
+        <target>Não foi possível remover o servidor %name%. %info%</target>
       </trans-unit>
       <trans-unit id="err_removed_server_id">
         <source>Server could not be removed. %info%</source>
-        <target>Não foi possivel remover o servidor. %info%</target>
+        <target>Não foi possível remover o servidor. %info%</target>
       </trans-unit>
       <trans-unit id="edited_server">
         <source>Server with name %name% edited successfully</source>
@@ -1882,7 +2348,27 @@
       </trans-unit>
       <trans-unit id="err_remove_server">
         <source>Unable to remove virtual server {0}!</source>
-        <target>Não foi possivel remover a máquina virtual {0}!</target>
+        <target>Não foi possível remover a máquina virtual {0}!</target>
+      </trans-unit>
+      <trans-unit id="server_high_availability">
+        <source>High Availability</source>
+        <target>Alta disponibilidade</target>
+      </trans-unit>
+      <trans-unit id="server_vm_high_availability">
+        <source>VM High availability</source>
+        <target>Servidor com alta disponibilidade</target>
+      </trans-unit>
+      <trans-unit id="server_priority_start_migrate">
+        <source>Priority to start/migrate</source>
+        <target>Prioridade no arranque/migração</target>
+      </trans-unit>
+      <trans-unit id="server_other_options">
+        <source>Other options</source>
+        <target>Outras opções</target>
+      </trans-unit>
+      <trans-unit id="server_feature_options">
+        <source>Feature options</source>
+        <target>Opções de recursos</target>
       </trans-unit>
 
       <!-- NETWORK INTERFACES -->
@@ -1900,11 +2386,114 @@
         <target>Seleccionar interface de rede da tabela!</target>
       </trans-unit>
 
+      <!-- Server snapshot -->
+      <trans-unit id="server_no_snapshots_support">
+        <source>Doesn't has snapshots support</source>
+        <target>Não suporta snapshots</target>
+      </trans-unit>
+      <trans-unit id="server_snapshots">
+        <source>Snapshots</source>
+        <target>Snapshots</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_for_server">
+        <source>Snapshots for {0}</source>
+        <target>Snapshots de {0}</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_create">
+        <source>Create snapshot...</source>
+        <target>A criar snapshot...</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_created_ok_msg">
+        <source>Virtual machine snapshot created successfully.</source>
+        <target>Snapshot da máquina virtual criada com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_create_err_msg">
+        <source>Unable to create snapshot</source>
+        <target>Não foi possível criar o snapshot</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_to_create">
+        <source>Create snapshot</source>
+        <target>Criar snapshot</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_create_for">
+        <source>Create snapshot for {0}</source>
+        <target>Criar snapshot para {0}</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_revert_to">
+        <source>Revert to snapshot</source>
+        <target>Reverter para o snapshot</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_ask_to_revert_1">
+        <source>Do you want revert server state to snapshot {0}?</source>
+        <target>Pretende reverter o estado do servidor para o snapshot {0}?</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_ask_to_revert_2">
+        <source>Do you want revert server state to snapshot {0}? Attention this will shutoff the server.</source>
+        <target>Pretende reverter o estado do servidor para o snapshot {0}? Atenção isto vai desligar o servidor.</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_reverting">
+        <source>Reverting snapshot...</source>
+        <target>A reverter snapshot...</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_revert_ok_msg">
+        <source>Virtual machine snapshot reverted successfully.</source>
+        <target>Snapshot da máquina virtual revertido com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_revert_err_msg">
+        <source>Unable to revert snapshot</source>
+        <target>Não foi possível reverter a snapshot</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_download_backup_tit">
+        <source>Download backup of snapshot</source>
+        <target>Download backup do snapshot</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_download_backup_ask">
+        <source>Do you want download the backup of snapshot {0} of server {1}?</source>
+        <target>Pretende fazer o download do backup da snapshot {0} do servidor {1}?</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_download_backup_load">
+        <source>Downloading backup of snapshot...</source>
+        <target>A fazer o download do backup da snapshot...</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_download_backup_msg_ok">
+        <source>Backup of snapshot {0} of server {1} downloaded with success.</source>
+        <target>Download do backup do snapshot {0} do servidor {1} efectuado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_to_remove">
+        <source>Remove snapshot</source>
+        <target>Remover snapshot</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_ask_to_remove">
+        <source>Do you want remove {0} snapshot?</source>
+        <target>Prentende remover o snapshot {0}?</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_remove">
+        <source>Remove snapshot...</source>
+        <target>A remover snapshot...</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_remove_ok_msg">
+        <source>Virtual machine snapshot removed successfully.</source>
+        <target>Snapshot da máquina virtual removida com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_remove_err_msg">
+        <source>Unable to remove snapshot</source>
+        <target>Não foi possível remover a snapshot</target>
+      </trans-unit>
+      <trans-unit id="server_snapshot_help">
+        <source>Snapshots Server Help</source>
+        <target>Ajuda Snapshots Servidor</target>
+      </trans-unit>
+
+      <trans-unit id="server_has_devices">
+        <source>The server has devices attached</source>
+        <target>O servidor tem dispositivos associados</target>
+      </trans-unit>
+
       <!-- STATISTICS -->
       <!--            -->
       <trans-unit id="node_load">
         <source>Node Load</source>
-        <target>Utilização do node</target>
+        <target>Utilização do nó</target>
       </trans-unit>
       <trans-unit id="memory_usage">
         <source>Memory Usage</source>
@@ -1973,11 +2562,11 @@
       <!--     -->
       <trans-unit id="err_parsing_ovf">
         <source>Could not parse OVF %url%</source>
-        <target>Não foi possivel efectuar o parsing do OVF %url%</target>
+        <target>Não foi possível efectuar o parsing do OVF %url%</target>
       </trans-unit>
       <trans-unit id="err_import_ovf">
         <source>Could not import OVF. %info%</source>
-        <target>Não foi possivel importar OVF. %info%</target>
+        <target>Não foi possível importar OVF. %info%</target>
       </trans-unit>       
       <trans-unit id="no_servers_available">
         <source>No virtual servers available</source>
@@ -2013,7 +2602,7 @@
       </trans-unit>
       <trans-unit id="err_import_vm">
         <source>Unable to import virtual server {0}!</source>
-        <target>Não foi possivel importar a máquina virtual {0}!</target>
+        <target>Não foi possível importar a máquina virtual {0}!</target>
       </trans-unit>
       <trans-unit id="source_ovf_file">
         <source>Source OVF file</source>
@@ -2108,7 +2697,7 @@
       <!--       -->
       <trans-unit id="node_status">
         <source>Node status</source>
-        <target>Estado do node</target>
+        <target>Estado do nó</target>
       </trans-unit>
       <trans-unit id="check_status">
         <source>Check status</source>
@@ -2140,7 +2729,7 @@
       </trans-unit>
       <trans-unit id="load_node">
         <source>Load node</source>
-        <target>Carregar node</target>
+        <target>Carregar nó</target>
       </trans-unit>
       <trans-unit id="ip_address">
         <source>IP address</source>
@@ -2205,6 +2794,14 @@
       <trans-unit id="edit_disk_type">
         <source>Edit disk type</source>
         <target>Editar tipo do disco</target>
+      </trans-unit>
+      <trans-unit id="attach_disk">
+        <source>Attach disk</source>
+        <target>Adicionar disco</target>
+      </trans-unit>
+      <trans-unit id="detach_disk">
+        <source>Detach disk</source>
+        <target>Remover disco</target>
       </trans-unit>
       <trans-unit id="add_server_in_use">
         <source>The server {0} is using this disk.</source>
@@ -2288,7 +2885,7 @@
       </trans-unit>      
       <trans-unit id="couldnotloadpanel">
         <source>Couldn't load panel</source>
-        <target>Não foi possivel carregar o painel</target>
+        <target>Não foi possível carregar o painel</target>
       </trans-unit>
       <trans-unit id="datapanelnotloaded">
         <source>Data for the '{0}' panel could not be loaded.</source>
@@ -2297,6 +2894,14 @@
       <trans-unit id="generate_graph_img">
         <source>Generate graph image</source>
         <target>Gerar imagem do gráfico</target>
+      </trans-unit>
+      <trans-unit id="load_graph_date_time_title">
+        <source>From {0} {1} To {2} {3}</source>
+        <target>De {0} {1} Até {2} {3}</target>
+      </trans-unit>
+      <trans-unit id="load_graph_button">
+        <source>Load</source>
+        <target>Carregar</target>
       </trans-unit>
       <trans-unit id="nodatafound">
         <source>No data found</source>
@@ -2344,7 +2949,7 @@
       </trans-unit>
       <trans-unit id="err_save">
         <source>Could not save changes!</source>
-        <target>Não foi possivel guardar as alterações!</target>
+        <target>Não foi possível guardar as alterações!</target>
       </trans-unit>
       <trans-unit id="disk_keep">
         <source>Keep disk</source>
@@ -2390,6 +2995,26 @@
         <source>Communication Failure</source>
         <target>Falha na comunicação</target>
       </trans-unit>
+      <trans-unit id="cannot_edit_disk_first_row_running_server">
+        <source>Cannot edit the first disk on running server!</source>
+        <target>Não é possível editar o primeiro disco num servidor a correr!</target>
+      </trans-unit>
+      <trans-unit id="cannot_edit_disk_ide_running_server">
+        <source>Cannot edit the IDE disk on running server!</source>
+        <target>Não é possível editar um disco IDE com o servidor a correr!</target>
+      </trans-unit>
+      <trans-unit id="cannot_edit_disk_to_set_ide_running_server">
+        <source>Cannot edit disk to set IDE disk type on running server!</source>
+        <target>Não é possível alterar o disco para IDE com o servidor a correr!</target>
+      </trans-unit>
+      <trans-unit id="cannot_detach_disk_first_row_running_server">
+        <source>Cannot detach the first disk on running server!</source>
+        <target>Não é possível retirar o disk da primeira posição num servidor a correr!</target>
+      </trans-unit>
+      <trans-unit id="cannot_detach_ide_disk_running_server">
+        <source>Cannot detach the IDE disk on running server!</source>
+        <target>Não é possível retirar um disco IDE num servidor a correr!</target>
+      </trans-unit>
       
       <!-- MISC -->
       <trans-unit id="module_view_notfound">
@@ -2429,21 +3054,13 @@
         <source>Authentication</source>
         <target>Autenticação</target>
       </trans-unit>
-      <trans-unit id="registering_etva">
-        <source>Registering ETVA...</source>
-        <target>A registar ETVA...</target>
-      </trans-unit>
-      <trans-unit id="registering_etvm">
-        <source>Registering ETVM...</source>
-        <target>A registar ETVM...</target>
+      <trans-unit id="registering_">
+        <source>Registering {0}...</source>
+        <target>A registar {0}...</target>
       </trans-unit>
       <trans-unit id="could_not_register">        
-        <source>Could not register ETVA.&lt;br&gt; {0}</source>
-        <target>Não foi possível registar ETVA.&lt;br&gt; {0}</target>
-      </trans-unit>
-      <trans-unit id="could_not_register_etvm">        
-        <source>Could not register ETVM.&lt;br&gt; {0}</source>
-        <target>Não foi possível registar ETVM.&lt;br&gt; {0}</target>
+        <source>Could not register {0}.&lt;br&gt; {1}</source>
+        <target>Não foi possível registar {0}.&lt;br&gt; {1}</target>
       </trans-unit>
       <trans-unit id="register_ok">
         <source>Register OK with serial number &lt;b&gt;{0}&lt;/b&gt;</source>
@@ -2454,12 +3071,8 @@
         <target>Registar Appliance</target>
       </trans-unit>
       <trans-unit id="backup_appliance_notice">
-        <source>An appliance backup will save all ETVA settings. &lt;br&gt; If a virtual machine as an agent running, actual configuration/settings of that service will also be saved.&lt;br&gt;&lt;br&gt;IT DOES NOT BACKUP DISK DATA!!! ONLY CURRENT CONFIGURATION!</source>
-        <target>O backup da appliance irá guardar todas as configurações do ETVA. &lt;br&gt; Se uma máquina virtual tiver um agente a correr, a configuração do serviço desse agente será guardada.&lt;br&gt;&lt;br&gt;NÃO REALIZA BACKUP DA INFORMAÇÂO DOS DISCOS!!! APENAS CONFIGURAÇÃO ACTUAL!</target>
-      </trans-unit>
-      <trans-unit id="backup_appliance_notice_etvm">
-        <source>An appliance backup will save all ETVM settings. &lt;br&gt; If a virtual machine as an agent running, actual configuration/settings of that service will also be saved.&lt;br&gt;&lt;br&gt;IT DOES NOT BACKUP DISK DATA!!! ONLY CURRENT CONFIGURATION!</source>
-        <target>O backup da appliance irá guardar todas as configurações do ETVM. &lt;br&gt; Se uma máquina virtual tiver um agente a correr, a configuração do serviço desse agente será guardada.&lt;br&gt;&lt;br&gt;NÃO REALIZA BACKUP DA INFORMAÇÂO DOS DISCOS!!! APENAS CONFIGURAÇÃO ACTUAL!</target>
+        <source>An appliance backup will save all {0} settings. &lt;br&gt; If a virtual machine as an agent running, actual configuration/settings of that service will also be saved.&lt;br&gt;&lt;br&gt;IT DOES NOT BACKUP DISK DATA!!! ONLY CURRENT CONFIGURATION!</source>
+        <target>O backup da appliance irá guardar todas as configurações do {0}. &lt;br&gt; Se uma máquina virtual tiver um agente a correr, a configuração do serviço desse agente será guardada.&lt;br&gt;&lt;br&gt;NÃO REALIZA BACKUP DA INFORMAÇÂO DOS DISCOS!!! APENAS CONFIGURAÇÃO ACTUAL!</target>
       </trans-unit>
       <trans-unit id="backup_now">
         <source>BACKUP NOW!</source>
@@ -2498,12 +3111,8 @@
         <target>Alguns agentes das máquinas virtuais estão em baixo. Se prosseguir com o backup a configuração desses agentes NÃO SERÁ GUARDADA NO BACKUP.</target>
       </trans-unit>
       <trans-unit id="err_backup">
-        <source>Could not perform ETVA BACKUP.&lt;br&gt; {0}</source>
-        <target>Não foi possível efectuar o BACKUP da ETVA.&lt;br&gt; {0}</target>
-      </trans-unit>
-      <trans-unit id="err_backup">
-        <source>Could not perform ETVM BACKUP.&lt;br&gt; {0}</source>
-        <target>Não foi possível efectuar o BACKUP da ETVM.&lt;br&gt; {0}</target>
+        <source>Could not perform {0} BACKUP.&lt;br&gt; {1}</source>
+        <target>Não foi possível efectuar o BACKUP da {0}.&lt;br&gt; {1}</target>
       </trans-unit>
       <trans-unit id="ok_backup">
         <source>Appliance Backup success!</source>
@@ -2530,12 +3139,8 @@
         <target>Estado do node em baixo. Não é possível prosseguir. Verifique conectividade com Central Management</target>
       </trans-unit>
       <trans-unit id="err_restore">
-        <source>Could not perform ETVA RESTORE.&lt;br&gt; {0}</source>
-        <target>Não foi possível efectuar o RESTAURO da ETVA.&lt;br&gt; {0}</target>
-      </trans-unit>
-      <trans-unit id="err_restore_etvm">
-        <source>Could not perform ETVM RESTORE.&lt;br&gt; {0}</source>
-        <target>Não foi possível efectuar o RESTAURO da ETVM.&lt;br&gt; {0}</target>
+        <source>Could not perform {0} RESTORE.&lt;br&gt; {1}</source>
+        <target>Não foi possível efectuar o RESTAURO da {0}.&lt;br&gt; {0}</target>
       </trans-unit>
       <trans-unit id="removing_backup">
         <source>Removing backup...</source>
@@ -2656,9 +3261,13 @@
         <source>Groups Management Help</source>
         <target>Gestão de Grupos - Ajuda</target>
       </trans-unit>
+      <trans-unit id="edit_node_help">
+        <source>Edit node Help</source>
+        <target>Editar nó - Ajuda</target>
+      </trans-unit>
       <trans-unit id="nodes_help">
         <source>Nodes Help</source>
-        <target>Nodes - Ajuda</target>
+        <target>Nós - Ajuda</target>
       </trans-unit>
       <trans-unit id="hostname_help">
         <source>Hostname Help</source>
@@ -2736,6 +3345,10 @@
         <source>Server disk Help</source>
         <target>Disco do servidor - Ajuda</target>
       </trans-unit>
+      <trans-unit id="edit_cluster_help">
+        <source>Edit cluster Help</source>
+        <target>Editar datacenter - Ajuda</target>
+      </trans-unit>
       <!-- Help -->
       <trans-unit id="on_setup_wizard">
         <source>One-Time Setup Wizard Help</source>
@@ -2802,6 +3415,124 @@
         <trans-unit id="however_mail_unsuccessful">
             <source>However, the email message could not be sent.</source>
             <target>No entanto, o email não foi enviado.</target>
+        </trans-unit>
+        <trans-unit id="however_mail_unsuccessful">
+            <source>Could not generate diagnostic file. Please contact the support for further information.</source>
+            <target>Não foi possível gerar o ficheiro de diagnóstico. Por favor, contacte o suporte.</target>
+        </trans-unit>
+        <trans-unit id="no_disk">
+            <source>No disk</source>
+            <target>Sem disco</target>
+        </trans-unit>
+
+        <!-- shut down process -->
+        <trans-unit id="shutting_down">
+            <source>Shutting down</source>
+            <target>A desligar</target>
+        </trans-unit>
+        <trans-unit id="information">
+            <source>Information</source>
+            <target>Informação</target>
+        </trans-unit>
+        <trans-unit id="shut_down_question">
+            <source>Shutdown node {0} ? This will also shut down all virtual servers from this node.</source>
+            <target>Desligar o node {0} ? Esta operação terminará todas as máquinas virtuais associadas ao node.</target>
+        </trans-unit>
+        <trans-unit id="shut_down_question1">
+            <source>Shutdown {0}</source>
+            <target>Desligar {0}</target>
+        </trans-unit>
+        <trans-unit id="shutting_down_node">
+            <source>Node is shutting down...</source>
+            <target>A enviar o comando de shut down...</target>
+        </trans-unit>
+        <trans-unit id="shutting_down_node">
+            <source>Command sent successfully</source>
+            <target>Operação executada com sucesso</target>
+        </trans-unit>
+        <trans-unit id="shutting_cm">
+            <source>Shutdown Central Management</source>
+            <target>Desligar Central Management</target>
+        </trans-unit>
+        <trans-unit id="shutting_cm">
+            <source>Shutdown Central Management?</source>
+            <target>Desligar Central Management?</target>
+        </trans-unit>
+        <trans-unit id="shutdown">
+            <source>Shutdown</source>
+            <target>Desligar</target>
+        </trans-unit>
+        <trans-unit id="unable_to_shutt">
+            <source>Unable to shutdown!</source>
+            <target>Não foi possível desligar.</target>
+        </trans-unit>
+        <trans-unit id="cm_shutting">
+            <source>Central Management server is shutting down!</source>
+            <target>O Central Management está a desligar!</target>
+        </trans-unit>
+        <trans-unit id="expande_collapse_nodes">
+            <source>Expand/collapse all nodes</source>
+            <target>Expande/oculta os nós da árvore</target>
+        </trans-unit>
+        <trans-unit id="still_proceed">
+            <source>Do you still want to proceed?</source>
+            <target>Deseja continuar?</target>
+        </trans-unit>
+        <trans-unit id="save_before">
+            <source>We recomend to save the changes before proceed.</source>
+            <target>Recomendamos guardar as alterações antes de prosseguir</target>
+        </trans-unit>
+        <trans-unit id="changes_will_lost">
+            <source>This changes will be lost during the logical volume resize.</source>
+            <target>As alterações feitas serão perdidas durante o redimensionamento do volume.</target>
+        </trans-unit>
+        <trans-unit id="made_changes_server">
+            <source>You have made changes on the virtual server.</source>
+            <target>Foram detetadas alterações ao servidor virtual.</target>
+        </trans-unit>
+        <trans-unit id="device_type">
+            <source>Device Type</source>
+            <target>Tipo</target>
+        </trans-unit>
+        <trans-unit id="devices">
+            <source>Devices</source>
+            <target>Dispositivos</target>
+        </trans-unit>
+        <trans-unit id="no_devices">
+            <source>There are no devices available.</source>
+            <target>Não há dispositivos disponíveis.</target>
+        </trans-unit>
+        <trans-unit id="add_device">
+            <source>Add device</source>
+            <target>Adicionar dispositivo</target>
+        </trans-unit>
+        <trans-unit id="hosted_devices">
+            <source>Hosted Devices</source>
+            <target>Dispositivos</target>
+        </trans-unit>
+        <trans-unit id="moving_node">
+            <source>Moving node...</source>
+            <target>A mover o node...</target>
+        </trans-unit>
+        <trans-unit id="start">
+            <source>Start</source>
+            <target>Iniciar</target>
+        </trans-unit>
+        <trans-unit id="stop">
+            <source>Stop</source>
+            <target>Parar</target>
+        </trans-unit>
+        <trans-unit id="forced">
+            <source>Forced</source>
+            <target>Forçado</target>
+        </trans-unit>
+        <trans-unit id="boot_from_net">
+            <source>Boot from the network was disabled. &lt;/br&gt; Please confirm if the boot settings are correct.</source>
+            <target>O arranque através da rede foi desabilitado. &lt;/br&gt; Por favor confirme se as definições de arraque estão correctas.</target>
+        </trans-unit>
+        <trans-unit id="boot_from_disk">
+            <source>Boot from filesystem was disabled. &lt;/br&gt; Please confirm if the boot options are correct.</source>
+            <target>O arranque pelo sistema de ficheiros foi desabilitado. &lt;/br&gt; Por favor confirme se as definições de arraque estão correctas.</target>
         </trans-unit>
     </body>
   </file>

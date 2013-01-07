@@ -83,10 +83,9 @@ class myUser extends sfGuardSecurityUser
             }elseif($p_type_credential['server']){
                 error_log("MYUSER:[INFO]Server id: ".$p_type_credential['server']);
                 $dc_c = new Criteria();
-                $dc_c->addJoin(EtvaNodePeer::ID, EtvaServerPeer::NODE_ID);
                 $dc_c->add(EtvaServerPeer::ID, (int)$p_type_credential['server'], Criteria::EQUAL);
-                $node = EtvaNodePeer::doSelectOne($dc_c);
-                $p_cluster_id = $node->getClusterId();
+                $server = EtvaServerPeer::doSelectOne($dc_c);
+                $p_cluster_id = $server->getClusterId();
             }elseif($p_type_credential['cluster']){
                 error_log("MYUSER:[INFO]Cluster id: ".$p_type_credential['cluster']);
                 $p_cluster_id = (int)$p_type_credential['cluster'];

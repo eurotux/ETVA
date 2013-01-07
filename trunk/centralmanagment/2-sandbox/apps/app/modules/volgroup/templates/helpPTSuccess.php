@@ -5,8 +5,8 @@
 <ul>
     <li><a href="#help-vol-group-add">Criar</a></li>
     <li><a href="#help-vol-group-extend">Estender</a></li>
-    <li><a href="#help-vol-group-rm_rs">Reduzir</a></li>
-    <li><a href="#help-vol-group-rm_rs">Remover</a></li>
+    <li><a href="#help-vol-group-rm_rs">Remover/Reduzir</a></li>
+    <li><a href="#help-vol-group-scan">Procurar volume groups</a></li>
 </ul>
 
 <br/>
@@ -39,6 +39,12 @@ a remover e escolhe-se a opção correspondente do sub-menu de contexto.
 </p>
 <p><b>Nota </b>Só é permitido remover um <em>volume group</em> se não houver nenhum <em>logical volume</em>
 associado.</p>
+<a href="#help-vol-group"><div>Início</div></a>
+<hr/>
+
+<a id="help-vol-group-scan"><h1>Procurar <em><b>Volume Groups</b></em></h1></a>
+<p>Em <em>Procurar volume groups</em> é possível obter os volume groups do lado do agente de virtualização e efectuar o seu registo no <em>Central Management</em>.
+Caso se pretenda, é também possível remover o registo de um <em>volume group</em> do Central Management, deixando de ser gerido pelo sistema.</p>
 <a href="#help-vol-group"><div>Início</div></a>
 <hr/>
 

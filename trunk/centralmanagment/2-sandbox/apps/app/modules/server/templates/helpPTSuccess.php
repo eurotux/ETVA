@@ -63,6 +63,7 @@
         <li><a href="#help-vmachine-remove">Remover máquina virtual</a></li>
         <li><a href="#help-vmachine-vnc">Abrir máquina virtual numa consola VNC</a></li>
         <li><a href="#help-vmachine-startstop">Iniciar/parar máquina virtual</a></li>
+        <li><a href="#help-vmachine-snapshots">Snapshots</a></li>
         <li><a href="#help-vmachine-migrate">Migrar máquina virtual</a></li>
     </ul>
     <br/>
@@ -196,14 +197,16 @@
         <li><a href="#help-vmachine-general">Opções gerais</a></li>
         <li><a href="#help-vmachine-net">Interfaces de rede</a></li>
         <li><a href="#help-vmachine-disks">Discos</a></li>
+        <li><a href="#help-vmachine-devices">Devices</a></li>
+        <li><a href="#help-vmachine-otheroptions">Outras opções</a></li>
+        <li><a href="#help-vmachine-ha">Alta disponibilidade</a></li>
     </ul>
     <br/>
     <hr/>
 
     <a id="help-vmachine-general"><h2>Opções gerais:</h2></a>
-    <p>Neste painel é permitido alterar o nome, memória, opções do keymap e
-    parâmetros de boot da máquina. Os parâmetros de boot variam consoante o tipo da
-    máquina virtual.</p>
+    <p>Neste painel é permitido alterar o nome, memória, número de CPUs e número de sockets, cores e threads, sistema operativo e
+    parâmetros de arranque da máquina. Os parâmetros de arranque variam consoante o tipo da máquina virtual e o sistema de virtualização.</p>
     <a href="#help_vmachine_edit"><div>Início</div></a>
     <hr/>
 
@@ -213,12 +216,29 @@
     <hr/>
 
     <a id="help-vmachine-disks"><h2>Discos:</h2></a>
-    <p>A máquina virtual tem que ter pelo menos um disco associado. Para adicionar/remover discos selecciona-se o disco pretendido
-    e recorre-se ao drag-n-drop entre as tabelas.
+    <p>Adicionar/remover discos. Para adicionar/remover discos selecciona-se o disco pretendido e recorre-se ao drag-n-drop entre as tabelas.
 
+        É possível alterar o tipo de driver a usar (se a máquina virtual for HVM ou KVM).</p>
+    <p><b>Nota: </b>O disco de arranque da máquina é o disco que se encontra na primeira posição da tabela.</p>
+    <a href="#help_vmachine_edit"><div>Início</div></a>
+    <hr/>
 
-        Adicionar/remover interfaces. É possível alterar o tipo de driver a usar (se a máquina virtual for HVM ou KVM).</p>
-    <p><b>Nota: </b>O disco de boot da máquina é o disco que se encontra na primeira posição da tabela.</p>
+    <a id="help-vmachine-devices"><h2>Devices:</h2></a>
+    <p>Adicionar/remover dispositivos USB/PCI à máquina. Cada dispositivo apenas pode estar associado a uma máquina virtual.</p>
+    <p><b>Nota: </b>Caso a máquina virtual tenha dispositivos associados não poderá ser movida/migrada para outro nó do datacenter.</p>
+    <a href="#help_vmachine_edit"><div>Início</div></a>
+    <hr/>
+
+    <a id="help-vmachine-otheroptions"><h2>Outras opções:</h2></a>
+    <p>Permite definir as opções VNC como keymap e configurar as flags ACPI, APIC e PAE.</p>
+    <a href="#help_vmachine_edit"><div>Início</div></a>
+    <hr/>
+
+    <a id="help-vmachine-ha"><h2>Alta disponibilidade:</h2></a>
+    <p>Permite configurar a prioridade do servidor no arranque e/ou em migração e definir se as políticas de alta disponibilidade estão activas para este servidor.</p>
+    <p><b>Nota: </b>Em <i>Servidor com alta disponibilidade</i> definimos o tempo limite ao fim do qual o servidor é reiniciado caso deixe de responder.
+    Esta opção só ficará disponível se as ferramentas de suporte à virtualização estiverem instaladas na máquina virtual. 
+    </p>
     <a href="#help_vmachine_edit"><div>Início</div></a>
     <hr/>
 
@@ -241,7 +261,7 @@
 
     <!-- START STOP -->
     <a id="help-vmachine-startstop"><h1>Iniciar/parar máquina virtual</h1></a>
-    <p>No arranque da máquina virtual é possível escolher um dos seguintes parâmetro de boot:</p>
+    <p>No arranque da máquina virtual é possível escolher um dos seguintes parâmetros:</p>
     <p><b>Disco: </b>Arranque pelo disco associado ao servidor.</p>
     <p><b>PXE: </b>Arranque por PXE (Só disponível caso o tipo da máquina virtual <b>não seja</b> <em>Linux PV</em>).</p>
     <p><b>Location URL: </b>Arranque pelo url definido em Location (Só disponível caso o tipo da máquina virtual <b>seja</b> <em>Linux PV</em>
@@ -250,12 +270,22 @@
     <a href="#help-vmachine-main"><div>Início</div></a>
     <hr/>
 
-    <!-- MIGRAR MÁQUINA VIRTUAL -->
+    <!-- SNAPSHOTS -->
+    <a id="help-vmachine-snapshots"><h1>Snapshots</h1></a>
+    <p>
+    Em <em>Snapshots</em> é possível criar uma <em>snapshot</em> do estado da máquina virtual naquele instante, em que consiste na criação de um snapshot de todos os discos e, caso a máquina se encontre a correr, é também guardado o estado naquele momento. 
+    Nesta janela temos ainda a possibilidade de reverter, remover ou fazer download do backup de determinado snapshot.
+    </p>
+    <p><b>Nota: </b>Esta opção só está disponível se todos os discos da máquina virtual estiverem num formato que suporte <em>snapshots</em>, ou seja, <em>qcow2</em>.
+    </p>
+    <a href="#help-vmachine-main"><div>Início</div></a>
+
+     <!-- MIGRAR MÁQUINA VIRTUAL -->
     <a id="help-vmachine-migrate"><h1>Migrar máquina virtual</h1></a>
     <p>
     Seleccionando um servidor e de seguida clicando em <em>Migrar servidor</em> é possível migrar uma máquina de um <em>node</em> para outro desde que partilhem o mesmo armazenamento. A migração de uma máquina virtual é efectuada no modo <em>offline</em>.
     </p>
-    <p><b>Nota: </b>Esta opção só está disponível no modelo <em>ETVM</em>.
+    <p><b>Nota: </b>Esta opção só está disponível no modelo <em>Enterprise</em>.
     </p>
     <a href="#help-vmachine-main"><div>Início</div></a>
     <hr/>

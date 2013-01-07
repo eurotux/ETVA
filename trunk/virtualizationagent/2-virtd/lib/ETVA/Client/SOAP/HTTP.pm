@@ -99,17 +99,17 @@ sub send_receive {
     my $self = shift;
     my ($data) = @_;
 
-plog "ETVA::Client::SOAP::HTTP - send_receive data=$data\n" if( $debug || $self->{'debug'} );
+plog "ETVA::Client::SOAP::HTTP - send_receive data=$data\n" if( ($debug || $self->{'debug'}) > 3 );
     $self->{'_request'}->content($data);
     my $response = $self->{'_ua'}->request( $self->{'_request'} );
 
     if( $response->is_success() ){
         my $res = $response->content();
-plog "ETVA::Client::SOAP::HTTP - send_receive res=$res\n" if( $debug || $self->{'debug'} );
+plog "ETVA::Client::SOAP::HTTP - send_receive res=$res\n" if( ($debug || $self->{'debug'}) > 3 );
         return $res;
     } else {
         my $err = $response->status_line();
-plog "ETVA::Client::SOAP::HTTP - send_receive err=$err\n" if( $debug || $self->{'debug'} );
+plog "ETVA::Client::SOAP::HTTP - send_receive err=$err\n" if( ($debug || $self->{'debug'}) > 3 );
         return { _error_ => 1, detail => $err };
     }
 }

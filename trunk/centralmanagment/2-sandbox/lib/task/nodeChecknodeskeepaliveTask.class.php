@@ -67,13 +67,35 @@ EOF;
 
             $c1 = new Criteria();
             $c1->add(EtvaNodePeer::LAST_KEEPALIVE, $offset_date, Criteria::LESS_THAN);
-            //$c1->add(EtvaNodePeer::STATE, 0, Criteria::NOT_EQUAL);
+            $c1->add(EtvaNodePeer::STATE, EtvaNode::NODE_ACTIVE);   // only active
 
             //update statement
             $c2 = new Criteria();
-            $c2->add(EtvaNodePeer::STATE,0);
+            $c2->add(EtvaNodePeer::STATE, EtvaNode::NODE_INACTIVE);
 
-            $affected = BasePeer::doUpdate($c1, $c2, $con);
+            $affected += BasePeer::doUpdate($c1, $c2, $con);
+
+            // update maintenance and running to maintenance
+            $c1 = new Criteria();
+            $c1->add(EtvaNodePeer::LAST_KEEPALIVE, $offset_date, Criteria::LESS_THAN);
+            $c1->add(EtvaNodePeer::STATE, EtvaNode::NODE_MAINTENANCE_UP);
+
+            //update statement
+            $c2 = new Criteria();
+            $c2->add(EtvaNodePeer::STATE, EtvaNode::NODE_MAINTENANCE);
+
+            $affected += BasePeer::doUpdate($c1, $c2, $con);
+
+            // update fail and running to fail
+            $c1 = new Criteria();
+            $c1->add(EtvaNodePeer::LAST_KEEPALIVE, $offset_date, Criteria::LESS_THAN);
+            $c1->add(EtvaNodePeer::STATE, EtvaNode::NODE_FAIL_UP);   // only active
+
+            //update statement
+            $c2 = new Criteria();
+            $c2->add(EtvaNodePeer::STATE, EtvaNode::NODE_FAIL);
+
+            $affected += BasePeer::doUpdate($c1, $c2, $con);
 
             $con->commit();
 
@@ -108,3 +130,4 @@ EOF;
   
 
 }
+?>

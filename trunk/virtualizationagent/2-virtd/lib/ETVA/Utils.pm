@@ -10,6 +10,8 @@ package ETVA::Utils;
 
 use strict;
 
+use ETVA::DebugLog;
+
 use Socket;
 use POSIX;
 use Digest::MD5 qw(md5_hex md5_base64);
@@ -27,14 +29,14 @@ BEGIN {
     $VERSION = '0.0.1';
     @ISA = qw( Exporter );
     @EXPORT = qw( trim tokey enckey
-                    plog now nowStr retErr retOk isError isOk
+                    plog plogNow now nowStr retErr retOk isError isOk
                     cmd_exec cmd_exec_errh backquote_exec
                     loadconfigfile saveconfigfile random_uuid
                     get_conf set_conf random_mac rand_tmpfile rand_tmpdir
                     fieldsAsString
                     decode_content encode_content
                     make_soap make_soap_args
-                    str2size prettysize
+                    str2size prettysize convertsize
                     list_processes find_procname
                     debug_level debug_inc debug_dec set_debug_level
                      );
@@ -68,7 +70,22 @@ sub enckey {
 }
 
 sub plog {
-	print STDERR @_,$/;
+	ETVA::DebugLog::pdebuglog @_,$/;
+}
+sub plogNow {
+    my $now = &nowStr();
+	plog $now," ",@_;
+}
+
+sub setDebugFile {
+	return ETVA::DebugLog::setDebugFile(@_);
+}
+sub closeDebugFile {
+	return ETVA::DebugLog::closeDebugFile(@_);
+}
+sub reloadDebugFile {
+    &closeDebugFile();
+    &setDebugFile();
 }
 
 sub now {
@@ -87,14 +104,14 @@ sub retErr {
     my ($type,$msg,$code) = @_;
     
     # TODO: 
-    plog "ERROR ($type): $msg" if( &debug_level > 0 );
+    plogNow "ERROR ($type): $msg";
     my %E = ( '_error_'=>1, '_errorcode_'=>$code, '_errorstring_'=>$type, '_errordetail_'=>$msg );
     return wantarray() ? %E : \%E;
 }
 sub retOk {
     my ($type,$msg,$code,$obj) = @_;
 
-    plog "RETOK ($type)[$code]: $msg" if( &debug_level > 1 );
+    plogNow "RETOK ($type)[$code]: $msg" if( &debug_level > 1 );
     my %O = ( '_ok_'=>1, '_oktype_'=>$type, '_okmsg_'=>$msg );
     $O{'_okcode_'} = $code if( $code );
     $O{'_obj_'} = $obj if( $obj );
@@ -132,8 +149,6 @@ sub cmd_exec {
     push(@cmds,">$fptmpfile","2>&1");
     my $cmd_str = join(" ",@cmds);
 
-    plog("system exec: $cmd_str ") if( &debug_level > 2 );
-
     my $e = system($cmd_str);
 
     my $msg = "";
@@ -142,8 +157,12 @@ sub cmd_exec {
     close(M);
     unlink($fptmpfile);
 
-    plog("  error: $e ") if( &debug_level > 2 );
-    plog("  message: $msg ") if( &debug_level > 2);
+    my $log_level = ($e == 0) ? 2 : 1; # decrease log level when exit code not 0
+
+    plogNow("system exec: $cmd_str ") if( &debug_level > $log_level );
+
+    plogNow("  error: $e ") if( &debug_level > $log_level );
+    plogNow("  message: $msg ") if( &debug_level > $log_level);
 
     return wantarray() ? ($e,$msg) : $e;
 }
@@ -158,8 +177,6 @@ sub cmd_exec_errh {
     push(@cmds,"2>$fptmpfile");
     my $cmd_str = join(" ",@cmds);
 
-    plog("system exec: $cmd_str ") if( &debug_level > 2 );
-
     my $e = system($cmd_str);
 
     my $msg = "";
@@ -168,8 +185,12 @@ sub cmd_exec_errh {
     close(M);
     unlink($fptmpfile);
 
-    plog("  error: $e ") if( &debug_level > 2 );
-    plog("  message: $msg ") if( &debug_level > 2 );
+    my $log_level = ($e == 0) ? 2 : 1; # decrease log level when exit code not 0
+
+    plogNow("system exec: $cmd_str ") if( &debug_level > $log_level );
+
+    plogNow("  error: $e ") if( &debug_level > $log_level );
+    plogNow("  message: $msg ") if( &debug_level > $log_level );
 
     return wantarray() ? ($e,$msg) : $e;
 }
@@ -181,13 +202,15 @@ sub backquote_exec {
 
     my $cmd_str = join(" ",@cmds);
 
-    plog("backquote exec: $cmd_str ") if( &debug_level > 2 );
-
     my $msg = `$cmd_str`;
     my $e = $?;
 
-    plog("  error: $e ") if( &debug_level > 2 );
-    plog("  message: $msg ") if( &debug_level > 2);
+    my $log_level = ($e == 0) ? 2 : 1; # decrease log level when exit code not 0
+
+    plogNow("backquote exec: $cmd_str ") if( &debug_level > $log_level );
+
+    plogNow("  error: $e ") if( &debug_level > $log_level );
+    plogNow("  message: $msg ") if( &debug_level > $log_level );
 
     return wantarray() ? ($e,$msg) : $e;
 }
@@ -943,6 +966,17 @@ sub prettysize {
     }
     return $spsize;
 }
+sub convertsize {
+    my ($str,$u) = @_;
+    my $size = str2size($str);
+    $size = 0 if( !$size );
+
+    $size = $size / 1024 if( $u =~ /K/i );              # convert to kbytes
+    $size = $size / 1024 / 1024 if( $u =~ /M/i );       # convert to mbytes
+    $size = $size / 1024 / 1024 / 1024 if( $u =~ /G/i );# convert to Gbytes
+
+    return $size;
+}
 
 sub roundconvertsize { 
     my ($s) = @_; 
@@ -1005,7 +1039,7 @@ sub debug_dec {
 # gencerts
 #   generate server certificates
 sub gencerts {
-    my ($organization,$cn,$force) = @_;
+    my ($organization,$cn,$force,$forceca,$forcesrvkey,$forcecakey) = @_;
 
     if( !-x "/usr/bin/certtool" ){
         return 0;
@@ -1030,14 +1064,20 @@ sub gencerts {
     my $srv_tmpinfo = '/var/tmp/server.info';
     my $ca_tmpinfo = '/var/tmp/ca.info';
 
-    # generate CA certificate
-    if( $force || !-e "$ca_keyfile" ){
+    # check if dont have CA key file
+    if( $forcecakey || !-e "$ca_keyfile" ){
         cmd_exec_errh("/usr/bin/certtool","--generate-privkey",">$ca_keyfile");
+    }
+
+    # generate CA certificate
+    if( $forceca || !-e "$ca_certfile" ){
+
         open(F,">$ca_tmpinfo");
         print F <<__SRVINFO__;
-organization = $organization
+cn = $organization
 ca
 cert_signing_key
+expiration_days = 730
 __SRVINFO__
         close(F);
         cmd_exec("/usr/bin/certtool","--generate-self-signed",
@@ -1047,22 +1087,27 @@ __SRVINFO__
         unlink("$ca_tmpinfo");
     }
 
-    # generate server certificate
-    if( $force || !-e "$srv_keyfile" ){
-        #certtool --generate-privkey > cakey.pem
+    # check if dont have server key file
+    if( $forcesrvkey || !-e "$srv_keyfile" ){
         cmd_exec_errh("/usr/bin/certtool","--generate-privkey",">$srv_keyfile");
+    }
+
+    # generate server certificate
+    if( $force || !-e "$srv_certfile" ){
+
         open(F,">$srv_tmpinfo");
         print F <<__SRVINFO__;
 organization = $organization
 cn = $cn
 tls_www_server
+tls_www_client
 encryption_key
 signing_key
+expiration_days = 730
 __SRVINFO__
         close(F);
         #certtool --generate-self-signed --load-privkey cakey.pem \
         #  --template ca.info --outfile cacert.pem
-#        cmd_exec("/usr/bin/certtool","--generate-self-signed",
         cmd_exec("/usr/bin/certtool","--generate-certificate",
                             "--load-ca-privkey","$ca_keyfile",
                             "--load-ca-certificate","$ca_certfile",
@@ -1132,6 +1177,63 @@ sub process_max_childs {
     }
     close(SL);
     return $max_childs;
+}
+
+sub regpid {
+    my ($pid,$fn,$runpath) = @_;
+    $pid = $$ if( !$pid );
+    $fn = "$0-${pid}.pid" if( !$fn );
+
+    $runpath ||= $CONF{'runpath'}  || "/var/run/$0";
+
+    if( !-d "$runpath" ){
+        mkpath("$runpath");
+    }
+
+    plog("regpid $runpath/$fn $pid") if( &debug_level > 3 );
+
+    open(PF,">$runpath/$fn");
+    print PF $pid,$/;
+    close PF;
+}
+
+sub killpids {
+    my ($runpath) = @_;
+    $runpath ||= $CONF{'runpath'}  || "/var/run/$0";
+
+    if( -d "$runpath" ){
+        opendir(RD,"$runpath");
+        my @pid_files = readdir(RD);
+        for my $pf (@pid_files){
+            if( $pf =~ m/\.pid$/ ){
+                open(PF,"$runpath/$pf");
+                my $pid_i = <PF>;
+                close(PF);
+                chomp($pid_i);
+
+                my %P = &getproc($pid_i);
+                if( %P && ($P{'cmdline'} =~ m/\b$0\b/) ){
+
+                    plog("killpids $runpath/$pf $pid_i") if( &debug_level > 3 );
+
+                    kill SIGHUP, $pid_i;
+                    sleep(2);
+                    waitpid(-1,&WNOHANG);
+                }
+
+                unlink("$runpath/$pf");
+            }
+        }
+        closedir(RD);
+    }
+}
+sub getproc {
+    my ($pid) = @_;
+    my %P = ( 'pid'=>$pid );
+    open(PF,"/proc/$pid/cmdline");
+    $P{'cmdline'} = <PF>;
+    close(PF);
+    return wantarray() ? %P : \%P;
 }
 
 1;

@@ -47,12 +47,15 @@ use XML::DOM;
 use File::Copy;
 use Data::Dumper;
 
+use POSIX qw(strftime);
+
 my $CONF;
 my $UUID;
 my $MAXMEM;         # max memory in bytes
 my $MAXNCPU;
 my %CPUInfo = ();
 my %MEMInfo = ();
+my %NodeInfo = ();
 
 my $VMConnection;
 
@@ -180,6 +183,7 @@ sub loadsysinfo {
         if( $@ ){
             plog( "VirtAgent hypervisor does not support get_node_info" );
         } elsif( $NodeInfo ){
+            %NodeInfo = %$NodeInfo;
             my $old_MemTotal = $MEMInfo{'MemTotal'};
             my $old_MemFree = $MEMInfo{'MemFree'};
             $MAXMEM = $MEMInfo{'MemTotal'} = $NodeInfo->{'memory'} * 1024;
@@ -190,7 +194,7 @@ sub loadsysinfo {
             if( $@ ){
                 plog( "VirtAgent hypervisor does not support get_node_free_memory" );
             } else {
-                $MEMInfo{'MemFree'} = $MemFree;
+                $MEMInfo{'MemFree'} =  $MEMInfo{'NodeFreeMemory'} = $MemFree;
             }
         }
     }
@@ -211,7 +215,7 @@ get system info
 sub getsysinfo {
     loadsysinfo();
 
-    my %res = ( maxmem=>$MAXMEM, maxncpu=>$MAXNCPU, cpuinfo=>\%CPUInfo, meminfo=>\%MEMInfo );
+    my %res = ( maxmem=>$MAXMEM, maxncpu=>$MAXNCPU, cpuinfo=>\%CPUInfo, meminfo=>\%MEMInfo, 'nodeinfo'=>\%NodeInfo );
     return wantarray() ? %res : \%res;
 }
 
@@ -335,9 +339,18 @@ sub domainStats {
     my $node_maxcpus = $node_info->{'cpus'} || $MAXNCPU;
     for my $dom (@domains){
         
-        my $maxmem = $dom->get_info()->{'maxMem'};
+        my $name = $dom->get_name();
+
+        my $info = {};
+        eval {
+            $info = $dom->get_info();
+        };
+        if( $@ ){
+            plog("domainStats error get info of dom '$name': $@");
+        }
+        my $maxmem = $info->{'maxMem'};
         $maxmem = $node_maxmem if( !$maxmem  );
-        my $state_id = $dom->get_info()->{'state'};
+        my $state_id = $info->{'state'};
         my $state_str = "";
         if( $state_id == Sys::Virt::Domain::STATE_NOSTATE ){
             $state_str = "STATE_NOSTATE";
@@ -356,29 +369,37 @@ sub domainStats {
         }
         my $state = $state_str;
         if( $state_id == Sys::Virt::Domain::STATE_RUNNING ||
-                $state_id == Sys::Virt::Domain::STATE_BLOCKED ){
+                $state_id == Sys::Virt::Domain::STATE_BLOCKED ||
+                $state_id == Sys::Virt::Domain::STATE_NOSTATE ){
             $state = "running";
         } elsif( $state_id == Sys::Virt::Domain::STATE_PAUSED ){
             $state = "suspended";
+        } elsif( $state_id == Sys::Virt::Domain::STATE_SHUTDOWN ){
+            $state_str = "shuttingdown";
         } elsif( $state_id == Sys::Virt::Domain::STATE_SHUTOFF ){
             $state = "stop";
         } else {
             $state = "notrunning";
         }
 
+        my $has_snapshots = 0;
+        if( my $lsnaps = $self->domainListSnapshots($dom) ){
+            $has_snapshots = 1 if( !isError($lsnaps) && @$lsnaps );
+        }
         push @stats, {
                         "id" => $dom->get_id(),
-                        "name" => $dom->get_name(),
+                        "name" => $name,
                         "uuid" => $dom->get_uuid_string(),
-                        "cputime" => $dom->get_info()->{'cpuTime'},     # cpu time in nano secs 
-                        "ncpus" => $dom->get_info()->{'nrVirtCpu'},     # number of cpus
-                        "mem" => $dom->get_info()->{'memory'} * 1024,  # current mem in bytes
+                        "cputime" => $info->{'cpuTime'},     # cpu time in nano secs 
+                        "ncpus" => $info->{'nrVirtCpu'},     # number of cpus
+                        "mem" => $info->{'memory'} * 1024,  # current mem in bytes
                         "maxmem" => $maxmem * 1024,     # max mem in bytes
                         "node_maxmem" => $node_maxmem * 1024,
                         "node_maxcpus" => $node_maxcpus,
                         "state"=>$state,
                         "state_str"=>$state_str,
                         "state_id"=>$state_id,
+                        "has_snapshots"=>$has_snapshots,
                         "timestamp" => time()
                         };
     }
@@ -498,7 +519,7 @@ sub defineDomain {
 
     my $xml = $self->genXMLDomain(@_);
 
-    plog "defineDomain xml=$xml" if( &debug_level );
+    plog "defineDomain xml=$xml" if( &debug_level > 3 );
     my $dom;
     # try create domain
     eval {
@@ -937,7 +958,7 @@ sub attachDevice {
     } 
 
     my $dxml = $self->genXMLDevices(@_);
-    plog "dxml=$dxml" if( &debug_level );
+    plog "dxml=$dxml" if( &debug_level > 3 );
 
     eval {
         $dom->attach_device($dxml)
@@ -978,6 +999,65 @@ sub detachDevice {
         return retErr('_DETACH_DEVICE_DOMAIN_',"Can't detach device to domain: $@");
     }
     retOk("_OK_","ok");
+}
+
+=item attachHostdev
+
+attach hostdev to domain
+
+    my $OK = VirtAgent->attachHostdev( name=>$name, type=>... );
+
+=cut
+
+sub prepHostdev {
+    my $self = shift;
+    my %params = @_;
+
+    if( my $hostdev = $params{'devices'}{'hostdev'} ){
+        my $hostdevs = [];
+        my @l_hostdev = (ref($hostdev) eq 'ARRAY') ? @$hostdev : ($hostdev);
+        for my $H ( @l_hostdev ){
+            my %DH = ();
+            for my $k (keys %$H){
+                if( $H->{'type'} eq 'usb' ){
+                    $DH{'type'} = 'usb';
+                    $DH{'source'}{'vendor'} = { 'id'=>$H->{'vendor'} };
+                    $DH{'source'}{'product'} = { 'id'=>$H->{'product'} };
+                } elsif( $H->{'type'} eq 'pci' ){
+                    $DH{'type'} = 'pci';
+                    $DH{'source'}{'address'} = { 'bus'=>$H->{'bus'}, 'slot'=>$H->{'slot'}, 'function'=>$H->{'function'} };
+                }
+            }
+            push @$hostdevs, \%DH;
+        }
+        $params{'devices'}{'hostdev'} = $hostdevs;
+    }
+
+    return wantarray() ? %params : \%params;
+}
+
+sub attachHostdev {
+    my $self = shift;
+    my %params = @_;
+
+    %params = $self->prepHostdev(%params);
+    return $self->attachDevice(%params);
+}
+
+=item detachHostdev
+
+attach hostdev to domain
+
+    my $OK = VirtAgent->detachHostdev( name=>$name, type=>... );
+
+=cut
+
+sub detachHostdev {
+    my $self = shift;
+    my %params = @_;
+
+    %params = $self->prepHostdev(%params);
+    return $self->detachDevice(%params);
 }
 
 =item vmMigrate
@@ -1148,6 +1228,286 @@ sub restoreDomain {
     return retOk("_OK_RESTORE_","Domain successful restored");
 }
 
+# create snapshots
+my $HAVEVIRSHCREATESNAPSHOTSUPPORT;
+sub haveVirshCreateSnapshotSupport {
+    my ($err) = @_;
+    if( $err =~ m/error: this function is not supported by the connection driver/ ){
+        $HAVEVIRSHCREATESNAPSHOTSUPPORT = 0;
+    }
+    if( not defined $HAVEVIRSHCREATESNAPSHOTSUPPORT ){
+        my ($e,$m) = cmd_exec("virsh help");
+        if( $e == 0 && ( $m =~ m/snapshot-create/gs ) ){
+            $HAVEVIRSHCREATESNAPSHOTSUPPORT = 1;
+        } else {
+            $HAVEVIRSHCREATESNAPSHOTSUPPORT = 0;
+        }
+    }
+    return $HAVEVIRSHCREATESNAPSHOTSUPPORT;
+}
+sub create_snapshot {
+    my $self = shift;
+    my %p = @_;
+
+    # get source host connection
+    my $vm = $self->vmConnect();
+
+    # get domain
+    my $dom = $self->getDomain(%p);
+
+    if( isError($dom) ){
+        return wantarray() ? %$dom : $dom;
+    } 
+
+    if( $dom->can("create_snapshot") ){
+        # generate xml domain snapshot
+        my $X = XML::Generator->new(':pretty');
+        my @domainsnapshot_params = ();
+        push(@domainsnapshot_params, $X->name($p{'snapshot'})) if( $p{'snapshot'} );
+        my $xml = sprintf('%s', $X->domainsnapshot(@domainsnapshot_params) );
+
+        my $flags;
+        my $snapshot;
+        eval {
+            $snapshot = $dom->create_snapshot($xml,$flags);
+        };
+        if( $@ ){
+            return retErr('_ERR_CREATE_SNAPSHOT_',"Something wrong creating snapshot: $@");
+        }
+    } elsif( &haveVirshCreateSnapshotSupport ){
+        plog("Module Perl of libvirt doesn't support snapshots") if( &debug_level > 3 );
+        my $name = $dom->get_name();
+        my ($e,$m) = cmd_exec("virsh snapshot-create-as",$name,$p{'snapshot'});
+        unless( $e == 0 ){
+            return retErr('_ERR_CREATE_SNAPSHOT_',"Something wrong creating snapshot: $m");
+        }
+        my ($snaphost) = ($m =~ m/Domain snapshot (.+) created/);
+
+    } else {
+        return retErr('_ERR_CREATE_SNAPSHOT_',"libvirt doesn't support snapshots");
+    }
+
+    # return domain info
+    my $ID = retDomainInfo($dom);
+    return retOk("_OK_CREATE_SNAPSHOT_","Snapshot created successfully.","_RET_OBJ_",$ID);
+}
+sub revert_snapshot {
+    my $self = shift;
+    my %p = @_;
+
+    # get source host connection
+    my $vm = $self->vmConnect();
+
+    # get domain
+    my $dom = $self->getDomain(%p);
+
+    if( isError($dom) ){
+        return wantarray() ? %$dom : $dom;
+    } 
+
+    if( $dom->can("create_snapshot") ){
+        if( $dom->has_current_snapshot() ){
+            my $snapshot;
+            if( $p{'snapshot'} ){
+                eval {
+                    $snapshot = $dom->get_snapshot_by_name($p{'snapshot'});
+                };
+            }
+            if( !$snapshot ){
+                return retErr('_ERR_REMOVE_SNAPSHOT_',"Snapshot '$p{snapshot}' not found.");
+            }
+            eval {
+                $snapshot->revert_to()
+            };
+            if( $@ ){
+                return retErr('_ERR_REMOVE_SNAPSHOT_',"Something wrong to revert snapshot: $@");
+            }
+        } else {
+            return retErr('_ERR_REMOVE_SNAPSHOT_',"No snapshots available.");
+        }
+    } elsif( &haveVirshCreateSnapshotSupport ){
+        plog("Module Perl of libvirt doesn't support snapshots") if( &debug_level > 3 );
+        my $name = $dom->get_name();
+        my ($e,$m) = cmd_exec("virsh snapshot-revert",$name,$p{'snapshot'});
+        unless( $e == 0 ){
+            return retErr('_ERR_REMOVE_SNAPSHOT_',"Something wrong to revert snapshot: $m");
+        }
+        # TODO
+    } else {
+        return retErr('_ERR_REMOVE_SNAPSHOT_',"libvirt doesn't support snapshots");
+    }
+
+    # return domain info
+    my $ID = retDomainInfo($dom);
+    return retOk("_OK_REMOVE_SNAPSHOT_","Snapshot reverted successfully.","_RET_OBJ_",$ID);
+}
+sub remove_snapshot {
+    my $self = shift;
+    my %p = @_;
+
+    # get source host connection
+    my $vm = $self->vmConnect();
+
+    # get domain
+    my $dom = $self->getDomain(%p);
+
+    if( isError($dom) ){
+        return wantarray() ? %$dom : $dom;
+    } 
+
+    if( $dom->can("create_snapshot") ){
+        if( $dom->has_current_snapshot() ){
+            my $snapshot;
+            eval {
+                $snapshot = ($p{'snapshot'}) ? $dom->get_snapshot_by_name($p{'snapshot'})
+                                                    : $dom->current_snapshot();
+            };
+            if( !$snapshot ){
+                return retErr('_ERR_REVERT_SNAPSHOT_',"Snapshot '$p{snapshot}' not found.");
+            }
+            eval {
+                $snapshot->delete()
+            };
+            if( $@ ){
+                return retErr('_ERR_REVERT_SNAPSHOT_',"Something wrong to remove snapshot: $@");
+            }
+        } else {
+            return retErr('_ERR_REVERT_SNAPSHOT_',"No snapshots available.");
+        }
+    } elsif( &haveVirshCreateSnapshotSupport ){
+        plog("Module Perl of libvirt doesn't support snapshots") if( &debug_level > 3 );
+        my $name = $dom->get_name();
+        my ($e,$m) = cmd_exec("virsh snapshot-delete",$name,$p{'snapshot'});
+        unless( $e == 0 ){
+            return retErr('_ERR_REVERT_SNAPSHOT_',"Something wrong to remove snapshot: $m");
+        }
+        # TODO
+    } else {
+        return retErr('_ERR_REVERT_SNAPSHOT_',"libvirt doesn't support snapshots");
+    }
+
+    # return domain info
+    my $ID = retDomainInfo($dom);
+    return retOk("_OK_REVERT_SNAPSHOT_","Snapshot removed successfully.","_RET_OBJ_",$ID);
+}
+sub domainListSnapshots {
+    my $self = shift;
+    my ($dom) = @_;
+
+    my @list = ();
+    if( $dom ){
+        if( $dom->can("create_snapshot") ){
+            my @snapshots = ();
+            eval {
+                @snapshots = $dom->list_snapshots();
+            };
+            if( $@ ){
+                return retErr('_ERR_LIST_SNAPSHOTS_',"Something wrong to list snapshots: $@");
+            }
+            for my $S (@snapshots){
+                my %H = $self->domainSnapshotToHash( $S );
+                push(@list, { 'name'=>$H{'name'}, 'createdate'=>$H{'createdate'} ,'createtime'=>$H{'creationTime'}, 'state'=>$H{'state'} });
+            }
+        } elsif( &haveVirshCreateSnapshotSupport ){
+            plog("Module Perl of libvirt doesn't support snapshots") if( &debug_level > 3 );
+            my $name = $dom->get_name();
+            my ($e,$m) = cmd_exec("virsh snapshot-list",$name);
+            unless( $e == 0 ){
+                &haveVirshCreateSnapshotSupport($m);
+                return retErr('_ERR_LIST_SNAPSHOTS_',"Something wrong to list snapshots: $m");
+            }
+            for my $l (split(/\n/,$m)){
+                # 1344498085           2012-08-09 08:41:25 +0100 shutoff
+                if( $l =~ m/^\s+(.+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} .\d{4})\s+(\S+)$/ ){
+                    my ($snapshot,$time,$state) = ($1,$2,$3);
+                    push(@list, { 'name'=>trim($snapshot), 'createtime'=>$time, 'state'=>$state });
+                }
+            }
+            # TODO
+        } else {
+            return retErr('_ERR_LIST_SNAPSHOTS_',"libvirt doesn't support snapshots");
+        }
+    }
+    return wantarray() ? @list : \@list;
+}
+sub list_snapshots {
+    my $self = shift;
+    my %p = @_;
+
+    # get source host connection
+    my $vm = $self->vmConnect();
+
+    # get domain
+    my $dom = $self->getDomain(%p);
+
+    if( isError($dom) ){
+        return wantarray() ? %$dom : $dom;
+    } 
+
+    return $self->domainListSnapshots($dom);
+}
+
+sub domainSnapshotToHash {
+    my $self = shift;
+    my ($snapshot) = @_;
+
+    my $xml = ref($snapshot) ? $snapshot->get_xml_description() : $snapshot;
+    my %H = $self->domain_xml_parser( $xml );
+    $H{'createdate'} = strftime('%Y-%m-%d %H:%M:%S %z',localtime($H{'creationTime'}));
+
+    return wantarray() ? %H : \%H;
+}
+
+sub get_snapshot {
+    my $self = shift;
+    my %p = @_;
+
+    # get source host connection
+    my $vm = $self->vmConnect();
+
+    # get domain
+    my $dom = $self->getDomain(%p);
+
+    if( isError($dom) ){
+        return wantarray() ? %$dom : $dom;
+    } 
+
+    if( $dom->can("create_snapshot") ){
+        if( $dom->has_current_snapshot() ){
+            my $snapshot;
+            eval {
+                $snapshot = ($p{'snapshot'}) ? $dom->get_snapshot_by_name($p{'snapshot'})
+                                                    : $dom->current_snapshot();
+            };
+            if( !$snapshot ){
+                return retErr('_ERR_GET_SNAPSHOT_',"No Snapshot found.");
+            }
+            return $self->domainSnapshotToHash($snapshot);
+        } else {
+            return retErr('_ERR_GET_SNAPSHOT_',"No snapshots available.");
+        }
+    } elsif( &haveVirshCreateSnapshotSupport ){
+        plog("Module Perl of libvirt doesn't support snapshots") if( &debug_level > 3 );
+        my $name = $dom->get_name();
+        my @cmd = ("virsh snapshot-current",$name);
+        if( $p{'snapshot'} ){
+            @cmd = ("virsh snapshot-dumpxml",$name,$p{'snapshot'});
+        }
+        my ($e,$xml) = cmd_exec(@cmd);
+        unless( $e == 0 ){
+            return retErr('_ERR_GET_SNAPSHOT_',"Something wrong to get snapshot: $xml");
+        }
+        if( $xml ){
+            return $self->domainSnapshotToHash($xml);
+        } else {
+            return retErr('_ERR_GET_SNAPSHOT_',"Something wrong to get snapshot: not xml available.");
+        }
+    } else {
+        return retErr('_ERR_GET_SNAPSHOT_',"libvirt doesn't support snapshots");
+    }
+}
+
+
 sub vmIsRunning {
     my $self = shift;
     my (%p) = @_;
@@ -1240,19 +1600,84 @@ sub genXMLDomain {
     if( my $F = $params{'features'} ){
         my @features_params = ();
         for my $feature (keys %$F){
-            push(@features_params, $X->$feature());
+            if( $F->{"$feature"} ){
+                push(@features_params, $X->$feature());
+            }
         }
         push(@dom_params, $X->features(@features_params) ) if( @features_params );
     }
 
+    # cpu
+    if( my $C = $params{'cpu'} ){
+        my @cpu_params = ();
+
+        if( $C->{'vendor'} ){
+            my $v = delete($C->{'vendor'});
+            push(@cpu_params, $X->vendor($v));
+        }
+        if( $C->{'model'} || $C->{'model_fallback'} ){
+            my $m = delete($C->{'model'});
+            my $mf = delete $C->{'model_fallback'};
+            my $am = {};
+            $am->{'fallback'} = $mf if( $mf );
+            push(@cpu_params, $X->model($am,$m));
+        }
+
+        # get attributes
+        my $cpu_attrs = getAttrs($C);
+        unshift(@cpu_params,$cpu_attrs) if( $cpu_attrs );
+
+        for my $e (keys %$C){
+            my $v = $C->{"$e"};
+            if( ref($v) ){
+                my $vatt = {};
+                my @e_params = ();
+                for my $va (keys %$v){
+                    my $va_v = $v->{"$va"};
+                    if( !ref($va_v) ){
+                        $vatt->{"$va"} = $va_v;
+                    } elsif(ref($va_v) eq 'ARRAY'){     # for tags like numae
+                        for my $va_ve (@$va_v){
+                            push(@e_params,$X->$va($va_ve));
+                        }
+                    } elsif(ref($va_v) eq 'HASH'){      # for other tags
+                        push(@e_params,$X->$va($va_v));
+                    }
+                }
+                unshift(@e_params, $vatt) if( %$vatt );     # put attributes in first place
+                push(@cpu_params, $X->$e(@e_params));
+            }
+        }
+        push(@dom_params, $X->cpu(@cpu_params) ) if( @cpu_params );
+    }
+
+#    open FILE, ">>/tmp/debug.txt" or die $!;
+#    print FILE Dumper \%params;
+#    close FILE;
+
     my @devices_params = ();
 
+    #   <disk>
     my @diskdevices_params = $self->get_diskdevices_xml(%params);
     push(@devices_params, @diskdevices_params ) if( @diskdevices_params );
 
+    #   <hostdev>
+    my @hostdevdevices_params = $self->get_hostdevdevices_xml(%params);
+    push(@devices_params, @hostdevdevices_params ) if( @hostdevdevices_params );
+
+    #   <controller>
+    my @controllers_params = $self->get_controllers_xml(%params);
+    push(@devices_params, @controllers_params ) if ( @controllers_params );
+    
+    #   <channel>
+    my @channels_params = $self->get_channels_xml(%params);
+    push(@devices_params, @channels_params ) if ( @channels_params );
+
+    #   <interface>
     my @interfacedevices_params = $self->get_interfacedevices_xml(%params);
     push(@devices_params, @interfacedevices_params ) if( @interfacedevices_params );
 
+    #   <filesystem>
     my @filesystemdevices_params = $self->get_filesystemdevices_xml(%params);
     push(@devices_params, @filesystemdevices_params ) if( @filesystemdevices_params );
 
@@ -1293,23 +1718,16 @@ sub genXMLDevices {
     push(@devices_params, @diskdevices_params ) if( @diskdevices_params );
 
     #   <hostdev>
-    if( $params{'devices'}{'hostdev'} ){
-        my @hostdev_params = ();
+    my @hostdevdevices_params = $self->get_hostdevdevices_xml(%params);
+    push(@devices_params, @hostdevdevices_params ) if( @hostdevdevices_params );
 
-        my $hostdev_attrs = getAttrs($params{'devices'}{'hostdev'});
-        push(@hostdev_params,$hostdev_attrs) if( $hostdev_attrs );
-
-        #       <source>
-        my @source_params = ();
-
-        push(@source_params,$X->vendor( $params{'devices'}{'hostdev'}{'source'}{'vendor'} )) if( $params{'devices'}{'hostdev'}{'source'}{'vendor'}  );
-        push(@source_params,$X->product( $params{'devices'}{'hostdev'}{'source'}{'product'} )) if( $params{'devices'}{'hostdev'}{'source'}{'product'} );
-        push(@source_params,$X->address( $params{'devices'}{'hostdev'}{'source'}{'address'} )) if( $params{'devices'}{'hostdev'}{'source'}{'address'} );
-        
-        push(@hostdev_params, $X->source( @source_params )) if( @source_params );
-
-        push(@devices_params,$X->hostdev(@hostdev_params)) if( @hostdev_params );
-    }
+    #   <controller>
+    my @controllers_params = $self->get_controllers_xml(%params);
+    push(@devices_params, @controllers_params ) if ( @controllers_params );
+    
+    #   <channel>
+    my @channels_params = $self->get_channels_xml(%params);
+    push(@devices_params, @channels_params ) if ( @channels_params );
 
     # <interface>
     my @interfacedevices_params = $self->get_interfacedevices_xml(%params);
@@ -1319,7 +1737,9 @@ sub genXMLDevices {
     my @filesystemdevices_params = $self->get_filesystemdevices_xml(%params);
     push(@devices_params, @filesystemdevices_params ) if( @filesystemdevices_params );
 
-    push(@devices_params, $X->input( $params{'devices'}{'input'} )) if( $params{'devices'}{'input'} );
+    my @inputdevices_params = $self->get_inputdevices_xml(%params);
+    push(@devices_params, @inputdevices_params ) if( @inputdevices_params );
+
     push(@devices_params, $X->graphics( $params{'devices'}{'graphics'} )) if( $params{'devices'}{'graphics'} );
 
 
@@ -1726,6 +2146,150 @@ sub get_inputdevices_xml {
 
     return wantarray() ? @devices_params : \@devices_params;
 }
+sub get_hostdevdevice_xml {
+    my $self = shift;
+    my ($D) = my %p = @_; 
+
+    $D = \%p if( !ref($D) );
+
+    my $X = XML::Generator->new(':pretty');
+
+    my @devices_params = ();
+
+    my @hostdev_params = ();
+
+    #   <hostdev>
+    my $hostdev_attrs = getAttrs($D);
+    push(@hostdev_params,$hostdev_attrs) if( $hostdev_attrs );
+
+    #       <source>
+    my @source_params = ();
+
+    if( $D->{'type'} eq 'usb' ){
+        push(@source_params,$X->vendor( $D->{'source'}{'vendor'} )) if( $D->{'source'}{'vendor'}  );
+        push(@source_params,$X->product( $D->{'source'}{'product'} )) if( $D->{'source'}{'product'} );
+    } else {
+        push(@source_params,$X->address( $D->{'source'}{'address'} )) if( $D->{'source'}{'address'} );
+    }
+    
+    push(@hostdev_params, $X->source( @source_params )) if( @source_params );
+
+    push(@devices_params,$X->hostdev(@hostdev_params)) if( @hostdev_params );
+
+    return wantarray() ? @devices_params : \@devices_params;
+}
+
+sub get_controller_xml {
+    my $self = shift;
+    my ($D) = my %p = @_; 
+
+    $D = \%p if( !ref($D) );
+
+    my $X = XML::Generator->new(':pretty');
+
+    my @devices_params = ();
+
+    my @controller_params = ();
+
+    #   <controller>
+    my $controller_attrs = getAttrs($D);
+    push(@controller_params,$controller_attrs) if( $controller_attrs );
+    push(@devices_params,$X->controller(@controller_params)) if( @controller_params );
+
+    return wantarray() ? @devices_params : \@devices_params;
+}
+
+sub get_channel_xml {
+    my $self = shift;
+    my ($D) = my %p = @_; 
+
+    $D = \%p if( !ref($D) );
+
+    my $X = XML::Generator->new(':pretty');
+
+    my @devices_params = ();
+
+    my @channel_params = ();
+    my @target_params = ();
+    my @source_params = ();
+
+    #   <channel>
+    my $channel_attrs = getAttrs($D);
+    push(@channel_params,$channel_attrs) if( $channel_attrs );
+
+    #       <target>
+    my $target_attrs = getAttrs($D->{'target'});
+    push(@target_params, $target_attrs) if( $target_attrs );    
+
+    #       <source>
+    my $source_attrs = getAttrs($D->{'source'});
+    push(@source_params, $source_attrs) if( $source_attrs );    
+   
+    push(@channel_params, $X->source( @source_params )) if( @source_params );
+    push(@channel_params, $X->target( @target_params )) if( @target_params );
+
+    push(@devices_params,$X->channel(@channel_params)) if( @channel_params );
+
+    return wantarray() ? @devices_params : \@devices_params;
+}
+
+sub get_hostdevdevices_xml {
+    my $self = shift;
+    my %params = @_; 
+
+    my $X = XML::Generator->new(':pretty');
+
+    my @devices_params = ();
+    my $ldf = $params{'devices'}{'hostdev'};
+    if(ref($ldf) eq 'HASH'){
+        push(@devices_params,$self->get_hostdevdevice_xml($ldf));
+    } elsif( ref($ldf) eq 'ARRAY'){
+        for my $D (@$ldf){
+            push(@devices_params,$self->get_hostdevdevice_xml($D));
+        }
+    }
+
+    return wantarray() ? @devices_params : \@devices_params;
+}
+
+sub get_controllers_xml {
+    my $self = shift;
+    my %params = @_; 
+
+    my $X = XML::Generator->new(':pretty');
+
+    my @devices_params = ();
+    my $ldf = $params{'devices'}{'controller'};
+    if(ref($ldf) eq 'HASH'){
+        push(@devices_params,$self->get_controller_xml($ldf));
+    } elsif( ref($ldf) eq 'ARRAY'){
+        for my $D (@$ldf){
+            push(@devices_params,$self->get_controller_xml($D));
+        }
+    }
+
+    return wantarray() ? @devices_params : \@devices_params;
+}
+
+sub get_channels_xml {
+    my $self = shift;
+    my %params = @_; 
+
+    my $X = XML::Generator->new(':pretty');
+
+    my @devices_params = ();
+    my $ldf = $params{'devices'}{'channel'};
+    if(ref($ldf) eq 'HASH'){
+        push(@devices_params,$self->get_channel_xml($ldf));
+    } elsif( ref($ldf) eq 'ARRAY'){
+        for my $D (@$ldf){
+            push(@devices_params,$self->get_channel_xml($D));
+        }
+    }
+
+    return wantarray() ? @devices_params : \@devices_params;
+}
+
 sub load_kernel_params {
     my $self = shift;
     my %params = @_;
@@ -1757,10 +2321,8 @@ get kernel from location
 
 sub get_kernel {
     my $self = shift;
-    my ( $location, $type, $arch, $distro ) = @_;
+    my ( $location, $type, $arch, $adistro ) = @_;
     my $TMP_DIR = $self->get_tmpdir(); 
-
-    my ($kernelpath,$initrdpath) = $self->get_kernelpath_ditro($distro,$type,$arch);
 
     my ($kernelfn,$initrdfn,$args);
 
@@ -1768,48 +2330,72 @@ sub get_kernel {
     my $initrd_file = ETVA::Utils::rand_tmpfile("$TMP_DIR/initrd.img");
     my $extras = "";
 
-    if( $location =~ m/^http:/ ||
-        $location =~ m/^ftp:/ ){
-        # http or ftp source
+    my @distros = ( );
 
-        my $child;
-        LWP::Simple::getstore("$location/$kernelpath",$kernel_file);
-        LWP::Simple::getstore("$location/$initrdpath",$initrd_file);
-        $extras = "text method=$location";
-    } elsif( $location =~ m/^nfs:/ ){
-        # nfs source
-        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
-        my $ofs = ($location =~ m/nfs:\/\//)? 6: 4;
-        my $nl = substr($location,$ofs);
-        cmd_exec("mount","-o","ro",$nl,$tmpdir);
-        copy("$tmpdir/$kernelpath",$kernel_file);
-        copy("$tmpdir/$initrdpath",$initrd_file);
-        cmd_exec("umount",$tmpdir);
-        rmdir($tmpdir);
-        $extras = "text method=nfs:$nl";
-    } elsif( -d $location ){ 
-        # is dir
-        copy("$location/$kernelpath",$kernel_file);
-        copy("$location/$initrdpath",$initrd_file);
-        $extras = "text method=$location";
-    } elsif( -b $location ){
-        # is block device
-        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
-        cmd_exec("mount","-o","ro",$location,$tmpdir);
-        copy("$tmpdir/$kernelpath",$kernel_file);
-        copy("$tmpdir/$initrdpath",$initrd_file);
-        cmd_exec("umount",$tmpdir);
-        rmdir($tmpdir);
-        $extras = "text method=$location";
-    } elsif( -e $location ){ 
-        # is file
-        my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
-        cmd_exec("mount","-o","ro,loop",$location,$tmpdir);
-        copy("$tmpdir/$kernelpath",$kernel_file);
-        copy("$tmpdir/$initrdpath",$initrd_file);
-        cmd_exec("umount",$tmpdir);
-        rmdir($tmpdir);
-        $extras = "text method=$location";
+    if( !$adistro || ($adistro eq 'RedHatLike') ){
+        push(@distros, 'RedHatLike', 'RedHat6Like');
+        if( !$adistro ){
+            push(@distros, 'UbuntuLike');
+        }
+    } else {
+        push(@distros, $adistro);
+    }
+    
+
+    for my $distro (@distros){
+
+        my ($kernelpath,$initrdpath) = $self->get_kernelpath_ditro($distro,$type,$arch);
+
+        if( $location =~ m/^http:/ ||
+            $location =~ m/^ftp:/ ){
+            # http or ftp source
+
+            my $child;
+            LWP::Simple::getstore("$location/$kernelpath",$kernel_file);
+            LWP::Simple::getstore("$location/$initrdpath",$initrd_file);
+            $extras = "text method=$location";
+        } elsif( $location =~ m/^nfs:/ ){
+            # nfs source
+            my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
+            my $ofs = ($location =~ m/nfs:\/\//)? 6: 4;
+            my $nl = substr($location,$ofs);
+            cmd_exec("mount","-o","ro",$nl,$tmpdir);
+            copy("$tmpdir/$kernelpath",$kernel_file);
+            copy("$tmpdir/$initrdpath",$initrd_file);
+            cmd_exec("umount",$tmpdir);
+            rmdir($tmpdir);
+            $extras = "text method=nfs:$nl";
+        } elsif( -d $location ){ 
+            # is dir
+            copy("$location/$kernelpath",$kernel_file);
+            copy("$location/$initrdpath",$initrd_file);
+            $extras = "text method=$location";
+        } elsif( -b $location ){
+            # is block device
+            my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
+            cmd_exec("mount","-o","ro",$location,$tmpdir);
+            copy("$tmpdir/$kernelpath",$kernel_file);
+            copy("$tmpdir/$initrdpath",$initrd_file);
+            cmd_exec("umount",$tmpdir);
+            rmdir($tmpdir);
+            $extras = "text method=$location";
+        } elsif( -e $location ){ 
+            # is file
+            my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
+            cmd_exec("mount","-o","ro,loop",$location,$tmpdir);
+            copy("$tmpdir/$kernelpath",$kernel_file);
+            copy("$tmpdir/$initrdpath",$initrd_file);
+            cmd_exec("umount",$tmpdir);
+            rmdir($tmpdir);
+            $extras = "text method=$location";
+        }
+
+        # if it fails lets try other distro paths
+        if( (!-e "$kernel_file") && (!-e "$initrd_file") ){
+            next;
+        } else {
+            last;
+        }
     }
     return ( $kernel_file,$initrd_file,$extras );
 }
@@ -1870,14 +2456,41 @@ sub get_kernelpath_ditro {
             $kpath = "images/pxeboot/vmlinuz";
             $ipath = "images/pxeboot/initrd.img";
         }
-    } elsif( $distro eq 'UbuntuLike' ){
-        my $s_arch = $arch || '*';
-        if( $type eq 'xen' ){
-            $kpath = sprintf 'install/netboot/xen/linux';
-            $ipath = sprintf 'install/netboot/xen/initrd.gz';
+    } elsif( $distro eq 'RedHat6Like' ){
+        if( $type ){
+            $kpath = 'isolinux/vmlinuz';
+            $ipath = 'isolinux/initrd.img';
         } else {
-            $kpath = sprintf 'install/netboot/ubuntu-installer/%s/linux', $s_arch;
-            $ipath = sprintf 'install/netboot/ubuntu-installer/%s/initrd.gz', $s_arch;
+            $kpath = "images/pxeboot/vmlinuz";
+            $ipath = "images/pxeboot/initrd.img";
+        }
+    } elsif( $distro eq 'UbuntuLike' ){
+        #ftp://.../main/installer-i386/current/images/netboot/xen/vmlinuz
+        #ftp://.../main/installer-i386/current/images/netboot/xen/initrd.gz
+        #ftp://.../main/installer-i386/current/images/netboot/ubuntu-installer/i386/linux
+        #ftp://.../main/installer-i386/current/images/netboot/ubuntu-installer/i386/initrd.gz
+        my $s_arch = $arch || '*';
+        $s_arch = "amd64" if( $arch eq 'x86_64' );
+        if( $type eq 'xen' ){
+            $kpath = sprintf 'images/netboot/xen/vmlinuz';
+            $ipath = sprintf 'images/netboot/xen/initrd.gz';
+        } else {
+            $kpath = sprintf 'images/netboot/ubuntu-installer/%s/linux', $s_arch;
+            $ipath = sprintf 'images/netboot/ubuntu-installer/%s/initrd.gz', $s_arch;
+        }
+     } elsif( $distro eq 'DebianLike' ){
+        #ftp://.../main/installer-i386/current/images/netboot/xen/vmlinuz
+        #ftp://.../main/installer-i386/current/images/netboot/xen/initrd.gz
+        #ftp://.../main/installer-i386/current/images/netboot/debian-installer/i386/linux
+        #ftp://.../main/installer-i386/current/images/netboot/debian-installer/i386/initrd.gz
+        my $s_arch = $arch || '*';
+        $s_arch = "amd64" if( $arch eq 'x86_64' );
+        if( $type eq 'xen' ){
+            $kpath = sprintf 'images/netboot/xen/vmlinuz';
+            $ipath = sprintf 'images/netboot/xen/initrd.gz';
+        } else {
+            $kpath = sprintf 'images/netboot/debian-installer/%s/linux', $s_arch;
+            $ipath = sprintf 'images/netboot/debian-installer/%s/initrd.gz', $s_arch;
         }
     }
     # TODO other cases

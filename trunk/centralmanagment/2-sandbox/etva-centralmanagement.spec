@@ -2,7 +2,7 @@
 %define nagios_plugins /usr/lib64/nagios/plugins  
 
 Name: etva-centralmanagement
-Version: 1.0.1
+Version: 1.2.1
 Release: 2536
 Summary: ETVA Central Management
 License: GPL
@@ -37,8 +37,10 @@ Requires: perl-Email-Sender
 Requires: perl-MIME-tools
 Requires: perl-Net-SMTP-SSL
 Requires: sos
-Requires(post): chkconfig
+Requires(post): chkconfig perl
 BuildRequires: symfony
+Requires: /usr/bin/timeout
+Requires: cman selinux-policy
 
 %description
 ETVA Central Management
@@ -94,6 +96,7 @@ NRPE Nagios checks
 rm -rf $RPM_BUILD_ROOT;
 
 %{__mkdir_p} $RPM_BUILD_ROOT/srv/etva-centralmanagement;
+%{__mkdir_p} $RPM_BUILD_ROOT/srv/etva-centralmanagement/.ssh;
 %{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/;
 %{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/php.d/;
 %{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/
@@ -113,6 +116,7 @@ rm -rf $RPM_BUILD_ROOT;
 %{__mv} etva-model.conf.ent $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/etva-model.conf.ent;
 %{__mv} utils/cronjobs.conf $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/etva
 %{__mv} utils/cronjobs-ent.conf $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/etva-ent
+%{__mv} utils/cronjobs-smb.conf $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/etva-smb
 %{__mv} etva.service $RPM_BUILD_ROOT%{_sysconfdir}/avahi/services/
 %{__mv} utils/pl/check_etvm.pl $RPM_BUILD_ROOT%{nagios_plugins}
 
@@ -128,6 +132,11 @@ rm -rf $RPM_BUILD_ROOT
 #Comandos para executar depois da instalacao contem instrucoes diversas que sao executadas
 #apos a instalacao do pacote no sistema (copia dos arquivos).
 %post
+# disable selinux
+if [ -f /etc/selinux/config ]; then
+    perl -npe 's/^SELINUX=.*/SELINUX=disabled/' -i /etc/selinux/config
+fi
+
 cd /srv/etva-centralmanagement
 
 #Incluir no ficheiro de configuracao a versao do cm
@@ -147,7 +156,10 @@ else
 fi
 
 #####
-
+# Generate key pair to access nodes via ssh
+if [ ! -f '.ssh/id_dsa' ]; then
+    ssh-keygen -t dsa -f .ssh/id_dsa -P "";
+fi
 
 /sbin/chkconfig httpd on
 /sbin/chkconfig mysqld on
@@ -201,10 +213,13 @@ cd /srv/etva-centralmanagement
 _ACRONYM=`grep 'acronym' apps/app/config/config.yml`;
 
 if [ "$_ACRONYM" == "" ]; then
-    echo "  release: ETVA" >> apps/app/config/config.yml 
+    echo "  acronym: ETVA" >> apps/app/config/config.yml 
 else
     %{__perl} -pi -e 's/acronym:.*/acronym: ETVA/' apps/app/config/config.yml
 fi
+
+# change title
+%{__perl} -pi -e 's/^\s+title:.*/    title: Eurotux Virtual Appliance ( ETVA )/' apps/app/config/view.yml
 
 if [ "$1" == "1" ]; then
 	# inicializa ligacao mysql e insere dados
@@ -231,13 +246,13 @@ cd /srv/etva-centralmanagement
 _ACRONYM=`grep 'acronym' apps/app/config/config.yml`;
 
 if [ "$_ACRONYM" == "" ]; then
-    echo "  acronym: ETVM" >> apps/app/config/config.yml 
+    echo "  acronym: NUXIS" >> apps/app/config/config.yml 
 else
-    %{__perl} -pi -e 's/acronym:.*/acronym: ETVM/' apps/app/config/config.yml
+    %{__perl} -pi -e 's/acronym:.*/acronym: NUXIS/' apps/app/config/config.yml
 fi
 
-# change name
-%{__perl} -pi -e 's/^\s{4}title:.*/    title: Eurotux Virtual Manager ( ETVM )/' apps/app/config/view.yml
+# change title
+%{__perl} -pi -e 's/^\s+title:.*/    title: NUXIS/' apps/app/config/view.yml
 
 if [ "$1" == "1" ]; then
 	# insert nfs share
@@ -331,7 +346,7 @@ fi
 
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/httpd_etvacm.conf
 %{_sysconfdir}/php.d/php_etva.ini
-%config(noreplace) %{_sysconfdir}/cron.d/etva
+%{_sysconfdir}/cron.d/etva
 %{_sysconfdir}/avahi/services/etva.service
 
 %config(noreplace) /srv/etva-centralmanagement/config/databases.yml
@@ -340,10 +355,11 @@ fi
 %files ent
 %config(noreplace) %{_sysconfdir}/sysconfig/etva-model.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/etva-model.conf.ent
-%config(noreplace) %{_sysconfdir}/cron.d/etva-ent
+%{_sysconfdir}/cron.d/etva-ent
 
 %files smb
 %config(noreplace) %{_sysconfdir}/sysconfig/etva-model.conf
+%{_sysconfdir}/cron.d/etva-smb
 
 %files https
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/https_etvacm.conf.disabled

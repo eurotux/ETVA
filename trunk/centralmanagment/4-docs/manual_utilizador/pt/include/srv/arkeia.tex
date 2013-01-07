@@ -26,3 +26,25 @@ O comando para controlar este serviço (iniciar/parar) é o seguinte:
 Caso o cliente tenha adquirido a opção de Disaster Recovery a mesma permite-lhe efectuar a recuperação de todo o sistema operativo aquando da criação do backup. Deste modo o cliente está seguro em caso de falha de hardware como um disco avariado.
 
 Informações adicionais podem ser obtidas em:\\ \begin{normalsize}\sffamily\href{http://www.arkeia.com/products/arkeiaoptions/disaster\_recovery.php}{www.arkeia.com/products/arkeiaoptions/disaster\_recovery.php}\end{normalsize}
+
+As máquinas às quais se desejam fazer \textit{backups} deverão ter instalado o cliente Arkeia. Este está disponível para vários sistemas operativos, podendo ser descarregado no seguinte endereço: \url{ftp://ftp.arkeia.com/pub/arkeia-9.1/arkeia-network-backup}
+
+O acesso à interface deverá ser feito através da URL http://XXX.XXX.XXX.XXX:20617/ onde XXX.XXX.XXX.XXX é o endereço ip do seu servidor de backup.
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=15cm]{include/img/arkeia1.png}
+    \end{center}
+    \caption{Interface de login do Arkeia 9.1}
+    \label{fig:arkeia1}
+\end{figure}
+
+Após o login, em "configure" -> "clients", deverá ser possível obter uma lista dos clientes que já têm o agente instalado e correctamente configurado, cf. figura \ref{fig:arkeia2}
+
+\begin{figure}[H]
+    \begin{center}
+        \includegraphics[width=15cm]{include/img/arkeia2.png}
+    \end{center}
+    \caption{Clientes Arkeia}
+    \label{fig:arkeia2}
+\end{figure}

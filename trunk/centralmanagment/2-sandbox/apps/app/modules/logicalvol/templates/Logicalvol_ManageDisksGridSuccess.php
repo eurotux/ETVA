@@ -4,7 +4,6 @@ Ext.ns('Logicalvol');
 
 Logicalvol.ManageDisksGrid = function(config) {
     Ext.apply(this,config);
-    
 	var fields_available = [
                 {name:'id', type:'int'}
                 ,{name:'lv', type:'string'}
@@ -23,7 +22,7 @@ Logicalvol.ManageDisksGrid = function(config) {
     // create the data store
     var availableGridStore = new Ext.data.JsonStore({
             proxy: new Ext.data.HttpProxy({url:<?php echo json_encode(url_for('logicalvol/jsonGetAll')); ?>}),
-            baseParams: {'nid': this.node_id},
+            baseParams: {'nid': this.node_id,'sid':this.server_id},
             fields:fields_available,
             totalProperty: 'total',
             root: 'data',
@@ -35,11 +34,14 @@ Logicalvol.ManageDisksGrid = function(config) {
                 ,load:{scope:this,fn:function(){
                     var tBar = this.getTopToolbar();
                     tBar.refreshBtn.removeClass('x-item-disabled');
-                    availableGridStore.filter([ {
+
+                    /*
+                     * filter send on request dont need filter grid where
+                     * availableGridStore.filter([ {
                                             fn: function(record){
                                                 return record.get('server_id') != this.server_id;
                                             }, scope: this
-                                        } ]);
+                                        } ]);*/
                 }}
             }
         });
@@ -97,6 +99,7 @@ Logicalvol.ManageDisksGrid = function(config) {
                 return Ext.util.Format.fileSize(v);
         }},
         {
+            id:'disk_type',
             header: "Type",
             dataIndex: 'disk_type',
             fixed:true,            
@@ -109,6 +112,11 @@ Logicalvol.ManageDisksGrid = function(config) {
             }
         }        
 	];    
+
+// this was to recover the user changes after a resize
+//    var dragged_to_selected_id = [];
+//    var dragged_to_available_id = [];
+    var grids_changed = false;
 
 	// declare the source Grid
     var availableGrid = new Ext.grid.GridPanel({
@@ -149,10 +157,11 @@ Logicalvol.ManageDisksGrid = function(config) {
         });
         
 
-
     // create the destination Grid
     var selectedGrid = new Ext.grid.EditorGridPanel({
         id               : this.id+'-selected',
+        node_id          : this.node_id,
+        level            : 'node',
         border           : false,
         ddGroup          : 'availableDiskGridDDGroup',
         store            : selectedGridStore,
@@ -171,7 +180,6 @@ Logicalvol.ManageDisksGrid = function(config) {
     });
 
     Ext.apply(selectedGrid,{
-
         isCellValid:function(col, row) {
 
             var record = this.store.getAt(row);
@@ -203,12 +211,302 @@ Logicalvol.ManageDisksGrid = function(config) {
             }
             return valid;
         }
+        ,reload: function(){
+            selectedGridStore.reload();
+            availableGridStore.reload();
+        }
+        ,lvresize:function() {
+            var selModel = selectedGrid.getSelectionModel();
+            var selRow = selModel.getSelected();
+            if(typeof(selRow) == 'undefined'){
+                return;    
+            }
+            
+            var lvname = selRow.data.lv;
+            var lvsize = selRow.data.size; 
+            var lvid = selRow.data.id;
+            var win = Ext.getCmp('lv-resize-win');
+            
+            // GET VG free space
+            var conn = new Ext.data.Connection();// end conn
+            
+            conn.request({
+                url: <?php echo json_encode(url_for('volgroup/jsonGetVg')) ?>,
+                params: {lv_id: lvid},
+                success: function(resp,opt) {
+                    var response = Ext.util.JSON.decode(resp.responseText);
+                    var vgfreesize = response['Freesize'];
+            
+                    var attributes = {
+                       vgfreesize:vgfreesize,
+                       size:""+lvsize,
+                       text:lvname
+                    };
+            
+                    var ctx = new Object();
+                    ctx.attributes = attributes;
+            
+                    if(!win){
+                        var centerPanel = new lvwin.resizeForm.Main(selectedGrid.node_id, selectedGrid.level);
+                        centerPanel.load(ctx);
+            
+                        centerPanel.on('updated',function(){
+                            win.close();
+                            selectedGrid.reload();
+                        },
+                        this);
+            
+                        win = new Ext.Window({
+                            id: 'lv-resize-win',
+                            title: String.format(<?php echo json_encode(__('Resize logical volume {0}')) ?>,ctx.attributes.text),
+                            width:360,
+                            height:200,
+                            iconCls: 'icon-window',
+                           // shim:false,
+                            animCollapse:false,
+                            //     closeAction:'hide',
+                            modal:true,
+                            border:false,
+                            defaultButton:centerPanel.items.get(0).lv_new_size,
+                           // constrainHeader:true,
+                            layout: 'fit',
+                            items: [centerPanel]
+                            ,tools: [{
+                                id:'help',
+                                qtip: __('Help'),
+                                handler:function(){
+                                    View.showHelp({
+                                        anchorid:'help-lvol-rs',
+                                        autoLoad:{ params:'mod=logicalvol'},
+                                        title: <?php echo json_encode(__('Logical Volume Help')) ?>
+                                    });
+                                }
+                            }]
+                        });
+                    }
+            
+                    win.show();
+                },
+                failure: function(resp,opt) {
+                    return;
+                }
+            });
+        }
+        ,attachdisk: function(records,sourceGrid){
+            Ext.each(records,function(f){
+
+                // enable boot from filesystem option 
+                Ext.getCmp('server-edit-config-boot-vmfilesystem').enable();
+
+                var added = false;
+                var data = f.data;
+
+                if( !f.data['disk_type'] )  // set default disk type
+                    f.data['disk_type'] = default_disk_type;
+
+                if( f.data['in_use'] )
+                    Ext.Msg.show({
+                        title: String.format(<?php echo json_encode(__('Disk {0} in use')) ?>, f.data['lv']),
+                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        scope:this,
+                        msg: String.format(<?php echo json_encode(__('The server {0} is using this disk.')) ?>,f.data['vm_name'])+'<br>'
+                             +String.format(<?php echo json_encode(__('Do you want add it any way?')) ?>),
+                        fn: function(btn){
+                            if (btn == 'yes'){
+                                sourceGrid.store.remove(f);
+                                selectedGrid.store.add(f);
+                                added = true;
+                            }
+                        }
+                    });
+                else {
+                    sourceGrid.store.remove(f);
+                    selectedGrid.store.add(f);
+                    added = true;
+                }
+
+                // this was to recover the user changes after a resize
+                if(added){
+                    grids_changed = true;
+                }
+            });
+            return true
+        }
+        ,detachdisk: function(records,sourceGrid,vm_state){
+            Ext.each(records,function(f){
+                
+                // check if there are any disks
+                if(sourceGrid.store.getCount() == 1){
+                    var showmsg = false;
+                    var bootdisk = Ext.getCmp('server-edit-config-boot-vmfilesystem');
+                    if(bootdisk){
+                        var bootpxe = Ext.getCmp('server-edit-config-boot-pxe');
+
+                        if(bootpxe){
+                            if(bootdisk.getValue() == true){
+                                bootdisk.setValue(true);
+                                var bootcdrom = Ext.getCmp('server-edit-config-boot-cdrom');
+                                bootcdrom.setValue(true);
+                                showmsg = true;
+                            }
+                        }else{
+                            showmsg = true;
+                        }
+                        bootdisk.disable();
+                    }
+
+                    if(showmsg){
+                        Ext.Msg.show({
+                            title: this.text,
+                            buttons: Ext.MessageBox.OK,
+                            icon: Ext.MessageBox.INFO,
+                            msg: <?php echo json_encode(__('Boot from filesystem was disabled. </br> Please confirm if the boot options are correct.')) ?>
+                        });
+
+                        var tabpanel = Ext.getCmp('server-edit-tabpanel');
+                        tabpanel.setActiveTab(0);
+                    }
+                }else{
+                    Ext.getCmp('server-edit-config-boot-vmfilesystem').enable();
+                }
+
+                var data = f.data;
+                if(f.data['pos']==0 && vm_state == 'running' ){
+                    Ext.Msg.show({
+                        title: this.text,
+                        buttons: Ext.MessageBox.OK,
+                        icon: Ext.MessageBox.ERROR,
+                        msg: <?php echo json_encode(__('Cannot detach the first disk on running server!')) ?>
+                    });
+                    return false;
+                }
+                if(f.data['disk_type']=='ide' && vm_state == 'running' ){
+                    Ext.Msg.show({
+                        title: this.text,
+                        buttons: Ext.MessageBox.OK,
+                        icon: Ext.MessageBox.ERROR,
+                        msg: <?php echo json_encode(__('Cannot detach the IDE disk on running server!')) ?>
+                    });
+                    return false;
+                }
+                sourceGrid.store.remove(f);
+                availableGrid.store.add(f);
+                grids_changed = true;
+            });
+            sourceGrid.getView().refresh();
+            return true;
+        }
 
     });
+
+    selectedGrid.on('rowcontextmenu', 
+        function(grid, rowIndex, e){
+            var selModel = this.getSelectionModel();
+            selModel.selectRow(rowIndex);
+
+            if(!this.menu){ // create context menu on first right click
+                this.menu = new Ext.ux.TooltipMenu({
+                    items: [{
+                            iconCls:'go-action',
+                            ref:'lvresize',
+                            text: <?php echo json_encode(__('Resize logical volume')) ?>,
+                            scope: this,
+                            handler: function(){
+                                if(grids_changed){
+                                    Ext.MessageBox.show({
+                                        title: __('Warning'),
+                                        msg: String.format('{0}<br>{1}<br>{2}<br>{3}'
+                                                ,<?php echo json_encode(__('You have made changes on the virtual server.')) ?>
+                                                ,<?php echo json_encode(__('This changes will be lost during the logical volume resize.')) ?>
+                                                ,<?php echo json_encode(__('We recomend to save the changes before proceed.')) ?>
+                                                ,<?php echo json_encode(__('Do you still want to proceed?')) ?>)
+                                                ,
+                                        buttons: Ext.MessageBox.YESNO,
+                                        fn: function(btn){
+                    
+                                            if(btn=='yes'){ 
+                                                this.lvresize();
+                                            }
+                                        },
+                                        scope:this,
+                                        icon: Ext.MessageBox.WARNING
+                                    });
+                                }else{
+                                    this.lvresize();
+                                }
+                        }
+                    }]
+                });
+            }
+            this.menu.showAt(e.getXY());
+        }
+        ,selectedGrid);
+    selectedGrid.on('beforeedit', function(e){
+        if( this.vm_state=='running' ){
+            if( e.row==0 ){
+                e.cancel=true;
+                Ext.Msg.show({
+                    title: this.text,
+                    buttons: Ext.MessageBox.OK,
+                    icon: Ext.MessageBox.ERROR,
+                    msg: <?php echo json_encode(__('Cannot edit the first disk on running server!')) ?>
+                });
+            } else if( (e.field=='disk_type') && (e.record.data.disk_type=='ide') ){
+                e.cancel=true;
+                Ext.Msg.show({
+                    title: this.text,
+                    buttons: Ext.MessageBox.OK,
+                    icon: Ext.MessageBox.ERROR,
+                    msg: <?php echo json_encode(__('Cannot edit the IDE disk on running server!')) ?>
+                });
+            }
+        }
+    },this);
+    selectedGrid.on('validateedit', function(e){
+        if( this.vm_state=='running' ){
+            if( e.row==0 ){
+                e.cancel=true;
+                Ext.Msg.show({
+                    title: this.text,
+                    buttons: Ext.MessageBox.OK,
+                    icon: Ext.MessageBox.ERROR,
+                    msg: <?php echo json_encode(__('Cannot edit the first disk on running server')) ?>
+                });
+            } else if( (e.field=='disk_type') && (e.originalValue=='ide') ){
+                e.cancel=true;
+                Ext.Msg.show({
+                    title: this.text,
+                    buttons: Ext.MessageBox.OK,
+                    icon: Ext.MessageBox.ERROR,
+                    msg: <?php echo json_encode(__('Cannot edit the IDE disk on running server!')) ?>
+                });
+            } else if( (e.field=='disk_type') && (e.value=='ide') ){
+                e.cancel=true;
+                Ext.Msg.show({
+                    title: this.text,
+                    buttons: Ext.MessageBox.OK,
+                    icon: Ext.MessageBox.ERROR,
+                    msg: <?php echo json_encode(__('Cannot edit disk to set IDE disk type on running server!')) ?>
+                });
+            }
+        }
+    },this);
+
+    availableGrid.getSelectionModel().on({selectionchange:{scope:this,fn:function(sm){
+        var btnState = sm.getCount() < 1 ? true :false;
+        var selected = sm.getSelected();
+
+        this.attachBtn.setTooltip(btnState ? this.selectItem_msg : '');
+        this.attachBtn.setDisabled(btnState);
+
+    }}});
 
     selectedGrid.getSelectionModel().on({selectionchange:{scope:this,fn:function(sm){
         var btnState = sm.getCount() < 1 ? true :false;
         var selected = sm.getSelected();
+
+        this.detachBtn.setTooltip(btnState ? this.selectItem_msg : '');
+        this.detachBtn.setDisabled(btnState);
 
         this.editBtn.setTooltip(btnState ? this.selectItem_msg : '');
         this.editBtn.setDisabled(btnState);
@@ -230,6 +528,36 @@ Logicalvol.ManageDisksGrid = function(config) {
         items: [{columnWidth:.5,items:[availableGrid]}
                 ,{columnWidth:.5,items:[selectedGrid]}],		
 		tbar    : [
+            {
+                text: <?php echo json_encode(__('Attach disk')) ?>,
+                iconCls:'icon-drive-add',
+                tooltip:this.selectItem_msg,
+                ref:'.../attachBtn',
+                disabled:true,
+                scope:this,
+                handler : function(){
+
+                    var records = availableGrid.getSelectionModel().getSelections();
+                    if (!records) {return;}
+
+                    return selectedGrid.attachdisk(records,availableGrid);
+                }
+            },
+            {
+                text: <?php echo json_encode(__('Detach disk')) ?>,
+                iconCls:'icon-drive-delete',
+                tooltip:this.selectItem_msg,
+                ref:'.../detachBtn',
+                disabled:true,
+                scope:this,
+                handler : function(){
+
+                    var records = selectedGrid.getSelectionModel().getSelections();
+                    if (!records) {return;}
+
+                    return selectedGrid.detachdisk(records,selectedGrid,this.vm_state);
+                }
+            },
 			'->', // Fill
             {
                 text: <?php echo json_encode(__('Edit disk type')) ?>,
@@ -295,6 +623,7 @@ Logicalvol.ManageDisksGrid = function(config) {
                 {
                     selectedGridStore.reload();
                     availableGridStore.reload();
+                    grids_changed = false;
                 }
             }
 		]
@@ -328,19 +657,7 @@ Logicalvol.ManageDisksGrid = function(config) {
                 ddGroup    : 'availableDiskGridDDGroup',
                 notifyDrop : function(ddSource, e, data){
                     var records =  ddSource.dragData.selections;
-                    
-                    Ext.each(records,function(f){
-                        var data = f.data;
-                        if(f.data['pos']==0 && vm_state == 'running' ) return false;
-                        ddSource.grid.store.remove(f);
-                        availableGrid.store.add(f);
-                     
-                    });
-                    ddSource.grid.getView().refresh();
-                    //  Ext.each(records, ddSource.grid.store.remove, ddSource.grid.store);
-                    //   availableGrid.store.add(records);
-                    //   availableGrid.store.sort('lv', 'ASC');
-                    return true
+                    return ddSource.grid.detachdisk(records,ddSource.grid,vm_state);
                 }                                
         });
         
@@ -349,7 +666,8 @@ Logicalvol.ManageDisksGrid = function(config) {
     selectedGrid.on({render:function(g){
 
         g.store.load.defer(100,this.store);
-       
+
+
         // This will make sure we only drop to the view scroller element
         var selectedGridDropTargetEl = selectedGrid.getView().scroller.dom;
         var selectedGridDropTarget = new Ext.dd.DropTarget(selectedGridDropTargetEl, {
@@ -357,34 +675,7 @@ Logicalvol.ManageDisksGrid = function(config) {
                 notifyDrop : function(ddSource, e, data){
                         var records =  ddSource.dragData.selections;
                         //Ext.each(records, ddSource.grid.store.remove, ddSource.grid.store);
-                        Ext.each(records,function(f){
-                            var data = f.data;
-
-                            if( !f.data['disk_type'] )  // set default disk type
-                                f.data['disk_type'] = default_disk_type;
-
-                            if( f.data['in_use'] )
-                                Ext.Msg.show({
-                                    title: String.format(<?php echo json_encode(__('Disk {0} in use')) ?>, f.data['lv']),
-                                    buttons: Ext.MessageBox.YESNOCANCEL,
-                                    scope:this,
-                                    msg: String.format(<?php echo json_encode(__('The server {0} is using this disk.')) ?>,f.data['vm_name'])+'<br>'
-                                         +String.format(<?php echo json_encode(__('Do you want add it any way?')) ?>),
-                                    fn: function(btn){
-                                        if (btn == 'yes'){
-                                            ddSource.grid.store.remove(f);
-                                            selectedGrid.store.add(f);
-                                        }
-                                    }
-                                });
-                            else {
-                                ddSource.grid.store.remove(f);
-                                selectedGrid.store.add(f);
-                            }
-                        });
-                        //selectedGrid.store.add(records);
-                        //selectedGrid.store.sort('lv', 'ASC');
-                        return true
+                        return selectedGrid.attachdisk(records,ddSource.grid);
                 }
         });
     }});

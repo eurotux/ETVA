@@ -49,7 +49,7 @@ class etvaBaseTask extends sfBaseTask
         }        
     }
 
-    protected function sigAlarmCallback(){
+    public function sigAlarmCallback(){
         $alarmFile = $this->getLogName('.alert');
   
         $this->log("[INFO] The alarm file is ".$alarmFile);

@@ -1,0 +1,83 @@
+#CREATE TABLE IF NOT EXISTS `etvaperm`(`id` int(11) NOT NULL AUTO_INCREMENT,
+#   `permission_id` int(11) NULL,
+#   `perm_type` varchar(255) NOT NULL,
+#   `name` varchar(255) NOT NULL,
+#   `description` text,
+#   PRIMARY KEY (`id`), 
+#   KEY `etvaperm_permission_FI_2` (`permission_id`)
+#) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+#
+#CREATE TABLE IF NOT EXISTS `etvaperm_user` (
+#   `user_id` int(11) NOT NULL,
+#   `etvaperm_id` int(11) NOT NULL,
+#    PRIMARY KEY (`etvaperm_id`,`user_id`),
+#    KEY `etvaperm_permission_FI_2` (`user_id`)
+#) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+#
+#CREATE TABLE IF NOT EXISTS `etvaperm_group` (
+#   `group_id` int(11) NOT NULL,
+#   `etvaperm_id` int(11) NOT NULL,
+#    PRIMARY KEY (`etvaperm_id`,`group_id`),
+#    KEY `etvaperm_permission_FI_2` (`group_id`)
+#) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+#
+#CREATE TABLE IF NOT EXISTS `etvaperm_server` (
+#   `server_id` int(11) NOT NULL,
+#   `etvaperm_id` int(11) NOT NULL,
+#    PRIMARY KEY (`etvaperm_id`,`server_id`),
+#    KEY `etvaperm_permission_FI_2` (`server_id`)
+#) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+#
+#CREATE TABLE IF NOT EXISTS `etvaperm_node` (
+#   `node_id` int(11) NOT NULL,
+#   `etvaperm_id` int(11) NOT NULL,
+#    PRIMARY KEY (`etvaperm_id`,`node_id`),
+#    KEY `etvaperm_permission_FI_2` (`node_id`)
+#) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+#
+#
+#CREATE TABLE IF NOT EXISTS `etvaperm_cluster` (
+#   `cluster_id` int(11) NOT NULL,
+#   `etvaperm_id` int(11) NOT NULL,
+#    PRIMARY KEY (`etvaperm_id`,`cluster_id`),
+#    KEY `etvaperm_permission_FI_2` (`cluster_id`)
+#) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+propel:
+  _attributes:
+    defaultIdMethod: native
+    package: lib.model
+
+  etvaperm:
+    _attributes:    { phpName: EtvaPermission }
+    id:             { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    name:           { type: varchar, size: 255, required: true }
+    description:    { type: longvarchar }
+    permission_id:  { type: integer, required: false, foreignTable: sf_guard_permission, foreignReference: id, onDelete: cascade }
+    perm_type:      { type: VARCHAR, size: '255' }
+
+  etvaperm_user:
+    _attributes:    { phpName: EtvaPermissionUser }
+    user_id:        { type: INTEGER, primarykey: true, required: true, foreignTable: sf_guard_user, foreignReference: id, onDelete: restrict }
+    etvaperm_id:    { type: integer, primaryKey: true, required: true, foreignTable: etvaperm, foreignReference: id, onDelete: cascade }
+
+  etvaperm_group:
+    _attributes:    { phpName: EtvaPermissionGroup }
+    group_id:       { type: integer, primaryKey: true, required: true, foreignTable: sf_guard_group, foreignReference: id, onDelete: cascade }
+    etvaperm_id:    { type: integer, primaryKey: true, required: true, foreignTable: etvaperm, foreignReference: id, onDelete: cascade }
+    
+  etvaperm_cluster:
+    _attributes:    { phpName: EtvaPermissionCluster }
+    cluster_id:     { type: integer, primaryKey: true, required: true, foreignTable: cluster, foreignReference: id, onDelete: cascade }
+    etvaperm_id:    { type: integer, primaryKey: true, required: true, foreignTable: etvaperm, foreignReference: id, onDelete: cascade }
+
+  etvaperm_node:
+    _attributes:    { phpName: EtvaPermissionNode }
+    node_id:     { type: integer, primaryKey: true, required: true, foreignTable: node, foreignReference: id, onDelete: cascade }
+    etvaperm_id:    { type: integer, primaryKey: true, required: true, foreignTable: etvaperm, foreignReference: id, onDelete: cascade }
+
+  etvaperm_server:
+    _attributes:    { phpName: EtvaPermissionServer }
+    server_id:      { type: integer, primaryKey: true, required: true, foreignTable: server, foreignReference: id, onDelete: cascade }
+    etvaperm_id:    { type: integer, primaryKey: true, required: true, foreignTable: etvaperm, foreignReference: id, onDelete: cascade }
+

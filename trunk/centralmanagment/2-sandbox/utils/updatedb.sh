@@ -18,14 +18,17 @@ applyschema(){
     local CONFIG=$SERVERDIR'/apps/app/config/app.yml';
     REQUIRED=`grep 'dbrequired' $CONFIG | tr -d '  dbrequired: '`;
     DIRECTORY=$SERVERDIR'/data/schemas/'$REQUIRED;
+
     if [ -d "$DIRECTORY" ]; then
-        `cd data/schemas/1.0; find * | grep -v '/\.' | cpio -dump ../../../config/.; cd ../../../;`;
+        echo "[INFO] Applying schema";
+        echo "[INFO] cd $DIRECTORY; find * | grep -v '/\.' | cpio -dump ../../../config/.; cd ../../../;"
+        `cd $DIRECTORY; find * | grep -v '/\.' | cpio -dump ../../../config/.; cd ../../../;`;
+#        `cd data/schemas/1.0; find * | grep -v '/\.' | cpio -dump ../../../config/.; cd ../../../;`;
     else
         #rollback
         echo '[ERROR] Configuration copy failed. Please check dbrequired entry on app.yml!';
         exit 2;
     fi
-    
     
     # apply required schema
     symfony propel:build-all --no-confirmation   
@@ -59,7 +62,7 @@ status=$?
 if [ $status -ne 0 ]; then
     echo '[WARNING] Cannot stop symfony project';
 fi
-symfony cc
+#symfony cc
 
 
 # backup current configuration (for rollback purposes)
@@ -74,6 +77,9 @@ else
     exit 1;
 fi
 
+
+# run flushlog to clean some event logs
+symfony event:flushlog
 
 # backup database data
 symfony propel:data-dump $BACKUPFILE
@@ -94,10 +100,11 @@ else
     exit 1;
 fi
 
+
 # run updatedb command
 symfony etva:updatedb $BACKUPFILEMODIFIED
-
 if [ $? -eq 0 ]; then
+    echo "applyschema";
     applyschema;
     if [ $? -ne 0 ]; then
         rollback;    

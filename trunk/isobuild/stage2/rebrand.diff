@@ -4,7 +4,7 @@
  
  class WelcomeWindow:
      def __call__(self, screen, anaconda):
-+        productName = "ETVA"
++        productName = "NUXIS"
          rc = ButtonChoiceWindow(screen, _("%s") % (productName,), 
                                  _("Welcome to %s!\n\n")
                                  % (productName, ),

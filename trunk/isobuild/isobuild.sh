@@ -37,6 +37,7 @@ fi
 DIRSOURCE=`mktemp -d`
 DIRDEST=/tmp/BUILD
 ISOFILE=$DIR/etva.iso
+ETVMVER=`svn info . |grep URL|awk {'print $2'}|sed -e 's/.*etva\///' -e 's/\/isobuild//' -e 's/.*tags\///'`
 
 ############################ FUNCAO DE TRAP
 function limpa() {
@@ -99,20 +100,20 @@ sudo /sbin/mksquashfs squashfs-root/ $DIRDEST/images/stage2.img -noappend
 sudo rm -rf squashfs-root
 
 # cria o ks de enterprise
-cat $DIRDEST/ks.cfg | sed -e 's/^# interactive/interactive/g' |egrep -v "^(virtagent|etva-centralmanagement|etva-virtio-win|xen|kernel-xen|etva-smb|kvm|ignoredisk|clearpart|part|raid|volgroup|logvol)" > $DIRDEST/ks.ent.cfg
+cat $DIRDEST/ks.cfg | sed -e 's/^# interactive/interactive/g' |egrep -v "^(virtagent|etva-centralmanagement|etva-xen-win|etva-virtio-win|xen|kernel-xen|kernel-ml|etva-smb|kvm|ignoredisk|clearpart|part|raid|volgroup|logvol)" > $DIRDEST/ks.ent.cfg
 # cria o ks de smb
-cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe)"> $DIRDEST/ks.smb.kvm.cfg
+cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-xen-win|kernel-ml)"> $DIRDEST/ks.smb.kvm.cfg
 cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-virtio-win)"> $DIRDEST/ks.smb.xen.cfg
 # cria o ks de smb-usb
-cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.kvm.usb.cfg
+cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-xen-win|kernel-ml)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.kvm.usb.cfg
 cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-virtio-win)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.xen.usb.cfg
 
 # Cria o iso
 mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table \
--V "ETVA 1.0" -p "Eurotux Informatica S.A." -A "ETVA 1.0 - 2010/06/25" \
+-V "ETVM $ETVMVER" -p "Eurotux Informatica S.A." -A "ETVM $ETVMVER - `date '+%Y-%m-%d'`" \
 -b isolinux/isolinux.bin -c isolinux/boot.cat -x "lost+found" -o $ISOFILE $DIRDEST
 
-# Implanta MD5
+# Implant MD5
 /usr/lib/anaconda-runtime/implantisomd5 $ISOFILE
 
 # Transforma o iso para poder ser bootable tambem por USB

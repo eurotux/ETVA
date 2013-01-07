@@ -8,9 +8,7 @@ use strict;
 
 use ETVA::Utils;
 
-use POSIX qw/SIGHUP SIGTERM SIGKILL/;
-use POSIX ":sys_wait_h";
-use POSIX;
+use POSIX qw/:sys_wait_h SIGHUP SIGTERM SIGKILL/;
 
 use CGI qw(:cgi);
 use HTTP::Request;
@@ -147,9 +145,9 @@ sub isForkable {
     return ( $method =~ m/_may_fork$/ ) ? 1 : 0;
 }
 
-sub disconnect { plog "ETVA::Agent::SOAPFork disconnect" if(&debug_level); }
-sub set_imchild { plog "ETVA::Agent::SOAPFork set_imchild" if(&debug_level); }
-sub set_imparent { plog "ETVA::Agent::SOAPFork set_imparent" if(&debug_level); }
+sub disconnect { plog "ETVA::Agent::SOAPFork disconnect" if( &debug_level > 3 ); }
+sub set_imchild { plog "ETVA::Agent::SOAPFork set_imchild" if( &debug_level > 3 ); }
+sub set_imparent { plog "ETVA::Agent::SOAPFork set_imparent" if( &debug_level > 3 ); }
 
 sub processdata {
     my $self = shift;
@@ -157,13 +155,13 @@ sub processdata {
 
     my $bef_cur_mem = ETVA::Utils::process_mem_size($$);
 
-    plog("processing data") if(&debug_level);
+    plog("processing data") if( &debug_level > 3 );
 
     # Get data
     $fh->blocking(0);
     my $request = $self->receive($fh);
 
-    plog("processdata: $request") if(&debug_level);
+    plog("processdata: $request") if( &debug_level > 3 );
 
     my ($headers,$body,$typeuri,$method,$rtype) = $self->parse_request( $request );
 
@@ -302,6 +300,8 @@ sub treatRequest {
 
     my ($headers,$body,$typeuri,$method,$rtype) = $self->parse_request( $request );
 
+    plog( &nowStr(), " [info] Receive call to treatRequest '$method'");
+
     if( $@ ){
 plog "Failed while unmarshaling the request: $@" if( &debug_level );
         return $self->make_response_fault( $rtype,$typeuri, "Server",
@@ -320,12 +320,12 @@ plog "Failed while unmarshaling the request: $@" if( &debug_level );
 
     my $response;
 
-plog  "paramas Dump=",Dumper(\%params),"\n" if( &debug_level );
+plog  "paramas Dump=",Dumper(\%params),"\n" if( &debug_level > 3 );
     eval {
         my $res = $self->$method(%params);
         if( defined $res ){ # response only if return somethin
             #$res = {} if( not defined $res );
-plog  "result Dumper=",Dumper($res),"\n" if( &debug_level );
+plog  "result Dumper=",Dumper($res),"\n" if( &debug_level > 3 );
             if( ref($res) eq 'HASH' && $res->{'_error_'} ){
                 $response = $self->make_response_fault( $rtype,$typeuri,$res->{'_errorcode_'},
                                                         $res->{'_errorstring_'},

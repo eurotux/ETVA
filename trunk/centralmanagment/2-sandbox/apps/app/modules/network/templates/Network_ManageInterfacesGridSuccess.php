@@ -173,6 +173,12 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
             }
         ]);// end mac_vlan columnmodel
 
+        var url_macCreateWin = 'mac/createwin';
+        if( this.server_id ){
+            url_macCreateWin += '?sid='+this.server_id;
+        } else {
+            url_macCreateWin += '?cid='+this.treenode_id;
+        }
         // hard coded - cannot be changed from outsid
         var config = {
                 scope:this,
@@ -220,6 +226,21 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                                 this.getSelectionModel().selectRow(0, true);
                                 button.setDisabled(false);
 
+                                // enable boot from network
+
+                                var bootlocation = Ext.getCmp('server-edit-config-boot-locationurl');
+                                if(bootlocation && !bootlocation.hidden){
+                                    var bootlocationurl = Ext.getCmp('server-edit-config-boot-locationurl-text');
+                                    bootlocationurl.setDisabled(false);
+                                    bootlocation.setDisabled(false);
+                                    if(bootlocation.getValue() == true){
+    //                                    var cdrom
+                                    }
+                                }else{
+                                    var bootpxe = Ext.getCmp('server-edit-config-boot-pxe');
+                                    if(bootpxe && !bootpxe.hidden)
+                                        bootpxe.setDisabled(false);
+                                }
                             },
                             failure: function(resp,opt) {
 
@@ -264,6 +285,44 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                         if (!record) {return;}
                         this.getStore().remove(record);
                         this.getView().refresh();
+
+                        // if there are no interfaces disable boot from pxe/network
+                        if(this.getStore().getCount() == 0){
+                            var showmsg = false;
+                            var bootlocation = Ext.getCmp('server-edit-config-boot-locationurl');
+                            if(bootlocation && !bootlocation.hidden){
+                                var bootlocationurl = Ext.getCmp('server-edit-config-boot-locationurl-text');
+                                bootlocationurl.setDisabled(true);
+                                bootlocation.setDisabled(true);
+                                if(bootlocation.getValue() == true){
+                                    showmsg = true;
+//                                    var cdrom
+                                }
+                            }else{
+                                var bootpxe = Ext.getCmp('server-edit-config-boot-pxe');
+                                if(bootpxe && !bootpxe.hidden){
+                                    bootpxe.disable();
+                                    if(bootpxe.getValue() == true){
+                                        var cdrom = Ext.getCmp('server-edit-config-boot-cdrom');
+                                        cdrom.setValue(true);
+                                        showmsg = true;
+                                    }    
+                                }
+                            }
+                           
+                            if(showmsg){
+                                var tabpanel = Ext.getCmp('server-edit-tabpanel');
+                                tabpanel.setActiveTab(0);
+            
+                                Ext.Msg.show({
+                                    title: this.text,
+                                    buttons: Ext.MessageBox.OK,
+                                    icon: Ext.MessageBox.INFO,
+                                    msg: <?php echo json_encode(__('Boot from the network was disabled. </br> Please confirm if the boot settings are correct.')) ?>
+                                });
+                            }
+                        }
+                        
                     }
                 },'-',
                 {
@@ -289,10 +348,9 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                 ]
                 ,bbar:['->',
                     {text: <?php echo json_encode(__('MAC Pool Management')) ?>,
-                        url:'mac/createwin?sid='+this.server_id,
+                        url: url_macCreateWin,
                         handler: View.clickHandler
                         ,scope:this
-//                        params: {'cid': this.treenode_id}
                     }
                     <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
                     ,'-',
@@ -442,7 +500,7 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
     isValid:function(editInvalid) {
         var cols = this.colModel.getColumnCount();
         var rows = this.store.getCount();
-        if(rows==0) return false;
+        if(rows==0) return true;
 
         var r, c;
         var valid = true;

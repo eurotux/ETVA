@@ -1,6 +1,57 @@
 <script>
 Ext.ns('Server.Migrate');
 
+Server.Migrate.Call = function(scope,form_values,type,success_fh,failure_fh){
+    var send_data = new Object();
+
+    send_data['id'] = form_values['id'];
+    send_data['nid'] = form_values['nodes_cb'];
+
+    switch(type){
+        case 'migrate' :
+                        var url = <?php echo json_encode(url_for('server/jsonMigrate')) ?>;
+                        var wait_msg = <?php echo json_encode(__('Migrating virtual server...')) ?>;
+                        var err_msg = <?php echo json_encode(__('Unable to migrate virtual server {0}!')) ?>;
+                        break;
+           case 'move' :
+                        var url = <?php echo json_encode(url_for('server/jsonMove')) ?>;
+                        var wait_msg = <?php echo json_encode(__('Moving virtual server...')) ?>;
+                        var err_msg = <?php echo json_encode(__('Unable to move virtual server {0}!')) ?>;
+                        break;
+
+
+    }
+
+    // process delete
+    var conn = new Ext.data.Connection({
+        listeners:{
+            // wait message.....
+            beforerequest:function(){
+                Ext.MessageBox.show({
+                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                    msg: wait_msg,
+                    width:300,
+                    wait:true,
+                    modal: false
+                });
+            },// on request complete hide message
+            requestcomplete:function(){Ext.MessageBox.hide();}
+            ,requestexception:function(c,r,o){
+                        Ext.MessageBox.hide();
+                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+        }
+    });// end conn
+                
+                
+    conn.request({
+        url: url,
+        params: send_data,
+        scope:scope,
+        success: success_fh,
+        failure: failure_fh
+    });// END Ajax request
+};
+
 Server.Migrate.Form = Ext.extend(Ext.form.FormPanel, {
     border:true
     ,monitorValid:true
@@ -68,74 +119,29 @@ Server.Migrate.Form = Ext.extend(Ext.form.FormPanel, {
     ,onSave:function(){
               
         var form_values = this.getForm().getValues();
-        var send_data = new Object();
 
-        send_data['id'] = form_values['id'];
-        send_data['nid'] = form_values['nodes_cb'];
+        Server.Migrate.Call(this,form_values,this.type,
+                                function(resp,opt) {
 
-        switch(this.type){
-            case 'migrate' :
-                            var url = <?php echo json_encode(url_for('server/jsonMigrate')) ?>;
-                            var wait_msg = <?php echo json_encode(__('Migrating virtual server...')) ?>;
-                            var err_msg = <?php echo json_encode(__('Unable to migrate virtual server {0}!')) ?>;
-                            break;
-               case 'move' :
-                            var url = <?php echo json_encode(url_for('server/jsonMove')) ?>;
-                            var wait_msg = <?php echo json_encode(__('Moving virtual server...')) ?>;
-                            var err_msg = <?php echo json_encode(__('Unable to move virtual server {0}!')) ?>;
-                            break;
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    var sId = 's'+form_values['id'];
 
+                                    Ext.ux.Logger.info(response['agent'],response['response']);
 
-        }
+                                    this.ownerCt.fireEvent('onSave',sId);
+                                    this.ownerCt.close();
+                                },
+                                function(resp,opt) {
+                                
+                                    var response = Ext.util.JSON.decode(resp.responseText);                
 
-        // process delete
-        var conn = new Ext.data.Connection({
-            listeners:{
-                // wait message.....
-                beforerequest:function(){
-                    Ext.MessageBox.show({
-                        title: <?php echo json_encode(__('Please wait...')) ?>,
-                        msg: wait_msg,
-                        width:300,
-                        wait:true,
-                        modal: false
-                    });
-                },// on request complete hide message
-                requestcomplete:function(){Ext.MessageBox.hide();}
-                ,requestexception:function(c,r,o){
-                            Ext.MessageBox.hide();
-                            Ext.Ajax.fireEvent('requestexception',c,r,o);}
-            }
-        });// end conn
-                    
-                    
-        conn.request({
-            url: url,
-            params: send_data,
-            scope:this,
-            success: function(resp,opt) {
+                                    Ext.Msg.show({
+                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                        buttons: Ext.MessageBox.OK,
+                                        msg: String.format(err_msg,form_values['name'])+'<br>'+response['info'],
+                                        icon: Ext.MessageBox.ERROR});
 
-                var response = Ext.util.JSON.decode(resp.responseText);
-                var sId = 's'+form_values['id'];
-
-                Ext.ux.Logger.info(response['agent'],response['response']);
-
-                this.ownerCt.fireEvent('onSave',sId);
-                this.ownerCt.close();
-
-            },
-            failure: function(resp,opt) {
-            
-                var response = Ext.util.JSON.decode(resp.responseText);                
-
-                Ext.Msg.show({
-                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
-                    buttons: Ext.MessageBox.OK,
-                    msg: String.format(err_msg,form_values['name'])+'<br>'+response['info'],
-                    icon: Ext.MessageBox.ERROR});
-
-            }
-        });// END Ajax request
+                                });
     }
 });
 

@@ -17,6 +17,7 @@ all:
        - e1000
        - virtio
       hvm:
+       - xen
        - rtl8139
        - e1000
        
@@ -34,7 +35,21 @@ all:
        - virtio
        - ide
        - scsi
-      
+  #
+    fencingcmds:
+      datacenter:
+        fence_bladecenter: 'bladecenter'
+        fence_virsh: 'virsh'
+      node:
+        fence_ilo: 'ilo'
+        fence_ipmilan: 'ipmilan'
+        fence_rsa: 'rsa'
+    disk_formats:
+        - raw
+        - qcow2
+        - qcow
+        - cow
+        - vmdk
   mac:
     default_first_octect: 0x00 #default first three octects for mac pool
     default_second_octect: 0x16
@@ -45,6 +60,11 @@ all:
     keepalive_update: 60 # seconds to perform update. Added offset (keepalive_update_offset)
                         # to add tolerance for comm delay..
     keepalive_update_offset: 30 # seconds of tolerance before change node state
+  server:
+    heartbeat_timeout_default: 180 # interval between heartbeat checks (in seconds)
+    heartbeat_starttime: 300 # seconds of expected starting time
+    heartbeat_number_of_restart: 3 # maximum number of restarts 
+
   setting:
     vnc_keymap: pt  # if not set in DB this will be used as default value
     eventlog_flush: 14  # remove event records after specified days (two weeks)
@@ -55,7 +75,7 @@ all:
     dir: '%SF_DATA_DIR%/rra' 
   sf_guard_plugin:
     import_encrypted_passwords: true
-  dbrequired: 1.0
+  dbrequired: 1.2
   cron:
     alert_dir: '/var/run/etva_etvm'
     log_dir: '/var/log/etva_etvm'
@@ -63,7 +83,10 @@ all:
     file: '%SF_DATA_DIR%/diagnostic_ball.tgz'           # Diagnostic file
     script: '%SF_ROOT_DIR%/utils/diagnostic_ball.sh'    # Script that generates the file
     mailscript: '%SF_ROOT_DIR%/utils/pl/EmailLogs.pl'   # Script responsible for sending emails (with the diagnostic file attached)
-    toemail: 'etva@suporte.eurotux.com' #etva@eurotux.com # rcpt to
+    toemail: 'etva@eurotux.com' # rcpt to
+  sshkey:
+    pubfile: '%SF_ROOT_DIR%/.ssh/id_rsa.pub'
+    privfile: '%SF_ROOT_DIR%/.ssh/id_rsa'
 
 extdirect:
   ds_ext_direct_plugin:

@@ -4,6 +4,8 @@ class EtvaVolumegroupPeer extends BaseEtvaVolumegroupPeer
 {
   const _ERR_NOTFOUND_   = 'Volume group %name% could not be found';
 
+  const _ERR_VG_EXIST_   = 'Volume group %name% already exist';
+
   const _ERR_CREATE_EXTEND_ = 'Volume group %name% could not be created/extended. %info%';
 
   const _OK_CREATE_   = 'Volume group %name%  created successfully with %pvs%';
@@ -34,8 +36,14 @@ class EtvaVolumegroupPeer extends BaseEtvaVolumegroupPeer
 
   const _ERR_INIT_OTHER_CLUSTER_ = 'Node has some volume group that exists on cluster %name%.';
 
+  const _ERR_REGISTER_   = 'Volume group %name% could not be registered. %info%';
+  const _OK_REGISTER_   = 'Volume group %name% registered successfully';
 
-    public static function retrieveByVg($name, Criteria $criteria = null)
+  const _ERR_UNREGISTER_   = 'Volume group %name% could not be unregistered. %info%';
+  const _OK_UNREGISTER_   = 'Volume group %name% unregistered successfully';
+
+
+  public static function retrieveByVg($name, Criteria $criteria = null)
   {
     if(is_null($criteria )) $criteria = new Criteria();
 

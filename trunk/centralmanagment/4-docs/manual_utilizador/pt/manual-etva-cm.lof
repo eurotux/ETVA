@@ -1,163 +1,174 @@
 \select@language {portuges}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces Esquema geral do ETVA }}{10}{figure.1.1}
-\contentsline {figure}{\numberline {1.2}{\ignorespaces Modelo ETVA }}{11}{figure.1.2}
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Esquema geral do ETVA }}{11}{figure.1.1}
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Modelo ETVA }}{12}{figure.1.2}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Menu de instala\IeC {\c c}\IeC {\~a}o da vers\IeC {\~a}o ETVA Standard}}{12}{figure.2.1}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Insta\IeC {\c c}\IeC {\~a}o da vers\IeC {\~a}o ETVA }}{13}{figure.2.2}
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Menu de boot da vers\IeC {\~a}o ETVA }}{14}{figure.2.3}
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Identifica\IeC {\c c}\IeC {\~a}o das portas a ligar na vers\IeC {\~a}o ETVA }}{14}{figure.2.4}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Menu de instala\IeC {\c c}\IeC {\~a}o da vers\IeC {\~a}o ETVA Standard}}{13}{figure.2.1}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Insta\IeC {\c c}\IeC {\~a}o da vers\IeC {\~a}o ETVA }}{14}{figure.2.2}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Menu de boot da vers\IeC {\~a}o ETVA }}{15}{figure.2.3}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Identifica\IeC {\c c}\IeC {\~a}o das portas a ligar na vers\IeC {\~a}o ETVA }}{15}{figure.2.4}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Layout principal}}{15}{figure.3.1}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces P\IeC {\'a}gina de autentica\IeC {\c c}\IeC {\~a}o}}{16}{figure.3.2}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Vista dos nodes do Central Management}}{17}{figure.3.3}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces Vista das redes do sistema e das interfaces de rede}}{18}{figure.3.4}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de uma rede}}{19}{figure.3.5}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o da pool de MACs}}{19}{figure.3.6}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Janela de gest\IeC {\~a}o das interfaces de rede de uma m\IeC {\'a}quina virtual}}{20}{figure.3.7}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da conectividade do agente \emph {VirtAgent01}}}{21}{figure.3.8}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do node \emph {VirtAgent01}}}{22}{figure.3.9}
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Lista das m\IeC {\'a}quinas virtuais do node \emph {VirtAgent01}}}{23}{figure.3.10}
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Bem-vindo}}{24}{figure.3.11}
-\contentsline {figure}{\numberline {3.12}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Nome da m\IeC {\'a}quina virtual}}{25}{figure.3.12}
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Mem\IeC {\'o}ria}}{25}{figure.3.13}
-\contentsline {figure}{\numberline {3.14}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Processador}}{26}{figure.3.14}
-\contentsline {figure}{\numberline {3.15}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Armazenamento}}{27}{figure.3.15}
-\contentsline {figure}{\numberline {3.16}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Rede do servidor}}{28}{figure.3.16}
-\contentsline {figure}{\numberline {3.17}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Arranque}}{29}{figure.3.17}
-\contentsline {figure}{\numberline {3.18}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Finaliza\IeC {\c c}\IeC {\~a}o!}}{29}{figure.3.18}
-\contentsline {figure}{\numberline {3.19}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Op\IeC {\c c}\IeC {\~o}es gerais}}{30}{figure.3.19}
-\contentsline {figure}{\numberline {3.20}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Interfaces de rede}}{31}{figure.3.20}
-\contentsline {figure}{\numberline {3.21}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Discos}}{32}{figure.3.21}
-\contentsline {figure}{\numberline {3.22}{\ignorespaces Janela de remo\IeC {\c c}\IeC {\~a}o de um servidor}}{32}{figure.3.22}
-\contentsline {figure}{\numberline {3.23}{\ignorespaces Par\IeC {\^a}metros de arranque de uma m\IeC {\'a}quina virtual}}{33}{figure.3.23}
-\contentsline {figure}{\numberline {3.24}{\ignorespaces Migra\IeC {\c c}\IeC {\~a}o de uma m\IeC {\'a}quina virtual}}{34}{figure.3.24}
-\contentsline {figure}{\numberline {3.25}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do armazenamento de um \emph {node}}}{35}{figure.3.25}
-\contentsline {figure}{\numberline {3.26}{\ignorespaces Sub-menu de contexto de um physical volume}}{36}{figure.3.26}
-\contentsline {figure}{\numberline {3.27}{\ignorespaces Sub-menu de contexto de um volume group}}{37}{figure.3.27}
-\contentsline {figure}{\numberline {3.28}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um volume group}}{37}{figure.3.28}
-\contentsline {figure}{\numberline {3.29}{\ignorespaces Extens\IeC {\~a}o de um volume group}}{38}{figure.3.29}
-\contentsline {figure}{\numberline {3.30}{\ignorespaces Sub-menu de contexto de um logical volume}}{39}{figure.3.30}
-\contentsline {figure}{\numberline {3.31}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um logical volume}}{39}{figure.3.31}
-\contentsline {figure}{\numberline {3.32}{\ignorespaces Redimensionamento de um logical volume}}{40}{figure.3.32}
-\contentsline {figure}{\numberline {3.33}{\ignorespaces Desligar um node}}{41}{figure.3.33}
-\contentsline {figure}{\numberline {3.34}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o da m\IeC {\'a}quina virtual \emph {etfww}}}{42}{figure.3.34}
-\contentsline {figure}{\numberline {3.35}{\ignorespaces Estat\IeC {\'\i }sticas de uma m\IeC {\'a}quina virtual}}{43}{figure.3.35}
-\contentsline {figure}{\numberline {3.36}{\ignorespaces Estat\IeC {\'\i }sticas de \emph {Utiliza\IeC {\c c}\IeC {\~a}o do node} - Carga no CPU}}{44}{figure.3.36}
-\contentsline {figure}{\numberline {3.37}{\ignorespaces Selecionar a imagem com os drivers virtio}}{45}{figure.3.37}
-\contentsline {figure}{\numberline {3.38}{\ignorespaces Atribuir logical volume (drivers virtio)}}{46}{figure.3.38}
-\contentsline {figure}{\numberline {3.39}{\ignorespaces Definir arranque pelo disco}}{46}{figure.3.39}
-\contentsline {figure}{\numberline {3.40}{\ignorespaces Windows - actualiza\IeC {\c c}\IeC {\~a}o de drivers}}{47}{figure.3.40}
-\contentsline {figure}{\numberline {3.41}{\ignorespaces Alterar o driver do disco para virtio}}{48}{figure.3.41}
-\contentsline {figure}{\numberline {3.42}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Bem-vindo}}{49}{figure.3.42}
-\contentsline {figure}{\numberline {3.43}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Ficheiro OVF de origem}}{49}{figure.3.43}
-\contentsline {figure}{\numberline {3.44}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Resumo do OVF}}{50}{figure.3.44}
-\contentsline {figure}{\numberline {3.45}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Contrato de licen\IeC {\c c}a}}{50}{figure.3.45}
-\contentsline {figure}{\numberline {3.46}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Nome e localiza\IeC {\c c}\IeC {\~a}o}}{51}{figure.3.46}
-\contentsline {figure}{\numberline {3.47}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Armazenamento}}{52}{figure.3.47}
-\contentsline {figure}{\numberline {3.48}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Interfaces de rede}}{52}{figure.3.48}
-\contentsline {figure}{\numberline {3.49}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Finaliza\IeC {\c c}\IeC {\~a}o!}}{53}{figure.3.49}
-\contentsline {figure}{\numberline {3.50}{\ignorespaces Janela de exporta\IeC {\c c}\IeC {\~a}o OVF}}{53}{figure.3.50}
-\contentsline {figure}{\numberline {3.51}{\ignorespaces Painel de gest\IeC {\~a}o das ISOs}}{54}{figure.3.51}
-\contentsline {figure}{\numberline {3.52}{\ignorespaces Janela do registo de eventos do sistema}}{55}{figure.3.52}
-\contentsline {figure}{\numberline {3.53}{\ignorespaces Assistente de configura\IeC {\c c}\IeC {\~a}o inicial}}{56}{figure.3.53}
-\contentsline {figure}{\numberline {3.54}{\ignorespaces Janela de prefer\IeC {\^e}ncias do sistema - Painel Geral}}{57}{figure.3.54}
-\contentsline {figure}{\numberline {3.55}{\ignorespaces Janela de prefer\IeC {\^e}ncias do sistema - Painel Conectividade}}{58}{figure.3.55}
-\contentsline {figure}{\numberline {3.56}{\ignorespaces Janela de administra\IeC {\c c}\IeC {\~a}o de utilizadores e permiss\IeC {\~o}es}}{59}{figure.3.56}
-\contentsline {figure}{\numberline {3.57}{\ignorespaces Permiss\IeC {\~o}es no menu de contexto do node}}{59}{figure.3.57}
-\contentsline {figure}{\numberline {3.58}{\ignorespaces Permiss\IeC {\~o}es no menu de contexto do servidor}}{60}{figure.3.58}
-\contentsline {figure}{\numberline {3.59}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de permiss\IeC {\~o}es de acesso ao servidor}}{60}{figure.3.59}
-\contentsline {figure}{\numberline {3.60}{\ignorespaces Display dispon\IeC {\'\i }vel nas appliances ETVA}}{61}{figure.3.60}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Layout principal}}{17}{figure.3.1}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces P\IeC {\'a}gina de autentica\IeC {\c c}\IeC {\~a}o}}{18}{figure.3.2}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Vista dos nodes do Central Management}}{19}{figure.3.3}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Vista das redes do sistema e das interfaces de rede}}{20}{figure.3.4}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de uma rede}}{20}{figure.3.5}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o da pool de MACs}}{21}{figure.3.6}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Janela de gest\IeC {\~a}o das interfaces de rede de uma m\IeC {\'a}quina virtual}}{22}{figure.3.7}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Editar datacenter}}{23}{figure.3.8}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Editar n\IeC {\'o}}}{24}{figure.3.9}
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da conectividade do agente}}{25}{figure.3.10}
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Manuten\IeC {\c c}\IeC {\~a}o do n\IeC {\'o}}}{25}{figure.3.11}
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do node}}{26}{figure.3.12}
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Lista das m\IeC {\'a}quinas virtuais do node}}{27}{figure.3.13}
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Bem-vindo}}{27}{figure.3.14}
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Nome da m\IeC {\'a}quina virtual}}{28}{figure.3.15}
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Mem\IeC {\'o}ria}}{29}{figure.3.16}
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Processador}}{29}{figure.3.17}
+\contentsline {figure}{\numberline {3.18}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Armazenamento}}{30}{figure.3.18}
+\contentsline {figure}{\numberline {3.19}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Rede do servidor}}{31}{figure.3.19}
+\contentsline {figure}{\numberline {3.20}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Arranque}}{32}{figure.3.20}
+\contentsline {figure}{\numberline {3.21}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Finaliza\IeC {\c c}\IeC {\~a}o!}}{32}{figure.3.21}
+\contentsline {figure}{\numberline {3.22}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Op\IeC {\c c}\IeC {\~o}es gerais}}{33}{figure.3.22}
+\contentsline {figure}{\numberline {3.23}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Interfaces de rede}}{34}{figure.3.23}
+\contentsline {figure}{\numberline {3.24}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Discos}}{34}{figure.3.24}
+\contentsline {figure}{\numberline {3.25}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Dispositivos}}{35}{figure.3.25}
+\contentsline {figure}{\numberline {3.26}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Outras op\IeC {\c c}\IeC {\~o}es}}{35}{figure.3.26}
+\contentsline {figure}{\numberline {3.27}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Alta disponibilidade}}{36}{figure.3.27}
+\contentsline {figure}{\numberline {3.28}{\ignorespaces Janela de remo\IeC {\c c}\IeC {\~a}o de um servidor}}{36}{figure.3.28}
+\contentsline {figure}{\numberline {3.29}{\ignorespaces Par\IeC {\^a}metros de arranque de uma m\IeC {\'a}quina virtual}}{37}{figure.3.29}
+\contentsline {figure}{\numberline {3.30}{\ignorespaces Migra\IeC {\c c}\IeC {\~a}o de uma m\IeC {\'a}quina virtual}}{37}{figure.3.30}
+\contentsline {figure}{\numberline {3.31}{\ignorespaces Snapshots}}{38}{figure.3.31}
+\contentsline {figure}{\numberline {3.32}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do armazenamento de um \emph {node}}}{39}{figure.3.32}
+\contentsline {figure}{\numberline {3.33}{\ignorespaces Sub-menu de contexto de um physical volume}}{39}{figure.3.33}
+\contentsline {figure}{\numberline {3.34}{\ignorespaces Procurar \emph {physical devices} }}{40}{figure.3.34}
+\contentsline {figure}{\numberline {3.35}{\ignorespaces Sub-menu de contexto de um volume group}}{40}{figure.3.35}
+\contentsline {figure}{\numberline {3.36}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um volume group}}{41}{figure.3.36}
+\contentsline {figure}{\numberline {3.37}{\ignorespaces Extens\IeC {\~a}o de um volume group}}{42}{figure.3.37}
+\contentsline {figure}{\numberline {3.38}{\ignorespaces Procurar \emph {volume groups}}}{42}{figure.3.38}
+\contentsline {figure}{\numberline {3.39}{\ignorespaces Sub-menu de contexto de um logical volume}}{43}{figure.3.39}
+\contentsline {figure}{\numberline {3.40}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um logical volume}}{43}{figure.3.40}
+\contentsline {figure}{\numberline {3.41}{\ignorespaces Redimensionamento de um logical volume}}{44}{figure.3.41}
+\contentsline {figure}{\numberline {3.42}{\ignorespaces Procurar \emph {logical volumes}}}{44}{figure.3.42}
+\contentsline {figure}{\numberline {3.43}{\ignorespaces Desligar um node}}{45}{figure.3.43}
+\contentsline {figure}{\numberline {3.44}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o da m\IeC {\'a}quina virtual}}{46}{figure.3.44}
+\contentsline {figure}{\numberline {3.45}{\ignorespaces Estat\IeC {\'\i }sticas de uma m\IeC {\'a}quina virtual}}{47}{figure.3.45}
+\contentsline {figure}{\numberline {3.46}{\ignorespaces Estat\IeC {\'\i }sticas de carga do n\IeC {\'o}}}{47}{figure.3.46}
+\contentsline {figure}{\numberline {3.47}{\ignorespaces Estat\IeC {\'\i }sticas de \emph {Utiliza\IeC {\c c}\IeC {\~a}o do node} - Carga no CPU}}{48}{figure.3.47}
+\contentsline {figure}{\numberline {3.48}{\ignorespaces Selecionar a imagem com os drivers virtio}}{49}{figure.3.48}
+\contentsline {figure}{\numberline {3.49}{\ignorespaces Atribuir logical volume (drivers virtio)}}{50}{figure.3.49}
+\contentsline {figure}{\numberline {3.50}{\ignorespaces Definir arranque pelo disco}}{50}{figure.3.50}
+\contentsline {figure}{\numberline {3.51}{\ignorespaces Windows - actualiza\IeC {\c c}\IeC {\~a}o de drivers}}{51}{figure.3.51}
+\contentsline {figure}{\numberline {3.52}{\ignorespaces Alterar o driver do disco para virtio}}{51}{figure.3.52}
+\contentsline {figure}{\numberline {3.53}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Bem-vindo}}{52}{figure.3.53}
+\contentsline {figure}{\numberline {3.54}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Ficheiro OVF de origem}}{53}{figure.3.54}
+\contentsline {figure}{\numberline {3.55}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Resumo do OVF}}{53}{figure.3.55}
+\contentsline {figure}{\numberline {3.56}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Contrato de licen\IeC {\c c}a}}{54}{figure.3.56}
+\contentsline {figure}{\numberline {3.57}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Nome e localiza\IeC {\c c}\IeC {\~a}o}}{55}{figure.3.57}
+\contentsline {figure}{\numberline {3.58}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Armazenamento}}{56}{figure.3.58}
+\contentsline {figure}{\numberline {3.59}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Interfaces de rede}}{56}{figure.3.59}
+\contentsline {figure}{\numberline {3.60}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Finaliza\IeC {\c c}\IeC {\~a}o!}}{57}{figure.3.60}
+\contentsline {figure}{\numberline {3.61}{\ignorespaces Janela de exporta\IeC {\c c}\IeC {\~a}o OVF}}{57}{figure.3.61}
+\contentsline {figure}{\numberline {3.62}{\ignorespaces Painel de gest\IeC {\~a}o das ISOs}}{58}{figure.3.62}
+\contentsline {figure}{\numberline {3.63}{\ignorespaces Janela do registo de eventos do sistema}}{59}{figure.3.63}
+\contentsline {figure}{\numberline {3.64}{\ignorespaces Assistente de configura\IeC {\c c}\IeC {\~a}o inicial}}{60}{figure.3.64}
+\contentsline {figure}{\numberline {3.65}{\ignorespaces Janela de prefer\IeC {\^e}ncias do sistema - Painel Geral}}{61}{figure.3.65}
+\contentsline {figure}{\numberline {3.66}{\ignorespaces Janela de prefer\IeC {\^e}ncias do sistema - Painel Conectividade}}{62}{figure.3.66}
+\contentsline {figure}{\numberline {3.67}{\ignorespaces Janela de administra\IeC {\c c}\IeC {\~a}o de utilizadores e permiss\IeC {\~o}es}}{63}{figure.3.67}
+\contentsline {figure}{\numberline {3.68}{\ignorespaces Permiss\IeC {\~o}es no menu de contexto do node}}{63}{figure.3.68}
+\contentsline {figure}{\numberline {3.69}{\ignorespaces Permiss\IeC {\~o}es no menu de contexto do servidor}}{64}{figure.3.69}
+\contentsline {figure}{\numberline {3.70}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de permiss\IeC {\~o}es de acesso ao servidor}}{64}{figure.3.70}
+\contentsline {figure}{\numberline {3.71}{\ignorespaces Display dispon\IeC {\'\i }vel nas appliances ETVA}}{65}{figure.3.71}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Painel Principal}}{63}{figure.4.1}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Boas vindas}}{64}{figure.4.2}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da topologia}}{64}{figure.4.3}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da interface WAN}}{65}{figure.4.4}
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da interface LAN}}{65}{figure.4.5}
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do servi\IeC {\c c}o DHCP para a rede LAN}}{66}{figure.4.6}
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do proxy SQUID}}{66}{figure.4.7}
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da interface DMZ}}{67}{figure.4.8}
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do servi\IeC {\c c}o DHCP para a rede DMZ}}{67}{figure.4.9}
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Finaliza\IeC {\c c}\IeC {\~a}o do processo de configura\IeC {\c c}\IeC {\~a}o}}{68}{figure.4.10}
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Interfaces activas}}{69}{figure.4.11}
-\contentsline {figure}{\numberline {4.12}{\ignorespaces Interfaces activas no arranque}}{69}{figure.4.12}
-\contentsline {figure}{\numberline {4.13}{\ignorespaces Alias interface}}{70}{figure.4.13}
-\contentsline {figure}{\numberline {4.14}{\ignorespaces Alias interface activa no arranque}}{70}{figure.4.14}
-\contentsline {figure}{\numberline {4.15}{\ignorespaces Regras de encaminhamento activas}}{71}{figure.4.15}
-\contentsline {figure}{\numberline {4.16}{\ignorespaces Regras de encaminhamento definidas no arranque}}{72}{figure.4.16}
-\contentsline {figure}{\numberline {4.17}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o de endere\IeC {\c c}os}}{73}{figure.4.17}
-\contentsline {figure}{\numberline {4.18}{\ignorespaces Cliente DNS}}{73}{figure.4.18}
-\contentsline {figure}{\numberline {4.19}{\ignorespaces M\IeC {\'o}dulo \textit {Firewall}: Tabela \textit {Filter} }}{74}{figure.4.19}
-\contentsline {figure}{\numberline {4.20}{\ignorespaces Criar regra na tabela \textit {filter} - \textit {Chain} e ac\IeC {\c c}\IeC {\~a}o}}{75}{figure.4.20}
-\contentsline {figure}{\numberline {4.21}{\ignorespaces Criar regra na tabela \textit {filter} - Detalhes da condi\IeC {\c c}\IeC {\~a}o}}{76}{figure.4.21}
-\contentsline {figure}{\numberline {4.22}{\ignorespaces Criar regra na tabela \textit {NAT}}}{78}{figure.4.22}
-\contentsline {figure}{\numberline {4.23}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o dos intervalos de IP}}{79}{figure.4.23}
-\contentsline {figure}{\numberline {4.24}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o sub-redes}}{80}{figure.4.24}
-\contentsline {figure}{\numberline {4.25}{\ignorespaces Editar sub-rede}}{80}{figure.4.25}
-\contentsline {figure}{\numberline {4.26}{\ignorespaces Escolha de interface}}{81}{figure.4.26}
-\contentsline {figure}{\numberline {4.27}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o do ficheiro de configura\IeC {\c c}\IeC {\~a}o}}{81}{figure.4.27}
-\contentsline {figure}{\numberline {4.28}{\ignorespaces Lista de concess\IeC {\~o}es activas}}{82}{figure.4.28}
-\contentsline {figure}{\numberline {4.29}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do servidor SQUID}}{83}{figure.4.29}
-\contentsline {figure}{\numberline {4.30}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o de portas e rede}}{84}{figure.4.30}
-\contentsline {figure}{\numberline {4.31}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o de pol\IeC {\'\i }ticas de controlo de acesso - \textit {ACLs}}}{85}{figure.4.31}
-\contentsline {figure}{\numberline {4.32}{\ignorespaces Criar nova \textit {ACLs}}}{85}{figure.4.32}
-\contentsline {figure}{\numberline {4.33}{\ignorespaces Criar nova \textit {External ACLs}}}{86}{figure.4.33}
-\contentsline {figure}{\numberline {4.34}{\ignorespaces Defini\IeC {\c c}\IeC {\~a}o de uma restri\IeC {\c c}\IeC {\~a}o - \textit {Proxy restrictions}}}{86}{figure.4.34}
-\contentsline {figure}{\numberline {4.35}{\ignorespaces Programas de autentica\IeC {\c c}\IeC {\~a}o - \textit {Authentication Programs}}}{87}{figure.4.35}
-\contentsline {figure}{\numberline {4.36}{\ignorespaces \textit {Proxies} - \textit {Other Caches}}}{88}{figure.4.36}
-\contentsline {figure}{\numberline {4.37}{\ignorespaces Editar \textit {Cache} \textit {Host}}}{89}{figure.4.37}
-\contentsline {figure}{\numberline {4.38}{\ignorespaces Restringir acessos da rede interna apenas em hor\IeC {\'a}rio de trabalho - Criar \textit {ACLs}}}{90}{figure.4.38}
-\contentsline {figure}{\numberline {4.39}{\ignorespaces Restringir acessos da rede interna apenas em hor\IeC {\'a}rio de trabalho - Criar restri\IeC {\c c}\IeC {\~a}o usando as \textit {ACLs} anteriores}}{90}{figure.4.39}
-\contentsline {figure}{\numberline {4.40}{\ignorespaces Restringir acesso apenas de manh\IeC {\~a} - Criar \textit {ACLs}}}{91}{figure.4.40}
-\contentsline {figure}{\numberline {4.41}{\ignorespaces Restringir acesso apenas de manh\IeC {\~a} - Criar restri\IeC {\c c}\IeC {\~a}o usando as \textit {ACLs} anteriores}}{91}{figure.4.41}
-\contentsline {figure}{\numberline {4.42}{\ignorespaces Restringir acessos pelo endere\IeC {\c c}o IP - Criar \textit {ACLs}}}{92}{figure.4.42}
-\contentsline {figure}{\numberline {4.43}{\ignorespaces Restringir acessos pelo endere\IeC {\c c}o IP - Criar restri\IeC {\c c}\IeC {\~a}o usando as \textit {ACLs} anteriores}}{92}{figure.4.43}
-\contentsline {figure}{\numberline {4.44}{\ignorespaces Negar acesso baseado em RegEXP no URL - Criar \textit {ACLs}}}{93}{figure.4.44}
-\contentsline {figure}{\numberline {4.45}{\ignorespaces Negar acesso baseado em RegEXP no URL - Criar restri\IeC {\c c}\IeC {\~a}o usando as \textit {ACLs} anteriores}}{93}{figure.4.45}
-\contentsline {figure}{\numberline {4.46}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do servidor SNMP}}{94}{figure.4.46}
-\contentsline {figure}{\numberline {4.47}{\ignorespaces ETMS - Painel de Informa\IeC {\c c}\IeC {\~a}o Principal}}{95}{figure.4.47}
-\contentsline {figure}{\numberline {4.48}{\ignorespaces ETMS - Painel de Gest\IeC {\~a}o de Dom\IeC {\'\i }nios}}{96}{figure.4.48}
-\contentsline {figure}{\numberline {4.49}{\ignorespaces Criar Dom\IeC {\'\i }nio}}{97}{figure.4.49}
-\contentsline {figure}{\numberline {4.50}{\ignorespaces Remover Dom\IeC {\'\i }nio}}{98}{figure.4.50}
-\contentsline {figure}{\numberline {4.51}{\ignorespaces Gerir Caixas de Correio de um Dom\IeC {\'\i }nio}}{99}{figure.4.51}
-\contentsline {figure}{\numberline {4.52}{\ignorespaces Espa\IeC {\c c}o Ocupado pelos Dom\IeC {\'\i }nio}}{99}{figure.4.52}
-\contentsline {figure}{\numberline {4.53}{\ignorespaces Adicionar Alias a um Dom\IeC {\'\i }nio}}{100}{figure.4.53}
-\contentsline {figure}{\numberline {4.54}{\ignorespaces Sucesso na Cria\IeC {\c c}\IeC {\~a}o de Alias de Dom\IeC {\'\i }nio}}{100}{figure.4.54}
-\contentsline {figure}{\numberline {4.55}{\ignorespaces ETMS - Painel de Gest\IeC {\~a}o de Caixas de Correio}}{101}{figure.4.55}
-\contentsline {figure}{\numberline {4.56}{\ignorespaces Criar Caixa de Correio}}{102}{figure.4.56}
-\contentsline {figure}{\numberline {4.57}{\ignorespaces Alerar Palavra-Chave de Caixa de Correio}}{104}{figure.4.57}
-\contentsline {figure}{\numberline {4.58}{\ignorespaces Criar Alias para Caixa de Correio}}{104}{figure.4.58}
-\contentsline {figure}{\numberline {4.59}{\ignorespaces Eliminar Alias de uma Caixa de Correio - passo 1}}{105}{figure.4.59}
-\contentsline {figure}{\numberline {4.60}{\ignorespaces Eliminar Alias de uma Caixa de Correio - passo 2}}{105}{figure.4.60}
-\contentsline {figure}{\numberline {4.61}{\ignorespaces Definir Endere\IeC {\c c}os para Encaminhamento de Emails}}{106}{figure.4.61}
-\contentsline {figure}{\numberline {4.62}{\ignorespaces Caixas de Correio Disponveis}}{106}{figure.4.62}
-\contentsline {figure}{\numberline {4.63}{\ignorespaces Espa\IeC {\c c}o Ocupado pelos Email da Caixas de Correio}}{107}{figure.4.63}
-\contentsline {figure}{\numberline {4.64}{\ignorespaces Confirmar Elimina\IeC {\c c}\IeC {\~a}o da Caixa de Correio}}{108}{figure.4.64}
-\contentsline {figure}{\numberline {4.65}{\ignorespaces Painel principal de gest\IeC {\~a}o ETVOIP}}{109}{figure.4.65}
-\contentsline {figure}{\numberline {4.66}{\ignorespaces Painel de gest\IeC {\~a}o de Extens\IeC {\~o}es}}{110}{figure.4.66}
-\contentsline {figure}{\numberline {4.67}{\ignorespaces Janel de cria\IeC {\c c}\IeC {\~a}o de extens\IeC {\~a}o SIP}}{110}{figure.4.67}
-\contentsline {figure}{\numberline {4.68}{\ignorespaces Remover extens\IeC {\~a}o}}{113}{figure.4.68}
-\contentsline {figure}{\numberline {4.69}{\ignorespaces Painel de gest\IeC {\~a}o de Trunks}}{114}{figure.4.69}
-\contentsline {figure}{\numberline {4.70}{\ignorespaces Janel de cria\IeC {\c c}\IeC {\~a}o de trunk IAX2}}{114}{figure.4.70}
-\contentsline {figure}{\numberline {4.71}{\ignorespaces Remover trunk}}{117}{figure.4.71}
-\contentsline {figure}{\numberline {4.72}{\ignorespaces Painel de gest\IeC {\~a}o de Rotas de Sa\IeC {\'\i }da}}{118}{figure.4.72}
-\contentsline {figure}{\numberline {4.73}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de uma rota de sa\IeC {\'\i }da}}{120}{figure.4.73}
-\contentsline {figure}{\numberline {4.74}{\ignorespaces Remover rota de sa\IeC {\'\i }da}}{121}{figure.4.74}
-\contentsline {figure}{\numberline {4.75}{\ignorespaces Painel de gest\IeC {\~a}o de Rotas de Entrada}}{122}{figure.4.75}
-\contentsline {figure}{\numberline {4.76}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de uma rota de entrada}}{123}{figure.4.76}
-\contentsline {figure}{\numberline {4.77}{\ignorespaces Remover rota de entrada}}{123}{figure.4.77}
-\contentsline {figure}{\numberline {4.78}{\ignorespaces Passo 1 - Escolha da directoria de instala\IeC {\c c}\IeC {\~a}o}}{124}{figure.4.78}
-\contentsline {figure}{\numberline {4.79}{\ignorespaces Passo 2 - Estado da instala\IeC {\c c}\IeC {\~a}o}}{124}{figure.4.79}
-\contentsline {figure}{\numberline {4.80}{\ignorespaces Passo 3 - Par\IeC {\^a}metros de configura\IeC {\c c}\IeC {\~a}o do Agente}}{125}{figure.4.80}
-\contentsline {figure}{\numberline {4.81}{\ignorespaces Passo 4 - Confirma\IeC {\c c}\IeC {\~a}o de reboot}}{125}{figure.4.81}
-\contentsline {figure}{\numberline {4.82}{\ignorespaces Passo 5 - Inicializa\IeC {\c c}\IeC {\~a}o do agente}}{125}{figure.4.82}
-\contentsline {figure}{\numberline {4.83}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do servi\IeC {\c c}o}}{126}{figure.4.83}
-\contentsline {figure}{\numberline {4.84}{\ignorespaces Lista de planos de backup}}{127}{figure.4.84}
-\contentsline {figure}{\numberline {4.85}{\ignorespaces Criar novo plano de backup}}{128}{figure.4.85}
-\contentsline {figure}{\numberline {4.86}{\ignorespaces Efectuar backup na hora}}{128}{figure.4.86}
-\contentsline {figure}{\numberline {4.87}{\ignorespaces Efectuar restauro}}{129}{figure.4.87}
-\contentsline {figure}{\numberline {4.88}{\ignorespaces Alterar IP}}{130}{figure.4.88}
-\contentsline {figure}{\numberline {4.89}{\ignorespaces Lista de utilizadores Primavera}}{131}{figure.4.89}
-\contentsline {figure}{\numberline {4.90}{\ignorespaces Adicionar utilizador Primavera}}{132}{figure.4.90}
-\contentsline {figure}{\numberline {4.91}{\ignorespaces Editar utilizador Primavera}}{132}{figure.4.91}
-\contentsline {figure}{\numberline {4.92}{\ignorespaces Remover utilizador Primavera}}{133}{figure.4.92}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Painel Principal}}{67}{figure.4.1}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Boas vindas}}{68}{figure.4.2}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da topologia}}{68}{figure.4.3}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da interface WAN}}{69}{figure.4.4}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da interface LAN}}{69}{figure.4.5}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do servi\IeC {\c c}o DHCP para a rede LAN}}{70}{figure.4.6}
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do proxy SQUID}}{70}{figure.4.7}
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da interface DMZ}}{71}{figure.4.8}
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do servi\IeC {\c c}o DHCP para a rede DMZ}}{71}{figure.4.9}
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Finaliza\IeC {\c c}\IeC {\~a}o do processo de configura\IeC {\c c}\IeC {\~a}o}}{72}{figure.4.10}
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Interfaces activas}}{73}{figure.4.11}
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Interfaces activas no arranque}}{73}{figure.4.12}
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Alias interface}}{74}{figure.4.13}
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Alias interface activa no arranque}}{74}{figure.4.14}
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Regras de encaminhamento activas}}{75}{figure.4.15}
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Regras de encaminhamento definidas no arranque}}{76}{figure.4.16}
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o de endere\IeC {\c c}os}}{77}{figure.4.17}
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Cliente DNS}}{77}{figure.4.18}
+\contentsline {figure}{\numberline {4.19}{\ignorespaces M\IeC {\'o}dulo \textit {Firewall}: Tabela \textit {Filter} }}{78}{figure.4.19}
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Criar regra na tabela \textit {filter} - \textit {Chain} e ac\IeC {\c c}\IeC {\~a}o}}{79}{figure.4.20}
+\contentsline {figure}{\numberline {4.21}{\ignorespaces Criar regra na tabela \textit {filter} - Detalhes da condi\IeC {\c c}\IeC {\~a}o}}{80}{figure.4.21}
+\contentsline {figure}{\numberline {4.22}{\ignorespaces Criar regra na tabela \textit {NAT}}}{82}{figure.4.22}
+\contentsline {figure}{\numberline {4.23}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o dos intervalos de IP}}{83}{figure.4.23}
+\contentsline {figure}{\numberline {4.24}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o sub-redes}}{84}{figure.4.24}
+\contentsline {figure}{\numberline {4.25}{\ignorespaces Editar sub-rede}}{84}{figure.4.25}
+\contentsline {figure}{\numberline {4.26}{\ignorespaces Escolha de interface}}{85}{figure.4.26}
+\contentsline {figure}{\numberline {4.27}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o do ficheiro de configura\IeC {\c c}\IeC {\~a}o}}{85}{figure.4.27}
+\contentsline {figure}{\numberline {4.28}{\ignorespaces Lista de concess\IeC {\~o}es activas}}{86}{figure.4.28}
+\contentsline {figure}{\numberline {4.29}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do servidor SQUID}}{87}{figure.4.29}
+\contentsline {figure}{\numberline {4.30}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o de portas e rede}}{88}{figure.4.30}
+\contentsline {figure}{\numberline {4.31}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o de pol\IeC {\'\i }ticas de controlo de acesso - \textit {ACLs}}}{89}{figure.4.31}
+\contentsline {figure}{\numberline {4.32}{\ignorespaces Criar nova \textit {ACLs}}}{89}{figure.4.32}
+\contentsline {figure}{\numberline {4.33}{\ignorespaces Criar nova \textit {External ACLs}}}{90}{figure.4.33}
+\contentsline {figure}{\numberline {4.34}{\ignorespaces Defini\IeC {\c c}\IeC {\~a}o de uma restri\IeC {\c c}\IeC {\~a}o - \textit {Proxy restrictions}}}{90}{figure.4.34}
+\contentsline {figure}{\numberline {4.35}{\ignorespaces Programas de autentica\IeC {\c c}\IeC {\~a}o - \textit {Authentication Programs}}}{91}{figure.4.35}
+\contentsline {figure}{\numberline {4.36}{\ignorespaces \textit {Proxies} - \textit {Other Caches}}}{92}{figure.4.36}
+\contentsline {figure}{\numberline {4.37}{\ignorespaces Editar \textit {Cache} \textit {Host}}}{93}{figure.4.37}
+\contentsline {figure}{\numberline {4.38}{\ignorespaces Restringir acessos da rede interna apenas em hor\IeC {\'a}rio de trabalho - Criar \textit {ACLs}}}{94}{figure.4.38}
+\contentsline {figure}{\numberline {4.39}{\ignorespaces Restringir acessos da rede interna apenas em hor\IeC {\'a}rio de trabalho - Criar restri\IeC {\c c}\IeC {\~a}o usando as \textit {ACLs} anteriores}}{94}{figure.4.39}
+\contentsline {figure}{\numberline {4.40}{\ignorespaces Restringir acesso apenas de manh\IeC {\~a} - Criar \textit {ACLs}}}{95}{figure.4.40}
+\contentsline {figure}{\numberline {4.41}{\ignorespaces Restringir acesso apenas de manh\IeC {\~a} - Criar restri\IeC {\c c}\IeC {\~a}o usando as \textit {ACLs} anteriores}}{95}{figure.4.41}
+\contentsline {figure}{\numberline {4.42}{\ignorespaces Restringir acessos pelo endere\IeC {\c c}o IP - Criar \textit {ACLs}}}{96}{figure.4.42}
+\contentsline {figure}{\numberline {4.43}{\ignorespaces Restringir acessos pelo endere\IeC {\c c}o IP - Criar restri\IeC {\c c}\IeC {\~a}o usando as \textit {ACLs} anteriores}}{96}{figure.4.43}
+\contentsline {figure}{\numberline {4.44}{\ignorespaces Negar acesso baseado em RegEXP no URL - Criar \textit {ACLs}}}{97}{figure.4.44}
+\contentsline {figure}{\numberline {4.45}{\ignorespaces Negar acesso baseado em RegEXP no URL - Criar restri\IeC {\c c}\IeC {\~a}o usando as \textit {ACLs} anteriores}}{97}{figure.4.45}
+\contentsline {figure}{\numberline {4.46}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o do servidor SNMP}}{98}{figure.4.46}
+\contentsline {figure}{\numberline {4.47}{\ignorespaces ETMS - Painel de Informa\IeC {\c c}\IeC {\~a}o Principal}}{99}{figure.4.47}
+\contentsline {figure}{\numberline {4.48}{\ignorespaces ETMS - Painel de Gest\IeC {\~a}o de Dom\IeC {\'\i }nios}}{100}{figure.4.48}
+\contentsline {figure}{\numberline {4.49}{\ignorespaces Criar Dom\IeC {\'\i }nio}}{101}{figure.4.49}
+\contentsline {figure}{\numberline {4.50}{\ignorespaces Remover Dom\IeC {\'\i }nio}}{102}{figure.4.50}
+\contentsline {figure}{\numberline {4.51}{\ignorespaces Gerir Caixas de Correio de um Dom\IeC {\'\i }nio}}{103}{figure.4.51}
+\contentsline {figure}{\numberline {4.52}{\ignorespaces Espa\IeC {\c c}o Ocupado pelos Dom\IeC {\'\i }nio}}{103}{figure.4.52}
+\contentsline {figure}{\numberline {4.53}{\ignorespaces Adicionar Alias a um Dom\IeC {\'\i }nio}}{104}{figure.4.53}
+\contentsline {figure}{\numberline {4.54}{\ignorespaces Sucesso na Cria\IeC {\c c}\IeC {\~a}o de Alias de Dom\IeC {\'\i }nio}}{104}{figure.4.54}
+\contentsline {figure}{\numberline {4.55}{\ignorespaces ETMS - Painel de Gest\IeC {\~a}o de Caixas de Correio}}{105}{figure.4.55}
+\contentsline {figure}{\numberline {4.56}{\ignorespaces Criar Caixa de Correio}}{106}{figure.4.56}
+\contentsline {figure}{\numberline {4.57}{\ignorespaces Alerar Palavra-Chave de Caixa de Correio}}{108}{figure.4.57}
+\contentsline {figure}{\numberline {4.58}{\ignorespaces Criar Alias para Caixa de Correio}}{108}{figure.4.58}
+\contentsline {figure}{\numberline {4.59}{\ignorespaces Eliminar Alias de uma Caixa de Correio - passo 1}}{109}{figure.4.59}
+\contentsline {figure}{\numberline {4.60}{\ignorespaces Eliminar Alias de uma Caixa de Correio - passo 2}}{109}{figure.4.60}
+\contentsline {figure}{\numberline {4.61}{\ignorespaces Definir Endere\IeC {\c c}os para Encaminhamento de Emails}}{110}{figure.4.61}
+\contentsline {figure}{\numberline {4.62}{\ignorespaces Caixas de Correio Disponveis}}{110}{figure.4.62}
+\contentsline {figure}{\numberline {4.63}{\ignorespaces Espa\IeC {\c c}o Ocupado pelos Email da Caixas de Correio}}{111}{figure.4.63}
+\contentsline {figure}{\numberline {4.64}{\ignorespaces Confirmar Elimina\IeC {\c c}\IeC {\~a}o da Caixa de Correio}}{112}{figure.4.64}
+\contentsline {figure}{\numberline {4.65}{\ignorespaces Painel principal de gest\IeC {\~a}o ETVOIP}}{113}{figure.4.65}
+\contentsline {figure}{\numberline {4.66}{\ignorespaces Painel de gest\IeC {\~a}o de Extens\IeC {\~o}es}}{114}{figure.4.66}
+\contentsline {figure}{\numberline {4.67}{\ignorespaces Janel de cria\IeC {\c c}\IeC {\~a}o de extens\IeC {\~a}o SIP}}{114}{figure.4.67}
+\contentsline {figure}{\numberline {4.68}{\ignorespaces Remover extens\IeC {\~a}o}}{117}{figure.4.68}
+\contentsline {figure}{\numberline {4.69}{\ignorespaces Painel de gest\IeC {\~a}o de Trunks}}{118}{figure.4.69}
+\contentsline {figure}{\numberline {4.70}{\ignorespaces Janel de cria\IeC {\c c}\IeC {\~a}o de trunk IAX2}}{118}{figure.4.70}
+\contentsline {figure}{\numberline {4.71}{\ignorespaces Remover trunk}}{121}{figure.4.71}
+\contentsline {figure}{\numberline {4.72}{\ignorespaces Painel de gest\IeC {\~a}o de Rotas de Sa\IeC {\'\i }da}}{122}{figure.4.72}
+\contentsline {figure}{\numberline {4.73}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de uma rota de sa\IeC {\'\i }da}}{124}{figure.4.73}
+\contentsline {figure}{\numberline {4.74}{\ignorespaces Remover rota de sa\IeC {\'\i }da}}{125}{figure.4.74}
+\contentsline {figure}{\numberline {4.75}{\ignorespaces Painel de gest\IeC {\~a}o de Rotas de Entrada}}{126}{figure.4.75}
+\contentsline {figure}{\numberline {4.76}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de uma rota de entrada}}{127}{figure.4.76}
+\contentsline {figure}{\numberline {4.77}{\ignorespaces Remover rota de entrada}}{127}{figure.4.77}
+\contentsline {figure}{\numberline {4.78}{\ignorespaces Passo 1 - Escolha da directoria de instala\IeC {\c c}\IeC {\~a}o}}{128}{figure.4.78}
+\contentsline {figure}{\numberline {4.79}{\ignorespaces Passo 2 - Estado da instala\IeC {\c c}\IeC {\~a}o}}{128}{figure.4.79}
+\contentsline {figure}{\numberline {4.80}{\ignorespaces Passo 3 - Par\IeC {\^a}metros de configura\IeC {\c c}\IeC {\~a}o do Agente}}{129}{figure.4.80}
+\contentsline {figure}{\numberline {4.81}{\ignorespaces Passo 4 - Confirma\IeC {\c c}\IeC {\~a}o de reboot}}{129}{figure.4.81}
+\contentsline {figure}{\numberline {4.82}{\ignorespaces Passo 5 - Inicializa\IeC {\c c}\IeC {\~a}o do agente}}{129}{figure.4.82}
+\contentsline {figure}{\numberline {4.83}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do servi\IeC {\c c}o}}{130}{figure.4.83}
+\contentsline {figure}{\numberline {4.84}{\ignorespaces Lista de planos de backup}}{131}{figure.4.84}
+\contentsline {figure}{\numberline {4.85}{\ignorespaces Criar novo plano de backup}}{132}{figure.4.85}
+\contentsline {figure}{\numberline {4.86}{\ignorespaces Efectuar backup na hora}}{132}{figure.4.86}
+\contentsline {figure}{\numberline {4.87}{\ignorespaces Efectuar restauro}}{133}{figure.4.87}
+\contentsline {figure}{\numberline {4.88}{\ignorespaces Alterar IP}}{134}{figure.4.88}
+\contentsline {figure}{\numberline {4.89}{\ignorespaces Lista de utilizadores Primavera}}{135}{figure.4.89}
+\contentsline {figure}{\numberline {4.90}{\ignorespaces Adicionar utilizador Primavera}}{136}{figure.4.90}
+\contentsline {figure}{\numberline {4.91}{\ignorespaces Editar utilizador Primavera}}{136}{figure.4.91}
+\contentsline {figure}{\numberline {4.92}{\ignorespaces Remover utilizador Primavera}}{137}{figure.4.92}

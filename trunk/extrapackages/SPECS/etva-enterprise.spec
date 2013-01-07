@@ -1,6 +1,6 @@
 Name: etva-enterprise
 Summary: ETVA enterprise related files
-Version: 1.0.1
+Version: 1.2.1
 Release: 11%{?dist}
 Group: System Environment/Base
 Source0: lvm.conf
@@ -45,6 +45,7 @@ if [ "$1" == "1" ]; then
 	%{__perl} -pi -e 's/#LIBVIRTD_ARGS="--listen"/LIBVIRTD_ARGS="--listen"/' %{_sysconfdir}/sysconfig/libvirtd
 
     # Alterar o shutdown dos guest e timeout
+	%{__perl} -pi -e 's/#ON_BOOT=start/ON_BOOT=ignore/' %{_sysconfdir}/sysconfig/libvirt-guests
 	%{__perl} -pi -e 's/#ON_SHUTDOWN=suspend/ON_SHUTDOWN=shutdown/' %{_sysconfdir}/sysconfig/libvirt-guests
 	%{__perl} -pi -e 's/#SHUTDOWN_TIMEOUT=0/SHUTDOWN_TIMEOUT=120/' %{_sysconfdir}/sysconfig/libvirt-guests
 

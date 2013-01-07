@@ -8,7 +8,7 @@
     <li><a href="#help-vlan-mac">Gerir da pool de endereços MAC</a></li>
     <li><a href="#help-vlan-list">Listar interfaces de rede</a></li>
 </ul>
-<p><b>Nota: </b>Algumas das operações só estão disponíveis na versão <em>ETVM</em>.</p>
+<p><b>Nota: </b>Algumas das operações só estão disponíveis na versão <em>Enterprise</em>.</p>
 <br/>
 <hr/>
 
@@ -16,7 +16,7 @@
 <p>Para criar uma rede no datacenter seleccionado, clica-se em <em>Adicionar rede</em>. A informação da rede consiste no seu nome
 e ID (Caso a rede/vlan seja tagged o campo ID da rede refere-se à VLAN ID).</p>
 
-<p><b>Nota 1: </b>A operação de adicionar rede só está disponível na versão <em>ETVM</em>.</p>
+<p><b>Nota 1: </b>A operação de adicionar rede só está disponível na versão <em>Enterprise</em>.</p>
 
 <p><b>Nota 2: </b>A rede adicionada é propagada a todos os nodes do datacenter seleccionado.</p>
 <a href="#help-vlan"><div>Início</div></a>
@@ -25,7 +25,7 @@ e ID (Caso a rede/vlan seja tagged o campo ID da rede refere-se à VLAN ID).</p>
 <a id="help-vlan-manage-remove"><h1>Remover Redes</h1></a>
 <p>Para remover uma rede do datacenter, selecciona-se a rede pretendida e clica-se em <em>Remover rede</em>.</p>
 
-<p><b>Nota 1: </b>A operação de remover rede só está disponível na versão <em>ETVM</em>.</p>
+<p><b>Nota 1: </b>A operação de remover rede só está disponível na versão <em>Enterprise</em>.</p>
 
 <p><b>Nota 2: </b>A rede removida é propagada a todos os nodes do CM.</p>
 <a href="#help-vlan"><div>Início</div></a>

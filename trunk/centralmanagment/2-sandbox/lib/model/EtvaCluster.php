@@ -20,6 +20,9 @@ require 'lib/model/om/BaseEtvaCluster.php';
  */
 class EtvaCluster extends BaseEtvaCluster {
 
+    const CLUSTER_ADMISSION_GATE_TYPE_SPARENODE = 0;
+    const CLUSTER_ADMISSION_GATE_TYPE_N_HOSTS_TOLERATE = 1;
+    const CLUSTER_ADMISSION_GATE_TYPE_PER_RESOURCES = 2;
 
     /*
      * sends soap to cluster nodes....
@@ -93,5 +96,150 @@ class EtvaCluster extends BaseEtvaCluster {
                 
         return $etva_shared_lvs;
     }
+
+    /*
+     * gets array of fields names in DB
+     */
+    public function toDisplay()
+	{
+        $array_data = $this->toArray(BasePeer::TYPE_FIELDNAME);
+		return $array_data;       
+	}
+
+    /*
+     * before delete cluster from db delete other info...
+     */
+    public function preDelete(PropelPDO $con = null)
+    {
+
+        /*
+         * delete servers info
+         *
+         */
+        $servers = $this->getEtvaServers();
+        foreach($servers as $server)
+            $server->delete();
+
+        /*
+         * delete nodes info
+         *
+         */
+        $nodes = $this->getEtvaNodes();
+        foreach($nodes as $node)
+            $node->delete();
+
+        $vlans = $this->getEtvaVlans();
+        foreach($vlans as $vlan)
+            $vlan->delete();
+
+        $physicalvolumes = $this->getEtvaPhysicalvolumes();
+        foreach($physicalvolumes as $physicalvolume)
+            $physicalvolume->delete();
+
+        $logicalvolumes = $this->getEtvaLogicalvolumes();
+        foreach($logicalvolumes as $logicalvolume)
+            $logicalvolume->delete();
+
+        $volumegroups = $this->getEtvaVolumegroups();
+        foreach($volumegroups as $volumegroup)
+            $volumegroup->delete();
+
+        return true;
+    }
+
+    public function getSpareNode(){
+        $spare_node = EtvaNodeQuery::create()
+                            ->filterByEtvaCluster($this)
+                            ->filterByIssparenode(1)
+                            ->findOne();
+
+        return $spare_node;
+    }
+
+    public function getAdmissionGate( EtvaServer $server ){
+        if( $this->getHasNodeHA() ){
+            if( ($this->getAdmissionGateType() == self::CLUSTER_ADMISSION_GATE_TYPE_N_HOSTS_TOLERATE) || 
+                ($this->getAdmissionGateType() == self::CLUSTER_ADMISSION_GATE_TYPE_PER_RESOURCES) ){
+
+                $nodes =
+                    EtvaNodeQuery::create()
+                                ->leftJoin('EtvaNode.EtvaServerAssign')
+                                ->leftJoin('EtvaServerAssign.EtvaServer')
+                                ->addJoinCondition('EtvaServer','EtvaServer.VmState = ?',EtvaServer::RUNNING)
+                                ->withColumn('SUM(EtvaServer.Mem)','sum_mem')
+                                ->withColumn('SUM(EtvaServer.Vcpu)','sum_vcpu')
+                                ->groupBy('EtvaNode.Id')
+                                ->orderBy('EtvaNode.Memtotal','desc')
+                                ->filterByClusterId($this->getId())
+                                ->find();
+
+                $n_hosts_tolerate = 0;
+                if( $this->getAdmissionGateType() == self::CLUSTER_ADMISSION_GATE_TYPE_N_HOSTS_TOLERATE ) 
+                        $n_hosts_tolerate = $this->getAdmissionGateValue();
+                $n_hosts_tolerate_value = $n_hosts_tolerate;
+                $sum_all_Nodes_memtotal = 0;
+                $sum_n_biggest_Nodes_memtotal = 0;
+                $sum_all_running_Servers_mem = 0;
+                $sum_all_Nodes_memfree = 0;
+                $max_cpu_Nodes = 0;
+                $server_mem_bytes = $server->getMem() * 1024 * 1024;
+                foreach($nodes as $node){
+                    if( $n_hosts_tolerate ){
+                        $sum_n_biggest_Nodes_memtotal =+ $node->getMemtotal();
+                        $n_hosts_tolerate --;   // decrease
+                    }
+                    $sum_all_Nodes_memtotal += $node->getMemtotal();
+                    $sum_all_Nodes_memfree += $node->getMemfree();
+                    $sum_all_running_Servers_mem += $node->getSum_mem();
+                    if( !$max_cpu_Nodes || ($node->getCputotal() < $max_cpu_Nodes) )
+                        $max_cpu_Nodes = $node->getCputotal();
+                }
+                $sum_all_running_Servers_mem_bytes = $sum_all_running_Servers_mem * 1024 * 1024;
+
+                error_log("getAdmissionGate getAdmissionGateType=".$this->getAdmissionGateType()." getAdmissionGateValue=".$this->getAdmissionGateValue() . " sum_all_Nodes_memtotal=$sum_all_Nodes_memtotal sum_n_biggest_Nodes_memtotal=$sum_n_biggest_Nodes_memtotal sum_all_running_Servers_mem_bytes=$sum_all_running_Servers_mem_bytes sum_all_Nodes_memfree=$sum_all_Nodes_memfree max_cpu_Nodes=$max_cpu_Nodes vcpu=".$server->getVcpu()." mem=".$server->getMem()." name=".$server->getName());
+
+                if( $this->getAdmissionGateType() == self::CLUSTER_ADMISSION_GATE_TYPE_N_HOSTS_TOLERATE ){
+
+                    $sum_all_running_Servers_memfree_bytes_after = $sum_all_Nodes_memtotal - $sum_all_running_Servers_mem_bytes - $server_mem_bytes;
+                    $sum_all_Nodes_memfree_after = $sum_all_Nodes_memfree - $server_mem_bytes;
+
+                    error_log("getAdmissionGate TYPE_N_HOSTS_TOLERATE n_hosts_tolerate_value=$n_hosts_tolerate_value sum_all_running_Servers_memfree_bytes_after=$sum_all_running_Servers_memfree_bytes_after sum_all_Nodes_memfree_after=$sum_all_Nodes_memfree_after sum_n_biggest_Nodes_memtotal=$sum_n_biggest_Nodes_memtotal max_cpu_Nodes=$max_cpu_Nodes vcpu=".$server->getVcpu()." mem=".$server->getMem()." name=".$server->getName());
+
+                    if( $sum_all_running_Servers_memfree_bytes_after < $sum_n_biggest_Nodes_memtotal )
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate.',array('%n_hosts_tolerate_value%'=>$n_hosts_tolerate_value)) );
+                    
+                    if( $sum_all_Nodes_memfree_after < $sum_n_biggest_Nodes_memtotal )
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate.',array('%n_hosts_tolerate_value%'=>$n_hosts_tolerate_value)) );
+
+                    if( $server->getVcpu() > $max_cpu_Nodes )
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Number max. of cpus (%max_cpu_Nodes%) exceeded.',array('%max_cpu_Nodes%'=>$max_cpu_Nodes)) );
+
+                }
+                if( $this->getAdmissionGateType() == self::CLUSTER_ADMISSION_GATE_TYPE_PER_RESOURCES ){
+
+                    $per_resources_value = $this->getAdmissionGateValue();
+                    $per_resources = $per_resources_value / 100;
+
+                    $sum_all_running_Servers_memfree_bytes_after = $sum_all_Nodes_memtotal - $sum_all_running_Servers_mem_bytes - $server_mem_bytes;
+                    $sum_all_Nodes_memfree_after = $sum_all_Nodes_memfree - $server_mem_bytes;
+                    $all_Node_memtotal_threshold = $sum_all_Nodes_memtotal*$per_resources;
+
+                    error_log("getAdmissionGate TYPE_PER_RESOURCES sum_all_running_Servers_memfree_bytes_after=$sum_all_running_Servers_memfree_bytes_after sum_all_Nodes_memfree_after=$sum_all_Nodes_memfree_after all_Node_memtotal_threshold=$all_Node_memtotal_threshold max_cpu_Nodes=$max_cpu_Nodes vcpu=".$server->getVcpu()." mem=".$server->getMem()." name=".$server->getName());
+
+                    if( $sum_all_running_Servers_memfree_bytes_after < $all_Node_memtotal_threshold )
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover.',array('%per_resources_value%'=>$per_resources_value)) );
+
+                    if( $sum_all_Nodes_memfree_after < $all_Node_memtotal_threshold )
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover.',array('%per_resources_value%'=>$per_resources_value)) );
+
+                    if( $server->getVcpu() > $max_cpu_Nodes )
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Number max. of cpus (%max_cpu_Nodes%) exceeded.',array('%max_cpu_Nodes%'=>$max_cpu_Nodes)) );
+
+                }
+            }
+        }
+        return array( 'success'=>true ); 
+    }
+
 
 } // EtvaCluster

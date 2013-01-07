@@ -259,7 +259,7 @@ drange = function(config) {
 
         labelAlign: 'right',
         labelWidth: 35,
-        defaults: {width: 620},
+        //defaults: {width: 620},
         bodyStyle:'padding:5px 0 0 0',
         items: [{
                 layout:'column',
@@ -267,13 +267,13 @@ drange = function(config) {
                 layoutConfig: {fitHeight: true},
                 items:[
                     {
-                        columnWidth:.33,
+                        columnWidth:.20,
                         layout: 'form',
                         labelWidth:60,
                         items: [this.combo]
                     }
                     ,{
-                        columnWidth:.2,
+                        columnWidth:.15,
                         layout: 'form',
                         items: [{
                                 xtype:'datefield',
@@ -289,7 +289,22 @@ drange = function(config) {
                             }]
                     }
                     ,{
-                        columnWidth:.2,
+                        columnWidth:.1,
+                        layout: 'form',
+                        items: [{
+                                xtype:'timefield',
+                                fieldLabel: __('at'),
+                                name: 'starttime',
+                                msgTarget:'none',
+                                allowBlank:false,
+                                format:'H:i',
+                                ref:'../starttime',
+                                //vtype: 'timerange',
+                                anchor:'100%',
+                            }]
+                    }
+                    ,{
+                        columnWidth:.15,
                         layout: 'form',
                         items: [{
                                 xtype:'datefield',
@@ -305,7 +320,22 @@ drange = function(config) {
                             }]
                     }
                     ,{
-                        columnWidth:.3,
+                        columnWidth:.1,
+                        layout: 'form',
+                        items: [{
+                                xtype:'timefield',
+                                ref:'../endtime',
+                                fieldLabel: __('at'),
+                                name: 'endtime',
+                                msgTarget:'none',
+                                allowBlank:false,
+                                format:'H:i',
+                                anchor:'100%',
+                                //vtype: 'timerange',
+                            }]
+                    }
+                    ,{
+                        columnWidth:.15,
                         layout: 'form',
                         items: [{
                                 xtype:'button',
@@ -314,11 +344,21 @@ drange = function(config) {
                                     if(this.form.isValid()){
 
                                         var startdate = this.form.findField('startdt').getValue();
-                                        var enddate = this.form.findField('enddt').getValue();                                    
+                                        var starttime = this.form.findField('starttime').getValue();
+                                        var enddate = this.form.findField('enddt').getValue();
+                                        var endtime = this.form.findField('endtime').getValue();
 
                                         //var start_unix_time = startdate.format('U');
-                                        var start_unix_time = startdate.getTime()/1000;                                        
-                                        var end_unix_time = enddate.getTime()/1000;                                        
+                                        var startdate_unix_time = startdate.getTime()/1000;
+                                        var enddate_unix_time = enddate.getTime()/1000;
+
+                                        var stt = starttime.split(":");
+
+                                        var start_unix_time = startdate_unix_time + parseInt(stt[0]) * 60 * 60 + parseInt(stt[1]) * 60;
+
+                                        var ett = endtime.split(":");
+
+                                        var end_unix_time = enddate_unix_time + parseInt(ett[0]) * 60 * 60 + parseInt(ett[1]) * 60;
 
                                         var src =  '/server/graph_'+this.pPanel.type+'Image?'+
                                             'id='+this.pPanel.server_id+
@@ -334,6 +374,39 @@ drange = function(config) {
                                         graph_ifr.show();
 
 
+                                    }
+                                },
+                                scope:this
+                            }]
+                    }
+                    ,{
+                        columnWidth:.15,
+                        layout: 'form',
+                        items: [{
+                                xtype: 'button',
+                                text: <?php echo json_encode(__('Load')) ?>,
+                                handler: function(){
+                                    if(this.form.isValid()){
+                                        var startdate = this.form.findField('startdt').getValue();
+                                        var starttime = this.form.findField('starttime').getValue();
+                                        var enddate = this.form.findField('enddt').getValue();
+                                        var endtime = this.form.findField('endtime').getValue();
+
+                                        var startdate_unix_time = startdate.getTime()/1000;
+                                        var enddate_unix_time = enddate.getTime()/1000;
+
+                                        var stt = starttime.split(":");
+
+                                        var start_unix_time = startdate_unix_time + parseInt(stt[0]) * 60 * 60 + parseInt(stt[1]) * 60;
+
+                                        var ett = endtime.split(":");
+
+                                        var end_unix_time = enddate_unix_time + parseInt(ett[0]) * 60 * 60 + parseInt(ett[1]) * 60;
+
+                                        var step_time = 300;
+                                        //var time_span = "From " + startdate.format('d/m/Y') + " " + starttime + " To " + enddate.format('d/m/Y') + " " + endtime;
+                                        var time_span = String.format(<?php echo json_encode(__('From {0} {1} To {2} {3}')) ?>,startdate.format('d/m/Y'),starttime,enddate.format('d/m/Y'),endtime);
+                                        this.pPanel.reloadStores(time_span,start_unix_time,end_unix_time,step_time);
                                     }
                                 },
                                 scope:this

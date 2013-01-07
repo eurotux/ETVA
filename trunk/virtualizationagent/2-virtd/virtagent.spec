@@ -1,8 +1,8 @@
 %{!?rhel:%define rhel   %(cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//')}
 
 Name:           virtagent
-Version:        1.0.1
-Release: 4149
+Version:        1.2.1
+Release: 5751
 Summary:        Virtualization Agent
 License:        GPL
 BuildArch:		noarch
@@ -13,6 +13,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}
 
 BuildRequires:  perl-Pod-Simple
 BuildRequires:  perl-Pod-Simple-Wiki
+BuildRequires:  perl(ExtUtils::MakeMaker)
 
 Requires:  %{name}-libs = %{version}-%{release}
 
@@ -21,13 +22,18 @@ Requires:  libvirt >= 0.7.0
 Requires:  parted-swig
 Requires:  daemontools
 
+Requires:  qemu-img >= 0.14
+
+Requires:  samba-client
+Requires:  nfs-utils
+
 Requires:  perl-Sys-Virt >= 0.2.0
 Requires:  perl-libwww-perl
 
 Requires:  perl(IPC::SysV) >= 2.01
 Requires:  perl(IPC::SharedMem)
 
-Requires:  lvm2
+Requires:  lvm2 >= 2.02.88
 Requires:  e2fsprogs
 Requires:  coreutils initscripts bridge-utils util-linux net-tools
 Requires:  vconfig
@@ -37,11 +43,15 @@ Requires:  avahi-tools
 Requires:  gnutls-utils
 Requires:  gpg
 Requires:  perl-Mail-Sender
+Requires:  sos
+Requires:  pciutils
+Requires:  libguestfs-tools
 %if 0%{?rhel} == 6
 Requires: perl-Class-Inspector
 %endif
 
 Requires:  logrotate
+Requires:  which
 
 %description
 Virtualization Agent
@@ -97,6 +107,10 @@ cp virtd $RPM_BUILD_ROOT/srv/etva-vdaemon/virtd
 cp virtd.sh $RPM_BUILD_ROOT/srv/etva-vdaemon/virtd.sh
 cp client.pl $RPM_BUILD_ROOT/srv/etva-vdaemon/client.pl
 
+cp check.pl $RPM_BUILD_ROOT/srv/etva-vdaemon/check.pl
+cp restart.pl $RPM_BUILD_ROOT/srv/etva-vdaemon/restart.pl
+cp poweroff.pl $RPM_BUILD_ROOT/srv/etva-vdaemon/poweroff.pl
+
 cp -rf VirtAgent.conf $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/etva-vdaemon/virtd.conf
 mkdir -p $RPM_BUILD_ROOT/srv/etva-vdaemon/storage
 
@@ -108,6 +122,7 @@ rm -rf lib/ETVA
 cp -rf lib $RPM_BUILD_ROOT/srv/etva-vdaemon/
 
 cp change_cm.sh $RPM_BUILD_ROOT/srv/etva-vdaemon/change_cm.sh
+cp script-upgrade.sh $RPM_BUILD_ROOT/srv/etva-vdaemon/script-upgrade.sh
 
 mkdir -p $RPM_BUILD_ROOT/service/etva-vdaemon
 cp service-run $RPM_BUILD_ROOT/service/etva-vdaemon/run
@@ -138,14 +153,19 @@ rm -rf %{buildroot}%{perl_vendorlib}/*.pl
 rm -rf $RPM_BUILD_ROOT
 
 %post
-/sbin/chkconfig --add etva-script
-/sbin/chkconfig etva-script on
 
-/sbin/chkconfig --add multipathd
-/sbin/chkconfig multipathd on
+if [ "$1" == "1" ]; then
+    /sbin/chkconfig --add etva-script;
+    /sbin/chkconfig etva-script on;
 
-echo "Para alterar o endereço do CentralManagement, corra o seguinte comando:";
-echo "    /bin/sh /srv/etva-vdaemon/change_cm.sh %{_sysconfdir}/sysconfig/etva-vdaemon/virtd.conf http://cm:8008/soapapi.php";
+    /sbin/chkconfig --add multipathd;
+    /sbin/chkconfig multipathd on;
+
+    echo "Para alterar o endereço do CentralManagement, corra o seguinte comando:";
+    echo "    /bin/sh /srv/etva-vdaemon/change_cm.sh %{_sysconfdir}/sysconfig/etva-vdaemon/virtd.conf http://cm:8008/soapapi.php";
+else 
+    /bin/sh /srv/etva-vdaemon/script-upgrade.sh
+fi
 
 %files
 %defattr(-,root,root)

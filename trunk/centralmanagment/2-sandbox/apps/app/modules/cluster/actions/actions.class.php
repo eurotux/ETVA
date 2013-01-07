@@ -122,6 +122,9 @@ class clusterActions extends sfActions
         if($clustername){
             $form_data['name'] = $clustername;
             $form_data['isDefaultCluster'] = '0';
+            $form_data['hasNodeHA'] = '0';
+            $form_data['admissionGate_type'] = 0;
+            $form_data['admissionGate_value'] = 0;
             error_log("CLUSTER[INFO] Creating cluster with name ".$clustername);
         }else{
             //invalid parameters
@@ -190,7 +193,7 @@ class clusterActions extends sfActions
 
         // create cluster entry
         $form = new EtvaClusterForm();
-        $result = $this->processJsonForm($form_data, $form);
+        $result = $this->processJsonForm($request, $form, $form_data);
         
         if(!$result['success']){
             error_log("CLUSTER[ERROR] Error processing cluster form");
@@ -241,38 +244,41 @@ class clusterActions extends sfActions
         return $task->run(array(), array('cluster_id' => $clusterObj->getId()));  // array('option_name' => 'option'));
     }
 
-    protected function processJsonForm($request, sfForm $form)
+    protected function processJsonForm(sfWebRequest $request, sfForm $form, $form_data=null)
     {
+        if( !$form_data ) $form_data = (array)json_decode($request->getParameter($form->getName()));
 
-        $form->bind($request);
+        $form->bind($form_data);
 
         if ($form->isValid())
         {
+            // if default cluster changed
+            if( $form_data['isDefaultCluster'] ){
+                $updatecluster = array('Isdefaultcluster'=>0);
+                EtvaClusterQuery::create()
+                        ->update($updatecluster);
+            }
+
             try{
                 $etva_cluster = $form->save();
 
+                $result = array('success'=>true, 'object'=>$etva_cluster);
             }catch(Exception $e){
                 $result = array('success'=>false,'error'=>array('cluster'=>$e->getMessage()), 'obj'=>$etva_cluster);
                 return $result;
             }
-
-            //$result = array('success'=>true,'insert_id'=>$etva_server->getId());
-            $result = array('success'=>true, 'object'=>$etva_cluster);
             return $result;
-
-        }
-        else
-        {
-            error_log("CREATECLUSTER[ERROR] Form is invalid");
+        } else {
             $errors = array();
+            foreach ($form->getErrorSchema() as $field => $error)
+                $errors[$field] = $error->getMessage();
 
-            foreach ($form->getFormattedErrors() as $error){
-                $errors[] = $error;
-            }
+            //notify system log
+            $msg_i18n = Etva::makeNotifyLogMessage(sfConfig::get('config_acronym'),
+                                                                EtvaClusterPeer::_ERR_UPDATE_,
+                                                                array('name'=>$form_data['name'],'info'=>$this->setJsonError($errors)));
 
-            $msg_err = implode('<br>',$errors);
-            $err = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_err);
-            $result = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>array($err));
+            $result = array('success'=>false,'error'=>$msg_i18n,'info'=>$msg_i18n);
             return $result;
         }
     }
@@ -370,6 +376,116 @@ class clusterActions extends sfActions
         }
     }
 
+    public function executeJsonLoad(sfWebRequest $request)
+    {
+        $id = $request->getParameter('id');
+
+        if(!$etva_cluster = EtvaClusterPeer::retrieveByPK($id)){
+
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaClusterPeer::_ERR_CLUSTER_,array('%id%'=>$id));
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+        
+        $cluster_array = $etva_cluster->toDisplay();        
+        $list_etva_nodes = $etva_cluster->getEtvaNodes();
+        $cluster_array['nodes_up'] = 0;
+        $cluster_array['nodes_down'] = 0;
+        $cluster_array['servers_assign'] = 0;
+        $cluster_array['servers_unassign'] = 0;
+        $cluster_array['count_fencing_cmd'] = 0;
+        foreach( $list_etva_nodes as $etva_node){
+            $cluster_array['mem_text'] += $etva_node->getMemtotal();
+            $cluster_array['mem_available'] += $etva_node->getMemfree();
+            $cluster_array['cpus'] += $etva_node->getCputotal();
+            if( $etva_node->getState() == EtvaNode::NODE_ACTIVE ){
+                $cluster_array['nodes_up'] += 1;
+            } else {
+                $cluster_array['nodes_down'] += 1;
+            }
+            if( $etva_node->getFencingconf_cmd() )
+                $cluster_array['count_fencing_cmd']++;
+        }
+        $cluster_array['allnodes_have_fencing_cmd_configured'] = ( $cluster_array['count_fencing_cmd'] == count($list_etva_nodes) )? 1:0;
+
+        $cluster_array['mem_text'] = Etva::Byte_to_MBconvert($cluster_array['mem_text']);
+        $cluster_array['mem_available'] = Etva::Byte_to_MBconvert($cluster_array['mem_available']);
+        $cluster_array['servers_assign'] = EtvaServerQuery::create()
+                                                ->filterByClusterId($etva_cluster->getId())
+                                                ->useEtvaServerAssignQuery()
+                                                ->endUse()
+                                                ->count();
+        $cluster_array['servers_unassign'] = EtvaServerQuery::create()
+                                                ->filterByClusterId($etva_cluster->getId())
+                                                ->count() - $cluster_array['servers_assign'];
+
+        $return = array(
+                       'success' => true,
+                       'total' => $count,
+                       'data'  => $cluster_array
+        );
+
+        $result = json_encode($return);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($result);
+    }
+    public function executeJsonUpdate(sfWebRequest $request)
+    {
+
+        // create cluster entry
+        $id = $request->getParameter('id');
+        $cluster = EtvaClusterPeer::retrieveByPK($id);
+
+        if(!$cluster) $form = new EtvaClusterForm();
+        else $form = new EtvaClusterForm($cluster);
+
+        $result = $this->processJsonForm($request, $form);
+
+        if(!$result['success']){
+            $error = $this->setJsonError($result);
+            return $this->renderText($error);
+        }
+
+        //get cluster object
+        $etva_cluster =  $result['object'];
+
+        $updateNodes = array('Issparenode' => 0);
+
+        if($request->getParameter('fencingconf') ){
+            $fencingconf = $request->getParameter('fencingconf');
+            $updateNodes['Fencingconf'] = $fencingconf;
+        }
+
+        //clear spare node
+        EtvaNodeQuery::create()
+                ->filterByClusterId($etva_cluster->getId())
+                ->update($updateNodes);
+
+        if( $sparenode_id = $request->getParameter('sparenode') ){
+            if($etva_sparenode = EtvaNodePeer::retrieveByPK($sparenode_id)){
+                // and mark the spare node
+                $etva_sparenode->setIsSpareNode(1);
+                $etva_sparenode->save();
+            }
+        }
+
+        $name = $etva_cluster->getName();
+
+        $i18n_msg = $msg_i18n = $this->getContext()->getI18N()->__(EtvaClusterPeer::_OK_UPDATE_,array('%name%'=>$name));
+
+        //notify system log
+        $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log', array('message' => Etva::getLogMessage(array('name'=>$name), EtvaClusterPeer::_OK_UPDATE_))));
+        $return = array('success'=>true,'agent'=>sfConfig::get('config_acronym'),'response'=> $i18n_msg, 'cluster_id' => $etva_cluster->getId());
+        $return = json_encode($return);
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+
+        return $this->renderText($return);
+    }
+
 
     /**
      * Moves an unaccepted node to the given cluster
@@ -416,5 +532,38 @@ class clusterActions extends sfActions
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
 
+    }
+    public function executeEdit(sfWebRequest $request)
+    {
+    }
+    protected function setJsonError($info,$statusCode = 400){
+        if(isset($info['faultcode']) && $info['faultcode']=='TCP') $statusCode = 404;
+        $this->getContext()->getResponse()->setStatusCode($statusCode);
+        $error = json_encode($info);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $error;
+    }
+  /*
+   * Used to delete a field cluster 
+   */
+    public function executeJsonDelete(sfWebRequest $request)
+    {
+        $isAjax = $request->isXmlHttpRequest();
+
+        if(!$isAjax) return $this->redirect('@homepage');
+
+        if(!$etva_cluster = EtvaClusterPeer::retrieveByPk($request->getParameter('id'))){
+            $error_msg = sprintf('Object etva_cluster does not exist (%s).', $request->getParameter('id'));
+            $info = array('success'=>false,'error'=>$error_msg);
+            $error = $this->setJsonError($info);
+            return $this->renderText($error);
+        }
+
+        $etva_cluster->delete();
+
+        $result = array('success'=>true);
+        $result = json_encode($result);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($result);
     }
 }

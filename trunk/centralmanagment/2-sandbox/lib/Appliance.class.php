@@ -501,6 +501,8 @@ class Appliance
         if($response_status_code != 200)
             return array('success'=>false, 'agent'=>'MASTERSITE','info'=>'An error occurred! '.$error,'error'=>$error);        
 
+        return array('success'=>true, 'agent'=>'MASTERSITE');   // status 200 send ok
+
     }
 
     /*
@@ -662,7 +664,7 @@ class Appliance
             $msg = 'Could not open '.$path_to_store.' for writing!';
             return array('success'=>false, 'error'=>$msg);
         }
-                                           
+
         $curl_req = new cURL($url);
         $curl_req->post("diagnostic=$diagnostic");
         $curl_req->progress($serial_number);
@@ -693,10 +695,7 @@ class Appliance
         }
 
         return array('success'=>true,'path' => $stored_path);
-
     }
-
-    
 
     /*
      * performs Appliance Backup

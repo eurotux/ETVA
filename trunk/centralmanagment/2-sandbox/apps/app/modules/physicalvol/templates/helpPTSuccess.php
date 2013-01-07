@@ -6,6 +6,7 @@
 <ul>
     <li><a href="#help-physical-vol-start">Iniciar <em>physical volume</em>;</a></li>
     <li><a href="#help-physical-vol-stop">Parar <em>physical volume</em>.</a></li>
+    <li><a href="#help-physical-vol-scan">Procurar <em>physical volumes</em>.</a></li>
 </ul>
 
 <br/>
@@ -26,4 +27,10 @@
 <p><b>Nota </b>Só é permitido remover um <em>physical volume</em> se este não pertencer a nenhum <em>volume group</em>.</p>
 <a href="#help-physical-vol"><div>Início</div></a>
 <hr/>
+
+<a id="help-physical-vol-scan"><h1>Procurar <em><b>Physical Volumes</b></em></h1></a>
+<p>Em <em>Procurar physical devices</em> é possível correr uma tarefa do lado do agente de virtualização que procura discos no sistema e possibilita o registo no <em>Central Management</em>. Analogamente, é possível remover o registo de um physical device do <em>Central Management</em>, caso se pretenda que este deixe ser gerido pelo sistema.</p>
+<a href="#help-physical-vol"><div>Início</div></a>
+<hr/>
+
 </div>

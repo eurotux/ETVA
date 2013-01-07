@@ -58,7 +58,13 @@ EOF;
 
     $this->log('[INFO]Checking node(s) virtual machines state...'."\n");
 
-    $nodes = EtvaNodePeer::doSelect(new Criteria());
+    // reset VM state
+    EtvaServerQuery::create()
+                        ->update(array('VmState'=>EtvaServer::STATE_STOP));
+
+    $nodes = EtvaNodeQuery::create()
+                    ->filterByState(EtvaNode::NODE_ACTIVE)
+                    ->find();
 
     $affected = 0;
     foreach ($nodes as $node){

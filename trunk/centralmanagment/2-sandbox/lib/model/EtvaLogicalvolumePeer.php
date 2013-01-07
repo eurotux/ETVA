@@ -14,18 +14,18 @@ class EtvaLogicalvolumePeer extends BaseEtvaLogicalvolumePeer
   const _OK_SOAPUPDATE_   = 'Logical volumes %info% updated';
 
   const _ERR_CREATE_   = 'Logical volume %name% could not be created. %info%';
-  const _OK_CREATE_   = 'Logical volume %name% created successfully';
+  const _OK_CREATE_   = 'Logical volume %name% created successfully.';
 
   const _ERR_REMOVE_   = 'Logical volume %name% could not be removed. %info%';
-  const _OK_REMOVE_   = 'Logical volume %name% removed successfully';
+  const _OK_REMOVE_   = 'Logical volume %name% removed successfully.';
 
   const _ERR_RESIZE_   = 'Logical volume %name% could not be resized to %size%MB. %info%';
-  const _OK_RESIZE_   = 'Logical volume %name% resized to %size%MB successfully';
+  const _OK_RESIZE_   = 'Logical volume %name% resized to %size%MB successfully.';
 
   const _OK_KEEP_   = 'Logical volume %name% NOT REMOVED';
   const _OK_NOTKEEP_   = 'Logical volume %name% REMOVED';
 
-  const _OK_SOAPREFRESH_ = 'Logical volumes info reloaded successfully';
+  const _OK_SOAPREFRESH_ = 'Logical volumes info reloaded successfully.';
   const _ERR_SOAPREFRESH_ = 'Logical volumes info could not be reloaded. %info%';
 
   const _ERR_INUSE_   = 'Logical volume %name% in use by  virtual server %server%';
@@ -44,7 +44,10 @@ class EtvaLogicalvolumePeer extends BaseEtvaLogicalvolumePeer
   const _SNAPSHOT_LV_   = 'Volume %name% is a snapshot.';
     
   const _ERR_CREATESNAPSHOT_   = 'Snapshot %name% could not be created. %info%';
-  const _OK_CREATESNAPSHOT_   = 'Snapshot %name% created successfully';
+  const _OK_CREATESNAPSHOT_   = 'Snapshot %name% created successfully.';
+
+  const _ERR_REVERTSNAPSHOT_   = 'Snapshot %name% could not be reverted. %info%';
+  const _OK_REVERTSNAPSHOT_   = 'Snapshot %name% reverted successfully.';
 
   const _SNAPSHOT_INOTHERNODE_   = 'Volume %name% is a snapshot in other node.';
   const _SNAPSHOT_CLUSTER_CONTEXT_ = 'Volume %name% is a snapshot and cannot be changed in cluster context. Please select the corresponding the node.';
@@ -55,6 +58,12 @@ class EtvaLogicalvolumePeer extends BaseEtvaLogicalvolumePeer
 
   const _OK_CREATECLONE_    = 'Clone %name% was successfully created.';
   const _ERR_CREATECLONE_   = 'Could not create clone %name%.';
+
+  const _ERR_UNREGISTER_   = 'Logical volume %name% could not be unregistered. %info%';
+  const _OK_UNREGISTER_   = 'Logical volume %name% unregistered successfully.';
+
+  const _ERR_CONVERT_   = 'Logical volume %name% could not be converted. %info%';
+  const _OK_CONVERT_   = 'Logical volume %name% converted successfully.';
 
   public static function retrieveByLvDevice($name, Criteria $criteria = null)
   {
@@ -146,5 +155,13 @@ class EtvaLogicalvolumePeer extends BaseEtvaLogicalvolumePeer
 
   }
 
+  public static function getByEtvaVolumeGroupId($vgid)
+  {
+    $criteria = new Criteria();
+
+    $criteria->add(self::VOLUMEGROUP_ID, $vgid);
+
+    return self::doSelect($criteria);
+  }
     
 }

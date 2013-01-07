@@ -47,6 +47,8 @@ use ETVA::Agent;
 use ETVA::Agent::SOAP;
 use ETVA::Agent::JSON;
 
+use GuestAgent::Manager;
+
 use VirtAgent;
 use VirtAgentSOAP;
 use VirtAgentInterface;
@@ -62,7 +64,8 @@ my $CONF = { "CFG_FILE"=>"/etc/sysconfig/etva-vdaemon/virtd.conf" };
 
 my $run_poll = 0;
 my $RUNNING;
-my @childs;
+my @CHILD_PIDS;
+my $GA_PID;
 
 # all stats data
 my %StatsData = ();
@@ -100,6 +103,8 @@ sub launch_agent {
     # register and keepalive func handlers
     $C{'_register_handler'} = \&register_handler;
     $C{'_alarmhandler_'} = $C{'_keepalive_handler'} = \&keepalive_handler;
+    $C{'_termhandler_'} = \&term_handler;
+    $C{'_chldhandler_'} = \&chld_handler;
 
     # initialization agent
 	my $agent = $class->new( %C );
@@ -110,15 +115,105 @@ sub launch_agent {
 	}
 }
 
+=item launch_guestagent
+start guestagent
+
+    create ETVA::Agent::SOAP instance with VirtAgentInterface dispatcher module
+
+=cut
+
+sub launch_guestagent {
+    if( VirtAgentInterface->get_hypervisor_type() ne 'kvm' ){
+        plog("launch_guestagent hypervisor not support guest agent");
+        return;
+    }
+
+    plog "Starting [host -> guest] agent \n" if( &debug_level > 3 );
+    # create a child process to read the socket
+    die "cant fork: $!" unless defined(my $kidpid = fork());
+
+    # child scope ####
+    if($kidpid==0){
+
+        # Save the process pid
+
+        # Start working
+        my $gm = GuestAgent::Manager->new('addr' => '127.0.0.1', 'port' => 7778, 'protocol' => 'tcp');
+        plog("guest manager added");        
+
+#        $gm->addVASkt('addr' => '127.0.0.1', 'port' => 7778, 'protocol' => 'tcp');
+#        plog("Guest Agent Server created");        
+#        $gm->addSkt('skt' => '/tmp/foo/pipe', 'name' => 'centos6', 'cluster' => 'Default');
+        
+        $RUNNING = 1;
+        while($RUNNING){
+            eval {
+                $gm->_readVa();
+                $gm->_writeGuests();
+            
+                my @readga = $gm->_readGuests();
+                $gm->_writeVa();
+
+                &send_ga_info(\@readga);
+            };
+            if( $@ ){
+                plogNow("launch_guestagent: something goes wrong with guest agent - $@");
+            }
+        }
+
+        plog("launch_guestagent: go exit...") if( &debug_level > 3 );
+        POSIX::_exit(0);
+    } else {
+        $GA_PID = $kidpid;
+        ETVA::Utils::regpid($kidpid);
+        plog "register child pid \n" if( &debug_level > 3 );
+        push(@CHILD_PIDS,$kidpid);
+    }    
+}
+
+sub send_ga_info {
+    my ($ga_info) = @_;
+
+    if( $CONF->{'cm_uri'} && $ga_info ){
+        my @vms_ga_info = ();
+        for my $g (@$ga_info){
+            my $vmname = $g->{'guest'}{'vmname'};
+            my $VM = VirtAgentInterface->getVM( 'name'=>$vmname );
+            if( $VM ){
+                my %G = ();
+                $G{'uuid'} = $VM->get_uuid();
+                $G{'msg'} = $g->{'msg'};
+                $G{'timestamp'} = now();    # timestamp
+                push(@vms_ga_info,\%G);
+            }
+        }
+        if( @vms_ga_info ){
+            plog( "updateVirtAgentGAInfo vms_ga_info:" . Dumper(\@vms_ga_info));
+            my $R = new ETVA::Client::SOAP::HTTP( uri => $CONF->{'cm_uri'} )
+                    -> call( $CONF->{'cm_namespace'},
+                                'updateVirtAgentGAInfo',
+                                uuid=>$CONF->{'uuid'},
+                                data=>\@vms_ga_info
+                            );
+            plog( "updateVirtAgentGAInfo " . Dumper($R));
+        }
+    }
+}
+
 # load function
 sub loadfunc {
     
     $CONF->{"CFG_FILE"} = $ENV->{'CFG_FILE'} if( $ENV{'CFG_FILE'} );
     $CONF = ETVA::Utils::get_conf(1,$CONF->{"CFG_FILE"});
 
+    if( $CONF->{'DEBUG_FILE'} ){    # change debug file
+        ETVA::Utils::closeDebugFile();
+        ETVA::Utils::setDebugFile($CONF->{'DEBUG_FILE'});
+    }
+
     &set_debug_level( $CONF->{'debug'} ); # set debug flag
 
-    plog "CONF=",Dumper($CONF),"\n" if( &debug_level );
+    plog "CONF=",Dumper($CONF),"\n" if( &debug_level > 3 );
     VirtAgentInterface->loadsysinfo();
 }
 
@@ -169,7 +264,7 @@ sub poll_stats {
                 my $pcpu = $sctime * 100 / ( ($nts - $lts) * 1000 * 1000 * 1000 * $tcpus );
                 my $s_pcpu = sprintf('%0.2f',$pcpu);
 
-                plog "domain $dn cpu = $s_pcpu% ($sctime [$gctime] $ncpus) mem = $s_pmem% ($cmem $mmem)" if( &debug_level );
+                plog "domain $dn cpu = $s_pcpu% ($sctime [$gctime] $ncpus) mem = $s_pmem% ($cmem $mmem)" if( &debug_level > 3 );
 
                 $tStamps{$dn}{'cpu'}{'cpu_t'} = $sctime;
                 $tStamps{$dn}{'cpu'}{'cpu_n'} = $ncpus;
@@ -285,7 +380,7 @@ sub send_stats {
     }
     $stats{"virtualmachines"} = \%st_vm;
 
-    plog Dumper(\%stats),"\n" if( &debug_level );
+    plog Dumper(\%stats),"\n" if( &debug_level > 3 );
 
     return wantarray() ? %stats : \%stats;
 }
@@ -311,19 +406,58 @@ launch agent
 # simple startup
 sub main {
 
+    my $debugfile_path = $ENV{'DEBUG_FILE'} || "/var/log/etva-vdaemon/virtdDebug.log";
+    ETVA::Utils::setDebugFile($debugfile_path);
+
+    ETVA::Utils::killpids();    # kill previous pids
+
+    ETVA::Utils::regpid();
+
+    $SIG{'HUP'} = $SIG{'TERM'} = \&term_handler;
+
     # load stuff
     loadfunc();
 
     # init stats
     poll_stats();
 
+    # call guest agent process  
+    launch_guestagent();
+
     # call soap process
     launch_agent();
+
+    ETVA::Utils::killpids();    # kill previous pids
 }
 
 sub term_handler {
-	$RUNNING = 0;
-	plog("deamon terminate!");
+    $RUNNING = 0;
+
+    plog("receive term signal... deamon terminate!");
+
+    plog("...waiting for childs...\n") if( &debug_level > 3 );
+
+    for my $cpid (@CHILD_PIDS){
+        kill SIGHUP, $cpid;
+        sleep(2);
+        waitpid(-1,&WNOHANG);
+    }
+}
+
+sub chld_handler {
+    plogNow "[info] - virtd - receiving chld signal..." if( &debug_level > 5 );
+
+    my $kpid = waitpid(-1,&WNOHANG);
+    if( $kpid == $GA_PID ){
+        plogNow "[info] - virtd - guest agent die... deamon go terminate!";
+
+        $RUNNING = 0;
+
+        #VirtAgentSOAP->terminate_agent();   # terminate agent
+        #kill SIGHUP, $$; # kill my self
+        plogNow "[error] - guest agent die... so i will die too...";
+        die "guest agent die... so i will die too...";
+    }
 }
 
 my $REGISTER_OK = 0;
@@ -336,7 +470,7 @@ sub register_handler {
     my $port = $agent->{'LocalPort'};
     my $proto = $agent->{'Proto'};
 
-    plog("agent initialized listen in addr=$laddr ip=$agent->{'LocalIP'} memtotal=>$agent->{'maxmem'} memfree=>$agent->{'meminfo'}{'MemFree'} cputotal=>$agent->{'maxncpu'} port=$port proto=$proto uuid=$agent->{'uuid'}");
+    plogNow("agent initialized listen in addr=$laddr ip=$agent->{'LocalIP'} memtotal=>$agent->{'maxmem'} memfree=>$agent->{'meminfo'}{'MemFree'} cputotal=>$agent->{'maxncpu'} port=$port proto=$proto uuid=$agent->{'uuid'}");
     plog("CM info cm_uri=> $agent->{'cm_uri'}, cm_namespace=$agent->{'cm_namespace'}\n");
 
 #    return;
@@ -365,7 +499,7 @@ sub register_handler {
                         );
 
         if( !$R || $R->{'_error_'} || (ref($R->{'return'}) && !$R->{'return'}{'success'} && $R->{'return'}{'error'}) ){
-            plog("Cant connect to CentralManagement.\nInitialization Agent aborted!");
+            plogNow("Cant connect to CentralManagement.\nInitialization Agent aborted!");
             if( &debug_level && !$R->{'return'}{'success'} && $R->{'return'}{'error'} ){
                 plog("\tReason: ",Dumper($R->{'return'}{'error'}));
             }
@@ -374,6 +508,11 @@ sub register_handler {
             $agent->set_runout();
         } else {
             if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
+
+                if( $R->{'return'}{'state'} < VirtAgentInterface::NODE_INACTIVE ){
+                    plog(" Agent state is not active state=".$R->{'return'}{'state'} );
+                }
+
                 $agent->{'_cm_insert_id'} = $R->{'return'}{'insert_id'};
 
                 my $now = nowStr();
@@ -505,7 +644,7 @@ sub register_handler {
 
                 # try send list of networks
                 my $networks = VirtAgentInterface->list_networks(1);
-                plog "networks=",Dumper($networks) if( &debug_level );
+                plog "networks=",Dumper($networks) if( &debug_level > 3 );
                 my $networks_arr = [];
                 if( $networks ){
                     my @l = values %$networks;
@@ -518,12 +657,12 @@ sub register_handler {
                                     uuid=>$agent->{'uuid'},
                                     vlans => [] # send empty array to receive all networks $networks_arr
                                 );
-                plog "RN=",Dumper($RN) if( &debug_level );
+                plog "RN=",Dumper($RN) if( &debug_level > 3 );
                 # waiting for networks to create
                 if( $RN && $RN->{'return'} ){
                     my $r_networks = $RN->{'return'};
                     if( ref($r_networks) ){ # testing if is a reference else ignore...
-                        plog "lnets=",Dumper($r_networks) if( &debug_level );
+                        plog "lnets=",Dumper($r_networks) if( &debug_level > 3 );
 
                         # destroy networks not send from CM
                         for my $N (@$networks_arr){
@@ -548,7 +687,7 @@ sub register_handler {
 
                 # try send list for disk devices
                 my $devs = VirtAgentInterface->hash_phydisks();
-                plog "devs=",Dumper($devs) if( &debug_level );
+                plog "devs=",Dumper($devs) if( &debug_level > 3 );
 
                 my $RD = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
                         -> call( $agent->{'cm_namespace'},
@@ -562,7 +701,7 @@ sub register_handler {
 
                 # try send list for physical volumes
                 my $pvs = VirtAgentInterface->getpvs();
-                plog "pvs=",Dumper($pvs) if( &debug_level );
+                plog "pvs=",Dumper($pvs) if( &ebug_level  > 3 );
 
                 my $RP = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
                         -> call( $agent->{'cm_namespace'},
@@ -570,7 +709,7 @@ sub register_handler {
                                     uuid=>$agent->{'uuid'},
                                     pvs => $pvs
                                 );
-                plog "PHYSICAL VOLUMES=",Dumper($RP) if( &debug_level );
+                plog "PHYSICAL VOLUMES=",Dumper($RP) if( &debug_level > 3 );
 
 =end comment
 
@@ -578,7 +717,7 @@ sub register_handler {
 
                 # try send list for volumes groups
                 my $vgs = VirtAgentInterface->getvgpvs();
-                plog "vgs=",Dumper($vgs) if( &debug_level );
+                plog "vgs=",Dumper($vgs) if( &debug_level > 3 );
 
                 my $RG = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
                         -> call( $agent->{'cm_namespace'},
@@ -586,11 +725,11 @@ sub register_handler {
                                     uuid=>$agent->{'uuid'},
                                     vgs => $vgs
                                 );
-                plog "VOLUME GROUPS=",Dumper($RG) if( &debug_level );
+                plog "VOLUME GROUPS=",Dumper($RG) if( &debug_level > 3 );
 
                 # try send list for logical volumes
                 my $lvs = VirtAgentInterface->getlvs();
-                plog "lvs=",Dumper($lvs) if( &debug_level );
+                plog "lvs=",Dumper($lvs) if( &debug_level > 3 );
                 my @a_lvs = values %$lvs;   # convert to array
 
                 my @dtable = VirtAgentInterface->device_table();
@@ -602,54 +741,68 @@ sub register_handler {
                                     lvs => \@a_lvs,
                                     'devicetable' => \@dtable
                                 );
-                plog "LOGICAL VOLUMES=",Dumper($RL) if( &debug_level );
+                plog "LOGICAL VOLUMES=",Dumper($RL) if( &debug_level > 3 );
 
                 # try send list for VMs
                 my $vms = VirtAgentInterface->hash_vms();
 
-                plog "vms=",Dumper($vms) if( &debug_level );
+                plog "vms=",Dumper($vms) if( &debug_level > 3 );
 
-                my $RV = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                my $RV = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'}, debug=>&debug_level )
                         -> call( $agent->{'cm_namespace'},
-                                    'updateVirtAgentServers',
+                                    'syncVirtAgentServers',
                                     uuid=>$agent->{'uuid'},
                                     vms => $vms
                                 );
-                plog "RV=",Dumper($RV) if( &debug_level );
+                plog "RV=",Dumper($RV) if( &debug_level > 3 );
                 # waiting for virtual machines to create
                 if( $RV && $RV->{'return'} ){
-                    my $vmachines = $RV->{'return'};
-                    plog "lvms=",Dumper($vmachines) if( &debug_level );
-                    # create them
-                    if( ref($vmachines) eq 'HASH' ){
-                        for my $vm (values %$vmachines){
-                            if( ref($vm) ){                 # testing if is a reference else ignore...
-                                my $state = $vm->{"state"};
-                                my $name = $vm->{"name"};
-                                my $E;
-                                if( !$vms->{"$name"} ){
-                                    plog "creating name=$name","\n";
-                                    $E = VirtAgentInterface->create_vm( %$vm ); 
-                                }
+                    if( $RV->{'return'}{'success'} ){
 
-                                if( !$E || isError($E) ){
-                                    # trying to reload vm info
-                                    plog "try to reload name=$name","\n";
-                                    $E = VirtAgentInterface->reload_vm( %$vm );
-                                    if( isError($E) ){
-                                        # TODO think more about it
-                                        # ignore this one
-                                        plog "Something goes wrong with server '$name'. I will ignore it.";
-                                        next;
+                        my $vms_to_destroy = $RV->{'return'}{'destroy_servers'};
+                        plog "vms to destroy=",Dumper($vms_to_destroy) if( &debug_level > 3 );
+                        if( ref($vms_to_destroy) eq 'ARRAY' ){
+                            # destroy them
+                            for my $vm (@$vms_to_destroy){
+                                if( ref($vm) ){                 # testing if is a reference else ignore...
+                                    VirtAgentInterface->destroy_vm( 'uuid'=>$vm->{'uuid'} );
+                                }
+                            }
+                        }
+
+                        my $vmachines = $RV->{'return'}{'load_servers'};
+                        plog "lvms=",Dumper($vmachines) if( &debug_level > 3 );
+                        # create them
+                        if( ref($vmachines) eq 'ARRAY' ){
+                            for my $vm (@$vmachines){
+                                if( ref($vm) ){                 # testing if is a reference else ignore...
+                                    my $state = $vm->{"vm_state"};
+                                    my $name = $vm->{"name"};
+                                    my $E;
+                                    if( !$vms->{"$name"} ){
+                                        plog "creating name=$name","\n";
+                                        $E = VirtAgentInterface->create_vm( %$vm ); 
                                     }
-                                }
 
-                                # previous state is runnig: start it
-                                if( $state eq "running" || $vm->{'autostart'} ){
-                                    plog "starting name=",$vm->{"name"}," boot=",$vm->{'boot'},"\n";
-                                    VirtAgentInterface->start_vm( name=>$vm->{"name"}, boot=>$vm->{'boot'} );
+                                    if( !$E || isError($E) ){
+                                        # trying to reload vm info
+                                        plog "try to reload name=$name","\n";
+                                        $E = VirtAgentInterface->reload_vm( %$vm );
+                                        if( isError($E) ){
+                                            # TODO think more about it
+                                            # ignore this one
+                                            plog "Something goes wrong with server '$name'. I will ignore it.";
+                                            next;
+                                        }
+                                    }
+
+                                    # previous state is runnig: start it
+                                    if( ($state eq "running") || $vm->{'autostart'} ){
+                                        plog "starting name=",$vm->{"name"}," boot=",$vm->{'boot'},"\n";
+                                        VirtAgentInterface->start_vm( name=>$vm->{"name"}, boot=>$vm->{'boot'} );
+                                    } 
                                 } 
-                            } 
+                            }
                         }
                     }
                 }
@@ -664,8 +817,7 @@ sub register_handler {
                                     );
                 }
                 
-                $agent->set_registerok( $REGISTER_OK = 1 );
-
+                $agent->set_registerok( ($R->{'return'}{'uuid'})? ($REGISTER_OK = 1) : ($REGISTER_OK = 0));
             } else {
 
                 $agent->set_registerok( $REGISTER_OK = 0 );
@@ -676,6 +828,27 @@ sub register_handler {
                 }
 
                 plog( "Error initialize Agent: $response.\n" );
+            }
+
+            # Get ssh key
+            open my $authkeys, "</root/.ssh/authorized_keys";
+            #open my $authkeys, "</tmp/authorized_keys";
+            my $key = 0;
+            while(<$authkeys>){
+                my $tmpkey = "";
+                if($R->{'return'}{'cmpubkey'} =~ /([^=]*)/){
+                    $tmpkey = $1;
+                }
+                if($_ =~ /\Q$tmpkey\E/){
+                    $key = 1;    
+                }
+            }
+            close $authkeys;
+            unless($key){
+                open $authkeys, ">>/root/.ssh/authorized_keys";
+                #open $authkeys, ">>/tmp/authorized_keys";
+                print $authkeys $R->{'return'}{'cmpubkey'};
+                close $authkeys;
             }
         }
     }
@@ -702,13 +875,12 @@ sub keepalive_handler {
                                 }
                             );
             if( !$R || $R->{'_error_'} ){
-                plog("Error CentralManagement connection problem.\n");
+                plogNow("Error CentralManagement connection problem.\n");
             } else {
-                my $now = nowStr();
                 if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
-                    plog("$now - Agent keepalive state update successful.");
+                    plogNow("Agent keepalive state update successful.");
                 } else {
-                    plog( "Error update Agent.\n" );
+                    plogNow( "Error update Agent.\n" );
                     if( &debug_level ){
                         if( ref($R->{'return'}) && !$R->{'return'}{'success'} && $R->{'return'}{'error'} ){
                             plog("\tReason: ",Dumper($R->{'return'}{'error'}));
@@ -739,13 +911,12 @@ sub keepalive_handler {
                                 data=>$stats
                             );
             if( !$R || $R->{'_error_'} ){
-                plog("Error CentralManagement connection problem.\n");
+                plogNow("Error CentralManagement connection problem.\n");
             } else {
-                my $now = nowStr();
                 if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
-                    plog("$now - Agent keepalive logs send successful.");
+                    plogNow("Agent keepalive logs send successful.");
                 } else {
-                    plog( "Error update Agent Logs.\n" );
+                    plogNow( "Error update Agent Logs.\n" );
                     if( &debug_level ){
                         if( ref($R->{'return'}) && !$R->{'return'}{'success'} && $R->{'return'}{'error'} ){
                             plog("\tReason: ",Dumper($R->{'return'}{'error'}));

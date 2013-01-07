@@ -8,6 +8,9 @@ class EtvaNodePeer extends BaseEtvaNodePeer
     const _ERR_SOAPUPDATE_   = 'Node %name% could not be updated. %info%';
     const _OK_SOAPUPDATE_   = 'Node %name% updated';
     
+    const _ERR_UPDATE_   = 'Node %name% could not be updated. %info%';
+    const _OK_UPDATE_   = 'Node %name% updated successfully';
+
     const _ERR_SOAPSTATE_   = 'Node %name% state could not be checked. %info%';
     const _OK_SOAPSTATE_   = 'Node %name% state has been checked';
 
@@ -38,6 +41,14 @@ class EtvaNodePeer extends BaseEtvaNodePeer
     const _PROBLEM_ = 'Some errors occurred. See events log!';
 
     const _ERR_MEM_AVAILABLE_   = 'Node %name% has no memory available. Need %info% MB';
+    const _ERR_LIST_DEVICES_   = 'Can not list %name% devices. Verify if the Virtual Agent is running.';
+    const _ERR_DEVICE_ATTACHED_   = 'The device %dev% is already attached to another virtual server. Please dettach the device before proceed.';
+
+    const _ERR_PUTMAINTENANCE_ = 'Could not put the node %name% in maintenance mode. %info%';
+    const _OK_PUTMAINTENANCE_ = 'Node %name% marked in maintenance mode successfully';
+
+    const _ERR_SYSTEMCHECK_   = 'Node %name% could not execute system check. %info%';
+    const _OK_SYSTEMCHECK_   = 'Node %name% execute system check successfully.';
 
     static function getWithServers()
     {
@@ -116,14 +127,9 @@ class EtvaNodePeer extends BaseEtvaNodePeer
              $c->add(EtvaVolumeGroupPeer::STORAGE_TYPE, EtvaVolumeGroup::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
              $etva_vg = EtvaVolumegroupPeer::retrieveByVg($vg, $c);
              return ($etva_vg) ? EtvaNodePeer::ElectNode($etva_node): $etva_node;                     
+        }else{
+             return $etva_node;
         }
-//        }else{
-//            return $etva_node;
-//            $etva_node = EtvaNodePeer::retrieveByPK($nid);
-//            $cluster_id = $etva_node->getClusterId();
-//            $etva_cluster = EtvaClusterPeer::retrieveByPK($cluster_id);
-//            $etva_node = EtvaNode::getFirstActiveNode($etva_cluster);
-//        }
      }
   }
   private static function ElectNode(EtvaNode $etva_node){
@@ -131,4 +137,27 @@ class EtvaNodePeer extends BaseEtvaNodePeer
         $etva_cluster = EtvaClusterPeer::retrieveByPK($cluster_id);
         return EtvaNode::getFirstActiveNode($etva_cluster);
   }
+
+    public static function getDevicesInUse($etva_node, $ignore_server){
+        $id = $etva_node->getId();
+        $servers = EtvaServerQuery::create()
+                    ->useEtvaServerAssignQuery('ServerAssign','RIGHT JOIN')
+                        ->filterByNodeId($id)
+                    ->endUse()
+                    ->find();
+            
+        $devs_in_use = array();
+
+        // gather devices
+        foreach($servers as $server){
+            if(isset($ignore_server) && $server->getId() == $ignore_server->getId())
+                continue;
+
+            $srv_devices = json_decode($server->getDevices());
+            foreach($srv_devices as $d){
+                $devs_in_use[] = $d->idvendor.$d->idproduct.$d->type;
+            }
+        }
+        return array_unique($devs_in_use);
+    }
 }

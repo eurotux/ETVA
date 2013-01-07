@@ -587,7 +587,10 @@ Ovf.ImportWizard.Cards = function(){
                     dataIndex: 'capacity',
                     allowBlank: false,
                     width: 120
-                    ,renderer: function(val){return '<span ext:qtip="'+__('Drag and Drop to reorder')+'">' + Ext.util.Format.fileSize(val) + '</span>';}
+                    ,editor: new Ext.form.NumberField({
+                        allowBlank: false
+                    })
+                    ,renderer: function(val){return '<span ext:qtip="'+__('Click to edit')+'">' + Ext.util.Format.fileSize(val) + '</span>';}
                 },
                 {
                     header: "Volume Group",
@@ -873,7 +876,8 @@ Ovf.ImportWizard.Cards = function(){
                             invalidText : <?php echo json_encode(__('Network interfaces mapping incomplete!')) ?>,
                             allowBlank : false,
                             validator  : function(v){
-                                return v!=<?php echo json_encode(__('Network interfaces mapping incomplete!')) ?>;
+//                                return v!=<#?php echo json_encode(__(Network interfaces mapping incomplete!)) #>;
+                                return true;
                             }
                         }
                         

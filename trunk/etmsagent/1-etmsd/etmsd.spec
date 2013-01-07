@@ -1,5 +1,5 @@
 name:           etva-etms
-Version:        1.0.1
+Version:        1.2.1
 Release:        beta
 Summary:        ETMS Agent
 License:        GPL

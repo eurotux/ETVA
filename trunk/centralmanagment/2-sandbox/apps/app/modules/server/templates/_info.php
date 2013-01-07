@@ -148,67 +148,8 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                             var server_id = this.form.findField('id').getValue();
                             var server_state = this.form.findField('vm_state').getValue();
 
-                            if(server_state!='running')
-                            {
-                                Ext.Msg.show({
-                                    title: this.consoleBtn.text,
-                                    buttons: Ext.MessageBox.OK,
-                                    icon: Ext.MessageBox.INFO,
-                                    msg: <?php echo json_encode(__('Cannot open console. Maybe server not running!')) ?>});
-                                return;
-                            }
+                            this.openConsole( {'id':server_id, 'vm_state':server_state} );
 
-                            if(!navigator.javaEnabled()){
-                                Ext.Msg.show({
-                                    title: this.consoleBtn.text,
-                                    buttons: Ext.MessageBox.OK,
-                                    icon: Ext.MessageBox.INFO,
-                                    msg: __('Java required!')});
-                                return;
-                            }
-
-                            Ext.getBody().mask(<?php echo json_encode(__('Retrieving data...')) ?>);
-
-                            var url = '<?php echo url_for('/view/vncviewer/id/') ?>'+server_id+'/';
-                            var viewerSize = Ext.getBody().getViewSize();
-                            var windowHeight = viewerSize.height * 0.95;
-                            windowHeight = Ext.util.Format.round(windowHeight,0);
-
-                            var config = {
-                                    title: <?php echo json_encode(__('Please wait...')) ?>,
-                                    //html:'Loadin applet',
-                                    maximizable   : true,
-                                    collapsible   : true,
-                                    constrain     : true,
-                                    defaultSrc:url,
-                                    shadow        : Ext.isIE,
-                                    autoScroll    : true,
-                                    useShim:true,
-                                    //loadMask:true,
-                                    hidden:true,
-                                    hideMode      : 'nosize',
-                                    listeners : {
-                                        domready : function(frameEl){  //raised for "same-origin" frames only
-                                                        var MIF = frameEl.ownerCt;
-                                        },
-                                        documentloaded : function(frameEl){
-
-                                                        var MIF = frameEl.ownerCt;
-                                                        var doc = frameEl.getFrameDocument();
-                                                        View.notify({html:doc.title+' reports: DATA LOADED'});
-                                                        (function(){Ext.getBody().unmask();}).defer(1000);
-
-
-                                        },
-                                        beforedestroy : function(){}
-                                    },
-                                    sourceModule : 'mifsimple'
-                            };
-
-                            var win = new Ext.ux.ManagedIFrame.Window(config);
-
-                            win.show();
-                            win.hide();
                         }
                     },
                     '-'
@@ -223,6 +164,19 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                                 {
                                     text: <?php echo json_encode(__('Boot From')) ?>
                                     ,menu: menu_boot
+                                }
+                                ,{
+                                    text: <?php echo json_encode(__('With console')) ?>
+                                    ,scope:this
+                                    ,handler: function(item) {
+
+                                        var server_id = this.form.findField('id').getValue();
+                                        var server_name = this.form.findField('name').getValue();
+                                        var server_vm_state = this.form.findField('vm_state').getValue();
+                                        var node_id = this.form.findField('node_id').getValue();                            
+                                        var obj = { 'id': server_id, 'name': server_name, 'vm_state':server_vm_state, 'node_id':node_id, 'withconsole':true };
+                                        this.startServer(obj,item);
+                                    }
                                 }
                         ],
                         listeners:{
@@ -278,59 +232,8 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                             var server_vm_state = this.form.findField('vm_state').getValue();
                             var node_id = this.form.findField('node_id').getValue();                            
 
-                            var send_data = {'nid': node_id,
-                                             'server': server_name};
-
-                            Ext.Msg.show({
-                                title: item.text,
-                                buttons: Ext.MessageBox.YESNOCANCEL,
-                                scope:this,
-                                msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,server_vm_state)+'<br>'
-                                     +String.format(<?php echo json_encode(__('Start server {0} ?')) ?>,server_name),
-                                fn: function(btn){
-                                    if (btn == 'yes'){
-
-                                        var conn = new Ext.data.Connection({
-                                            listeners:{
-                                                // wait message.....
-                                                beforerequest:function(){
-                                                    Ext.MessageBox.show({
-                                                        title: <?php echo json_encode(__('Please wait...')) ?>,
-                                                        msg: <?php echo json_encode(__('Starting virtual server...')) ?>,
-                                                        width:300,
-                                                        wait:true
-                                                     //   modal: true
-                                                    });
-                                                },// on request complete hide message
-                                                requestcomplete:function(){Ext.MessageBox.hide();}
-                                                ,requestexception:function(c,r,o){Ext.Ajax.fireEvent('requestexception',c,r,o);}
-                                            }
-                                        });// end conn
-                                        conn.request({
-                                            url: <?php echo json_encode(url_for('server/jsonStart'))?>,
-                                            params: send_data,
-                                            scope:this,
-                                            success: function(resp,opt) {
-
-                                                var response = Ext.util.JSON.decode(resp.responseText);
-                                                Ext.ux.Logger.info(response['agent'], response['response']);
-                                                var parentCmp = Ext.getCmp((item.scope).id);
-                                                parentCmp.fireEvent('refresh',parentCmp);
-
-                                            }
-                                            ,failure: function(resp,opt) {
-                                                var response = Ext.util.JSON.decode(resp.responseText);
-                                                if(response && resp.status!=401)
-                                                    Ext.Msg.show({
-                                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
-                                                        buttons: Ext.MessageBox.OK,
-                                                        msg: String.format(<?php echo json_encode(__('Unable to start virtual server {0}!')) ?>,server_name)+'<br>'+response['info'],
-                                                        icon: Ext.MessageBox.ERROR});
-                                            }
-                                        });// END Ajax request
-                                    }//END button==yes
-                                }// END fn
-                            }); //END Msg.show
+                            var obj = { 'id': server_id, 'name': server_name, 'vm_state':server_vm_state, 'node_id':node_id, 'withconsole':false };
+                            this.startServer(obj,item);
 
                         }//END handler
                     },
@@ -457,29 +360,6 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         },
                         handler: function(btn){View.loadComponent(btn);}
                     },
-                    <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
-                    {
-                        ref: '../migrateBtn',
-                        disabled:false,
-                        hidden:true,
-                        url:<?php echo(json_encode(url_for('server/Server_Migrate')))?>,
-                        call:'Server.Migrate',
-                        scope:this,
-                        callback:function(item){
-
-                            var server_id = (item.scope).form.findField('id').getValue();
-                            var server_name = (item.scope).form.findField('name').getValue();
-                            var node_id = (item.scope).form.findField('node_id').getValue();
-
-                            var record = {data:{'id':server_id,'name':server_name}};
-
-                            var window = new Server.Migrate.Window({title:item.text,type:item.type, parent:(item.scope).id}).show();
-                            window.loadData(record);
-                            //eval("var window = new "+item.call+".Window().show();window.loadData(sel)");
-                        },
-                        handler: function(btn){View.loadComponent(btn);}
-                    },
-                    <?php endif; ?>
                     {
                         text: <?php echo json_encode(__('Remove server')) ?>,
                         ref: '../removeBtn',
@@ -507,6 +387,53 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         },
                         handler: function(btn){View.loadComponent(btn);}
                     },
+                    '-',
+                    {
+                        text: <?php echo json_encode(__('Snapshots')) ?>,
+                        ref: '../snapshotsBtn',
+                        disabled:false,
+                        hidden:true,
+                        url:<?php echo(json_encode(url_for('server/Server_Snapshots')))?>,
+                        call:'Server.Snapshots',
+                        scope:this,
+                        callback:function(item){
+
+                            var server_id = (item.scope).form.findField('id').getValue();
+                            var server_name = (item.scope).form.findField('name').getValue();
+                            var node_id = (item.scope).form.findField('node_id').getValue();
+
+                            var record = {data:{'id':server_id,'name':server_name}};
+
+                            var title = String.format(<?php echo json_encode(__('Snapshots for {0}')) ?>, server_name);
+
+                            var window = new Server.Snapshots.Window({title:title, parent:(item.scope).id, server_id:server_id, server_name:server_name, node_id:node_id}).show();
+                            window.loadData(record);
+                        },
+                        handler: function(btn){View.loadComponent(btn);}
+                    },
+                    <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
+                    {
+                        ref: '../migrateBtn',
+                        disabled:false,
+                        hidden:true,
+                        url:<?php echo(json_encode(url_for('server/Server_Migrate')))?>,
+                        call:'Server.Migrate',
+                        scope:this,
+                        callback:function(item){
+
+                            var server_id = (item.scope).form.findField('id').getValue();
+                            var server_name = (item.scope).form.findField('name').getValue();
+                            var node_id = (item.scope).form.findField('node_id').getValue();
+
+                            var record = {data:{'id':server_id,'name':server_name}};
+
+                            var window = new Server.Migrate.Window({title:item.text,type:item.type, parent:(item.scope).id}).show();
+                            window.loadData(record);
+                            //eval("var window = new "+item.call+".Window().show();window.loadData(sel)");
+                        },
+                        handler: function(btn){View.loadComponent(btn);}
+                    },
+                    <?php endif; ?>
 //                    <#?php endif; ?>
                     '->',
                     {
@@ -616,7 +543,10 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                             totalProperty: 'total',
                             root: 'data',
                             listeners:{
-                                load:{scope:this,fn:function(){
+                                metachange: {scope:this,fn:function(store, meta){
+                                    }
+                                }    
+                                ,load:{scope:this,fn:function(){
                                     /*
                                      * on store reload make sort by pos
                                      */
@@ -634,7 +564,6 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                 ,{header: <?php echo json_encode(__('Type')) ?>,dataIndex: 'disk_type'}
                 ,{header: <?php echo json_encode(__('Storage type')) ?>,dataIndex: 'storage_type'}
         ];
-
 
         this.disk_grid = new Ext.grid.GridPanel({
                             border: false,                            
@@ -774,6 +703,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     this.consoleBtn.show();
                     this.startBtn.show();
                     this.stopBtn.show();
+                    this.snapshotsBtn.show();
                 }else{
                     if(response['server']){
                         this.consoleBtn.show();
@@ -790,6 +720,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         this.consoleBtn.hide();
                         this.startBtn.hide();
                         this.stopBtn.hide();
+                        this.snapshotsBtn.hide();
                     }
                 }
 
@@ -833,17 +764,22 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                  */
 
                 var node_id = data.node_id;
-                var node_state = data.node_state;
+                var nodeState = data.node_state;
+                var can_create_vms = data.can_create_vms;
                 var not_running_msg = <?php echo json_encode(__('VirtAgent should be running to enable this menu')) ?>;
 
                 if( !data.unassigned ){
-                    this.addwizardBtn.setDisabled(!node_state);
+                    this.addwizardBtn.setDisabled(!can_create_vms || (nodeState!=<?php echo json_encode(EtvaNode::NODE_ACTIVE); ?>));
                     this.addwizardBtn.url = <?php echo(json_encode(url_for('server/wizard?nid=')))?>+node_id;
 
 
-                    if(node_state)
+                    if(nodeState==<?php echo json_encode(EtvaNode::NODE_ACTIVE); ?>)
                     {
-                        this.addwizardBtn.el.child('button:first').dom.qtip = <?php echo json_encode(__('Click to open new server wizard')) ?>;
+                        if( can_create_vms ){
+                            this.addwizardBtn.el.child('button:first').dom.qtip = <?php echo json_encode(__('Click to open new server wizard')) ?>;
+                        } else {
+                            this.addwizardBtn.el.child('button:first').dom.qtip = <?php echo json_encode(__('Can\'t create servers in this node')) ?>;
+                        }
                     }
                     else
                     {
@@ -860,11 +796,11 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                    vm_state.removeClass('vm-state-notrunning');
                    vm_state.addClass('vm-state-running');
 
-                   if(data['vm_type']!='pv')
+                   /*if(data['vm_type']!='pv')
                    {
                        this.editBtn.setTooltip(<?php echo json_encode(__('Server need to be stop to edit!')) ?>);
                        this.editBtn.setDisabled(true);                       
-                   }
+                   }*/
 
 
                    <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
@@ -874,7 +810,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     */
                     if( !data.unassigned ){
                         this.migrateBtn.type = 'migrate';
-                        this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate the server must be stopped!')); ?>);
+                        this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate, the server must be stopped!')); ?>);
                         this.migrateBtn.setText(<?php echo json_encode(__('Migrate server')) ?>);
                         this.migrateBtn.setDisabled(false);                     
                     }
@@ -897,7 +833,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                       */
                     if( !data.unassigned ){
                         this.migrateBtn.type = 'move';
-                        this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move the server must be running!')); ?>);
+                        this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move, the server must be running!')); ?>);
                         this.migrateBtn.setText(<?php echo json_encode(__('Move server')) ?>);
                         this.migrateBtn.setDisabled(false);
                     }
@@ -916,8 +852,22 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                          this.migrateBtn.setDisabled(true);
                  }
                  
+                 if(this.migrateBtn && data['has_devices'] )
+                 {
+                         this.migrateBtn.setTooltip(<?php echo json_encode(__(EtvaServerPeer::_HASDEVICES_)); ?>);
+                         this.migrateBtn.setDisabled(true);
+                 }
+                 
+                 if(this.snapshotsBtn && !data['has_snapshots_support'] )
+                 {
+                         this.snapshotsBtn.setTooltip(<?php echo json_encode(__(EtvaServerPeer::_NOSNAPSHOTSSUPPORT_)); ?>);
+                         this.snapshotsBtn.setDisabled(true);
+                 }
+                 
                  if( !data.unassigned ){
                      this.startBtn.setDisabled(data['vm_state']=='running');
+                     // disable boot from cdrom when dont have cdrom defined
+                     this.startBtn.menu.get(0).menu.boot_cdrom.setDisabled((data['location']!=null)? false: true);  
                      this.stopBtn.menu.stop_normal.setChecked(true);
                      this.stopBtn.menu.stop_force.setChecked(false);
                  } else {
@@ -925,6 +875,16 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                      this.stopBtn.setDisabled(true);
                      this.consoleBtn.setDisabled(true);
                  }
+
+                if( nodeState!=<?php echo json_encode(EtvaNode::NODE_ACTIVE); ?> ){
+                    this.getTopToolbar().items.each(function(item,index,length){
+                                        if( (item.xtype != 'panel') && (item.ref != '../btn_refresh') && (item.ref != '../consoleBtn') && (item.ref != '../migrateBtn')){
+                                            item.setDisabled(true);
+                                            if( item.el )
+                                                item.el.set({qtip: <?php echo json_encode(__('VirtAgent should be running to enable this menu')) ?>});
+                                        }
+                    });
+                }
             }
         });
     }
@@ -966,6 +926,149 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                 }
             });//END Ajax request
 
+    }
+    ,startServer: function(obj,item){
+        var server_id = obj['id'];
+        var server_name = obj['name'];
+        var server_vm_state = obj['vm_state'];
+        var node_id = obj['node_id'];
+
+        var start_openconsole = (obj['withconsole']) ? true : false;
+
+        var send_data = {'nid': node_id,
+                         'server': server_name};
+
+        var title = String.format(<?php echo json_encode(__('Start server')) ?>);
+
+        if( start_openconsole ){
+            title = String.format(<?php echo json_encode(__('Start server with console')) ?>);
+        }
+
+        Ext.Msg.show({
+            title: title,
+            buttons: Ext.MessageBox.YESNOCANCEL,
+            scope:this,
+            msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,server_vm_state)+'<br>'
+                 +String.format(<?php echo json_encode(__('Start server {0} ?')) ?>,server_name),
+            fn: function(btn){
+                if (btn == 'yes'){
+
+                    var conn = new Ext.data.Connection({
+                        listeners:{
+                            // wait message.....
+                            beforerequest:function(){
+                                Ext.MessageBox.show({
+                                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                                    msg: <?php echo json_encode(__('Starting virtual server...')) ?>,
+                                    width:300,
+                                    wait:true
+                                 //   modal: true
+                                });
+                            },// on request complete hide message
+                            requestcomplete:function(){Ext.MessageBox.hide();}
+                            ,requestexception:function(c,r,o){Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                        }
+                    });// end conn
+                    conn.request({
+                        url: <?php echo json_encode(url_for('server/jsonStart'))?>,
+                        params: send_data,
+                        scope:this,
+                        success: function(resp,opt) {
+
+                            var response = Ext.util.JSON.decode(resp.responseText);
+                            Ext.ux.Logger.info(response['agent'], response['response']);
+                            var parentCmp = Ext.getCmp((item.scope).id);
+                            parentCmp.fireEvent('refresh',parentCmp);
+
+                            if( start_openconsole ){
+                                this.openConsole( {'id':server_id, 'vm_state':'running', 'sleep':'10'} );
+                            }
+
+                        }
+                        ,failure: function(resp,opt) {
+                            var response = Ext.util.JSON.decode(resp.responseText);
+                            if(response && resp.status!=401)
+                                Ext.Msg.show({
+                                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                    buttons: Ext.MessageBox.OK,
+                                    msg: String.format(<?php echo json_encode(__('Unable to start virtual server {0}!')) ?>,server_name)+'<br>'+response['info'],
+                                    icon: Ext.MessageBox.ERROR});
+                        }
+                    });// END Ajax request
+                }//END button==yes
+            }// END fn
+        }); //END Msg.show
+
+    }
+    ,openConsole:function(obj){
+
+        var server_id = obj['id'];
+        var server_state = obj['vm_state'];
+
+        if(server_state!='running')
+        {
+            Ext.Msg.show({
+                title: this.consoleBtn.text,
+                buttons: Ext.MessageBox.OK,
+                icon: Ext.MessageBox.INFO,
+                msg: <?php echo json_encode(__('Cannot open console. Maybe server not running!')) ?>});
+            return;
+        }
+
+        if(!navigator.javaEnabled()){
+            Ext.Msg.show({
+                title: this.consoleBtn.text,
+                buttons: Ext.MessageBox.OK,
+                icon: Ext.MessageBox.INFO,
+                msg: __('Java required!')});
+            return;
+        }
+
+        Ext.getBody().mask(<?php echo json_encode(__('Retrieving data...')) ?>);
+
+        var url = '<?php echo url_for('/view/vncviewer/id/') ?>'+server_id+'/';
+        if( obj['sleep'] ){
+            url += 'sleep/'+obj['sleep']+'/';
+        }
+        var viewerSize = Ext.getBody().getViewSize();
+        var windowHeight = viewerSize.height * 0.95;
+        windowHeight = Ext.util.Format.round(windowHeight,0);
+
+        var config = {
+                title: <?php echo json_encode(__('Please wait...')) ?>,
+                //html:'Loadin applet',
+                maximizable   : true,
+                collapsible   : true,
+                constrain     : true,
+                defaultSrc:url,
+                shadow        : Ext.isIE,
+                autoScroll    : true,
+                useShim:true,
+                //loadMask:true,
+                hidden:true,
+                hideMode      : 'nosize',
+                listeners : {
+                    domready : function(frameEl){  //raised for "same-origin" frames only
+                                    var MIF = frameEl.ownerCt;
+                    },
+                    documentloaded : function(frameEl){
+
+                                    var MIF = frameEl.ownerCt;
+                                    var doc = frameEl.getFrameDocument();
+                                    View.notify({html:doc.title+' reports: DATA LOADED'});
+                                    (function(){Ext.getBody().unmask();}).defer(1000);
+
+
+                    },
+                    beforedestroy : function(){}
+                },
+                sourceModule : 'mifsimple'
+        };
+
+        var win = new Ext.ux.ManagedIFrame.Window(config);
+
+        win.show();
+        win.hide();
     }
 });
 

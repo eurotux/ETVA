@@ -9,7 +9,7 @@
     <li><a href="#help-vlan-mac">MAC Pool Management</a></li>
     <li><a href="#help-vlan-list">List of network interfaces</a></li>
 </ul>
-<p><b>Note: </b>Some operations are only available in <em>ETVM</em> version.</p>
+<p><b>Note: </b>Some operations are only available in <em>Enterprise</em> version.</p>
 <br/>
 <hr/>
 
@@ -17,7 +17,7 @@
 <p>To create a network in the selected cluster/datacenter, click on <em>Add network</em> button. The network information consists of his name and ID (If the network/vlan is tagged the ID field of the network refers to the VLAN ID).</p>
 
 <p><b>Note 1: </b>
-The operation to add the network is only available in <em>ETVM</em> version.
+The operation to add the network is only available in <em>Enterprise</em> version.
 </p>
 
 <p><b>Note 2: </b>
@@ -31,7 +31,7 @@ The added network is propagated to all nodes of the selected cluster.
 To remove a network, you choose the desired network and click on <em>Remove network</em> button.
 </p>
 
-<p><b>Note 1: </b>This option is only available in <em>ETVM</em> version.</p>
+<p><b>Note 1: </b>This option is only available in <em>Enterprise</em> version.</p>
 <p><b>Note 2: </b>The operation is propagated to all nodes of the cluster.</p>
 <a href="#help-vlan"><div>Index</div></a>
 <hr/>

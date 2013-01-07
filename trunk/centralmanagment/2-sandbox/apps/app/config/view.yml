@@ -4,7 +4,7 @@ default:
     charset: UTF-8
 
   metas:
-    title:        Eurotux Virtual Appliance ( ETVA )
+    title: NUXIS
     #description:  symfony project
     #keywords:     symfony, project
     #language:     en

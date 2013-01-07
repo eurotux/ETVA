@@ -36,7 +36,6 @@ class eventActions extends sfActions
             $this->updateSetting(EtvaSettingPeer::_SMTP_USERNAME_ ,$request->getParameter('username'));
             $this->updateSetting(EtvaSettingPeer::_SMTP_KEY_ , $request->getParameter('key'));
             $this->updateSetting(EtvaSettingPeer::_SMTP_SECURITY_ ,$request->getParameter('security_type'));
-
         }
 
         error_log("[METHOD] $method");
@@ -160,6 +159,31 @@ class eventActions extends sfActions
 
         $result = $final;
         $result = json_encode($final);
+ 
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($result);
+    }
+    public function executeJsonPollMessage($request)
+    {
+
+        $isAjax = $request->isXmlHttpRequest();
+
+        if(!$isAjax) return $this->redirect('@homepage');
+
+        $c = new Criteria();
+        $c->addDescendingOrderByColumn('created_at');
+        $last = EtvaEventPeer::doSelectOne($c);
+        
+        $data = $last->toArray();
+        $data['Priority'] = EtvaEventLogger::getPriority($data['Level']);
+
+        $result = array(
+            'success' => true,
+            'response' => $data['Message'],
+            'data'    => $data
+        );
+
+        $result = json_encode($result);
  
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);

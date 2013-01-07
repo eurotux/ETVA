@@ -47,7 +47,9 @@ sub new {
 }
 
 sub do_need_update {
-    VirtAgentInterface->loadsysinfo(1);
+    # CMAR 14/08/2012
+    # #509 - dont (re)load syste info... this call is heavy
+    #VirtAgentInterface->loadsysinfo(1);
 }
 
 
@@ -88,17 +90,28 @@ sub opPeriodic5Secs {
 
     plog "opPeriodic5secs " if(&debug_level() > 7);
 
+    my $restart = 0;
+
     if( $self->get_registerok() ){
         my $vms = $self->domains_stats();
-        my $R = new ETVA::Client::SOAP::HTTP( uri => $self->{'cm_uri'} )
+        my $R = new ETVA::Client::SOAP::HTTP( uri => $self->{'cm_uri'}, 'debug'=>&debug_level )
                 -> call( $self->{'cm_namespace'},
                             'updateVirtAgentServersStats',
                             uuid=>$self->{'uuid'},
                             'vms'=>$vms
                         );
+        plog("updateVirtAgentServersStats ",Dumper($R)) if( &debug_level > 7 );
+
+        unless( $R && !$R->{'_error_'} && ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
+            if( $R->{'return'}{'reason'} eq '_servers_inconsistency_' ){    # if we get servers inconsistency
+                $restart = 1;   # do restart
+                plog("something wrong with update domains stats... servers info is inconsistent... is going restart...");
+            } else {
+                plog("something wrong with update domains stats...");
+            }
+        }
     }
 
-    my $restart = 0;
     my $max_mem = $self->{'proc_maxmem'} || 512 * 1024 * 1024; # process max memory 512Mb
     my $cur_mem = ETVA::Utils::process_mem_size($$);
     if( $cur_mem > $max_mem ){

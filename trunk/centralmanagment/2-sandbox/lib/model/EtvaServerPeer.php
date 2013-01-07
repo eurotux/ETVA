@@ -22,6 +22,8 @@ class EtvaServerPeer extends BaseEtvaServerPeer
     const _ERR_START_   = 'Server with name %name% could not be started. %info%';
     const _OK_START_   = 'Server with name %name% started successfully';
 
+    const _ERR_NO_NODE_TO_ASSIGN_ = 'No node available to assign server.';
+
     const _ERR_STOP_   = 'Server with name %name% could not be stopped. %info%';
     const _OK_STOP_   = 'Server with name %name% stopped successfully';
 
@@ -61,6 +63,21 @@ class EtvaServerPeer extends BaseEtvaServerPeer
 
     const _CDROM_INUSE_ = 'Server %name% has ISO mounted in CD-ROM';
 
+    const _OK_ADD_DEVICE_ = 'Device successfully attached to server %name%';
+
+    const _GA_RUNNING_ = 'running';
+    const _GA_STOPPED_ = 'stopped';
+    const _GA_UNINSTALLED_ = 'uninstalled';
+    const _GA_NOSTATE_ = 'nostate';
+
+    const _ERR_GAUPDATE_   = 'Could not update server %name% GA info. %info%';
+    const _OK_GAUPDATE_   = 'Server %name% update GA info successfully';
+
+    const _CANTASSIGNTO_ = 'Can not assign to node %name%.';
+    const _NOSNAPSHOTSSUPPORT_ = 'Doesn\'t has snapshots support';
+
+    const _HASDEVICES_ = 'The server has devices attached';
+
     static public function getServers(Criteria $criteria = null)
     {
         if (is_null($criteria))
@@ -76,6 +93,14 @@ class EtvaServerPeer extends BaseEtvaServerPeer
     if(is_null($criteria )) $criteria = new Criteria();
 
     $criteria->add(self::NAME, $server);
+
+    return self::doSelectOne($criteria);
+  }
+  public static function retrieveByUuid($uuid, Criteria $criteria = null)
+  {
+    if(is_null($criteria )) $criteria = new Criteria();
+
+    $criteria->add(self::UUID, $uuid);
 
     return self::doSelectOne($criteria);
   }
@@ -115,5 +140,4 @@ class EtvaServerPeer extends BaseEtvaServerPeer
     if($row) return $row['total_mem'];
     else return 0;
   }
-
 }

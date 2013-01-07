@@ -48,6 +48,7 @@ class EtvaVolumegroup extends BaseEtvaVolumegroup
                        self::SIZE_MAP => $this->getSize(),
                        self::FREESIZE_MAP => $this->getFreesize(),
                        self::VG_MAP => $this->getVg(),
+                       self::STORAGE_TYPE_MAP => $this->getStorageType(),
                        self::PHYSICALVOLUMES_MAP => $pvs);
 
         return $vg_VA;
@@ -116,6 +117,15 @@ class EtvaVolumegroup extends BaseEtvaVolumegroup
         
         parent::save($con);
 
+    }
+
+    public function hasLogicalVolumesInUse(){
+        $num = EtvaLogicalVolumeQuery::create()
+                    ->filterByEtvaVolumegroup($this)
+                    ->useEtvaServerLogicalQuery()
+                    ->endUse()
+                    ->count();
+        return ($num > 0) ? true : false;
     }
 
 

@@ -409,10 +409,9 @@ class vlanActions extends sfActions
                 $p_cluster_id = $node->getClusterId();
             }elseif($p_level == 'server'){
                 $dc_c = new Criteria(); //convert server id in cluster id
-                $dc_c->addJoin(EtvaNodePeer::ID, EtvaServerPeer::NODE_ID);
                 $dc_c->add(EtvaServerPeer::ID, $p_cluster_id, Criteria::EQUAL);
-                $node = EtvaNodePeer::doSelectOne($dc_c);
-                $p_cluster_id = $node->getClusterId();
+                $server = EtvaServerPeer::doSelectOne($dc_c);
+                $p_cluster_id = $server->getClusterId();
             }elseif($p_level == 'cluster'){
                 //do nothing
             }else{

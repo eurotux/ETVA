@@ -60,6 +60,7 @@
         <li><a href="#help-vmachine-remove">Remove server</a></li>
         <li><a href="#help-vmachine-vnc">Connect to the server via VNC</a></li>
         <li><a href="#help-vmachine-startstop">Start/stop virtual machine</a></li>
+        <li><a href="#help-vmachine-snapshots">Snapshots</a></li>
         <li><a href="#help-vmachine-migrate">Migrate server</a></li>
     </ul>
     <br/>
@@ -183,13 +184,16 @@
         <li><a href="#help-vmachine-general">General options</a></li>
         <li><a href="#help-vmachine-net">Network interfaces</a></li>
         <li><a href="#help-vmachine-disks">Disks</a></li>
+        <li><a href="#help-vmachine-devices">Devices</a></li>
+        <li><a href="#help-vmachine-otheroptions">Other options</a></li>
+        <li><a href="#help-vmachine-ha">High availability</a></li>
     </ul>
     <br/>
     <hr/>
     
     <a id="help-vmachine-general"><h2>General options:</h2></a>
     <p>
-    In this panel we can change the name, memory, keymap options, and boot parameters. The boot parameters vary depending on the virtual machine type.
+    In this panel we can change the name, memory, number of CPUs and number of sockets, cores and threads, operating system and boot parameters. The boot parameters vary depending on the virtual machine type and the virtualization system.
     </p>
     <a href="#help_vmachine_edit"><div>Index</div></a>
     <hr/>
@@ -201,11 +205,32 @@
     <hr/>
     
     <a id="help-vmachine-disks"><h2>Disks:</h2></a>
-    <p>Add/remove disks. You can change the type of driver to use (if the virtual machine is HVM and KVM).</p>
+    <p>Add/remove disks. To add/remove a disk, select the desired disc and drag-n-drop between the tables.
+    
+        You can change the type of driver to use (if the virtual machine is HVM and KVM).</p>
     <p><b>Note: </b>The boot disk is the first of the table.</p>
     <a href="#help_vmachine_edit"><div>Index</div></a>
     <hr/>
-    
+   
+    <a id="help-vmachine-devices"><h2>Devices:</h2></a>
+    <p>Attach/detach USB/PCI devices into the virtual server. A device can only be associated with one virtual server.</p>
+    <p><b>Note: </b>If the virtual server have any associated devices, it cannot be migrated/move into another node of the cluster.</p>
+    <a href="#help_vmachine_edit"><div>Index</div></a>
+    <hr/>
+
+    <a id="help-vmachine-otheroptions"><h2>Other options:</h2></a>
+    <p>Lets you set VNC options like keymap and configure ACPI, APIC and PAE flags.</p>
+    <a href="#help_vmachine_edit"><div>Início</div></a>
+    <hr/>
+
+    <a id="help-vmachine-ha"><h2>High availability:</h2></a>
+    <p>Provides a way to configure server priority to start and to migrate and define if high availability is active on this server.</p>
+    <p><b>Note: </b>For <i>VM High availability</i> we set heartbeat timeout that server should be restart if not responding.
+    This option will be available only if the guest tools are installed on virtual machine.
+    </p>
+    <a href="#help_vmachine_edit"><div>Início</div></a>
+    <hr/>
+
     <!-- REMOVE SERVER -->
     <a id="help-vmachine-remove"><h1>Remove server</h1></a>
     <p>To remove a server, select the pretended server and click on the <em>Remove server</em> button.</p>
@@ -233,12 +258,22 @@
     <a href="#help-vmachine-main"><div>Index</div></a>
     <hr/>
     
+    <!-- SNAPSHOTS -->
+    <a id="help-vmachine-snapshots"><h1>Snapshots</h1></a>
+    <p>In Snapshots we can create one snapshot of virtual machine state, that consists on disks
+    snapshots and, if virtual machines is running, the state of virtual machine on that moment.
+    It’s also possible revert, remove or download of backup of one virtual machine snapshot.
+    </p>
+    <p><b>Note: </b>This option is only available if the format of all server disk support <em>snapshots</em>.</p>
+    <a href="#help-vmachine-main"><div>Index</div></a>
+    <hr/>
+
     <!-- MIGRAR MÁQUINA VIRTUAL -->
     <a id="help-vmachine-migrate"><h1>Server migrate</h1></a>
     <p>
     Selecting a server and then clicking <em>Migrate server</em> is possible to migrate a machine from one node to another since they share the same storage. The migration of a virtual machine is made in offline mode.
     </p>
-    <p><b>Note: </b>This option is only available on <em>ETVM</em> version.
+    <p><b>Note: </b>This option is only available on <em>Enterprise</em> version.
     </p>
     <a href="#help-vmachine-main"><div>Index</div></a>
     <hr/>

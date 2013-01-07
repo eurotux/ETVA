@@ -48,17 +48,21 @@
         <li>Node</li>
         <ul>
             <li><a href="#help-left-panel-loadnode">Load node</a></li>
-            <li><a href="#help-left-panel-hostname">Change hostname</a></li>
+            <li><a href="#help-left-panel-edit">Edit <em>Node</em></a></li>
             <li><a href="#help-left-panel-connectivity">Connectivity settings</a></li>
             <li><a href="#help-left-panel-keymap">Set keymap</a></li>
             <li><a href="#help-left-panel-addperm">Set permissions</a></li>
             <li><a href="#help-left-panel-status">Check node status</a></li>
+            <li><a href="#help-left-panel-maintenance">Maintenance/Recover</a></li>
+            <li><a href="#help-left-panel-shutdown">Shutdown</a></li>
             <li><a href="#help-left-panel-remove">Remove node</a></li>            
+            <li><a href="#help-left-panel-addperm">Set permissions</a></li>
         </ul>
         <li>Server</li>
         <ul>
             <li><a href="#help-left-panel-keymap">Alterar keymap</a></li>
             <li><a href="#help-left-panel-addperm">Set permissions</a></li>
+            <li><a href="#help-left-panel-start_stop">Start/Stop</a></li>
         </ul>
     </ul>
     <br/>
@@ -90,10 +94,15 @@
     <a href="#help-left-panel-main"><div>Index</div></a>
     <hr/>
 
+    <a id="help-left-panel-edit"><h1>Edit Node</h1></a>
+    <p><em>Edit Nó</em> allow to change some settings of the virtualization server like host name and <em>fencing</em> configuration.</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
+
     <a id="help-left-panel-connectivity"><h1>Connectivity settings</h1></a>
     <p>In <em>Connectivity settings</em>, we can configure the management interface.</p>
     <p>Here its possible to define the IP address and DNS server.</p>
-    <p><b>Note: </b>This option is only available on <em>ETVM</em> version.</p>
+    <p><b>Note: </b>This option is only available on <em>Enterprise</em> version.</p>
     <a href="#help-left-panel-main"><div>Index</div></a>
     <hr/>
 
@@ -108,8 +117,24 @@
     <a href="#help-left-panel-main"><div>Index</div></a>
     <hr />
 
+    <a id="help-left-panel-start_stop"><h1>Start/Stop</h1></a>
+    <p>To start/stop server.</p>    
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
+
     <a id="help-left-panel-status"><h1>Check node status</h1></a>
     <p>Force to fetch the node status on the selected node.</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
+
+    <a id="help-left-panel-maintenance"><h1>Maintenance/Recover</h1></a>
+    <p>Put node in maintenance, migrating server to <em>Spare</em> node if is configured.
+    In <em>Recover</em>, execute system check on node and recover it to active state.</p>
+    <a href="#help-left-panel-main"><div>Index</div></a>
+    <hr/>
+
+    <a id="help-left-panel-shutdown"><h1>Desligar</h1></a>
+    <p>Execute shutdown on node.</p>
     <a href="#help-left-panel-main"><div>Index</div></a>
     <hr/>
 

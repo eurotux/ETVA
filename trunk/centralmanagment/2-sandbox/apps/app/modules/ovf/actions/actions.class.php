@@ -33,15 +33,21 @@ class ovfActions extends sfActions
         //$this->getUser()->shutdown();
         //session_write_close();
 
-        $sid = $request->getParameter('sid');
-        
-        if(!$etva_server = EtvaServerPeer::retrieveByPK($sid)){
+        if( $sid = $request->getParameter('uuid') ){
+            $etva_server = EtvaServerPeer::retrieveByUuid($sid);
+        } else {
+            $sid = $request->getParameter('sid');
+            $etva_server = EtvaServerPeer::retrieveByPK($sid);
+        }
+
+        if(!$etva_server){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$sid));            
             return $this->renderText($msg_i18n);
         }
 
+        $snapshot = $request->getParameter('snapshot');
 
-        if($etva_server->getVmState() != 'stop' && $etva_server->getVmState() != 'notrunning'){
+        if(!$snapshot && ($etva_server->getVmState() != 'stop') && ($etva_server->getVmState() != 'notrunning') ){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$sid));            
             return $this->renderText($msg_i18n);
         }
@@ -51,6 +57,11 @@ class ovfActions extends sfActions
         
         $url = "http://".$etva_node->getIp();
         $request_body = "uuid=".$etva_server->getUuid();
+
+        if( $snapshot ){
+            $request_body .= "&snapshot=$snapshot";
+        }
+
         $filename = $etva_server->getName().".tar";
         
         $port = $etva_node->getPort();
@@ -235,8 +246,8 @@ class ovfActions extends sfActions
         $disks = $import_data['disks'];
         $collVgs = array();
         foreach($disks as $id => $info){
-            $lv = $info['lv'];
             $vg = $info['vg'];
+            $lv = $info['lv'];
             
             if($etva_lv = $etva_node->retrieveLogicalvolumeByLv($lv)){
 
@@ -289,6 +300,10 @@ class ovfActions extends sfActions
 
 
             }
+
+            // fix lv path
+            $is_DiskFile = ($vg == sfConfig::get('app_volgroup_disk_flag')) ? 1:0;
+            $import_data['disks'][$id]['lv'] = $is_DiskFile ? $etva_node->getStoragedir().'/'.$lv : $lv;
 
             $collVgs[$vg] = $etva_vg;
 
@@ -462,7 +477,9 @@ class ovfActions extends sfActions
         $vm = (array) $returned_object['VM'];
         $etva_server->initData($vm);
 
-        $etva_server->setEtvaNode($etva_node);
+        //$etva_server->setEtvaNode($etva_node);
+        $etva_server->setEtvaCluster($etva_node->getEtvaCluster());
+
         
         try
         {
@@ -474,6 +491,9 @@ class ovfActions extends sfActions
             $return = $this->setJsonError($result);
             return  $this->renderText($return);
         }
+
+        // assign To etva_node
+        $etva_server->assignTo($etva_node);
 
         $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_OK_CREATE_,array('%name%'=>$server['name']));
         $message = Etva::getLogMessage(array('name'=>$server['name']), EtvaServerPeer::_OK_CREATE_);

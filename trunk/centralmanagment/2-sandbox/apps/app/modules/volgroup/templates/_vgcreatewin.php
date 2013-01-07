@@ -49,7 +49,7 @@
             allowBlank: false,
             msgTarget: 'side',
             name: 'vgname',
-            maxLength: 10
+            maxLength: 50
         });               
 
     

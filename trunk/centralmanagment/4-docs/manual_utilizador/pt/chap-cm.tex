@@ -10,6 +10,16 @@ A interface principal do Central Management é constituida por quatro áreas:
 	\item[Painel de informação (\emph{Painel de Informação}) -] Área de breve notificação acerca dos eventos despoletados pelo utilizador. Mensagens de erro e sucesso são aqui visualizadas.
 \end{description}
 
+\opt{etvm}{
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.45]{screenshots/principal_nuxis.png}
+	\caption{Layout principal}
+	\label{fig:principal}
+	\end{center}
+\end{figure}
+}
+\opt{etva}{
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.45]{screenshots/principal.png}
@@ -17,18 +27,19 @@ A interface principal do Central Management é constituida por quatro áreas:
 	\label{fig:principal}
 	\end{center}
 \end{figure}
+}
 
 \pagebreak
 
 
 \section{Primeiro acesso}
 \label{sec:first_access}
-Após a instalação do CM pela primeira vez acede-se ao url do sistema disponível no endereço http://<ENDEREÇO IP>\footnote{Endereço especificado na {\bf \emph{Instalação}} (capítulo \ref{chp:installation}).}
+Após a instalação do CM pela primeira vez acede-se ao url do sistema disponível no endereço http://<ENDEREÇO IP>\footnote{Endereço especificado na {\bf \emph{Instalação}}\opt{etva}{ (capítulo \ref{chp:installation})}.}
 
 \opt{etvm}{
     \begin{figure}[H]
     \begin{center}
-    \includegraphics[scale=0.7]{screenshots/login_etvm.png}
+    \includegraphics[scale=0.7]{screenshots/login_nuxis.png}
     \caption{Página de autenticação}
     \label{fig:login}
     \end{center}
@@ -72,6 +83,7 @@ Neste painel é apresentada a vista geral do CM.
 Podemos visualizar os servidores de virtualização e a informação da rede do CM (ver figura \ref{fig:main_nodes}).
 
 \subsection{Nodes}
+\label{sub:nodes}
 
 Em \emph{Nodes} é disponibilizada alguma informação acerca dos vários servidores de virtualização. Podemos ver o \emph{hypervisor} suportado pelas máquinas reais e, entre outras informações, o estado do agente de virtualização.
 \begin{figure}[H]
@@ -114,7 +126,7 @@ Para remover uma rede selecciona-se a rede pretendida e clica-se em \emph{Remove
 \begin{quote}
 	{\large \bf Nota} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
-	As operações de adicionar/remover rede só estão disponíveis na versão \emph{ETVM}.
+	As operações de adicionar/remover rede só estão disponíveis na versão \emph{NUXIS}.
 \end{quote}
 
 
@@ -157,6 +169,44 @@ Seleccionando um registo da tabela de interfaces e acedendo ao sub-menu de conte
 
 Na gestão de interfaces de uma máquina, dependendo do tipo de máquina virtual é possível seleccionar os drivers das placas de rede.\footnote{Esta opção está disponível para máquinas em HVM ou KVM.Os drivers disponíveis são: e1000, rtl8139 e virtio}
 
+\section{Datacenter virtual}
+\label{sec:cluster}
+
+No painel do lado esquerdo é possível seleccionar um \emph{Datacenter} e efectuar as seguintes operações:
+
+\begin{itemize}
+    \item \emph{Nodes} - Consultar informação sobre os nós (ver secção \ref{sub:nodes})
+    \item Armazenamento - Gestão do armazenamento no contexto de \emph{Datacenter} (ver secção \ref{sec:storage})
+    \item Redes - Gestão de redes (ver secção \ref{sub:redes})
+\end{itemize}
+
+Para além das operações mencionadas acima, é possível aceder ao sub-menu de contexto de um \emph{datacenter} que permite operações de:
+\begin{itemize}
+    \item Editar datacenter
+    \item Remover datacenter
+\end{itemize}
+
+Em \emph{Editar datacenter} é possível alterar o nome do \emph{datacenter} e activar alta disponibilidade nos nós. 
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.5]{screenshots/cluster_edit.png}
+	\caption{Editar datacenter}
+	\label{fig:cluster_edit}
+	\end{center}
+\end{figure}
+
+Ao activarmos a opção \emph{Nó com alta disponibilidade}\footnote{A opção \emph{Nó com alta disponibilidade} só estará disponível se a configuração de \emph{fencing} estiver definida em todos os nós (ver \ref{para:node_fencing_config}).} podemos escolher uma das seguintes opções:
+
+\begin{itemize}
+    \item \emph{Tolerância de hosts a falha} - número de \emph{hosts} em falha em que será garantido alta disponibilidade, ficando a alocação de recursos limitada para garantir alta disponibilidade do número de \emph{hosts} definido;
+    \item \emph{Percentagem de recursos reservada a failover} - percentagem de recursos reservada para garantir a alta disponibilidade dos serviços mais críticos;
+    \item \emph{Nó suplente} - é definido um nó que garante a alta disponibilidade no caso de falha de um dos nós. Este nó suplente deverá ter recursos necessário para garantir a disponibilidade dos servidores críticos do nó em falha.
+\end{itemize}
+
+O algoritmo de alta disponibilidade prevê que em caso de falha, os servidores são migrados por ordem de prioridade (ver figura \ref{fig:server_edit_ha}), garantido assim a continuidade dos serviços.
+
+A opção \emph{Remover datacenter}, remove informação relativa ao \emph{datacenter} (nós, redes e armazanamento) da base de dados do \emph{Central Management}.
+
 % PAINEL NODE
 
 \section{Servidor de virtualização}
@@ -169,35 +219,69 @@ No painel \emph{Nodes} é possivel seleccionar um \emph{node}(servidor de virtua
     \item Gestão do armazenamento do node (ver secção \ref{sec:storage})
 \end{itemize}
 
-Para além das operações mencionadas acima, é possível aceder ao sub-menu de contexto de um \emph{node} que permite operações de:
+O sub-menu de contexto de um \emph{node} permite as seguintes operações:
 \begin{itemize}
-    \item Carregar node
-    \item Opções de conectividade\footnote{Disponível apenas na versão \emph{ETVM}}
+    \item Carregar nó
+    \item Editar nó
+    \item Remover nó
+    \item Opções de conectividade\footnote{Disponível apenas na versão \emph{NUXIS}}
     \item Alterar keymap
-    \item Estado do node
+    \item Estado do nó
 \end{itemize}
+
+Em \emph{Carregar nó}, é enviado um pedido ao \emph{Central Management} para que o estado do nó seja actualizado. 
+
+A opção \emph{Editar nó} possibilita a edição de alguma propriedades do servidor de virtualização, nomedamente, nome da máquina e configuração de \emph{fencing}.
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.5]{screenshots/node_edit.png}
+	\caption{Editar nó}
+	\label{fig:node_edit}
+	\end{center}
+\end{figure}
+\label{para:node_fencing_config}Em \emph{Activar configuração \emph{fencing}} podemos activar o dispositivo \emph{fencing} de gestão do nó e definir os parâmetros de configuração de acordo com os seguintes tipos: \emph{bladecenter}, \emph{virsh}, \emph{ilo}, \emph{ipmilan} e \emph{rsa}.
+
+A opção \emph{Remover nó}, remove um nó do \emph{Central Management}, eliminando apenas informação da base de dados relativa a este nó.
 
 Em \emph{Opções de conectividade}, é possível editar a configuração da interface \emph{Management} ao qual se encontra ligado o agente de virtualização.
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.5]{screenshots/node_conn.png}
-	\caption{Configuração da conectividade do agente \emph{VirtAgent01}}
+	\caption{Configuração da conectividade do agente}
 	\label{fig:node_conn}
 	\end{center}
 \end{figure}
 
 Em \emph{Alterar keymap}, consoante o item seleccionado, servidor de virtualização ou máquina virtual, é possível definir o keymap padrão usado pelo VNC, ou o keymap específico a uma determinada máquina virtual respectivamente.
 
-Em \emph{Estado do node}, é possível enviar ao servidor de virtualização um pedido de verificação do estado da conectividade do agente.
+Em \emph{Estado do nó}, é possível aceder ao conjunto de opçoes:
+\begin{itemize}
+    \item Verificar estado - envia ao servidor de virtualização um pedido de verificação do estado da conectividade do agente
+    \item Manutenção / Recuperar - Executa operação de manutenção/recuperação de estado 
+    \item Desligar - desligar nó (ver secção \ref{sub:desligar_no}).
+\end{itemize}
 
-\subsection{Informação do node}
+Na opção \emph{Manutenção} temos a possibilidade de colocar a máquina em estado de manutenação para poder efectuar rotinas de manutenção.
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.45]{screenshots/node_maintenance.png}
+	\caption{Manutenção do nó}
+	\label{fig:node_maintenance}
+	\end{center}
+\end{figure}
+
+Quando o nó é colocado neste estado, os servidores virtuais são migrados por ordem de prioridade (ver figura \ref{fig:server_edit_ha}).
+
+A operação \emph{Recuperar}, executa tarefas de verificação de estado do agente do nó, conectividade e consistência da informação sobre armazenamento, antes de recuperar o nó do estado de manutenção.
+
+\subsection{Informação do nó}
 \label{sec:nodeinfo}
 Em \emph{Informação do node} é disponibilizada a informação acerca do servidor de virtualização. Podemos ver o \emph{hypervisor} suportado pela máquina real e, entre outras informações, o estado do agente de virtualização.
 
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.45]{screenshots/node_info.png}
-	\caption{Informação do node \emph{VirtAgent01}}
+	\caption{Informação do node}
 	\label{fig:node_info}
 	\end{center}
 \end{figure}
@@ -212,11 +296,12 @@ Em \emph{Servidores} é disponibilizada a informação acerca das máquinas virt
 	\item Abrir máquina virtual numa consola VNC
 	\item Iniciar/parar máquina virtual
     \item Migrar máquina virtual
+    \item Snapshots
 \end{itemize}
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.45]{screenshots/node_servers.png}
-	\caption{Lista das máquinas virtuais do node \emph{VirtAgent01}}
+	\caption{Lista das máquinas virtuais do node}
 	\label{fig:node_servers}
 	\end{center}
 \end{figure}
@@ -358,13 +443,13 @@ Para editar um servidor, selecciona-se a máquina pretendida e clica-se em \emph
     \begin{quote}
         {\large \bf Nota} \\*[-.8pc]
         \underline{\hspace{6in}} \\
-        Se a máquina virtual for do tipo PV, é possivel fazer alterações com a máquina a correr, caso contrário a opção encontra-se desabilitada, sendo necessário que a máquina não se encontre activa para poder efectuar alterações.
+        Se a máquina virtual estiver a correr, dependendo do tipo de máquina e sistema de virtualização usado, algumas opções encontram-se desabilitadas, sendo necessário parar a máquina para poder efectuar alterações.
     \end{quote}
 
 A edição de uma máquina virtual permite a configuração de:
 \begin{description}
-	\item[Opções gerais:] Neste painel é permitido alterar o nome, memória, opções do keymap e parâmetros de boot da máquina.
-        Os parâmetros de boot variam consoante o tipo da máquina virtual (ver secção \ref{sec:add_server_boot}).
+	\item[Opções gerais:] Neste painel é permitido alterar o nome, memória, número de CPUs e número de \emph{sockets}, \emph{cores} e \emph{threads}, sistema operativo e parâmetros de arranque da máquina.
+        Os parâmetros de arranque variam consoante o tipo da máquina virtual e sistema de virtualização (ver secção \ref{sec:add_server_boot}).
 		\begin{figure}[H]
         		\begin{center}
 		        \includegraphics[scale=0.5]{screenshots/server_edit_general.png}
@@ -382,13 +467,12 @@ A edição de uma máquina virtual permite a configuração de:
 	        	\end{center}
 		\end{figure}
 
-	\item[Discos:] Adicionar/remover discos da máquina. A máquina virtual tem que ter pelo menos um disco associado.
-                    Para adicionar/remover discos selecciona-se o disco pretendido e recorre-se ao \emph{drag-n-drop} entre as tabelas.
+	\item[Discos:] Adicionar/remover discos da máquina. Para adicionar/remover discos selecciona-se o disco pretendido e recorre-se ao \emph{drag-n-drop} entre as tabelas.
                     
                 \begin{quote}
                     {\large \bf Nota} \\*[-.8pc]
                     \underline{\hspace{6in}} \\
-                    O disco de boot da máquina é o disco que se encontra na primeira posição da tabela.
+                    O disco de arranque da máquina é o disco que se encontra na primeira posição da tabela.
                 \end{quote}
                     
 		\begin{figure}[H]
@@ -398,9 +482,51 @@ A edição de uma máquina virtual permite a configuração de:
 		        \label{fig:server_edit_disks}
 	        	\end{center}
 		\end{figure}
+    \item[Dispositivos:] Adicionar/remover dispositivos USB/PCI à máquina. Cada dispositivo apenas pode estar associado a uma máquina virtual. 
+
+                \begin{quote}
+                    {\large \bf Nota} \\*[-.8pc]
+                    \underline{\hspace{6in}} \\
+                    Caso a máquina virtual tenha dispositivos associados não poderá ser movida/migrada para outro nó do datacenter.
+                \end{quote}
+    
+		\begin{figure}[H]
+        		\begin{center}
+		        \includegraphics[scale=0.5]{screenshots/server_edit_devices.png}
+        		\caption{Edição de um servidor - Dispositivos}
+		        \label{fig:server_edit_devices}
+	        	\end{center}
+		\end{figure}
+      
+	\item[Outras opções:] Permite definir as opções VNC como keymap e configurar as flags ACPI, APIC e PAE.
+
+		\begin{figure}[H]
+        		\begin{center}
+		        \includegraphics[scale=0.5]{screenshots/server_edit_otheroptions.png}
+        		\caption{Edição de um servidor - Outras opções}
+	        	\label{fig:server_edit_otheroptions}
+	        	\end{center}
+		\end{figure}
+
+	\item[Alta disponibilidade:] Permite configurar a prioridade do servidor no arranque e/ou em migração e definir se as políticas de alta disponibilidade estão activas para este servidor.
+
+                \begin{quote}
+                    {\large \bf Nota} \\*[-.8pc]
+                    \underline{\hspace{6in}} \\
+                    Em \emph{Servidor com alta disponibilidade} definimos o tempo limite ao fim do qual
+                        o servidor é reiniciado caso deixe de responder.
+                    Esta opção só ficará disponível se as ferramentas de suporte à virtualização estiverem instaladas na máquina virtual.
+                \end{quote}
+                    
+		\begin{figure}[H]
+        		\begin{center}
+		        \includegraphics[scale=0.5]{screenshots/server_edit_ha.png}
+        		\caption{Edição de um servidor - Alta disponibilidade}
+	        	\label{fig:server_edit_ha}
+	        	\end{center}
+		\end{figure}
 
 \end{description}
-
 
 
 \subsubsection{Remover máquina virtual}
@@ -432,7 +558,7 @@ Seleccionando um servidor e de seguida clicando em \emph{Abrir numa consola} é 
 \subsubsection{Iniciar/parar máquina virtual}
 \label{sec:start_server}
 
-No arranque da máquina virtual é possível escolher um dos seguintes parâmetro de boot:
+No arranque da máquina virtual é possível escolher um dos seguintes parâmetros:
 \begin{description}
 	\item[Disco:] Arranque pelo disco associado ao servidor.
     \item[PXE:] Arranque por PXE\footnote{Só disponível caso o tipo da máquina virtual não seja \emph{Linux PV}\label{foot:notpv}}.
@@ -449,12 +575,12 @@ No arranque da máquina virtual é possível escolher um dos seguintes parâmetr
 	\end{center}
 \end{figure}
 
+É possível também escolher a opção \emph{Iniciar servidor} \emph{Com consola}, que permite iniciar o servidor e imediatamente a seguir abrir uma consola.
 
 \subsubsection{Migrar máquina virtual}
 \label{sec:migrate_server}
 
 Seleccionando um servidor e de seguida clicando em \emph{Migrar servidor} é possível migrar uma máquina de um \emph{node} para outro desde que partilhem o mesmo armazenamento.
-A migração de uma máquina virtual é efectuada no modo \emph{offline}.
 
 \begin{figure}[H]
 	\begin{center}
@@ -467,9 +593,22 @@ A migração de uma máquina virtual é efectuada no modo \emph{offline}.
 \begin{quote}
 	{\large \bf Nota} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
-	Esta opção só está disponível no modelo \emph{ETVM}.
+	Esta opção só está disponível no modelo \emph{NUXIS}.
 \end{quote}
 
+\subsubsection{Snapshots}
+\label{sec:server_snapshots}
+
+Em \emph{Snapshots} podemos criar uma \emph{snapshot} do estado da máquina virtual, em que consiste na criação de um snapshots de todos os discos da máquina virtual e, caso a máquina se encontre a correr, é também guardado o estado da máquina naquele instante.
+Além da opção criar é também possível reverter, remover ou fazer \emph{download} do \emph{backup} de determinado \emph{snapshot}.
+
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.5]{screenshots/server_snapshots.png}
+	\caption{Snapshots}
+	\label{fig:server_snapshots}
+	\end{center}
+\end{figure}
 
 \subsection{Armazenamento}
 \label{sec:storage}
@@ -478,7 +617,7 @@ Em \emph{Armazenamento} encontra-se a informação relativa aos volumes existent
 Este painel encontra-se divido em três secções:
 
 \begin{description}
-	\item[Devices -] Informação relativa aos \emph{physical volumes}\footnote{Um \emph{physical volume} é um dispositivo fisico, como por exemplo um disco} e seu estado. Permite fazer a administração de \emph{physical volumes} do \emph{node}.
+	\item[Physical Devices -] Informação relativa aos \emph{physical volumes}\footnote{Um \emph{physical volume} é um dispositivo fisico, como por exemplo um disco} e seu estado. Permite fazer a administração de \emph{physical volumes} do \emph{node}.
 	\item[Volume Groups -] Lista os \emph{volumes groups}\footnote{Um \emph{volume group} consiste na agregação de diversos \emph{physical volumes} num único volume virtual} existentes no node e seus \emph{physical volumes} associados. Permite fazer operações de administração de \emph{volume groups}.
 	\item[Logical Volumes -] Apresenta a informação dos \emph{logical volumes}\footnote{Um \emph{logical volume} é uma "fatia" de um \emph{volume group}. É usado como sendo uma partição do sistema} do \emph{node}. Área de administração dos \emph{logical volumes}.
 \end{description}
@@ -505,7 +644,8 @@ Este painel encontra-se divido em três secções:
 A administração de \emph{physical volumes} consiste nas seguintes operações:
 \begin{itemize}
 	\item Inicialização de um \emph{physical volume}
-        \item Remoção da inicialização de um \emph{physical volume}
+    \item Remoção da inicialização de um \emph{physical volume}
+    \item Registar/Desregistar um \emph{physical volume}
 \end{itemize}
 
 \begin{figure}[H]
@@ -541,6 +681,17 @@ Desta forma, cria-se um ficheiro \texttt{/etc/sysconfig/etva-vdaemon/san\_file.c
 
 }
 
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_device_search.png}
+        \caption{Procurar \emph{physical devices} }
+        \label{fig:storage_device_search}
+        \end{center}
+\end{figure}
+
+Em ''Procurar \emph{physical devices}'' é possível correr uma tarefa do lado do agente de virtualização que procura discos no sistema e possibilita o registo no \emph{Central Management}.
+Analogamente, é possível remover o registo de um \emph{physical device} do \emph{Central Management}, caso se pretenda que este deixe ser gerido pelo sistema.
+
 % ADMINISTRAÇÃO VOLUME GROUPS
 
 \subsubsection{Administração de Volume Groups}
@@ -550,6 +701,7 @@ Na administração de \emph{volumes groups} é permitido:
 	\item Extender um \emph{volume group}
 	\item Reduzir um \emph{volume group}
 	\item Remover um \emph{volume group}
+    \item Registar/Desregistar um \emph{volume group}
 \end{itemize}
 
 \begin{figure}[H]
@@ -592,6 +744,17 @@ Na remoção/redução de um \emph{volume group} seleccciona-se o \emph{volume g
 
 Na figura \ref{fig:storage_vg_extend} extende-se o \emph{volume group} {\bf black} com o \emph{physival volume} {\bf sdb1}.
 
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_vg_search.png}
+        \caption{Procurar \emph{volume groups}}
+        \label{fig:storage_vg_search}
+        \end{center}
+\end{figure}
+
+Em ''Procurar \emph{volume groups}'', à semelhança dos \emph{physical volumes}, é possível obter os \emph{volume groups} do lado do agente de virtualização e efectuar o seu registo no \emph{Central Management}.
+Caso se pretenda, é também possível remover o registo de um \emph{volume group} do \emph{Central Management}, deixando de ser gerido pelo sistema.
+
 % ADMINISTRAÇÃO LOGICAL VOLUMES
 
 \subsubsection{Administração de Logical Volumes}
@@ -601,6 +764,9 @@ As operações disponíveis sobre os \emph{logical volumes} são as seguintes:
 	\item Criar um \emph{logical volume}
 	\item Redimensionar um \emph{logical volume}
 	\item Remover um \emph{logical volume}
+	\item Clonar um \emph{logical volume}
+	\item Converter o formato dum \emph{logical volume}
+    \item Registar/Desregistar um \emph{logical volume}
 \end{itemize}
 
 \begin{figure}[H]
@@ -613,6 +779,7 @@ As operações disponíveis sobre os \emph{logical volumes} são as seguintes:
 
 Para criar um \emph{logical volume} acede-se ao sub-menu de contexto sobre um qualquer \emph{logical volume} e selecciona-se \emph{Adicionar logical volume}.
 Na janela de criação deverá ser introduzido o nome pretendido, o \emph{volume group} a partir do qual se criará e o tamanho que não deverá exceder o tamanho disponível no \emph{volume group}.
+Além destas opções é possível também definir o formato do discos de um dos possíveis (raw, qcow2,qcow,cow e vmdk - por omissão é raw) e a percentagem de utilização para \emph{snapshots}.
 
 \begin{figure}[H]
         \begin{center}
@@ -642,6 +809,45 @@ No redimensionamento selecciona-se o \emph{logical volume} que se pretende redim
 
 Na remoção de um \emph{logical volume}, no sub-menu de contexto existe a opção \emph{Remover logical volume}. O \emph{logical volume} só será removido se não tiver associado a nenhuma máquina virtual. Para verificar se está em uso passa-se o rato por cima do \emph{logical volume} e observar a informação contida no \emph{tooltip} que aparece.
 
+É possível ainda clonar um \emph{logical volume}, sendo necessário espaço livre no \emph{volume group} para pode fazer a cópia.
+E podemos ainda fazer a conversão dos discos para os vários formatos indicados (raw, qcow2,qcow,cow e vmdk).
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_lv_search.png}
+        \caption{Procurar \emph{logical volumes}}
+        \label{fig:storage_lv_search}
+        \end{center}
+\end{figure}
+
+Em ''Procurar \emph{logical volumes}'' sincroniza os \emph{logical volumes} que se encontram do lado do agente de virtualização e não estão registados no \emph{Central Management}.
+É possível também que existam \emph{logical volumes} que se encontram registados no \emph{Central Management} mas não existam físicamente por alguma razão alheia ao sistema. 
+Nestes casos, é possível remover o registo do sistema e voltar a sincronizar os \emph{logical volumes} com a funcionalidade ''Procurar \emph{logical volumes}''.
+
+\subsection{Desligar nó}
+\label{sub:desligar_no}
+Através da interface de gestão, Central Management, é possível desligar um nó físico. Para tal é necessário seguir os seguintes passos:
+
+\begin{itemize}
+\item No painel lateral esquerdo, selecionar o \textit{node} pretendido e aceder ao menu de contexto;
+\item Selecionar a opção \textit{Desligar}.
+\end{itemize}
+
+\begin{quote}
+    {\large \bf Nota} \\*[-.8pc]
+    \underline{\hspace{6in}} \\
+    No decorrer da operação, todas as máquinas virtuais associadas ao \textit{node} serão terminadas ordeiramente.
+\end{quote}
+
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/shutdownnode.png}
+        \caption{Desligar um node}
+        \label{fig:storage_lv_ctx}
+        \end{center}
+\end{figure}
+
 \pagebreak
 
 \section{Máquina virtual}
@@ -665,12 +871,13 @@ Para além de visualizar informação, este painel permite efectuar as seguintes
 	\item Abrir máquina virtual numa consola VNC (ver secção \ref{sec:open_vnc})
 	\item Iniciar/parar máquina virtual (ver secção \ref{sec:start_server})
     \item Migrar máquina virtual (ver secção \ref{sec:migrate_server})
+    \item Snapshots (ver secção \ref{sec:server_snapshots})
 \end{itemize}
 
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.45]{screenshots/server_info.png}
-	\caption{Informação da máquina virtual \emph{etfww}}
+	\caption{Informação da máquina virtual}
 	\label{fig:server_info}
 	\end{center}
 \end{figure}
@@ -685,11 +892,18 @@ Em \emph{Estatísticas} é possível visualizar gráficamente informação de:
 	\item Node Load
 \end{itemize}
 
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.45]{screenshots/server_stats_memUsage.png}
+	\caption{Estatísticas de uma máquina virtual}
+	\label{fig:server_stats_memUsage}
+	\end{center}
+\end{figure}
 
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.45]{screenshots/server_stats_nodeLoad.png}
-	\caption{Estatísticas de uma máquina virtual}
+	\caption{Estatísticas de carga do nó}
 	\label{fig:server_stats_nodeLoad}
 	\end{center}
 \end{figure}
@@ -1015,7 +1229,7 @@ O assistente de configuração, conforme a figura \ref{fig:first_time_wizard}, c
 \begin{quote}
 	{\large \bf Nota} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
-	Caso se trate da versão \emph{ETVM}, a configuração das redes é omitida.
+	Caso se trate da versão \emph{NUXIS}, a configuração das redes é omitida.
 \end{quote}
 
 \opt{etvm}{
@@ -1032,7 +1246,7 @@ Ao selecionar um dos nós base da árvore que surge no painel esquerdo, é apres
 
 
 \subsubsection{Assistente de criação de datacenter}
-O assistente de criação de datacenter possibilita a definição de novos \textit{clusters} de servidores. Cada datacenter possui as suas redes, e acesso aos volumes de armazenamento partilhados\footnote{Opção apenas disponível na versão \emph{ETVM}}.
+O assistente de criação de datacenter possibilita a definição de novos \textit{clusters} de servidores. Cada datacenter possui as suas redes, e acesso aos volumes de armazenamento partilhados\footnote{Opção apenas disponível na versão \emph{NUXIS}}.
 
 Para proceder à configuração de um novo datacenter, seleccione a opção \textit{Administração do sistema} seguido da opção \textit{Assistente de configuração de datacenter virtual}. É então apresentado o assistente, que requer os seguintes passos (Imagem \ref{fig:cluster_config}):
 
@@ -1057,7 +1271,7 @@ Para mover, arrastar o node pretendido para o datacenter de destino.
 \begin{figure}[H]
         \begin{center}
         \includegraphics[scale=0.7]{screenshots/cluster-move.png}
-        \caption{Mover nodes entre datacenters (\emph{ETVM})}
+        \caption{Mover nodes entre datacenters (\emph{NUXIS})}
         \label{fig:cluster-move}
         \end{center}
 \end{figure}
@@ -1084,7 +1298,7 @@ Para proceder à autorização de um node, selecionar o nó pretendido, e aceder
 \end{figure}
 
 No processo de autorização, o \textit{Central Management} verifica se o node possui a mesma visão dos volumes de armazenamento partilhados. Caso algum exista algum erro, consulte o registo de eventos do sistema - ver Secção \ref{sec:system_event_reg}.
-} %fim da secção do etvm
+} %fim da secção do NUXIS
  
 \subsection{Alterar preferências}
 Acedendo a \emph{Preferências} é possível definir alguns parâmetros globais ao sistema.
@@ -1098,7 +1312,7 @@ No painel \emph{Geral} é permitido especificar o \emph{keymap} usado por omiss�
         \end{center}
 \end{figure}
 
-No painel \emph{Conectividade} é permitido alterar o IP do CM e da rede LAN caso se trate de um \emph{ETVM}. No modelo \emph{ETVM} permite apenas configurar o IP do CM.
+No painel \emph{Conectividade} é permitido alterar o IP do CM e da rede LAN caso se trate de um \emph{NUXIS}. No modelo \emph{NUXIS} permite apenas configurar o IP do CM.
 
 \begin{figure}[H]
         \begin{center}
@@ -1162,4 +1376,42 @@ Para além da janela de gestão apresentada, é possível atribuir as permissõe
 	Em \emph{Gestão de Grupos} não é possível remover o grupo com ID 1 dado ser o grupo por omissão do sistema.
 \end{quote}
 
+\opt{etvm}{
+    \subsection{Desligar o Central Management}
+    Para desligar o Central Management aceder ao menu \textit{Administração do sistema} e escolher a opção \textit{Desligar Central Management}.
+    Responder afimativamente à pergunta de confirmação.
+
+\begin{quote}
+	{\large \bf Nota} \\*[-.8pc]
+	\underline{\hspace{6in}} \\
+    Ao desligar o Central Management terminará quaisquer máquinas virtuais existentes na máquina.
+\end{quote}
+}
+
+\opt{etva}{
+    \subsection{Desligar a appliance}
+    Existem dois métodos para desligar a \textit{appliance ETVA}. O primeiro método é através da interface de gestão, seguindo os passos abaixo:
+    
+    \begin{itemize}
+    \item Aceder ao site do Central Management
+    \item Selecionar o node existente e aceder ao menu de contexto
+    \item Escolher a opção shutdown (desligar). Esta opção desliga a appliance e as máquinas virtuais existentes.
+    \end{itemize}
+
+    O segundo método pode ser efetuado através dos botões disponíveis na \textit{appliance} (ver imagem \ref{fig:app_display}).
+
+    \begin{itemize}
+    \item No display da appliance, selecionar MENU
+    \item Navegar sobre as opções, através das setas, até encontrar o menu de SHUTDOWN
+    \item Pressionar o botão ENTER
+    \end{itemize}
+    
+    \begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.3]{screenshots/appliancedisplay.jpg}
+        \caption{Display disponível nas appliances ETVA}
+        \label{fig:app_display}
+        \end{center}
+    \end{figure}
+}
 \pagebreak

@@ -46,6 +46,11 @@ BEGIN {
 use ETVA::Utils;
 use ETVA::NetworkTools;
 use ETVA::ArchiveTar;
+use ETVA::Devices;
+
+use GuestAgent::Client;
+use GuestAgent::MessageFactory;
+use JSON;
 
 use VirtMachine;
 
@@ -54,7 +59,7 @@ use XML::Generator;
 use LWP::Simple;
 use Data::Dumper;
 
-use File::Path qw( mkpath );
+use File::Path qw( mkpath rmtree );
 
 use POSIX qw/SIGHUP SIGTERM SIGKILL/;
 use POSIX ":sys_wait_h";
@@ -66,6 +71,14 @@ use Fcntl ':flock';
 use Time::localtime;
 use File::stat;
 
+use constant {
+    NODE_ACTIVE => 1,
+    NODE_INACTIVE => 0,
+    NODE_FAIL => -1,
+    NODE_MAINTENANCE => -2,
+    NODE_COMA => -3
+};
+
 my $hypervisor_type;    # hypervisor type
 
 my $PARENT = 1;
@@ -73,6 +86,8 @@ my $PARENT = 1;
 my $VM_DIR = "./vmdir";
 my $CONF;
 my $TMP_DIR = "/var/tmp";
+my $VIRTIO_CHANNELS_SOCKETS_DIR = "/var/tmp/virtagent-virtio/virtio-sockets-dir";
+my $VIRTIO_CHANNELS_STATE_DIR = "/var/tmp/virtagent-virtio/virtio-state-dir";
 
 sub AUTOLOAD {
     my $method = $AUTOLOAD;
@@ -230,7 +245,7 @@ sub vmStart {
         }
     }
 
-    plog "VM(1)=",Dumper($VM) if( &debug_level );
+    plog "VM(1)=",Dumper($VM) if( &debug_level > 3 );
 
     my %V = $self->defineDomain( $VM->todomain() );
     if( isError(%V) ){
@@ -244,7 +259,10 @@ sub vmStart {
     }
 
     my $xml = $self->get_xml_domain( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name() );
-    plog "init xml=",$xml if( &debug_level );
+    plog "init xml=",$xml if( &debug_level > 3 );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
 
     $VM = $VM->loadfromxml( $xml );
 
@@ -269,12 +287,12 @@ sub vmStart {
         $VM->set_on_reboot('restart');
         $VM->set_on_crash('restart');
 
-        plog "VM(2)=",Dumper($VM) if( &debug_level );
+        plog "VM(2)=",Dumper($VM) if( &debug_level > 3 );
 
         my @ptod = $VM->todomain();
 
         my $boot_xml = $self->genXMLDomain( @ptod );
-        plog "boot_xml=",$boot_xml if( &debug_level );
+        plog "boot_xml=",$boot_xml if( &debug_level > 3 );
 
         %V = $self->defineDomain( @ptod );
         if( isError(%V) ){
@@ -399,14 +417,22 @@ sub vmSetLocation {
             $location =~ s/^\s+//; $location =~ s/\s+$//; # clean spaces
             if( $location ){
                 if( $p{'cdrom'} ){          # try boot from cdrom
-                    if( -e "$location" ){
+                    if( 1 || -e "$location" ){  # force to set empty location
                         my $prev_cdrom = $VM->get_cdrom();
                         if( !defined($prev_cdrom) ){
-                            my %CD = $self->set_disk_node( path=>$location, device=>'cdrom', readonly=>1, 'hypervisor_type'=>$type, 'os_type'=>$ostype );
+                            my %cdrom_attr = ( device=>'cdrom', readonly=>1, 'hypervisor_type'=>$type, 'os_type'=>$ostype );
+                            if( $type =~ 'xen' ){
+                                $cdrom_attr{'OLDDISKS'} = $VM->get_Disks();
+                                if( my @disks = $self->get_loadvm_disks_params(%p) ){
+                                    $cdrom_attr{'NEWDISKS'} = \@disks;
+                                }
+                            }
+                            my %CD = $self->set_disk_node( %cdrom_attr );
+                            $CD{'path'} = $location if( -e "$location" );
                             $VM->add_disk( %CD );
                         } elsif( $prev_cdrom ne $location ){
                             my $VD = $VM->get_disk( 'path'=> $prev_cdrom );
-                            $VD->set_path( $location );
+                            $VD->set_path( $location ) if( -e "$location" );
                         }
                         $VM->set_cdrom( $location );
                     } else {
@@ -417,7 +443,14 @@ sub vmSetLocation {
                     if( -e "$bootdisk" ){
                         my $prev_cdrom = $VM->get_cdrom();
                         if( !defined($prev_cdrom) ){
-                            my %CD = $self->set_disk_node( path=>$bootdisk, device=>'cdrom', readonly=>1, 'hypervisor_type'=>$type, 'os_type'=>$ostype );
+                            my %cdrom_attr = ( path=>$bootdisk, device=>'cdrom', readonly=>1, 'hypervisor_type'=>$type, 'os_type'=>$ostype );
+                            if( $type =~ 'xen' ){
+                                $cdrom_attr{'OLDDISKS'} = $VM->get_Disks();
+                                if( my @disks = $self->get_loadvm_disks_params(%p) ){
+                                    $cdrom_attr{'NEWDISKS'} = \@disks;
+                                }
+                            }
+                            my %CD = $self->set_disk_node( %cdrom_attr );
                             $VM->add_disk( %CD );
                         } elsif( $prev_cdrom ne $bootdisk ){
                             my $VD = $VM->get_disk( 'path'=> $prev_cdrom );
@@ -450,6 +483,40 @@ sub vmSetLocation {
     }
     return $VM
 }
+sub get_loadvm_disks_params {
+    my $self = shift;
+    my %p = @_;
+
+    my @Disks = ();
+    if( ref($p{'disk'}) eq 'ARRAY' ){
+        @Disks = @{$p{'disk'}};
+    } else {
+        my %D = ();
+
+        $D{'path'} = $p{'path'} || $p{'disk'}{'path'};
+
+        if( $D{'path'} ){
+            $D{'device'} = $p{'diskdevice'} || $p{'disk'}{'device'};
+            $D{'drivertype'} = $p{'diskdrivertype'} || $p{'disk'}{'drivertype'};
+            $D{'drivername'} = $p{'diskdrivername'} || $p{'disk'}{'drivername'};
+            $D{'target'} = $p{'disktarget'} || $p{'disk'}{'target'};
+            $D{'readonly'} = $p{'diskreadonly'} || $p{'disk'}{'readonly'};
+            $D{'node'} = $p{'disknode'} || $p{'disk'}{'node'};
+            $D{'bus'} = $p{'diskbus'} || $p{'disk'}{'bus'};
+
+            if( !$D{'drivertype'} && !$D{'drivername'} && ($p{'diskformat'} || $p{'disk'}{'format'}) ){
+                if( $self->get_hypervisor_type() eq 'kvm' ){
+                    $D{'drivername'} = "qemu";
+                    $D{'drivertype'} = $p{'diskformat'} || $p{'disk'}{'format'};
+                }
+            }
+
+            push(@Disks,\%D);
+        }
+    }
+    return wantarray() ? @Disks : \@Disks;
+}
+
 # vmLoad
 #   load virtual machine config
 #
@@ -505,9 +572,17 @@ sub vmLoad {
             $A{'tablet_bus'} = $p{'tablet_bus'} || "usb";
         }
     }
-    my @features = $p{'features'} ? keys %{$p{'features'}} : map { s/feature_(\w+)/$1/ } grep { /feature_/ } keys %p; 
-    if( @features ){
-        $A{'features'} = { map { $_ => 1 } @features };
+    my %features = ();
+    if( $p{'features'} ){
+        %features = %{$p{'features'}};
+    } else {
+        my @keysfeatures = map { s/feature_(\w+)/$1/ } grep { /feature_/ } keys %p; 
+        foreach my $kf (@keysfeatures){
+            $features{"$kf"} = $p{"$kf"};
+        }
+    }
+    if( %features ){
+        $A{'features'} = { %features };
     }
 
     if( $p{'acpi'} || (!defined($p{'acpi'}) && !defined($A{'features'}{'acpi'})) ){   # set ACPI by default
@@ -529,6 +604,25 @@ sub vmLoad {
         if( !$p{'no_tablet'} ){
             $A{'tablet_bus'} = $p{'tablet_bus'} || "usb";
         }
+    }
+
+    # set cpu information
+    if( $p{'cpu'} ){
+        $A{'cpu'} = $p{'cpu'};
+    }
+    if( $p{'sockets'} && $p{'cores'} && $p{'threads'} ){
+        $A{'cpu'}{'topology'} = { 'sockets'=>$p{'sockets'}, 'cores'=>$p{'cores'}, 'threads'=>$p{'threads'} };
+    }
+
+    # for kvm add channel and controller 
+    if( !$p{'nochannel'} && ($self->get_hypervisor_type() eq 'kvm') ){
+        my $controller = $A{'Controllers'} || [];
+        $A{'Controllers'} = [ @$controller, { 'type'=>'virtio-serial', 'index'=>'0', 'ports'=>'16' } ];
+
+        my $channelpath = "${VIRTIO_CHANNELS_SOCKETS_DIR}/$name";
+        my $channels = $A{'Channels'} || [];
+        $A{'Channels'} = [ @$channels, { 'type'=>'unix', 'target'=>{ 'type'=>'virtio', 'name'=>'com.redhat.rhevm.vdsm' }, 'source'=>{ 'mode'=>'bind', 'path'=>$channelpath } } ];
+        
     }
 
     my $VM = VirtMachine->new( %A );
@@ -561,31 +655,24 @@ sub vmLoad {
         return wantarray() ? %$VM : $VM;
     }
 
-    # disk devices
-    my @Disks = ();
-    if( ref($p{'disk'}) eq 'ARRAY' ){
-        @Disks = @{$p{'disk'}};
-    } else {
-        my %D = ();
-
-        $D{'path'} = $p{'path'} || $p{'disk'}{'path'};
-
-        if( $D{'path'} ){
-            $D{'device'} = $p{'diskdevice'} || $p{'disk'}{'device'};
-            $D{'drivertype'} = $p{'diskdrivertype'} || $p{'disk'}{'drivertype'};
-            $D{'drivername'} = $p{'diskdrivername'} || $p{'disk'}{'drivername'};
-            $D{'target'} = $p{'disktarget'} || $p{'disk'}{'target'};
-            $D{'readonly'} = $p{'diskreadonly'} || $p{'disk'}{'readonly'};
-            $D{'node'} = $p{'disknode'} || $p{'disk'}{'node'};
-            $D{'bus'} = $p{'diskbus'} || $p{'disk'}{'bus'};
-
-            push(@Disks,\%D);
-        }
+    my @HostDevs = ();
+    
+    if( ref($p{'hostdevs'}) eq 'ARRAY' ){
+        @HostDevs = @{$p{'hostdevs'}};
     }
+
+    for my $hdev (@HostDevs){
+
+        $VM->add_hostdev(%$hdev);
+    }
+
+    # disk devices
+    my @Disks = $self->get_loadvm_disks_params(%p);
+
     my $htype = $self->get_type();
     my $ostype = $VM->get_os_type();
     for my $D (@Disks){
-        $D = $self->set_disk_node( %$D, 'hypervisor_type'=>$htype, 'os_type'=>$ostype );
+        $D = $self->set_disk_node( %$D, 'hypervisor_type'=>$htype, 'os_type'=>$ostype, 'NEWDISKS'=>\@Disks );
         my $VD = $VM->add_disk(%$D);
         # initialized if not yet
 # CMAR 03/03/2010
@@ -659,6 +746,9 @@ sub set_disk_node {
     my $htype = delete $p{'hypervisor_type'};
     my $ostype = delete $p{'os_type'};
 
+    my $new_disks = delete $p{'NEWDISKS'};
+    my $old_disks = delete $p{'OLDDISKS'};
+
     # if target present
     if( $p{'target'} ){
         # override node
@@ -680,12 +770,29 @@ sub set_disk_node {
         }
     } elsif( !$p{'node'} ){    # try determinate best node type
         if( $p{'device'} eq 'cdrom' ){
-            if( $htype eq 'xen' ){
-                $p{'node'} = 'xvd';
-                $p{'bus'} = 'xen';
-            } else {
-                $p{'node'} = 'hd';
-                $p{'bus'} = 'ide';
+            $p{'node'} = 'hd';  # by default
+            $p{'bus'} = 'ide';
+            if( $htype eq 'kvm' ){
+                if( !-e "$p{'path'}" ){
+                    $p{'path'} = '/dev/null';
+                }
+            } elsif( $htype =~ 'xen' ){
+                if( $new_disks ){
+                    if( grep { $_->{'bus'} eq 'xen' } @$new_disks ){
+                        $p{'node'} = 'xvd';
+                        $p{'bus'} = 'xen';
+                    }
+                }
+                if( $old_disks ){
+                    if( grep { $_->{'bus'} eq 'xen' } @$old_disks ){
+                        $p{'node'} = 'xvd';
+                        $p{'bus'} = 'xen';
+                    }
+                }
+            } elsif( $htype eq 'kvm' ){
+                if( !-e "$p{'path'}" ){
+                    $p{'path'} = '/dev/null';
+                }
             }
         }  else {
             if( ( $ostype eq 'hvm')
@@ -812,7 +919,19 @@ sub prep_disk_params {
     if( defined $p{'disk'} ){
         my $disk = $p{'disk'};
         if( !ref($disk) ){
-            $p{'disk'} = &prep_comma_sep_fields($disk);
+            $p{'disk'} = &prep_comma_sep_fields($disk,
+                                                        sub {
+                                                            my (%D) = @_;
+                                                            my $format = delete($D{'format'});
+                                                            if( !$D{'drivertype'} && !$D{'drivername'} && $format ){
+                                                                if( $hypervisor_type eq 'kvm' ){
+                                                                    $D{'drivername'} = "qemu";
+                                                                    $D{'drivertype'} = $format;
+                                                                }
+                                                            }
+                                                            return wantarray() ? %D : \%D;
+
+                                                        });
         }
     }
     return wantarray() ? %p : \%p;
@@ -836,13 +955,68 @@ sub prep_network_params {
                                                                 $N{'type'} = "user";
                                                             }
                                                         }
-                                                        return wantarray() ? %N : \%N
+                                                        if( ($N{'model'} eq 'xen') && ($hypervisor_type =~ 'xen') ){
+                                                            delete($N{'model'});
+                                                        }
+                                                        return wantarray() ? %N : \%N;
                                                     });
             $p{'network'} = \@Network;
         }
     }
     return wantarray() ? %p : \%p;
 }
+
+sub prep_hostdev_obj{
+    my %p = @_;
+    plog('PREP_HOSTDEV_OBJ');
+    plog($p{'type'});
+
+    if($p{'type'} eq 'usb'){
+        unless($p{'vendor'} =~ /0x/){
+            $p{'vendor'} = '0x'.$p{'vendor'};
+        }
+    
+        unless($p{'product'} =~ /0x/){
+            $p{'product'} = '0x'.$p{'product'};
+        }
+
+        delete $p{'bus'};
+        delete $p{'slot'};
+        delete $p{'function'};
+    }elsif($p{'type'} eq 'pci'){
+        unless($p{'bus'} =~ /0x/){
+            $p{'bus'} = '0x'.$p{'bus'};
+        }
+    
+        unless($p{'slot'} =~ /0x/){
+            $p{'slot'} = '0x'.$p{'slot'};
+        }
+    
+        unless($p{'function'} =~ /0x/){
+            $p{'function'} = '0x'.$p{'function'};
+        }
+
+        delete $p{'vendor'};
+        delete $p{'product'};
+    }
+
+    return wantarray() ? %p : \%p;
+}
+
+sub prep_hostdevs_params {
+    my $self = shift;
+    my (%p) = @_;
+
+    if( defined $p{'hostdevs'} ){
+        my $devs = $p{'hostdevs'};
+        if( !ref($devs) ){
+            $p{'hostdevs'} = &prep_comma_sep_fields($devs, \&prep_hostdev_obj);
+        }
+    }
+
+    return wantarray() ? %p : \%p;
+}
+
 sub prep_filesystem_params {
     my $self = shift;
     my (%p) = @_;
@@ -900,6 +1074,8 @@ sub prep_devices_params {
     %p = $self->prep_network_params(%p);
     # prepare filesystem
     %p = $self->prep_filesystem_params(%p);
+    # prepare hostdevs
+    %p = $self->prep_hostdevs_params(%p);
 
     # other stuff
 
@@ -1010,6 +1186,9 @@ sub vmInit {
     }
 
     my $xml = $self->get_xml_domain( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name() );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
     # TODO
     #   fixme - update some info
     $VM = $VM->loadfromxml( $xml );
@@ -1055,6 +1234,9 @@ sub create_n_init_vm {
     }
 
     my $xml = $self->get_xml_domain( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name() );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
     # TODO
     #   fixme - update some info
     $VM = $VM->loadfromxml( $xml );
@@ -1139,6 +1321,9 @@ sub vmReload {
 
             # get running VM
             my $rxml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+            if( isError($rxml) ){
+                return wantarray() ? %$rxml : $rxml;
+            }
             my $rVM = VirtMachine->loadfromxml( $rxml );
 
             # one live mode only change change:
@@ -1180,37 +1365,46 @@ sub vmReload {
             # ... attach/detach device 
             
             #       ... disks
-            plog "vmReload process disks..." if( &debug_level );
+            plog "vmReload process disks..." if( &debug_level > 3 );
 
             my $ndisks = $newVM->get_Disks();
             if( $ndisks ){
                 for my $VD ( @$ndisks ){
-                    plog "vmReload process disk target=",$VD->get_target()," path=",$VD->get_path() if( &debug_level );
+                    plog "vmReload process disk target=",$VD->get_target()," path=",$VD->get_path() if( &debug_level > 3 );
 
                     my $already_attached = 0;
-                    my ($oi,$oVD) = $rVM->get_disk_i( 'target'=>$VD->get_target(), 'path'=>$VD->get_path() );
-                    if( $oVD ){
-                        plog "vmReload disk exists target=",$oVD->get_target()," path=",$oVD->get_path() if( &debug_level );
-                        $already_attached = $VD->isequal( $oVD );
-                        if( !$already_attached ){
-                            plog "vmReload detach old disk target=",$oVD->get_target()," path=",$oVD->get_path() if( &debug_level );
+                    for my $disk_p ( ({ 'path'=>$VD->get_path() },{ 'target'=>$VD->get_target() }) ){
+                        my ($oi,$oVD) = $rVM->get_disk_i( %$disk_p );
+                        if( $oVD ){
+                            plog "vmReload disk exists target=",$oVD->get_target()," path=",$oVD->get_path() if( &debug_level > 3 );
+                            $already_attached = $VD->isequal( $oVD );
+                            if( !$already_attached ){
 
-                            my $D = $oVD->todevice();
-                            my $Er = $self->detachDevice( 'uuid'=>$uuid, name => $name,
-                                                            devices => { disk => $D } );
-                            if( isError($Er) ){
-                                return retErr("_ERR_DETACH_DISK_","Error detach disk '".$oVD->get_target()."'.");
+                                if( $oVD->get_device() ne 'cdrom' ){
+                                    plog "vmReload detach old disk target=",$oVD->get_target()," path=",$oVD->get_path() if( &debug_level > 3 );
+                                    my $D = $oVD->todevice();
+                                    my $Er = $self->detachDevice( 'uuid'=>$uuid, name => $name,
+                                                                    devices => { disk => $D } );
+                                    if( isError($Er) ){
+                                        return retErr("_ERR_DETACH_DISK_","Error detach disk '".$oVD->get_target()."'.");
+                                    }
+                                    sleep(2);
+                                } else {
+                                    plog "vmReload not detach old cdrom target=",$oVD->get_target()," path=",$oVD->get_path() if( &debug_level > 3 );
+                                }
+                                $oVD = $rVM->del_disk( i => $oi );
+                            } else {
+                                # mark to already attached
+                                $already_attached = 1;
                             }
-                            $oVD = $rVM->del_disk( i => $oi );
-                        } else {
-                            # mark to already attached
-                            $already_attached = 1;
+                            # dont touch
+                            $oVD->set_dontdetach(1);
                         }
-                        # dont touch
-                        $oVD->set_dontdetach(1);
                     }
 
                     if( !$already_attached ){
+                        sleep(2);
+                        plog "vmReload attach disk target=",$VD->get_target()," path=",$VD->get_path() if( &debug_level > 3 );
                         my $D = $VD->todevice();
                         my $Er = $self->attachDevice( 'uuid'=>$uuid, name => $name,
                                                         devices => { disk => $D } );
@@ -1220,7 +1414,7 @@ sub vmReload {
 
                         $rVM->add_disk( $VD->tohash(), 'dontdetach'=>1 );
                     }
-                    plog "vmReload end process disk target=",$VD->get_target()," path=",$VD->get_path() if( &debug_level );
+                    plog "vmReload end process disk target=",$VD->get_target()," path=",$VD->get_path() if( &debug_level > 3 );
                 }
             }
 
@@ -1231,7 +1425,7 @@ sub vmReload {
                 for my $oVD (@$oldisks){
                     if( $oVD ){
                         if( !$oVD->get_dontdetach() ){
-                            plog "vmReload detach old disk target=",$oVD->get_target()," path=",$oVD->get_path() if( &debug_level );
+                            plog "vmReload detach old disk target=",$oVD->get_target()," path=",$oVD->get_path() if( &debug_level > 3 );
 
                             my $D = $oVD->todevice();
                             my $Er = $self->detachDevice( 'uuid'=>$uuid, name => $name,
@@ -1249,20 +1443,20 @@ sub vmReload {
             }
 
             #       ... interfaces
-            plog "vmReload process interfaces..." if( &debug_level );
+            plog "vmReload process interfaces..." if( &debug_level > 3 );
 
             my $ninterfaces = $newVM->get_Network();
             if( $ninterfaces ){
                 for my $VN ( @$ninterfaces ){
-                    plog "vmReload process interfaces macaddr=",$VN->get_macaddr() if( &debug_level );
+                    plog "vmReload process interfaces macaddr=",$VN->get_macaddr() if( &debug_level > 3 );
 
                     my $already_attached = 0;
                     my ($oi,$oVN) = $rVM->get_network_i( 'macaddr'=>$VN->get_macaddr() );
                     if( $oVN ){
-                        plog "vmReload interface exists macaddr=",$VN->get_macaddr() if( &debug_level );
+                        plog "vmReload interface exists macaddr=",$VN->get_macaddr() if( &debug_level > 3 );
                         $already_attached = $VN->isequal( $oVN );
                         if( !$already_attached ){
-                            plog "vmReload detach old interface macaddr=",$VN->get_macaddr() if( &debug_level );
+                            plog "vmReload detach old interface macaddr=",$VN->get_macaddr() if( &debug_level > 3 );
 
                             my $D = $oVN->todevice();
                             my $Er = $self->detachDevice( 'uuid'=>$uuid, name => $name,
@@ -1289,7 +1483,7 @@ sub vmReload {
 
                         $rVM->add_network( $VN->tohash(), 'dontdetach'=>1 );
                     }
-                    plog "vmReload end process interfaces macaddr=",$VN->get_macaddr() if( &debug_level );
+                    plog "vmReload end process interfaces macaddr=",$VN->get_macaddr() if( &debug_level > 3 );
                 }
             }
 
@@ -1300,7 +1494,7 @@ sub vmReload {
                 for my $oVN (@$olinterfaces){
                     if( $oVN ){
                         if( !$oVN->get_dontdetach() ){
-                            plog "vmReload detach old interface macaddr=",$oVN->get_macaddr() if( &debug_level );
+                            plog "vmReload detach old interface macaddr=",$oVN->get_macaddr() if( &debug_level > 3 );
 
                             my $D = $oVN->todevice();
                             my $Er = $self->detachDevice( 'uuid'=>$uuid, name => $name,
@@ -1316,11 +1510,62 @@ sub vmReload {
                 }
             }
 
-            plog "vmReload live end..." if( &debug_level );
+            #       ... hostdevs
+            plog "vmReload process hostdevices..." if( &debug_level > 3 );
+
+            my $nhostdevs = $newVM->get_Hostdev();
+            if( $nhostdevs ){
+                for my $HD ( @$nhostdevs ){
+                    plog "vmReload process hostdevs type=",$HD->{'type'} if( &debug_level > 3 );
+
+                    my $already_attached = 0;
+                    my ($oi,$oHD) = $rVM->get_hostdev_i( 'type'=>$HD->{'type'}, %$HD );
+                    if( $oHD ){
+                        plog "vmReload hostdev exists type=",$HD->{'type'} if( &debug_level > 3 );
+                        # dont touch
+                        $oHD->set_dontdetach(1);
+                    } else {
+                        my $Er = $self->attachHostdev( 'uuid'=>$uuid, name => $name,
+                                                        devices => { hostdev => {%$HD} } );
+                        if( isError($Er) ){
+                            return retErr("_ERR_ATTACH_HOSTDEV_","Error attach hostdev '".$HD->{'type'}."'.");
+                        }
+
+                        $rVM->add_hostdev( %$HD, 'dontdetach'=>1 );
+                    }
+                    plog "vmReload end process hostdevs type=",$HD->{'type'} if( &debug_level > 3 );
+                }
+            }
+
+            # delete not used
+            my $olhostdevs = $rVM->get_Hostdev();
+            if( $olhostdevs ){
+                my $c = 0;
+                for my $oHD (@$olhostdevs){
+                    if( $oHD ){
+                        if( !$oHD->{'dontdetach'} ){
+                            plog "vmReload detach old hostdev type=",$oHD->{'type'} if( &debug_level > 3 );
+
+                            my $Er = $self->detachHostdev( 'uuid'=>$uuid, name => $name,
+                                                            devices => { hostdev => {%$oHD} } );
+                            if( isError($Er) ){
+                                return retErr("_ERR_DETACH_HOSTDEV_","Error detach hostdev '".$oHD->{'type'}."'.");
+                            }
+                            $rVM->del_hostdev( i=>$c );
+                            $c--;                       # one less
+                        }
+                    }
+                    $c++;
+                }
+            }
+
+            plog "vmReload live end..." if( &debug_level > 3 );
 
         } else {
             # undefine previous xml definition
-            $self->undefDomain( 'uuid'=>$uuid, 'name'=>$name );
+            # #127 - 28/08/2012
+            # CMAR: dont undefine domain to preserve domain snapshots
+            #$self->undefDomain( 'uuid'=>$uuid, 'name'=>$name );
         }
         $VM = $newVM;   # change object
 
@@ -1337,6 +1582,9 @@ sub vmReload {
         $name = $VM->get_name();
 
         my $xml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+        if( isError($xml) ){
+            return wantarray() ? %$xml : $xml;
+        }
 
         if( !$isrunning ){  # if not running
             # update info
@@ -1377,6 +1625,9 @@ sub apply_config_vm {
         }
 
         my $xml = $self->get_xml_domain( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name() );
+        if( isError($xml) ){
+            return wantarray() ? %$xml : $xml;
+        }
 
         my $prev_state = $VM->get_state();
 
@@ -1458,6 +1709,9 @@ sub vmReboot {
     }
 
     my $xml = $self->get_xml_domain( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name() );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
 
     $VM = $VM->loadfromxml( $xml );
 
@@ -1596,7 +1850,9 @@ sub umount_isosdir {
         my ($e,$m) = cmd_exec("/bin/mount | grep \"$CONF->{'isosdir'}\" | grep \"nfs\"");
         if( ( $e==0 ) && $m ){
             my ($e1,$m) = cmd_exec("/bin/umount","$CONF->{'isosdir'}");
-            return 0;
+            unless( $e1 == 0 ){
+                return 0;   # fail
+            }
         }
 
         # check if exists in /etc/fstab
@@ -1666,8 +1922,27 @@ sub loadconf {
     $CONF = ETVA::Utils::get_conf();
     $VM_DIR = $CONF->{'VM_DIR'} if( $CONF->{'VM_DIR'} );
     $TMP_DIR = $CONF->{'tmpdir'} if( $CONF->{'tmpdir'} );
+    $VIRTIO_CHANNELS_SOCKETS_DIR = $ENV{'ga_socket_dir'} || $CONF->{'ga_socket_dir'} || "$TMP_DIR/virtagent-virtio/virtio-sockets-dir";
+    $VIRTIO_CHANNELS_STATE_DIR = $ENV{'ga_state_dir'} || $CONF->{'ga_state_dir'} || "$TMP_DIR/virtagent-virtio/virtio-state-dir";
+    if( !$ENV{'ga_socket_dir'} ){
+        $ENV{'ga_socket_dir'} = $VIRTIO_CHANNELS_SOCKETS_DIR;
+    }
+    if( ! -d "$VIRTIO_CHANNELS_SOCKETS_DIR" ){
+        mkpath("$VIRTIO_CHANNELS_SOCKETS_DIR");
+    }
+    if( !$ENV{'ga_state_dir'} ){
+        $ENV{'ga_state_dir'} = $VIRTIO_CHANNELS_STATE_DIR;
+    }
+    if( ! -d "$VIRTIO_CHANNELS_STATE_DIR" ){
+        mkpath("$VIRTIO_CHANNELS_STATE_DIR");
+    }
     &set_debug_level( $CONF->{'debug'} || 0 );
 
+    # fix agent name resolution to ip
+    if( $CONF->{'name'} ){
+        ETVA::NetworkTools::fix_hostname_resolution($CONF->{'name'}, $CONF->{'IP'} || $CONF->{'LocalIP'} || '127.0.0.1');
+    }
+    
     &mount_isosdir();
 }
 
@@ -1727,7 +2002,9 @@ sub getVM {
 
     my $VM = VMSCache::getVMFromUuid($uuid);
 
-    if( !$VM && $p{'force'} ){
+    plog( &nowStr()," [info] Call getVM name=$name uuid=$uuid vm=$VM" );
+
+    if( !$VM || $p{'force'} ){
         $VM = $self->loadVM(%p);
     }
 
@@ -1861,6 +2138,10 @@ sub vms_xml {
             'uuid'  => $VM->get_uuid(),
             'xml'   => $xml
         );
+        if( isError($xml) ){
+            $vmh{'xml'} = '';
+            $vmh{'xmlWithErrors'} = 1;
+        }
         push @list, \%vmh;
     }
     return wantarray() ? @list : \@list;
@@ -1960,6 +2241,13 @@ sub attach_disk {
             $D{'node'} = $p{'disknode'} || $p{'disk'}{'node'};
             $D{'bus'} = $p{'diskbus'} || $p{'disk'}{'bus'};
 
+            if( !$D{'drivertype'} && !$D{'drivername'} && ($p{'diskformat'} || $p{'disk'}{'format'}) ){
+                if( $self->get_hypervisor_type() eq 'kvm' ){
+                    $D{'drivername'} = "qemu";
+                    $D{'drivertype'} = $p{'diskformat'} || $p{'disk'}{'format'};
+                }
+            }
+
             push(@Disks,\%D);
         }
     }
@@ -1983,7 +2271,11 @@ sub attach_disk {
         my $new_VM = $VM->clone();
 
         # get running VM
-        my $rVM = VirtMachine->loadfromxml( $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name ) );
+        my $xml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+        if( isError($xml) ){
+            return wantarray() ? %$xml : $xml;
+        }
+        my $rVM = VirtMachine->loadfromxml( $xml );
 
         for my $D (@Disks){
             my %TD = ( 'path' => $D->{'path'},
@@ -1995,7 +2287,7 @@ sub attach_disk {
                             'node' => $D->{'node'},
                             'bus' => $D->{'bus'}
                             );
-            %TD = $self->set_disk_node( %TD, 'hypervisor_type'=>$htype, 'os_type'=>$ostype );
+            %TD = $self->set_disk_node( %TD, 'hypervisor_type'=>$htype, 'os_type'=>$ostype, 'NEWDISKS'=>\@Disks, 'OLDDISKS'=>$rVM->get_Disks() );
             my $VD = $new_VM->add_disk( %TD );
 
             # if is running and live flag on
@@ -2070,7 +2362,11 @@ sub detach_disk {
     my $new_VM = $VM->clone();
 
     # get running VM
-    my $rVM = VirtMachine->loadfromxml( $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name ) );
+    my $xml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
+    my $rVM = VirtMachine->loadfromxml( $xml );
 
     my $VD = $new_VM->get_disk( i => $p{'i'} );
     if( $VD ){
@@ -2170,7 +2466,11 @@ sub attach_interface {
         my $new_VM = $VM->clone();
 
         # get running VM
-        my $rVM = VirtMachine->loadfromxml( $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name ) );
+        my $xml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+        if( isError($xml) ){
+            return wantarray() ? %$xml : $xml;
+        }
+        my $rVM = VirtMachine->loadfromxml( $xml );
 
         for my $N (@Network){
             my %TN = ( 'type' => $N->{'type'},
@@ -2255,7 +2555,11 @@ sub detach_interface {
     my $new_VM = $VM->clone();
 
     # get running VM
-    my $rVM = VirtMachine->loadfromxml( $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name ) );
+    my $xml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
+    my $rVM = VirtMachine->loadfromxml( $xml );
 
     my $VN = $new_VM->get_network( i => $p{'i'}, macaddr => $p{'macaddr'} );
     if( $VN ){
@@ -2332,7 +2636,11 @@ sub detachall_interfaces {
     my $new_VM = $VM->clone();
 
     # get running VM
-    my $rVM = VirtMachine->loadfromxml( $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name ) );
+    my $xml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
+    my $rVM = VirtMachine->loadfromxml( $xml );
 
     while( my $VN = $new_VM->last_network() ){
         # if is running and live flag on
@@ -2438,7 +2746,11 @@ sub attach_filesystem {
         my $new_VM = $VM->clone();
 
         # get running VM
-        my $rVM = VirtMachine->loadfromxml( $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name ) );
+        my $xml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+        if( isError($xml) ){
+            return wantarray() ? %$xml : $xml;
+        }
+        my $rVM = VirtMachine->loadfromxml( $xml );
 
         for my $F (@Filesystem){
             # if is running and live flag on
@@ -2512,7 +2824,11 @@ sub detach_filesystem {
     my $new_VM = $VM->clone();
 
     # get running VM
-    my $rVM = VirtMachine->loadfromxml( $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name ) );
+    my $xml = $self->get_xml_domain( 'uuid'=>$uuid, 'name'=>$name );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
+    my $rVM = VirtMachine->loadfromxml( $xml );
 
     my $VF = $new_VM->get_filesystem( i => $p{'i'} );
     if( $VF ){
@@ -2523,6 +2839,7 @@ sub detach_filesystem {
             if( isError($S) ){
                 return wantarray() ? %$S : $S;
             }
+            $rVM->del_filesystem( i => $p{'i'} );
         }
         $VF = $new_VM->del_filesystem( i => $p{'i'} );
 
@@ -2634,7 +2951,7 @@ sub create_network {
 
     # generate xml
     my $xml = VirtAgent->genXMLNetwork( 'network' => \%X );
-    plog "create_network xml=",$xml if( &debug_level );
+    plog "create_network xml=",$xml if( &debug_level > 3 );
 
     my $vm = $self->vmConnect();
     if( isError($vm) ){
@@ -2658,7 +2975,7 @@ sub create_network {
     }
 
     my $dxml = $vn->get_xml_description();
-    plog "create_network xml=",$dxml,"\n" if( &debug_level );
+    plog "create_network xml=",$dxml,"\n" if( &debug_level > 3 );
 
     $name = $vn->get_name();
     my %N = ( 'name' => $name,
@@ -2720,7 +3037,7 @@ sub create_network {
 
                 # generate xml
                 my $xml_2 = VirtAgent->genXMLNetwork( 'network' => \%X );
-                plog "xml_2=",$xml_2 if( &debug_level );
+                plog "xml_2=",$xml_2 if( &debug_level > 3 );
 
                 eval {
                     $vn = $vm->define_network($xml_2);
@@ -2736,15 +3053,15 @@ sub create_network {
                 # change ip address
                 # clear bridge when set ip
                 $IC{'ipaddr'} = '0.0.0.0';
-                VirtAgent::Network->boot_chgipaddr( 'if'=>$if, 'ipaddr'=>'0.0.0.0', 'netmask'=>'', 'network'=>'', 'bridge'=>'', bootproto=>'none' );
-                my %br = ( 'name'=>$N{'bridge'}, 'address'=>$ipaddr, 'type'=>'Bridge', 'bootproto'=>'none', 'up'=>1 );
+                VirtAgent::Network->boot_chgipaddr( 'if'=>$if, 'ipaddr'=>'0.0.0.0', 'netmask'=>'', 'network'=>'', 'bridge'=>'', bootproto=>'static' );
+                my %br = ( 'name'=>$N{'bridge'}, 'address'=>$ipaddr, 'type'=>'Bridge', 'bootproto'=>'static', 'up'=>1 );
                 $BC{'ipaddr'} = $ipaddr;
                 $BC{'netmask'} = $br{'netmask'} = $netmask if( $netmask );
                 $BC{'gateway'} = $br{'gateway'} = $gateway if( $gateway );
                 VirtAgent::Network->save_boot_interface( 'name'=>$N{'bridge'}, %br );
             } else {
-                VirtAgent::Network->boot_chgipaddr( 'if'=>$if, 'ipaddr'=>'0.0.0.0', 'netmask'=>'', 'network'=>'', 'bridge'=>'', bootproto=>'none' );
-                my %br = ( 'name'=>$N{'bridge'}, 'type'=>'Bridge', 'bootproto'=>'none', 'up'=>1 );
+                VirtAgent::Network->boot_chgipaddr( 'if'=>$if, 'ipaddr'=>'0.0.0.0', 'netmask'=>'', 'network'=>'', 'bridge'=>'', bootproto=>'static' );
+                my %br = ( 'name'=>$N{'bridge'}, 'type'=>'Bridge', 'bootproto'=>'static', 'up'=>1 );
                 VirtAgent::Network->save_boot_interface( 'name'=>$N{'bridge'}, %br );
             }
         }
@@ -3264,6 +3581,9 @@ sub updateStateVM {
     }
 
     my $xml = $self->get_xml_domain( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name() );
+    if( isError($xml) ){
+        return wantarray() ? %$xml : $xml;
+    }
 
     if( $p{'sync'} ){
         $VM = $VM->loadfromxml( $xml );
@@ -3447,15 +3767,10 @@ sub migrate_vm {
     if( $p{'dagentname'} && ($p{'duri'} =~ m/:\/\/(\d+\.\d+\.\d+\.\d+)\//) ){
         my $agentip = $1;
         my $agentname = $p{'dagentname'};
-        # check if hostname define
-        # TODO check alias
-        if( ! grep { $_->{'Hostname'} eq $agentname } ETVA::NetworkTools::get_hosts_list() ){
-            ETVA::NetworkTools::add_hosts_list($agentname,$agentip);
-        }
+        ETVA::NetworkTools::fix_hostname_resolution($agentname,$agentip);
     }
     
     my %E = $self->vmMigrate(%p);
-    
     if( !isError(%E) ){
         my $VM = $self->getVM(%p, 'force'=>1 ); # force to get actualized
         if( $VM ){  # if exists
@@ -3698,11 +4013,11 @@ sub create_storage_pool {
         $pool{'target'}{'encryption'}{'type'} = $p{'target_encryption_type'} || $p{'encryption_type'};
     }
 
-    plog "hash=",Dumper(\%p) if( &debug_level );
+    plog "hash=",Dumper(\%p) if( &debug_level > 3 );
 
     my $xml = VirtAgent::Storage->gen_xml_storage_pool( %pool );
 
-    plog "xml=",$xml if( &debug_level );
+    plog "xml=",$xml if( &debug_level > 3 );
 
     my $SP;
     
@@ -3868,11 +4183,11 @@ sub create_storage_volume {
         $volume{'backingStore'}{'permissions'}{'label'} = $p{'backingStore_permissions_label'} || $p{'permissions_label'} if( $p{'backingStore_permissions_label'} || $p{'permissions_label'} );
     }
 
-    plog "hash=",Dumper(\%p) if( &debug_level );
+    plog "hash=",Dumper(\%p) if( &debug_level > 3 );
 
     my $xml = VirtAgent::Storage->gen_xml_storage_volume( %volume );
 
-    plog "xml=",$xml if( &debug_level );
+    plog "xml=",$xml if( &debug_level > 3 );
 
     my $SV;
     
@@ -4008,7 +4323,7 @@ sub _change_ip {
             if( $p{'dhcp'} ){   # dhcp
                 $p{'bootproto'} = 'dhcp';
             } else {            # manual
-                $p{'bootproto'} = 'none';
+                $p{'bootproto'} = 'static';
                 # check ip
                 if( !ETVA::NetworkTools::valid_ipaddr($p{'ip'}) ){
                     return retErr("_ERR_CHANGE_IP_","Error: invalid IP.");
@@ -4081,6 +4396,7 @@ sub change_ip {
         plog "going down.... Dump=",Dumper($CONF),"\n";
         # restart process
         #kill SIGHUP, $$;
+        sleep(2);
         $self->reinitialize();
     }
 
@@ -4097,6 +4413,34 @@ sub change_uuid {
     $self->reinitialize();
 
     return retOk("_OK_","ok");
+}
+
+# change_uuid: change uuid and reinitialize
+sub shutdown {
+    my $self = shift;
+    my (%p) = @_;
+    my ($e,$m) = cmd_exec("poweroff");
+
+    if($e != 0){
+        return retErr("_ERR_POWEROFF_",$m);
+    }else{
+        return retOk("_OK_","ok");
+    }
+}
+
+sub get_pci_devices{
+    my $self = shift;
+    my %hostdev = ();
+    my @devices = ETVA::Devices::pci_dev_list();
+
+#    plog(Dumper(\@devices));
+    return wantarray() ? @devices : \@devices; 
+}
+
+sub get_usb_devices{
+    my $self = shift;
+    my @devices = ETVA::Devices::usb_dev_list();
+    return wantarray() ? @devices : \@devices; 
 }
 
 =item get_va_ipconf
@@ -4160,12 +4504,7 @@ sub change_va_name {
         ETVA::NetworkTools::change_hostname($p{'name'});
 
         # generate server certificates
-
-        my $runproc = fork();
-        if( defined($runproc) && ( $runproc == 0 ) ){
-            # generate certificates on fork child
-            ETVA::Utils::gencerts( $CONF->{'Organization'}, $p{'name'}, 1 );
-        }
+        ETVA::Utils::gencerts( $CONF->{'Organization'}, $p{'name'}, 1 );
 
         return retOk("_OK_CHANGE_VA_NAME_","Change name ok!", "_RET_OBJ_", { 'name'=>$p{'name'} } );
     } else {
@@ -4232,10 +4571,19 @@ sub vm_ovf_import {
         }
     }
 
-    my @features = $p{'features'} ? keys %{$p{'features'}} : map { s/feature_(\w+)/$1/ } grep { /feature_/ } keys %p; 
-    if( @features ){
-        $p{'features'} = { map { $_ => 1 } @features };
+    my %features = ();
+    if( $p{'features'} ){
+        %features = %{$p{'features'}};
+    } else {
+        my @keysfeatures = map { s/feature_(\w+)/$1/ } grep { /feature_/ } keys %p; 
+        foreach my $kf (@keysfeatures){
+            $features{"$kf"} = $p{"$kf"};
+        }
     }
+    if( %features ){
+        $p{'features'} = { %features };
+    }
+
     if( $p{'acpi'} ){
         $p{'features'}{'acpi'} = 1;
     }
@@ -4272,6 +4620,9 @@ sub vm_ovf_import {
                 }
 
                 my $xml = $self->get_xml_domain( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name() );
+                if( isError($xml) ){
+                    return wantarray() ? %$xml : $xml;
+                }
 
                 plog "vm_ovf_import xml=$xml";
 
@@ -4319,15 +4670,17 @@ sub vm_ovf_export {
         return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
     }
 
+    my $name = $VM->get_name();
+
     #$p{'export_path_dir'} = $TMP_DIR if( !$p{'export_path_dir'} );
-    $p{'export_ovf_file'} = $VM->get_name() . ".ovf" if( !$p{'export_ovf_file'} );
+    $p{'export_ovf_file'} = $name . ".ovf" if( !$p{'export_ovf_file'} );
 
     my %F = $VM->ovf_export(%p);
 
     # set blocking for wait to transmission end
     $sock->blocking(1);
 
-    my $fn_ova = "$F{'ovf_file'}" || $VM->get_name() . ".ova";
+    my $fn_ova = "$F{'ovf_file'}" || $name . ".ova";
     $fn_ova =~ s/\.ovf/.ova/;
     my $fn_ovf = $F{'ovf_file'};
 #    print $sock 'Content-disposition: attachment; filename="',$fn_ova,'"',"\n";
@@ -4335,22 +4688,138 @@ sub vm_ovf_export {
 
     plog( "fn_ova=$fn_ova fn_ovf=$fn_ovf" );
 
+    my $bkp_randtmpdir = my $bkp_randtmpdir_ori = ETVA::Utils::rand_tmpdir("${TMP_DIR}/.virtd-export-backup-${name}");
+
     my $tar = new ETVA::ArchiveTar( 'handle'=>$sock );
+
+    if( $p{'location'} ){
+        my $E = $bkp_randtmpdir = &_pre_copy_backup_to_location( %p, 'backup_dir'=>$bkp_randtmpdir );
+        if( isError($E) ){
+            return wantarray() ? %$E: $E;
+        }
+        my $tar_randtmpfile = ETVA::Utils::rand_tmpfile("${bkp_randtmpdir}/ovf-export-${name}") . "tar";
+        $tar = new ETVA::ArchiveTar( 'file'=>$tar_randtmpfile );
+    }
+
     $tar->add_file( 'name'=>"$fn_ovf", 'path'=>'', 'data'=>$F{'xml'}, type=>ETVA::ArchiveTar::FILE, 'mode'=>33204, 'mtime'=>now()  );
 
     for my $D (@{$F{'Disks'}}){ 
+        next if( $D->get_device() eq 'cdrom' ); # ignore CDROM
+
         my $oripath = $D->get_path();
         if( -l $oripath ){
             $oripath = readlink($oripath);
         }
         my $fname = $D->get_filename();
-        plog ("file name=$fname oripath=$D->{'path'}($oripath)");
-        $tar->add_file( 'name'=>"$fname", 'path'=>"$oripath", type=>ETVA::ArchiveTar::FILE, 'mode'=>33204, 'mtime'=>now() );
+
+        my $bkp_path = $oripath;
+        if( my $snapshot = $p{'snapshot'} ){    # if has snapshot do export from snapshot
+            $bkp_path = "${bkp_randtmpdir}/${fname}";
+            plog( "vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... " );
+            my $E = $self->backupsnapshot('olv'=>$oripath, 'slv'=>$snapshot, 'backup'=>$bkp_path, 'use_qemu'=>$p{'use_qemu'} );
+            if( isError($E) ){
+                plog( "vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... ERROR!" );
+                return wantarray() ? %$E: $E;
+            }
+            plog( "vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... done" );
+        }
+        plog ("file name=$fname oripath=$D->{'path'}($oripath) bkp_path=$bkp_path");
+        $tar->add_file( 'name'=>"$fname", 'path'=>"$bkp_path", type=>ETVA::ArchiveTar::FILE, 'mode'=>33204, 'mtime'=>now() );
     }
-    $tar->write();
+    
+    if( !$p{'_do_not_generate_tar_'} ){
+        $tar->write();
+    } else {
+        # write .ovf to tmpdir
+        open(FOVF,">${bkp_randtmpdir}/$fn_ovf");
+        print FOVF $F{'xml'};
+        close(FOVF);
+    }
+
+    if( $p{'location'} ){
+        # TODO move to location $bkp_randtmpdir
+        &_pos_copy_backup_to_location( %p, 'backup_dir'=>$bkp_randtmpdir );
+        rmdir $bkp_randtmpdir_ori if( -d "$bkp_randtmpdir_ori" );   # if exists remove it
+    } else {
+        rmtree $bkp_randtmpdir; # remove dir recursively
+    }
 
     # no return... must write to socket...
     return;
+}
+
+# prepare location to copy backup
+sub _pre_copy_backup_to_location {
+    my ($location,$backupdir) = my %p = @_;
+    if( $p{'backup_dir'} || $p{'location'} ){
+        $location = $p{'location'};
+        $backupdir = $p{'backup_dir'};
+    }
+
+    if( $location =~ m/ftp:\/\// ){
+        # TODO for FTP and/or HTTP
+        return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: invalid location");
+    } elsif( -d "$location" ){
+        return $location;
+    } elsif( ($location =~ m/smb:\/\//) ||
+                ($location =~ m/nfs:\/\//) ||
+                (-b "$location") ||
+                (-e "$location" ) ){
+        $backupdir ||= ETVA::Utils::rand_tmpdir("${TMP_DIR}/.virtd-copy_backup_to_location-tmdir");
+
+        if( $location =~ m/smb:\/\// ){
+            my @opts = ();
+            my $ofs = ($location =~ m/smb:\/\//)? 4: 0;
+            if( $location =~ s/smb:\/\/(\S+):(\S+)\@/smb:\/\// ){
+                my ($username,$password) = ($1,$2);
+                push(@opts,"-o","username=$username,password=$password");
+            }
+            my $nl = substr($location,$ofs);
+            my ($e,$m) = cmd_exec("mount",$nl,$backupdir,@opts);
+            unless( $e == 0 ){
+                return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: $m");
+            }
+        } elsif( $location =~ m/nfs:\/\// ){
+            my $ofs = ($location =~ m/nfs:\/\//)? 6: 4;
+            my $nl = substr($location,$ofs);
+            my ($e,$m) = cmd_exec("mount",$nl,$backupdir);
+            unless( $e == 0 ){
+                return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: $m");
+            }
+        } elsif( -b "$location" ){
+            my ($e,$m) = cmd_exec("mount",$location,$backupdir);
+            unless( $e == 0 ){
+                return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: $m");
+            }
+        } elsif( -e "$location" ){
+            my ($e,$m) = cmd_exec("mount","-o","loop",$location,$backupdir);
+            unless( $e == 0 ){
+                return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: $m");
+            }
+        }
+    } else {
+        return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: invalid location");
+    }
+    return $backupdir;
+}
+# post call for copy backup to location
+sub _pos_copy_backup_to_location {
+    my ($backupdir, $location) = my %p = @_;
+    if( $p{'backup_dir'} || $p{'location'} ){
+        $location = $p{'location'};
+        $backupdir = $p{'backup_dir'};
+    }
+
+    if( $location =~ m/ftp:\/\// ){
+        # TODO for FTP and/or HTTP
+    } elsif( -d "$location" ){
+    } elsif( ($location =~ m/smb:\/\//) ||
+                ($location =~ m/nfs:\/\//) ||
+                (-b "$location") ||
+                (-e "$location" ) ){
+        cmd_exec("umount",$backupdir);
+        rmdir($backupdir);
+    }
 }
 
 sub set_imchild { $PARENT = 0; }
@@ -4413,6 +4882,16 @@ sub get_backupconf {
 
         $self->get_agentinfo($infofile);
         $tar->add_file( 'name'=>$infofile, 'path'=>$infofile );
+
+        my $sos = $self->get_sosreport();
+        if($sos){
+            my @sosfiles = glob $sos;
+            print "[INFO] @sosfiles";
+            for my $f (@sosfiles){
+                print "[INFO] Adding file $f\n";
+                $tar->add_file( 'name'=>$f, 'path'=>$f);
+            }
+        }
         
         my @xml = $self->vms_xml();
         foreach my $x (@xml){
@@ -4426,9 +4905,22 @@ sub get_backupconf {
     return;
 }
 
+
+sub get_sosreport {
+    my $sosfiles = '/tmp/sosreport*';
+
+    my $res = `/usr/sbin/sosreport --batch --name=eurotux --no-progressbar;`;
+    if($?){
+        print STDERR "[ERROR] sosreport problem $res \n";
+        return 0;       
+    }
+    return $sosfiles;
+}
+
 sub get_agentinfo {
     my $self = shift;
     my $filename = shift;
+
     open FILE, ">$filename";
     my $oldhandle = select FILE;
     print " ============ UPTIME =========== \n";
@@ -4499,7 +4991,10 @@ sub set_backupconf {
     return;
 }
 
-sub vm_create_snapshot {
+=com # this manual way to create snapshots
+    # This should be deprecated with new libvirt versions
+=cut
+sub vm_create_snapshot_manualway {
     my $self = shift;
     my %p = @_;
 
@@ -4530,6 +5025,9 @@ sub vm_create_snapshot {
         # save vm config??
         my $snapshot_xmlfile = "${snapshots_dir}/${name}-snapshot-${tag}.xml";
         my $xml = $self->get_xml_domain(%p);
+        if( isError($xml) ){
+            return wantarray() ? %$xml : $xml;
+        }
         open(F,">$snapshot_xmlfile");
         print F $xml;
         close(F);
@@ -4538,7 +5036,7 @@ sub vm_create_snapshot {
         my $disks = $VM->get_Disks();
         if( $disks ){
             for my $D (@$disks){
-                $self->createsnapshot( 'olv'=>$D->get_path(), 'tag'=>$tag, 'extents'=>'20%FREE' );
+                $self->createsnapshot( %p, 'olv'=>$D->get_path(), 'name'=>$tag, 'extents'=>'20%FREE' );
                 # TODO testing errors
             }
         }
@@ -4547,7 +5045,7 @@ sub vm_create_snapshot {
     return retOk("_VM_CREATE_SNAPSHOT_OK_","Virtual machine snapshot created successfully","_RET_OBJ_",\%H);
 }
 
-sub vm_revert_snapshot {
+sub vm_revert_snapshot_manualway {
     my $self = shift;
     my %p = @_;
 
@@ -4575,6 +5073,9 @@ sub vm_revert_snapshot {
     # revert vm config??
     my $snapshot_xmlfile = "${snapshots_dir}/${name}-snapshot-${tag}.xml";
     #my $xml = $self->get_xml_domain(%p);
+    #if( isError($xml) ){
+    #    return wantarray() ? %$xml : $xml;
+    #}
     #open(F,">$snapshot_xmlfile");
     #print F $xml;
     #close(F);
@@ -4583,7 +5084,7 @@ sub vm_revert_snapshot {
     my $disks = $VM->get_Disks();
     if( $disks ){
         for my $D (@$disks){
-            $self->convertsnapshot( 'olv'=>$D->get_path(), 'tag'=>$tag  );
+            $self->revertsnapshot( %p, 'olv'=>$D->get_path(), 'name'=>$tag );
             # TODO testing errors
         }
     }
@@ -4595,7 +5096,7 @@ sub vm_revert_snapshot {
     return retOk("_VM_REVERT_SNAPSHOT_OK_","Virtual machine snapshot reverted successfully","_RET_OBJ_",\%H);
 }
 
-sub vm_list_snapshots {
+sub vm_list_snapshots_manualway {
     my $self = shift;
     my %p = @_;
 
@@ -4627,6 +5128,290 @@ sub vm_list_snapshots {
         closedir(D);
     }
     return wantarray() ? @list : \@list;
+}
+# END snapshots manual way
+
+sub vm_create_snapshot {
+    my $self = shift;
+    my %p = @_;
+
+    my $VM = $self->getVM(%p);
+    if( !$VM ){
+        return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
+    }
+
+    my $E = $self->create_snapshot(%p);
+    if( isError($E) ){
+        return wantarray() ? %$E: $E;
+    }
+    return retOk("_VM_CREATE_SNAPSHOT_OK_","Virtual machine snapshot created successfully.","_RET_OBJ_",$E->{'_RET_OBJ_'});
+}
+
+sub vm_revert_snapshot {
+    my $self = shift;
+    my %p = @_;
+
+    my $VM = $self->getVM(%p);
+    if( !$VM ){
+        return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
+    }
+
+    # revert snapshot
+    my $E = $self->revert_snapshot(%p);
+    if( isError($E) ){
+        return wantarray() ? %$E: $E;
+    }
+    return retOk("_VM_REVERT_SNAPSHOT_OK_","Virtual machine snapshot reverted successfully.","_RET_OBJ_",$E->{'_RET_OBJ_'});
+}
+sub vm_remove_snapshot {
+    my $self = shift;
+    my %p = @_;
+
+    my $VM = $self->getVM(%p);
+    if( !$VM ){
+        return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
+    }
+
+    # remove snapshot
+    my $E = $self->remove_snapshot(%p);
+    if( isError($E) ){
+        return wantarray() ? %$E: $E;
+    }
+    return retOk("_VM_REMOVE_SNAPSHOT_OK_","Virtual machine snapshot removed successfully.","_RET_OBJ_",$E->{'_RET_OBJ_'});
+}
+
+sub vm_list_snapshots {
+    my $self = shift;
+    my %p = @_;
+
+    my $VM = $self->getVM(%p);
+    if( !$VM ){
+        return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
+    }
+    return $self->list_snapshots(%p);
+}
+
+sub vm_backup_snapshot {
+    my $self = shift;
+    my %p = @_;
+
+    my $VM = $self->getVM(%p);
+    if( !$VM ){
+        return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
+    }
+
+    my $Snapshot = $self->get_snapshot(%p);
+    if( isError($Snapshot) ){
+        return wantarray() ? %$Snapshot: $Snapshot;
+    }
+
+    return $self->vm_ovf_export(%p, 'snapshot'=>$Snapshot->{'name'} );
+    
+}
+
+###### GUEST AGENT METHODS ######
+sub refreshGAInfo{
+    my $self = shift;
+    my (%p) = @_;
+        
+    plogNow("[info] - VirtAgentInterface - refreshGAInfo called");
+    
+    # get plone info
+    $self->plone_info(%p);
+
+    my $client;
+    eval {
+        $client = GuestAgent::Client->new(
+            'addr'  => 'localhost',
+            'port'  => '7778',
+            'proto' => 'tcp'
+        );
+    };
+    if( $@ ){
+        return retErr("_ERR_REFRESH_GA_CLIENT_CREATE_","Couldn't create guest agent client connection: $@");
+    }
+    
+    my $res;
+    eval {
+        $res = $client->connect(
+            'vmname'    => $p{'vmname'},
+        );
+    };
+    if( $@ ){
+        return retErr("_ERR_REFRESH_GA_CONNECT_","Couldn't connect to guest agent: $@");
+    }
+
+    my %obj = ();
+    eval {
+        %obj = %{ decode_json $res };
+        
+        if($obj{'success'} eq GuestAgent::MessageFactory::OK){
+            $res = $client->refresh('vmname' => $p{'vmname'});
+            $res = $client->getState('vmname' => $p{'vmname'});
+            #print Dumper \%obj;
+            %obj = %{ decode_json $res };
+        }
+    };
+    if( $@ ){
+        return retErr("_ERR_REFRESH_GA_REFRESH_","Couldn't refresh state of guest agent: $@");
+    }
+
+    $client->disconnect();
+    return wantarray() ? %obj: \%obj;
+}
+
+sub plone_info{
+    my $self = shift;
+    my (%p) = @_;
+        
+    plog("plone_info called") if( &debug_level > 3 );
+
+    my $client;
+    eval {
+        $client = GuestAgent::Client->new(
+            'addr'  => 'localhost',
+            'port'  => '7778',
+            'proto' => 'tcp'
+        );
+    };
+    if( $@ ){
+        return retErr("_ERR_PLONE_INFO_GA_CLIENT_CREATE_","Couldn't create guest agent client connection: $@");
+    }
+    
+    my $res;
+    eval {
+        $res = $client->connect(
+            'vmname'    => $p{'vmname'},
+        );
+    };
+    if( $@ ){
+        return retErr("_ERR_PLONE_INFO_GA_CONNECT_","Couldn't connect to guest agent: $@");
+    }
+
+    my %obj = ();
+    eval {
+        %obj = %{ decode_json $res };
+        
+        if($obj{'success'} eq GuestAgent::MessageFactory::OK){
+            $client->genericMsg(
+                'vmname'    => $p{'vmname'},
+                'action'    => GuestAgent::MessageFactory::ETASPCOMMAND,
+                'method'    => 'getInstanceMetadata'
+            );
+            
+            $client->genericMsg(
+                'vmname'    => $p{'vmname'},
+                'action'    => GuestAgent::MessageFactory::ETASPCOMMAND,
+                'method'    => 'getDatabaseInfo'
+            );
+            
+            $client->genericMsg(
+                'vmname'    => $p{'vmname'},
+                'action'    => GuestAgent::MessageFactory::ETASPCOMMAND,
+                'method'    => 'getResourceUsage'
+            );
+
+            $res = $client->refresh('vmname' => $p{'vmname'});
+            $res = $client->getState('vmname' => $p{'vmname'});
+            %obj = %{ decode_json $res };
+        }
+    };
+    if( $@ ){
+        return retErr("_ERR_PLONE_INFO_GA_REFRESH_","Couldn't refresh state of guest agent: $@");
+    }
+
+    $client->disconnect();
+    return wantarray() ? %obj: \%obj;
+}
+
+sub plone_pack{
+    my $self = shift;
+    my (%p) = @_;
+        
+    plog("plone_pack called") if( &debug_level > 3 );
+
+    my $client;
+    eval {
+        $client = GuestAgent::Client->new(
+            'addr'  => 'localhost',
+            'port'  => '7778',
+            'proto' => 'tcp'
+        );
+    };
+    if( $@ ){
+        return retErr("_ERR_PLONE_PACK_GA_CLIENT_CREATE_","Couldn't create guest agent client connection: $@");
+    }
+    
+    my $res;
+    eval {
+        $res = $client->connect(
+            'vmname'    => $p{'vmname'},
+        );
+    };
+    if( $@ ){
+        return retErr("_ERR_PLONE_PACK_GA_CONNECT_","Couldn't connect to guest agent: $@");
+    }
+
+    my %obj = ();
+    eval {
+        %obj = %{ decode_json $res };
+        
+        if($obj{'success'} eq GuestAgent::MessageFactory::OK){
+#            $client->genericMsg(
+            $res = $client->messageWithResponse(
+                'vmname'    => $p{'vmname'},
+                'action'    => GuestAgent::MessageFactory::ETASPCOMMAND,
+                'method'    => 'pack'
+            );
+
+#            $res = $client->refresh('vmname' => $p{'vmname'});
+#            $res = $client->getState('vmname' => $p{'vmname'});
+            %obj = %{ decode_json $res };
+        }
+    };
+    if( $@ ){
+        return retErr("_ERR_PLONE_PACK_GA_REFRESH_","Couldn't refresh state of guest agent: $@");
+    }
+
+    $client->disconnect();
+    return wantarray() ? %obj: \%obj;
+}
+
+sub refreshAllGAInfo{
+    my $self = shift;
+    my %p = @_;
+    my @guestlist = ();
+    @guestlist = @{ $p{'vmnames'} } if( $p{'vmnames'} );
+
+    my %rsp;
+
+    my @errors = ();
+
+    foreach my $guest (@guestlist){
+        my $obj = $self->refreshGAInfo('vmname' => $guest);
+        if( isError($obj) ){
+            push(@errors, $obj);
+            next;
+        }
+        $rsp{$guest} = $obj;
+    }
+
+    if( !%rsp && @errors ){
+        return retErr("_ERR_REFRESH_ALL_GA_INFO_","Something wrong with GA info, we only get error messages...");
+    }
+    return wantarray() ? %rsp: \%rsp;
+}
+
+=item systemCheck
+
+ run system check process
+
+=cut
+
+sub systemCheck {
+    my $self = shift;
+    # TODO improve this
+    return retOk("_OK_SYSTEMCHECK_","System check ok.");
 }
 
 1;
@@ -4873,7 +5658,9 @@ sub _stat {
     
     my $shm = IPC::SharedMem->new($key,0,0600);
     if( $shm ){
-        return @{$shm->stat()};
+        if( my $stat = $shm->stat() ){
+            return @$stat;
+        }
     }
     return undef;
 }
@@ -4900,6 +5687,7 @@ sub sclookup {
             delete $Proc_Reg{"$shm"};
         } else {
             if( ($C->{'id'} eq $id) && ($C->{'cache'} eq $cache) ){
+                $Proc_Reg{"$shm"} = $C if( !$Proc_Reg{"$shm"} );    # sync Proc_Reg
                 _unlock();
                 return $C->{'_data'};
             }
@@ -4977,5 +5765,6 @@ sub _lock {
 sub _unlock {
     flock(LF,LOCK_UN);
 }
+
 
 1;

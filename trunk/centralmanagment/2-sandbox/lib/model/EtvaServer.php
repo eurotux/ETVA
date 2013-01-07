@@ -10,6 +10,13 @@ class EtvaServer extends BaseEtvaServer
     const VM_STATE_MAP = 'state';
     const DISKS_MAP = 'Disks';
     const NETWORKS_MAP = 'Network';
+    const FEATURES_MAP = 'features';
+
+    const RUNNING = 'running';
+    const STATE_RUNNING = 'running';
+    const STATE_STOP = 'stop';
+    const STATE_OK = 1;
+    const STATE_NOK = 0;
 
     /*
      * update some object data from VA response
@@ -29,6 +36,7 @@ class EtvaServer extends BaseEtvaServer
         if(array_key_exists(self::VM_STATE_MAP, $arr)) $this->setVmState($arr[self::VM_STATE_MAP]);
         if(array_key_exists(self::DISKS_MAP, $arr)) $this->setDisks($arr[self::DISKS_MAP]);
         if(array_key_exists(self::NETWORKS_MAP, $arr)) $this->setNetworks($arr[self::NETWORKS_MAP]);
+        if(array_key_exists(self::FEATURES_MAP, $arr)) $this->setFeatures(json_encode($arr[self::FEATURES_MAP]));
         
 	}
 
@@ -137,6 +145,31 @@ class EtvaServer extends BaseEtvaServer
   }
 
   /*
+   * format devices data to be sent to Virtualization Agent
+   */
+  public function getDevices_VA()
+  {
+    $devices = $this->getDevices();
+
+    $devices = json_decode($devices);
+
+    if(!$devices) $devices = array();
+
+    $devices_to_send = array();
+
+    foreach($devices as $key=>$d){
+        if($d->type == 'usb'){
+            $devices_to_send[] = 'vendor='.$d->idvendor.',product='.$d->idproduct.',type='.$d->type; //.',description='.$d->description;
+        }elseif($d->type == 'pci'){
+            $devices_to_send[] = 'bus='.$d->bus.',slot='.$d->slot.',function='.$d->function.',type='.$d->type; 
+        }
+    }
+    $devices_str = implode(';', $devices_to_send);
+    
+    return $devices_str;
+  }
+
+  /*
    * format disk data to be sent to Virtualization Agent
    */
   public function disks_VA()
@@ -149,6 +182,15 @@ class EtvaServer extends BaseEtvaServer
 
       foreach($server_disks as $server_disk){          
           $disks[] = $server_disk->serverdisk_VA();
+      }
+
+      // add extra cdrom
+      $cdromextra = $this->getCdromextra();
+      if( isset($cdromextra) && ($this->getVmType() != 'pv') ){
+          $cdromextra_str = 'device=cdrom,readonly=1';
+          if( $cdromextra ) $cdromextra_str .= strtr(',path=%path%', array('%path%' => $cdromextra));
+
+          $disks[] = $cdromextra_str;
       }
 
       $disks_string = implode(';',$disks);
@@ -172,6 +214,7 @@ class EtvaServer extends BaseEtvaServer
   {
       $networks = $this->networks_VA();
       $disks = $this->disks_VA();
+      $devices = $this->getDevices_VA();
 
 
 
@@ -179,7 +222,7 @@ class EtvaServer extends BaseEtvaServer
      // $server_path = $etva_lv->getLvdevice();
 
 
-
+      $features = (array)json_decode($this->getFeatures());
 
       $server_VA = array('uuid'=>$this->getUuid(),
                          'name'=> $this->getName(),
@@ -188,7 +231,11 @@ class EtvaServer extends BaseEtvaServer
                          'cdrom'=> $this->getCdrom(),
                          'ram' => $this->getMem(),
                          'vcpu'=>$this->getVcpu(),
+                         'sockets'=>$this->getCpuSockets(),
+                         'cores'=>$this->getCpuCores(),
+                         'threads'=>$this->getCpuThreads(),
                          'state'=> $this->getState(),
+                         'vm_state'=> $this->getVmState(),
                          'network'=>$networks,
                          'disk'=>$disks,
                          'vm_os'=> $this->getVmOs(),
@@ -197,7 +244,12 @@ class EtvaServer extends BaseEtvaServer
                          'vnc_listen'=>'any',
                          'vnc_keymap'=>$this->getVncKeymap(),
                          'autostart'=>$this->getAutostart(),
+                         'hostdevs'=>$devices,
+                         'priority_ha'=>$this->getPriorityHa(),
+                         'hasHA'=>$this->getHasHa(),
+                         'features'=>$features
       );
+      //if( $devices ) $server_VA['no_tablet'] = true;
 
 
 
@@ -214,6 +266,19 @@ class EtvaServer extends BaseEtvaServer
       $criteria->add(EtvaServerLogicalPeer::SERVER_ID, $this->getId());
       $criteria->addJoin(EtvaLogicalvolumePeer::ID, EtvaServerLogicalPeer::LOGICALVOLUME_ID);
       return EtvaLogicalvolumePeer::doSelect($criteria);
+  }
+
+  public function getEtvaServerLogical(Criteria $criteria = null)
+  {
+      if(!$criteria) $criteria = new Criteria();
+
+      return EtvaServerLogicalQuery::create(null,$criteria)
+                 ->useEtvaServerQuery()
+                     ->filterById($this->getId())
+                 ->endUse()
+                 ->joinWith('EtvaLogicalvolume')
+                 ->find();
+
   }
 
   /*
@@ -269,9 +334,35 @@ class EtvaServer extends BaseEtvaServer
               break;
           }
       }
-
-
       return $has_snapshots;
+  }
+  /*
+   * check if server has snapshots (libvirt) or if has disk with lv snapshots (lvm)
+   */
+  public function hasSnapshots(){
+      $has_snapshots = false;
+      if( $this->getHasSnapshots() ){    // check if has snapshots flag
+          $has_snapshots = true;
+      } else {
+          $has_snapshots = $this->hasLogicalvolumeSnapshots();
+      }
+      return $has_snapshots;
+  }
+  /*
+   * check if can do snapshots in this server
+   */
+  public function hasSnapshotsSupport(){
+      $server_lvs = EtvaLogicalvolumeQuery::create()
+                ->useEtvaServerLogicalQuery()
+                    ->filterByServerId($this->getId())
+                ->endUse()
+                ->find();
+      foreach( $server_lvs as $lv ){
+          if( $lv->getFormat() != 'qcow2' ){
+              return false;
+          }
+      }
+      return true;
   }
 
        
@@ -487,5 +578,144 @@ class EtvaServer extends BaseEtvaServer
 		}
 		return $this->collEtvaServerLogicals;
 	}
+    public function hasEtvaServerLogicals(){
+        $count = EtvaServerLogicalQuery::create()
+                        ->filterByServerId($this->getId())
+                        ->count();
+        return $count ? true : false;
+    }
+    public function hasDevices(){
+        $devs = $this->getDevices();
+        if( $devs ){
+            $devices_arr = json_decode($devs);
+            if(isset($devices_arr) && count($devices_arr)>0 ){
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public function canMove(){
+        $hasdevs = $this->hasDevices();
+        return ($hasdevs) ? False: True;
+    }
+
+    public function canMigrate(){
+        return $this->canMove();
+    }
+
+    public function mergeGaInfo($json){
+        $new_gainfo = json_decode($json);
+        if( $name = $new_gainfo->__name__ ){
+            $old_json = $this->getGaInfo();
+            $up_gainfo = (array)json_decode($old_json);
+            $up_gainfo[$name] = $new_gainfo;
+            $new_json = json_encode($up_gainfo);
+            $this->setGaInfo($new_json);
+        }
+    }
+    public function resetHeartbeat($state=EtvaServerPeer::_GA_RUNNING_){
+        $ts = time();   // always use my ts
+        $this->setHeartbeat($ts);    // reset heart beat
+        $this->setGaState($state);
+    }
+    public function getUnassigned(){
+        $count = EtvaServerAssignQuery::create()
+                        ->filterByServerId($this->getId())
+                        ->count();
+        return ($count) ? false : true;
+    }
+    public function setUnassigned(){
+        EtvaServerAssignQuery::create()
+                        ->filterByServerId($this->getId())
+                        ->delete();
+    }
+    public function getEtvaNode(){
+        return EtvaNodeQuery::create()
+                        ->useEtvaServerAssignQuery('ServerAssign','INNER JOIN')
+                            ->filterByServerId($this->getId())
+                        ->endUse()
+                        ->findOne();
+    }
+    public function assignTo(EtvaNode $etva_node){
+        EtvaServerAssignQuery::create()
+                        ->filterByServerId($this->getId())
+                        ->filterByNodeId($etva_node->getId(),Criteria::NOT_EQUAL)
+                        ->delete();
+        $serverassign = new EtvaServerAssign();
+        $serverassign->setServerId($this->getId());
+        $serverassign->setNodeId($etva_node->getId());
+        $serverassign->save();
+    }
+    public function listNodesAssignTo($migrate = false){
+
+        $nodes_assign = array();
+        $actual_node = $this->getEtvaNode();
+        if( !$migrate && $actual_node ){
+            array_push($nodes_assign,$actual_node);
+        } else {
+            $nodes =
+                EtvaNodeQuery::create()
+                            ->leftJoin('EtvaNode.EtvaServerAssign')
+                            ->leftJoin('EtvaServerAssign.EtvaServer')
+                            ->addJoinCondition('EtvaServer','EtvaServer.VmState = ?',EtvaServer::RUNNING)
+                            ->withColumn('sum(EtvaServer.Vcpu)','sum_vcpu')
+                            ->withColumn('sum(EtvaServer.Vcpu)/EtvaNode.Cputotal','per_cpu')
+                            ->withColumn('((sum(EtvaServer.Vcpu)/EtvaNode.Cputotal)+(1-(EtvaNode.Memfree/EtvaNode.Memtotal)))/2','per_res')
+                            ->withColumn('1-(EtvaNode.Memfree/EtvaNode.Memtotal)','per_mem')
+                            ->groupBy('EtvaNode.Id')
+                            ->orderBy('per_res','asc')
+                            ->orderBy('per_mem','asc')
+                            ->orderBy('per_cpu','asc')
+                            ->filterByClusterId($this->getClusterId())
+                            ->filterByState(EtvaNode::NODE_ACTIVE)
+                            ->find();
+            if( count($nodes) == 1 ||  ((count($nodes)>1) && $this->isAllSharedLogicalvolumes()) ){
+                # TODO calc assign gate
+                foreach($nodes as $i => $node){
+                    if( !$actual_node || ($actual_node->getId() != $node->getId()) )
+                        if( $node->canAssignServer($this) ) array_push($nodes_assign,$node);
+                }
+            } else {
+                $nodes_withdisks = 
+                                EtvaNodeQuery::create()
+                                            ->leftJoin('EtvaNode.EtvaServerAssign')
+                                            ->leftJoin('EtvaServerAssign.EtvaServer')
+                                            ->addJoinCondition('EtvaServer','EtvaServer.VmState = ?',EtvaServer::RUNNING)
+                                            ->withColumn('sum(EtvaServer.Vcpu)','sum_vcpu')
+                                            ->withColumn('sum(EtvaServer.Vcpu)/EtvaNode.Cputotal','per_cpu')
+                                            ->withColumn('((sum(EtvaServer.Vcpu)/EtvaNode.Cputotal)+(1-(EtvaNode.Memfree/EtvaNode.Memtotal)))/2','per_res')
+                                            ->withColumn('1-(EtvaNode.Memfree/EtvaNode.Memtotal)','per_mem')
+                                            ->groupBy('EtvaNode.Id')
+                                            ->orderBy('per_res','asc')
+                                            ->orderBy('per_mem','asc')
+                                            ->orderBy('per_cpu','asc')
+                                            ->filterByClusterId($this->getClusterId())
+                                            ->filterByState(EtvaNode::NODE_ACTIVE)
+                                            ->useEtvaNodeLogicalvolumeQuery('NodeLogicalvolume','INNER JOIN')
+                                                ->useEtvaLogicalvolumeQuery('Logicalvolume','INNER JOIN')
+                                                    ->useEtvaServerLogicalQuery('ServerLogical','INNER JOIN')
+                                                        ->filterByServerId($this->getId())
+                                                    ->endUse()
+                                                ->endUse()
+                                            ->endUse()
+                                            ->find();
+                foreach($nodes_withdisks as $i => $node){
+                    if( !$actual_node || ($actual_node->getId() != $node->getId()) )
+                        if( $node->canAssignServer($this) ) array_push($nodes_assign,$node);
+                }
+            }
+        }
+        //usort($nodes_assign,'cmp_nodes_by_resources');
+        return $nodes_assign;
+    }
+    public function canAssignTo(EtvaNode $etva_node){
+        $nodes_toassign = $this->listNodesAssignTo();
+        foreach($nodes_toassign as $i => $node){
+            if( $etva_node->getId() == $node->getId() ){
+                return true;
+            }
+        }
+        return false;
+    }
 }

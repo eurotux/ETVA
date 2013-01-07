@@ -87,7 +87,7 @@ sub soap_request {
                                 ->serializer();
     $soap_request = $serializer->envelope( method=>$method, make_soap_args($serializer, @params) );
 
-    plog "soap_request = $soap_request" if( $debug || $self->{'debug'} );
+    plog "soap_request = $soap_request" if( ($debug || $self->{'debug'}) > 3 );
 
     return $soap_request;
 }
@@ -112,7 +112,7 @@ sub soap_response {
             $data_xml .= $line . "\n";
         }
     }
-    plog "soap_response = $data_xml\n" if( $debug || $self->{'debug'} );
+    plog "soap_response = $data_xml\n" if( ($debug || $self->{'debug'}) > 3 );
 
     my ($headers,$body,$typeuri,$method);
 
@@ -152,11 +152,11 @@ sub call {
 
     my $request = $self->soap_request($uri,$method,@params);
 
-    plog "ETVA::Client::SOAP call request = $request" if( $debug || $self->{'debug'} );
+    plog "ETVA::Client::SOAP call request = $request" if( ($debug || $self->{'debug'}) > 3 );
 
     my $response = $self->send_receive($request);
 
-    plog "ETVA::Client::SOAP call response = $response" if( $debug || $self->{'debug'} );
+    plog "ETVA::Client::SOAP call response = $response" if( ($debug || $self->{'debug'}) > 3 );
 
     return $self->soap_response($response);
 }

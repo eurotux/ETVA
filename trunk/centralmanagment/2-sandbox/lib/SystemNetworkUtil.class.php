@@ -40,12 +40,12 @@ class SystemNetworkUtil
         $this->networks = array();       
 
         $i = 0;
-        foreach($devices as $devname=>$device){
+        foreach($devices as $type=>$device){
             $aux_network = new SystemNetwork();
-            $aux_network->fromArray(array('if'=>$devname));
-            $this->networks[$devname] = $aux_network;
+            $aux_network->fromArray(array('if'=>$device));
+            $this->networks[$device] = $aux_network;
     
-            $matches_to_found[$i] = array('if'=>$devname,'match'=>"/([\w\.]+\.(\w+))\.Device=$device/");
+            $matches_to_found[$i] = array('type'=>$type,'if'=>$device,'match'=>"/([\w\.]+\.(\w+))\.Device=$device/");
             $i++;
         }
 
@@ -97,10 +97,10 @@ class SystemNetworkUtil
                     }
 
                 }elseif($re_if && $re_dev == $match_if && preg_match("/$re_if\.(\w+)=(.+)/",$r,$regs)){
-                        $this->networks[$match_if]->set($regs[1], $regs[2]);
-                    }else{
-                        $aux[] = $r;
-                    }
+                    $this->networks[$match_if]->set($regs[1], $regs[2]);
+                }else{
+                    $aux[] = $r;
+                }
 
             }//end foreach devices
         }//end while read data

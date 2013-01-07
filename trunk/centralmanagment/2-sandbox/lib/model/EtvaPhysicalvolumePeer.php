@@ -33,6 +33,12 @@ class EtvaPhysicalvolumePeer extends BaseEtvaPhysicalvolumePeer
 
   const _ERR_INIT_OTHER_CLUSTER_ = 'Node has some physical volumes that exists on cluster %name%.';  
   
+  const _ERR_REGISTER_   = 'Physical device %name% could not be registered. %info%';
+  const _OK_REGISTER_   = 'Physical device %name% registered successfully';
+
+  const _ERR_UNREGISTER_   = 'Physical device %name% could not be unregistered. %info%';
+  const _OK_UNREGISTER_   = 'Physical device %name% unregistered successfully';
+
   public static function retrieveByPv($pv, Criteria $criteria = null)
   {
     if(is_null($criteria )) $criteria = new Criteria();
@@ -90,7 +96,8 @@ class EtvaPhysicalvolumePeer extends BaseEtvaPhysicalvolumePeer
              * if shared storage check only if device is already in DB
              */
             $criteria->add(self::STORAGE_TYPE,$type);
-            $criteria->add(self::UUID,$uuid);
+            if($uuid) $criteria->add(self::UUID,$uuid);
+            else $criteria->add(self::DEVICE,$device);
 
             break;
     }
@@ -99,6 +106,22 @@ class EtvaPhysicalvolumePeer extends BaseEtvaPhysicalvolumePeer
     return $etva_physicalvol;
 
     
+  }
+  public static function retrieveByClusterTypeUUIDDevice($cluster_id, $type, $uuid=null, $device) {
+
+    $criteria = new Criteria();
+
+    /*
+     * check if pv already exists on DB
+     */
+    if($uuid) $criteria->add(self::UUID,$uuid);
+    else $criteria->add(self::DEVICE,$device);
+
+    $criteria->add(self::CLUSTER_ID,$cluster_id);
+    $criteria->add(self::STORAGE_TYPE,$type);
+
+    $etva_physicalvol = self::doSelectOne($criteria);
+    return $etva_physicalvol;
   }
 
   public static function retrieveByNodeTypeDevice($node_id, $type, $device)

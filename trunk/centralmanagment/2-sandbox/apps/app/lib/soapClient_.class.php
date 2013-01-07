@@ -21,7 +21,12 @@ class soapClient_ extends SOAP_CLient
     {
         
         if($this->rcv_timeout) $this->setOpt("rcv_timeout",$this->rcv_timeout);
+
+        //sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($this, sfConfig::get('app_clientsoap_log'),array('message' =>sprintf('host=%s port=%s method=%s params=%s',$this->_endpoint,$this->_portName,$method,print_r($params,true)),'priority'=>EtvaEventLogger::DEBUG)));
+
         $response = $this->call($method,$params);
+
+        //sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($this, sfConfig::get('app_clientsoap_log'),array('message' =>sprintf('host=%s port=%s method=%s response=%s',$this->_endpoint,$this->_portName,$method,print_r($response,true)),'priority'=>EtvaEventLogger::DEBUG)));
 
         if ($response instanceOf PEAR_Error)
         {                            

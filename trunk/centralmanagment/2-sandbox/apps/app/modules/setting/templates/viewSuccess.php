@@ -246,11 +246,11 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
             
             for(var i=0,len = this.devices.length;i<len;i++){
 
-                if(alldata['network_'+this.devices[i]+'_static']=='0'){
+                if(alldata['network_'+this.devices[i]+'_bootp']=='dhcp'){
                     networks[this.devices[i]] = {
                         'bootp':'dhcp',
-                        'primarydns':alldata['network_staticdns_primarydns'],
-                        'secondarydns':alldata['network_staticdns_secondarydns'],
+                        /*'primarydns':alldata['network_staticdns_primarydns'],
+                        'secondarydns':alldata['network_staticdns_secondarydns'],*/
                         'if':alldata['network_'+this.devices[i]+'_if']};
                 }else{
                     networks[this.devices[i]] = {
@@ -297,7 +297,9 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
                 timeout:10000,
                 failure:function(response) {
 
-                    if(response.status==-1){
+                    console.log(response);
+
+                    if((response.status==-1) && cm_ip){
                         this.redirect(cm_ip);
                         return;
                     }

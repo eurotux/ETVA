@@ -11,6 +11,8 @@ use_javascript('ux/ux-form/form.js'); // tooltip icon on form items and more
 //use_javascript('ux/Ext.ux.menu.js'); // contains menu plugin for grid filter plugin
 use_javascript('ux/Ext.ux.menu.js');
 use_javascript('ux/MultiSelect.js'); //plugin for multiselect & itemselector
+use_javascript('ux/Spinner.js'); //plugin for Spinner
+use_javascript('ux/SpinnerField.js'); //plugin for Spinner
 //
 use_javascript('ux/ux-grid/Ext.ux.grid.filter.js'); // contains plugin for filter plugin. numeric and string filters
 //// contains plugin for remeber selection in grids reload, grid reorder DD, RowEditor
@@ -59,10 +61,14 @@ include_partial('cluster/changename');
 $lang_js = sfFinder::type('file')->name($sf_user->getCulture().'.js')->in(sfConfig::get('sf_web_dir').'/js');
 if($lang_js) use_javascript("locale/".$sf_user->getCulture().".js");
 
-$sfExtjs3Plugin = new sfExtjs3Plugin(array('theme'=>'blue'),array
+$locale_js = array();
+if( sfFinder::type('file')->name('ext-lang-'.$sf_user->getCulture().'.js')->in(sfConfig::get('sf_web_dir').'/js') ){
+    $locale_js['js'] = 'locale/ext-lang-'.$sf_user->getCulture().'.js';
+}
+$sfExtjs3Plugin = new sfExtjs3Plugin(array('theme'=>'blue'),$locale_js/*array
                               (
                                 'js' => 'locale/ext-lang-'.$sf_user->getCulture().'.js'
-                              )
+                              )*/
     //,array('js' => sfConfig::get('sf_extjs2_js_dir').'ext-all.js')
    //'css' => '/css/symfony-extjs.css'
    );
@@ -215,6 +221,67 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 }
                                 ,handler:this.loadComponent
                                 ,scope:this
+                            },{
+                                text:<?php echo json_encode(__('Shutdown Central Management')) ?>
+                                ,url:<?php echo json_encode(url_for('setting/jsonShutdown')); ?>
+//                                ,call:'Setting.Shutdown'
+//                                ,callback:function(item){
+//                                    var main = new Setting.Main({title:item.text});
+//                                    var win = Ext.getCmp('setting-main');
+//                                    win.on('beforeclose', function(){
+//                                        var ftw_pref = Ext.getCmp('ft-wiz-preferences');     //notify first time wizard preferences card
+//                                        if(ftw_pref){
+//                                            ftw_pref.fireEvent('reloadData', ftw_pref);
+//                                        }
+//                                    });
+//                                }
+                                ,handler: function(){
+
+                                    //this.loadComponent
+                                    Ext.Msg.show({
+                                        title: <?php echo json_encode(__('Shutdown')) ?>,
+                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                        msg: <?php echo json_encode(__('Shutdown Central Management?')) ?>,
+                                        icon: Ext.MessageBox.WARNING,
+                                        fn: function(btn){
+                                            if (btn == 'yes'){
+            
+                                                var conn = new Ext.data.Connection({
+                                                    listeners:{
+                                                        // wait message.....
+                                                        beforerequest:function(){
+                                                            Ext.MessageBox.show({
+                                                                title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                                msg: <?php echo json_encode(__('Shutting down...')) ?>,
+                                                                width:300,
+                                                                wait:true
+                                                            });
+                                                        },// on request complete hide message
+                                                        requestcomplete:function(){Ext.MessageBox.hide();}
+                                                        ,requestexception:function(c,r,o){
+                                                            Ext.MessageBox.hide();
+                                                            Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                                    }
+                                                });// end conn
+            
+                                                conn.request({
+                                                    url: <?php echo json_encode(url_for('setting/jsonShutdown')) ?>,
+//                                                    params: {id: node.id},
+                                                    success: function(resp,opt) {
+            //                                            Ext.getCmp('view-nodes-panel').removeNode(node.id);
+            //                                            Ext.getCmp('view-main-panel').remove('view-center-panel-'+node.id);                 
+                                                        Ext.Msg.alert(<?php echo json_encode(__('Information')) ?>, <?php echo json_encode(__('Central Management server is shutting down!')) ?>);
+                                                    },
+                                                    failure: function(resp,opt) {
+                                                        Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Unable to shutdown!')) ?>);
+                                                    }
+                                                });// END Ajax request
+                                            }//END button==yes
+                                        }// END fn
+                                    }); //END Msg.show
+                                }
+                                ,scope:this
+                                ,id: 'menuitm-shutdown'
                             }
                            ,buttonLogout
                     ]});
@@ -408,6 +475,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         enableDD:true,
                         listeners: {
                             nodedragover: function(e){
+                                                //console.log(e);
                                             <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
 
                                                 //unaccepted node move between clusters
@@ -417,6 +485,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                                                //live migrate
                                                 if( e.point=='append' && e.target.attributes.type == 'node' && e.target.attributes.state == 1
+                                                        && e.target.attributes.can_create_vms
                                                         && e.target.attributes.contextmenu
                                                         && e.dropNode.attributes.all_shared && !e.dropNode.attributes.has_snapshots
                                                         && e.dropNode.parentNode.attributes.id != e.target.attributes.id
@@ -435,7 +504,10 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                 // assign
                                                 if( e.point=='append' && e.dropNode.parentNode.attributes.type == 'unassignednode' && e.target.attributes.type == 'node'
                                                         && e.target.attributes.state == 1 && e.target.attributes.contextmenu
-                                                        && ( (e.dropNode.attributes.all_shared && !e.dropNode.attributes.has_snapshots) ||
+                                                        && e.target.attributes.can_create_vms
+                                                        && ( e.dropNode.attributes.nodes_toassign.indexOf(e.target.attributes.id)!=-1 ||
+                                                                !e.dropNode.attributes.has_disks ||
+                                                                (e.dropNode.attributes.all_shared && !e.dropNode.attributes.has_snapshots) ||
                                                                 (e.dropNode.attributes.node_id == e.target.attributes.id) )
                                                         && e.dropNode.parentNode.attributes.id != e.target.attributes.id
                                                         && e.dropNode.parentNode.attributes.cluster_id == e.target.attributes.cluster_id )
@@ -470,8 +542,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                                                 title: <?php echo json_encode(__('Please wait...')) ?>,
                                                                                 msg: <?php echo json_encode(__('Unassigning server...')) ?>,
                                                                                 width:300,
-                                                                                wait:true,
-                                                                                modal: false
+                                                                                wait:true
                                                                             });
                                                                         },// on request complete hide message
                                                                         requestcomplete:function(){Ext.MessageBox.hide();}
@@ -491,11 +562,11 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                                     },
                                                                     failure: function(resp,opt) {
                                                                         Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Unable to unassign server!')) ?>);
-                                                                        Ext.getCmp('view-nodes-panel').reload();
+                                                                        Ext.getCmp('view-nodes-panel').reload({'server_id':server_id});
                                                                     }
                                                                 });// END Ajax request
                                                             } else {//END button==yes
-                                                                Ext.getCmp('view-nodes-panel').reload();
+                                                                Ext.getCmp('view-nodes-panel').reload({'server_id':server_id});
                                                             }
                                                         }// END fn
                                                     }); //END Msg.show
@@ -520,8 +591,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                                                 title: <?php echo json_encode(__('Please wait...')) ?>,
                                                                                 msg: <?php echo json_encode(__('Assigning server...')) ?>,
                                                                                 width:300,
-                                                                                wait:true,
-                                                                                modal: false
+                                                                                wait:true
                                                                             });
                                                                         },// on request complete hide message
                                                                         requestcomplete:function(){Ext.MessageBox.hide();}
@@ -541,11 +611,11 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                                     },
                                                                     failure: function(resp,opt) {
                                                                         Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Unable to assign server!')) ?>);
-                                                                        Ext.getCmp('view-nodes-panel').reload();
+                                                                        Ext.getCmp('view-nodes-panel').reload({'server_id':server_id});
                                                                     }
                                                                 });// END Ajax request
                                                             } else {//END button==yes
-                                                                Ext.getCmp('view-nodes-panel').reload();
+                                                                Ext.getCmp('view-nodes-panel').reload({'server_id':server_id});
                                                             }
                                                         }// END fn
                                                     }); //END Msg.show
@@ -575,7 +645,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                             var window = new Server.Migrate.Window({title:text,type:type, parent:NodePanel.id});
                             window.on('close',function(){
-                                                            Ext.getCmp('view-nodes-panel').reload();
+                                                            Ext.getCmp('view-nodes-panel').reload({'server_id':server_id});
                                                     });
                             window.show();
                             window.loadData(record);
@@ -595,11 +665,13 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                             title: <?php echo json_encode(__('Please wait...')) ?>,
                                             msg: <?php echo json_encode(__('Moving node...')) ?>,
                                             width:300,
-                                            wait:true,
-                                            modal: false
+                                            wait:true
                                         });
                                     },// on request complete hide message
-                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                    requestcomplete:function(){
+                                        Ext.MessageBox.hide();
+
+                                    }
                                     ,requestexception:function(c,r,o){
                                         Ext.MessageBox.hide();
                                         Ext.Ajax.fireEvent('requestexception',c,r,o);}
@@ -613,12 +685,28 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 success: function(resp,opt){
                                     var response = Ext.util.JSON.decode(resp.responseText);
                                     Ext.ux.Logger.info(response['agent'],response['info']);
-                                    Ext.getCmp('view-nodes-panel').reload();
+                                    var pan = Ext.getCmp('view-nodes-panel')
+//                                    pan.on('beforeload', function(node){
+//                                        console.log(node);
+//                                        console.log("EVENT: " + e.target.id);
+//                                        node.expand();
+    
+                                        // Search for node and expand
+//                                        var pan = Ext.getCmp('view-nodes-panel');
+//                                        console.log(e.target.id);
+//                                        console.log(pan);
+//
+//                                        var root  = Ext.getCmp('view-nodes-panel').root;
+//                                        var f = root.findChild('id',e.target.id, true );
+//                                        f.expand(true);
+////                                        alert('bla');
+//                                        return false;
+//                                    });
+//                                    pan.reload();
+
                                 },scope:this
                                 ,failure: function(o) {
                                     var response = Ext.util.JSON.decode(o.responseText);
-
-
                                     Ext.getCmp('view-nodes-panel').reload();
                                }
                             });// END Ajax request
@@ -670,6 +758,29 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                 //this.root.reload(attrs);
                                             }
                                     ,scope:this
+                                }
+                            },{
+                                id: 'plus',
+                                qtip: <?php echo json_encode(__('Expand/collapse all nodes')) ?>,
+                                on:{
+                                    click: function(){
+                                        var nodes = Ext.getCmp('view-nodes-panel').root.childNodes;
+                                        for(node in nodes){
+                                            if(!isNaN(node)){
+                                                if(this.clapse){
+                                                    nodes[node].collapse(true);
+                                                }else{
+                                                    nodes[node].expand(true);
+                                                }
+                                            }
+                                        }
+                                        
+                                        if(this.clapse != undefined){
+                                            this.clapse = !this.clapse;
+                                        }else{
+                                            this.clapse = true;
+                                        }
+                                    }
                                 }
                             },{
                                 id:'help',
@@ -807,7 +918,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                     onContextMenu : function(node, e){
                         if( node.attributes.type == 'unassignednode' ) // no context menu for unassigned node
                             return false;
-                        
+
                         var items = [
                                     {
                                         html: '<b class="menu-title">'+<?php echo json_encode(__('Cluster')) ?>+'</b>',
@@ -823,6 +934,56 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                         scope:this,
                                         handler:function(btn,e){
                                             this.setClusterName(btn,this.ctxNode);
+                                        }
+                                    },{
+                                        text: <?php echo json_encode(__('Edit cluster')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('This will change the cluster settings. "Default" cluster name cannot be changed.')) ?>},
+                                        ref:'btn_edit_cluster',
+                                        disabled:false,
+                                        hidden: true,
+                                        scope:this,
+                                        url:<?php echo(json_encode(url_for('cluster/edit')))?>,
+                                        call:'Cluster.Edit',
+                                        callback:function(btn,e,cluster){
+                                            var cId = cluster.id;
+                                            var cluster_id = cId.replace('d','');
+
+                                            var name = cluster.text;
+                                            var window = new Cluster.Edit.Window({
+                                                                                    title: String.format(<?php echo json_encode(__('Edit cluster {0}')) ?>,name), 'cluster_id': cluster_id});
+                                            window.on({'show':function(){window.loadData({id:cluster_id});}
+                                                        ,'onCancel':function(){window.close();}
+                                                        ,'onSave':function(){window.close();
+
+                                                            Ext.getCmp('view-nodes-panel').reload({ 'cluster_id': cluster_id });
+                                                            /*Ext.getCmp('view-nodes-panel').getRootNode().reload(function(){
+                                                                var centerElem = Ext.getCmp('view-main-panel').findById('view-center-panel-'+cluster_id);
+                                                                if(centerElem && centerElem.isVisible())
+                                                                {
+
+                                                                    this.selectNode(cluster_id);
+                                                                    centerElem.fireEvent('beforeshow');
+                                                                }
+
+
+                                                            },this);*/
+
+                                                        }
+                                                        ,scope:this
+                                            });
+                                            window.show();
+
+                                        }
+                                        ,handler: function(btn,e){View.loadComponent(btn,e,this.ctxNode);}
+                                    },{
+                                        text: <?php echo json_encode(__('Remove cluster')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('This will only remove data from Central Management')) ?>},
+                                        ref:'btn_remove_cluster',
+                                        disabled:true,
+                                        scope:this,
+                                        iconCls: 'icon-remove',
+                                        handler:function(btn,e){
+                                            this.deleteCluster(btn,this.ctxNode);
                                         }
                                     },
 //                                    '<b class="menu-title">'+<?php echo json_encode(__('Initialization')) ?>+'</b>'
@@ -876,14 +1037,52 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                 this.ctxNode.unselect();
                                             }
                                             this.ctxNode.select();}
-                                    },
-                                    {
-                                        text: <?php echo json_encode(__('Change hostname')) ?>,
+                                    },{
+                                        /*text: <?php echo json_encode(__('Change hostname')) ?>,
                                         scope: this,
                                         ref:'btn_hostname',
                                         disabled:true,
                                         handler:function(btn,e){
                                             this.setHostname(btn,this.ctxNode);
+                                        }
+                                    },{*/
+                                        text: <?php echo json_encode(__('Edit node')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('This will change the node settings.')) ?>},
+                                        ref:'btn_edit_node',
+                                        disabled:false,
+                                        hidden: true,
+                                        scope:this,
+                                        url:<?php echo(json_encode(url_for('node/edit')))?>,
+                                        call:'Node.Edit',
+                                        callback:function(btn,e,node){
+                                            var nId = node.id;
+                                            //var node_id = nId.replace('d','');
+                                            var node_id = nId;
+
+                                            var name = node.text;
+                                            var window = new Node.Edit.Window({
+                                                                                    title: String.format(<?php echo json_encode(__('Edit node {0}')) ?>,name), 'node_id': node_id});
+                                            window.on({'show':function(){window.loadData({id:node_id});}
+                                                        ,'onCancel':function(){window.close();}
+                                                        ,'onSave':function(){window.close();
+                                                            Ext.getCmp('view-nodes-panel').reload({ 'node_id': node_id });
+                                                        }
+                                                        ,scope:this
+                                            });
+                                            window.show();
+
+                                        }
+                                        ,handler: function(btn,e){View.loadComponent(btn,e,this.ctxNode);}
+                                    },
+                                    {
+                                        text: <?php echo json_encode(__('Remove node')) ?>,                                        
+                                        tooltip: {text: <?php echo json_encode(__('This will only remove data from Central Management')) ?>},
+                                        ref:'btn_remove',
+                                        disabled:true,
+                                        scope:this,
+                                        iconCls: 'icon-remove',
+                                        handler:function(btn,e){
+                                            this.deleteNode(btn,this.ctxNode);
                                         }
                                     },
                                     <?php if($etvamodel=='enterprise'): ?>
@@ -922,36 +1121,47 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                     <?php endif; ?>
                                     ,{
                                         text :<?php echo json_encode(__('Node status')) ?>,
-                                        param:'listDomains',
-                                        ref:'btn_listdomains',
+                                        ref:'btn_node_status',
                                         menu:[
-                                            //{text:'listDomains',param:'listDomains&id='+node.id,handler: this.showNodeWindowSoap},
-                                            //{text:'getphydisk',param:'getphydisk_as_xml&id='+node.id,handler: this.showNodeWindowSoap},
-                                            //'-',
                                             {text:<?php echo json_encode(__('Check status')) ?>,
                                                 scope:this,
-                                             handler:function(){View.checkNodeState(this.ctxNode);}}
-                                            //,{text:'Go Virtual Machines',param:'list_vms&opt=update&id='+node.id,handler: this.showNodeWindowSoap},
-                                            //'-',
-                                            //{text:'Sync Virtual Machines',param:'list_vms_as_xml&id='+node.id,handler: this.showNodeWindowSoap}
+                                             handler:function(){
+                                                View.checkNodeState(this.ctxNode);
+                                             }
+                                            }
+                                            ,{
+                                                text: <?php echo json_encode(__('Maintenance')) ?>,
+                                                tooltip: {text: <?php echo json_encode(__('This will put in maintenance the selected node')) ?>},
+                                                ref:'btn_maintenance_node',
+                                                disabled:false,
+                                                hidden: true,
+                                                scope:this,
+                                                iconCls: 'icon-maintenance',
+                                                handler: this.maintenanceNode
+                                            },{
+                                                text: <?php echo json_encode(__('Recover')) ?>,
+                                                tooltip: {text: <?php echo json_encode(__('This will execute system check on selected node and recover it.')) ?>},
+                                                ref:'btn_systemcheck_node',
+                                                disabled:false,
+                                                hidden: true,
+                                                scope:this,
+                                                handler: this.systemCheck
+                                            },{
+                                                text: <?php echo json_encode(__('Shutdown')) ?>,
+                                                tooltip: {text: <?php echo json_encode(__('This will shutdown the selected node')) ?>},
+                                                ref:'btn_shutdown_node',
+                                                disabled:false,
+                                                hidden: true,
+                                                scope:this,
+                                                iconCls: 'icon-shutdown',
+                                                handler:function(btn,e){
+                                                    this.shutdownNode(btn,this.ctxNode);
+                                                }
+                                            }
                                         ],
                                         scope: this
-                                        //,handler: this.showNodeWindowSoap
-                                    }
-                                    ,{
-                                        text: <?php echo json_encode(__('Remove node')) ?>,                                        
-                                        tooltip: {text: <?php echo json_encode(__('This will only remove data from Central Management')) ?>},
-                                        ref:'btn_remove',
-                                        disabled:true,
-                                        scope:this,
-                                        iconCls: 'icon-remove',
-                                        handler:function(btn,e){
-                                            this.deleteNode(btn,this.ctxNode);
-                                        }
                                     }
 //                                    ,'-'
-
-
                                     ,{
                                         html: '<b class="menu-title">'+<?php echo json_encode(__('Server')) ?>+'</b>',
                                         ref:'ttl_server',
@@ -977,6 +1187,41 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                         iconCls: 'icon-lockedit',
                                         handler:function(btn,e){
                                             this.changePerms(btn,this.ctxNode);
+                                        }
+                                    },{
+                                        text: <?php echo json_encode(__('Start')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('Starts the selected server')) ?>},
+                                        ref:'btn_start_server',
+                                        disabled:false,
+                                        hidden: true,
+                                        scope:this,
+                                        iconCls: 'icon-play',
+                                        handler:function(btn,e){
+                                            this.startServer(btn, this.ctxNode);
+                                        }
+                                    },{
+                                        text: <?php echo json_encode(__('Stop')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('Stops the selected server')) ?>},
+                                        ref:'btn_stop_server',
+                                        disabled:false,
+                                        hidden: true,
+                                        scope:this,
+                                        iconCls: 'icon-mystop',
+                                        menu:[{
+                                            text    : <?php echo json_encode(__('Normal')) ?>
+                                            ,scope  : this
+                                            ,handler: function(btn,e){
+                                                this.stopServer(btn, this.ctxNode, false);
+                                            }
+                                        },{
+                                            text    : <?php echo json_encode(__('Forced')) ?>
+                                            ,scope  : this
+                                            ,handler: function(btn,e){
+                                                this.stopServer(btn, this.ctxNode, true);
+                                            }
+                                        }],
+                                        handler:function(btn,e){
+                                            this.stopServer(btn, this.ctxNode, false);
                                         }
                                     }
                                 ];//end contextmenu items
@@ -1012,27 +1257,36 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 //enable/disable cluster rename button (in the case of default cluster)
                                 if(node.text == 'Default' && node.id.toString().substring(0,1) == 'd'){
                                     this.menu.btn_rename_cluster.setDisabled(true);
+                                    this.menu.btn_remove_cluster.setDisabled(true);
                                 }else{
                                     this.menu.btn_rename_cluster.setDisabled(false);
+                                    this.menu.btn_remove_cluster.setDisabled(false);
                                 }
+                                this.menu.btn_edit_cluster.setDisabled(false);
 
                                 //enable cluster items
                                 this.menu.ttl_cluster.show();
-                                this.menu.btn_rename_cluster.show();
+                                //this.menu.btn_rename_cluster.show();
+                                this.menu.btn_edit_cluster.show();
+                                this.menu.btn_remove_cluster.show();
 
-                                //enable node items
+                                //disable node items
                                 this.menu.ttl_node.hide();
                                 this.menu.btn_remove.hide();
                                 if(this.menu.btn_permission)
-                                    this.menu.btn_permission.hide();
-                                this.menu.btn_hostname.hide();
+                                    this.menu.btn_permission.show();
+                                //this.menu.btn_hostname.hide();
+                                this.menu.btn_edit_node.hide();
                                 this.menu.btn_keymap.hide();
                                 this.menu.ttl_initialization.hide();
                                 this.menu.btn_authorize.hide();
                                 this.menu.btn_reinitialize.hide();
+                                this.menu.btn_node_status.menu.btn_maintenance_node.hide();
+                                this.menu.btn_node_status.menu.btn_systemcheck_node.hide();
                                 this.menu.ttl_node.hide();
                                 this.menu.btn_loadnode.hide();
-                                this.menu.btn_listdomains.hide();
+                                this.menu.btn_node_status.hide();
+                                this.menu.btn_node_status.menu.btn_shutdown_node.hide();
                                 if(this.menu.btn_connectivity)
                                     this.menu.btn_connectivity.hide();
 
@@ -1040,6 +1294,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 this.menu.btn_keymap_server.hide();
                                 this.menu.ttl_server.hide();
                                 this.menu.btn_permission_server.hide();
+                                this.menu.btn_stop_server.hide();
+                                this.menu.btn_start_server.hide();
 
                                 this.menu.btn_remove.setDisabled(false);
                                 this.menu.btn_keymap.setDisabled(false);
@@ -1050,25 +1306,51 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 //hide cluster items
                                 this.menu.ttl_cluster.hide();
                                 this.menu.btn_rename_cluster.hide();
+                                this.menu.btn_remove_cluster.hide();
+                                this.menu.btn_edit_cluster.hide();
                                 
                                 //enable node items
                                 this.menu.ttl_node.show();
                                 this.menu.btn_remove.show();
                                 if(this.menu.btn_permission)
-                                    this.menu.btn_permission.show();
-                                this.menu.btn_hostname.show();
+                                    this.menu.btn_permission.hide();
+                                //this.menu.btn_hostname.show();
+                                this.menu.btn_edit_node.show(); // TODO change me 
                                 this.menu.btn_keymap.show();
                                 this.menu.ttl_initialization.show();
                                 this.menu.btn_authorize.show();
                                 this.menu.btn_reinitialize.show();
                                 this.menu.ttl_node.show();
                                 this.menu.btn_loadnode.show();
-                                this.menu.btn_listdomains.show();
+                                this.menu.btn_node_status.show();
+                                this.menu.btn_node_status.menu.btn_shutdown_node.show();
+
+                                if( (node.attributes.state==<?php echo json_encode(EtvaNode::NODE_MAINTENANCE); ?>) ||
+                                        (node.attributes.state==<?php echo json_encode(EtvaNode::NODE_MAINTENANCE_UP); ?>) ){
+                                    this.menu.btn_node_status.menu.btn_maintenance_node.hide();
+                                    this.menu.btn_node_status.menu.btn_systemcheck_node.show();
+                                /*} else if( node.attributes.sparenodeid && (node.attributes.sparenodeid==node.attributes.id) ){
+                                    this.menu.btn_node_status.menu.btn_maintenance_node.hide();
+                                    this.menu.btn_node_status.menu.btn_systemcheck_node.hide();*/
+                                } else {
+                                    this.menu.btn_node_status.menu.btn_systemcheck_node.hide();
+                                    this.menu.btn_node_status.menu.btn_maintenance_node.show();
+
+                                    /*if( (node.attributes.sparenodeid && node.attributes.sparenodeIsFree) || !node.attributes.has_servers_running ){
+                                        this.menu.btn_node_status.menu.btn_maintenance_node.setDisabled(false);
+                                        this.menu.btn_node_status.menu.btn_maintenance_node.clearTooltip();
+                                    } else {
+                                        this.menu.btn_node_status.menu.btn_maintenance_node.setDisabled(true);
+                                        this.menu.btn_node_status.menu.btn_maintenance_node.setTooltip({text: <?php echo json_encode(__('This cluster doesn\'t have free spare node configured.')) ?>});
+                                    }*/
+                                }
 
                                 //hide server specific items
                                 this.menu.btn_keymap_server.hide();
                                 this.menu.ttl_server.hide();
                                 this.menu.btn_permission_server.hide();
+                                this.menu.btn_stop_server.hide();
+                                this.menu.btn_start_server.hide();
 
                                 this.menu.btn_remove.setDisabled(false);
                                 this.menu.btn_keymap.setDisabled(false);
@@ -1083,8 +1365,11 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                     this.menu.btn_reinitialize.setDisabled(true);
                                     this.menu.btn_reinitialize.setTooltip({text: node_state_msg});
 
-                                    this.menu.btn_hostname.setDisabled(true);
-                                    this.menu.btn_hostname.setTooltip({text: node_state_msg});
+                                    //this.menu.btn_hostname.setDisabled(true);
+                                    //this.menu.btn_hostname.setTooltip({text: node_state_msg});
+
+                                    this.menu.btn_edit_node.setDisabled(true);
+                                    this.menu.btn_edit_node.setTooltip({text: node_state_msg});
 
 
                                     if(this.menu.btn_connectivity)
@@ -1102,8 +1387,11 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                     this.menu.btn_reinitialize.setDisabled(false);
                                     this.menu.btn_reinitialize.setTooltip({text:<?php echo json_encode(__('Re-initialize')) ?>});
 
-                                    this.menu.btn_hostname.setDisabled(false);
-                                    this.menu.btn_hostname.clearTooltip();
+                                    //this.menu.btn_hostname.setDisabled(false);
+                                    //this.menu.btn_hostname.clearTooltip();
+
+                                    this.menu.btn_edit_node.setDisabled(false);
+                                    this.menu.btn_edit_node.clearTooltip();
 
 
                                     if(this.menu.btn_connectivity){
@@ -1127,33 +1415,67 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 this.menu.btn_keymap_server.show();
                                 this.menu.ttl_server.show();
                                 this.menu.btn_permission_server.show();
-
+                                   
+                                // start stop features 
+                                if(node.parentNode.attributes.type == 'unassignednode'){
+                                    this.menu.btn_start_server.hide();
+                                    this.menu.btn_start_server.clearTooltip();
+                                    this.menu.btn_stop_server.hide();
+                                    this.menu.btn_stop_server.clearTooltip();
+                                }else{
+                                    if(node.attributes.vm_state == 'running'){
+                                        this.menu.btn_start_server.hide();
+                                        this.menu.btn_stop_server.show();
+                                    }else if(node.attributes.vm_state == 'stop'){
+                                        this.menu.btn_stop_server.hide();
+                                        this.menu.btn_start_server.show();
+                                    }
+    
+                                    if(node.parentNode.attributes.state != 1){
+                                        this.menu.btn_start_server.setDisabled(true);
+                                        this.menu.btn_start_server.setTooltip({text: <?php echo json_encode(__('Node needs to be running')) ?>});
+                                        this.menu.btn_stop_server.setDisabled(true);
+                                        this.menu.btn_stop_server.setTooltip({text: <?php echo json_encode(__('Node needs to be running')) ?>});
+                                    }else{
+                                        this.menu.btn_start_server.setDisabled(false);
+                                        this.menu.btn_start_server.clearTooltip();
+                                        this.menu.btn_stop_server.setDisabled(false);
+                                        this.menu.btn_stop_server.clearTooltip();
+                                    }
+                                }
+                                
                                 //enable cluster items
                                 this.menu.ttl_cluster.hide();
                                 this.menu.btn_rename_cluster.hide();
+                                this.menu.btn_remove_cluster.hide();
+                                this.menu.btn_edit_cluster.hide();
 
                                 //hide node items
                                 this.menu.ttl_node.hide();
                                 this.menu.btn_remove.hide();
                                 if(this.menu.btn_permission)
                                     this.menu.btn_permission.hide();
-                                this.menu.btn_hostname.hide();
+                                //this.menu.btn_hostname.hide();
+                                this.menu.btn_edit_node.hide();
                                 this.menu.btn_keymap.hide();
                                 this.menu.ttl_initialization.hide();
                                 this.menu.btn_authorize.hide();
                                 this.menu.btn_reinitialize.hide();
                                 this.menu.ttl_node.hide();
                                 this.menu.btn_loadnode.hide();
-                                this.menu.btn_listdomains.hide();
+                                this.menu.btn_node_status.hide();
+                                this.menu.btn_node_status.menu.btn_shutdown_node.hide();
 
-//
+                                this.menu.btn_node_status.menu.btn_maintenance_node.hide();
+                                this.menu.btn_node_status.menu.btn_systemcheck_node.hide();
 
 //                                this.menu.btn_connectivity.hide();
 
-
                                 this.menu.btn_remove.setDisabled(true);
-                                this.menu.btn_hostname.setDisabled(true);
-                                this.menu.btn_hostname.clearTooltip();
+                                //this.menu.btn_hostname.setDisabled(true);
+                                //this.menu.btn_hostname.clearTooltip();
+                                this.menu.btn_edit_node.setDisabled(true);
+                                this.menu.btn_edit_node.clearTooltip();
 
                                 if(node.attributes.node_state==0)
                                 {
@@ -1233,7 +1555,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             'onCancel':function(){window.close();}
                             ,'onSave':function(){window.close();
 
-                                this.getRootNode().reload(function(){
+                                Ext.getCmp('view-nodes-panel').reload({ 'cluster_id': cluster_id });
+                                /*this.getRootNode().reload(function(){
                                     var centerElem = Ext.getCmp('view-main-panel').findById('view-center-panel-'+cluster_id);
                                     if(centerElem && centerElem.isVisible())
                                     {
@@ -1243,7 +1566,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                     }
 
 
-                                },this);
+                                },this);*/
 
                             }
                             ,scope:this
@@ -1256,7 +1579,143 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         window.show(btn.id);
 
                     }
+                    ,startServer: function(btn, node){
+                        
+                        var server_name = node.attributes.text;
+                        var nid = node.parentNode.attributes.id; 
+                        var server_vm_state = node.attributes.vm_state;
+
+                        var send_data = {'nid': nid,
+                                         'server': server_name};
+
+                        Ext.Msg.show({
+                            title: <?php echo json_encode(__('Start server')) ?>,
+                            buttons: Ext.MessageBox.YESNO,
+                            scope:this,
+                            msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,server_vm_state)+'<br>'
+                                 +String.format(<?php echo json_encode(__('Start server {0} ?')) ?>,server_name),
+                            fn: function(btn){
+                                if (btn == 'yes'){
+
+                                    var conn = new Ext.data.Connection({
+                                        listeners:{
+                                            // wait message.....
+                                            beforerequest:function(){
+                                                Ext.MessageBox.show({
+                                                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                    msg: <?php echo json_encode(__('Starting virtual server...')) ?>,
+                                                    width:300,
+                                                    wait:true
+                                                });
+                                            },// on request complete hide message
+                                            requestcomplete:function(){Ext.MessageBox.hide();}
+                                            ,requestexception:function(c,r,o){Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                        }
+                                    });// end conn
+                                    conn.request({
+                                        url: <?php echo json_encode(url_for('server/jsonStart'))?>,
+                                        params: send_data,
+                                        scope:this,
+                                        success: function(resp,opt) {
+                                            var response = Ext.util.JSON.decode(resp.responseText);
+                                            Ext.ux.Logger.info(response['agent'], response['response']);
+//                                            var parentCmp = Ext.getCmp((item.scope).id);
+//                                            parentCmp.fireEvent('refresh',parentCmp);
+
+                                        }
+                                        ,failure: function(resp,opt) {
+                                            var response = Ext.util.JSON.decode(resp.responseText);
+                                            if(response && resp.status!=401)
+                                                Ext.Msg.show({
+                                                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                                    buttons: Ext.MessageBox.OK,
+                                                    msg: String.format(<?php echo json_encode(__('Unable to start virtual server {0}!')) ?>,server_name)+'<br>'+response['info'],
+                                                    icon: Ext.MessageBox.ERROR
+                                                });
+                                        }
+                                    });// END Ajax request
+                                }//END button==yes
+                            }// END fn
+                        }); //END Msg.show
+
+
+                    }
+                    ,stopServer: function(btn, node, forced){
+                        var server_name = node.attributes.text;
+                        var node_id = node.parentNode.attributes.id; 
+                        var server_vm_state = node.attributes.vm_state;
+
+                        var forcestop = 0;
+                        var title = <?php echo json_encode(__('Stop server')) ?> + ' (';
+
+                        if( forced ){
+                            forcestop = 1;                            
+                            title += <?php echo json_encode(__('Forced')) ?>;                            
+                        }else{
+                            title += <?php echo json_encode(__('Normal')) ?>
+                        }
+                        title += ')';
+
+                        Ext.Msg.show({
+                            title: title,
+                            scope:this,
+                            buttons: Ext.MessageBox.YESNO,
+                            msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,server_vm_state)+'<br>'
+                                 +String.format(<?php echo json_encode(__('Stop server {0} ?')) ?>,server_name),
+                            icon: Ext.MessageBox.QUESTION,
+                            fn: function(btn){
+
+                                if (btn == 'yes'){
+                                    var params = {'name':server_name};
+                                    var conn = new Ext.data.Connection({
+                                        listeners:{
+                                            // wait message.....
+                                            beforerequest:function(){
+                                                Ext.MessageBox.show({
+                                                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                    msg: <?php echo json_encode(__('Stoping virtual server...')) ?>,
+                                                    width:300,
+                                                    wait:true
+                                                });
+                                            },// on request complete hide message
+                                            requestcomplete:function(){Ext.MessageBox.hide();}
+                                            ,requestexception:function(c,r,o){
+                                                Ext.MessageBox.hide();
+                                                Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                        }
+                                    });// end conn
+                                    conn.request({
+                                        url: <?php echo json_encode(url_for('server/jsonStop'))?>,
+                                        params: {'nid':node_id,'server': server_name, 'force': forcestop, 'destroy': forcestop },
+                                        scope:this,
+                                        success: function(resp,opt) {
+                                            var response = Ext.util.JSON.decode(resp.responseText);
+                                            Ext.ux.Logger.info(response['agent'],response['response']);
+//                                            var parentCmp = Ext.getCmp((item.scope).id);
+//                                            parentCmp.fireEvent('refresh',parentCmp);
+                                        },
+                                        failure: function(resp,opt) {
+                                            var response = Ext.util.JSON.decode(resp.responseText);
+
+                                            Ext.ux.Logger.error(response['agent'], response['error']);
+
+                                            Ext.Msg.show({
+                                                title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                                width:300,
+                                                buttons: Ext.MessageBox.OK,
+                                                msg: String.format(<?php echo json_encode(__('Unable to stop virtual server {0}!')) ?>,server_name)+'<br>'+response['info'],
+                                                icon: Ext.MessageBox.ERROR});
+                                        }
+                                    });// END Ajax request
+                                }//END button==yes
+                            }// END fn
+                        }); //END Msg.show
+
+
+
+                    }
                     ,changePerms: function(btn,node){
+                        //console.log(node);
 
                         var title = <?php echo json_encode(__('Set permissions')) ?>;
 
@@ -1275,14 +1734,18 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             p_id = sId;
                             p_level = 'server';
                             p_permtype = 'op'
-//                            url = <#?php echo json_encode(url_for('server/jsonKeymap?id='))?>+sId;
+                        } else if(node.attributes.type='cluster'){
+                            var cId = node.id;
+                            cId = cId.replace(/^d/,'');
+                            p_id = cId;
+                            p_level = 'cluster';
+                            p_permtype = 'admin';
                         }else{
                             p_id = node.id;
                             p_level = 'node';
                             p_permtype = 'admin';
                         }
 
-                        //var keyMapForm = new View.KeyMap({url:url,isLeaf:isLeaf});
                         var permsForm = new View.PermForm({id: p_id, level: p_level, permtype: p_permtype});
                         var windowPerms = new Ext.Window({
                             title: title,
@@ -1335,7 +1798,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 //                        }});
 
                     }
-                    ,deleteNode: function(btn,node){                                                
+                    ,deleteNode: function(btn,node){
 
                         Ext.Msg.show({
                             title: <?php echo json_encode(__('Remove node')) ?>,
@@ -1353,8 +1816,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                     title: <?php echo json_encode(__('Please wait...')) ?>,
                                                     msg: <?php echo json_encode(__('Removing node...')) ?>,
                                                     width:300,
-                                                    wait:true,
-                                                    modal: false
+                                                    wait:true
                                                 });
                                             },// on request complete hide message
                                             requestcomplete:function(){Ext.MessageBox.hide();}
@@ -1381,6 +1843,193 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         }); //END Msg.show
 
 
+                    }
+                    ,shutdownNode: function(btn, node){
+                        
+                        Ext.Msg.show({
+                            title: String.format(<?php echo json_encode(__('Shutdown {0}')) ?>, node.attributes.text ),
+                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            msg: String.format(<?php echo json_encode(__('Shutdown node {0} ? This will also shut down all virtual servers from this node.')) ?>,node.attributes.text),
+                            icon: Ext.MessageBox.WARNING,
+                            fn: function(btn){
+                                if (btn == 'yes'){
+
+                                    var conn = new Ext.data.Connection({
+                                        listeners:{
+                                            // wait message.....
+                                            beforerequest:function(){
+                                                Ext.MessageBox.show({
+                                                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                    msg: <?php echo json_encode(__('Node is shutting down...')) ?>,
+                                                    width:300,
+                                                    wait:true
+                                                });
+                                            },// on request complete hide message
+                                            requestcomplete:function(){Ext.MessageBox.hide();}
+                                            ,requestexception:function(c,r,o){
+                                                Ext.MessageBox.hide();
+                                                Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                        }
+                                    });// end conn
+
+                                    var alrtmsg = <?php echo json_encode(__('Command sent successfully')) ?>;
+                                    var successMsg = <?php echo json_encode(__('Shutting down')) ?> + ' '+ node.attributes.text;
+                                    conn.request({
+                                        url: <?php echo json_encode(url_for('node/jsonShutdown')) ?>,
+                                        params: {id: node.id},
+                                        success: function(resp,opt) {
+                                            var response = Ext.decode(resp.responseText);
+                                            Ext.ux.Logger.info(response['agent'], successMsg);
+                                            View.notify({html:successMsg});
+                                            Ext.Msg.alert(<?php echo json_encode(__('Information')) ?>, alrtmsg);
+                                        },
+                                        failure: function(resp,opt) {
+                                            var response = Ext.decode(resp.responseText);
+                                            Ext.ux.Logger.info(response['agent'],response['info']);
+                                            View.notify({html:response['info']});
+                                            Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, response['info']);
+                                        }
+                                    });// END Ajax request
+                                }//END button==yes
+                            }// END fn
+                        }); //END Msg.show
+                    }
+                    ,maintenanceNode: function(btn, e){
+                        node = this.ctxNode;
+
+                        Ext.Msg.show({
+                            title: String.format(<?php echo json_encode(__('Put node {0} in maintenance')) ?>, node.attributes.text ),
+                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            msg: String.format(<?php echo json_encode(__('Do you want put node {0} in maintenance? This will also migrate all virtual servers.')) ?>,node.attributes.text),
+                            icon: Ext.MessageBox.WARNING,
+                            scope: this,
+                            fn: function(btn){
+                                if (btn == 'yes'){
+
+                                    var spare_node_id = node.attributes.sparenodeid;
+                                    var conn = new Ext.data.Connection({
+                                        listeners:{
+                                            // wait message.....
+                                            beforerequest:function(){
+                                                Ext.MessageBox.show({
+                                                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                    msg: <?php echo json_encode(__('Node is moving to maintenance mode...')) ?>,
+                                                    width:300,
+                                                    wait:true
+                                                });
+                                            },// on request complete hide message
+                                            requestcomplete:function(){Ext.MessageBox.hide();}
+                                            ,requestexception:function(c,r,o){
+                                                Ext.MessageBox.hide();
+                                                Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                        }
+                                    });// end conn
+
+                                    conn.request({
+                                        url: <?php echo json_encode(url_for('node/jsonPutMaintenance')) ?>,
+                                        params: {'id': node.id, 'spare_id':spare_node_id},
+                                        success: function(resp,opt) {
+                                            //Ext.TaskMgr.stop(task);
+                                            var response = Ext.decode(resp.responseText);
+                                            Ext.ux.Logger.info(response['agent'], response['response']);
+                                            View.notify({html:response['response']});
+                                            Ext.getCmp('view-nodes-panel').reload({ 'node_id': node.id });
+                                        },
+                                        failure: function(resp,opt) {
+                                            //Ext.TaskMgr.stop(task);
+                                            var response = Ext.decode(resp.responseText);
+                                            Ext.ux.Logger.info(response['agent'],response['error']);
+                                            View.notify({html:response['info']});
+                                            Ext.Msg.show({
+                                                title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                                width:300,
+                                                buttons: Ext.MessageBox.OK,
+                                                msg: response['error'],
+                                                icon: Ext.MessageBox.ERROR});
+                                            Ext.getCmp('view-nodes-panel').reload({ 'node_id': node.id });
+                                        }
+                                    });// END Ajax request
+
+                                }//END button==yes
+                            }// END fn
+                        }); //END Msg.show
+                    }
+                    ,systemCheck: function(btn, e){
+                        node = this.ctxNode;
+
+                        Ext.Msg.show({
+                            title: String.format(<?php echo json_encode(__('System check on node {0}')) ?>, node.attributes.text ),
+                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            msg: String.format(<?php echo json_encode(__('Do you like execute system check on node {0}?')) ?>,node.attributes.text),
+                            icon: Ext.MessageBox.WARNING,
+                            scope: this,
+                            fn: function(btn){
+                                if (btn == 'yes'){
+                                        var conn = new Ext.data.Connection({
+                                            listeners:{
+                                                // wait message.....
+                                                beforerequest:function(){
+                                                    Ext.MessageBox.show({
+                                                        title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                        msg: <?php echo json_encode(__('Executing system check...')) ?>,
+                                                        width:300,
+                                                        wait:true
+                                                    });
+                                                },// on request complete hide message
+                                                requestcomplete:function(){Ext.MessageBox.hide();}
+                                                ,requestexception:function(c,r,o){
+                                                    Ext.MessageBox.hide();
+                                                    Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                            }
+                                        });// end conn
+
+                                        conn.request({
+                                            url: <?php echo json_encode(url_for('node/jsonSystemCheck')) ?>,
+                                            params: {'id': node.id},
+                                            success: function(resp,opt) {
+                                                var response = Ext.decode(resp.responseText);
+                                                Ext.ux.Logger.info(response['agent'], response['response']);
+                                                View.notify({html:response['response']});
+                                                Ext.getCmp('view-nodes-panel').reload({ 'node_id': node.id });
+                                            },
+                                            failure: function(resp,opt) {
+                                                var response = Ext.decode(resp.responseText);
+                                                //Ext.ux.Logger.info(response['agent'],response['info']);
+                                                //View.notify({html:response['info']});
+                                                Ext.Msg.show({
+                                                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                                    width:300,
+                                                    buttons: Ext.MessageBox.OK,
+                                                    msg: response['error'],
+                                                    icon: Ext.MessageBox.ERROR});
+                                                Ext.getCmp('view-nodes-panel').reload({ 'node_id': node.id });
+                                            }
+                                        });// END Ajax request
+                                }//END button==yes
+                            }// END fn
+                        }); //END Msg.show
+                    }
+                    ,callMigrateServer: function(srv,tnode){
+                        /*send_data['id'] = form_values['id'];
+                            send_data['nid'] = form_values['nodes_cb'];*/
+
+                        var sId = srv.id;
+                        var server_id = sId.replace('s','');
+                        var server_name = srv.text;
+
+                        var node_id = tnode.id;
+
+                        var params = { 'id':server_id, 'nodes_cb':node_id };
+
+                        var type = (srv.attributes.vm_state=='running')?  'migrate' : 'move';
+                        Server.Migrate.Call(this,params,type,
+                                                    function(){
+                                                        console.log(server_name + ' migrate ok');
+                                                    }
+                                                    ,function(){
+                                                        console.log(server_name + ' migrate nok');
+                                                    }
+                        );
                     }
                     ,setInitialize: function(btn,node){
 
@@ -1413,7 +2062,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             // everything ok...
                             success: function(resp,opt){
 
-                                this.reload();
+                                this.reload({ 'node_id': node.id });
                                 var response = Ext.decode(resp.responseText);
                                 Ext.ux.Logger.info(response['agent'],response['response']);
                                 View.notify({html:response['response']});
@@ -1494,7 +2143,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             'onCancel':function(){window.close();}
                             ,'onSave':function(){window.close();
 
-                                this.getRootNode().reload(function(){
+                                Ext.getCmp('view-nodes-panel').reload({ 'node_id': node.id });
+                                /*this.getRootNode().reload(function(){
                                     var centerElem = Ext.getCmp('view-main-panel').findById('view-center-panel-'+node.id);
                                     if(centerElem && centerElem.isVisible())
                                     {
@@ -1503,7 +2153,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                     }
                                     
                                     
-                                },this);
+                                },this);*/
                                
                             }
                             ,scope:this
@@ -1672,7 +2322,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         var node_id;
                         var node = this.getNodeById(id);                        
 
-                        if( node.attributes.type == 'server' )
+                        if( node && node.attributes.type == 'server' )
                             node_id = node.parentNode.id;
 
                         if(node){
@@ -1729,6 +2379,54 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                     afterRender : function(){
                         NodePanel.superclass.afterRender.call(this);
                         this.el.on('contextmenu', function(e){e.preventDefault();});
+                    }
+                    ,deleteCluster: function(btn,cluster){
+
+                        Ext.Msg.show({
+                            title: <?php echo json_encode(__('Remove cluster')) ?>,
+                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            msg: String.format(<?php echo json_encode(__('Remove cluster {0} ?')) ?>,cluster.attributes.text),
+                            icon: Ext.MessageBox.WARNING,
+                            fn: function(btn){
+                                if (btn == 'yes'){
+
+                                    var conn = new Ext.data.Connection({
+                                        listeners:{
+                                            // wait message.....
+                                            beforerequest:function(){
+                                                Ext.MessageBox.show({
+                                                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                    msg: <?php echo json_encode(__('Removing cluster...')) ?>,
+                                                    width:300,
+                                                    wait:true
+                                                });
+                                            },// on request complete hide message
+                                            requestcomplete:function(){Ext.MessageBox.hide();}
+                                            ,requestexception:function(c,r,o){
+                                                Ext.MessageBox.hide();
+                                                Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                        }
+                                    });// end conn
+
+                                    var cId = cluster.id;
+                                    var cluster_id = cId.replace('d','');
+
+                                    conn.request({
+                                        url: <?php echo json_encode(url_for('cluster/jsonDelete')) ?>,
+                                        params: {id: cluster_id},
+                                        success: function(resp,opt) {
+                                            Ext.getCmp('view-nodes-panel').removeNode(cluster.id);
+                                            Ext.getCmp('view-main-panel').remove('view-center-panel-'+cluster.id);
+                                        },
+                                        failure: function(resp,opt) {
+                                            Ext.Msg.alert(<?php echo json_encode(__('Error!')) ?>, <?php echo json_encode(__('Unable to delete cluster!')) ?>);
+                                        }
+                                    });// END Ajax request
+                                }//END button==yes
+                            }// END fn
+                        }); //END Msg.show
+
+
                     }
                 });
                 /*
@@ -2207,9 +2905,11 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                     if(config.anchorid) initConf.autoLoad.callback = (function(ctEl){
 
                         var el = Ext.get(config.anchorid);
-                        var yoffset = el.getOffsetsTo(ctEl)[1];
-                        ctEl.scrollTo('top',yoffset,true);
-                        //    Ext.get(config.anchorid).scrollIntoView(ctEl);
+                        if( el ){
+                            var yoffset = el.getOffsetsTo(ctEl)[1];
+                            ctEl.scrollTo('top',yoffset,true);
+                            //    Ext.get(config.anchorid).scrollIntoView(ctEl);
+                        }
                     });
                 }
 
@@ -2268,6 +2968,11 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         response = (Ext.util.JSON.decode(resp.responseText))['error'];
                     else response = <?php echo json_encode(__('Error')) ?>;
                     View.notify({html:response});
+                    if(node.attributes.type=='server'){
+                        Ext.getCmp('view-nodes-panel').reload({ 'server_id': node.id });
+                    } else {
+                        Ext.getCmp('view-nodes-panel').reload({ 'node_id': node.id });
+                    }
 
                 });
 
@@ -2278,6 +2983,11 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                     if( !message )
                         message = <?php echo json_encode(__('System check')) ?>;
                     Ext.ux.Logger.info(agent, message);
+                    if(node.attributes.type=='server'){
+                        Ext.getCmp('view-nodes-panel').reload({ 'server_id': node.id });
+                    } else {
+                        Ext.getCmp('view-nodes-panel').reload({ 'node_id': node.id });
+                    }
 
                 });
 
@@ -2363,7 +3073,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
             },
             //load webpage component once...
-            loadComponent:function(item,e){                
+            loadComponent:function(item,e,obj){
                 var class_load = item.call.split('.');
                 var evaluated = true;
                 var func_eval = [];
@@ -2386,14 +3096,14 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                 //    && eval("typeof "+item.callback+"!='undefined'"))
                 if(evaluated && eval("typeof "+item.callback+"!='undefined'"))
                 {                    
-                    item.callback(item);
+                    item.callback(item,e,obj);
                 }
                 else{                    
-                    View.clickHandler(item,e);
+                    View.clickHandler(item,e,obj);
                 }
 
             },
-            clickHandler:function (item, e) {            
+            clickHandler:function (item, e, obj) {            
                 Ext.getBody().mask(<?php echo json_encode(__('Retrieving data...')) ?>);                
                 Ext.Ajax.request({
                     url: item.url,
@@ -2402,7 +3112,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                         Ext.get('dynPageContainer').update(response.responseText,true,function(){
 
-                            if(eval("typeof "+item.callback+"!='undefined'")) item.callback(item);
+                            if(eval("typeof "+item.callback+"!='undefined'")) item.callback(item,e,obj);
                             Ext.getBody().unmask();
                             
                         });
@@ -2590,7 +3300,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
             windowHeight = Ext.util.Format.round(windowHeight,0);
 
             var config = {
-                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                    title: <?php echo json_encode(__(sfConfig::get('config_acronym').' :: ISO Upload')) ?>,
                     height        : 370,
                     width         : 675,
                     maximizable   : true,
@@ -2607,21 +3317,23 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                   //  hideMode      : 'nosize',
                    // hideMode      : 'offsets',
                     listeners : {
-                        documentloaded : function(frameEl){
+                        /*documentloaded : function(frameEl){
                                         var MIF = frameEl.ownerCt;
                                         var doc = frameEl.getFrameDocument();
                                         var applet = doc.getElementsByTagName('applet');
-                                        var docHeight = parseInt(applet[0].height)+70;
-                                        var docWidth = parseInt(applet[0].width)+35;
+                                        if( applet && applet[0]){
+                                            var docHeight = parseInt(applet[0].height)+70;
+                                            var docWidth = parseInt(applet[0].width)+35;
 
-                                        MIF.setTitle(doc.title);
-                                        MIF.setWidth(docWidth);
-                                        MIF.setHeight(windowHeight > docHeight  ? docHeight:windowHeight );
-                                        MIF.center();
+                                            MIF.setTitle(doc.title);
+                                            MIF.setWidth(docWidth);
+                                            MIF.setHeight(windowHeight > docHeight  ? docHeight:windowHeight );
+                                            MIF.center();
 
-                                        View.notify({html:MIF.title+' reports: DATA LOADED'});
+                                            View.notify({html:MIF.title+' reports: DATA LOADED'});
+                                        }
 
-                        },
+                        },*/
                         resize:function(frameEl,event,docSize,viewPortSize,viewSize){
                                         var MIF = frameEl.ownerCt;
                                         var doc = frameEl.getFrameDocument();
@@ -2802,9 +3514,14 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 layout:'form',
                                 items:[
                                     new Ext.form.Radio({
+                                        boxLabel: <?php echo json_encode(__('DHCP')) ?>, width:90,
+                                        name: 'network_'+id+'_bootp',fieldLabel:'',hideLabel:true,
+                                        inputValue: 'dhcp'
+                                    }),
+                                    new Ext.form.Radio({
                                         boxLabel: <?php echo json_encode(__('Static')) ?>, width:90,
-                                        name: 'network_'+id+'_static',fieldLabel:'',hideLabel:true,
-                                        inputValue: '1'
+                                        name: 'network_'+id+'_bootp',fieldLabel:'',hideLabel:true,
+                                        inputValue: 'static'
                                         ,listeners:{
                                             check:function(chkbox,checked){
                                                     var addrCmp = (this.ownerCt).ownerCt;
@@ -2906,9 +3623,14 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 layout:'form',
                                 items:[
                                     new Ext.form.Radio({
+                                        boxLabel: <?php echo json_encode(__('DHCP')) ?>, width:90,
+                                        name: id+'_bootpdns',fieldLabel:'',hideLabel:true,
+                                        inputValue: 'dhcp'
+                                    }),
+                                    new Ext.form.Radio({
                                         boxLabel: <?php echo json_encode(__('Static')) ?>, width:90,
-                                        name: id+'_staticdns',fieldLabel:'',hideLabel:true,
-                                        inputValue: '1'
+                                        name: id+'_bootpdns',fieldLabel:'',hideLabel:true,
+                                        inputValue: 'static'
                                         ,listeners:{
                                             check:function(chkbox,checked){
                                                 var addrCmp = (this.ownerCt).ownerCt;
@@ -3023,12 +3745,12 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         xtype: 'fieldset',
                         title: 'IP',
                         collapsible: false,
-                        items:[dhcp_source,View.StaticIpTpl('va_management')]
+                        items:[View.StaticIpTpl('va_management')]
                     },{
                         xtype: 'fieldset',
                         title: <?php echo json_encode(__('DNS')) ?>,
                         collapsible: false,
-                        items:[dns_source,View.DnsTpl('network')]
+                        items:[View.DnsTpl('network')]
                     }
                     ]
                 //,frame:true
@@ -3075,7 +3797,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                 var alldata = this.form.getValues();
                 var network = new Object();
                 var send_data = new Object();
-                if(alldata['network_va_management_static']=='0'){
+                if(alldata['network_va_management_bootp']=='dhcp'){
                     network = {
                         'bootp':'dhcp',
                         'if':alldata['network_va_management_if']};
@@ -3100,8 +3822,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 title: <?php echo json_encode(__('Please wait...')) ?>,
                                 msg: <?php echo json_encode(__('Changing IP...')) ?>,
                                 width:300,
-                                wait:true,
-                                modal: false
+                                wait:true
                             });
                         },// on request complete hide message
                         requestcomplete:function(){Ext.MessageBox.hide();}
@@ -3684,27 +4405,27 @@ if($sf_user->getAttribute('etvamodel')!='standard')
         }
 
         var responseText = new Object();        
-
         if(response.responseText) responseText = Ext.util.JSON.decode(response.responseText);
         if(!responseText['agent']) responseText['agent'] = '<?php echo sfConfig::get('config_acronym'); ?>';
-        if(!responseText['error']) responseText['error'] = 'Error!';
-        if(!responseText['info']) responseText['info'] = 'Error!';
+
+        var errorResponse = responseText['error'];
+        if(!errorResponse) errorResponse = responseText['info'];
+        if(!errorResponse) errorResponse = 'Error!';
 
         var agent = responseText['agent'];
 
-        var isArray = ((responseText['error']).constructor.toString().indexOf("Array") != -1);
+        var isArray = ((errorResponse).constructor.toString().indexOf("Array") != -1);
 
 
+        if(!isArray && errorResponse ){
 
-        if(!isArray && responseText['error']){
-
-            if((typeof responseText['error'])=='string'){
+            if((typeof errorResponse)=='string'){
 
                 if(response.status==0)                    
                     Ext.ux.Logger.error(agent, response.statusText);                
                 else{
                     Ext.MessageBox.hide();                    
-                    Ext.ux.Logger.error(agent, responseText['error']);
+                    Ext.ux.Logger.error(agent, errorResponse);
                 }
 
             }
@@ -3730,7 +4451,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
             if(response.status==404){                
                 Ext.MessageBox.show({
                     title: 'Error '+agent,
-                    msg: '<center><b>The request could not be accomplished!</b></center><br>'+responseText['error'],
+                    msg: '<center><b>The request could not be accomplished!</b></center><br>'+errorResponse,
                     buttons: Ext.MessageBox.OK,
                     icon: Ext.MessageBox.ERROR
                 });
@@ -3741,7 +4462,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                 
                 Ext.MessageBox.show({
                     title: String.format(<?php echo json_encode(__('Error {0}')) ?>,agent),
-                    msg: responseText['error'],
+                    msg: errorResponse,
                     buttons: Ext.MessageBox.OK,
                     icon: Ext.MessageBox.ERROR
                 });

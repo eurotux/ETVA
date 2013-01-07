@@ -10,7 +10,9 @@ Appliance.Backup.Form = Ext.extend(Ext.form.FormPanel, {
         var config = {
             monitorValid:true,
             items:[
-                {xtype:'displayfield',hideLabel:true,value: <?php echo json_encode(__('An appliance backup will save all '.sfConfig::get('config_acronym').'settings. <br> If a virtual machine as an agent running, actual configuration/settings of that service will also be saved.<br><br>IT DOES NOT BACKUP DISK DATA!!! ONLY CURRENT CONFIGURATION!')) ?>}
+                {xtype:'displayfield',hideLabel:true,
+                    value: String.format(<?php echo json_encode(__('An appliance backup will save all {0} settings. <br> If a virtual machine as an agent running, actual configuration/settings of that service will also be saved.<br><br>IT DOES NOT BACKUP DISK DATA!!! ONLY CURRENT CONFIGURATION!')) ?>,'<?php echo sfConfig::get('config_acronym'); ?>')
+                }
                 ,{
                     xtype:'button',text: <?php echo json_encode(__('BACKUP NOW!')) ?>,
                     ref:'backup_now',
@@ -213,7 +215,7 @@ Appliance.Backup.Form = Ext.extend(Ext.form.FormPanel, {
                   
                     Ext.MessageBox.show({
                         title: String.format(<?php echo json_encode(__('Error {0}')) ?>,resp['agent']),
-                        msg: String.format(<?php echo json_encode(__('Could not perform '.sfConfig::get('config_acronym').' BACKUP.<br> {0}')) ?>,resp['info']),
+                        msg: String.format(<?php echo json_encode(__('Could not perform {0} BACKUP.<br> {1}')) ?>,'<?php echo sfConfig::get('config_acronym'); ?>',resp['info']),
                         buttons: Ext.MessageBox.OK,
                         icon: Ext.MessageBox.ERROR
                     });

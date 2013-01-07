@@ -1,6 +1,6 @@
 Name: etva-smb
 Summary: ETVA smb related files
-Version: 1.0.1
+Version: 1.2.1
 Release: 11%{?dist}
 Group: System Environment/Base
 License: Copyright © 2010-2011 Eurotux Informatica S.A.  All rights reserved.
@@ -18,8 +18,8 @@ ETVA smb related files and metapackage
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/lcdproc/
-install -m 644 %{SOURCE0} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/lcdproc/
-install -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/lcdproc/
+install -m 644 %{SOURCE0} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/lcdproc/LCDd.conf.new
+install -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/lcdproc/lcdproc.conf.new
 
 %files
 %{_sysconfdir}/sysconfig/lcdproc/*
@@ -29,7 +29,17 @@ install -m 644 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/lcdproc/
 /sbin/chkconfig lcdproc on
 
 if [ "$1" == "1" ]; then
+
+    if [ ! -e "%{_sysconfdir}/sysconfig/lcdproc/LCDd.conf" ]; then
+        cp -f %{_sysconfdir}/sysconfig/lcdproc/LCDd.conf.new %{_sysconfdir}/sysconfig/lcdproc/LCDd.conf
+    fi
+
+    if [ ! -e "%{_sysconfdir}/sysconfig/lcdproc/lcdproc.conf" ]; then
+        cp -f %{_sysconfdir}/sysconfig/lcdproc/lcdproc.conf.new %{_sysconfdir}/sysconfig/lcdproc/lcdproc.conf
+    fi
+
     # Alterar o shutdown dos guest e timeout
+	%{__perl} -pi -e 's/#ON_BOOT=start/ON_BOOT=ignore/' %{_sysconfdir}/sysconfig/libvirt-guests
 	%{__perl} -pi -e 's/#ON_SHUTDOWN=suspend/ON_SHUTDOWN=shutdown/' %{_sysconfdir}/sysconfig/libvirt-guests
 	%{__perl} -pi -e 's/#SHUTDOWN_TIMEOUT=0/SHUTDOWN_TIMEOUT=120/' %{_sysconfdir}/sysconfig/libvirt-guests
 fi

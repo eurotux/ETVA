@@ -3,9 +3,14 @@
 class EtvaNode extends BaseEtvaNode
 {
     const NAME_MAP = 'name';
-    const RESERVED_MEM_MB = 640;
+    const RESERVED_MEM_MB = 768;
     const NODE_ACTIVE = 1;
     const NODE_INACTIVE = 0;
+    const NODE_FAIL = -1;
+    const NODE_FAIL_UP = -11;
+    const NODE_MAINTENANCE = -2;
+    const NODE_MAINTENANCE_UP = -21;
+    const NODE_COMA = -3;
     const INITIALIZE_OK = 'ok';
     const INITIALIZE_PENDING = 'pending';
 
@@ -36,18 +41,26 @@ class EtvaNode extends BaseEtvaNode
         $last_message = $this->getLastMessage();
         $last_message_decoded = json_decode($last_message,true);
         
-        if(isset($last_message_decoded['action'])){
+        if(isset($last_message_decoded['action']) && ($last_message_decoded['action']==$action)){
             $this->setLastMessage('');
             $this->save();
         }
     }
 
 
-    public function getServers()
+    public function getServers($query = null)
     {
-        $criteria = new Criteria();
-        $criteria->add(EtvaServerPeer::NODE_ID, $this->getId());
-        return EtvaServerPeer::getServers($criteria);
+        return $this->getEtvaServers($query);
+    }
+    public function getEtvaServers($query = null)
+    {
+        if( !$query ) $query = EtvaServerQuery::create();
+        return $query->useEtvaServerAssignQuery('ServerAssign','RIGHT JOIN')
+                        ->filterByNodeId($this->getId())
+                    ->endUse()
+                    ->find();
+
+
     }
 
     /*
@@ -137,14 +150,18 @@ class EtvaNode extends BaseEtvaNode
              * if response is TCP failure then VirtAgent is not reachable
              * set state to 0
              */
-            if($response['faultcode'] && $response['faultcode']=='TCP')
+            if(isset($response['faultcode']) && $response['faultcode']=='TCP')
             {
-                $this->setState(0);
+                if( $this->getState() >= self::NODE_INACTIVE ){
+                    $this->setState(self::NODE_INACTIVE);
+                }
                 $this->save();
             }else{
 
                 //keepalive update
-                $this->setState(1);
+                if( $this->getState() >= self::NODE_INACTIVE ){
+                    $this->setState(self::NODE_ACTIVE);
+                }
                 $this->setLastKeepalive('NOW');
                 $this->save();
             }
@@ -190,12 +207,19 @@ class EtvaNode extends BaseEtvaNode
         return EtvaPhysicalvolumePeer::doSelectOne($criteria);
     }
 
-
     public function retrieveVolumegroupByVg($vg){
         $criteria = new Criteria();
         $criteria->add(EtvaNodeVolumegroupPeer::NODE_ID, $this->getId());
         $criteria->addJoin(EtvaNodeVolumegroupPeer::VOLUMEGROUP_ID, EtvaVolumegroupPeer::ID);
         $criteria->add(EtvaVolumegroupPeer::VG, $vg);
+
+        return EtvaVolumegroupPeer::doSelectOne($criteria);
+    }
+    public function retrieveVolumegroupByUuid($uuid){
+        $criteria = new Criteria();
+        $criteria->add(EtvaNodeVolumegroupPeer::NODE_ID, $this->getId());
+        $criteria->addJoin(EtvaNodeVolumegroupPeer::VOLUMEGROUP_ID, EtvaVolumegroupPeer::ID);
+        $criteria->add(EtvaVolumegroupPeer::UUID, $uuid);
 
         return EtvaVolumegroupPeer::doSelectOne($criteria);
     }
@@ -239,10 +263,16 @@ class EtvaNode extends BaseEtvaNode
     }
 
     public function retrieveServerByName($server){
-        $criteria = new Criteria();
+        /*$criteria = new Criteria();
         $criteria->add(EtvaServerPeer::NODE_ID, $this->getId());
 
-        return EtvaServerPeer::retrieveByName($server, $criteria);
+        return EtvaServerPeer::retrieveByName($server, $criteria);*/
+        return EtvaServerQuery::create()
+                        ->filterByName($server)
+                        ->useEtvaServerAssignQuery('ServerAssign','RIGHT JOIN')
+                            ->filterByNodeId($this->getId())
+                        ->endUse()
+                        ->findOne();
     }
 
     /*
@@ -254,7 +284,28 @@ class EtvaNode extends BaseEtvaNode
         $array_data = $this->toArray(BasePeer::TYPE_FIELDNAME);
         $array_data['mem_text'] = Etva::Byte_to_MBconvert($array_data['memtotal']);
         $array_data['mem_available'] = Etva::Byte_to_MBconvert($array_data['memfree']);
-        $array_data['state_text'] = $array_data['state'] == 0 ? 'Down' : 'Up';
+
+        if( $fencingconf = $this->getFencingconf() ){
+            $fencingconf_arr = (array)json_decode($fencingconf);
+            foreach($fencingconf_arr as $f=>$v){
+                $fk = "fencingconf_" . $f;
+                $array_data[$fk] = $v;
+            }
+        }
+
+
+        switch($array_data['state']){
+            case self::NODE_ACTIVE :      $array_data['state_text'] = sfContext::getInstance()->getI18N()->__('Up');
+                                          break;
+            case self::NODE_INACTIVE :    $array_data['state_text'] = sfContext::getInstance()->getI18N()->__('Down');
+                                          break;
+            case self::NODE_FAIL_UP :
+            case self::NODE_FAIL :        $array_data['state_text'] = sfContext::getInstance()->getI18N()->__('Fail');
+                                          break;
+            case self::NODE_MAINTENANCE_UP :
+            case self::NODE_MAINTENANCE : $array_data['state_text'] = sfContext::getInstance()->getI18N()->__('Maintenance');
+                                          break;
+        }
 		
 		return $array_data;       
 	}
@@ -264,10 +315,20 @@ class EtvaNode extends BaseEtvaNode
      */
     public function updateMemFree()
     {        
-        $criteria = new Criteria();
+        /*$criteria = new Criteria();
         $criteria->add(EtvaServerPeer::NODE_ID,$this->getId());
         $criteria->add(EtvaServerPeer::VM_STATE,'stop',Criteria::NOT_EQUAL);    // count vms that not stopped
-        $total_vms = EtvaServerPeer::getTotalMem($criteria);
+        $total_vms = EtvaServerPeer::getTotalMem($criteria);*/
+        $servers = EtvaServerQuery::create()
+                        ->filterByVmState(EtvaServer::STATE_STOP,Criteria::NOT_EQUAL)
+                        ->useEtvaServerAssignQuery('ServerAssign','RIGHT JOIN')
+                            ->filterByNodeId($this->getId())
+                        ->endUse()
+                        ->find();
+        $total_vms = 0;
+        foreach($servers as $i => $server){
+            $total_vms += $server->getMem();
+        }
         $total_vms = Etva::MB_to_Byteconvert($total_vms);
         $sys_mem = Etva::MB_to_Byteconvert(self::RESERVED_MEM_MB);
         $mem_free = $this->getMemtotal()-$sys_mem-$total_vms;
@@ -286,16 +347,6 @@ class EtvaNode extends BaseEtvaNode
      */
     public function preDelete(PropelPDO $con = null)
     {
-
-        /*
-         * delete servers info
-         *
-         */
-        $servers = $this->getEtvaServers();
-        foreach($servers as $server)
-            $server->deleteServer(true); //keep lvs....will be deleted later
-
-
 
         /*
          * delete lvs that are not shared....numVgs=1 only
@@ -400,11 +451,94 @@ class EtvaNode extends BaseEtvaNode
         $c->addAnd(EtvaNodePeer::STATE, EtvaNode::NODE_ACTIVE, Criteria::EQUAL);
         $c->addDescendingOrderByColumn(EtvaNodePeer::ID);
         $c->setLimit(1);
-        error_log($c->toString());
         $etva_node = EtvaNodePeer::doSelectOne($c);
         return $etva_node;
     }
 
+    public function hasPvs(){
+        $disk_pvs = $this->getEtvaNodePhysicalvolumesJoinEtvaPhysicalvolume();
+        return ((!count($disk_pvs)) ? false: true);
+    }
+    public function hasVgs(){
+        $c = new Criteria();
+        //$c->add(EtvaVolumegroupPeer::VG,sfConfig::get('app_volgroup_disk_flag'));
+        $disk_vgs = $this->getEtvaNodeVolumegroupsJoinEtvaVolumegroup($c);
+        return ((!count($disk_vgs)) ? false: true);
+    }
+    public function canCreateVms(){
+        return (!$this->getIsSpareNode() && ($this->getState()==self::NODE_ACTIVE) && ($this->getInitialize()==self::INITIALIZE_OK) && $this->hasVgs());
+    }
+    public function isNodeFree(){
+        $servers = $this->getEtvaServers();
+        return count($servers) ? false : true;
+    }
 
+    public function getFencingconf_cmd($action=null,$fencingconf_json=null){
+        if( !$fencingconf_json ) $fencingconf_json = $this->getFencingconf();
 
+        if( $fencingconf_json ){
+            $fc_obj = (array)json_decode($fencingconf_json);
+            if( $fc_obj['type'] ){
+                $fencingtypes_cmds = sfConfig::get('app_fencingcmds');
+
+                # add execution path
+                # TODO improve this
+                $fencing_cmd = "/sbin/".$fc_obj['type'];
+
+                $fencing_cmd .= " -a ".$fc_obj['address'];
+                $fencing_cmd .= " -l ".$fc_obj['username'];
+                if( $fc_obj['password'] ){
+                    $fencing_cmd .= " -p ".$fc_obj['password'];
+                }
+                if( $fc_obj['plug'] || isset($fencingtypes_cmds['datacenter'][$fc_obj['type']]) ){
+                    $plug = $fc_obj['plug'] ? $fc_obj['plug']: $this->getName(); 
+                    $fencing_cmd .= " -n ". $plug;
+                }
+                if( $action ){
+                    $fencing_cmd .= " -o $action";
+                } else if( $fc_obj['action'] ){
+                    $fencing_cmd .= " -o ".$fc_obj['action'];
+                }
+                if( $fc_obj['secure'] ){
+                    $identity_file = sfConfig::get('app_sshkey_privfile');
+                    if( file_exists($identity_file) ){
+                        $fencing_cmd .= " -k ". $identity_file;
+                    }
+                }
+
+                return $fencing_cmd;
+            }
+        }
+    }
+
+    public function getIsUp(){
+        return ( ( $this->getState() == NODE_ACTIVE ) || 
+                    ( $this->getState() == NODE_FAIL_UP ) || 
+                    ( $this->getState() == NODE_MAINTENANCE_UP ) ) ? true :false;
+    }
+
+    public function canAssignServer( EtvaServer $server ){
+        if( ($this->getCputotal() >= $server->getVcpu()) &&
+            ($this->getMemfree() > $server->getMem()) &&
+            !$server->getDevices_VA() &&
+            !$server->getHasSnapshots() ){
+            return true;
+        }
+        return false;
+    }
+
+    # get servers assign to node with guest agent installed
+    public function getServersWithGA(){
+        $servers = EtvaServerQuery::create()
+            ->filterByVmState(EtvaServer::RUNNING)
+            ->filterByGaState(EtvaServerPeer::_GA_UNINSTALLED_,Criteria::NOT_EQUAL)
+            ->useEtvaServerAssignQuery('ServerAssign','RIGHT JOIN')
+                ->useEtvaNodeQuery()
+                    ->filterByState(EtvaNode::NODE_ACTIVE)  // only if node is active
+                    ->filterById($this->getId())
+                ->endUse()
+            ->endUse()
+            ->find();
+        return $servers;
+    }
 }

@@ -16,7 +16,32 @@ class settingActions extends sfActions
       $this->etvamodel = $etva_data['model'];      
       $this->host = $request->getHost();
   }      
+    
+    public function executeJsonShutdown(sfWebRequest $request)
+    {
+        error_log("[INFO] shutdown Central MANAGEMENT");
+        
+        $command = "poweroff";
+        error_log('[COMMAND]'.$command);
 
+        $path = sfConfig::get('sf_root_dir').DIRECTORY_SEPARATOR."utils";
+        error_log("[INFO] PATH TO SUDOEXEC".$path.DIRECTORY_SEPARATOR);
+        ob_start();
+        passthru('echo '.$command.' | sudo /usr/bin/php -f '.$path.DIRECTORY_SEPARATOR.'sudoexec.php',$return);                
+        ob_end_clean();
+        error_log("[INFO] Shutdown executed.");
+        error_log("[INFO] ".$return);
+
+        if($return != 0){
+            $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
+            $error = $this->setJsonError($msg);
+            return $this->renderText($error);
+        }else{
+            
+            $msg =  array('success'=>true);
+            return $this->renderText(json_encode($msg));
+        }
+    }
 
   public function executeJsonSetting(sfWebRequest $request)
   {
@@ -69,27 +94,31 @@ class settingActions extends sfActions
 
                   $networks = $cm_networks->getNetworks();
                                     
-                  foreach($networks as $intf=>$netdata){
-                      $static = 0;
-                      $bootp = $netdata->get(SystemNetwork::BOOTP);
-                      if(strtolower($bootp)=='none' || strtolower($bootp)=='static' ) $static = 1;
+                  foreach($devices as $type=>$intf){
+                      $netdata = $networks[$intf];
+                      if( $netdata ){
+                          $static = 0;
+                          $bootp = $netdata->get(SystemNetwork::BOOTP);
+                          if(strtolower($bootp)=='none' || strtolower($bootp)=='static' ) $static = 1;
 
-                      $ip = $netdata->get(SystemNetwork::IP);
-                      $subnet = $netdata->get(SystemNetwork::NETMASK);
-                      $gw = $netdata->get(SystemNetwork::GW);
-                      $if = $netdata->get(SystemNetwork::INTF);
-                      $dns = $netdata->get(SystemNetwork::DNS);
-                      $seconddns = $netdata->get(SystemNetwork::DNSSec);
+                          $ip = $netdata->get(SystemNetwork::IP);
+                          $subnet = $netdata->get(SystemNetwork::NETMASK);
+                          $gw = $netdata->get(SystemNetwork::GW);
+                          $if = $netdata->get(SystemNetwork::INTF);
+                          $dns = $netdata->get(SystemNetwork::DNS);
+                          $seconddns = $netdata->get(SystemNetwork::DNSSec);
 
-                      $data['network_'.$intf.'_static'] = $static;
-                      $data['network_'.$intf.'_ip'] = $ip;
-                      $data['network_'.$intf.'_netmask'] = $subnet;
-                      $data['network_'.$intf.'_gateway'] = $gw;
-                      $data['network_'.$intf.'_if'] = $if;
-                      $data['network_primarydns'] = $dns;
-                      $data['network_secondarydns'] = $seconddns;
-                      $data['network_staticdns'] = $static;
-
+                          $data['network_'.$type.'_static'] = $static;
+                          $data['network_'.$type.'_bootp'] = $static ? 'static' : 'dhcp';
+                          $data['network_'.$type.'_ip'] = $ip;
+                          $data['network_'.$type.'_netmask'] = $subnet;
+                          $data['network_'.$type.'_gateway'] = $gw;
+                          $data['network_'.$type.'_if'] = $if;
+                          $data['network_primarydns'] = $dns;
+                          $data['network_secondarydns'] = $seconddns;
+                          $data['network_staticdns'] = $static;
+                          $data['network_bootpdns'] = $static ? 'static' : 'dhcp';
+                      }
                   }
               }
        
@@ -110,6 +139,7 @@ class settingActions extends sfActions
    */
   public function executeJsonUpdateSetting(sfWebRequest $request)
   {
+
         $isAjax = $request->isXmlHttpRequest();
 
         if(!$isAjax) return $this->redirect('@homepage');
@@ -140,7 +170,7 @@ class settingActions extends sfActions
             $interfaces_devices = sfConfig::get('app_device_interfaces');
             $devices = $interfaces_devices[$etvamodel];
 
-            $cm_networks->loadCMNetworks($devices);                      
+            $cm_networks->loadCMNetworks($devices); 
             $sys_networks = $cm_networks->getNetworks();
 
             if($etvamodel=='standard'){
@@ -154,8 +184,10 @@ class settingActions extends sfActions
                 $remote_net = new SystemNetwork();
                 $remote_net->fromArray($remote);
 
-                $sys_lan_net = $sys_networks['lan'];
-                $sys_manag_net = $sys_networks['cm_management'];
+                $sys_lan_if = $devices['lan'];
+                $sys_manag_if = $devices['cm_management'];
+                $sys_lan_net = $sys_networks[$sys_lan_if];
+                $sys_manag_net = $sys_networks[$sys_manag_if];
 
                 if(!$local_net->equals($sys_lan_net) || !$remote_net->equals($sys_manag_net)) $change_networks = 1;
 
@@ -167,7 +199,8 @@ class settingActions extends sfActions
 
                 $local_net = new SystemNetwork();
                 $local_net->fromArray($local);
-                $sys_manag_net = $sys_networks['cm_management'];
+                $sys_manag_if = $devices['cm_management'];
+                $sys_manag_net = $sys_networks[$sys_manag_if];
 
                 if(!$local_net->equals($sys_manag_net)) $change_networks = 1;
 
@@ -215,72 +248,75 @@ class settingActions extends sfActions
                 }
 
 
-                /*
-                 * 
-                 * check ISO DIR in use
-                 *
-                 */
-                $isosdir = sfConfig::get("config_isos_dir");
-                $criteria = new Criteria();
-                $criteria->add(EtvaServerPeer::LOCATION, "%${isosdir}%",Criteria::LIKE);                
-               
-                $criteria->add(EtvaServerPeer::VM_STATE,'running');
-
-                $servers_running_iso = EtvaServerPeer::doSelect($criteria);
+                if($etvamodel!='standard'){ // only if not standard version
                 
+                    /*
+                     * 
+                     * check ISO DIR in use
+                     *
+                     */
+                    $isosdir = sfConfig::get("config_isos_dir");
+                    $criteria = new Criteria();
+                    $criteria->add(EtvaServerPeer::LOCATION, "%${isosdir}%",Criteria::LIKE);                
+                   
+                    $criteria->add(EtvaServerPeer::VM_STATE,'running');
 
-                foreach($servers_running_iso as $server)
-                {
+                    $servers_running_iso = EtvaServerPeer::doSelect($criteria);
                     
-                    $remote_errors[] = $this->getContext()->getI18N()->__(EtvaServerPeer::_CDROM_INUSE_,array('%name%'=>$server->getName()));
-                }
 
-                if($remote_errors){
-
-                    $message = Etva::getLogMessage(array('info'=>ETVA::_CDROM_INUSE_), ETVA::_ERR_ISODIR_INUSE_);
-                    $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-
-                    $i18n_br_sep = implode('<br>',$remote_errors);
-                    $i18n_sp_sep = implode(' ',$remote_errors);
-
-                    //$iso_br_msg = Etva::getLogMessage(array('info'=>'<br>'.$br_sep), ETVA::_ERR_ISODIR_INUSE_);
-                    $i18n_iso_br_msg = $this->getContext()->getI18N()->__(ETVA::_ERR_ISODIR_INUSE_,array('%info%'=>'<br>'.$i18n_br_sep));
-                    //$iso_sp_msg = Etva::getLogMessage(array('info'=>$sp_sep), ETVA::_ERR_ISODIR_INUSE_);
-                    $i18n_iso_sp_msg = $this->getContext()->getI18N()->__(ETVA::_ERR_ISODIR_INUSE_,array('%info%'=>$i18n_sp_sep));
-
-                    $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>$i18n_iso_br_msg,'error'=>$i18n_iso_sp_msg);
-                    $error = $this->setJsonError($msg);
-                    return $this->renderText($error);
-                }                
-
-                /*
-                 * if all ok so far.....send nodes umount ISO DIR
-                 */
-                foreach($etva_nodes as $etva_node)
-                {
-                    $node_va = new EtvaNode_VA($etva_node);
-
-                    $response = array('success'=>true);
-
-                    if($force && $etva_node->getState()) $response = $node_va->send_umount_isosdir();
-
-                    $success = $response['success'];
-                    if(!$success)
-                    {                        
-                        $node_msg = Etva::getLogMessage(array('name'=>$response['agent'],'info'=>$response['error']), EtvaNodePeer::_ERR_ISODIR_UMOUNT_);
-
-                        $remote_errors[] = $node_msg;
-
-                        $message = Etva::getLogMessage(array('info'=>$node_msg), EtvaSettingPeer::_ERR_SETTING_REMOTE_CONNECTIVITY_SAVE_);
-                        $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));                        
+                    foreach($servers_running_iso as $server)
+                    {
+                        
+                        $remote_errors[] = $this->getContext()->getI18N()->__(EtvaServerPeer::_CDROM_INUSE_,array('%name%'=>$server->getName()));
                     }
-                    
-                }
 
-                if(!empty($remote_errors)){
-                    $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
-                    $error = $this->setJsonError($msg);
-                    return $this->renderText($error);
+                    if($remote_errors){
+
+                        $message = Etva::getLogMessage(array('info'=>ETVA::_CDROM_INUSE_), ETVA::_ERR_ISODIR_INUSE_);
+                        $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+                        $i18n_br_sep = implode('<br>',$remote_errors);
+                        $i18n_sp_sep = implode(' ',$remote_errors);
+
+                        //$iso_br_msg = Etva::getLogMessage(array('info'=>'<br>'.$br_sep), ETVA::_ERR_ISODIR_INUSE_);
+                        $i18n_iso_br_msg = $this->getContext()->getI18N()->__(ETVA::_ERR_ISODIR_INUSE_,array('%info%'=>'<br>'.$i18n_br_sep));
+                        //$iso_sp_msg = Etva::getLogMessage(array('info'=>$sp_sep), ETVA::_ERR_ISODIR_INUSE_);
+                        $i18n_iso_sp_msg = $this->getContext()->getI18N()->__(ETVA::_ERR_ISODIR_INUSE_,array('%info%'=>$i18n_sp_sep));
+
+                        $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>$i18n_iso_br_msg,'error'=>$i18n_iso_sp_msg);
+                        $error = $this->setJsonError($msg);
+                        return $this->renderText($error);
+                    }                
+
+                    /*
+                     * if all ok so far.....send nodes umount ISO DIR
+                     */
+                    foreach($etva_nodes as $etva_node)
+                    {
+                        $node_va = new EtvaNode_VA($etva_node);
+
+                        $response = array('success'=>true);
+
+                        if($force && $etva_node->getState()) $response = $node_va->send_umount_isosdir();
+
+                        $success = $response['success'];
+                        if(!$success)
+                        {                        
+                            $node_msg = Etva::getLogMessage(array('name'=>$response['agent'],'info'=>$response['error']), EtvaNodePeer::_ERR_ISODIR_UMOUNT_);
+
+                            $remote_errors[] = $node_msg;
+
+                            $message = Etva::getLogMessage(array('info'=>$node_msg), EtvaSettingPeer::_ERR_SETTING_REMOTE_CONNECTIVITY_SAVE_);
+                            $this->dispatcher->notify(new sfEvent(sfConfig::get('config_acronym'), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));                        
+                        }
+                        
+                    }
+
+                    if(!empty($remote_errors)){
+                        $msg = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'info'=>implode('<br>',$remote_errors),'error'=>implode(' ',$remote_errors));
+                        $error = $this->setJsonError($msg);
+                        return $this->renderText($error);
+                    }
                 }
                 
 

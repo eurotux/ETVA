@@ -1,44 +1,46 @@
 \select@language {portuges}
-\contentsline {chapter}{\numberline {1}\textsf {ETVM }}{7}{chapter.1}
+\contentsline {chapter}{\numberline {1}\textsf {NUXIS }}{7}{chapter.1}
 \contentsline {chapter}{\numberline {2}\textsf {Central Management}}{9}{chapter.2}
-\contentsline {section}{\numberline {2.1}Primeiro acesso}{10}{section.2.1}
-\contentsline {section}{\numberline {2.2}Main}{11}{section.2.2}
-\contentsline {subsection}{\numberline {2.2.1}Nodes}{11}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}Redes}{11}{subsection.2.2.2}
-\contentsline {subsubsection}{\numberline {2.2.2.1}Administra\IeC {\c c}\IeC {\~a}o das redes}{12}{subsubsection.2.2.2.1}
-\contentsline {subsubsection}{\numberline {2.2.2.2}Gest\IeC {\~a}o da pool de endere\IeC {\c c}os MAC}{13}{subsubsection.2.2.2.2}
-\contentsline {subsubsection}{\numberline {2.2.2.3}Gest\IeC {\~a}o das interfaces de rede das m\IeC {\'a}quinas virtuais}{13}{subsubsection.2.2.2.3}
-\contentsline {section}{\numberline {2.3}Servidor de virtualiza\IeC {\c c}\IeC {\~a}o}{14}{section.2.3}
-\contentsline {subsection}{\numberline {2.3.1}Informa\IeC {\c c}\IeC {\~a}o do node}{15}{subsection.2.3.1}
-\contentsline {subsection}{\numberline {2.3.2}Servidores}{16}{subsection.2.3.2}
-\contentsline {subsubsection}{\numberline {2.3.2.1}Adicionar m\IeC {\'a}quina virtual}{17}{subsubsection.2.3.2.1}
-\contentsline {subsubsection}{\numberline {2.3.2.2}Editar m\IeC {\'a}quina virtual}{24}{subsubsection.2.3.2.2}
-\contentsline {subsubsection}{\numberline {2.3.2.3}Remover m\IeC {\'a}quina virtual}{26}{subsubsection.2.3.2.3}
-\contentsline {subsubsection}{\numberline {2.3.2.4}Abrir m\IeC {\'a}quina virtual numa consola VNC}{26}{subsubsection.2.3.2.4}
-\contentsline {subsubsection}{\numberline {2.3.2.5}Iniciar/parar m\IeC {\'a}quina virtual}{27}{subsubsection.2.3.2.5}
-\contentsline {subsubsection}{\numberline {2.3.2.6}Migrar m\IeC {\'a}quina virtual}{27}{subsubsection.2.3.2.6}
-\contentsline {subsection}{\numberline {2.3.3}Armazenamento}{28}{subsection.2.3.3}
-\contentsline {subsubsection}{\numberline {2.3.3.1}Administra\IeC {\c c}\IeC {\~a}o de Physical Volumes}{29}{subsubsection.2.3.3.1}
-\contentsline {subsubsection}{\numberline {2.3.3.2}Administra\IeC {\c c}\IeC {\~a}o de Volume Groups}{31}{subsubsection.2.3.3.2}
-\contentsline {subsubsection}{\numberline {2.3.3.3}Administra\IeC {\c c}\IeC {\~a}o de Logical Volumes}{33}{subsubsection.2.3.3.3}
-\contentsline {subsection}{\numberline {2.3.4}Desligar node}{35}{subsection.2.3.4}
-\contentsline {section}{\numberline {2.4}M\IeC {\'a}quina virtual}{37}{section.2.4}
-\contentsline {subsection}{\numberline {2.4.1}Informa\IeC {\c c}\IeC {\~a}o do servidor}{37}{subsection.2.4.1}
-\contentsline {subsection}{\numberline {2.4.2}Estat\IeC {\'\i }sticas}{38}{subsection.2.4.2}
-\contentsline {subsection}{\numberline {2.4.3}Servi\IeC {\c c}os}{39}{subsection.2.4.3}
-\contentsline {subsection}{\numberline {2.4.4}Drivers Virtio}{39}{subsection.2.4.4}
-\contentsline {section}{\numberline {2.5}Ferramentas}{43}{section.2.5}
-\contentsline {subsection}{\numberline {2.5.1}Importar OVF}{43}{subsection.2.5.1}
-\contentsline {subsection}{\numberline {2.5.2}Exportar OVF}{48}{subsection.2.5.2}
-\contentsline {subsection}{\numberline {2.5.3}Gestor de ISOs}{49}{subsection.2.5.3}
-\contentsline {subsection}{\numberline {2.5.4}Monitoriza\IeC {\c c}\IeC {\~a}o do agente dos nodes}{50}{subsection.2.5.4}
-\contentsline {subsection}{\numberline {2.5.5}Registo de eventos do sistema}{50}{subsection.2.5.5}
-\contentsline {section}{\numberline {2.6}Administra\IeC {\c c}\IeC {\~a}o do sistema}{50}{section.2.6}
-\contentsline {subsection}{\numberline {2.6.1}Assistente de configura\IeC {\c c}\IeC {\~a}o inicial}{51}{subsection.2.6.1}
-\contentsline {subsection}{\numberline {2.6.2}Gest\IeC {\~a}o de Datacenters Virtuais}{52}{subsection.2.6.2}
-\contentsline {subsubsection}{\numberline {2.6.2.1}Assistente de cria\IeC {\c c}\IeC {\~a}o de datacenter}{53}{subsubsection.2.6.2.1}
-\contentsline {subsubsection}{\numberline {2.6.2.2}Mover node entre datacenters}{54}{subsubsection.2.6.2.2}
-\contentsline {subsubsection}{\numberline {2.6.2.3}Aceitar node}{55}{subsubsection.2.6.2.3}
-\contentsline {subsection}{\numberline {2.6.3}Alterar prefer\IeC {\^e}ncias}{56}{subsection.2.6.3}
-\contentsline {subsection}{\numberline {2.6.4}Administra\IeC {\c c}\IeC {\~a}o de utilizadores, grupos e permiss\IeC {\~o}es}{58}{subsection.2.6.4}
-\contentsline {subsection}{\numberline {2.6.5}Desligar o Central Management}{60}{subsection.2.6.5}
+\contentsline {section}{\numberline {2.1}Primeiro acesso}{11}{section.2.1}
+\contentsline {section}{\numberline {2.2}Main}{12}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Nodes}{12}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Redes}{12}{subsection.2.2.2}
+\contentsline {subsubsection}{\numberline {2.2.2.1}Administra\IeC {\c c}\IeC {\~a}o das redes}{13}{subsubsection.2.2.2.1}
+\contentsline {subsubsection}{\numberline {2.2.2.2}Gest\IeC {\~a}o da pool de endere\IeC {\c c}os MAC}{14}{subsubsection.2.2.2.2}
+\contentsline {subsubsection}{\numberline {2.2.2.3}Gest\IeC {\~a}o das interfaces de rede das m\IeC {\'a}quinas virtuais}{14}{subsubsection.2.2.2.3}
+\contentsline {section}{\numberline {2.3}Datacenter virtual}{15}{section.2.3}
+\contentsline {section}{\numberline {2.4}Servidor de virtualiza\IeC {\c c}\IeC {\~a}o}{16}{section.2.4}
+\contentsline {subsection}{\numberline {2.4.1}Informa\IeC {\c c}\IeC {\~a}o do n\IeC {\'o}}{19}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}Servidores}{19}{subsection.2.4.2}
+\contentsline {subsubsection}{\numberline {2.4.2.1}Adicionar m\IeC {\'a}quina virtual}{20}{subsubsection.2.4.2.1}
+\contentsline {subsubsection}{\numberline {2.4.2.2}Editar m\IeC {\'a}quina virtual}{26}{subsubsection.2.4.2.2}
+\contentsline {subsubsection}{\numberline {2.4.2.3}Remover m\IeC {\'a}quina virtual}{29}{subsubsection.2.4.2.3}
+\contentsline {subsubsection}{\numberline {2.4.2.4}Abrir m\IeC {\'a}quina virtual numa consola VNC}{29}{subsubsection.2.4.2.4}
+\contentsline {subsubsection}{\numberline {2.4.2.5}Iniciar/parar m\IeC {\'a}quina virtual}{30}{subsubsection.2.4.2.5}
+\contentsline {subsubsection}{\numberline {2.4.2.6}Migrar m\IeC {\'a}quina virtual}{30}{subsubsection.2.4.2.6}
+\contentsline {subsubsection}{\numberline {2.4.2.7}Snapshots}{31}{subsubsection.2.4.2.7}
+\contentsline {subsection}{\numberline {2.4.3}Armazenamento}{31}{subsection.2.4.3}
+\contentsline {subsubsection}{\numberline {2.4.3.1}Administra\IeC {\c c}\IeC {\~a}o de Physical Volumes}{32}{subsubsection.2.4.3.1}
+\contentsline {subsubsection}{\numberline {2.4.3.2}Administra\IeC {\c c}\IeC {\~a}o de Volume Groups}{33}{subsubsection.2.4.3.2}
+\contentsline {subsubsection}{\numberline {2.4.3.3}Administra\IeC {\c c}\IeC {\~a}o de Logical Volumes}{35}{subsubsection.2.4.3.3}
+\contentsline {subsection}{\numberline {2.4.4}Desligar n\IeC {\'o}}{38}{subsection.2.4.4}
+\contentsline {section}{\numberline {2.5}M\IeC {\'a}quina virtual}{39}{section.2.5}
+\contentsline {subsection}{\numberline {2.5.1}Informa\IeC {\c c}\IeC {\~a}o do servidor}{39}{subsection.2.5.1}
+\contentsline {subsection}{\numberline {2.5.2}Estat\IeC {\'\i }sticas}{40}{subsection.2.5.2}
+\contentsline {subsection}{\numberline {2.5.3}Servi\IeC {\c c}os}{41}{subsection.2.5.3}
+\contentsline {subsection}{\numberline {2.5.4}Drivers Virtio}{41}{subsection.2.5.4}
+\contentsline {section}{\numberline {2.6}Ferramentas}{45}{section.2.6}
+\contentsline {subsection}{\numberline {2.6.1}Importar OVF}{45}{subsection.2.6.1}
+\contentsline {subsection}{\numberline {2.6.2}Exportar OVF}{50}{subsection.2.6.2}
+\contentsline {subsection}{\numberline {2.6.3}Gestor de ISOs}{50}{subsection.2.6.3}
+\contentsline {subsection}{\numberline {2.6.4}Monitoriza\IeC {\c c}\IeC {\~a}o do agente dos nodes}{51}{subsection.2.6.4}
+\contentsline {subsection}{\numberline {2.6.5}Registo de eventos do sistema}{51}{subsection.2.6.5}
+\contentsline {section}{\numberline {2.7}Administra\IeC {\c c}\IeC {\~a}o do sistema}{52}{section.2.7}
+\contentsline {subsection}{\numberline {2.7.1}Assistente de configura\IeC {\c c}\IeC {\~a}o inicial}{52}{subsection.2.7.1}
+\contentsline {subsection}{\numberline {2.7.2}Gest\IeC {\~a}o de Datacenters Virtuais}{53}{subsection.2.7.2}
+\contentsline {subsubsection}{\numberline {2.7.2.1}Assistente de cria\IeC {\c c}\IeC {\~a}o de datacenter}{54}{subsubsection.2.7.2.1}
+\contentsline {subsubsection}{\numberline {2.7.2.2}Mover node entre datacenters}{55}{subsubsection.2.7.2.2}
+\contentsline {subsubsection}{\numberline {2.7.2.3}Aceitar node}{56}{subsubsection.2.7.2.3}
+\contentsline {subsection}{\numberline {2.7.3}Alterar prefer\IeC {\^e}ncias}{57}{subsection.2.7.3}
+\contentsline {subsection}{\numberline {2.7.4}Administra\IeC {\c c}\IeC {\~a}o de utilizadores, grupos e permiss\IeC {\~o}es}{59}{subsection.2.7.4}
+\contentsline {subsection}{\numberline {2.7.5}Desligar o Central Management}{61}{subsection.2.7.5}

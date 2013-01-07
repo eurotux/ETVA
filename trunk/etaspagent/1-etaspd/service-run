@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#exec su -c "cd /srv/etva-etasp && /usr/bin/perl -I./lib etaspd > /var/log/etva-etasp/etaspd.log 2>&1"
+cd /srv/etva-etasp
+exec > /var/log/etva-etasp/etaspd.log 2>&1
+exec /usr/bin/perl -I./lib etaspd
+

@@ -13,7 +13,7 @@ all:
       classname: PropelPDO
       dsn: 'mysql:host=localhost;dbname=etva'
       username: etva_mysql
-      password: ola123
+      password: nAREv2PX
       encoding: utf8
       persistent: true
       pooling: true

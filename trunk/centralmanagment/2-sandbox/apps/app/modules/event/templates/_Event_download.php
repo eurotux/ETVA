@@ -444,17 +444,23 @@ Event.Diagnostic.Form = Ext.extend(Ext.form.FormPanel, {
 //                this.canSendEmail(true);
                 this.disableDownload(false);
     
-                var msg = String.format(<?php echo json_encode(__('File generated successfully')) ?>);
-                View.notify({html:msg});
+                
 //                this.setStatusLable(<?php echo json_encode(__('File generated successfully')) ?>);
                 progressbar.updateText('');
                 progressbar.updateProgress(1, Math.round(100)+progress_msg);
                 Ext.TaskMgr.stop(task);
                 var response = Ext.util.JSON.decode(resp.responseText);
-                var msg = <?php echo json_encode(__('File generated successfully')) ?>;
-                if(response['mail_errors']){
-                    msg += ". ";
-                    msg += <?php echo json_encode(__('However, the email message could not be sent.')) ?>;
+
+                if(response['success']){
+                    var msg = String.format(<?php echo json_encode(__('File generated successfully')) ?>);
+                    View.notify({html:msg});
+    //                var msg = <?php echo json_encode(__('File generated successfully')) ?>;
+                    if(response['mail_errors']){
+                        msg += ". ";
+                        msg += <?php echo json_encode(__('However, the email message could not be sent.')) ?>;
+                    }
+                }else{
+                    var msg = <?php echo json_encode(__('Could not generate diagnostic file. Please contact the support for further information.')) ?>
                 }
                 this.setStatusLable(msg);
 

@@ -28,7 +28,7 @@ lets you set the duration of the event logs records.
 <p>
 In the connectivity panel we can change the central management IP address for the LAN network.
 </p>
-<p><b>Note: </b>In version <em>ETVM</em> it is only possible to change the IP address.</p>
+<p><b>Note: </b>In version <em>Enterprise</em> it is only possible to change the IP address.</p>
 <a href="#help-settings-main"><div>Index</div></a>
 <hr/>
 </div>

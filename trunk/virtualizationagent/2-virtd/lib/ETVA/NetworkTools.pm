@@ -3,24 +3,98 @@
 package ETVA::NetworkTools;
 
 use strict;
+
+use ETVA::DebugLog;
+
 use File::Copy;
 
 # etva conf dir
 my $etva_config_dir = $ENV{'etva_conf_dir'} || "/etc/sysconfig/etva-vdaemon/config";
+
+my $SYSTEM_CONFIG_NETWORK_CMD;
+
+# read_pipe_lines(cmd)
+sub read_pipe_lines {
+    my ($cmd) = @_;
+    my @lines = ();
+    open(READ_PIPE,"$cmd |");
+    while(<READ_PIPE>){
+        chomp;
+        push(@lines,$_);
+    }
+    close(READ_PIPE);
+    return wantarray() ? @lines : \@lines;
+}
+# flush_pipe_lines(cmd,lines, [eol])
+sub flush_pipe_lines {
+    my ($cmd,$lines,$eol) = @_;
+    if( $lines ){
+        $eol ||= "\n";
+        my $tmpfile = ETVA::DebugLog::rand_logfile("/var/tmp/tmpfile_flush_pipe_lines","txt");
+        open(TMPFILE_FLUSH_PIPE_LINES,">$tmpfile");
+        for my $line (@$lines){
+            print TMPFILE_FLUSH_PIPE_LINES $line,$eol;
+        }
+        close(TMPFILE_FLUSH_PIPE_LINES);
+        my $tmplog = ETVA::DebugLog::rand_logfile("/var/tmp/flush_pipe_lines","log");
+        my $e = system("$cmd <$tmpfile 2>$tmplog");
+        unless( $e == 0 ){
+            my $m = ETVA::DebugLog::dumplogfile($tmplog);
+            ETVA::DebugLog::pdebuglog "ERROR flush_pipe_lines - error flush lines: $e - $m","\n";
+        }
+        unlink($tmpfile);
+        unlink($tmplog);
+    }
+}
+
+sub read_system_config_network_cmd {
+    if( ! -x "/usr/sbin/system-config-network-cmd" ){
+        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
+    } else {
+        if( !$SYSTEM_CONFIG_NETWORK_CMD ){
+            $SYSTEM_CONFIG_NETWORK_CMD = &read_pipe_lines('/usr/sbin/system-config-network-cmd -e');
+        }
+        return wantarray() ? @$SYSTEM_CONFIG_NETWORK_CMD : $SYSTEM_CONFIG_NETWORK_CMD;
+    }
+}
+sub flush_system_config_network_cmd {
+    if( ! -x "/usr/sbin/system-config-network-cmd" ){
+        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
+    } elsif( $SYSTEM_CONFIG_NETWORK_CMD ){
+        &flush_pipe_lines('/usr/sbin/system-config-network-cmd -ci',$SYSTEM_CONFIG_NETWORK_CMD);
+        $SYSTEM_CONFIG_NETWORK_CMD = 0;
+    }
+}
+
+sub replace_system_config_network_cmd {
+    my (@lines) = @_;
+    if( my $read_lines = &read_system_config_network_cmd() ){
+        for my $line (@lines){
+            my ($o,$nv) = ref($line) ? @$line : $line;
+            $nv = $nv ? "${o}${nv}" : "${o}";
+            my $re = $o; $re =~ s/\./\\./g;
+            if( !grep { s/^${re}.*$/$nv/ } @$read_lines ){
+                push(@$read_lines,"${nv}");
+            }
+        }
+        &flush_system_config_network_cmd();
+    }
+}
 
 # write DNS config
 sub change_dns {
     my (%p) = @_;
     if( ! -x "/usr/sbin/system-config-network-cmd" ){
         #die "system-config-network-cmd tool doest exists!\n";
-        print STDERR "system-config-network-cmd tool doest exists!\n";
+        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
     } else {
-        open(P,"| /usr/sbin/system-config-network-cmd -i 2>/dev/null");
-        print P 'ProfileList.default.DNS.Hostname=',$p{'hostname'},"\n" if( defined $p{'hostname'} );
-        print P 'ProfileList.default.DNS.Domainname=',$p{'domainname'},"\n" if( defined $p{'domainname'} );
-        print P 'ProfileList.default.DNS.PrimaryDNS=',$p{'primarydns'},"\n" if( defined $p{'primarydns'} );
-        print P 'ProfileList.default.DNS.SecondaryDNS=',$p{'secondarydns'},"\n" if( defined $p{'secondarydns'} );
-        print P 'ProfileList.default.DNS.TertiaryDNS=',$p{'tertiarydns'},"\n" if( defined $p{'tertiarydns'} );
+        my @lines = ();
+
+        push(@lines, ['ProfileList.default.DNS.Hostname=',$p{'hostname'}]) if( defined $p{'hostname'} );
+        push(@lines, ['ProfileList.default.DNS.Domainname=',$p{'domainname'}]) if( defined $p{'domainname'} );
+        push(@lines, ['ProfileList.default.DNS.PrimaryDNS=',$p{'primarydns'}]) if( defined $p{'primarydns'} );
+        push(@lines, ['ProfileList.default.DNS.SecondaryDNS=',$p{'secondarydns'}]) if( defined $p{'secondarydns'} );
+        push(@lines, ['ProfileList.default.DNS.TertiaryDNS=',$p{'tertiarydns'}]) if( defined $p{'tertiarydns'} );
 
         my @searchlist = ();
         if( my $sl = $p{'searchlist'} ){
@@ -33,10 +107,10 @@ sub change_dns {
         }
         if( @searchlist ){
             for(my $i=0; $i<scalar(@searchlist); $i++){
-                print P 'ProfileList.default.DNS.SearchList.',$i,'=',$searchlist[$i],"\n"; 
+                push @lines, ["ProfileList.default.DNS.SearchList.$i=", $searchlist[$i]];
             }
         }
-        close(P);
+        &replace_system_config_network_cmd( @lines );
     }
 }
 
@@ -52,12 +126,12 @@ sub active_ip_conf {
     if( $p{'if'} ){
         if( $p{'dhcp'} ){
             if( ! -x "/sbin/dhclient" ){
-                print STDERR "dhclient command not found!\n";
+                ETVA::DebugLog::pdebuglog "dhclient command not found!\n";
                 return 0;
             } else {
                 system("/usr/bin/killall dhclient >/dev/null 2>&1");
                 sleep(1);
-                system("/sbin/dhclient $p{'if'} >/dev/null 2>&1");
+                system("/sbin/dhclient -nw $p{'if'} >/dev/null 2>&1");
             }
         } else {
             # stop dhclient process
@@ -67,14 +141,14 @@ sub active_ip_conf {
             }
 
             if( ! -x "/sbin/ifconfig" ){
-                print STDERR "ifconfig command not found!\n";
+                ETVA::DebugLog::pdebuglog "ifconfig command not found!\n";
                 return 0;
             } else {
                 if( $p{'ip'} && $p{'netmask'} ){
-                    #print STDERR "/sbin/ifconfig $p{'if'} $p{'ip'} netmask $p{'netmask'} up","\n";
+                    #ETVA::DebugLog::pdebuglog "/sbin/ifconfig $p{'if'} $p{'ip'} netmask $p{'netmask'} up","\n";
                     system("/sbin/ifconfig $p{'if'} $p{'ip'} netmask $p{'netmask'} up >/dev/null 2>&1");
                 } else {
-                    print STDERR "ip or netmask not defined!\n";
+                    ETVA::DebugLog::pdebuglog "ip or netmask not defined!\n";
                     return 0;
                 }
             }
@@ -82,9 +156,9 @@ sub active_ip_conf {
 
         if( $p{'gateway'} ){
             if( ! -x "/sbin/route" ){
-                print STDERR "route command not found!\n";
+                ETVA::DebugLog::pdebuglog "route command not found!\n";
             } else {
-                #print STDERR "/sbin/route add default gw $p{'gateway'} dev $p{'if'}","\n";
+                #ETVA::DebugLog::pdebuglog "/sbin/route add default gw $p{'gateway'} dev $p{'if'}","\n";
                 system("/sbin/route add default gw $p{'gateway'} dev $p{'if'} >/dev/null 2>&1");
             }
         }
@@ -97,7 +171,7 @@ sub change_if_conf {
     my (%p) = @_;
 
     if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        print STDERR "system-config-network-cmd tool doest exists!\n";
+        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
     } else {
         if( $p{'if'} ){
             if( !$p{'type'} ){
@@ -110,22 +184,22 @@ sub change_if_conf {
                 }
             }
             my $ok = 0;
-            open(P,"| /usr/sbin/system-config-network-cmd -i 2>/dev/null");
+            my @lines = ();
             if( defined($p{'ip'}) && defined($p{'netmask'}) ){
-                print P "DeviceList.$p{'type'}.",$p{'if'},'.IP=',$p{'ip'},"\n";
-                print P "DeviceList.$p{'type'}.",$p{'if'},'.Netmask=',$p{'netmask'},"\n";
-                print P "DeviceList.$p{'type'}.",$p{'if'},'.Gateway=',$p{'gateway'},"\n" if( defined $p{'gateway'} );
+                push(@lines, ["DeviceList.$p{'type'}.$p{'if'}.IP=",$p{'ip'}]);
+                push(@lines, ["DeviceList.$p{'type'}.$p{'if'}.Netmask=",$p{'netmask'}]);
+                push(@lines, ["DeviceList.$p{'type'}.$p{'if'}.Gateway=",$p{'gateway'}]) if( defined $p{'gateway'} );
                 $ok = 1;
             }
             if( defined $p{'bootproto'} ){
-                print P "DeviceList.$p{'type'}.",$p{'if'},'.BootProto=',$p{'bootproto'},"\n";
+                push(@lines, ["DeviceList.$p{'type'}.$p{'if'}.BootProto=",$p{'bootproto'}]);
                 $ok = 1;
             }
-            close(P);
+            &replace_system_config_network_cmd( @lines );
 
             return $ok ? 1 : 0;
         } else {
-            print STDERR "interface not defined!\n";
+            ETVA::DebugLog::pdebuglog "interface not defined!\n";
         }
     }
     return 0;
@@ -197,7 +271,7 @@ sub get_ip_conf {
     my ($if,$ip) = @_;
 
     if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        print STDERR "system-config-network-cmd tool doest exists!\n";
+        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
     } else {
         my $re_if;
         my $re_ip = $ip ? $ip : '\d+.\d+.\d+.\d+';
@@ -241,7 +315,7 @@ sub get_hosts_list {
 
     my @l = ();
     if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        print STDERR "system-config-network-cmd tool doest exists!\n";
+        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
     } else {
         my %HostsList = ();
         open(F,"/usr/sbin/system-config-network-cmd -e |");
@@ -264,19 +338,19 @@ sub set_hosts_list {
     my @l = @_;
 
     if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        print STDERR "system-config-network-cmd tool doest exists!\n";
+        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
     } else {
         my $c = 1;
-        open(P,"| /usr/sbin/system-config-network-cmd -i 2>/dev/null");
+        my @lines = ();
         for my $H (@l){
             for my $k (keys %$H){
                 next if( $k eq 'id' );  # ignore id key
                 my $v = $H->{"$k"};
-                print P "ProfileList.default.HostsList.$c.$k=$v","\n";
+                push(@lines, ["ProfileList.default.HostsList.$c.$k=",$v]);
             }
             $c++;
         }
-        close(P);
+        &replace_system_config_network_cmd( @lines );
     }
 }
 # add host to hosts list
@@ -310,6 +384,18 @@ sub change_hosts_list {
         }
     }
     &set_hosts_list(@l);
+}
+
+sub fix_hostname_resolution {
+    my ($hostname,$ip) = @_;
+    my @H = grep { $_->{'Hostname'} eq $hostname } &get_hosts_list();
+    if( !@H ){
+        &add_hosts_list($hostname,$ip);
+    } else {
+        if( ! grep  { $_->{'IP'} eq $ip } @H ){    # change it
+            &change_hosts_list($hostname,$ip);
+        }
+    }
 }
 
 1;

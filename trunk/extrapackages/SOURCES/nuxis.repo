@@ -1,0 +1,11 @@
+[nuxis]
+name=Nuxis-$releasever - Base
+baseurl=http://etrepos.eurotux.com/redhat/el$releasever/en/$basearch/etva/
+gpgcheck=0
+enabled=1
+
+[nuxis-devel]
+name=Nuxis-$releasever - Updates
+baseurl=http://etrepos.eurotux.com/redhat/el$releasever/en/$basearch/etva-devel/
+gpgcheck=0
+enabled=0

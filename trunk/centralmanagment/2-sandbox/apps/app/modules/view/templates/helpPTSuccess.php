@@ -35,63 +35,65 @@
     <a id="help-left-panel-main"><h1><em><b>Nodes</b></em> (painel esquerdo)</h1></a>
 
     <p>O painel <em>Nodes</em> pertence à tela principal do <em>Central Management</em> e lista as máquinas reais/servidores de virtualização
-    (as máquinas associadas a cada <em>node</em>).</p>
+    (as máquinas associadas a cada <em>nó</em>).</p>
 
-    <p>O primeiro <em>node</em> visível é o <b><em>Main</em></b>, sob o qual se encontram os vários servidores de virtualização registados no <em>CM</em>.</p>
+    <p>O primeiro <em>nó</em> visível é o <b><em>Main</em></b>, sob o qual se encontram os vários servidores de virtualização registados no <em>CM</em>.</p>
 
-    <p>Ao seleccionar um <em>node</em> (servidor de virtualização) é carregada a informação correspondente no painel principal (painel da direita).</p>
+    <p>Ao seleccionar um <em>nó</em> (servidor de virtualização) é carregada a informação correspondente no painel principal (painel da direita).</p>
 
-    <p>Ao clicar com o botão direito do rato sobre o <em>node</em> acede-se ao menu de opções, onde é possível seleccionar efectuar as seguintes operações:</p>
+    <p>Ao clicar com o botão direito do rato sobre o <em>nó</em> acede-se ao menu de opções, onde é possível seleccionar efectuar as seguintes operações:</p>
 
     <ul>
         <li>Inicialização</li>
         <ul>
-            <li><a href="#help-left-panel-authorize">Autorizar <em>node</em></a></li>
-            <li><a href="#help-left-panel-restart">Re-inicializar <em>node</em></a></li>
+            <li><a href="#help-left-panel-authorize">Autorizar <em>nó</em></a></li>
+            <li><a href="#help-left-panel-restart">Re-inicializar <em>nó</em></a></li>
         </ul>
         <li>Node</li>
         <ul>
-            <li><a href="#help-left-panel-loadnode">Carregar <em>node</em></a></li>
-            <li><a href="#help-left-panel-hostname">Alterar <em>Hostname</em></a></li>
+            <li><a href="#help-left-panel-loadnode">Carregar <em>nó</em></a></li>
+            <li><a href="#help-left-panel-edit">Editar <em>nó</em></a></li>
             <li><a href="#help-left-panel-connectivity">Opções de conectividade</a></li>
             <li><a href="#help-left-panel-keymap">Alterar <em>keymap</em></a></li>
-            <li><a href="#help-left-panel-status">Verificar o estado do <em>node</em></a></li>
-            <li><a href="#help-left-panel-remove">Remover <em>node</em></a></li>
+            <li><a href="#help-left-panel-status">Verificar o estado do <em>nó</em></a></li>
+            <li><a href="#help-left-panel-maintenance">Manutenção/Recuperar</a></li>
+            <li><a href="#help-left-panel-shutdown">Desligar</a></li>
+            <li><a href="#help-left-panel-remove">Remover <em>nó</em></a></li>
             <li><a href="#help-left-panel-addperm">Atribuir permissões</a></li>
         </ul>
         <li>Servidor</li>
         <ul>
             <li><a href="#help-left-panel-keymap">Alterar keymap</a></li>
             <li><a href="#help-left-panel-addperm">Atribuir permissões</a></li>
+            <li><a href="#help-left-panel-start_stop">Iniciar/Parar</a></li>
         </ul>
     </ul>
     <p><b>Nota: </b><!--A lista de operações correspondentes aos pontos <em>Inicializar</em> e <em>Node</em>, são referentes ao <em>Node</em> onde foi solicitado o menu.-->
-    Caso tenha sido seleccionado um servidor ao invés de um <em>node</em>, todas as operações são referentes ao <b><em>node</em> pai</b>, com excepção da opção <em>Alterar keymap</em>.
+    Caso tenha sido seleccionado um servidor ao invés de um <em>nó</em>, todas as operações são referentes ao <b><em>nó</em> pai</b>, com excepção da opção <em>Alterar keymap</em>.
     </p>
     <br/>
     <hr/>
 
-    <a id="help-left-panel-authorize"><h1>Autorizar <em><b>node</b></em></h1></a>
-    <p>Quando um <em>node</em>, com o agente de virtualização instalado, é adicionado à rede, o <em>Cental Management</em> é notificado da sua existência.
-    Caso a afirmação anterior se verifique, o <em>node</em> aparece listado na árvore de nodes.</p>
-    <p>Para tornar possível a gestão do <em>node</em> é necessário seleccionar a opção <em>Autorizar node</em>.</p>
+    <a id="help-left-panel-authorize"><h1>Autorizar <em><b>nó</b></em></h1></a>
+    <p>Quando um <em>nó</em>, com o agente de virtualização instalado, é adicionado à rede, o <em>Cental Management</em> é notificado da sua existência.
+    Caso a afirmação anterior se verifique, o <em>nó</em> aparece listado na árvore de nós.</p>
+    <p>Para tornar possível a gestão do <em>nó</em> é necessário seleccionar a opção <em>Autorizar nó</em>.</p>
     <a href="#help-left-panel-main"><div>Início</div></a>
     <hr/>
 
-    <a id="help-left-panel-restart"><h1>Re-inicializar <em><b>node</b></em></h1></a>
-    <p>A opção <em>Re-inicializar node</em> reinicia ao agente de virtualização do node (não reinicia o seu sistema operativo).
-    <p><b>Nota: </b>Nos servidores existentes sob o <em>node</em>, não há qualquer tipo de modificação.</p>
+    <a id="help-left-panel-restart"><h1>Re-inicializar <em><b>nó</b></em></h1></a>
+    <p>A opção <em>Re-inicializar nó</em> reinicia ao agente de virtualização do nó (não reinicia o seu sistema operativo).
+    <p><b>Nota: </b>Nos servidores existentes sob o <em>nó</em>, não há qualquer tipo de modificação.</p>
     <a href="#help-left-panel-main"><div>Início</div></a>
     <hr/>
 
-    <a id="help-left-panel-loadnode"><h1>Carregar <em><b>node</b></em></h1></a>
-    <p>Ao seleccionar esta opção é enviado um pedido ao <em>Central Management</em> para que o estado do <em>node</em> em questão seja actualizado.</p>
+    <a id="help-left-panel-loadnode"><h1>Carregar <em><b>nó</b></em></h1></a>
+    <p>Ao seleccionar esta opção é enviado um pedido ao <em>Central Management</em> para que o estado do <em>nó</em> em questão seja actualizado.</p>
     <a href="#help-left-panel-main"><div>Início</div></a>
     <hr/>
 
-    <a id="help-left-panel-hostname"><h1>Alterar <em><b>Hostname</b></em></h1></a>
-    <p>A opção <em>Alterar Hostname</em> possibilita alterar o nome do servidor de virtualização.</p>
-    <p><b>Nota: </b>Esta opção apenas é disponibilizada para os servidores de virtualização, e não nas máquinas virtuais criadas nos <em>Nodes</em>.</p>
+    <a id="help-left-panel-edit"><h1>Editar nó</h1></a>
+    <p>A opção <em>Editar nó</em> possibilita a edição de algumas propriedades do servidor de virtualização, nomeadamente, nome da máquina e configuração de <em>fencing</em>.</p>
     <a href="#help-left-panel-main"><div>Início</div></a>
     <hr/>
 
@@ -99,29 +101,45 @@
     <p>Em <em>Opções de conectividade</em>, é possível editar a configuração da interface de gestão (<em>Management(</em>) ao
     qual se encontra ligado o agente de virtualização.</p>
     <p>É possível definir o endereço IP e o servidor de DNS.</p>
-    <p><b>Nota: </b>Esta opção apenas está disponível na versão <em>ETVM</em>.</p>
+    <p><b>Nota: </b>Esta opção apenas está disponível na versão <em>Enterprise</em>.</p>
     <a href="#help-left-panel-main"><div>Início</div></a>
     <hr/>
 
     <a id="help-left-panel-keymap"><h1>Alterar <em><b>keymap</b></em></h1></a>
-    <p>Permite alterar a definição do <em>layout</em> do teclado, no <em>node</em> ou servidor seleccionado.</p>
+    <p>Permite alterar a definição do <em>layout</em> do teclado, no <em>nó</em> ou servidor seleccionado.</p>
     <a href="#help-left-panel-main"><div>Início</div></a>
     <hr/>
 
     <a id="help-left-panel-addperm"><h1>Alterar permissões</h1></a>
-    <p>Permite definir o acesso ao nível do servidor ou do datacenter (em node).</p>    
+    <p>Permite definir o acesso ao nível do servidor ou do datacenter (em nó).</p>    
     <p>Na janela que aparece, selecione os utilizadores/grupos aos quais pretende dar acesso.</p>
     <a href="#help-left-panel-main"><div>Início</div></a>
     <hr/>
 
-
-    <a id="help-left-panel-status"><h1>Verificar o estado do <em>node</em></h1></a>
-    <p>Força a verificação do estado do <em>node</em>.</p>
+    <a id="help-left-panel-start_stop"><h1>Iniciar/Parar</h1></a>
+    <p>Permite iniciar/parar servidor.</p>    
     <a href="#help-left-panel-main"><div>Início</div></a>
     <hr/>
 
-    <a id="help-left-panel-remove"><h1>Remover <em><b>node</b></em></h1></a>
-    <p>A opção <em>Remover node</em> remove um Node. Para concluir a opção basta responder afirmativamente à mensagem de confirmação.</p>
+
+    <a id="help-left-panel-status"><h1>Verificar o estado do <em>nó</em></h1></a>
+    <p>Força a verificação do estado do <em>nó</em>.</p>
+    <a href="#help-left-panel-main"><div>Início</div></a>
+    <hr/>
+
+    <a id="help-left-panel-maintenance"><h1>Manutenção/Recuperar</h1></a>
+    <p>Coloca o nó em manutenção, migrando os servidores para um nó de <em>Spare</em> caso esteja configurado.
+    A opção <em>Recuperar</em> permite fazer uma verificação de sistema do nó e recuperá-lo para o estado activo.</p>
+    <a href="#help-left-panel-main"><div>Início</div></a>
+    <hr/>
+
+    <a id="help-left-panel-shutdown"><h1>Desligar</h1></a>
+    <p>Desliga um nó de virtualização civilizadamente.</p>
+    <a href="#help-left-panel-main"><div>Início</div></a>
+    <hr/>
+
+    <a id="help-left-panel-remove"><h1>Remover <em><b>nó</b></em></h1></a>
+    <p>A opção <em>Remover nó</em> remove um Node. Para concluir a opção basta responder afirmativamente à mensagem de confirmação.</p>
     <p>Esta opção não remove o agente de virtualização</p>
 
     <p><b>Nota 1: </b>Esta opção apenas remove o servidor de virtualização do <em>Central Management</em>,

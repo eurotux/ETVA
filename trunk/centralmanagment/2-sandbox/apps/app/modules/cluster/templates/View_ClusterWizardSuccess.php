@@ -7,8 +7,11 @@
 
 //Ext.ns("View.FirstTimeWizard");
 Ext.ns("Cluster.Create.Main");
-Cluster.Create.Main = function() {
+Cluster.Create.Main = function(config) {
 //View.FirstTimeWizard.Main = function() {
+
+    var CLUSTER_ID;
+
     Ext.QuickTips.init();
 
     /*
@@ -178,7 +181,7 @@ Cluster.Create.Main = function() {
                         var response = Ext.util.JSON.decode(resp.responseText);
                         var txt = response['response'];
                         var agent = response['agent'];
-                        var cluster_id = response['cluster_id'];
+                        var cluster_id = CLUSTER_ID = response['cluster_id'];
                         var netcard = Ext.getCmp('ft-wiz-network');
                         netcard.loadNets(cluster_id);
 
@@ -779,8 +782,24 @@ this.form.findField('nameStatus').setValue(<?php echo json_encode(__('Creating..
             }
         },
         cards: cards
-    });
+        ,listeners: {
+            finish: function() {
+                //console.log(this); console.log(this.getWizardData());
+                Ext.getCmp('view-nodes-panel').getRootNode().reload(function(){
+                    var centerElem = Ext.getCmp('view-main-panel').findById('view-center-panel-'+CLUSTER_ID);
+                    if(centerElem && centerElem.isVisible())
+                    {
 
+                        this.selectNode(CLUSTER_ID);
+                        centerElem.fireEvent('beforeshow');
+                    }
+
+
+                },this);
+            }
+        }
+
+    });
 
     // show the wizard
     wizard.show();

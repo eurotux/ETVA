@@ -1,73 +1,83 @@
-\select@language {portuges}
+\select@language {english}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces ETVM architecture}}{7}{figure.1.1}
-\contentsline {figure}{\numberline {1.2}{\ignorespaces ETVM model}}{8}{figure.1.2}
+\contentsline {figure}{\numberline {1.1}{\ignorespaces NUXIS architecture}}{8}{figure.1.1}
+\contentsline {figure}{\numberline {1.2}{\ignorespaces NUXIS model}}{9}{figure.1.2}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Main layout}}{9}{figure.2.1}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Authentication window}}{10}{figure.2.2}
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Central Management nodes view}}{11}{figure.2.3}
-\contentsline {figure}{\numberline {2.4}{\ignorespaces System networks view and virtual machines' interfaces}}{12}{figure.2.4}
-\contentsline {figure}{\numberline {2.5}{\ignorespaces Add network window}}{13}{figure.2.5}
-\contentsline {figure}{\numberline {2.6}{\ignorespaces MAC pool creation window}}{13}{figure.2.6}
-\contentsline {figure}{\numberline {2.7}{\ignorespaces Virtual machine interfaces (management window)}}{14}{figure.2.7}
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Agent connectivity configuration}}{15}{figure.2.8}
-\contentsline {figure}{\numberline {2.9}{\ignorespaces Node's information}}{16}{figure.2.9}
-\contentsline {figure}{\numberline {2.10}{\ignorespaces Node's virtual machines}}{17}{figure.2.10}
-\contentsline {figure}{\numberline {2.11}{\ignorespaces Add server wizard - Welcome}}{18}{figure.2.11}
-\contentsline {figure}{\numberline {2.12}{\ignorespaces Add server wizard - Virtual machine name}}{19}{figure.2.12}
-\contentsline {figure}{\numberline {2.13}{\ignorespaces Add server wizard - Memory}}{19}{figure.2.13}
-\contentsline {figure}{\numberline {2.14}{\ignorespaces Add server wizard - Processors}}{20}{figure.2.14}
-\contentsline {figure}{\numberline {2.15}{\ignorespaces Add server wizard - Storage}}{20}{figure.2.15}
-\contentsline {figure}{\numberline {2.16}{\ignorespaces Add server wizard - Host network}}{21}{figure.2.16}
-\contentsline {figure}{\numberline {2.17}{\ignorespaces Add server wizard - Startup}}{22}{figure.2.17}
-\contentsline {figure}{\numberline {2.18}{\ignorespaces Add server wizard - Finished!}}{22}{figure.2.18}
-\contentsline {figure}{\numberline {2.19}{\ignorespaces Edit server - General}}{23}{figure.2.19}
-\contentsline {figure}{\numberline {2.20}{\ignorespaces Edit server - Network interfaces}}{24}{figure.2.20}
-\contentsline {figure}{\numberline {2.21}{\ignorespaces Edit server - Disks}}{24}{figure.2.21}
-\contentsline {figure}{\numberline {2.22}{\ignorespaces Remove server window}}{25}{figure.2.22}
-\contentsline {figure}{\numberline {2.23}{\ignorespaces Virtual machine boot parameters}}{26}{figure.2.23}
-\contentsline {figure}{\numberline {2.24}{\ignorespaces Virtual machine migration}}{26}{figure.2.24}
-\contentsline {figure}{\numberline {2.25}{\ignorespaces Information about node's storage}}{27}{figure.2.25}
-\contentsline {figure}{\numberline {2.26}{\ignorespaces Context menu of a physical volume}}{28}{figure.2.26}
-\contentsline {figure}{\numberline {2.27}{\ignorespaces Context menu of a volume group}}{29}{figure.2.27}
-\contentsline {figure}{\numberline {2.28}{\ignorespaces Create volume group window}}{29}{figure.2.28}
-\contentsline {figure}{\numberline {2.29}{\ignorespaces Volume group extension}}{30}{figure.2.29}
-\contentsline {figure}{\numberline {2.30}{\ignorespaces Logical volume context menu}}{31}{figure.2.30}
-\contentsline {figure}{\numberline {2.31}{\ignorespaces Create a new logical volume window}}{31}{figure.2.31}
-\contentsline {figure}{\numberline {2.32}{\ignorespaces Resize of a volume group}}{32}{figure.2.32}
-\contentsline {figure}{\numberline {2.33}{\ignorespaces Node load}}{32}{figure.2.33}
-\contentsline {figure}{\numberline {2.34}{\ignorespaces Node usage statistics - CPU load}}{33}{figure.2.34}
-\contentsline {figure}{\numberline {2.35}{\ignorespaces Shutting down a node}}{34}{figure.2.35}
-\contentsline {figure}{\numberline {2.36}{\ignorespaces Information about the virtual machine}}{35}{figure.2.36}
-\contentsline {figure}{\numberline {2.37}{\ignorespaces Virtual machine cpu load}}{36}{figure.2.37}
-\contentsline {figure}{\numberline {2.38}{\ignorespaces Virtual machine network interfaces}}{36}{figure.2.38}
-\contentsline {figure}{\numberline {2.39}{\ignorespaces Virtual machine memory usage}}{37}{figure.2.39}
-\contentsline {figure}{\numberline {2.40}{\ignorespaces Virtual machine disk input/output}}{37}{figure.2.40}
-\contentsline {figure}{\numberline {2.41}{\ignorespaces Driver's - iso selection}}{39}{figure.2.41}
-\contentsline {figure}{\numberline {2.42}{\ignorespaces Set logical volume (drivers virtio)}}{39}{figure.2.42}
-\contentsline {figure}{\numberline {2.43}{\ignorespaces Set the startup disk}}{40}{figure.2.43}
-\contentsline {figure}{\numberline {2.44}{\ignorespaces Windows - driver update}}{41}{figure.2.44}
-\contentsline {figure}{\numberline {2.45}{\ignorespaces Change the disk driver to virtio}}{41}{figure.2.45}
-\contentsline {figure}{\numberline {2.46}{\ignorespaces OVF import wizard - Welcome}}{42}{figure.2.46}
-\contentsline {figure}{\numberline {2.47}{\ignorespaces OVF import wizard - Source OVF file}}{43}{figure.2.47}
-\contentsline {figure}{\numberline {2.48}{\ignorespaces OVF import wizard - OVF details}}{43}{figure.2.48}
-\contentsline {figure}{\numberline {2.49}{\ignorespaces OVF import wizard - License}}{44}{figure.2.49}
-\contentsline {figure}{\numberline {2.50}{\ignorespaces OVF import wizard - Name and location}}{45}{figure.2.50}
-\contentsline {figure}{\numberline {2.51}{\ignorespaces OVF import wizard - Storage}}{46}{figure.2.51}
-\contentsline {figure}{\numberline {2.52}{\ignorespaces OVF import wizard - Network interfaces}}{46}{figure.2.52}
-\contentsline {figure}{\numberline {2.53}{\ignorespaces OVF import wizard - Finished!}}{47}{figure.2.53}
-\contentsline {figure}{\numberline {2.54}{\ignorespaces OVF export window}}{47}{figure.2.54}
-\contentsline {figure}{\numberline {2.55}{\ignorespaces Iso management panel}}{48}{figure.2.55}
-\contentsline {figure}{\numberline {2.56}{\ignorespaces System events log window}}{49}{figure.2.56}
-\contentsline {figure}{\numberline {2.57}{\ignorespaces One time setup wizard}}{50}{figure.2.57}
-\contentsline {figure}{\numberline {2.58}{\ignorespaces Cluster management panels}}{51}{figure.2.58}
-\contentsline {figure}{\numberline {2.59}{\ignorespaces Virtual cluster setup wizard}}{52}{figure.2.59}
-\contentsline {figure}{\numberline {2.60}{\ignorespaces Move nodes between clusters (\emph {ETVM} version)}}{53}{figure.2.60}
-\contentsline {figure}{\numberline {2.61}{\ignorespaces Node authorization}}{53}{figure.2.61}
-\contentsline {figure}{\numberline {2.62}{\ignorespaces Authorize node - performing operation}}{54}{figure.2.62}
-\contentsline {figure}{\numberline {2.63}{\ignorespaces System preferences window - General panel}}{54}{figure.2.63}
-\contentsline {figure}{\numberline {2.64}{\ignorespaces System preferences window - Connectivity tab}}{55}{figure.2.64}
-\contentsline {figure}{\numberline {2.65}{\ignorespaces Users' and permissions' administration}}{56}{figure.2.65}
-\contentsline {figure}{\numberline {2.66}{\ignorespaces Permission option in node's context}}{56}{figure.2.66}
-\contentsline {figure}{\numberline {2.67}{\ignorespaces Permission option in server's context}}{57}{figure.2.67}
-\contentsline {figure}{\numberline {2.68}{\ignorespaces Changing servers' access permissions}}{57}{figure.2.68}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Layout principal}}{10}{figure.2.1}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Authentication window}}{11}{figure.2.2}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Central Management nodes view}}{12}{figure.2.3}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces System networks view and virtual machines' interfaces}}{13}{figure.2.4}
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Add network window}}{14}{figure.2.5}
+\contentsline {figure}{\numberline {2.6}{\ignorespaces MAC pool creation window}}{14}{figure.2.6}
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Virtual machine interfaces (management window)}}{15}{figure.2.7}
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Edit cluster}}{16}{figure.2.8}
+\contentsline {figure}{\numberline {2.9}{\ignorespaces Edit node}}{17}{figure.2.9}
+\contentsline {figure}{\numberline {2.10}{\ignorespaces Agent connectivity configuration}}{18}{figure.2.10}
+\contentsline {figure}{\numberline {2.11}{\ignorespaces Node maintenance}}{18}{figure.2.11}
+\contentsline {figure}{\numberline {2.12}{\ignorespaces Node's information}}{19}{figure.2.12}
+\contentsline {figure}{\numberline {2.13}{\ignorespaces Node's virtual machines}}{20}{figure.2.13}
+\contentsline {figure}{\numberline {2.14}{\ignorespaces Add server wizard - Welcome}}{21}{figure.2.14}
+\contentsline {figure}{\numberline {2.15}{\ignorespaces Add server wizard - Virtual machine name}}{22}{figure.2.15}
+\contentsline {figure}{\numberline {2.16}{\ignorespaces Add server wizard - Memory}}{22}{figure.2.16}
+\contentsline {figure}{\numberline {2.17}{\ignorespaces Add server wizard - Processors}}{23}{figure.2.17}
+\contentsline {figure}{\numberline {2.18}{\ignorespaces Add server wizard - Storage}}{23}{figure.2.18}
+\contentsline {figure}{\numberline {2.19}{\ignorespaces Add server wizard - Host network}}{24}{figure.2.19}
+\contentsline {figure}{\numberline {2.20}{\ignorespaces Add server wizard - Startup}}{25}{figure.2.20}
+\contentsline {figure}{\numberline {2.21}{\ignorespaces Add server wizard - Finished!}}{25}{figure.2.21}
+\contentsline {figure}{\numberline {2.22}{\ignorespaces Edit server - General}}{26}{figure.2.22}
+\contentsline {figure}{\numberline {2.23}{\ignorespaces Edit server - Network interfaces}}{27}{figure.2.23}
+\contentsline {figure}{\numberline {2.24}{\ignorespaces Edit server - Disks}}{27}{figure.2.24}
+\contentsline {figure}{\numberline {2.25}{\ignorespaces Edit server - Devices}}{28}{figure.2.25}
+\contentsline {figure}{\numberline {2.26}{\ignorespaces Edit server - Other options}}{28}{figure.2.26}
+\contentsline {figure}{\numberline {2.27}{\ignorespaces Edit server - High availability}}{29}{figure.2.27}
+\contentsline {figure}{\numberline {2.28}{\ignorespaces Remove server window}}{29}{figure.2.28}
+\contentsline {figure}{\numberline {2.29}{\ignorespaces Virtual machine boot parameters}}{30}{figure.2.29}
+\contentsline {figure}{\numberline {2.30}{\ignorespaces Virtual machine migration}}{30}{figure.2.30}
+\contentsline {figure}{\numberline {2.31}{\ignorespaces Snapshots}}{31}{figure.2.31}
+\contentsline {figure}{\numberline {2.32}{\ignorespaces Information about node's storage}}{32}{figure.2.32}
+\contentsline {figure}{\numberline {2.33}{\ignorespaces Context menu of a physical volume}}{32}{figure.2.33}
+\contentsline {figure}{\numberline {2.34}{\ignorespaces Scan \emph {physical devices} }}{33}{figure.2.34}
+\contentsline {figure}{\numberline {2.35}{\ignorespaces Context menu of a volume group}}{33}{figure.2.35}
+\contentsline {figure}{\numberline {2.36}{\ignorespaces Create volume group window}}{34}{figure.2.36}
+\contentsline {figure}{\numberline {2.37}{\ignorespaces Volume group extension}}{35}{figure.2.37}
+\contentsline {figure}{\numberline {2.38}{\ignorespaces Scan \emph {volume groups}}}{35}{figure.2.38}
+\contentsline {figure}{\numberline {2.39}{\ignorespaces Logical volume context menu}}{36}{figure.2.39}
+\contentsline {figure}{\numberline {2.40}{\ignorespaces Create a new logical volume window}}{36}{figure.2.40}
+\contentsline {figure}{\numberline {2.41}{\ignorespaces Resize of a volume group}}{37}{figure.2.41}
+\contentsline {figure}{\numberline {2.42}{\ignorespaces Scan \emph {logical volumes}}}{37}{figure.2.42}
+\contentsline {figure}{\numberline {2.43}{\ignorespaces Node load}}{38}{figure.2.43}
+\contentsline {figure}{\numberline {2.44}{\ignorespaces Node usage statistics - CPU load}}{39}{figure.2.44}
+\contentsline {figure}{\numberline {2.45}{\ignorespaces Shutting down a node}}{39}{figure.2.45}
+\contentsline {figure}{\numberline {2.46}{\ignorespaces Information about the virtual machine}}{41}{figure.2.46}
+\contentsline {figure}{\numberline {2.47}{\ignorespaces Virtual machine cpu load}}{42}{figure.2.47}
+\contentsline {figure}{\numberline {2.48}{\ignorespaces Virtual machine network interfaces}}{42}{figure.2.48}
+\contentsline {figure}{\numberline {2.49}{\ignorespaces Virtual machine memory usage}}{43}{figure.2.49}
+\contentsline {figure}{\numberline {2.50}{\ignorespaces Virtual machine disk input/output}}{43}{figure.2.50}
+\contentsline {figure}{\numberline {2.51}{\ignorespaces Driver's - iso selection}}{45}{figure.2.51}
+\contentsline {figure}{\numberline {2.52}{\ignorespaces Set logical volume (drivers virtio)}}{45}{figure.2.52}
+\contentsline {figure}{\numberline {2.53}{\ignorespaces Set the startup disk}}{46}{figure.2.53}
+\contentsline {figure}{\numberline {2.54}{\ignorespaces Windows - driver update}}{47}{figure.2.54}
+\contentsline {figure}{\numberline {2.55}{\ignorespaces Change the disk driver to virtio}}{47}{figure.2.55}
+\contentsline {figure}{\numberline {2.56}{\ignorespaces OVF import wizard - Welcome}}{48}{figure.2.56}
+\contentsline {figure}{\numberline {2.57}{\ignorespaces OVF import wizard - Source OVF file}}{49}{figure.2.57}
+\contentsline {figure}{\numberline {2.58}{\ignorespaces OVF import wizard - OVF details}}{49}{figure.2.58}
+\contentsline {figure}{\numberline {2.59}{\ignorespaces OVF import wizard - License}}{50}{figure.2.59}
+\contentsline {figure}{\numberline {2.60}{\ignorespaces OVF import wizard - Name and location}}{51}{figure.2.60}
+\contentsline {figure}{\numberline {2.61}{\ignorespaces OVF import wizard - Storage}}{52}{figure.2.61}
+\contentsline {figure}{\numberline {2.62}{\ignorespaces OVF import wizard - Network interfaces}}{52}{figure.2.62}
+\contentsline {figure}{\numberline {2.63}{\ignorespaces OVF import wizard - Finished!}}{53}{figure.2.63}
+\contentsline {figure}{\numberline {2.64}{\ignorespaces OVF export window}}{53}{figure.2.64}
+\contentsline {figure}{\numberline {2.65}{\ignorespaces Iso management panel}}{54}{figure.2.65}
+\contentsline {figure}{\numberline {2.66}{\ignorespaces System events log window}}{55}{figure.2.66}
+\contentsline {figure}{\numberline {2.67}{\ignorespaces One time setup wizard}}{56}{figure.2.67}
+\contentsline {figure}{\numberline {2.68}{\ignorespaces Cluster management panels}}{57}{figure.2.68}
+\contentsline {figure}{\numberline {2.69}{\ignorespaces Virtual cluster setup wizard}}{58}{figure.2.69}
+\contentsline {figure}{\numberline {2.70}{\ignorespaces Move nodes between clusters (\emph {NUXIS} version)}}{59}{figure.2.70}
+\contentsline {figure}{\numberline {2.71}{\ignorespaces Node authorization}}{59}{figure.2.71}
+\contentsline {figure}{\numberline {2.72}{\ignorespaces Authorize node - performing operation}}{60}{figure.2.72}
+\contentsline {figure}{\numberline {2.73}{\ignorespaces System preferences window - General panel}}{60}{figure.2.73}
+\contentsline {figure}{\numberline {2.74}{\ignorespaces System preferences window - Connectivity tab}}{61}{figure.2.74}
+\contentsline {figure}{\numberline {2.75}{\ignorespaces Users' and permissions' administration}}{62}{figure.2.75}
+\contentsline {figure}{\numberline {2.76}{\ignorespaces Permission option in node's context}}{62}{figure.2.76}
+\contentsline {figure}{\numberline {2.77}{\ignorespaces Permission option in server's context}}{63}{figure.2.77}
+\contentsline {figure}{\numberline {2.78}{\ignorespaces Changing servers' access permissions}}{63}{figure.2.78}

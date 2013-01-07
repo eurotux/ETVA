@@ -31,6 +31,17 @@
             return t.test(val);
         },
         vm_nameText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed!')) ?>,
+        vm_vcpu_topology : function(val, field) {
+                    var max_cpu = (field.ownerCt).vm_realcpu.getValue();
+                    var nsockets = (field.ownerCt).cpu_sockets.getValue();
+                    var ncores = (field.ownerCt).cpu_cores.getValue();
+                    var nthreads = (field.ownerCt).cpu_threads.getValue();
+                    var vcpu = nsockets * ncores * nthreads;
+                    if(max_cpu)
+                        if(vcpu > max_cpu) return false;
+                    return true;
+                },
+        vm_vcpu_topologyText: <?php echo json_encode(__('Cannot exceed max cpu')) ?>
     });
 
 
@@ -284,6 +295,7 @@
                             fieldLabel : <?php echo json_encode(__('Max allocatable memory (MB)')) ?>,
                             allowBlank : false,
                             readOnly:true
+                            ,disabled: true
                         },
                         {
                             xtype:'numberfield',
@@ -292,6 +304,7 @@
                             fieldLabel : <?php echo json_encode(__('Free memory (MB)')) ?>,
                             allowBlank : false,
                             readOnly:true
+                            ,disabled: true
                         },
                         {
                             xtype:'numberfield',
@@ -347,7 +360,7 @@
                 title        : <?php echo json_encode(__('Processor')) ?>,
                 monitorValid : true,
                 defaults     : {
-                    labelStyle : 'font-size:11px;',
+                    labelStyle : 'font-size:11px;width:150px;',
                     bodyStyle: 'padding:10px;'
                 },
                 items : [{
@@ -363,12 +376,14 @@
                             width:50,
                             allowBlank : false,
                             readOnly:true
+                            ,disabled: true
                         }
                         ,{
                             xtype: 'numberfield',
                             allowBlank : false,
                             fieldLabel: <?php echo json_encode(__('CPUs to use')) ?>,
                             name:"vm_cpu",
+                            ref:"vcpu",
                             allowNegative:false,
                             validator:function(v){
                                 
@@ -385,6 +400,77 @@
                                         if(!this.wizard.nextButton.disabled) this.wizard.onNextClick();
 
                                 }}
+                                ,'change': function(f,n,o){
+                                        var vcpu = (f.ownerCt).vcpu.getValue();
+                                        // set sockets and cores by default
+                                        if( (vcpu>2) && ((vcpu % 2) == 0) ){
+                                            var half_vcpu = vcpu/2;
+                                            (f.ownerCt).cpu_sockets.setValue(half_vcpu);
+                                            (f.ownerCt).cpu_cores.setValue(half_vcpu);
+                                        } else {
+                                            (f.ownerCt).cpu_sockets.setValue(vcpu);
+                                            (f.ownerCt).cpu_cores.setValue(1);
+                                        }
+                                        (f.ownerCt).cpu_threads.setValue(1);
+                                }
+                            }
+                        }
+                        ,{ xtype: 'spacer', height: '10' }
+                        ,{
+                            xtype         : 'numberfield',
+                            name          : 'cpu_sockets',
+                            ref           : 'cpu_sockets',
+                            fieldLabel    : <?php echo json_encode(__('Number of CPU sockets')) ?>,
+                            width         : 50,
+                            allowBlank    : false,
+                            allowNegative :false,
+                            vtype         : 'vm_vcpu_topology'
+                            ,listeners    : {
+                                    'change': this.onVCPUChange
+                                    ,specialkey:{scope:this,fn:function(field,e){
+
+                                        if(e.getKey()==e.ENTER)
+                                            if(!this.wizard.nextButton.disabled) this.wizard.onNextClick();
+
+                                    }}
+                            }
+                        }
+                        ,{
+                            xtype         : 'numberfield',
+                            name          : 'cpu_cores',
+                            ref           : 'cpu_cores',
+                            fieldLabel    : <?php echo json_encode(__('Number of cores per socket')) ?>,
+                            width         : 50,
+                            allowBlank    : false,
+                            allowNegative : false,
+                            vtype         : 'vm_vcpu_topology'
+                            ,listeners    : {
+                                    'change': this.onVCPUChange
+                                    ,specialkey:{scope:this,fn:function(field,e){
+
+                                        if(e.getKey()==e.ENTER)
+                                            if(!this.wizard.nextButton.disabled) this.wizard.onNextClick();
+
+                                    }}
+                            }
+                        }
+                        ,{
+                            xtype         : 'numberfield',
+                            name          : 'cpu_threads',
+                            ref           : 'cpu_threads',
+                            fieldLabel    : <?php echo json_encode(__('Number of threads per core')) ?>,
+                            width         : 50,
+                            allowBlank    : false,
+                            allowNegative : false,
+                            vtype         : 'vm_vcpu_topology'
+                            ,listeners    : {
+                                    'change': this.onVCPUChange
+                                    ,specialkey:{scope:this,fn:function(field,e){
+
+                                        if(e.getKey()==e.ENTER)
+                                            if(!this.wizard.nextButton.disabled) this.wizard.onNextClick();
+
+                                    }}
                             }
                         }
                 ]
@@ -404,6 +490,13 @@
             var rec = new Object();
             rec.data = data;
             form.loadRecord(rec);
+        }
+        ,onVCPUChange: function(f,n,o){
+                                var nsockets = (f.ownerCt).cpu_sockets.getValue();
+                                var ncores = (f.ownerCt).cpu_cores.getValue();
+                                var nthreads = (f.ownerCt).cpu_threads.getValue();
+                                var vcpu = nsockets * ncores * nthreads;
+                                (f.ownerCt).vcpu.setValue(vcpu);
         }
 
     });
@@ -564,14 +657,51 @@
                 ,anchor:'80%'
             });// end vgcombo
 
+            var lvsnapshotusage = new Ext.form.SliderField({
+                                        ref: 'vm_lv_snapshotusage-sf',
+                                        id: 'vm_lv_snapshotusage-sf',
+                                        name: 'vm_lv_snapshotusage',
+                                        anchor: '95%',
+                                        tipText: function(thumb){
+                                                    return String(thumb.value) + '%';
+                                        },
+                                        value: 20,
+                                        fieldLabel: <?php echo json_encode(__('Snapshot usage (%)')) ?>,
+                                    });
+            var lvformat = new Ext.form.ComboBox({
+                            ref:'vm_lv_new_format-cb',
+                            id:'vm_lv_new_format-cb'
+                            ,editable: false
+                            ,typeAhead: false
+                            ,fieldLabel: <?php echo json_encode(__('Format')) ?>,
+                            width:150,hiddenName:'vm_lv_format'
+                            ,valueField: 'format',displayField: 'format',forceSelection: true,emptyText: <?php echo json_encode(__('Select format...')) ?>
+                            ,store: new Ext.data.ArrayStore({
+                                    fields: ['format'],
+                                    data : <?php
+                                                /*
+                                                 * build interfaces model dynamic
+                                                 */
+                                                $disk_formats = sfConfig::get('app_disk_formats');
+                                                $disk_format_elem = array();
+
+                                                foreach($disk_formats as $eformat)
+                                                    $disk_format_elem[] = '['.json_encode($eformat).']';
+                                                echo '['.implode(',',$disk_format_elem).']'."\n";
+                                            ?>
+                                    })
+                            ,mode: 'local'
+                            ,lastQuery:''
+                            //,allowBlank:false
+                            ,triggerAction: 'all'
+            });
+
             var lv_exists = {
                             id:'vm_device_set_exist',
                             xtype:'fieldset',
                             labelWidth:170,
                             collapsed:config.diskfile ? true : false,
-                            // hidden: config.diskfile ? true : false,
-                            // disabled: config.diskfile ? true : false,
-                            checkboxToggle:true,
+                            checkboxToggle: {tag: 'input', type: 'radio', name: 'vm_device_set_exist-checkbox'},
                             title: <?php echo json_encode(__('Existing logical volume')) ?>,
                             autoHeight:true,
                             items:[
@@ -589,11 +719,13 @@
                                 beforecollapse:{scope:this,fn:function(panel,anim){
                                     var new_dev = Ext.getCmp('vm_device_set_new');
 
-                                    if((!new_dev || new_dev.collapsed)
-                                       && Ext.getCmp('vm_device_set_file').collapsed )
-                                    {
-                                       panel.checkbox.dom.checked = true;
-                                       return false;
+                                    if(Ext.getCmp('vm_device_none').collapsed){
+                                       if((!new_dev || new_dev.collapsed)
+                                          && Ext.getCmp('vm_device_set_file').collapsed )
+                                       {
+                                          panel.checkbox.dom.checked = true;
+                                          return false;
+                                       }
                                     }
 
                                     lvcombo.setDisabled(true);
@@ -608,6 +740,8 @@
                                     var new_dev = Ext.getCmp('vm_device_set_new');
                                     if(new_dev ) new_dev.collapse();
                                     Ext.getCmp('vm_device_set_file').collapse();
+                                    Ext.getCmp('vm_device_none').collapse();
+                                    Ext.getCmp('vm_disk_type').setDisabled(false);
 
                                 }
                             }
@@ -617,7 +751,7 @@
             var lv_new = {
                             id:'vm_device_set_new',
                             xtype:'fieldset',
-                            checkboxToggle:true,
+                            checkboxToggle: {tag: 'input', type: 'radio', name: 'vm_device_set_new-checkbox'},
                             title: <?php echo json_encode(__('New logical volume')) ?>,
                             hidden: config.diskfile ? true : false,
                             disabled: config.diskfile ? true : false,
@@ -646,23 +780,28 @@
                                     allowBlank: false,
                                     totallvsize: 'vm_total_vg_size'
                                 }
+                                ,lvformat
+                                ,lvsnapshotusage
                             ]
                             ,listeners:{
 
                                 beforecollapse:{scope:this,fn:function(panel,anim){
 
-                                    if(Ext.getCmp('vm_device_set_exist').collapsed
-                                       && Ext.getCmp('vm_device_set_file').collapsed )
-                                    {
-                                       panel.checkbox.dom.checked = true;
-                                       return false;
+                                    if(Ext.getCmp('vm_device_none').collapsed){
+                                        if(Ext.getCmp('vm_device_set_exist').collapsed
+                                           && Ext.getCmp('vm_device_set_file').collapsed )
+                                        {
+                                           panel.checkbox.dom.checked = true;
+                                           return false;
+                                        }
                                     }
 
                                     this.getForm().findField('vm_lv_new').setDisabled(true);
                                     this.getForm().findField('vm_lv_newsize').setDisabled(true);
                                     this.getForm().findField('vm_total_vg_size').setDisabled(true);
                                     vgcombo.setDisabled(true);
-
+                                    lvformat.setDisabled(true);
+                                    lvsnapshotusage.setDisabled(true);
                                 }},
                                 beforeexpand:{scope:this,fn:function(panel,anim){
 
@@ -670,20 +809,49 @@
                                     this.getForm().findField('vm_lv_newsize').setDisabled(false);
                                     this.getForm().findField('vm_total_vg_size').setDisabled(false);
                                     vgcombo.setDisabled(false);
-
+                                    lvformat.setDisabled(false);
+                                    lvsnapshotusage.setDisabled(false);
                                 }},
                                 expand:function(){
-
                                     Ext.getCmp('vm_device_set_exist').collapse();
                                     Ext.getCmp('vm_device_set_file').collapse();
+                                    Ext.getCmp('vm_device_none').collapse();
+                                    Ext.getCmp('vm_disk_type').setDisabled(false);
                                 }
                             }
                         };
 
+            var lv_disk_format = new Ext.form.ComboBox({
+                            ref:'vm_disk_format-cb',
+                            id:'vm_disk_format-cb'
+                            ,editable: false
+                            ,typeAhead: false
+                            ,fieldLabel: <?php echo json_encode(__('Format')) ?>,
+                            width:150,hiddenName:'vm_disk_format'
+                            ,valueField: 'format',displayField: 'format',forceSelection: true,emptyText: <?php echo json_encode(__('Select format...')) ?>
+                            ,store: new Ext.data.ArrayStore({
+                                    fields: ['format'],
+                                    data : <?php
+                                                /*
+                                                 * build interfaces model dynamic
+                                                 */
+                                                $disk_formats = sfConfig::get('app_disk_formats');
+                                                $disk_format_elem = array();
+
+                                                foreach($disk_formats as $eformat)
+                                                    $disk_format_elem[] = '['.json_encode($eformat).']';
+                                                echo '['.implode(',',$disk_format_elem).']'."\n";
+                                            ?>
+                                    })
+                            ,mode: 'local'
+                            ,lastQuery:''
+                            //,allowBlank:false
+                            ,triggerAction: 'all'
+            });
             var lv_disk = {
                             id:'vm_device_set_file',
                             xtype:'fieldset',
-                            checkboxToggle: true,
+                            checkboxToggle: {tag: 'input', type: 'radio', name: 'vm_device_set_file-checkbox'},
                             title: <?php echo json_encode(__('New disk file')) ?>,
                             autoHeight:true,
                             labelWidth:170,
@@ -696,7 +864,8 @@
                                     fieldLabel : <?php echo json_encode(__('Max available file size (MB)')) ?>,
                                     allowBlank : false,
                                     value: byte_to_MBconvert(<?php echo $max_size_diskfile ?>,2,'floor'),
-                                    readOnly:true
+                                    readOnly:true,
+                                    disabled: true
                                 },                                
                                 {
                                     fieldLabel: <?php echo json_encode(__('File name')) ?>,
@@ -715,6 +884,7 @@
                                     allowBlank: false
 
                                 }
+                                ,lv_disk_format
                             ]
                             ,listeners:{
 
@@ -724,38 +894,80 @@
 //                                       panel.checkbox.dom.checked = true;
 //                                       return false;
 //                                    }
-
-                                    if(Ext.getCmp('vm_device_set_exist').collapsed
-                                       && (!dev_new || dev_new.collapsed) )
-                                    {
-                                       panel.checkbox.dom.checked = true;
-                                       return false;
+                                    if(Ext.getCmp('vm_device_none').collapsed){
+                                        if(Ext.getCmp('vm_device_set_exist').collapsed
+                                           && (!dev_new || dev_new.collapsed) )
+                                        {
+                                           panel.checkbox.dom.checked = true;
+                                           return false;
+                                        }
                                     }
 
                                     this.getForm().findField('vm_diskfile').setDisabled(true);
                                     this.getForm().findField('vm_disksize').setDisabled(true);
+                                    this.getForm().findField('vm_disk_format-cb').setDisabled(true);
 
                                 }},
                                 beforeexpand:{scope:this,fn:function(panel,anim){
 
                                     this.getForm().findField('vm_diskfile').setDisabled(false);
                                     this.getForm().findField('vm_disksize').setDisabled(false);
+                                    this.getForm().findField('vm_disk_format-cb').setDisabled(false);
 
                                 }},
                                 expand:function(){
                                     var dev_new = Ext.getCmp('vm_device_set_new');
                                     if(dev_new) dev_new.collapse();
-                                    Ext.getCmp('vm_device_set_exist').collapse();
+
+                                    var dev_existing =  Ext.getCmp('vm_device_set_exist');
+                                    if(dev_existing) dev_existing.collapse();
+
+                                    var dev_none = Ext.getCmp('vm_device_none');
+                                    if(dev_none) dev_none.collapse();
+                                    Ext.getCmp('vm_disk_type').setDisabled(false);
                                 }
                             }
                         };
 
+            var lv_none = {
+                            id:'vm_device_none',
+                            xtype:'fieldset',
+                            checkboxToggle: {tag: 'input', type: 'radio', name: 'vm_device_none-checkbox'},
+                            title: <?php echo json_encode(__('No disk')) ?>,
+                            autoHeight:true,
+                            labelWidth:170,
+                            collapsed:config.diskfile ? false : true,
+                            items :[
+                            ]
+                            ,listeners:{
+
+                                beforecollapse:{scope:this,fn:function(panel,anim){
+                                }},
+                                beforeexpand:{scope:this,fn:function(panel,anim){
+                                }},
+                                expand:function(){
+                                    var dev_new = Ext.getCmp('vm_device_set_new');
+                                    if(dev_new) dev_new.collapse();
+
+                                    var dev_existing =  Ext.getCmp('vm_device_set_exist');
+                                    if(dev_existing) dev_existing.collapse();
+
+                                    var dev_file = Ext.getCmp('vm_device_set_file');
+                                    if(dev_file) dev_file.collapse();
+
+                                    Ext.getCmp('vm_device_none').addClass('x-panel-collapsed');
+                                    Ext.getCmp('vm_disk_type').setDisabled(true);
+                                }
+                            }
+                        };
             var storage_tpls = [];
 
+
+//AKIII
             if(config.diskfile){
-                storage_tpls.push(lv_exists,lv_disk);
+                storage_tpls.push(lv_exists,lv_disk, lv_none);
             }else{
-                storage_tpls.push(lv_exists,lv_new,lv_disk);
+                storage_tpls.push(lv_exists,lv_new,lv_disk, lv_none);
             }
 
             storage_tpls.push({
@@ -794,9 +1006,11 @@
                 monitorValid : true,                
                 items : [{
                         border    : false,
-                        bodyStyle : 'background:none;padding-bottom:30px;',
+                        bodyStyle : 'background:none;padding-bottom:15px;',
                         html      : <?php echo json_encode(__('Choose storage for the machine.')) ?>
-                        },storage_tpls
+                        },
+                        storage_tpls
+                        //lv_none
                 ]
                 ,listeners:{
                     show:function(){                        
@@ -814,7 +1028,6 @@
         }
 
     });
-
 
 
     network_cardPanel = Ext.extend(Ext.ux.Wiz.Card, {
@@ -883,12 +1096,23 @@
                             name:'network_status',
                             cls: 'nopad-border',
                             readOnly:true,
+                            disabled: true,
                             anchor:'90%',
                             hideLabel:true,
                             value : <?php echo json_encode(__('Network interfaces mapping incomplete!')) ?>,
                             invalidText : <?php echo json_encode(__('Network interfaces mapping incomplete!')) ?>,
                             allowBlank : false,
+                            scope: this,
                             validator  : function(v){
+                                var netgrid = this.ownerCt.hostnetworks_panel.get(0); 
+                                if(netgrid){
+                                    var nr_if = netgrid.store.getCount();
+    
+                                    if(nr_if == 0){
+                                        return true;
+                                    }
+                                }
+
                                 return v!=<?php echo json_encode(__('Network interfaces mapping incomplete!')) ?>;
                             }
                         }
@@ -1008,6 +1232,56 @@
 
                         var item = this.items.get(1);
                         item.items.get(1).focus();
+
+                        var netcard = Ext.getCmp('server-wiz-hostnet');
+                        var netgrid = netcard.hostnetworks_panel.get(0);
+                        var nr_if = netgrid.store.getCount();
+                        var has_disk = Ext.getCmp('vm_device_none');
+
+                        var item_Boot = Ext.getCmp('server-wiz-startup-boot');
+                        var item_Location = Ext.getCmp('server-wiz-startup-location');
+
+                        if(item_Boot){
+                            var disk_cmp = item_Boot.getComponent('vm_boot_disk');
+                            var pxe_cmp = item_Boot.getComponent('vm_boot_pxe');
+                            var cdrom_cmp = item_Boot.getComponent('vm_boot_cdrom');
+    
+                            if(has_disk.collapsed){ // has disk
+                                disk_cmp.enable();
+                            }else{
+                                disk_cmp.disable();
+                                if(disk_cmp.getValue() == true){
+                                    if(nr_if == 0){
+                                        cdrom_cmp.setValue(true);
+                                    }else{
+                                        pxe_cmp.setValue(true);                                            
+                                    }
+                                }
+                            }
+    
+                            if(nr_if == 0){
+                                pxe_cmp.disable();
+    
+                                if(pxe_cmp.getValue() == true){
+                                    if(!has_disk.collapsed){
+                                        cdrom_cmp.setValue(true);
+                                    }else{
+                                        disk_cmp.setValue(true);
+                                    }
+                                }
+                            }else{
+                                pxe_cmp.enable();
+                            }
+                        }else if(item_Location){                            
+                            var none_cmp = item_Location.getComponent('vm_location_none');
+                            var netinstall = item_Location.getComponent('vm_location_netinstall');
+                            if(nr_if == 0){ 
+                                netinstall.disable();
+                                none_cmp.setValue(true);
+                            }else{
+                                netinstall.enable()
+                            }
+                        }
                     }
 
                 }
@@ -1030,7 +1304,7 @@
                 editable:false
                 ,disabled:true
                 ,valueField:'full_path'
-                ,hiddenName:'vm_boot_cdrom'
+                ,hiddenName:'vm_boot_cdrom_iso'
                 ,displayField:'name'
                 ,triggerAction:'all'
                 ,forceSelection:true
@@ -1064,7 +1338,7 @@
             var item_Location = Ext.getCmp('server-wiz-startup-location');
 
             if(item_Boot){
-                var boot_cdrom_field = this.form.findField('vm_boot_cdrom');
+                var boot_cdrom_field = this.form.findField('vm_boot_cdrom_iso');
                 boot_cdrom_field.setDisabled(true);
 
                 this.items.get(item_Boot.id).hide();
@@ -1090,13 +1364,16 @@
                         },
                         {
                             boxLabel: <?php echo json_encode(__('None')) ?>,
-                            name: 'vm_location',checked: true,
+                            name: 'vm_location',
+                            id: 'vm_location_none',
+                            checked: true,
                             hideLabel:true,
                             inputValue: 'none',
                             scope:this
                         },{
                             boxLabel: <?php echo json_encode(__('Network install (http,ftp,...)')) ?>,
                             name: 'vm_location',
+                            id: 'vm_location_netinstall',
                             hideLabel:true,
                             inputValue: 'remote',
                             scope:this,
@@ -1173,9 +1450,11 @@
                                     bodyStyle : 'background:none;padding-bottom:20px;',
                                     html      : <?php echo json_encode(__('Specify boot device.')) ?>
                                 },
+                                //AKIII
                                 {
                                     boxLabel: <?php echo json_encode(__('Disk')) ?>,
                                     name: 'vm_boot',
+                                    id: 'vm_boot_disk',
                                     checked: true,
                                     hideLabel:true,
                                     inputValue: 'filesystem',
@@ -1184,6 +1463,7 @@
                                 {
                                     boxLabel: <?php echo json_encode(__('Network boot (PXE)')) ?>,
                                     name: 'vm_boot',
+                                    id: 'vm_boot_pxe',
                                     hideLabel:true,
                                     inputValue: 'network'
                                 },
@@ -1191,10 +1471,11 @@
                                     hideLabel:true,
                                     boxLabel: 'CD-ROM',
                                     name: 'vm_boot',
+                                    id: 'vm_boot_cdrom',
                                     inputValue: 'cdrom'
                                     ,scope:this
                                     ,handler:function(box,check){
-                                        var boot_cdrom_field = this.form.findField('vm_boot_cdrom');
+                                        var boot_cdrom_field = this.form.findField('vm_boot_cdrom_iso');
                                         boot_cdrom_field.setDisabled(!check);
                                         boot_cdrom_field.clearInvalid();}
                                 },this.cdromcombo
@@ -1209,7 +1490,7 @@
                 var boot = values['vm_boot'];
 
                 if(boot == 'cdrom' ){
-                    var cdrom_field = this.form.findField('vm_boot_cdrom');
+                    var cdrom_field = this.form.findField('vm_boot_cdrom_iso');
                     cdrom_field.setDisabled(false);
                 }
 
@@ -1243,7 +1524,7 @@
     var cpuCard = new cpu_cardPanel({id:'server-wiz-cpuset'});
     var storageCard = new storage_cardPanel({id:'server-wiz-storage'});
     //var networkCard = new network_cardPanel({id:'server-wiz-nettype'});
-    var hostnetworkCard = new hostnetwork_cardPanel();
+    var hostnetworkCard = new hostnetwork_cardPanel({id:'server-wiz-hostnet'});
 
     var startupCard = new startup_cardPanel({id:'server-wiz-startup'});
    
@@ -1313,7 +1594,7 @@
             title : <?php echo json_encode(__('Create new virtual server')) ?>
         },
         width:800,
-        height:450,
+        height:480,
 
         westConfig : {
             width : 170
@@ -1338,6 +1619,7 @@
 
         var lvname = storage['vm_lv_new'];
         var vgname = storage['vm_vg'];
+        var lvformat_value = storage['vm_lv_format'];
         var size = storage['vm_lv_newsize']+'M';
 
         // create parameters array to pass to soap request....
@@ -1345,7 +1627,10 @@
             'nid':config.nodeId,
             'lv':lvname,
             'vg':vgname,
+            'format':lvformat_value,
             'size':size};
+
+        if( storage['vm_lv_snapshotusage'] ) params['persnapshotusage'] = storage['vm_lv_snapshotusage'];
 
         var conn = new Ext.data.Connection({
             listeners:{
@@ -1373,7 +1658,7 @@
             success: function(resp,opt){
                 var response = Ext.util.JSON.decode(resp.responseText);
                 Ext.ux.Logger.info(response['agent'],response['response']);                                
-                
+
                 var disks=[{'id':response['insert_id'],'disk_type':storage['disk_type']}];
                 data['disks'] = disks;
 
@@ -1553,12 +1838,12 @@
                                 //else send_data['vm_type'] = 'kvm';
 
                                 var boot_data = startup_raw['vm_boot'];
-                                var cdrom_field = startupPanel.form.findField('vm_boot_cdrom');
+                                var cdrom_field = startupPanel.form.findField('vm_boot_cdrom_iso');
 
                                 if(boot_data == 'cdrom'){
 
-                                    if(startup_raw['vm_boot_cdrom'] != cdrom_field.emptyText){
-                                        send_data['location'] = startup_raw['vm_boot_cdrom'];
+                                    if(startup_raw['vm_boot_cdrom_iso'] != cdrom_field.emptyText){
+                                        send_data['location'] = startup_raw['vm_boot_cdrom_iso'];
                                         send_data['boot'] = boot_data;
                                     }
                                 }
@@ -1589,15 +1874,19 @@
             storage_raw['vm_lv_new'] = storage_raw['vm_diskfile'];
             storage_raw['vm_lv_newsize'] = storage_raw['vm_disksize'];
             storage_raw['vm_vg'] = <?php echo json_encode(sfConfig::get("app_volgroup_disk_flag")) ?>;
+            storage_raw['vm_lv_format'] = storage_raw['vm_disk_format'];
             // setting lv name parameter for post processing vmCreate
             lvcreate(storage_raw,send_data);
             return;
         }
 
-        // lv already exists just create server
-        var disks=[{'id':storage_raw['vm_lv'],'disk_type':storage_raw['disk_type']}];
-        send_data['disks'] = disks;
-        //send_data['lv'] = storage_raw['vm_lv'];
+        if(storage_raw['vm_device_none-checkbox'] == 'on'){            
+            send_data['disks'] = [];
+        } else {
+            // lv already exists just create server
+            var disks=[{'id':storage_raw['vm_lv'],'disk_type':storage_raw['disk_type']}];
+            send_data['disks'] = disks;
+        }
         vmcreate(send_data);
 
 

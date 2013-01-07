@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">
+<xliff version="1.0">
+  <file source-language="EN" target-language="pt" datatype="plaintext" original="messages" date="2010-08-16T12:09:30Z" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="resource_usage">
+        <source>Resource Usage</source>
+        <target>Recursos em Utilização</target>
+      </trans-unit>
+      <trans-unit id="database_info">
+        <source>Database Info</source>
+        <target>Informação da Base de Dados</target>
+      </trans-unit>
+      <trans-unit id="metadata">
+        <source>Metadata</source>
+        <target>Metadados</target>
+      </trans-unit>
+      <trans-unit id="process_failed">
+        <source>Could not start the process</source>
+        <target>Não foi possível iniciar o processo</target>
+      </trans-unit>
+      <trans-unit id="process_started">
+        <source>Process started with success</source>
+        <target>Processo iniciado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="process_started">
+        <source>Process started with success</source>
+        <target>Processo iniciado com sucesso</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

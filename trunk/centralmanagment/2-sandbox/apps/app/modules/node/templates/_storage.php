@@ -17,6 +17,8 @@
 //
 //
 //include_partial('physicalvol/pvresizewin');
+include_partial('physicalvol/pvscan');
+include_partial('volgroup/vgscan');
 
 // volume group create window
 include_partial('volgroup/vgcreatewin');
@@ -26,6 +28,7 @@ include_partial('logicalvol/lvcreatewin');
 include_partial('logicalvol/lvresizewin');
 include_partial('logicalvol/lvcreatesnapshotwin');
 include_partial('logicalvol/lvclonewin');
+include_partial('logicalvol/lvconvertwin');
 ?>
 <script>
 Ext.ns('Node.Storage');
@@ -39,17 +42,24 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
         columnWidth:0.3,
         border:false,
         enableSort: false, // disable sorting
-        title: <?php echo json_encode(__('Devices')) ?>,
+        title: <?php echo json_encode(__('Physical Devices')) ?>,
         columns:[{
-                header:'Device',
+                header: __('Device'),
                 width:150,
                 dataIndex:'text'
+                ,sortType: function(node) {
+                    return node.attributes.text;
+                }
             },
             {
-                header:'Device size',
+                header: __('Device size'),
                 width:100,
                 dataIndex:'devicesize',
                 align: 'center',
+                sortType: function(node) {
+                    var size = parseInt(node.attributes.devicesize);
+                    return size;
+                },
                 tpl: new Ext.XTemplate('{devicesize:this.formatSize}', {
                     formatSize: function(v) {
 
@@ -67,6 +77,11 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
         },
         initComponent: function(){
             this.tools = [{
+                id: 'gear',
+                qtip: <?php echo json_encode(__('Scan physical devices')) ?>,
+                scope:this,
+                handler:this.pvscan
+            },{
                 id:'refresh',
                 on:{
                     click: this.reload
@@ -111,7 +126,7 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
                 folderSort: true,
                 dir: "DESC",
                 sortType: function(node) {
-                    var size = parseInt(node.attributes.pvsize);
+                    var size = parseInt(node.attributes.devicesize);
                     return size;
                 }
             }); // end sort
@@ -163,6 +178,14 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
                             text: <?php echo json_encode(__('Uninitialize physical volume')) ?>,
                             scope: this,
                             handler:this.pvremove
+                        },
+                        '-',{
+                            ref:'pv_unregister',
+                            id:'pv-unregister',
+                            iconCls:'go-action',
+                            text: <?php echo json_encode(__('Unregister physical device')) ?>,
+                            scope: this,
+                            handler:this.pvunregister
                         }]
                 }); // end menu
 
@@ -180,8 +203,9 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
             if(node.isLeaf()){ //open context menu only if node is a leaf
                 this.ctxNode = node;
                 this.ctxNode.ui.addClass('x-node-ctx');
-                this.menu.pv_create.setDisabled(node.attributes.cls=='dev-pv' || childItems==0);
-                this.menu.pv_remove.setDisabled(node.attributes.cls=='dev-pd' || childItems==0);
+                this.menu.pv_create.setDisabled(node.attributes.cls.match(/dev-pv/) || node.attributes.cls.match(/-inc/) || childItems==0);
+                this.menu.pv_remove.setDisabled(node.attributes.cls.match(/dev-pd/) || node.attributes.cls.match(/-inc/) || childItems==0);
+                this.menu.pv_unregister.setDisabled( !node.attributes.cls.match(/-inc/) && (node.attributes.cls.match(/dev-pv/) || childItems==0) );
                 this.menu.showAt(e.getXY());
             }
 
@@ -198,14 +222,17 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
             var ctx = this.ctxNode;
             var tree = ctx.getOwnerTree();
 
-            var uuid = ctx.attributes.uuid;
             if(this.level == 'cluster'){
-                myparams = {'cid':this.tree_node_id, 'uuid': uuid, 'dev':ctx.attributes.device, 'level':this.level};
+                myparams = {'cid':this.tree_node_id, 'dev':ctx.attributes.device, 'level':this.level};
             }else if(this.level == 'node'){
-                myparams = {'nid':this.tree_node_id, 'uuid': uuid, 'dev':ctx.attributes.device, 'level':this.level};
+                myparams = {'nid':this.tree_node_id, 'dev':ctx.attributes.device, 'level':this.level};
             }else{
-                myparams = {'nid':this.node_id, 'uuid': uuid, 'dev':ctx.attributes.device}
+                myparams = {'nid':this.node_id, 'dev':ctx.attributes.device}
             }
+            if( ctx.attributes['uuid'] )
+                myparams['uuid'] = ctx.attributes['uuid'];
+            if( ctx.attributes['device'] )
+                myparams['dev'] = ctx.attributes['device'];
 
 
             var conn = new Ext.data.Connection({
@@ -318,6 +345,10 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
             }else{
                 myparams = {'nid':this.node_id, 'dev':ctx.attributes.device}
             }
+            if( ctx.attributes['uuid'] )
+                myparams['uuid'] = ctx.attributes['uuid'];
+            if( ctx.attributes['device'] )
+                myparams['dev'] = ctx.attributes['device'];
 
             var conn = new Ext.data.Connection({
                 listeners:{
@@ -369,6 +400,130 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
             });// END Ajax request
 
         }// end pvremove
+        // scan new physical devices
+        ,pvscan:function(){
+
+            var win = Ext.getCmp('pv-scan-win');
+
+            if(!win){
+                var centerPanel;
+
+                if(this.level == 'cluster' || this.level == 'node'){
+                    centerPanel = new pvwin.scanForm.Main(this.tree_node_id, this.level);
+                }else{
+                    centerPanel = new pvwin.scanForm.Main(this.node_id);
+                }
+                
+                centerPanel.on('updated',function(){
+                    win.close();
+                    this.reload();},this);
+
+                win = new Ext.Window({
+                    id: 'pv-scan-win',
+                    title: <?php echo json_encode(__('Scan physical devices')) ?>,
+                    width:430,
+                    height:320,
+                    modal:true,
+                    iconCls: 'icon-window',
+                    bodyStyle: 'padding:10px;',
+                    border:true,
+                    layout: 'fit',
+                    items: [centerPanel]
+                    ,tools: [{
+                        id:'help',
+                        qtip: __('Help'),
+                        handler:function(){
+                            View.showHelp({
+                                anchorid:'help-pvol-add',
+                                autoLoad:{ params:'mod=physicalvol'},
+                                title: <?php echo json_encode(__('Physical Volume Help')) ?>
+                            });
+                        }
+                    }]
+                });
+
+            }
+
+            win.show();
+            //gridDiskDevices.store.reload();
+            centerPanel.load();
+
+        }// end pvscan
+        ,pvunregister: function(){
+            var ctx = this.ctxNode;
+            var tree = ctx.getOwnerTree();
+
+            Ext.MessageBox.show({
+                    title: <?php echo json_encode(__('Unregister physical volume')) ?>,
+                    msg: String.format(<?php echo json_encode(__('Unregister physical volume {0} ?')) ?>,ctx.text),
+                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    fn: function(btn){
+
+                        if(btn=='yes'){
+                            var myparams;
+                            if(this.level == 'cluster'){
+                                myparams = {'cid': this.tree_node_id, 'level': this.level};
+                            } else if(this.level == 'node'){
+                                myparams = {'nid': this.tree_node_id, 'level': this.level};
+                            }else{
+                                myparams = {'nid': this.tree_node_id};
+                            }
+                            if( ctx.attributes['uuid'] )
+                                myparams['uuid'] = ctx.attributes['uuid'];
+                            if( ctx.attributes['device'] )
+                                myparams['device'] = ctx.attributes['device'];
+
+                            var conn = new Ext.data.Connection({
+                                listeners:{
+                                    beforerequest:function(){
+                                        Ext.MessageBox.show({
+                                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                                            msg: <?php echo json_encode(__('Unregistering physical volume...')) ?>,
+                                            width:300,
+                                            wait:true
+                                        });
+
+                                    },
+                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                    ,requestexception:function(c,r,o){
+                                                        Ext.MessageBox.hide();
+                                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+
+                                }
+                            });
+
+                            //var ctxid = (this.level == 'cluster' || this.level == 'node') ? this.tree_node_id : this.node_id;
+
+                            conn.request({
+                                url: <?php echo json_encode(url_for('physicalvol/jsonUnregister'))?>,
+                                params: myparams,
+                                scope:this,
+                                success: function(resp,opt){
+
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.ux.Logger.info(response['agent'],response['response']);
+                                    tree.root.reload();
+
+                                    /*Ext.getCmp('node-storage-vg-tree-'+ctxid).reload();
+                                    Ext.getCmp('node-storage-dev-tree-'+ctxid).reload();
+                                    Ext.getCmp('node-storage-lv-tree-'+ctxid).reload();*/
+                                },
+                                failure: function(resp,opt) {
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.Msg.show({
+                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                        buttons: Ext.MessageBox.OK,
+                                        msg: String.format(<?php echo json_encode(__('Unable to unregiste physical volume {0}')) ?>,ctx.text)+'<br>'+response['info'],
+                                        icon: Ext.MessageBox.ERROR});
+                                }
+                            });// END Ajax request
+
+                        }
+                    },
+                    scope:this,
+                    icon: Ext.MessageBox.QUESTION
+            });
+        }
 });
 
 
@@ -384,14 +539,21 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
         enableSort: false, // disable sorting
         title: <?php echo json_encode(__('Volume Groups')) ?>,
         columns:[{
-                header:'Volume Group',
+                header: __('Volume Group'),
                 width:150,
                 dataIndex:'text'
+                ,sortType: function(node) {
+                    return node.attributes.text;
+                }
             },{
-                header:'Size',
+                header: __('Size'),
                 align: 'center',
                 width:100,
                 dataIndex:'prettysize',
+                sortType: function(node) {
+                    var size = parseInt(node.attributes.size);
+                    return size;
+                },
                 tpl: new Ext.XTemplate('{prettysize:this.formatVGSize}', {
                     formatVGSize: function(v) {
 
@@ -401,10 +563,14 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
                 })
             }
             ,{
-                header:'Free size',
+                header: __('Free size'),
                 align: 'center',
                 width:100,
                 dataIndex:'freesize',
+                sortType: function(node) {
+                    var size = parseInt(node.attributes.freesize);
+                    return size;
+                },
                 tpl: new Ext.XTemplate('{freesize:this.formatVGSize}'
                 , {
                     formatVGSize: function(v) {
@@ -424,6 +590,11 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
 
 
             this.tools = [{
+                id: 'gear',
+                qtip: <?php echo json_encode(__('Scan volume groups')) ?>,
+                scope:this,
+                handler:this.vgscan
+                },{
                 id:'refresh',
                 on:{
                     click: this.reload
@@ -441,7 +612,7 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
             }];
 
             // Check if we want the tree from cluster or datacenter
-            var myparamsl= {};
+            var myparams= {};
             var myurl = '';
 
             if(this.level == 'cluster'){
@@ -466,7 +637,7 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
                 folderSort: true,
                 dir: "DESC",
                 sortType: function(node) {
-                    var size = parseInt(node.attributes.prettysize);
+                    var size = parseInt(node.attributes.size);
                     return size;
                 }
             }); // end sort
@@ -495,7 +666,6 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
             this.on('nodedragover', function(e){
                 var n = e.dropNode;
                 e.tree.expandAll();
-                //console.log(e);
                 return this.canMoveTo(e, n, this.dev_id);
             });
 
@@ -678,7 +848,15 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
                             text: <?php echo json_encode(__('Remove physical volume')) ?>,
                             scope: this,
                             handler:this.vgreduce
-                        }]
+                        },
+                        '-',{
+                            id:'vg-unregister',
+                            iconCls:'go-action',
+                            text: <?php echo json_encode(__('Unregister volume group')) ?>,
+                            scope: this,
+                            handler:this.vgunregister
+                        }
+                        ]
                 });// end menu
 
                 this.menu.on('hide', this.onContextHide, this);
@@ -693,9 +871,10 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
             if(node.isLeaf()){ //open context menu only if node is a leaf
                 this.ctxNode = node;
                 this.ctxNode.ui.addClass('x-node-ctx');
-                this.menu.items.get('vg-create').setDisabled(true);
+                //this.menu.items.get('vg-create').setDisabled(true);
                 this.menu.items.get('vg-remove-pv').setDisabled(false);
                 this.menu.items.get('vg-remove').setDisabled(true);
+                this.menu.items.get('vg-unregister').setDisabled(true);
 
                 if(node.isLast() && node.isFirst()) // last pv in vg. cannot use vgreduce. only vgremove
                 {
@@ -710,6 +889,13 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
                 this.menu.items.get('vg-create').setDisabled(false);
                 this.menu.items.get('vg-remove-pv').setDisabled(true);
                 this.menu.items.get('vg-remove').setDisabled(false);
+                
+                //this.menu.pv_unregister.setDisabled( !node.attributes.cls.match(/-inc/) && (node.attributes.cls.match(/dev-pv/) || childItems==0) );
+                
+                this.menu.items.get('vg-unregister').setDisabled(node.attributes.inuse);
+                if( node.attributes.inuse ){
+                    this.menu.items.get('vg-unregister').setTooltip({text: <?php echo json_encode(__('Cannot unregister the volume group with logical volumes in use by virtual server')) ?>});
+                }
             }
 
             this.menu.showAt(e.getXY());
@@ -772,7 +958,7 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
                             View.showHelp({
                                 anchorid:'help-vol-group-add',
                                 autoLoad:{ params:'mod=volgroup'},
-                                title: <?php echo json_encode(__('Physical Volume Help')) ?>
+                                title: <?php echo json_encode(__('Volume Groups Help')) ?>
                             });
                         }
                     }]
@@ -935,42 +1121,185 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
                     scope:this,
                     icon: Ext.MessageBox.QUESTION
             });
-
-
         }
+        ,vgscan:function(){
 
+            var win = Ext.getCmp('vg-scan-win');
+
+            if(!win){
+                var centerPanel;
+
+                if(this.level == 'cluster' || this.level == 'node'){
+                    centerPanel = new Volgroup.Scan.Main(this.tree_node_id, this.level);
+                }else{
+                    centerPanel = new Volgroup.Scan.Main(this.node_id);
+                }
+                
+                var ctxid = (this.level == 'cluster' || this.level == 'node') ? this.tree_node_id : this.node_id;
+                centerPanel.on('updated',function(){
+                    win.close();
+                    //this.reload();
+                    Ext.getCmp('node-storage-vg-tree-'+ctxid).reload();
+                    Ext.getCmp('node-storage-dev-tree-'+ctxid).reload();
+                    Ext.getCmp('node-storage-lv-tree-'+ctxid).reload();
+                    },this);
+
+                win = new Ext.Window({
+                    id: 'vg-scan-win',
+                    title: <?php echo json_encode(__('Scan volume groups')) ?>,
+                    width:430,
+                    height:420,
+                    modal:true,
+                    iconCls: 'icon-window',
+                    bodyStyle: 'padding:10px;',
+                    border:true,
+                    layout: 'fit',
+                    items: [centerPanel]
+                    ,tools: [{
+                        id:'help',
+                        qtip: __('Help'),
+                        handler:function(){
+                            View.showHelp({
+                                anchorid:'help-vol-group',
+                                autoLoad:{ params:'mod=volgroup'},
+                                title: <?php echo json_encode(__('Volume Groups Help')) ?>
+                            });
+                        }
+                    }]
+                });
+            }
+
+            win.show();
+            centerPanel.load();
+
+        }// end vgscan
+        ,vgunregister: function(){
+            var ctx = this.ctxNode;
+            var tree = ctx.getOwnerTree();
+
+            Ext.MessageBox.show({
+                    title: <?php echo json_encode(__('Unregister volume group')) ?>,
+                    msg: String.format(<?php echo json_encode(__('Unregister volume group {0} ?')) ?>,ctx.id),
+                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    fn: function(btn){
+
+                        if(btn=='yes'){
+                            var myparams;
+                            if(this.level == 'cluster'){
+                                myparams = {'cid': this.tree_node_id, 'level': this.level, 'vg':ctx.id};
+                            }else if(this.level == 'node'){
+                                myparams = {'nid': this.tree_node_id, 'level': this.level, 'vg':ctx.id};
+                            }else{
+                                myparams = {'nid': this.tree_node_id, 'vg':ctx.id};
+                            }
+
+                            var conn = new Ext.data.Connection({
+                                listeners:{
+                                    beforerequest:function(){
+                                        Ext.MessageBox.show({
+                                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                                            msg: <?php echo json_encode(__('Unregistering volume group...')) ?>,
+                                            width:300,
+                                            wait:true
+                                        });
+
+                                    },
+                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                    ,requestexception:function(c,r,o){
+                                                        Ext.MessageBox.hide();
+                                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+
+                                }
+                            });
+
+                            var ctxid = (this.level == 'cluster' || this.level == 'node') ? this.tree_node_id : this.node_id;
+
+                            conn.request({
+                                url: <?php echo json_encode(url_for('volgroup/jsonUnregister'))?>,
+                                params: myparams,  //{'nid':this.node_id,'vg':ctx.id },
+                                scope:this,
+                                success: function(resp,opt){
+
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.ux.Logger.info(response['agent'],response['response']);
+                                    tree.root.reload();
+
+                                    Ext.getCmp('node-storage-vg-tree-'+ctxid).reload();
+                                    Ext.getCmp('node-storage-dev-tree-'+ctxid).reload();
+                                    Ext.getCmp('node-storage-lv-tree-'+ctxid).reload();
+
+                                },
+                                failure: function(resp,opt) {
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.Msg.show({
+                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                        buttons: Ext.MessageBox.OK,
+                                        msg: String.format(<?php echo json_encode(__('Unable to unregiste volume group {0}')) ?>,ctx.id)+'<br>'+response['info'],
+                                        icon: Ext.MessageBox.ERROR});
+                                }
+                            });// END Ajax request
+
+                        }
+                    },
+                    scope:this,
+                    icon: Ext.MessageBox.QUESTION
+            });
+        }
 });
 
 
 treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
         id:this.id,
         enableDD:false,
-        enableSort:false,
+        //enableSort:false,
+        defaultSortable: true,
         border:false,
         columnWidth:0.35,
         title: <?php echo json_encode(__('Logical Volumes')) ?>,
         columns:[{
-                header:'Logical Volume',
+                header: __('Logical Volume'),
                 width:150,
                 dataIndex:'text'
+                ,sortType: function(node) {
+                    return node.attributes.text;
+                }
             },
             {
-                header:'Volume Group',
+                header: __('Volume Group'),
                 width:100,
                 align: 'center',
                 dataIndex:'vg'
+                ,sortType: function(node) {
+                    return node.attributes.vg + " " + node.attributes.text;
+                }
             },
             {
-                header:'Server',
+                header: __('Server'),
                 width:100,
                 align: 'center',
                 dataIndex:'vm_name'
+                ,sortType: function(node) {
+                    return node.attributes.vm_name + " " + node.attributes.text;
+                }
             },
             {
-                header:'Size',
+                header: __('Format'),
+                width:100,
+                align: 'center',
+                dataIndex:'format'
+                ,sortType: function(node) {
+                    return node.attributes.format + " " + node.attributes.text;
+                }
+            },
+            {
+                header: __('Size'),
                 align: 'center',
                 width:100,
                 dataIndex:'prettysize',
+                sortType: function(node) {
+                    var size = parseInt(node.attributes.size);
+                    return size;
+                },
                 tpl: new Ext.XTemplate('{prettysize:this.formatLVSize}', {
                     formatLVSize: function(v) {
 
@@ -978,8 +1307,8 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
                         else return '&#160;';
                     }
                 })
-            }],
-        listeners:{
+            }]
+        ,listeners:{
             'beforeload':function(){this.body.mask(<?php echo json_encode(__('Please wait...')) ?>, 'x-mask-loading');},
             'load':function(){this.body.unmask();}
             ,'contextmenu': function(node, evt_obj){
@@ -1000,9 +1329,12 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
             }
         },
         initComponent: function(){
-
-
             this.tools = [{
+                id: 'gear',
+                qtip: <?php echo json_encode(__('Scan logical volumes')) ?>,
+                scope:this,
+                handler:this.lvscan
+                },{
                 id:'refresh',
                 on:{
                     click: this.reload
@@ -1016,9 +1348,65 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
                         anchorid:'help-lvol',
                         autoLoad:{ params:'mod=logicalvol'},
                         title: <?php echo json_encode(__('Logical Volume Help')) ?>
-                    });}
+                    });
+               }
+            },{
+                id: 'search',
+                qtip: <?php echo json_encode(__('Search')) ?>,
+                scope:this,
+                handler: function(e, toolEl, panel, tc){
+                    var tbar = panel.getTopToolbar();
+
+                    if(tbar.isVisible()){
+                        tbar.hide();
+                    }else{
+                        tbar.show();
+                    }
+                    panel.doLayout();
+                }
             }];
 
+            this.tbar = new Ext.Toolbar({
+            //id: 'topbar-search-lvs',
+            hidden: true
+            ,items:       
+            [
+//            '->',
+            {   
+                cls: 'version_box',
+                xtype: 'tbtext',
+                text: <?php echo json_encode(__('Search')) ?>
+            },{
+                xtype: 'textfield',
+                fieldLabel: <?php echo json_encode(__('Search')) ?>,
+                //name: id+'_primarydns',
+                maxLength: 15,
+                //vtype:'ip_addr',
+                //allowBlank:false,
+                disabled:false,
+                width:100,
+                scope:this,
+                listeners:{
+                    specialkey:{
+                        scope:this,
+                        fn:function(field,e){
+
+                            /* Influence with a large hammer */
+                            try {
+                                search_on_nodetree(field, e);
+                            } catch (e) {
+                            }
+                        },
+                        render: function(c) {
+                            Ext.QuickTips.register({
+                                target: c.getEl(),
+                                text: <?php echo json_encode(__('Press enter to search')) ?>
+                            });
+                        }
+                    }
+                }    
+            }
+        ]});
             // Check if we want the tree from cluster or datacenter
             var myparams = {};
             var myurl = '';
@@ -1095,77 +1483,114 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
                             }
                             ,'-',
                             {
-                                //id:'lv-snapshot',
                                 iconCls:'go-action',
                                 ref: 'lvsnapshot',
-                                //text:'Take snapshot',
                                 text: <?php echo json_encode(__('Take snapshot')) ?>,
+                                hidden: true,
                                 scope: this,
                                 handler:this.lvsnapshot
+                            },{
+                                iconCls:'go-action',
+                                ref: 'lvsnapshot_revert',
+                                text: <?php echo json_encode(__('Revert snapshot')) ?>,
+                                hidden: true,
+                                scope: this,
+                                handler:this.lvsnapshotrevert
                             },
                             {
-                                //id:'lv-clone',
                                 iconCls:'go-action',
                                 ref: 'lvclone',
                                 text: <?php echo json_encode(__('Clone')) ?>,
                                 scope: this,
 //                                tooltip: {text: <?php echo json_encode(__('Enabled if virtual server is not running and if any volume groups have enouf space.')) ?>},
                                 handler:this.lvclone
+                            },
+                            {
+                                iconCls:'go-action',
+                                ref: 'lvconvert',
+                                text: <?php echo json_encode(__('Convert')) ?>,
+                                scope: this,
+                                handler:this.lvconvert
+                            },
+                            '-',{
+                                ref:'lv_unregister',
+                                id:'lv-unregister',
+                                iconCls:'go-action',
+                                text: <?php echo json_encode(__('Unregister logical volume')) ?>,
+                                scope: this,
+                                handler:this.lvunregister
                             }
                             ]
                 });
 
                 this.menu.on('hide', this.onContextHide, this);
 
+            } else {    // initialize
+                this.menu.lvadd.setDisabled(false); 
+                this.menu.lvadd.clearTooltip('');
+                this.menu.lvresize.setDisabled(false); 
+                this.menu.lvresize.clearTooltip('');
+                this.menu.lvremove.setDisabled(false); 
+                this.menu.lvremove.clearTooltip('');
+                this.menu.lvsnapshot.setDisabled(false); 
+                this.menu.lvsnapshot.clearTooltip('');
+                this.menu.lvsnapshot_revert.setDisabled(false); 
+                this.menu.lvsnapshot_revert.clearTooltip('');
+                this.menu.lvclone.setDisabled(false); 
+                this.menu.lvclone.clearTooltip('');
+                this.menu.lvconvert.setDisabled(false); 
+                this.menu.lvconvert.clearTooltip('');
+                this.menu.lv_unregister.setDisabled(false); 
+                this.menu.lv_unregister.clearTooltip('');
             } //end if create menu
-
-
-
-
 
             if(this.ctxNode){
                 if(this.ctxNode.ui) this.ctxNode.ui.removeClass('x-node-ctx');
                 this.ctxNode = null;
+            }
+            if( !node.attributes.type ){
+                this.menu.lvresize.setDisabled(true); 
+                this.menu.lvresize.clearTooltip('');
+                this.menu.lvremove.setDisabled(true); 
+                this.menu.lvremove.clearTooltip('');
             }
 
             if( node.attributes.havesnapshots &&
                 node.attributes.havesnapshots_inuse_inrunningvm ){
                 this.menu.lvremove.setTooltip({text: <?php echo json_encode(__('Can\'t remove logical volume with snapshots in use by any virtual server')) ?>});
                 this.menu.lvremove.setDisabled(true);
-            } else if(Ext.isEmpty(node.attributes.vm_name)){
-                this.menu.lvremove.setDisabled(false);                
-                this.menu.lvremove.clearTooltip();
-            } else {
+            } else if(!Ext.isEmpty(node.attributes.vm_name)){
                 this.menu.lvremove.setDisabled(true);
                 this.menu.lvremove.setTooltip({text: <?php echo json_encode(__('Enabled if not in use by any virtual server')) ?>});
             }
 
-            if(node.attributes.vm_state=='running'){
+            /*if(node.attributes.vm_state=='running'){
                 this.menu.lvresize.setTooltip({text: String.format(<?php echo json_encode(__('Enabled if virtual server {0} is not running')) ?>,node.attributes.vm_name)});
                 this.menu.lvresize.setDisabled(true);
                 this.menu.lvclone.setTooltip({text: <?php echo json_encode(__('Enabled if virtual server is not running and if any volume groups have enouf space.')) ?>});
                 this.menu.lvclone.setDisabled(true);
-            } else if(node.attributes.havesnapshots){
-                this.menu.lvresize.setTooltip({text: String.format(<?php echo json_encode(__('Can\'t resize volumes if snapshots')) ?>,node.attributes.vm_name)});
+            } else if(node.attributes.havesnapshots){*/
+            if(node.attributes.havesnapshots){
+                this.menu.lvresize.setTooltip({text: String.format(<?php echo json_encode(__('Can\'t resize volumes if has snapshots')) ?>,node.attributes.vm_name)});
                 this.menu.lvresize.setDisabled(true);
-                this.menu.lvclone.setDisabled(false);
-                this.menu.lvclone.clearTooltip();
-            }else{
-                this.menu.lvresize.clearTooltip();
-                this.menu.lvresize.setDisabled(false);
-                this.menu.lvclone.setDisabled(false);
-                this.menu.lvclone.clearTooltip();
             }
 
-            if( node.attributes.format=='lvm' && !node.attributes.snapshot ) {
-                this.menu.lvsnapshot.clearTooltip();
-                this.menu.lvsnapshot.setDisabled(false);
+            if( node.attributes.format!='lvm' && !node.attributes.snapshot ) {
+                this.menu.lvsnapshot.setTooltip({text: String.format(<?php echo json_encode(__('Enabled if volume support snapshot.')) ?>)});
+                this.menu.lvsnapshot.setDisabled(true);
+                this.menu.lvsnapshot_revert.setDisabled(true);
             } else if( node.attributes.snapshot ){
                 this.menu.lvsnapshot.setTooltip({text: String.format(<?php echo json_encode(__('Enabled if volume is not snapshot.')) ?>)});
                 this.menu.lvsnapshot.setDisabled(true);
+                if( (!Ext.isEmpty(node.attributes.vm_name) && (node.attributes.vm_state=='running')) || 
+                        (!Ext.isEmpty(node.parentNode.attributes.vm_name) && (node.parentNode.attributes.vm_state=='running')) ){
+                    this.menu.lvsnapshot_revert.setDisabled(true);
+                    this.menu.lvsnapshot_revert.setTooltip({text: <?php echo json_encode(__('Enabled if not in use by any running virtual server')) ?>});
+                } else {
+                    this.menu.lvsnapshot_revert.setDisabled(false);
+                }
             } else {
-                this.menu.lvsnapshot.setTooltip({text: String.format(<?php echo json_encode(__('Enabled if volume support snapshot.')) ?>)});
-                this.menu.lvsnapshot.setDisabled(true);
+                this.menu.lvsnapshot_revert.setDisabled(true);
             }
 
             if(node.disabled){
@@ -1178,6 +1603,8 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
 
                 this.menu.lvsnapshot.setTooltip({text:qtip});
                 this.menu.lvsnapshot.setDisabled(true);
+                this.menu.lvsnapshot_revert.setTooltip({text:qtip});
+                this.menu.lvsnapshot_revert.setDisabled(true);
 
                 this.menu.lvclone.setTooltip({text: <?php echo json_encode(__('Enabled if virtual server is not running and if any volume groups have enouf space.')) ?>});
                 this.menu.lvclone.setDisabled(true);
@@ -1188,11 +1615,18 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
                 //if in cluster context, disable create snapshot option
                 this.menu.lvsnapshot.setDisabled(true);
                 this.menu.lvsnapshot.setTooltip({text: String.format(<?php echo json_encode(__('Snapshots not supported in cluster context.')) ?>)});
+
+                this.menu.lvsnapshot_revert.setDisabled(true);
             }
 
             if( node.attributes.storagetype != 'local' ) {
                 this.menu.lvsnapshot.setDisabled(true);
                 this.menu.lvsnapshot.setTooltip({text: String.format(<?php echo json_encode(__('Snapshots not supported in shared storage.')) ?>)});
+
+                this.menu.lvsnapshot_revert.setDisabled(true);
+            }
+            if( !node.attributes.inconsistent ){
+                this.menu.lv_unregister.setDisabled(true);
             }
 
             this.fireEvent('checkContextItems',this.menu);
@@ -1221,7 +1655,7 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
                 }
                 this.menu.lvclone.setDisabled(disable_clone);
                 if(disable_clone)
-                    this.menu.lvclone.setTooltip({text: <?php echo json_encode(__('Enabled if virtual server is not running and if any volume groups have enouf space.')) ?>});
+                    this.menu.lvclone.setTooltip({text: <?php echo json_encode(__('Enabled if virtual server is not running and if any volume groups have enough space.')) ?>});
                 else
                     this.menu.lvclone.clearTooltip();
             }
@@ -1259,7 +1693,7 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
                     id: 'lv-create-win',
                     title: <?php echo json_encode(__('Add logical volume')) ?>,
                     width:430,
-                    height:210,
+                    height:240,
                     modal:true,
                     iconCls: 'icon-window',
                     bodyStyle: 'padding:10px;',
@@ -1435,7 +1869,7 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
 
                 win = new Ext.Window({
                     id: 'lv-clone-win',
-                    title: <?php echo json_encode(__('Clone logical volume')) ?>,
+                    title: String.format(<?php echo json_encode(__('Clone logical volume {0}')) ?>,ctx.text),
                     width:430,
                     height:230,
                     modal:true,
@@ -1449,13 +1883,54 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
                         qtip: __('Help'),
                         handler:function(){
                             View.showHelp({
-                                anchorid:'help-lvol-snapshot',
+                                anchorid:'help-lvol-clone',
                                 autoLoad:{ params:'mod=logicalvol'},
                                 title: <?php echo json_encode(__('Logical Volume Help')) ?>
                             });
                         }
                     }]
                 });
+            }
+
+            win.show();
+        }
+        ,lvconvert: function(){
+            var ctx = this.ctxNode;
+            var win = Ext.getCmp('lv-convert-win');
+
+            if(!win){
+
+                var centerPanel = new lvwin.convertForm.Main(this.node_id);
+
+                centerPanel.load(ctx);
+                centerPanel.on('updated',function(){
+                    win.close();
+                    this.reload();},this);
+
+                win = new Ext.Window({
+                    id: 'lv-convert-win',
+                    title: String.format(<?php echo json_encode(__('Convert logical volume {0}')) ?>,ctx.text),
+                    width:430,
+                    height:180,
+                    modal:true,
+                    iconCls: 'icon-window',
+                    bodyStyle: 'padding:10px;',
+                    border:true,
+                    layout: 'fit',
+                    items: [centerPanel]
+                    ,tools: [{
+                        id:'help',
+                        qtip: __('Help'),
+                        handler:function(){
+                            View.showHelp({
+                                anchorid:'help-lvol-convert',
+                                autoLoad:{ params:'mod=logicalvol'},
+                                title: <?php echo json_encode(__('Logical Volume Help')) ?>
+                            });
+                        }
+                    }]
+                });
+
             }
 
             win.show();
@@ -1483,7 +1958,7 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
 
                 win = new Ext.Window({
                     id: 'lv-createsnapshot-win',
-                    title: <?php echo json_encode(__('Create logical volume snapshot')) ?>,
+                    title: String.format(<?php echo json_encode(__('Create snapshot for logical volume {0}')) ?>,ctx.text),
                     width:430,
                     height:210,
                     modal:true,
@@ -1508,6 +1983,203 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
             }
 
             win.show();
+        }
+        ,lvsnapshotrevert:function(){
+            var ctx = this.ctxNode;
+            console.log(ctx);
+            var tree = ctx.getOwnerTree();
+
+            Ext.MessageBox.show({
+                    title: <?php echo json_encode(__('Revert snapshot')) ?>,
+                    msg: String.format(<?php echo json_encode(__('Revert snapshot {0}?')) ?>,ctx.text),
+                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    fn: function(btn){
+
+                        if(btn=='yes'){
+                            var myparams;
+                            if(this.level == 'cluster'){
+                                myparams = {'cid': this.tree_node_id, 'level': this.level, 'slv':ctx.attributes.text, 'olv':ctx.parentNode.attributes.text};
+                            }else if(this.level == 'node'){
+                                myparams = {'nid': this.tree_node_id, 'level': this.level, 'slv':ctx.attributes.text, 'olv':ctx.parentNode.attributes.text};
+                            }else{
+                                myparams = {'nid': this.tree_node_id, 'slv':ctx.attributes.text, 'olv':ctx.parentNode.attributes.text};
+                            }
+
+                            var conn = new Ext.data.Connection({
+                                            listeners:{
+                                                beforerequest:function(){
+
+                                                    Ext.MessageBox.show({
+                                                        title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                        msg: <?php echo json_encode(__('Reverting snapshot...')) ?>,
+                                                        width:300,
+                                                        wait:true
+                                                    });
+
+                                                },
+                                                requestcomplete:function(){Ext.MessageBox.hide();}
+                                                ,requestexception:function(c,r,o){
+                                                    Ext.MessageBox.hide();
+                                                    Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                            }
+                                        });
+
+                            conn.request({
+                                url: <?php echo json_encode(url_for('logicalvol/jsonRevertSnapshot'))?>,
+                                params: myparams,
+                                scope:this,
+                                success: function(resp,opt){
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.ux.Logger.info(response['agent'],response['response']);
+                                    tree.root.reload();
+                                },
+                                failure: function(resp,opt) {
+                                    var response = Ext.decode(resp.responseText);
+                                    //Ext.ux.Logger.error(response['agent'],response['error']);
+
+                                    Ext.Msg.show({
+                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                        buttons: Ext.MessageBox.OK,
+                                        msg: String.format(<?php echo json_encode(__('Unable to revert snapshot {0}')) ?>,ctx.attributes.text)+'<br>'+response['info'],
+                                        icon: Ext.MessageBox.ERROR});
+                                }
+                            });// END Ajax request
+                        }
+
+                    },
+                    scope:this,
+                    icon: Ext.MessageBox.QUESTION
+            });
+        }
+        ,lvscan: function(){
+            Ext.MessageBox.show({
+                    title: <?php echo json_encode(__('Scan logical volumes')) ?>,
+                    msg: String.format(<?php echo json_encode(__('Scan logical volumes?')) ?>),
+                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    fn: function(btn){
+
+                        if(btn=='yes'){
+                            var myparams;
+                            if(this.level == 'cluster'){
+                                myparams = {'cid': this.tree_node_id, 'level': this.level};
+                            }else if(this.level == 'node'){
+                                myparams = {'nid': this.tree_node_id, 'level': this.level};
+                            }else{
+                                myparams = {'nid': this.tree_node_id};
+                            }
+
+                            var conn = new Ext.data.Connection({
+                                listeners:{
+                                    beforerequest:function(){
+                                        Ext.MessageBox.show({
+                                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                                            msg: <?php echo json_encode(__('Scan logical volumes...')) ?>,
+                                            width:300,
+                                            wait:true
+                                        });
+
+                                    },
+                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                    ,requestexception:function(c,r,o){
+                                                        Ext.MessageBox.hide();
+                                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+
+                                }
+                            });
+
+                            conn.request({
+                                url: <?php echo json_encode(url_for('logicalvol/jsonReloadLogicalVolumes'))?>,
+                                params: myparams,
+                                scope:this,
+                                success: function(resp,opt){
+
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.ux.Logger.info(response['agent'],response['response']);
+                                    this.reload();
+                                },
+                                failure: function(resp,opt) {
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.Msg.show({
+                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                        buttons: Ext.MessageBox.OK,
+                                        msg: String.format(<?php echo json_encode(__('Unable to scan logical volumes')) ?>)+'<br>'+response['info'],
+                                        icon: Ext.MessageBox.ERROR});
+                                }
+                            });// END Ajax request
+
+                        }
+                    },
+                    scope:this,
+                    icon: Ext.MessageBox.QUESTION
+            });
+        }
+        ,lvunregister: function(){
+            var ctx = this.ctxNode;
+            var tree = ctx.getOwnerTree();
+
+            Ext.MessageBox.show({
+                    title: <?php echo json_encode(__('Unregister logical volume')) ?>,
+                    msg: String.format(<?php echo json_encode(__('Unregister logical volume {0} ?')) ?>,ctx.text),
+                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    fn: function(btn){
+
+                        if(btn=='yes'){
+                            var myparams;
+                            if(this.level == 'cluster'){
+                                myparams = {'cid': this.tree_node_id, 'level': this.level, 'lv':ctx.text, 'vg': ctx.attributes['vg'] };
+                            }else if(this.level == 'node'){
+                                myparams = {'nid': this.tree_node_id, 'level': this.level, 'lv':ctx.text, 'vg': ctx.attributes['vg'] };
+                            }else{
+                                myparams = {'nid': this.tree_node_id, 'lv':ctx.text, 'vg': ctx.attributes['vg'] };
+                            }
+
+                            if( ctx.attributes['uuid'] )
+                                myparams['uuid'] = ctx.attributes['uuid'];
+
+                            var conn = new Ext.data.Connection({
+                                listeners:{
+                                    beforerequest:function(){
+                                        Ext.MessageBox.show({
+                                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                                            msg: <?php echo json_encode(__('Unregistering logical volume...')) ?>,
+                                            width:300,
+                                            wait:true
+                                        });
+
+                                    },
+                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                    ,requestexception:function(c,r,o){
+                                                        Ext.MessageBox.hide();
+                                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+
+                                }
+                            });
+
+                            conn.request({
+                                url: <?php echo json_encode(url_for('logicalvol/jsonUnregister'))?>,
+                                params: myparams,
+                                scope:this,
+                                success: function(resp,opt){
+
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.ux.Logger.info(response['agent'],response['response']);
+                                    tree.root.reload();
+                                },
+                                failure: function(resp,opt) {
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                    Ext.Msg.show({
+                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                        buttons: Ext.MessageBox.OK,
+                                        msg: String.format(<?php echo json_encode(__('Unable to unregiste logical volume {0}')) ?>,ctx.text)+'<br>'+response['info'],
+                                        icon: Ext.MessageBox.ERROR});
+                                }
+                            });// END Ajax request
+
+                        }
+                    },
+                    scope:this,
+                    icon: Ext.MessageBox.QUESTION
+            });
         }
 });
 
@@ -1586,6 +2258,77 @@ Node.Storage.Main = function(config){
 
 Ext.extend(Node.Storage.Main, Ext.Panel,{});
 
+function search_on_nodetree(field,e){
 
+    var nodesPanel = field.ownerCt.ownerCt;
+    var name = field.getValue(); // Treenode name =P    
+    if(name == ''){
+        var node = nodesPanel.getRootNode();
+        node.ui.show();
+        var childs = node.childNodes;
+
+        for(idx in childs){
+            if(typeof(childs[idx]) == 'function'){
+                break;
+            }
+            childs[idx].ui.show();
+        }
+        nodesPanel.doLayout();
+    }else{
+        var root = nodesPanel.getRootNode();
+        var search_node = function(node, name){
+           
+            // Leaf nodes
+            if(!node.hasChildNodes()){
+                var patt=new RegExp(name,'ig');
+                if(node.attributes['text'].match(patt) != null){
+                    node.ensureVisible();
+                    node.attributes.cls = 'RedText';
+                    node.ui.show();
+                    return false;
+                }else{
+                    node.ui.removeClass('RedText');
+                    node.ui.hide();
+                    return true;
+                }
+            }else{
+                var childs = node.childNodes;
+                var collapse = true;
+  
+                for(idx in childs){
+                    if(typeof(childs[idx]) == 'function'){
+                        break;
+                    }
+  
+                    var child = childs[idx];
+                    child.expand();
+                    var res = search_node(childs[idx], name);
+                    collapse = (collapse && res);                                                    
+                }
+                
+                if(collapse){
+                    node.collapse();
+                    node.ui.hide();
+                }else{
+                    node.ui.show();
+                }
+                
+                var patt=new RegExp(name,'ig');
+            
+                if(node.attributes['text'].match(patt) != null){
+                    node.ensureVisible();
+                    //node.ui.addClass('RedText');
+                    node.attributes.cls = 'RedText';
+                    return false;
+                }else{
+                    node.ui.removeClass('RedText');
+                    return collapse;
+                }
+            }
+            return collapse;
+        }
+        search_node(root, name);
+    }
+}
 
 </script>

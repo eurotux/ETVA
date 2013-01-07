@@ -5,7 +5,8 @@
 <ul>
     <li><a href="#help-vol-group-add">Add</a></li>
     <li><a href="#help-vol-group-extend">Extend</a></li>
-    <li><a href="#help-vol-group-rm_rs">Remove</a></li>
+    <li><a href="#help-vol-group-rm_rs">Remove/Resize</a></li>
+    <li><a href="#help-vol-group-scan">Scan volume groups</a></li>
 </ul>
 
 <br/>
@@ -29,6 +30,12 @@ A physical volume is available when it is not allocated to any volume group and 
 <a id="help-vol-group-rm_rs"><h1>Remove/Re-size <em><b>Volume Group</b></em></h1></a>
 To remove/shrink a volume group, select the desired logical/physical volume and choose the option remove (available on context menu).
 <p><b>Note</b>We can remove a volume group if there is no logical volume associated with it.
+<a href="#help-vol-group"><div>Index</div></a>
+<hr/>
+
+<a id="help-vol-group-scan"><h1>Scan <em><b>Volume Groups</b></em></h1></a>
+<p>On <em>Scan volume groups</em>, it is possible to get <em>volume groups</em> from virtualization agent and register them on <em>Central Management</em>.
+Is is also possible to unregister the <em>volume group</em> on <em>Central Management</em> to get it out of system management.</p>
 <a href="#help-vol-group"><div>Index</div></a>
 <hr/>
 

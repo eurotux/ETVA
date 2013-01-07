@@ -97,12 +97,12 @@ sub processdata {
     my $self = shift;
     my ($fh) = @_;
 
-    plog("ETVA::Agent::SOAP processing data");
+    plog("ETVA::Agent::SOAP processing data") if( &debug_level > 3 );
 
     # Get data
     my $soap_request = $self->receive($fh);
 
-    plog("processdata: $soap_request") if(&debug_level);
+    plog("processdata: $soap_request") if( &debug_level > 3 );
 
     # treat soap request
     my $soap_response = $self->treatRequest($soap_request);
@@ -146,8 +146,8 @@ sub parse_request {
         $body = $st_body->{"$method"};
     };
 
-plog  "header Dump=",Dumper($headers),"\n" if( &debug_level );
-plog  "body Dump=",Dumper($body),"\n" if( &debug_level );
+plog  "header Dump=",Dumper($headers),"\n" if( &debug_level > 3 );
+plog  "body Dump=",Dumper($body),"\n" if( &debug_level > 3 );
 
     return ($headers,$body,$typeuri,$method);
 }
@@ -177,11 +177,11 @@ plog "Failed while unmarshaling the request: $@" if( &debug_level );
 
     my $response;
 
-plog  "paramas Dump=",Dumper(\%params),"\n" if( &debug_level );
+plog  "paramas Dump=",Dumper(\%params),"\n" if( &debug_level > 3 );
     eval {
         my $res = $request_class->$method(%params);
         $res = {} if( not defined $res );
-plog  "result Dumper=",Dumper($res),"\n" if( &debug_level );
+plog  "result Dumper=",Dumper($res),"\n" if( &debug_level > 3 );
         if( ref($res) eq 'HASH' && $res->{'_error_'} ){
             $response = $self->response_soap_fault($typeuri,$res->{'_errorcode_'},
                                                     $res->{'_errorstring_'},
@@ -239,7 +239,7 @@ sub response_soap {
                                 ->serializer();
     my $soap_response = $serializer->envelope( response=>"${method}Response", make_soap($serializer,\%a) );
 
-    plog("response_soap: $soap_response") if(&debug_level);
+    plog("response_soap: $soap_response") if(&debug_level > 3);
 
     return $soap_response;
 }

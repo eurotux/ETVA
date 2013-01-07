@@ -57,11 +57,17 @@ EOF;
 
     for($i; $i<=$required_version; $i++){    
         switch($i){
-            case 1:
-                $this->upgradeToV1($dbfile);
+            case 10:    // version 1.0
+                $this->upgradeToV10($dbfile);
                 break;
-            case 2:
-                $this->updateToV2($dbfile);
+            case 11:    // version 1.1
+                $this->upgradeToV11($dbfile);
+                break;
+            case 12:    // version 1.2
+                $this->upgradeToV12($dbfile);
+                break;
+            case 20:    // version 2.0
+                $this->upgradeToV20($dbfile);
                 break;
         }   
     }
@@ -73,27 +79,29 @@ EOF;
     $this->etva_model = Etva::getEtvaModelFile();
   }
 
+  private function versionToInt($version){
+    $pattern = '/(\d+)\.(\d+)/';
+    $replacement = '${1}${2}';
+    return intval(preg_replace($pattern, $replacement, $version));
+  }
+
   public function getCurrentVersion()
   {
     $dbversion = $this->etva_model['dbversion'];
     $this->log("[INFO] Central Management database is in version ".$dbversion);
 
-    $pattern = '/(\d+)\..*/';
-    $replacement = '${1}';
-    return intval(preg_replace($pattern, $replacement, $dbversion));
+    return $this->versionToInt($dbversion);
   }
 
   public function getRequiredVersion(){
     $dbrequired = sfConfig::get('app_dbrequired');
     $this->log("[INFO] Central Management requires that database must be in version ".$dbrequired);
     
-    $pattern = '/(\d+)\..*/';
-    $replacement = '${1}';
-    return intval(preg_replace($pattern, $replacement, $dbrequired));
+    return $this->versionToInt($dbrequired);
   }
 
-  private function upgradeToV1($dbdata){
-    $this->log("[INFO] Upgrading database to version 1!");
+  private function upgradeToV10($dbdata){
+    $this->log("[INFO] Upgrading database to version 1.0!");
     $this->log($dbdata);
 
     $output = shell_exec("perl utils/pl/upDBv1.pl $dbdata"); 
@@ -103,8 +111,21 @@ EOF;
 
   }
 
-  private function updateToV2($dbdata){
-    $this->log("[INFO] Upgrading database to version 2!");
+  private function upgradeToV11($dbdata){
+    $this->log("[INFO] Upgrading database to version 1.1!");
+    // nothing to change
+  }
+
+  private function upgradeToV12($dbdata){
+    $this->log("[INFO] Upgrading database to version 1.2!");
+    $this->log($dbdata);
+
+    $output = shell_exec("perl utils/pl/upDBv12.pl $dbdata"); 
+    echo $output;
+  }
+
+  private function upgradeToV20($dbdata){
+    $this->log("[INFO] Upgrading database to version 2.0!");
 
     // Insert your code here
   }

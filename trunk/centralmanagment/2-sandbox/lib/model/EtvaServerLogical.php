@@ -48,10 +48,14 @@ class EtvaServerLogical extends BaseEtvaServerLogical {
     {
         $lv = $this->getEtvaLogicalvolume();
 
-        return strtr(self::_DISK_MAP_VA_, array(
-                            '%path%' => $lv->getLvdevice(),
-                            '%bus%' => $this->getDiskType()
-        ));
+        $disk_map_va = self::_DISK_MAP_VA_;
+        $arr = array('%path%' => $lv->getLvdevice(),'%bus%' => $this->getDiskType());
+        if( $lv->getFormat() && ($lv->getFormat() != 'lvm') && ($lv->getFormat() != 'raw') ){
+            $arr['%format%'] = $lv->getFormat();
+            $disk_map_va .= ',format=%format%';
+        }
+
+        return strtr($disk_map_va, $arr);
 
     }
 

@@ -29,7 +29,10 @@ html, body {
 
 #header h1.ETVM{
     background: transparent url(../images/etvm_205.png) no-repeat;
+}
 
+#header h1.NUXIS{
+    background: transparent url(../images/nuxis_205.png) no-repeat;
 }
 
 .x-form-display-field{
@@ -56,6 +59,18 @@ background-image:url(../images/icons/window.png) !important;
 
 .icon-lockedit {
     background-image:url(../images/icons/lock_edit.png) !important;
+}
+
+.icon-play {
+    background-image:url(../images/silk/icons/control_play_blue.png) !important;
+}
+
+.icon-mystop {
+    background-image:url(../images/silk/icons/control_stop_blue.png) !important;
+}
+
+.icon-shutdown {
+    background-image:url(../images/icons/shutdown.png) !important;
 }
 /*
 * System popup
@@ -158,8 +173,18 @@ background-image:url(../images/icons/leaf.gif) !important;
 
 }
 
-.dev-pv a span{ /* is pv */
+.dev-pv a span, 
+    .scan-pv-registered div{ /* is pv */
     color:green;
+}
+
+.dev-pv-inc a span,
+    .scan-pv-inconsistent div{ /* is pv inconsistent */
+    color:gray;
+}
+
+.vg-inc a span{ /* is vg inconsistent */
+    color:gray;
 }
 
 /*
@@ -946,6 +971,17 @@ background-image:url(../images/icons/leaf.gif) !important;
 .icon-warn {
 	background-image:url(../images/silk/icons/error.png) ! important;
 }
+.icon-fail {
+	/*background-image:url(../images/silk/icons/server_error.png) ! important;*/
+	background-image:url(../images/silk/icons/exclamation.png) ! important;
+}
+.icon-maintenance {
+	background-image:url(../images/silk/icons/pill.png) ! important;
+}
+.icon-sparenode {
+	/*background-image:url(../images/silk/icons/server_lightning.png) ! important;*/
+	background-image:url(../images/silk/icons/lightning.png) ! important;
+}
 .icon-wages {
 	background-image:url(../img/icons/euro_16.png) ! important;
 }
@@ -991,6 +1027,13 @@ background-image:url(../images/icons/leaf.gif) !important;
 }
 .icon-bottom {
 	background-image:url(../images/silk/icons/arrow_bottom.png) ! important;
+}
+
+.icon-drive-add {
+	background-image:url(../images/silk/icons/drive_add.png) ! important;
+}
+.icon-drive-delete {
+	background-image:url(../images/silk/icons/drive_delete.png) ! important;
 }
 
 .icon-tree {
@@ -1182,6 +1225,10 @@ li.x-menu-list-item div {
 
 .header-login.ETVM{
     background: transparent url(../images/etvm_410.png) no-repeat;
+}
+
+.header-login.NUXIS{
+    background: transparent url(../images/nuxis_410.png) no-repeat;
 }
 
 .footer-login{

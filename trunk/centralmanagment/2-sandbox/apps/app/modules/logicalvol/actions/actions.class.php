@@ -164,6 +164,8 @@ class logicalvolActions extends sfActions
         $lv = $request->getParameter('lv');
         $size = $request->getParameter('size');
         $vg = $request->getParameter('vg');
+        $format = $request->getParameter('format');
+        $persnapshotusage = $request->getParameter('persnapshotusage');
 
         $etva_node = EtvaNodePeer::getOrElectNode($request);
 
@@ -260,7 +262,7 @@ class logicalvolActions extends sfActions
 //        error_log(print_r($etva_node,true));
         error_log("LVCREATE[INFO] Size: ".$size);
 
-        $response = $lv_va->send_create($etva_node,$size);
+        $response = $lv_va->send_create($etva_node,$size,$format,$persnapshotusage);
 
         if($response['success'])
         {
@@ -489,10 +491,9 @@ class logicalvolActions extends sfActions
 
             //notify system log
             $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
-            $message = Etva::getLogMessage(array('name'=>$lv,'size'=>$size,'info'=>$node_log), EtvaLogicalvolumePeer::_ERR_RESIZE_);
             $this->dispatcher->notify(
                 new sfEvent(sfConfig::get('config_acronym'), 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+                    array('message' => $msg_i18n,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
             if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
@@ -511,10 +512,9 @@ class logicalvolActions extends sfActions
             $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             //notify system log
-            $message = Etva::getLogMessage(array('name'=>$lv,'size'=>$size,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_RESIZE_);
             $this->dispatcher->notify(
                 new sfEvent($etva_node->getName(), 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+                    array('message' => $msg_i18n,'priority'=>EtvaEventLogger::ERR)));
 
             // if is a CLI soap request return json encoded data
             if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
@@ -590,7 +590,200 @@ class logicalvolActions extends sfActions
         }
 
     }
+    public function executeJsonRevertSnapshot(sfWebRequest $request)
+    {
 
+        // logical volume id
+        //$nid = $request->getParameter('nid');
+        $slv = $request->getParameter('slv');
+        $olv = $request->getParameter('olv');
+
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+        //if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+        if(!$etva_node){
+
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+
+            //notify system log
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+            $message = Etva::getLogMessage(array('name'=>$lv,'size'=>$size,'info'=>$node_log), EtvaLogicalvolumePeer::_ERR_RESIZE_);
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+
+        }
+
+        if(!$etva_lv = $etva_node->retrieveLogicalvolumeByLv($olv)){
+
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_NOTFOUND_,array('%name%'=>$lv));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent($etva_node->getName(), 'event.log',
+                    array('message' => $msg_i18n,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+
+        }
+
+        if(!$etva_slv = $etva_node->retrieveLogicalvolumeByLv($slv)){
+
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_NOTFOUND_,array('%name%'=>$slv));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent($etva_node->getName(), 'event.log',
+                    array('message' => $msg_i18n,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+
+        }
+                
+        // HERE
+        $etva_vg = $etva_lv->getEtvaVolumegroup();
+
+        /*
+         * send request to VA
+         */
+
+        // prepare soap info....
+        $slv_va = new EtvaLogicalvolume_VA($etva_slv);
+        $response = $slv_va->send_revertsnapshot($etva_node,$etva_lv);
+
+        if($response['success'])
+        {
+            $return = json_encode($response);
+
+            // if the request is made throught soap request...
+            if(sfConfig::get('sf_environment') == 'soap') return $return;
+            // if is browser request return text renderer
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+            return  $this->renderText($return);
+        }else{
+
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($response);
+
+            $return = $this->setJsonError($response);
+            return  $this->renderText($return);
+        }
+
+    }
+
+    /**
+     * convert logical volume
+     *
+     * $request may contain the following keys:
+     * - nid: node ID
+     * - lv: logical volume
+     * - vg: volume group
+     * - newformat: format
+     *
+     */
+    public function executeJsonConvert(sfWebRequest $request)
+    {
+
+        // logical volume id
+        $nid = $request->getParameter('nid');
+        $lv = $request->getParameter('lv');
+        $lvuuid = $request->getParameter('lvuuid');
+        $vg = $request->getParameter('vg');
+        $newformat = $request->getParameter('newformat');
+
+        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+
+            //notify system log
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $msg_i18n,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+
+        }
+
+        if(!$etva_lv = $etva_node->retrieveLogicalvolume($lvuuid,$vg,$lv)){  //lv is the logical volume name
+
+            $msg = Etva::getLogMessage(array('name'=>$lv), EtvaLogicalvolumePeer::_ERR_NOTFOUND_);
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_NOTFOUND_,array('%name%'=>$lv));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent($etva_node->getName(), 'event.log',
+                    array('message' => $msg_i18n,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+
+        }
+
+        // HERE
+        $etva_vg = $etva_lv->getEtvaVolumegroup();
+
+        /*
+         * send logical volume to VA
+         */
+        $lv_va = new EtvaLogicalvolume_VA($etva_lv);
+
+        $response = $lv_va->send_convertformat($etva_node,$newformat);
+
+        if($response['success'])
+        {
+            $return = json_encode($response);
+
+            // if the request is made throught soap request...
+            if(sfConfig::get('sf_environment') == 'soap') return $return;
+            // if is browser request return text renderer
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+            return  $this->renderText($return);
+
+
+        }else{
+
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($response);
+
+            $return = $this->setJsonError($response);
+            return  $this->renderText($return);
+        }
+
+    }
     /**
      * List logical volumes by server ID or node ID
      *
@@ -634,21 +827,19 @@ class logicalvolActions extends sfActions
 
         }
 
-        $criteria = new Criteria();
-        $criteria->addAscendingOrderByColumn(EtvaServerLogicalPeer::BOOT_DISK);
-        $list = $etva_->getEtvaLogicalvolumes($criteria);
-
         $lvs = array();        
 
         switch($listBy){
             case 'server':
+                            $criteria = new Criteria();
+                            $criteria->addAscendingOrderByColumn(EtvaServerLogicalPeer::BOOT_DISK);
+                            $list = $etva_->getEtvaServerLogical($criteria);
+
                             $pos = 0;
                             foreach ($list as $elem){
-                                
-                                $sls = $elem->getEtvaServerLogicals();
-                                $sl = $sls[0];
-                                $disk_type = $sl->getDiskType();                                
-                                $lv_array = $elem->toArray(BasePeer::TYPE_FIELDNAME);
+                                $disk_type = $elem->getDiskType();
+                                $lv = $elem->getEtvaLogicalVolume();
+                                $lv_array = $lv->toArray(BasePeer::TYPE_FIELDNAME);
                                 $lv_array['disk_type'] = $disk_type;
                                 $lv_array['pos'] = $pos;
                                 $lvs[] = $lv_array;
@@ -656,6 +847,10 @@ class logicalvolActions extends sfActions
                             }                            
                             break;
             default      :
+                            $criteria = new Criteria();
+                            $criteria->addAscendingOrderByColumn(EtvaServerLogicalPeer::BOOT_DISK);
+                            $list = $etva_->getEtvaLogicalvolumes($criteria);
+
                             foreach ($list as $elem){
                                 $id = $elem->getId();
                                 $lv = $elem->getLv();                                
@@ -740,6 +935,9 @@ class logicalvolActions extends sfActions
 //                    $disabled = true;
                 } else if($etva_lv->getSnapshot()){
                     $qtip = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_SNAPSHOT_CLUSTER_CONTEXT_,array('%name%'=>$text, '%node%' => '')); 
+                    $disabled = true;
+                } else if($etva_lv->getInconsistent()){
+                    $qtip = $this->getContext()->getI18N()->__('Inconsistent');
                     $disabled = true;
                 }else{
                     $qtip = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_NOTINUSE_,array('%name%'=>$text));
@@ -834,11 +1032,22 @@ class logicalvolActions extends sfActions
         }
 
         $criteria = new Criteria();
-        $node_lvs = $etva_node->getEtvaLogicalvolumes($criteria);               
+        //$node_lvs = $etva_node->getEtvaLogicalvolumes($criteria);               
+        $criteria->add(EtvaNodeLogicalvolumePeer::NODE_ID,$request->getParameter('nid'));
+        $criteria->add(EtvaLogicalvolumePeer::LV,'etva-isos',Criteria::NOT_EQUAL);
+        //$criteria->addJoin(EtvaNodeLogicalvolumePeer::LOGICALVOLUME_ID, EtvaLogicalvolumePeer::ID);
+        $criteria->addAscendingOrderByColumn(EtvaLogicalvolumePeer::LV);
+
+        $node_data_lvs = EtvaNodeLogicalvolumePeer::doSelectJoinEtvaLogicalvolume($criteria);
+
+        //$node_data_lvs = EtvaLogicalvolumePeer::doSelect($criteria);
+
+
 
         $snapshots = array();
 
-        foreach ($node_lvs as $etva_lv){
+        foreach ($node_data_lvs as $data_lv){
+            $etva_lv = $data_lv->getEtvaLogicalvolume();
             $vm_name = '';
             $vm_state = '';
             
@@ -865,6 +1074,9 @@ class logicalvolActions extends sfActions
                 } else if($etva_lv->getSnapshot()){
                     $qtip = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_SNAPSHOT_LV_,array('%name%'=>$text));
                     #$disabled = true;
+                } else if($etva_lv->getInconsistent() || $data_lv->getInconsistent()){
+                    $qtip = $this->getContext()->getI18N()->__('Inconsistent');
+                    $disabled = true;
                 }else{
                     $qtip = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_NOTINUSE_,array('%name%'=>$text));
                 }
@@ -887,6 +1099,7 @@ class logicalvolActions extends sfActions
                                    'origin'=>$etva_lv->getOrigin(), 'format'=>$etva_lv->getFormat(),
                                    'storagetype'=>$etva_vg->getStorageType(),
                                    'snapshot_node_id'=>$etva_lv->getSnapshotNodeId(),
+                                   'inconsistent'=>($etva_lv->getInconsistent() || $data_lv->getInconsistent()),
                                    'vm_name'=>$vm_name,'qtip'=>$qtip,'leaf'=>true);
                 } else {
                     $lvs[] = array('id'=>$id,'cls'=>$cls,
@@ -897,6 +1110,7 @@ class logicalvolActions extends sfActions
                                    'vg'=>$vg,'vgfreesize'=>$vg_freesize,
                                    'format'=>$etva_lv->getFormat(),'storagetype'=>$etva_vg->getStorageType(),
                                    'vm_state'=>$vm_state,'disabled'=>$disabled,
+                                   'inconsistent'=>($etva_lv->getInconsistent() || $data_lv->getInconsistent()),
                                    'vm_name'=>$vm_name,'qtip'=>$qtip,'leaf'=>true);
                 }
             }
@@ -1019,6 +1233,7 @@ class logicalvolActions extends sfActions
     public function executeJsonGetAll(sfWebRequest $request)
     {
 
+        $sid = $request->getParameter('sid');
         $nid = $request->getParameter('nid');
 
         if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
@@ -1073,12 +1288,25 @@ class logicalvolActions extends sfActions
             if( $available ){
                 $size = $lv->getSize();
                 $el = array('id'=>$lv->getId(),'lv'=>$lv->getLv(),'size'=>$size, 'snapshot'=>$lv->getSnapshot(), 'volumegroupid'=>$lv->getVolumegroupId(), 'origin'=>$lv->getOrigin(), 'snapshot_node_id'=>$lv->getSnapshotNodeId(), 'available'=>$available, 'vm_name'=>'', 'in_use'=>$lv->getInUse() );
-                $lv_etva_server = $lv->getEtvaServer();
+                $lv_etva_servers = $lv->getEtvaServers();
+                foreach( $lv_etva_servers as $lsrv ){
+                    if( !$el['vm_name'] && !$el['server_id'] ){
+                        $el['vm_name'] = $lsrv->getName();
+                        $el['server_id'] = $lsrv->getId();
+                    }
+                    if( $lsrv->getId() == $sid ){
+                        $available = false;
+                    }
+                }
+                /*$lv_etva_server = $lv->getEtvaServer();
                 if( $lv_etva_server ){
                     $el['vm_name'] = $lv_etva_server->getName();
                     $el['server_id'] = $lv_etva_server->getId();
+                }*/
+
+                if( $available ){   // still available ??
+                    $elements[] = $el;
                 }
-                $elements[] = $el;
             }
         }
 
@@ -1300,5 +1528,199 @@ class logicalvolActions extends sfActions
 
 
     }
+    public function executeJsonListSyncLogicalVolumes(sfWebRequest $request)
+    {
 
+        //adding cluster id filter
+        $elements = array();
+
+        // get node id from cluster context
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $sharedonly = false;
+        $force = false;
+        if( $request->getParameter('force') ) $force = true;
+        if( $request->getParameter('level') == 'cluster' ) $sharedonly = true;
+
+        $etva_node_va = new EtvaNode_VA($etva_node);
+        $elements = $etva_node_va->get_sync_logicalvolumes($force,$sharedonly);
+
+        // return array
+        $result = array('success'=>true,
+                    'total'=> count($elements),
+                    'data'=> $elements,
+                    'agent'=>$etva_node->getName()
+        );
+
+
+        $return = json_encode($result);
+
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+    }
+    public function executeJsonReloadLogicalVolumes(sfWebRequest $request)
+    {
+
+        //adding cluster id filter
+        $elements = array();
+
+        // get node id from cluster context
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $lv_va = new EtvaLogicalvolume_VA();
+        $lv_errors = $lv_va->send_update($etva_node,true);
+
+        //notify system log
+        $message = Etva::getLogMessage(array(), EtvaLogicalvolumePeer::_OK_SOAPREFRESH_);
+        $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_OK_SOAPREFRESH_,array());
+        sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(), 'event.log',array('message' => $message)));
+
+        // return array
+        $result = array('success'=>true,
+                    'agent'=>$etva_node->getName(),
+                    'response'=>$msg_i18n
+        );
+
+
+        $return = json_encode($result);
+
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+    }
+    public function executeJsonUnregister(sfWebRequest $request)
+    {
+
+        $msg_ok_type = EtvaLogicalvolumePeer::_OK_UNREGISTER_;
+        $msg_err_type = EtvaLogicalvolumePeer::_ERR_UNREGISTER_;
+
+        // get node id from cluster context
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $lv = $request->getParameter('lv');
+        $vg = $request->getParameter('vg');
+        $uuid = $request->getParameter('uuid');
+
+        if(!$etva_logicalvolume = $etva_node->retrieveLogicalvolume($uuid,$vg,$lv)){  //lv is the logical volume name
+            $msg = Etva::getLogMessage(array('name'=>$lv), EtvaLogicalvolumePeer::_ERR_NOTFOUND_);
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_NOTFOUND_,array('%name%'=>$lv));
+
+            $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n, 'info'=>$msg_i18n);
+
+            //notify system log
+            $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_UNREGISTER_);
+            $this->dispatcher->notify(
+                new sfEvent($error['agent'], 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $etva_lv_va = new EtvaLogicalvolume_VA($etva_logicalvolume);
+        $response = $etva_lv_va->unregister($etva_node);
+
+        if( !$response['success'] ){
+            $msg_i18n = $this->getContext()->getI18N()->__($msg_err_type,array('%name%'=>$lv));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('name'=>$lv), $msg_err_type);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        //notify system log
+        $message = Etva::getLogMessage(array('name'=>$lv), $msg_ok_type);
+        $msg_i18n = sfContext::getInstance()->getI18N()->__($msg_ok_type,array('%name%'=>$lv));
+        sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(), 'event.log',array('message' => $message)));
+        
+        $result = array('success'=>true,
+                    'agent'=>$etva_node->getName(),
+                    'response'=>$msg_i18n
+        );
+        $return = json_encode($result);
+
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+    }
 }

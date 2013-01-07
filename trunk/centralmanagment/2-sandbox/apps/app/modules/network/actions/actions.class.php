@@ -473,17 +473,20 @@ class networkActions extends sfActions
                 $etva_server_name = $etva_server->getName();
                 $etva_server_type = $etva_server->getVmType();
                 $etva_vm_state = $etva_server->getVmState();
-                $etva_node = $etva_server->getEtvaNode();                
-                $etva_node_name = $etva_node->getName();                
                 $etva_vlan_name = $etva_vlan->getName();
 
                 $elements[$i] = $item->toArray();
                 $elements[$i]['ServerName'] = $etva_server_name;
                 $elements[$i]['VmType'] = $etva_server_type;
-                $elements[$i]['NodeId'] = $etva_node->getId();
-                $elements[$i]['NodeName'] = $etva_node_name;
                 $elements[$i]['Vlan'] = $etva_vlan_name;
                 $elements[$i]['Vm_state'] = $etva_vm_state;
+
+                $etva_node = $etva_server->getEtvaNode();                
+                if( $etva_node ){
+                    $etva_node_name = $etva_node->getName();                
+                    $elements[$i]['NodeName'] = $etva_node_name;
+                    $elements[$i]['NodeId'] = $etva_node->getId();
+                }
 
                 $i++;
             }

@@ -32,11 +32,13 @@ Cluster.ChangeName = Ext.extend(Ext.form.FormPanel, {
                 fieldLabel: __('Name'), 
                 allowBlank:false,
                 name:'name',                
-                invalidText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed! "Default" not availalable.')) ?>,
+                //invalidText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed! "Default" not availalable.')) ?>,
+                invalidText : <?php echo json_encode(__('No spaces and only alpha-numeric characters allowed!')) ?>,
                 validator  : function(v){
                     var t = /^[a-zA-Z][a-zA-Z0-9\-\_]+$/;
-                    var d = /^Default$/;
-                    return t.test(v) && !d.test(v);
+                    //var d = /^Default$/;
+                    //return t.test(v) && !d.test(v);
+                    return t.test(v);
                 }
                 ,listeners:{
                     specialkey:{
@@ -46,7 +48,16 @@ Cluster.ChangeName = Ext.extend(Ext.form.FormPanel, {
                         }
                     }
                 }
-            }]
+            }
+            ,{
+                xtype: 'checkbox',
+                fieldLabel: __('Default'), 
+                xtype:'checkbox',
+                name:'isdefault',
+                inputValue:'1',
+                ref:'isdefault'
+            }
+            ]
             ,frame:true
             ,scope:this
             ,bodyStyle:'padding:10px'

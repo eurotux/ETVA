@@ -119,6 +119,18 @@ class EtvaLogicalvolume extends BaseEtvaLogicalvolume
 
 	}
 
+    /*
+     * returns the all servers associated with this lv
+     */
+    public function getEtvaServers(PropelPDO $con = null)
+	{
+
+      $criteria = new Criteria();
+      $criteria->add(EtvaServerLogicalPeer::LOGICALVOLUME_ID, $this->getId());
+      $criteria->addJoin(EtvaServerPeer::ID, EtvaServerLogicalPeer::SERVER_ID);
+      return EtvaServerPeer::doSelect($criteria, $con);
+	}
+
     public function getEtvaLogicalvolumesSnapshots(Criteria $criteria = null)
     {
         if(!$criteria) $criteria = new Criteria();

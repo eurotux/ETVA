@@ -2,6 +2,7 @@
 <a id="help-vmachine-main"><h1>Opções para a gestão de servidores</h1></a>
 <p>Estão disponíveis as seguintes opções para a gestão de servidores virtuais</p>
 <ul>
+    <li><a href="#help_edit_node">Editar nó</a></li>
     <li><a href="#help_virtual_machine_add">Criação de servidores</a></li>
     <li><a href="#help_vmachine_edit">Editar máquina virtual</a></li>
     <li><a href="#help-vmachine-remove">Remover máquina virtual</a></li>
@@ -10,6 +11,29 @@
     <li><a href="#help-vmachine-migrate">Migrar máquina virtual</a></li>
 </ul>
 <br/>
+<hr/>
+
+<a id="help_edit_node"><h1>Editar nó</h1></a>
+<p>A edição de nó permite a configuração de:</p>
+
+<ul>
+    <li><a href="#help-edit-name">Nome do nó</a></li>
+    <li><a href="#help-edit-fencing">Activar configuração <em>fencing</em></a></li>
+</ul>
+<br/>
+<hr/>
+
+<a id="help-edit-name"><h2>Nome do nó</h2></a>
+<p>Neste formulário é possível alterar o nome do nó.</em></p>
+<p><b>Nota: </b>O nome deverá começar por letras e só pode ser formado por letras, número, hífen e </em>underscore</em>.</p>
+<a href="#help_edit_node"><div>Início</div></a>
+<hr/>
+
+<a id="help-edit-fencing"><h2>Activar configuração <em>fencing</em></h2></a>
+<p>Nesta opção é possível activar o dispositivo <em>fencing</em> para gestão do nó.
+Para isso, é necessário definir os parâmetros de configuração de acordo com os seguintes tipos: bladecenter, virsh, ilo, ipmilan, rsa.
+</p>
+<a href="#help_edit_node"><div>Início</div></a>
 <hr/>
 
 
@@ -195,7 +219,7 @@ virtuais.
 <p>
 Seleccionando um servidor e de seguida clicando em <em>Migrar servidor</em> é possível migrar uma máquina de um <em>node</em> para outro desde que partilhem o mesmo armazenamento. A migração de uma máquina virtual é efectuada no modo <em>offline</em>.
 </p>
-<p><b>Nota: </b>Esta opção só está disponível no modelo <em>ETVM</em>.
+<p><b>Nota: </b>Esta opção só está disponível no modelo <em>Enterprise</em>.
 </p>
 <a href="#help-vmachine-main"><div>Início</div></a>
 <hr/>

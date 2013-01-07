@@ -1,69 +1,80 @@
 \select@language {portuges}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces Esquema geral do ETVM }}{7}{figure.1.1}
-\contentsline {figure}{\numberline {1.2}{\ignorespaces Modelo ETVM }}{8}{figure.1.2}
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Esquema geral do NUXIS }}{7}{figure.1.1}
+\contentsline {figure}{\numberline {1.2}{\ignorespaces Modelo NUXIS }}{8}{figure.1.2}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Layout principal}}{9}{figure.2.1}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces P\IeC {\'a}gina de autentica\IeC {\c c}\IeC {\~a}o}}{10}{figure.2.2}
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Vista dos nodes do Central Management}}{11}{figure.2.3}
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Vista das redes do sistema e das interfaces de rede}}{12}{figure.2.4}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Layout principal}}{10}{figure.2.1}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces P\IeC {\'a}gina de autentica\IeC {\c c}\IeC {\~a}o}}{11}{figure.2.2}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Vista dos nodes do Central Management}}{12}{figure.2.3}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Vista das redes do sistema e das interfaces de rede}}{13}{figure.2.4}
 \contentsline {figure}{\numberline {2.5}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de uma rede}}{13}{figure.2.5}
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o da pool de MACs}}{13}{figure.2.6}
-\contentsline {figure}{\numberline {2.7}{\ignorespaces Janela de gest\IeC {\~a}o das interfaces de rede de uma m\IeC {\'a}quina virtual}}{14}{figure.2.7}
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da conectividade do agente \emph {VirtAgent01}}}{15}{figure.2.8}
-\contentsline {figure}{\numberline {2.9}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do node \emph {VirtAgent01}}}{16}{figure.2.9}
-\contentsline {figure}{\numberline {2.10}{\ignorespaces Lista das m\IeC {\'a}quinas virtuais do node \emph {VirtAgent01}}}{17}{figure.2.10}
-\contentsline {figure}{\numberline {2.11}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Bem-vindo}}{18}{figure.2.11}
-\contentsline {figure}{\numberline {2.12}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Nome da m\IeC {\'a}quina virtual}}{19}{figure.2.12}
-\contentsline {figure}{\numberline {2.13}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Mem\IeC {\'o}ria}}{19}{figure.2.13}
-\contentsline {figure}{\numberline {2.14}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Processador}}{20}{figure.2.14}
-\contentsline {figure}{\numberline {2.15}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Armazenamento}}{21}{figure.2.15}
-\contentsline {figure}{\numberline {2.16}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Rede do servidor}}{22}{figure.2.16}
-\contentsline {figure}{\numberline {2.17}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Arranque}}{23}{figure.2.17}
-\contentsline {figure}{\numberline {2.18}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Finaliza\IeC {\c c}\IeC {\~a}o!}}{23}{figure.2.18}
-\contentsline {figure}{\numberline {2.19}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Op\IeC {\c c}\IeC {\~o}es gerais}}{24}{figure.2.19}
-\contentsline {figure}{\numberline {2.20}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Interfaces de rede}}{25}{figure.2.20}
-\contentsline {figure}{\numberline {2.21}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Discos}}{26}{figure.2.21}
-\contentsline {figure}{\numberline {2.22}{\ignorespaces Janela de remo\IeC {\c c}\IeC {\~a}o de um servidor}}{26}{figure.2.22}
-\contentsline {figure}{\numberline {2.23}{\ignorespaces Par\IeC {\^a}metros de arranque de uma m\IeC {\'a}quina virtual}}{27}{figure.2.23}
-\contentsline {figure}{\numberline {2.24}{\ignorespaces Migra\IeC {\c c}\IeC {\~a}o de uma m\IeC {\'a}quina virtual}}{28}{figure.2.24}
-\contentsline {figure}{\numberline {2.25}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do armazenamento de um \emph {node}}}{29}{figure.2.25}
-\contentsline {figure}{\numberline {2.26}{\ignorespaces Sub-menu de contexto de um physical volume}}{30}{figure.2.26}
-\contentsline {figure}{\numberline {2.27}{\ignorespaces Sub-menu de contexto de um volume group}}{31}{figure.2.27}
-\contentsline {figure}{\numberline {2.28}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um volume group}}{32}{figure.2.28}
-\contentsline {figure}{\numberline {2.29}{\ignorespaces Extens\IeC {\~a}o de um volume group}}{33}{figure.2.29}
-\contentsline {figure}{\numberline {2.30}{\ignorespaces Sub-menu de contexto de um logical volume}}{34}{figure.2.30}
-\contentsline {figure}{\numberline {2.31}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um logical volume}}{34}{figure.2.31}
-\contentsline {figure}{\numberline {2.32}{\ignorespaces Redimensionamento de um logical volume}}{35}{figure.2.32}
-\contentsline {figure}{\numberline {2.33}{\ignorespaces Desligar um node}}{36}{figure.2.33}
-\contentsline {figure}{\numberline {2.34}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o da m\IeC {\'a}quina virtual \emph {etfww}}}{37}{figure.2.34}
-\contentsline {figure}{\numberline {2.35}{\ignorespaces Estat\IeC {\'\i }sticas de uma m\IeC {\'a}quina virtual}}{38}{figure.2.35}
-\contentsline {figure}{\numberline {2.36}{\ignorespaces Estat\IeC {\'\i }sticas de \emph {Utiliza\IeC {\c c}\IeC {\~a}o do node} - Carga no CPU}}{39}{figure.2.36}
-\contentsline {figure}{\numberline {2.37}{\ignorespaces Selecionar a imagem com os drivers virtio}}{40}{figure.2.37}
-\contentsline {figure}{\numberline {2.38}{\ignorespaces Atribuir logical volume (drivers virtio)}}{41}{figure.2.38}
-\contentsline {figure}{\numberline {2.39}{\ignorespaces Definir arranque pelo disco}}{41}{figure.2.39}
-\contentsline {figure}{\numberline {2.40}{\ignorespaces Windows - actualiza\IeC {\c c}\IeC {\~a}o de drivers}}{42}{figure.2.40}
-\contentsline {figure}{\numberline {2.41}{\ignorespaces Alterar o driver do disco para virtio}}{43}{figure.2.41}
-\contentsline {figure}{\numberline {2.42}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Bem-vindo}}{44}{figure.2.42}
-\contentsline {figure}{\numberline {2.43}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Ficheiro OVF de origem}}{44}{figure.2.43}
-\contentsline {figure}{\numberline {2.44}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Resumo do OVF}}{45}{figure.2.44}
-\contentsline {figure}{\numberline {2.45}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Contrato de licen\IeC {\c c}a}}{45}{figure.2.45}
-\contentsline {figure}{\numberline {2.46}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Nome e localiza\IeC {\c c}\IeC {\~a}o}}{46}{figure.2.46}
-\contentsline {figure}{\numberline {2.47}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Armazenamento}}{47}{figure.2.47}
-\contentsline {figure}{\numberline {2.48}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Interfaces de rede}}{47}{figure.2.48}
-\contentsline {figure}{\numberline {2.49}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Finaliza\IeC {\c c}\IeC {\~a}o!}}{48}{figure.2.49}
-\contentsline {figure}{\numberline {2.50}{\ignorespaces Janela de exporta\IeC {\c c}\IeC {\~a}o OVF}}{48}{figure.2.50}
-\contentsline {figure}{\numberline {2.51}{\ignorespaces Painel de gest\IeC {\~a}o das ISOs}}{49}{figure.2.51}
-\contentsline {figure}{\numberline {2.52}{\ignorespaces Janela do registo de eventos do sistema}}{50}{figure.2.52}
-\contentsline {figure}{\numberline {2.53}{\ignorespaces Assistente de configura\IeC {\c c}\IeC {\~a}o inicial}}{52}{figure.2.53}
-\contentsline {figure}{\numberline {2.54}{\ignorespaces Paineis de gest\IeC {\~a}o de datacenter}}{53}{figure.2.54}
-\contentsline {figure}{\numberline {2.55}{\ignorespaces Assistente de configura\IeC {\c c}\IeC {\~a}o de datacenter virtual}}{54}{figure.2.55}
-\contentsline {figure}{\numberline {2.56}{\ignorespaces Mover nodes entre datacenters (\emph {ETVM})}}{55}{figure.2.56}
-\contentsline {figure}{\numberline {2.57}{\ignorespaces Aceitar node}}{56}{figure.2.57}
-\contentsline {figure}{\numberline {2.58}{\ignorespaces Aceitar node - em curso}}{56}{figure.2.58}
-\contentsline {figure}{\numberline {2.59}{\ignorespaces Janela de prefer\IeC {\^e}ncias do sistema - Painel Geral}}{57}{figure.2.59}
-\contentsline {figure}{\numberline {2.60}{\ignorespaces Janela de prefer\IeC {\^e}ncias do sistema - Painel Conectividade}}{58}{figure.2.60}
-\contentsline {figure}{\numberline {2.61}{\ignorespaces Janela de administra\IeC {\c c}\IeC {\~a}o de utilizadores e permiss\IeC {\~o}es}}{59}{figure.2.61}
-\contentsline {figure}{\numberline {2.62}{\ignorespaces Permiss\IeC {\~o}es no menu de contexto do node}}{59}{figure.2.62}
-\contentsline {figure}{\numberline {2.63}{\ignorespaces Permiss\IeC {\~o}es no menu de contexto do servidor}}{60}{figure.2.63}
-\contentsline {figure}{\numberline {2.64}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de permiss\IeC {\~o}es de acesso ao servidor}}{60}{figure.2.64}
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o da pool de MACs}}{14}{figure.2.6}
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Janela de gest\IeC {\~a}o das interfaces de rede de uma m\IeC {\'a}quina virtual}}{15}{figure.2.7}
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Editar datacenter}}{16}{figure.2.8}
+\contentsline {figure}{\numberline {2.9}{\ignorespaces Editar n\IeC {\'o}}}{17}{figure.2.9}
+\contentsline {figure}{\numberline {2.10}{\ignorespaces Configura\IeC {\c c}\IeC {\~a}o da conectividade do agente}}{18}{figure.2.10}
+\contentsline {figure}{\numberline {2.11}{\ignorespaces Manuten\IeC {\c c}\IeC {\~a}o do n\IeC {\'o}}}{18}{figure.2.11}
+\contentsline {figure}{\numberline {2.12}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do node}}{19}{figure.2.12}
+\contentsline {figure}{\numberline {2.13}{\ignorespaces Lista das m\IeC {\'a}quinas virtuais do node}}{20}{figure.2.13}
+\contentsline {figure}{\numberline {2.14}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Bem-vindo}}{20}{figure.2.14}
+\contentsline {figure}{\numberline {2.15}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Nome da m\IeC {\'a}quina virtual}}{21}{figure.2.15}
+\contentsline {figure}{\numberline {2.16}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Mem\IeC {\'o}ria}}{22}{figure.2.16}
+\contentsline {figure}{\numberline {2.17}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Processador}}{22}{figure.2.17}
+\contentsline {figure}{\numberline {2.18}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Armazenamento}}{23}{figure.2.18}
+\contentsline {figure}{\numberline {2.19}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Rede do servidor}}{24}{figure.2.19}
+\contentsline {figure}{\numberline {2.20}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Arranque}}{25}{figure.2.20}
+\contentsline {figure}{\numberline {2.21}{\ignorespaces Assistente de cria\IeC {\c c}\IeC {\~a}o de servidor - Finaliza\IeC {\c c}\IeC {\~a}o!}}{25}{figure.2.21}
+\contentsline {figure}{\numberline {2.22}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Op\IeC {\c c}\IeC {\~o}es gerais}}{26}{figure.2.22}
+\contentsline {figure}{\numberline {2.23}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Interfaces de rede}}{27}{figure.2.23}
+\contentsline {figure}{\numberline {2.24}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Discos}}{27}{figure.2.24}
+\contentsline {figure}{\numberline {2.25}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Dispositivos}}{28}{figure.2.25}
+\contentsline {figure}{\numberline {2.26}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Outras op\IeC {\c c}\IeC {\~o}es}}{28}{figure.2.26}
+\contentsline {figure}{\numberline {2.27}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de um servidor - Alta disponibilidade}}{29}{figure.2.27}
+\contentsline {figure}{\numberline {2.28}{\ignorespaces Janela de remo\IeC {\c c}\IeC {\~a}o de um servidor}}{29}{figure.2.28}
+\contentsline {figure}{\numberline {2.29}{\ignorespaces Par\IeC {\^a}metros de arranque de uma m\IeC {\'a}quina virtual}}{30}{figure.2.29}
+\contentsline {figure}{\numberline {2.30}{\ignorespaces Migra\IeC {\c c}\IeC {\~a}o de uma m\IeC {\'a}quina virtual}}{30}{figure.2.30}
+\contentsline {figure}{\numberline {2.31}{\ignorespaces Snapshots}}{31}{figure.2.31}
+\contentsline {figure}{\numberline {2.32}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o do armazenamento de um \emph {node}}}{32}{figure.2.32}
+\contentsline {figure}{\numberline {2.33}{\ignorespaces Sub-menu de contexto de um physical volume}}{32}{figure.2.33}
+\contentsline {figure}{\numberline {2.34}{\ignorespaces Procurar \emph {physical devices} }}{33}{figure.2.34}
+\contentsline {figure}{\numberline {2.35}{\ignorespaces Sub-menu de contexto de um volume group}}{34}{figure.2.35}
+\contentsline {figure}{\numberline {2.36}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um volume group}}{34}{figure.2.36}
+\contentsline {figure}{\numberline {2.37}{\ignorespaces Extens\IeC {\~a}o de um volume group}}{35}{figure.2.37}
+\contentsline {figure}{\numberline {2.38}{\ignorespaces Procurar \emph {volume groups}}}{35}{figure.2.38}
+\contentsline {figure}{\numberline {2.39}{\ignorespaces Sub-menu de contexto de um logical volume}}{36}{figure.2.39}
+\contentsline {figure}{\numberline {2.40}{\ignorespaces Janela de cria\IeC {\c c}\IeC {\~a}o de um logical volume}}{36}{figure.2.40}
+\contentsline {figure}{\numberline {2.41}{\ignorespaces Redimensionamento de um logical volume}}{37}{figure.2.41}
+\contentsline {figure}{\numberline {2.42}{\ignorespaces Procurar \emph {logical volumes}}}{37}{figure.2.42}
+\contentsline {figure}{\numberline {2.43}{\ignorespaces Desligar um node}}{38}{figure.2.43}
+\contentsline {figure}{\numberline {2.44}{\ignorespaces Informa\IeC {\c c}\IeC {\~a}o da m\IeC {\'a}quina virtual}}{39}{figure.2.44}
+\contentsline {figure}{\numberline {2.45}{\ignorespaces Estat\IeC {\'\i }sticas de uma m\IeC {\'a}quina virtual}}{40}{figure.2.45}
+\contentsline {figure}{\numberline {2.46}{\ignorespaces Estat\IeC {\'\i }sticas de carga do n\IeC {\'o}}}{40}{figure.2.46}
+\contentsline {figure}{\numberline {2.47}{\ignorespaces Estat\IeC {\'\i }sticas de \emph {Utiliza\IeC {\c c}\IeC {\~a}o do node} - Carga no CPU}}{41}{figure.2.47}
+\contentsline {figure}{\numberline {2.48}{\ignorespaces Selecionar a imagem com os drivers virtio}}{42}{figure.2.48}
+\contentsline {figure}{\numberline {2.49}{\ignorespaces Atribuir logical volume (drivers virtio)}}{43}{figure.2.49}
+\contentsline {figure}{\numberline {2.50}{\ignorespaces Definir arranque pelo disco}}{43}{figure.2.50}
+\contentsline {figure}{\numberline {2.51}{\ignorespaces Windows - actualiza\IeC {\c c}\IeC {\~a}o de drivers}}{44}{figure.2.51}
+\contentsline {figure}{\numberline {2.52}{\ignorespaces Alterar o driver do disco para virtio}}{44}{figure.2.52}
+\contentsline {figure}{\numberline {2.53}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Bem-vindo}}{45}{figure.2.53}
+\contentsline {figure}{\numberline {2.54}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Ficheiro OVF de origem}}{46}{figure.2.54}
+\contentsline {figure}{\numberline {2.55}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Resumo do OVF}}{46}{figure.2.55}
+\contentsline {figure}{\numberline {2.56}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Contrato de licen\IeC {\c c}a}}{47}{figure.2.56}
+\contentsline {figure}{\numberline {2.57}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Nome e localiza\IeC {\c c}\IeC {\~a}o}}{48}{figure.2.57}
+\contentsline {figure}{\numberline {2.58}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Armazenamento}}{49}{figure.2.58}
+\contentsline {figure}{\numberline {2.59}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Interfaces de rede}}{49}{figure.2.59}
+\contentsline {figure}{\numberline {2.60}{\ignorespaces Assistente de importa\IeC {\c c}\IeC {\~a}o OVF - Finaliza\IeC {\c c}\IeC {\~a}o!}}{50}{figure.2.60}
+\contentsline {figure}{\numberline {2.61}{\ignorespaces Janela de exporta\IeC {\c c}\IeC {\~a}o OVF}}{50}{figure.2.61}
+\contentsline {figure}{\numberline {2.62}{\ignorespaces Painel de gest\IeC {\~a}o das ISOs}}{51}{figure.2.62}
+\contentsline {figure}{\numberline {2.63}{\ignorespaces Janela do registo de eventos do sistema}}{52}{figure.2.63}
+\contentsline {figure}{\numberline {2.64}{\ignorespaces Assistente de configura\IeC {\c c}\IeC {\~a}o inicial}}{53}{figure.2.64}
+\contentsline {figure}{\numberline {2.65}{\ignorespaces Paineis de gest\IeC {\~a}o de datacenter}}{54}{figure.2.65}
+\contentsline {figure}{\numberline {2.66}{\ignorespaces Assistente de configura\IeC {\c c}\IeC {\~a}o de datacenter virtual}}{55}{figure.2.66}
+\contentsline {figure}{\numberline {2.67}{\ignorespaces Mover nodes entre datacenters (\emph {NUXIS})}}{56}{figure.2.67}
+\contentsline {figure}{\numberline {2.68}{\ignorespaces Aceitar node}}{57}{figure.2.68}
+\contentsline {figure}{\numberline {2.69}{\ignorespaces Aceitar node - em curso}}{57}{figure.2.69}
+\contentsline {figure}{\numberline {2.70}{\ignorespaces Janela de prefer\IeC {\^e}ncias do sistema - Painel Geral}}{58}{figure.2.70}
+\contentsline {figure}{\numberline {2.71}{\ignorespaces Janela de prefer\IeC {\^e}ncias do sistema - Painel Conectividade}}{59}{figure.2.71}
+\contentsline {figure}{\numberline {2.72}{\ignorespaces Janela de administra\IeC {\c c}\IeC {\~a}o de utilizadores e permiss\IeC {\~o}es}}{60}{figure.2.72}
+\contentsline {figure}{\numberline {2.73}{\ignorespaces Permiss\IeC {\~o}es no menu de contexto do node}}{60}{figure.2.73}
+\contentsline {figure}{\numberline {2.74}{\ignorespaces Permiss\IeC {\~o}es no menu de contexto do servidor}}{61}{figure.2.74}
+\contentsline {figure}{\numberline {2.75}{\ignorespaces Edi\IeC {\c c}\IeC {\~a}o de permiss\IeC {\~o}es de acesso ao servidor}}{61}{figure.2.75}

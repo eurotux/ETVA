@@ -55,7 +55,7 @@ if( $p{'help'} ){
 if( $p{'dhcp'} ){
     $p{'bootproto'} = 'dhcp';
 } else {
-    $p{'bootproto'} = 'none';
+    $p{'bootproto'} = 'static';
     # check ip
     if( !NetworkTools::valid_ipaddr($p{'ip'}) ){
         die "Error: invalid IP. ","\n";

@@ -111,6 +111,35 @@ class volgroupActions extends sfActions
 
     }
 
+    public function executeJsonGetVg(sfWebRequest $request)
+    {
+        $lv_id = $request->getParameter('lv_id');
+        error_log($lv_id);
+//        $c = new Criteria();
+//        $c->add(EtvaLogicalvolumePeer::ID, $lv_id);
+//        $lv = EtvaVolumegroupPeer::doSelect($c);
+
+        $vg = EtvaVolumegroupQuery::create()
+            ->useEtvaLogicalvolumeQuery()
+                ->filterByPrimaryKey($lv_id)
+            ->endUse()
+            ->findOne();
+
+        error_log("[VOLUME GROUP] ".print_r($vg, true));
+        if($vg)
+        {
+            $res = $vg->toArray();
+            $return = json_encode($res);
+
+            // if is browser request return text renderer
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+            return  $this->renderText($return);
+        }else{
+            $response['success'] = false;
+            $return = $this->setJsonError($response);
+            return  $this->renderText($return);
+        }
+    }
 
     /**
      * Removes volume group
@@ -428,7 +457,15 @@ class volgroupActions extends sfActions
             $is_DiskVG = ($id == sfConfig::get('app_volgroup_disk_flag')) ? 1:0;
             if($is_DiskVG) $type = 'file';
 
-            $volumes[] = array('id'=>$id,'expanded'=>$expanded,'vgid'=>$vgid,'iconCls'=>'devices-folder','cls'=>$cls,'text'=>$id,'type'=>$type,'size'=>$size,'prettysize'=>$pretty_size, 'freesize'=>$free_size, 'singleClickExpand'=>true,'qtip'=>$qtip,'children'=>$pvs_tree);
+            /* TODO improve this
+             */
+            if( $vg->getInconsistent() ){
+                $qtip .= ' [INCONSISTENT]';
+                $cls = 'vg-inc';
+            }
+
+            $inuse = $vg->hasLogicalVolumesInUse();
+            $volumes[] = array('id'=>$id,'expanded'=>$expanded,'vgid'=>$vgid,'iconCls'=>'devices-folder','cls'=>$cls,'text'=>$id,'type'=>$type,'size'=>$size,'prettysize'=>$pretty_size, 'freesize'=>$free_size, 'singleClickExpand'=>true,'qtip'=>$qtip,'children'=>$pvs_tree, 'inuse'=>$inuse );
         }
 
         if(empty($volumes)){
@@ -477,8 +514,12 @@ class volgroupActions extends sfActions
                     $id = $pv->getId();
 
                     $np = EtvaNodePhysicalvolumePeer::retrieveByPK($node_id, $id);
+                    //error_log(sprintf('node_id=%s id=%s',$node_id, $id));
 
-                    $elem = $np->getDevice();
+                    /* TODO 
+                     * mark this as inconsistence
+                     */
+                    $elem = ($np) ? $np->getDevice() : $pv->getDevice();
                     $pvdevice = $pv->getPv();
                     $pretty_size = $size = $pv->getPvsize();
                     $qtip = '';
@@ -498,7 +539,15 @@ class volgroupActions extends sfActions
             $is_DiskVG = ($id == sfConfig::get('app_volgroup_disk_flag')) ? 1:0;
             if($is_DiskVG) $type = 'file';
 
-            $volumes[] = array('id'=>$id,'expanded'=>$expanded,'vgid'=>$vgid,'iconCls'=>'devices-folder','cls'=>$cls,'text'=>$id,'type'=>$type,'size'=>$size,'prettysize'=>$pretty_size, 'freesize'=>$free_size, 'singleClickExpand'=>true,'qtip'=>$qtip,'children'=>$pvs_tree);
+            /* TODO improve this
+             */
+            if( $vg->getInconsistent() ){
+                $qtip .= ' [INCONSISTENT]';
+                $cls = 'vg-inc';
+            }
+
+            $inuse = $vg->hasLogicalVolumesInUse();
+            $volumes[] = array('id'=>$id,'expanded'=>$expanded,'vgid'=>$vgid,'iconCls'=>'devices-folder','cls'=>$cls,'text'=>$id,'type'=>$type,'size'=>$size,'prettysize'=>$pretty_size, 'freesize'=>$free_size, 'singleClickExpand'=>true,'qtip'=>$qtip,'children'=>$pvs_tree, 'inuse'=>$inuse);
         }
 
         if(empty($volumes)){
@@ -604,14 +653,292 @@ class volgroupActions extends sfActions
                 return $error;
             }
 
+            $etva_data = Etva::getEtvaModelFile();
+            $etvamodel = $etva_data['model'];
+
+            $force_regist = false;
+
+            // for model standard, if vgs initialize then force registration
+            if( $etvamodel=='standard' && !$etva_node->hasVgs() ){
+                $force_regist = true;
+            }
+            error_log("EtvaVolumegroup soapUpdate force_regist=".$force_regist." etvamodel=".$etvamodel." hasVgs=".$etva_node->hasVgs());
+            //error_log(print_r($vgs,true));
+
             /*
              * send volume group to VA
              */
             $vg_va = new EtvaVolumegroup_VA();
-            $response = $vg_va->initialize($etva_node,$vgs);
+            $response = $vg_va->initialize($etva_node,$vgs,$force_regist);
             return $response; 
        }
 
    }
 
+    public function executeJsonListSyncVolumeGroups(sfWebRequest $request)
+    {
+
+        //adding cluster id filter
+        $elements = array();
+
+        // get node id from cluster context
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $sharedonly = false;
+        $force = false;
+        if( $request->getParameter('force') ) $force = true;
+        if( $request->getParameter('level') == 'cluster' ) $sharedonly = true;
+
+        $etva_node_va = new EtvaNode_VA($etva_node);
+        $elements = $etva_node_va->get_sync_volumegroups($force,$sharedonly);
+
+        $res_elements = $elements;
+
+        /*
+         * For not registered volume groups
+         */
+        if( $request->getParameter('notregistered') ){
+            $filtered = array();
+            foreach($elements as $e){
+                if( !$e['registered'] ){
+                    $filtered[] = $e;
+                }
+            }
+            $res_elements = $filtered;
+        }
+
+        // return array
+        $result = array('success'=>true,
+                    'total'=> count($res_elements),
+                    'data'=> $res_elements,
+                    'agent'=>$etva_node->getName()
+        );
+
+
+        $return = json_encode($result);
+
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+    }
+    public function executeJsonRegister(sfWebRequest $request)
+    {
+        $msg_ok_type = EtvaVolumegroupPeer::_OK_REGISTER_;
+        $msg_err_type = EtvaVolumegroupPeer::_ERR_REGISTER_;
+
+        // get node id from cluster context
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $vg = $request->getParameter('name');
+        $uuid = $request->getParameter('uuid');
+        $type = $request->getParameter('type');
+
+        if($etva_vg = $etva_node->retrieveVolumegroupByVg($vg)){
+
+            $msg = Etva::getLogMessage(array('name'=>$vg), EtvaVolumegroupPeer::_ERR_VG_EXIST_);
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaVolumegroupPeer::_ERR_VG_EXIST_,array('%name%'=>$vg));
+
+            $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n, 'info'=>$msg_i18n);
+
+            //notify system log
+            $message = Etva::getLogMessage(array('name'=>$vg,'info'=>$msg), $msg_err_type);
+            $this->dispatcher->notify(
+                new sfEvent($error['agent'], 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $etva_volumegroup = new EtvaVolumegroup();
+        if( $uuid ) $etva_volumegroup->setUuid($uuid);
+        if( $type ) $etva_volumegroup->setStorageType($type);
+        $etva_volumegroup->setVg($vg);
+
+        $vg_info = json_decode($request->getParameter('volumegroup'),true);
+        //error_log(print_r($vg_info,true));
+
+        $etva_vg_va = new EtvaVolumegroup_VA($etva_volumegroup);
+        $response = $etva_vg_va->register($etva_node,$vg_info);
+        //$response = array( 'success'=>true );
+
+        //error_log("register response: " . print_r($response,true));
+        if( !$response['success'] ){
+            $msg_i18n = $this->getContext()->getI18N()->__($msg_err_type,array('%name%'=>$vg,'%info%'=>''));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('name'=>$vg,'info'=>''), $msg_err_type);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        //notify system log
+        $message = Etva::getLogMessage(array('name'=>$vg), $msg_ok_type);
+        $msg_i18n = sfContext::getInstance()->getI18N()->__($msg_ok_type,array('%name%'=>$vg));
+        sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(), 'event.log',array('message' => $message)));
+        
+        $result = array('success'=>true,
+                    'agent'=>$etva_node->getName(),
+                    'response'=>$msg_i18n
+        );
+        /*$result = array('success'=>true, 'response'=>'register ok' );
+        $result['agent'] = $etva_node->getName();*/
+
+        $return = json_encode($result);
+
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+    }
+    public function executeJsonUnregister(sfWebRequest $request)
+    {
+
+        $msg_ok_type = EtvaVolumegroupPeer::_OK_UNREGISTER_;
+        $msg_err_type = EtvaVolumegroupPeer::_ERR_UNREGISTER_;
+
+        // get node id from cluster context
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $vg = $request->getParameter('vg');
+
+        if(!$etva_volumegroup = $etva_node->retrieveVolumegroupByVg($vg) ){
+            $msg = Etva::getLogMessage(array('name'=>$vg), EtvaVolumegroupPeer::_ERR_NOTFOUND_);
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaVolumegroupPeer::_ERR_NOTFOUND_,array('%name%'=>$vg));
+
+            $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n, 'info'=>$msg_i18n);
+
+            //notify system log
+            $message = Etva::getLogMessage(array('name'=>$vg,'info'=>$msg), EtvaVolumegroupPeer::_ERR_UNREGISTER_);
+            $this->dispatcher->notify(
+                new sfEvent($error['agent'], 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+        //error_log("etva_volumegroup: " . print_r($etva_volumegroup,true));
+
+        $etva_vg_va = new EtvaVolumegroup_VA($etva_volumegroup);
+        $response = $etva_vg_va->unregister($etva_node);
+
+        if( !$response['success'] ){
+            $msg_i18n = $this->getContext()->getI18N()->__($msg_err_type,array('%name%'=>$vg));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            
+            $node_log = Etva::getLogMessage(array('name'=>$vg), $msg_err_type);
+
+            //notify system log
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $node_log,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        //notify system log
+        $message = Etva::getLogMessage(array('name'=>$vg), $msg_ok_type);
+        $msg_i18n = sfContext::getInstance()->getI18N()->__($msg_ok_type,array('%name%'=>$vg));
+        sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(), 'event.log',array('message' => $message)));
+        
+        $result = array('success'=>true,
+                    'agent'=>$etva_node->getName(),
+                    'response'=>$msg_i18n
+        );
+        /*$result = array('success'=>true, 'response'=>'unregister ok' );
+        $result['agent'] = $etva_node->getName();*/
+
+        $return = json_encode($result);
+
+        if(sfConfig::get('sf_environment') == 'soap') return $return;
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+    }
 }

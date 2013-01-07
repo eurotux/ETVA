@@ -93,6 +93,9 @@ my %AllDiskDevices = ();
 # Multipath support flag
 my $HAVEMULTIPATH;
 
+# Revert snapshots support
+my $HAVEREVERTSNAPSHOTSUPPORT;
+
 =item ...
 
 =cut
@@ -184,6 +187,13 @@ sub getpvs {
     return wantarray() ? %PVInfo : \%PVInfo;
 }
 
+sub getpvs_arr {
+    my $self = shift;
+
+    my @pvs = values %{$self->getpvs(@_)};
+    return wantarray() ? @pvs : \@pvs;
+}
+
 sub getphydev {
     my $self = shift;
     my (%p) = @_;
@@ -263,6 +273,13 @@ sub getvgs {
     return wantarray() ? %VGInfo : \%VGInfo;
 }
 
+sub getvgs_arr {
+    my $self = shift;
+
+    my @vgs = values %{$self->getvgs(@_)};
+    return wantarray() ? @vgs : \@vgs;
+}
+
 =item getlvs
 
 get logical volumes
@@ -283,6 +300,14 @@ sub getlvs {
 
     return wantarray() ? %LVInfo : \%LVInfo;
 }
+
+sub getlvs_arr {
+    my $self = shift;
+
+    my @lvs = values %{$self->getlvs(@_)};
+    return wantarray() ? @lvs : \@lvs;
+}
+
 
 # load disk device
 #   function to initialize disk device info
@@ -689,8 +714,12 @@ sub pvinfo {
         $H{"name"} = $H{"pv"} ||= $H{"pv_name"};
         $H{"vg"} ||= $H{"vg_name"};
         my $device = $H{"pv"};
+        $H{"aliasdevice"} = $H{"device"} = $device;
 
         next if( $device eq "unknown device" );
+
+        # for symbolic links resolve them
+        $device = abs_path($device) if( -l $device );
 
         my @p = ( $device =~ m/\/mapper\// ) ? split(/\//,$device)
 						:split(/\//,$device,3);
@@ -804,6 +833,7 @@ sub vginfo {
             $H{"pretty_${k}"} = prettysize($H{"$k"});
         }
 
+=cmt # bug on vgfreesize
         # fix freesize
         if( %LVInfo ){
             my $new_vgfreesize = $vgfreesize;
@@ -814,6 +844,7 @@ sub vginfo {
             $H{"lfree"} = $H{"freesize"} = $new_vgfreesize;
             $H{"pretty_freesize"} = prettysize($new_vgfreesize);
         }
+=cut
     }
 
     return wantarray() ? %VGInfo : \%VGInfo;
@@ -829,6 +860,8 @@ sub lvinfo {
         # force update lvs info
         cmd_exec("lvscan $debug_opt");
     }
+
+    my $LVDevices = [];
 
     %LVInfo = ( );
 
@@ -903,9 +936,13 @@ sub lvinfo {
             # pretty string for size field
             $H{"pretty_${k}"} = prettysize($H{"$k"});
         }
-        $LVInfo{"$lv"} = \%H;
+        my $rH = \%H;
+        push(@$LVDevices,$rH);
+        $LVInfo{"$lv"} = $rH;
     }
     close(I);
+
+    $LVDevices = &qemu_img_info_bulk($LVDevices);
 
     if( $CONF->{'storagedir'} ){
         my $DISKDevices = [];
@@ -988,12 +1025,20 @@ sub qemu_img_info_parseline {
     my $nv = trim($v);
     $nk =~ s/\s/_/g;
     if( $nk eq 'file_format' ){
-        $D->{"format"} = $nv;
+        if( !$D->{'format'} || (($nv ne 'host_device') && ($nv ne 'raw'))){ # ignore host_device and raw formats
+            $D->{"format"} = $nv;
+        }
     } elsif( $nk eq 'virtual_size' ){
         my ($ps,$s,$ts) = ( $nv =~ m/(\S+) \((\S+) (\w+)\)/ );
         # fix size calc for all disk formats
-        $D->{'pretty_size'} = $D->{'pretty_virtual_size'} = $ps;
-        $D->{'lsize'} = $D->{'size'} = $D->{'virtual_size'} = str2size("$s$ts");
+        $D->{'pretty_virtual_size'} = $ps;
+        $D->{'virtual_size'} = str2size("$s$ts");
+        if( !-b "$D->{'device'}" ){
+            if( !$D->{'size'} ){
+                $D->{'pretty_size'} = $D->{'pretty_virtual_size'};
+                $D->{'lsize'} = $D->{'size'} = $D->{'virtual_size'};
+            }
+        }
     } elsif( $nk eq 'disk_size' ){
         $D->{'pretty_disk_size'} = $nv;
         $D->{'disk_size'} = str2size($nv);
@@ -1004,9 +1049,13 @@ sub qemu_img_info_parseline {
 }
 sub qemu_img_info_formatsize {
     my ($D) = @_;
-    if( $D->{'disk_size'} && $D->{'virtual_size'} ){
-        $D->{'lfree'} = $D->{'freesize'} = $D->{'virtual_size'} - $D->{'disk_size'};
-        $D->{"pretty_freesize"} = prettysize($D->{'freesize'});
+    if( !-b "$D->{'device'}" ){
+        if( $D->{'disk_size'} && $D->{'virtual_size'} ){
+            if( !$D->{'freesize'} ){
+                $D->{'lfree'} = $D->{'freesize'} = ($D->{'virtual_size'} - $D->{'disk_size'});
+                $D->{"pretty_freesize"} = prettysize($D->{'freesize'});
+            }
+        }
     }
     return $D;
 }
@@ -1042,8 +1091,11 @@ sub qemu_img_info_bulk {
                 if( $go_process ){
                     last if( /image:/ );             # is next image
                     plog($_) if( &debug_level > 9 );
-                    last if( /Snapshot list:/ );     # go to snapshot list
+                    if( /Snapshot list:/ ){     # go to snapshot list
                         # TODO process snapshots list
+                        $D->{'has_snapshots'} = 1;
+                        last;
+                    }
                     $D = &qemu_img_info_parseline($_,$D);
                 }
             }
@@ -1251,6 +1303,39 @@ sub get_sparsefiles_apparentsize {
 
     return $size;
 }
+
+# get disk size and usage size
+sub get_file_disk_size {
+    my ($path) = @_;
+    $path = readlink($path) if( -l "$path" );   # get real path if link 
+    my $D = qemu_img_info( { 'device'=>"$path" } );
+    return ($D->{'virtual_size'},$D->{'disk_size'});
+}
+sub get_disk_size {
+    my ($path) = @_;
+    $path = readlink($path) if( -l "$path" );   # get real path if link 
+    if( -b "$path" ){
+        if( my $LV = __PACKAGE__->getlv( 'device'=> $path ) ){
+            return $LV->{'size'}
+        } else {
+            return &size_blockdev($path);
+        }
+    } else {
+        my ($vsize,$usize) = &get_file_disk_size($path);
+        return $vsize;
+    }
+}
+sub get_disk_usagesize {
+    my ($path) = @_;
+    $path = readlink($path) if( -l "$path" );   # get real path if link 
+    if( -b "$path" ){
+        return &get_disk_size($path);
+    } else {
+        my ($vsize,$usize) = &get_file_disk_size($path);
+        return $usize;
+    }
+}
+
 sub get_disk_usage {
     my ($path) = @_;
     my $dir = "$path";
@@ -1349,7 +1434,7 @@ sub update_devices {
             if( -e "$blockdir/ro" ){
                 open(FRO,"$blockdir/ro");
                 my $ro = <FRO>;
-                $AllDiskDevices{"$dn"}{'readonly'} = $ro ? 1 : 0;
+                $AllDiskDevices{"$dn"}{'readonly'} = int($ro) ? 1 : 0;
                 close(FRO);
             }
         }
@@ -2172,7 +2257,7 @@ sub qemu_img_create {
     my $self = shift;
     my (%p) = @_;
 
-    if( ! -e "$p{'path'}" ){
+    if( $p{'force'} || (! -e "$p{'path'}") ){
         my $size = ETVA::Utils::roundedsize($p{'size'});   # get rounded size
         if( $size ){
             my $fmt = $p{'format'} || "raw";
@@ -2250,12 +2335,13 @@ sub qemu_img_resize {
 
 sub lvcreate {
     my $self = shift;
-    my ($lv,$vg,$size,$format) = my %p = @_;
-    if( $p{'lv'} || $p{"vg"} || $p{"size"} || $p{'format'} ){
+    my ($lv,$vg,$size,$format,$usagesize) = my %p = @_;
+    if( $p{'lv'} || $p{"vg"} || $p{"size"} || $p{'format'} || $p{'usagesize'} ){
         $lv = $p{"lv"};
         $vg = $p{"vg"};
         $size = $p{"size"};
         $format = $p{"format"};
+        $usagesize = $p{"usagesize"};
     }
 
     $size = "${size}M" if( $size =~ m/^[0-9.]+$/ ); # size in Mb by default
@@ -2318,8 +2404,28 @@ sub lvcreate {
                 return retErr("_ERR_DISK_LVCREATE_","Error creating logical volume.");
             }
         }
+        
         # Get last logical volume created
         my $LV = $self->getlv('name'=>$lv);
+
+        if( $format && ( $format ne 'raw' ) && ( $format ne 'lvm' ) ){
+            if( &have_qemu_img() ){
+                $usagesize ||= $LV->{'size'};
+                my $usagesize_k = convertsize($usagesize,'K');
+                my $E = $self->qemu_img_create( 'path'=>$LV->{'device'}, 'size'=>"${usagesize_k}K", 'format'=>$format, 'force'=>1 );
+                #if( isError($E) ){
+                #    return retErr("_ERR_DISK_LVCREATE_","Error creating logical volume: ".$E->{'_errordetail_'});
+                #}
+
+                $self->loaddiskdev(1);  # update disk device info
+                # Get last logical volume created
+                $LV = $self->getlv('name'=>$lv);
+
+            #} else {
+            #    return retErr("_ERR_DISK_LVCREATE_","Dont have support for disk file format: '$format'");
+            }
+        }
+
         return retOk("_OK_LVCREATE_","Logical volume successfully created.","_RET_OBJ_",$LV);
     } else {
         return retErr("_INVALID_VG_","Invalid volume group");
@@ -2482,6 +2588,23 @@ sub lvresize {
             unless( $e == 0 ){
                 return retErr("_ERR_DISK_LVRESIZE_","Error resize logical volume.");
             }
+
+            $LV = $self->getlv( 'device'=>$lv, %p );
+=cmt # dont resize if qemu-img after lvresize
+            my $format = $LV->{'format'};
+            if( $format && ( $format ne 'raw' ) && ( $format ne 'lvm' ) ){
+                if( &have_qemu_img() ){
+                    my $size_k = convertsize($LV->{'size'},'K');
+                    my $E = $self->qemu_img_resize( 'path'=>$lv, 'size'=>"${size_k}K", 'format'=>$format );
+                    if( isError($E) ){
+                        return retErr("_ERR_DISK_LVRESIZE_","Error reisze logical volume: ".$E->{'_errordetail_'});
+                    }
+                } else {
+                    return retErr("_ERR_DISK_LVRESIZE_","Dont have support for resize disk file format: '$format'");
+                }
+            }
+=cut
+
         }
     } else {
         return retErr("_INVALID_LV_","Invalid logical volume");
@@ -2508,14 +2631,15 @@ create snapshot of logical volume
 # e.g. lvcreate --size 100m --name snap --snapshot /dev/vg00/lvol1
 sub createsnapshot {
     my $self = shift;
-    my ($olv,$slv,$size,$extents,$tag) = my %p = @_;
+    my ($olv,$slv,$size,$extents,$name,$tag) = my %p = @_;
 
-    if( $p{'olv'} || $p{'slv'} || $p{'size'} || $p{'extents'} || $p{'tag'} ){
+    if( $p{'olv'} || $p{'slv'} || $p{'size'} || $p{'extents'} || $p{'tag'} || $p{'name'} ){
         $olv = $p{'olv'};
         $slv = $p{'slv'};
         $size = $p{'size'};
         $extents = $p{'extents'};
         $tag = $p{'tag'};
+        $name = $p{'name'};
     }
     $size = "${size}M" if( $size =~ m/^[0-9.]+$/ ); # size in Mb by default
 
@@ -2523,12 +2647,12 @@ sub createsnapshot {
 
     if( my $LV = $self->getlv( 'device'=>$olv, %p ) ){
         $olv = $LV->{'device'};
-        if( $LV->{'vg'} eq '__DISK__' ){
+        if( $p{'use_qemu'} || $LV->{'vg'} eq '__DISK__' ){
             # do this usign qemu-img if available
             if( &have_qemu_img() ){
                 if( $LV->{'format'} eq 'qcow2' ){   # only qcow2 format support snapshots
                     if( !$slv ){
-                        $slv = $tag;
+                        $slv = $name || $tag;
                     }
                     my $qemu_img_cmd = &qemu_img_cmd();
                     my ($e,$m) = cmd_exec("$qemu_img_cmd snapshot -c $slv $olv");
@@ -2552,7 +2676,8 @@ sub createsnapshot {
                 push(@extra,"--size",$size),
             }
             if( !$slv ){
-                $slv = "$LV->{'name'}-$tag";
+                my $tok = $name || $tag;
+                $slv = "$LV->{'name'}-$tok";
             }
             unless( ( ($e,$m) = cmd_exec("lvcreate",@extra,"--snapshot",$LV->{'lvdevice'},"--name",$slv) ) && ( $e == 0 ) ){
                 return retErr("_ERR_CREATE_SNAPSHOT_","Error creating snapshot: $m");
@@ -2585,24 +2710,25 @@ convert to a snapshot
 # e.g. lvconvert -s vg00/lvol1 vg00/lvol2
 sub convertsnapshot {
     my $self = shift;
-    my ($olv,$slv,$tag) = my %p = @_;
+    my ($olv,$slv,$name,$tag) = my %p = @_;
 
-    if( $p{'olv'} || $p{'slv'} || $p{'tag'} ){
+    if( $p{'olv'} || $p{'slv'} || $p{'tag'} || $p{'name'} ){
         $olv = $p{'olv'};
         $slv = $p{'slv'};
         $tag = $p{'tag'};
+        $name = $p{'name'};
     }
 
     $self->loaddiskdev();
 
     if( my $LV = $self->getlv( 'device'=>$olv, %p ) ){
         $olv = $LV->{'device'};
-        if( $LV->{'vg'} eq '__DISK__' ){
+        if( $p{'use_qemu'} || $LV->{'vg'} eq '__DISK__' ){
             # do this usign qemu-img if available
             if( &have_qemu_img() ){
                 if( $LV->{'format'} eq 'qcow2' ){   # only qcow2 format support snapshots
                     if( !$slv ){
-                        $slv = $tag;
+                        $slv = $name || $tag;
                     }
                     my $qemu_img_cmd = &qemu_img_cmd();
                     my ($e,$m) = cmd_exec("$qemu_img_cmd snapshot -a $slv $olv");
@@ -2617,7 +2743,9 @@ sub convertsnapshot {
             }
         } else {
             if( !$slv ){
-                $slv = "$LV->{'name'}-$tag";
+                my $tok = $name || $tag;
+                #$slv = "$LV->{'name'}-$tok";
+                $slv = "$LV->{'device'}-$tok";
             }
             # TODO
             #   this can block process...
@@ -2636,21 +2764,173 @@ sub convertsnapshot {
     return retOk("_OK_","ok");
 }
 
-=item lvconvert
+=item revertsnapshot
 
-convert volume to specific format
+    revert a snapshot into its origin logical volume
 
-    my $OK = VirtAgent::Disk->lvconvert( olv=>$lv, dlv=>$newlv, format=>$format );
+    my $OK = VirtAgent::Disk->revertsnapshot( olv=>$lv, slv=>$snapshot );
 
 =cut
 
-# lvconvert
+# revertsnapshot
+#   revert a snapshot into its origin logical volume
+#
+#   args: olv,slv
+#   res: ok || Error
+# e.g. lvconvert --merge vg00/lvol1-snap
+# haveRevertSnapshotSupport - check revert snapshots support
+sub haveRevertSnapshotSupport {
+    if( not defined $HAVEREVERTSNAPSHOTSUPPORT ){
+        my ($e,$m) = cmd_exec("dmsetup targets");
+        if( $e == 0 && ( $m =~ m/snapshot-merge/gs ) ){
+            $HAVEREVERTSNAPSHOTSUPPORT = 1;
+        } else {
+            $HAVEREVERTSNAPSHOTSUPPORT = 0;
+        }
+    }
+    return $HAVEREVERTSNAPSHOTSUPPORT;
+}
+
+sub revertsnapshot {
+    my $self = shift;
+    my ($olv,$slv,$name,$tag) = my %p = @_;
+
+    if( $p{'olv'} || $p{'slv'} || $p{'tag'} || $p{'name'} ){
+        $olv = $p{'olv'};
+        $slv = $p{'slv'};
+        $tag = $p{'tag'};
+        $name = $p{'name'};
+    }
+
+    $self->loaddiskdev();
+
+    if( my $LV = $self->getlv( 'device'=>$olv, %p ) ){
+        $olv = $LV->{'device'};
+        if( $p{'use_qemu'} || ($LV->{'vg'} eq '__DISK__') ){
+            # do this usign qemu-img if available
+            if( &have_qemu_img() ){
+                if( $LV->{'format'} eq 'qcow2' ){   # only qcow2 format support snapshots
+                    if( !$slv ){
+                        $slv = $name || $tag;
+                    }
+                    my $qemu_img_cmd = &qemu_img_cmd();
+                    my ($e,$m) = cmd_exec("$qemu_img_cmd snapshot -a $slv $olv");
+                    unless( $e == 0 ){
+                        return retErr("_ERR_REVERT_SNAPSHOT_","Error revert snapshot: $m");
+                    }
+                } else {
+                    return retErr('_ERR_REVERT_SNAPSHOT_',"Cant revert snapshot: the volume format does not support snapshots.");
+                }
+            } else {
+                return retErr('_ERR_REVERT_SNAPSHOT_',"Cant revert snapshot: not qemu-img available.");
+            }
+        } else {
+            if( &haveRevertSnapshotSupport ){
+                if( !$slv ){
+                    if( $name ){
+                        $slv = "$LV->{'device'}-$name";
+                    } elsif( $tag ){
+                        $slv = '@'."$tag";
+                    }
+                }
+                # TODO
+                #   this can block process...
+                my ($e,$m);
+                unless( ( ($e,$m) = cmd_exec("lvconvert --merge",$slv) ) && ( $e == 0 ) ){
+                    return retErr("_ERR_REVERT_SNAPSHOT_","Error revert snapshot: $m");
+                }
+            } else {
+                return retErr("_ERR_REVERT_SNAPSHOT_","Don't have support to revert snapshots.");
+            }
+        }
+    } else {
+        return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $olv");
+    }
+
+    $self->loaddiskdev(1);  # update disk device info
+
+    # TODO change this
+    return retOk("_OK_","ok");
+}
+
+=item listsnapshots
+
+list snapshots of logical volume
+
+    my $LIST = VirtAgent::Disk->listsnapshots( lv=>$lv );
+
+=cut
+
+sub listsnapshots {
+    my $self = shift;
+    my ($lv) = my %p = @_;
+
+    if( $p{'lv'} ){
+        $lv = $p{'lv'};
+    }
+
+    $self->loaddiskdev();
+
+    my @list_snapshots = ();
+
+    if( my $LV = $self->getlv( 'device'=>$lv, %p ) ){
+        $lv = $LV->{'device'};
+        if( $p{'use_qemu'} || $LV->{'vg'} eq '__DISK__' ){
+            # do this usign qemu-img if available
+            if( &have_qemu_img() ){
+                if( $LV->{'format'} eq 'qcow2' ){   # only qcow2 format support snapshots
+                    my $qemu_img_cmd = &qemu_img_cmd();
+                    my ($e,$m) = cmd_exec("$qemu_img_cmd info -f $LV->{'format'} $lv");
+                    unless( $e == 0 ){
+                        return retErr("_ERR_LIST_SNAPSHOTS_","Error list snapshots: $m");
+                    }
+                    my $go_snapshots = 0;
+                    for my $l (split(/\r?\n/,$m)){
+                        if( $l =~ m/Snapshot list:/ ){     # go to snapshot list
+                            $go_snapshots = 1;
+                        }
+                        if( $go_snapshots ){
+                            if( $l =~ m/^(\d+)\s+(.+)\s+(\d+)\s+(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s+(\d{2}:\d{2}:\d{2}.\d{3})$/ ){
+                                my ($id,$snapshot,$size,$date,$vmclock) = ($1,$2,$3,$3,$4);
+                                push(@list_snapshots, { 'id'=>$id, 'name'=>trim($snapshot), 'size'=>$size, 'date'=>$date, 'vmclock'=>$vmclock });
+                            }
+                        }
+                    }
+                } else {
+                    return retErr('_ERR_LIST_SNAPSHOTS_',"Cant list snapshots: the volume format does not support snapshots.");
+                }
+            } else {
+                return retErr('_ERR_LIST_SNAPSHOTS_',"Cant list snapshots: not qemu-img available.");
+            }
+        } else {
+            # TODO
+            #if( $LV->{'volumetype'} eq 'origin' ){
+            #    @list_snapshots = ( grep { $_->{'snapshot'} && ( $_->{'vg'} eq $LV->{'vg'} ) && ( $_->{'origin'} eq $LV->{'lv'} ) } values %LVInfo );
+            #}
+            return retErr('_ERR_LIST_SNAPSHOTS_',"Cant list snapshots: this logical volume $lv does not support snapshots.");
+        }
+    } else {
+        return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $lv");
+    }
+
+    return wantarray() ? @list_snapshots : \@list_snapshots;
+}
+
+=item convertformat
+
+convert volume to specific format
+
+    my $OK = VirtAgent::Disk->convertformat( olv=>$lv, dlv=>$newlv, format=>$format );
+
+=cut
+
+# convertformat
 #   convert volume to specific format
 #
 #   args: olv,dlv,format
 #   res: ok || Error
 #
-sub lvconvert {
+sub convertformat {
     my $self = shift;
     my ($olv,$dlv,$format) = my %p = @_;
 
@@ -2669,10 +2949,19 @@ sub lvconvert {
             return retErr('_ERR_LVCONVERT_',"Volume already in this format: $format.");
         }
 
-        if( $LV->{'vg'} eq '__DISK__' ){
+        if( 1 || $LV->{'vg'} eq '__DISK__' ){
             # do this usign qemu-img if available
             if( &have_qemu_img() ){
                 my $qemu_img_cmd = &qemu_img_cmd();
+
+                if( ($format ne 'host_device') && ($format ne 'raw') ){
+                    # force to check format with qemu-img
+                    my ($e0,$m0) = cmd_exec("$qemu_img_cmd info -f $format $olv");
+                    if( ($e0 == 0) && ($m0 =~ m/file format: $format/gs) ){
+                        return retErr('_ERR_LVCONVERT_',"Volume already in this format: $format.");
+                    }
+                }
+
                 my ($e,$m) = cmd_exec("$qemu_img_cmd convert -O $format $olv $dlv");
                 unless( $e == 0 ){
                     return retErr("_ERR_LVCONVERT_","Error converting volume: $m");
@@ -2688,6 +2977,81 @@ sub lvconvert {
         return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $olv");
     }
     $self->loaddiskdev(1);  # update disk device info
+    # TODO change this
+    return retOk("_OK_","ok");
+}
+
+=item backupsnapshot
+
+    backup snapshot to standalone file
+
+    my $OK = VirtAgent::Disk->backupsnapshot( olv=>$lv, slv=>$snapshot, backup=>$backupfile );
+
+=cut
+
+sub backupsnapshot {
+    my $self = shift;
+    my ($olv,$slv,$name,$tag,$backup) = my %p = @_;
+
+    if( $p{'olv'} || $p{'slv'} || $p{'tag'} || $p{'name'} || $p{'backup'} ){
+        $olv = $p{'olv'};
+        $slv = $p{'slv'};
+        $tag = $p{'tag'};
+        $name = $p{'name'};
+        $backup = $p{'backup'};
+    }
+
+    $self->loaddiskdev();
+
+    if( my $LV = $self->getlv( 'device'=>$olv, %p ) ){
+        $olv = $LV->{'device'};
+        if( $p{'use_qemu'} || 
+                    ( $LV->{'format'} eq 'qcow2' ) ||   # only qcow2 format support snapshots
+                    ( $LV->{'vg'} eq '__DISK__' ) ){
+
+            # do this usign qemu-img if available
+            if( &have_qemu_img() ){
+                if( $LV->{'format'} eq 'qcow2' ){   # only qcow2 format support snapshots
+                    if( !$slv ){
+                        $slv = $name || $tag;
+                    }
+                    my $qemu_img_cmd = &qemu_img_cmd();
+                    #qemu-img2 convert -f qcow2 -O qcow2 -s $date $filename.qcow2 $filename-$date.qcow2
+                    my ($e,$m) = cmd_exec("$qemu_img_cmd convert -f qcow2 -O qcow2 -s $slv $olv $backup");
+                    unless( $e == 0 ){
+                        return retErr("_ERR_BACKUP_SNAPSHOT_","Error backup snapshot: $m");
+                    }
+                } else {
+                    return retErr('_ERR_BACKUP_SNAPSHOT_',"Cant backup snapshot: the volume format does not support snapshots.");
+                }
+            } else {
+                return retErr('_ERR_BACKUP_SNAPSHOT_',"Cant backup snapshot: not qemu-img available.");
+            }
+        } else {
+
+            if( !$slv ){
+                if( $name ){
+                    $slv = "$LV->{'device'}-$name";
+                } elsif( $tag ){
+                    $slv = "$LV->{'device'}-$tag";
+                }
+            }
+
+            my $bs = "512";
+            $bs = "10M" if( $LV->{'size'} > (10 * 1024 * 1024) ); # if greater then 10Mb
+            my ($e,$m) = cmd_exec("/bin/dd if=$slv of=$backup bs=$bs");
+
+            # TODO testing error cmd
+            unless( $e == 0 || $e == -1 ){
+                return retErr("_ERR_BACKUP_SNAPSHOT_","Error backup snapshot: $m");
+            }
+        }
+    } else {
+        return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $olv");
+    }
+
+    $self->loaddiskdev(1);  # update disk device info
+
     # TODO change this
     return retOk("_OK_","ok");
 }
@@ -2970,6 +3334,110 @@ sub device_remove {
     }
 
     return retOk("_OK_DEVICE_REMOVE_","Device successfully removed.");
+}
+
+sub lookup_fc_devices {
+    my $self = shift;
+
+    my $fc_bdir = '/sys/class/scsi_host';
+
+    my $pbefore = &get_fc_partitions();
+
+    for my $fc (&detect_fcs($fc_bdir)) {
+        &scan_fc($fc);
+    }
+
+    my $pafter = &get_fc_partitions();
+
+    my %NewFcDevices = ();
+    for my $uid (keys %$pafter) {
+        next if(exists $pbefore->{"$uid"});  # ignore old ones
+
+        $NewFcDevices{"$uid"} = $pafter->{"$uid"};
+
+        plog("Found new volume '$uid' with device(s): " . join(' ', @{$pafter->{$uid}}) ) if( &debug_level > 3 );
+        my $log = <<EOF;
+        multipath {
+            wwid			$uid
+            alias			<nome>
+        }
+EOF
+        plog("$log") if( &debug_level > 3 );
+    }
+
+    # load disk dev info
+    $self->loaddiskdev(1);
+}
+
+####################################################################
+
+sub detect_fcs {
+	my $dir = shift();
+	my @res;
+
+	if( opendir(DIR, $dir) ){
+        while(my $d = readdir(DIR)) {
+            # skip rubish
+            next unless($d =~ /^host\d+$/);
+
+            # skip hosts without description
+            next unless(-r "$dir/$d/model_desc");
+
+            # test model_desc
+            open(FILE, "<", "$dir/$d/model_desc");
+            my $str = <FILE>;
+            close(FILE);
+
+            # TODO improve this
+            next unless($str =~ /qlogic/i || $str =~ /FC Expansion Card/i || $str =~ /QLE220/ || $str =~ /Fibre Channel Mezzanine HBA/);
+
+            push(@res, $d);
+        }
+        closedir(DIR);
+    } else {
+        plog "Can't open $dir: $!";
+    }
+
+	return(@res);
+}
+
+sub scan_fc {
+	my $fc = shift();
+
+	my $file = "/sys/class/scsi_host/$fc/scan";
+
+	if( open(FILE, ">", $file) ){
+        plog("Scanning $fc...") if( &debug_level > 3 );
+        print FILE "- - -\n";
+        close(FILE);
+
+        sleep 3;
+        plog("Scanning $fc... done.") if( &debug_level > 3 );
+    } else {
+        plog("Can't open $file: $!");
+    }
+}
+
+sub get_fc_partitions {
+	my $p = {};
+	if( open my $f, '<', '/proc/partitions' ){
+        while(<$f>) {
+            chomp;
+            if(my ($disk) = /^\s*\d+\s+\d+\s+\d+\s+(sd[a-z]+)$/) {
+                my $uid = `scsi_id -p 0x83 -g -s /block/$disk`;
+                chomp($uid);
+                if(exists $p->{$uid}) {
+                    push(@{$p->{$uid}}, $disk);
+                } else {
+                    $p->{$uid} = [$disk];
+                }
+            }
+        }
+        close $f;
+    } else {
+        plog("Can't read from /proc/partitions.");
+    }
+	return $p;
 }
 
 1;

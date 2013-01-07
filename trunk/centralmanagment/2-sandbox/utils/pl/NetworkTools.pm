@@ -57,7 +57,7 @@ sub active_ip_conf {
             } else {
                 system("/usr/bin/killall dhclient >/dev/null 2>&1");
                 sleep(1);
-                system("/sbin/dhclient $p{'if'} >/dev/null 2>&1");
+                system("/sbin/dhclient -nw $p{'if'} >/dev/null 2>&1");
             }
         } else {
             # stop dhclient process

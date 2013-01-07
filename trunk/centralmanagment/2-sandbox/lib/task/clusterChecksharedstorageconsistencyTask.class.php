@@ -50,7 +50,7 @@ EOF;
     $clusters = EtvaClusterPeer::doSelect(new Criteria());
     foreach ($clusters as $cluster){
 
-        $bulk_response_lvs = $cluster->soapSend('getlvs',array('force'=>1));
+        $bulk_response_lvs = $cluster->soapSend('getlvs_arr',array('force'=>1));
         $bulk_response_dtable = $cluster->soapSend('device_table');
 
         $lv_va = new EtvaLogicalvolume_VA();
@@ -61,15 +61,31 @@ EOF;
                 $lvs = (array) $node_response['response'];
                 $node = EtvaNodePeer::retrieveByPK($node_id); 
 
-                $consist = $lv_va->check_shared_consistency($node,$lvs);
+                //$consist = $lv_va->check_shared_consistency($node,$lvs);
                 
                 $response_dtable = (array)$bulk_response_dtable[$node_id];
+                $dtable = array();
                 if( $response_dtable['success'] ){
                     $dtable = (array)$response_dtable['response'];
-                    $consist_dtable = $lv_va->check_shared_devicetable_consistency($node,$dtable,$bulk_response_dtable);
+                    //$consist_dtable = $lv_va->check_shared_devicetable_consistency($node,$dtable,$bulk_response_dtable);
                 }
 
-                if( !$consist || !$consist_dtable ){
+                $check_res = $lv_va->check_consistency($node,$lvs,$dtable,$bulk_response_dtable);
+
+
+                if( !$check_res['success'] ){
+                    $err = $check_res['errors'];
+                    $msg = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>''));
+
+                    $err_msg = sprintf( " node with id=%s is not consistent: %s \n", $node_id, $msg );
+                    $errors[] = array( 'message'=> $err_msg, 'debug'=>$err );
+                    $affected++;
+                    $node->setErrorMessage(EtvaLogicalvolume_VA::LVINIT);
+                } else {
+                    $node->clearErrorMessage(EtvaLogicalvolume_VA::LVINIT);
+                }
+
+                /*if( !$consist || !$consist_dtable ){
                     $errors = $lv_va->get_missing_lv_devices();
                     $msg = $errors ? $errors['message'] :
                                     sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>''));
@@ -80,6 +96,37 @@ EOF;
                     $node->setErrorMessage(EtvaLogicalvolume_VA::LVINIT);
                 } else {
                     $node->clearErrorMessage(EtvaLogicalvolume_VA::LVINIT);
+                }*/
+
+            } else {
+                $errors[] = $node_response;
+                $affected++;
+            }
+        }
+
+        $bulk_response_pvs = $cluster->soapSend('hash_phydisks',array('force'=>1));
+
+        $pv_va = new EtvaPhysicalvolume_VA();
+
+        foreach($bulk_response_pvs as $node_id =>$node_response){
+            if($node_response['success']){ //response received ok
+
+                $pvs = (array) $node_response['response'];
+                $node = EtvaNodePeer::retrieveByPK($node_id); 
+
+                $check_res = $pv_va->check_consistency($node,$pvs);
+
+
+                if( !$check_res['success'] ){
+                    $err = $check_res['errors'];
+                    $msg = sfContext::getInstance()->getI18N()->__(EtvaPhysicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>''));
+
+                    $err_msg = sprintf( " node with id=%s is not consistent: %s \n", $node_id, $msg );
+                    $errors[] = array( 'message'=> $err_msg, 'debug'=>$err );
+                    $affected++;
+                    $node->setErrorMessage(EtvaPhysicalvolume_VA::PVINIT);
+                } else {
+                    $node->clearErrorMessage(EtvaPhysicalvolume_VA::PVINIT);
                 }
 
             } else {
@@ -88,18 +135,36 @@ EOF;
             }
         }
 
+        $bulk_responses_vgs = $cluster->soapSend('getvgpvs',array('force'=>1));
+
+        $vg_va = new EtvaVolumegroup_VA();
+
+        foreach($bulk_response_vgs as $node_id =>$node_response){
+            if($node_response['success']){ //response received ok
+
+                $vgs = (array) $node_response['response'];
+                $node = EtvaNodePeer::retrieveByPK($node_id); 
+
+                $check_res = $vg_va->check_consistency($node,$vgs);
+
+                if( !$check_res['success'] ){
+                    $err = $check_res['errors'];
+                    $msg = sfContext::getInstance()->getI18N()->__(EtvaVolumegroupPeer::_ERR_INCONSISTENT_,array('%info%'=>''));
+
+                    $err_msg = sprintf( " node with id=%s is not consistent: %s \n", $node_id, $msg );
+                    $errors[] = array( 'message'=> $err_msg, 'debug'=>$err );
+                    $affected++;
+                    $node->setErrorMessage(EtvaVolumegroup_VA::VGINIT);
+                } else {
+                    $node->clearErrorMessage(EtvaVolumegroup_VA::VGINIT);
+                }
+
+            } else {
+                $errors[] = $node_response;
+                $affected++;
+            }
+        }
     }
-
-    if($clusters)
-    {
-        $message = sprintf('%d Clusters(s) could not be checked for shared storage consistency.\nErrors: %s ', $affected, print_r($errors,true));
-
-        if($affected > 0)
-            $context->getEventDispatcher()->notify(
-                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-    }
-
 
     if(!empty($errors)){
         $this->log( $message );

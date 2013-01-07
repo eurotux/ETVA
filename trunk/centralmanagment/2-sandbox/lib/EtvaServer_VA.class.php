@@ -5,15 +5,26 @@
 class EtvaServer_VA
 {
     const SERVER_CREATE = 'create_vm';
+    const SERVER_START = 'start_vm';
+    const SERVER_STOP = 'vmStop';
     const SERVER_EDIT = 'reload_vm';
     const SERVER_REMOVE = 'vmDestroy';
     const SERVER_MIGRATE = 'migrate_vm';
     const SERVER_MOVE = 'move';
     const SERVER_GET = 'get_vm';
+    const SERVER_GA_INFO = 'refreshGAInfo';
+    const SERVER_PLONE_PACK = 'plone_pack_may_fork';
+    const SERVER_LIST_SNAPSHOTS = 'vm_list_snapshots';
+    const SERVER_CREATE_SNAPSHOT = 'vm_create_snapshot_may_fork';
+    const SERVER_REVERT_SNAPSHOT = 'vm_revert_snapshot_may_fork';
+    const SERVER_REMOVE_SNAPSHOT = 'vm_remove_snapshot_may_fork';
 
     private $etva_server;
     private $collNetworks;
     private $collDisks;
+    private $collDevices;
+    private $disks_changed;
+    private $networks_changed;
 
     public function EtvaServer_VA(EtvaServer $etva_server)
     {
@@ -30,19 +41,19 @@ class EtvaServer_VA
 
         $params = array('uuid'=>$etva_server->getUuid(),'keep_fs' =>$keep_fs);
         
-        if( !$etva_server->getUnassigned() )
+        if( !$etva_server->getUnassigned() ){
             $response = $etva_node->soapSend($method,$params);
-        else
+        } else {
             $response = array('success'=>true);
+        }
 
         $result = $this->processRemoveResponse($etva_node,$response,$method,$keep_fs);
         return $result;
     }
 
     // update remove Logical Volumes on each node
-    private function updateRemovedLogicalVolumes($server_lvs){
+    private function updateRemovedLogicalVolumes(EtvaNode $etva_node, $server_lvs){
         $etva_server = $this->etva_server;
-        $etva_node = $etva_server->getEtvaNode();
 
         $etva_cluster = $etva_node->getEtvaCluster();
 
@@ -57,6 +68,30 @@ class EtvaServer_VA
 
         $lv_va = new EtvaLogicalvolume_VA();
         $lv_va->send_update($etva_node);
+    }
+
+    private function removeLogicalVolumes(EtvaNode $etva_node, $server_lvs=null){
+        if(!$server_lvs) $server_lvs = $this->etva_server->getEtvaLogicalvolumes();
+
+        foreach( $server_lvs as $logicalvol ){
+            $node = $etva_node;
+            if( $logicalvol->getStorageType() != EtvaLogicalvolume::STORAGE_TYPE_LOCAL_MAP ){
+                $node = EtvaNodePeer::ElectNode($etva_node);
+            }
+
+            $lvdevice = $logicalvol->getLvdevice();
+            $etva_vg = $logicalvol->getEtvaVolumegroup();
+            $vgname = $etva_vg->getVg();
+
+            // send soap request
+            $response = $node->soapSend(EtvaLogicalvolume_VA::LVREMOVE, array( 'lv' => $lvdevice, 'vg' => $vgname));
+            if( !$response['success'] ){
+                Etva::makeNotifyLogMessage($response['agent'],
+                                                        EtvaLogicalvolumePeer::_ERR_REMOVE_, array('name'=>$logicalvol->getLv(),'info'=>$response['info']),
+                                                        ServerPeer::_ERR_REMOVE_,array('%name%'=>$this->etva_server->getName()));
+            }
+        }
+        
     }
 
     public function processRemoveResponse($etva_node,$response,$method, $keep_fs)
@@ -86,6 +121,13 @@ class EtvaServer_VA
         $server_lvs = $etva_server->getEtvaLogicalvolumes();
         $has_shared_lvs = $etva_server->hasSharedLogicalvolume();
 
+        /*
+         * if server is unassigned and choose not keep fs, need remove lvs by hand
+         */
+        if( !$keep_fs && $etva_server->getUnassigned() ){
+            $this->removeLogicalVolumes($etva_node,$server_lvs);
+        }
+
         switch($method){
             case self::SERVER_REMOVE :
                                         $etva_server->deleteServer($keep_fs);
@@ -101,9 +143,8 @@ class EtvaServer_VA
          * if has an shared lv send bulk update to nodes...
          */
         if($has_shared_lvs && !$keep_fs){
-            $this->updateRemovedLogicalVolumes($server_lvs);
+            $this->updateRemovedLogicalVolumes($etva_node,$server_lvs);
         }
-
 
         $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_OK_REMOVE_,array('%name%'=>$server_name,'%info%'=>$returned_status));
 
@@ -145,9 +186,9 @@ class EtvaServer_VA
         $this->buildServer($method);
 
         $params = $etva_server->_VA();
-        
 
         $response = $etva_node->soapSend($method,$params);
+        error_log("[INFO] Send_create params sended to server ".print_r($params, true));
         $result = $this->processCreateResponse($etva_node,$response);
         return $result;
     }
@@ -183,9 +224,11 @@ class EtvaServer_VA
         //update some data from agent response
         $etva_server->initData($returned_object);
 
-        $etva_server->setEtvaNode($etva_node);
+        $etva_server->setEtvaCluster($etva_node->getEtvaCluster());
+        //$etva_server->setEtvaNode($etva_node);
         $etva_server->save();
 
+        $etva_server->assignTo($etva_node);
 
         $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_OK_CREATE_,array('%name%'=>$server_name));
         $message = Etva::getLogMessage(array('name'=>$server_name), EtvaServerPeer::_OK_CREATE_);
@@ -214,11 +257,10 @@ class EtvaServer_VA
         /*
          * process networks
          */
-        $networks_changed = isset($server_data['networks']);
+        $this->networks_changed = isset($server_data['networks']);
 
-        if($networks_changed)
+        if($this->networks_changed)
         {
-
             $check_nics_available = $this->check_nics_availability($etva_node, $server_data['networks'],$method);
             if(!$check_nics_available['success']) return $check_nics_available;
 
@@ -232,28 +274,60 @@ class EtvaServer_VA
 
         }
 
+        /*
+         * process devices
+         */
+        $devices_changed = isset($server_data['devices']);
 
-        $disks_changed = isset($server_data['disks']);
-        $disks = $server_data['disks'];
+        if($devices_changed)
+        {
+                // ensure if devices are not attached to other vms
+                $devs_in_use = EtvaNodePeer::getDevicesInUse($etva_node, $etva_server);
+                $srv_name = $etva_server->getName();
+                
+                foreach($server_data['devices'] as $k => $dev){
+                         
+                    // check if device is already attached
+                    $testid = $dev['idvendor'].$dev['idproduct'].$dev['type'];
+                    foreach($devs_in_use as $du){
+                        if($du == $testid){
+//                            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_DEVICE_ATTACHED_,array('%dev%'=>$dev['description']));
+                            $error = EtvaNodePeer::_ERR_DEVICE_ATTACHED_;
+                            $response = array('success'=>False, 'error'=>$error, 'agent'=>$srv_name, 'dev'=>$dev['description']);
+                            return $response;
+                        }
+                    }
+                }
 
-        // if disks data was changed and there is no disks to associate with server return error.
-        if($disks_changed && empty($disks)){
-
-            $error_decoded = $response['error'];
-
-            $result = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>'No disks found');
-
-            return  $result;
-
+//            $check_nics_available = $this->check_nics_availability($etva_node, $server_data['devices'],$method);
+//            if(!$check_nics_available['success']) return $check_nics_available;
+//
+            $check_devs_available = $this->check_devices_availability($etva_node, $server_data['devices'],$method);
+            if(!$check_devs_available['success']) return $check_devs_available;
+//            
+        }else
+        {
+            /*
+             * clone devices and add to server copy
+             */
+            $devices = $orig_server->getDevices();
+            $etva_server->setDevices($devices);
         }
 
+        /*
+         * process disks
+         */
+        $this->disks_changed = isset($server_data['disks']);
+        $disks = $server_data['disks'];
 
-        if($disks_changed)
+        if($this->disks_changed)
         {
+
             /*
              * create disks objects and add to server copy
              */
             $check_disks_available = $this->check_disks_availability($etva_node, $server_data['disks'], $method);
+
             //error processing parameters
             if(!$check_disks_available['success']) return $check_disks_available;
         }
@@ -263,16 +337,14 @@ class EtvaServer_VA
              * clone disks and add to server copy
              */
             $disks = $orig_server->getEtvaServerLogicals();
-            foreach($disks as $disk) $etva_server->addEtvaServerLogical($disk);
-
+            foreach($disks as $disk){
+                $etva_server->addEtvaServerLogical($disk);
+            }
         }
-
-
 
         $this->buildServer($method);
 
         $params = $etva_server->_VA();
-
         if( $etva_server->getVmState() == 'running' )
             $params['live'] = 1;
 
@@ -283,6 +355,7 @@ class EtvaServer_VA
 
         $result = $this->processEditResponse($etva_node,$orig_server,$response);
         return $result;
+
     }
 
     public function processEditResponse($etva_node,$orig_server,$response)
@@ -292,21 +365,11 @@ class EtvaServer_VA
 
         if(!$response['success']){
 
-            $error_decoded = $response['error'];
-
             $result = $response;
-
-            $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_ERR_EDIT_,array('%name%'=>$server_name,'%info%'=>$error_decoded));
+            $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
+                                                        EtvaServerPeer::_ERR_EDIT_,array('name'=>$server_name,'info'=>$response['info']));
             $result['error'] = $msg_i18n;
-
-            //notify event log
-            $message = Etva::getLogMessage(array('name'=>$server_name,'info'=>$response['info']), EtvaServerPeer::_ERR_EDIT_);
-            sfContext::getInstance()->getEventDispatcher()->notify(
-                new sfEvent($response['agent'], 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-
             return $result;
-
         }
 
         /*
@@ -314,10 +377,15 @@ class EtvaServer_VA
          */
 
         /* remove server networks if networks have changed */
-        if($this->collNetworks) $orig_server->deleteNetworks();
+        if($this->networks_changed){
+            $orig_server->deleteNetworks();
+            error_log("DELETING NETWORKS");
+        }
 
         // if disk data has been changed removed old disks references and keep lvs,
-        if($this->collDisks) $orig_server->deleteDisks(true);                
+        if($this->disks_changed){
+            $orig_server->deleteDisks(true);               
+        }
 
         // get some info from response...
         $response_decoded = (array) $response['response'];
@@ -381,9 +449,14 @@ class EtvaServer_VA
 
 
         foreach($this->collNetworks as $coll) $etva_server->addEtvaNetwork($coll);
+        foreach($this->collDisks as $coll){
+            $etva_server->addEtvaServerLogical($coll);        
+        }
 
-        foreach($this->collDisks as $coll) $etva_server->addEtvaServerLogical($coll);        
-
+        if( isset($this->collDevices) ){
+            $str = json_encode($this->collDevices);
+            $etva_server->setDevices($str);
+        }
     }
 
 
@@ -465,6 +538,16 @@ class EtvaServer_VA
 
     }
 
+
+    /**
+      * Devices already decoded
+      */
+    public function check_devices_availability($etva_node, $devices, $method)
+    {
+        $etva_server = $this->etva_server;
+        $this->collDevices = $devices;
+        return array('success'=>true);
+    }
     public function check_nics_availability($etva_node, $networks, $method)
     {
         $etva_server = $this->etva_server;
@@ -533,7 +616,8 @@ class EtvaServer_VA
         $params = array(
                     'daddr'=>$to_etva_node->getIp(),
                     'dagentname'=>$to_etva_node->getName(),
-                    'uuid'=>$this->etva_server->getUuid());
+                    'uuid'=>$this->etva_server->getUuid(),
+                    'live'=>true);  // do migrate in live mode
 
         $preCond = $this->preSend($method, $from_etva_node, $to_etva_node);
 
@@ -656,6 +740,30 @@ class EtvaServer_VA
             $message = Etva::getLogMessage(array('name'=>$etva_server->getName(),
                             'node'=>$etva_node->getName(),
                             'info'=>EtvaLogicalvolumePeer::_NOTALLSHARED_), $err);
+
+            sfContext::getInstance()->getEventDispatcher()->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            return $error;
+
+        }
+        $result = array('success'=>true);
+        return $result;
+    }
+    public function canAssignToNode($method,$etva_node){
+        $etva_server = $this->etva_server;
+
+        if(!$etva_server->canAssignTo($etva_node)){
+
+            $msg_i18n = sfContext::getInstance()->getI18N()->__($err_op,array('%name%'=>$etva_server->getName(),
+                                    '%node%'=>$etva_node->getName(),'%info%'=>EtvaServerPeer::_CANTASSIGNTO_));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            $message = Etva::getLogMessage(array('name'=>$etva_server->getName(),
+                            'node'=>$etva_node->getName(),
+                            'info'=>EtvaServerPeer::_CANTASSIGNTO_), $err);
 
             sfContext::getInstance()->getEventDispatcher()->notify(
                 new sfEvent(sfConfig::get('config_acronym'), 'event.log',
@@ -838,6 +946,91 @@ class EtvaServer_VA
 
     }
 
+    public function plonePack(EtvaNode $etva_node){
+        $etva_server = $this->etva_server;
+        $method = self::SERVER_PLONE_PACK;
+        $params = array('vmname' => $etva_server->getName());
+
+        $response = $etva_node->soapSend($method, $params);
+    
+        error_log("PLONE PACK RESPONSE");
+        error_log(print_r($response, true));
+
+        if(!$response['success']){
+            #TODO: implement
+
+            $error_decoded = $response['error'];
+            $result = $response;
+            $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_ERR_RELOAD_,array('%name%'=>$etva_server->getName(),
+                                    '%node%'=>$etva_node->getName(),'%info%'=>$error_decoded));
+            $result['error'] = $msg_i18n;
+            $message = Etva::getLogMessage(array('name'=>$etva_server->getName(),
+                            'node'=>$etva_node->getName(),
+                            'info'=>$response['info']), EtvaServerPeer::_ERR_RELOAD_);
+
+            sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($response['agent'], 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+            return $result;
+        }
+        
+        $returned_object = (array) $response['response'];
+
+        if($returned_object['success'] == 'ok'){
+            error_log("GA request well succeeded");
+            $str = json_encode($returned_object['msg']);
+            $etva_server->setGaState(EtvaServerPeer::_GA_RUNNING_);
+            $etva_server->setGaInfo($str);
+            $etva_server->save();
+        }else{
+            #TODO: treat error 
+            error_log("GA request had no success");
+            $etva_server->setGaState(EtvaServerPeer::_GA_STOPPED_);
+        }
+
+        return $response;
+    }   
+
+    public function getGAInfo(EtvaNode $etva_node){
+        $etva_server = $this->etva_server;
+        $method = self::SERVER_GA_INFO;
+        $params = array('vmname' => $etva_server->getName());
+
+        $response = $etva_node->soapSend($method, $params);
+        if(!$response['success']){
+            #TODO: implement
+
+            $error_decoded = $response['error'];
+            $result = $response;
+
+            $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
+                                                        EtvaServerPeer::_ERR_GAUPDATE_, array('name'=>$etva_server->getName(),'info'=>$error_decoded));
+            $result['error'] = $msg_i18n;
+            return $result;
+        }
+        
+        $returned_object = (array) $response['response'];
+
+        if($returned_object['success'] == 'ok'){
+            error_log("GA request well succeeded");
+            $str = json_encode($returned_object['msg']);
+            if( $returned_object['msg'] ){
+                $etva_server->setGaState(EtvaServerPeer::_GA_RUNNING_);
+            } else {
+                $etva_server->setGaState(EtvaServerPeer::_GA_NOSTATE_);
+            }
+            $etva_server->setGaInfo($str);
+        }else{
+            #TODO: treat error 
+            error_log("GA request had no success");
+            $etva_server->setGaState(EtvaServerPeer::_GA_STOPPED_);
+        }
+        $etva_server->save();
+
+        $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
+                                                    EtvaServerPeer::_OK_GAUPDATE_, array('name'=>$etva_server->getName()),
+                                                    null,array(),EtvaEventLogger::INFO);
+        $result = array('success'=>true,'agent'=>$response['agent'],'response'=>$msg_i18n, 'ga_state'=>$etva_server->getGaState() );
+        return $result;
+    }
 
     public function reloadVm(EtvaNode $etva_node)
     {
@@ -872,7 +1065,12 @@ class EtvaServer_VA
         $returned_object = (array) $response['response'];
 
         $etva_server->initData($returned_object);
-        $etva_server->setEtvaNode($etva_node);
+        $etva_server->setEtvaCluster($etva_node->getEtvaCluster());
+        //$etva_server->setEtvaNode($etva_node);
+
+        $etva_server->save();
+
+        $etva_server->assignTo($etva_node);
 
         //update agent free memory only if not stopped
         if( $etva_server->getVmState() != 'stop' ){
@@ -881,9 +1079,6 @@ class EtvaServer_VA
             $etva_node->setMemfree($cur_free);
             $etva_node->save();
         }
-
-        $etva_server->save();
-
 
         $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_OK_RELOAD_,array('%name%'=>$etva_server->getName(),
                                     '%node%'=>$etva_node->getName()));
@@ -958,17 +1153,24 @@ class EtvaServer_VA
     public function send_assign(EtvaNode $to_etva_node){
         $etva_server = $this->etva_server;
 
+        $from_etva_node = $etva_server->getEtvaNode();
+
         $etva_server->setUnassigned(0);   // mark server as unassigned
 
         $method = self::SERVER_MOVE;
+        $err_op = EtvaServerPeer::_ERR_ASSIGNED_;
 
         $preHaveMem = $this->haveMemoryAvailable($method,$to_etva_node);
         if( !$preHaveMem['success'] ) return $preHaveMem;
 
-        $from_etva_node = $etva_server->getEtvaNode();
-        if( $from_etva_node->getId() != $to_etva_node->getId() ){       // if different nodes
-            $preHaveAllShared = $this->haveAllSharedLogicalvolumes($method,$to_etva_node);
-            if( !$preHaveAllShared['success'] ) return $preHaveAllShared;
+        if( $from_etva_node ){
+            if( $from_etva_node->getId() != $to_etva_node->getId() ){       // if different nodes
+                $preHaveAllShared = $this->haveAllSharedLogicalvolumes($method,$to_etva_node);
+                if( !$preHaveAllShared['success'] ) return $preHaveAllShared;
+            }
+        } else {
+            $preCanAssign = $this->canAssignToNode($method,$to_etva_node);
+            if( !$preCanAssign['success'] ) return $preCanAssign;
         }
 
         $params = $etva_server->_VA();
@@ -1021,5 +1223,166 @@ class EtvaServer_VA
         }
 
         return $update_node_server;
+    }
+
+    public function send_stop(EtvaNode $etva_node,$extra=null){
+        $etva_server = $this->etva_server;
+        $method = self::SERVER_STOP;
+
+        $params = $extra ? $extra : array();
+        $params['uuid'] = $etva_server->getUuid();
+        
+        $response = $etva_node->soapSend($method,$params);
+        return $this->processStartStop($etva_node,$response,$method);
+    }
+    public function send_start(EtvaNode $etva_node, $extra=null){
+        $etva_server = $this->etva_server;
+        $method = self::SERVER_START;
+
+        $mem_available = $etva_node->getMemfree();
+        $server_mem_mb = $etva_server->getMem();
+        $server_mem = Etva::MB_to_Byteconvert($server_mem_mb);
+
+        error_log( " start_vm mem_available=".$mem_available." server_mem=".$server_mem);
+        if( $server_mem > $mem_available ){
+
+            //notify event log
+            $msg_i18n = Etva::makeNotifyLogMessage($error['agent'],
+                                            EtvaNodePeer::_ERR_MEM_AVAILABLE_, array('name' => $etva_node->getName(), 'info' => $server_mem_mb ),
+                                            EtvaServerPeer::_ERR_START_, array('name'=>$server));
+
+            $error = array('success'=>false,'agent'=>$etva_node->getName(),'info'=>$msg_i18n,'error'=>$msg_i18n);
+            return $error;
+        }
+
+        $etva_cluster = $etva_node->getEtvaCluster();
+        if( $etva_cluster->getHasNodeHA() ){
+            $admissiongate_response = $etva_cluster->getAdmissionGate( $etva_server );
+            if( !$admissiongate_response['success'] ){
+
+                //notify event log
+                $msg_i18n = Etva::makeNotifyLogMessage($error['agent'],
+                                                EtvaClusterPeer::_ERR_ADMISSION_GATE_FAIL_, array('name' => $etva_server->getName(), 'info' => $admissiongate_response['info'] ),
+                                                EtvaServerPeer::_ERR_START_, array('name'=>$server));
+
+                $error = array('success'=>false,'agent'=>$etva_node->getName(),'info'=>$msg_i18n,'error'=>$msg_i18n);
+                return $error;
+            }
+        }
+
+        $params = $extra ? $extra : array();
+        $params['uuid'] = $etva_server->getUuid();
+        
+        $boot = $etva_server->getBoot(); 
+        $location = $etva_server->getLocation(); 
+        $vm_type = $etva_server->getVmType(); 
+        $first_boot = $etva_server->getFirstBoot(); 
+        
+        if($first_boot){ 
+            $params['first_boot'] = $first_boot; 
+            if($location && $vm_type=='pv') $boot = 'location'; 
+        } 
+        
+        $params['boot'] = $boot; 
+        if($boot=='location' || $boot=='cdrom') $params['location'] = $location; 
+        $params['vnc_keymap'] = $etva_server->getVncKeymap(); 
+
+        $response = $etva_node->soapSend($method,$params);
+        return $this->processStartStop($etva_node,$response,$method);
+    }
+    protected function processStartStop(EtvaNode $etva_node, $response, $method )
+    {
+
+        $etva_server = $this->etva_server;
+
+        switch($method){
+            case self::SERVER_START :
+                                $msg_ok_type = EtvaServerPeer::_OK_START_;
+                                $msg_err_type = EtvaServerPeer::_ERR_START_;
+                                break;
+            case self::SERVER_STOP :
+                                $msg_ok_type = EtvaServerPeer::_OK_STOP_;
+                                $msg_err_type = EtvaServerPeer::_ERR_STOP_;                                
+                                break;
+        }
+        if(!$response['success']){
+            $result = $response;
+            $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
+                                                        $msg_err_type, array('name'=>$etva_server->getName(),'info'=>$response['error']));
+            $result['error'] = $msg_i18n;
+            return $result;
+        }
+
+        $response_decoded = (array) $response['response'];
+        $returned_status = $response_decoded['_okmsg_'];
+        $returned_object = (array) $response_decoded['_obj_'];
+
+        // get some info from response...
+
+        //update some server data from agent response
+        $etva_server->initData($returned_object);
+        $etva_server->setFirstBoot(0);
+        
+        if($first_boot) $etva_server->setBoot('filesystem');
+        else{
+            $boot_field = $etva_server->getBoot();
+            switch($boot_field){
+                case 'filesystem' :
+                case 'pxe'        :
+                                    if(!$etva_server->getCdrom()) $etva_server->setLocation(null);
+                                    break;
+            }
+        }
+
+        switch($method){
+            case self::SERVER_START :
+                                    $etva_server->setHblaststart('NOW');    // update hb last start
+                                    break;
+        }
+        $etva_server->save();
+
+        // update free memory
+        $etva_node->updateMemFree();
+        $etva_node->save();
+
+        //notify event log
+        $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
+                                                        $msg_ok_type, array('name'=>$etva_server->getName()),
+                                                        null,array(),EtvaEventLogger::INFO);
+
+        $result = array('success'=>true,'agent'=>$response['agent'],'response'=>$msg_i18n);
+
+        return $result;
+    }
+    public function get_list_snapshots(EtvaNode $etva_node){
+        $response = $etva_node->soapSend(self::SERVER_LIST_SNAPSHOTS,array('uuid'=>$this->etva_server->getUuid(),'name'=>$this->etva_server->getName()));
+        if( $response['success'] ){
+            $elems = $response['response'];
+
+            if( count($elems) && !$this->etva_server->getHassnapshots() ){
+                $this->etva_server->setHassnapshots(1);
+                $this->etva_server->save();
+            } else if( !count($elems) && $this->etva_server->getHassnapshots() ) {
+                $this->etva_server->setHassnapshots(0);
+                $this->etva_server->save();
+            }
+        }
+        return $response;
+    }
+    public function create_snapshot(EtvaNode $etva_node,$snapshot){
+        $response =$etva_node->soapSend(self::SERVER_CREATE_SNAPSHOT,array('uuid'=>$this->etva_server->getUuid(),'name'=>$this->etva_server->getName(),'snapshot'=>$snapshot));
+        if( $response['success'] ){
+            if( !$this->etva_server->getHassnapshots() ){
+                $this->etva_server->setHassnapshots(1);
+                $this->etva_server->save();
+            }
+        }
+        return $response;
+    }
+    public function revert_snapshot(EtvaNode $etva_node,$snapshot){
+        return $etva_node->soapSend(self::SERVER_REVERT_SNAPSHOT,array('uuid'=>$this->etva_server->getUuid(),'name'=>$this->etva_server->getName(),'snapshot'=>$snapshot));
+    }
+    public function remove_snapshot(EtvaNode $etva_node,$snapshot){
+        return $etva_node->soapSend(self::SERVER_REMOVE_SNAPSHOT,array('uuid'=>$this->etva_server->getUuid(),'name'=>$this->etva_server->getName(),'snapshot'=>$snapshot));
     }
 }

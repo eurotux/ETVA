@@ -10,27 +10,38 @@ The main frame of Central Management consists in four areas:
 	\item[Information panel (at bottom) -] This areas shows the volatile information about any operations made on the interface. Here we can found the success of the operations.
 \end{description}
 
-\begin{figure}[H]
-	\begin{center}
-	\includegraphics[scale=0.45]{screenshots/principal.png}
-	\caption{Main layout}
-	\label{fig:principal}
-	\end{center}
+\opt{etvm}{
+ \begin{figure}[H]
+    \begin{center}
+   \includegraphics[scale=0.45]{screenshots/principal_nuxis.png}
+   \caption{Layout principal}
+   \label{fig:principal}
+   \end{center}
 \end{figure}
+}
+\opt{etva}{
+\begin{figure}[H]
+   \begin{center}
+    \includegraphics[scale=0.45]{screenshots/principal.png}
+    \caption{Layout principal}
+    \label{fig:principal}
+    \end{center}
+ \end{figure}
+}
 
 \pagebreak
 
 
 \section{First access}
 \label{sec:first_access}
-After the installation, the CM can be accessed on the web browser by entering the address http://<IP ADDRESS>\footnote{The ip address is specified during the installation process \opt{etva}{
-, described in Chapter \ref{chp:installation}}
+After the installation, the CM can be accessed on the web browser by entering the address http://<IP ADDRESS>\footnote{The ip address is specified during the installation process\opt{etva}{
+ , described in Chapter \ref{chp:installation}}
 .}
 
 \opt{etvm}{
     \begin{figure}[H]
     \begin{center}
-    \includegraphics[scale=0.7]{screenshots/login_etvm.png}
+    \includegraphics[scale=0.7]{screenshots/login_nuxis.png}
     \caption{Authentication window}
     \label{fig:login}
     \end{center}
@@ -74,6 +85,7 @@ On the left panel, see Figure \ref{fig:principal}, will appear the virtualizatio
 In this panel we can see an overview of the CM. The virtualization servers can be seen as well as any existing networks (see Figure \ref{fig:main_nodes}).
 
 \subsection{Nodes}
+\label{sub:nodes}
 
 In \emph{Nodes} we can see some information about the virtualization servers such as the supported hypervisor, the state of the virtualization server, among other info.
 
@@ -160,6 +172,44 @@ If we select a network interface and access to the context menu, it's possible t
 
 On the management window it's possible to select the network card's driver\footnote{This option is available on HVM or KVM machines. The available drivers are: e1000, rtl8139 e virtio}.
 
+\section{Virtual cluster}
+\label{sec:cluster}
+
+On left side panel it's possible to select a \emph{cluster}(virtual cluster) and do the following operations:
+
+\begin{itemize}
+    \item \emph{Nodes} - View information about nodes (see Section \ref{sub:nodes})
+    \item Storage - Storage management on \emph{Cluster} context (see Section \ref{sec:storage})
+    \item Networks - Network management (see Section \ref{sub:network})
+\end{itemize}
+
+In addition. it's possible to access the context menu (right click) to perform the following operations:
+\begin{itemize}
+    \item Edit cluster
+    \item Remove cluster
+\end{itemize}
+
+In \emph{Edit cluster} it's possible to change the name of \emph{cluster} and allow use to activate nodes high availability.
+\begin{figure}[H]
+       \begin{center}
+       \includegraphics[scale=0.5]{screenshots/cluster_edit.png}
+       \caption{Edit cluster}
+       \label{fig:cluster_edit}
+       \end{center}
+\end{figure}
+
+When we enable \emph{Node High availability}\footnote{The option \emph{Node High availability} will be enable only if \emph{fencing} configuration is defined for all node (see \ref{para:node_fencing_config})}, we may choose one of this options:
+
+\begin{itemize}
+    \item \emph{Host failures tolerates} - number of hosts in failure that we can garantee high availability with restrictions of resources allocation;
+    \item \emph{Percentage of resources reserved to failover} - percentage of resources reserved to garantee the high availability of critical services;
+    \item \emph{Spare node} - it's define one \emph{spare node} that will be used to garantee the high availability of one of the others nodes. This \emph{spare node} should have necessary resources to ensure the availability of critical virtual servers of fail node.
+\end{itemize}
+
+The \emph{Node High availability} provides, in failure case, the migration of the virtual servers by priority order (see figure \ref{fig:server_edit_ha}), to keep the services of this virtual servers operational.
+
+The operation \emph{Remove cluster} removes information related to \emph{cluster} (nodes, networks and storage) from the \emph{Central Management} database.
+
 % PAINEL NODE
 
 \section{Virtualization server}
@@ -175,10 +225,26 @@ On panel \emph{Nodes} it's possible to select a \emph{node}(virtualization serve
 In addition to these options, it's possible to access the context menu (right click). This menu allow us to perform the following operations:
 \begin{itemize}
     \item Load node
-    \item Connectivity options \footnote{Only available on version \emph{ETVM}}
+    \item Edit node
+    \item Remove node
+    \item Connectivity options \footnote{Only available on version \emph{NUXIS}}
     \item Change keymap
     \item Check node state
 \end{itemize}
+
+In \emph{Load node}, it's send one request to \emph{Central Management} for node state update.
+
+For operation \emph{Edit node} it's available edition of server virtualization proprieties like name and \emph{fencing} device configuration.
+\begin{figure}[H]
+       \begin{center}
+       \includegraphics[scale=0.5]{screenshots/node_edit.png}
+       \caption{Edit node}
+       \label{fig:node_edit}
+       \end{center}
+\end{figure}
+\label{para:node_fencing_config}In \emph{Enable \emph{fencing} configuration} we can activate \emph{fencing} device for node management and configure the parameters accord on following types: \emph{bladecenter}, \emph{virsh}, \emph{ilo}, \emph{ipmilan} e \emph{rsa}.
+
+The operation \emph{Remove node} removes one node from the \emph{Central Management} and delete the information related to it on database.
 
 In \emph{Connectivity options}, it's possible to configure the interface \emph{Management} that is connected with the virtualization agent. 
 \begin{figure}[H]
@@ -191,7 +257,24 @@ In \emph{Connectivity options}, it's possible to configure the interface \emph{M
 
 In \emph{Change keymap}, depending on the selected item, the virtualization server or virtual machine, it's possible to define the standard VNC keymap, or the specific virtual machine keymap.
 
-In \emph{Node state}, it's possible to request the virtualization server to check the agent connectivity.
+In \emph{Node status}, it's possible to access to subset of options:
+\begin{itemize}
+    \item Check status - it send an request to the virtualization server to check the agent connectivity
+    \item Maintenance / Recover - Put the node in maintenance/recover mode
+    \item Shutdown - it shuts node down (see Section \ref{sub:shutdown_node}).
+\end{itemize}
+
+In operation \emph{Maintenance} we able to put node in maintenance mode in order to run maintenance tasks.
+\begin{figure}[H]
+   \begin{center}
+   \includegraphics[scale=0.45]{screenshots/node_maintenance.png}
+   \caption{Node maintenance}
+   \label{fig:node_maintenance}
+   \end{center}
+\end{figure}
+When node is moved to maintenance mode, the virtual servers will be migrated by priority order (see figure \ref{fig:server_edit_ha}).
+
+The operation \emph{Recover} runs some tasks like node agent status check, connectivity and storage info consistency, before recover node from maintenance mode.
 
 \subsection{Node information}
 \label{sec:nodeinfo}
@@ -216,6 +299,7 @@ In \emph{Servers} we can see the information of every virtual machines existing 
 	\item Access virtual machine in a VNC console
 	\item Start/Stop virtual machine
     \item Migrate virtual machine
+    \item Snapshots
 \end{itemize}
 \begin{figure}[H]
 	\begin{center}
@@ -362,13 +446,14 @@ To edit a server, you choose the machine you want and click on \emph{Edit server
     \begin{quote}
         {\large \bf Note} \\*[-.8pc]
         \underline{\hspace{6in}} \\
-        If the virtual machine is like PV, it is possible to make changes to the machine running, otherwise the option is disabled, requiring that the machine is not active in order to make changes.
+        If the virtual machine is running, depending on the virtual machine type and the virtualization system, some options will be disabled, it is require stop the machine in order to make the changes.
     \end{quote}
 
 The following options are available on virtual machine configuration:
 \begin{description}
-	\item[General:] This allows change the name, memory, keymap and boot parameters of the virtual machine.
-        The boot parameters vary depending on the type of virtual machine (see Section \ref{sec:add_server_boot}).
+	\item[General:] This allows change the name, memory, number of CPUs and number of sockets, cores and threads, operating system and boot parameters.
+            The boot parameters vary depending on the virtual machine type and the virtualization system. (see Section \ref{sec:add_server_boot}).
+
 		\begin{figure}[H]
         		\begin{center}
 		        \includegraphics[scale=0.5]{screenshots/server_edit_general.png}
@@ -386,8 +471,7 @@ The following options are available on virtual machine configuration:
 	        	\end{center}
 		\end{figure}
 
-	\item[Disks:] Add/remove machine disks. The virtual machine has to have at least one associated disk.
-                To add/remove a disk, select the desired disc and drag-n-drop between the tables.
+	\item[Disks:] Add/remove machine disks. To add/remove a disk, select the desired disc and drag-n-drop between the tables.
                     
                 \begin{quote}
                     {\large \bf Note} \\*[-.8pc]
@@ -400,6 +484,49 @@ The following options are available on virtual machine configuration:
 		        \includegraphics[scale=0.5]{screenshots/server_edit_disks.png}
         		\caption{Edit server - Disks}
 		        \label{fig:server_edit_disks}
+	        	\end{center}
+		\end{figure}
+    \item[Devices:] Attach/detach USB/PCI devices into the virtual server. A device can only be associated with one virtual server. 
+                \begin{quote}
+                    {\large \bf Note} \\*[-.8pc]
+                    \underline{\hspace{6in}} \\
+                    If the virtual server have any associated devices, it cannot be migrated/move into another node of the cluster.
+                \end{quote}
+    
+       \begin{figure}[H]
+               \begin{center}
+               \includegraphics[scale=0.5]{screenshots/server_edit_devices.png}
+               \caption{Edit server - Devices}
+               \label{fig:server_edit_devices}
+               \end{center}
+       \end{figure}
+
+	\item[Other options:] Lets you set VNC options like keymap and configure ACPI, APIC and PAE flags.
+
+
+		\begin{figure}[H]
+        		\begin{center}
+		        \includegraphics[scale=0.5]{screenshots/server_edit_otheroptions.png}
+        		\caption{Edit server - Other options}
+	        	\label{fig:server_edit_otheroptions}
+	        	\end{center}
+		\end{figure}
+
+	\item[High availability:] Provides a way to configure server priority to start and to migrate and define if high availability is active on this server.
+
+
+                \begin{quote}
+                    {\large \bf Nota} \\*[-.8pc]
+                    \underline{\hspace{6in}} \\
+                    For \emph{VM High availability} we set heartbeat timeout that server should be restart if not responding.
+                        This option will be available only if the guest tools are installed on virtual machine.
+                \end{quote}
+                    
+		\begin{figure}[H]
+        		\begin{center}
+		        \includegraphics[scale=0.5]{screenshots/server_edit_ha.png}
+        		\caption{Edit server - High availability}
+	        	\label{fig:server_edit_ha}
 	        	\end{center}
 		\end{figure}
 
@@ -453,12 +580,12 @@ It's possible to choose between one of the following boot parameters to start th
 	\end{center}
 \end{figure}
 
+It's possible to choose the option \emph{Start server} \emph{With console} to allow start the server and open console.
 
 \subsubsection{Migrate virtual machine}
 \label{sec:migrate_server}
 
 Selecting a server and then clicking on \emph{Migrate server} you can migrate a machine from a \emph{node} to another, since they share the same storage.
-The migration of a virtual machine is made in the offline mode.
 
 \begin{figure}[H]
 	\begin{center}
@@ -471,9 +598,22 @@ The migration of a virtual machine is made in the offline mode.
 \begin{quote}
 	{\large \bf Note} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
-	This option is only available on \emph{ETVM}.
+	This option is only available on \emph{NUXIS}.
 \end{quote}
 
+\subsubsection{Snapshots}
+\label{sec:server_snapshots}
+
+In \emph{Snapshots} we can create one \emph{snapshot} of virtual machine state, that consists on disks snapshots and, if virtual machines is running, the state of virtual machine on that moment.
+It's also possible revert, remove or download of backup of one virtual machine snapshot.
+
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.5]{screenshots/server_snapshots.png}
+	\caption{Snapshots}
+	\label{fig:server_snapshots}
+	\end{center}
+\end{figure}
 
 \subsection{Storage}
 \label{sec:storage}
@@ -510,6 +650,7 @@ The \emph{physical volumes} administration consists of the following operations:
 \begin{itemize}
 	\item Initialize \emph{physical volume}
     \item Uninitialize \emph{physical volume}
+    \item Register/Unregister \emph{physical volume}
 \end{itemize}
 
 \begin{figure}[H]
@@ -528,6 +669,16 @@ To initialize a \emph{physical volume}, access to the sub-context menu of the de
     The \emph{physical volume} can only be removed if it does not belong to any \emph{volume group}.
 \end{quote}
 
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_device_search.png}
+        \caption{Scan \emph{physical devices} }
+        \label{fig:storage_device_search}
+        \end{center}
+\end{figure}
+
+On ''Scan \emph{physical devices}'' it is possible to run a task on virtualization agent to lookup new disks and to register them on \emph{Central Management}. It is also possible to unregister the physical device on \emph{Central Management} to get it out of system management.
+
 % ADMINISTRAÇÃO VOLUME GROUPS
 
 \subsubsection{Volume groups administration}
@@ -537,6 +688,7 @@ In the administration of \emph{volume groups} is allowed to:
 	\item Extend a \emph{volume group}
 	\item Re-size a \emph{volume group}
 	\item Remove a \emph{volume group}
+	\item Register/Unregister \emph{volume group}
 \end{itemize}
 
 \begin{figure}[H]
@@ -580,6 +732,17 @@ In the removal/reduction of a \emph{volume group}, select the \emph{volume group
 
 On Figure \ref{fig:storage_vg_extend} we extend a \emph{volume group} with a new \emph{physival volume}.
 
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_vg_search.png}
+        \caption{Scan \emph{volume groups}}
+        \label{fig:storage_vg_search}
+        \end{center}
+\end{figure}
+
+On ''Scan \emph{volume groups}'', it is possible to get \emph{volume groups} from virtualization agent and register them on \emph{Central Management}.
+Is is also possible to unregister the \emph{volume group} on \emph{Central Management} to get it out of system management.
+
 % ADMINISTRAÇÃO LOGICAL VOLUMES
 
 \subsubsection{Logical volumes administration}
@@ -589,6 +752,9 @@ The operations available on the \emph{logical volumes} are:
 	\item Create a \emph{logical volume}
 	\item Resize a \emph{logical volume}
 	\item Remove a \emph{logical volume}
+	\item Register/Unregister \emph{logical volume}
+    \item Clone \emph{logical volume}
+    \item Convert \emph{logical volume}
 \end{itemize}
 
 \begin{figure}[H]
@@ -602,6 +768,7 @@ The operations available on the \emph{logical volumes} are:
 To create a new \emph{logical volume}, we access the context menu (over any \emph{logical volume}, and select the option \emph{Add logical volume}.
 
 The pretended name should be introduced in the creation window form, such as the \emph{volume group} size. Note that the size should not exceed the \emph{volume group} available size.
+It's also possible define the format of disk (raw, cow2,qcow,cow and vmdk - raw by default) and percentage of \emph{snapshot} usage.
 
 \begin{figure}[H]
         \begin{center}
@@ -630,6 +797,20 @@ To resize a \emph{logical volume}, select and access into the context menu. The 
 
 To remove a \emph{logical volume}, access the context menu and select the option \emph{Remove logical volume}. The \emph{logical volume} will be removed if it's not assigned to any virtual machine. To verify if is in use you may pass the mouse over the \emph{logical volume} and observe the information contained in the \emph{tooltip}.
 
+We have the operation to clone one \emph{logical volume}, if \emph{volume group} have free space to do the copy.
+And we can convert the disks format to one of the formats (raw, qcow2, qcow, cow and vmdk).
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_lv_search.png}
+        \caption{Scan \emph{logical volumes}}
+        \label{fig:storage_lv_search}
+        \end{center}
+\end{figure}
+
+On ''Scan \emph{logical volumes}'' it synchronizes \emph{logical volumes} that are on virtualization agent and they are not registered on \emph{Central Management}.
+It is may be possible that exist \emph{logical volumes} that are registered on \emph{Central Management} but really don't exist for some reason.
+In this cases, it is possible remove the register from the system and get the \emph{logical volumes} synchronized with ''Scan \emph{logical volumes}''.
 
 \subsection{Node Load}
 \label{sec:nodeload}
@@ -662,6 +843,29 @@ To view other time intervals use the option \emph{Generate graph image}. The ima
 	\end{center}
 \end{figure}
 
+\subsection{Shutdown node}
+\label{sub:shutdown_node}
+Through the Central Management interface we can power off a physical node. To do so do the following steps:
+
+\begin{itemize}
+\item On the left panel, select the desired node. Then access to it's context menu;
+\item Press the option \textit{Shutdown}.
+\end{itemize}
+
+\begin{quote}
+    {\large \bf Note} \\*[-.8pc]
+    \underline{\hspace{6in}} \\
+    During the procedure, all node's virtual servers will also turned off.
+\end{quote}
+
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/shutdownnode.png}
+        \caption{Shutting down a node}
+        \label{fig:storage_lv_ctx}
+        \end{center}
+\end{figure}
 
 
 \pagebreak
@@ -687,6 +891,7 @@ In addition to displaying information, this panel lets you perform the following
 	\item Open a virtual machine in a VNC console (see Section \ref{sec:open_vnc})
 	\item Start/stop virtual machine (see Section \ref{sec:start_server})
     \item Migrate a virtual machine (see Section \ref{sec:migrate_server})
+    \item Snapshots (see Section \ref{sec:server_snapshots})
 \end{itemize}
 
 \begin{figure}[H]
@@ -1041,7 +1246,7 @@ The setup wizard, as shown in Figure \ref{fig:first_time_wizard}, consists in th
 \begin{quote}
 	{\large \bf Note} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
-	On version \emph{ETVM}, the network configuration step is omitted.
+	On version \emph{NUXIS}, the network configuration step is omitted.
 \end{quote}
 
 \opt{etvm}{
@@ -1058,7 +1263,7 @@ When we select one of the tree nodes that appears in the left panel, is shown in
 
 
 \subsubsection{Virtual cluster setup wizard}
-The cluster setup wizard enables the definition of a new cluster of nodes. Each cluster has its own networks, and shared storage volumes \footnote{Option only available in version \emph{ETVM}}.
+The cluster setup wizard enables the definition of a new cluster of nodes. Each cluster has its own networks, and shared storage volumes \footnote{Option only available in version \emph{NUXIS}}.
 
 To open the wizard select \textit{System Administration} followed by the option \textit{Cluster setup wizard}. Then you will see the setup window, which requires the following configuration steps (Figure \ref{fig:cluster_config}):
 
@@ -1082,7 +1287,7 @@ To move, drag and drop the node to the desired target (datacenter).
 \begin{figure}[H]
         \begin{center}
         \includegraphics[scale=0.6]{screenshots/cluster-move.png}
-        \caption{Move nodes between clusters (\emph{ETVM} version)}
+        \caption{Move nodes between clusters (\emph{NUXIS} version)}
         \label{fig:cluster-move}
         \end{center}
 \end{figure}
@@ -1108,7 +1313,7 @@ To proceed with the authorization, select the desired node and access into its c
         \end{center}
 \end{figure}
 In the authorization process, the \textit{Central Management} checks if the node has the same vision of shared storage volumes as the other cluster nodes. If an error occur, check the system's event log - see Section \ref{sec:system_event_reg}.
-}% End of the section of etvm
+}% End of the section of NUXIS
 
 \subsection{System Preferences}
 By accessing the system references you can set some parameters. 
@@ -1122,7 +1327,7 @@ In the general panel you can specify the default VNC keymap to access virtual ma
         \end{center}
 \end{figure}
 
-In the connectivity tab you're allowed to change the CM IP address and for the LAN network (only available in \emph{ETVM} version. In the \emph{ETVM} version you are only allowed to change the CM IP.
+In the connectivity tab you're allowed to change the CM IP address and for the LAN network (only available in \emph{NUXIS} version. In the \emph{NUXIS} version you are only allowed to change the CM IP.
 
 \begin{figure}[H]
         \begin{center}
@@ -1186,5 +1391,44 @@ In addition, you have another way to assign permissions and/or groups, right cli
 	\underline{\hspace{6in}} \\    
     In \emph{Manage groups} it's not possible to remove the group with ID=1 (system reserved).
 \end{quote}
+
+\opt{etvm}{
+    \subsection{Shutdown Central Management}
+    To turn off Central Management we must access the \textit{System Administration} menu, and choose the \textit{Shutdown Central Management} option. Then answer yes to the confirmation question.
+
+\begin{quote}
+    {\large \bf Note} \\*[-.8pc]
+    \underline{\hspace{6in}} \\
+    Shutting down Central Management will also terminate any existing virtual machines.
+\end{quote}
+}
+
+\opt{etva}{
+    \subsection{Shutdown appliance}
+    There are two methods to turn off the \textit{ETVA appliance}. The first method is through the management interface, executing the steps below:
+
+    \begin{itemize}
+    \item Access the Central Management interface
+    \item Select the desired node and access it's context menu
+    \item Press the option \textit{Shutdown}. This option will also turn off any virtual machines of the node.
+    \end{itemize}
+
+    The other way of shutting down is using the appliance's display buttons (see Figure \ref{fig:app_display}).
+
+    \begin{itemize}
+    \item Select MENU;
+    \item Search the option SHUTDOWN;
+    \item Press the ENTER button.
+    \end{itemize}
+
+    \begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.3]{screenshots/appliancedisplay.jpg}
+        \caption{ETVA display and buttons}
+        \label{fig:app_display}
+        \end{center}
+    \end{figure}
+}
+
 
 \pagebreak

@@ -1,4 +1,4 @@
-all: prepare build compile iso
+all: prepare build compile iso repopush
 
 prepare:
 	./prepare.sh
@@ -11,6 +11,9 @@ compile:
 
 iso:
 	./iso.sh
+
+repopush:
+	./repopush.sh
 
 clean:
 	sudo rm -rf /var/lib/mock/etva* 2> /dev/null

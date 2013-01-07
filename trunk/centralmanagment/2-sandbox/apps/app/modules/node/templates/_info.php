@@ -69,6 +69,10 @@ Node.View.Info = Ext.extend(Ext.form.FormPanel, {
                                         {
                                             name: 'ip',
                                             fieldLabel : <?php echo json_encode(__('IP')) ?>
+                                        },
+                                        {
+                                            name: 'n_servers',
+                                            fieldLabel : <?php echo json_encode(__('Servers (up/down)')) ?>
                                         }
                                     ]
                                 }
@@ -101,6 +105,12 @@ Node.View.Info = Ext.extend(Ext.form.FormPanel, {
             ,success:function(f,a){
                 this.btn_refresh.removeClass('x-item-disabled');
                 var data = a.result['data'];                
+
+                this.form.findField('n_servers').setValue( data['servers_up'] + ' / ' + data['servers_down'] );
+                this.form.findField('mem_available').setValue( data['mem_available'] + ' / ' + data['node_free_memory'] );
+                if( data['sysinfo'] && data['sysinfo']['nodeinfo'] ){
+                    this.form.findField('cputotal').setValue( data['cputotal'] + ' @ ' + data['sysinfo']['nodeinfo']['mhz'] + ' mhz' );
+                }
 
                 /*
                  * check state

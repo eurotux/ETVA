@@ -9,6 +9,7 @@ use_helper('Extjs');
 *
 */
 include_partial('view/welcome');
+include_partial('cluster/info');
 include_partial('node/grid',array('node_tableMap'=>$node_tableMap));
 ?>
 <script>
@@ -61,11 +62,10 @@ View.Main = function(config) {
 
     this.cluster_id = this.aaa;
 
-    var node_grid = Node.Grid.init({url:'node/jsonGrid',type:'list',title: <?php echo json_encode(__('Nodes')) ?>, aaa:this.aaa }); //aaa = clusterId
-//    console.log(node_grid);
+    var cluster_info = new Cluster.View.Info({title:<?php echo json_encode(__('Cluster info')) ?>,cluster_id:this.cluster_id});
 
-//    node_grid.changeAAA(2);
-//    Ext.apply(node_grid, {aaa:2});
+    var node_grid = Node.Grid.init({url:'node/jsonGrid',type:'list',title: <?php echo json_encode(__('Nodes')) ?>, aaa:this.aaa }); //aaa = clusterId
+
     var tab_networks = this.loadNetworks(this.aaa); //aaa = clusterId
     var tab_storage = this.loadStorage(this.aaa);
 
@@ -99,11 +99,14 @@ View.Main = function(config) {
                 var response = Ext.decode(resp.responseText);
                 
                 if(response['datacenter']){
+                    this.add(cluster_info);
                     this.add(node_grid);
                     <?php if($sf_user->getAttribute('etvamodel') == 'enterprise'): ?>
                     this.add(tab_storage);
                     <?php endif ?>
                     this.add(tab_networks);
+
+                    this.activate(cluster_info);
                 }
             },
             failure: function(resp,opt) {
@@ -118,13 +121,8 @@ View.Main = function(config) {
         });
 
         View.Main.superclass.constructor.call(this, {
-        activeTab:0,
-        items:[{
-                title: <?php echo json_encode(__('Welcome')) ?>,
-                contentEl:'welcome',
-                bodyStyle:'padding:5px 5px 0'
-               }
-           ]
+            activeTab:0,
+            items:[]
         });
     }
 

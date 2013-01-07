@@ -47,6 +47,7 @@ use VirtAgentInterface;
 use VirtAgent::Disk;
 
 use ETVA::Utils;
+#use Data::Dumper;
 
 use XML::DOM;
 use XML::Generator;
@@ -196,7 +197,7 @@ sub get_disk {
         if( $i < scalar(@{$self->{'Disks'}}) ){
             return $self->{'Disks'}->[$i];
         }
-    } elsif( $p{'target'} || $p{'path'} ){
+    } elsif( defined($p{'target'}) || defined($p{'path'}) ){
         return $self->get_disk_i( %p );
     }
     return;
@@ -208,12 +209,12 @@ sub get_disk_i {
     my $target = $p{'target'};
     my $path = $p{'path'};
 
-    if( $target || $path ){
+    if( defined($target) || defined($path) ){
         if( my $disks = $self->{'Disks'} ){
             my $i = 0;
             for my $VD (@$disks){
-                if( ( $target && ( $VD->get_target() eq $target ) )
-                        || ( $path && ( $VD->get_path() eq $path ) ) ){
+                if( ( defined($target) && ( $VD->get_target() eq $target ) )
+                        || ( defined($path) && ( $VD->get_path() eq $path ) ) ){
                     return wantarray() ? ($i,$VD) : $VD;
                 }
                 $i++;
@@ -414,6 +415,129 @@ sub count_filesystem {
     return;
 }
 
+=item get_hostdev
+
+    my $HD = $VM->get_hostdev( i=>$i ); 
+
+=cut
+
+sub get_hostdev {
+    my $self = shift;
+    my %p = @_;
+    my $i = $p{'i'};
+    if( defined $i ){
+        if( $i < scalar(@{$self->{'Hostdev'}}) ){
+            return $self->{'Hostdev'}->[$i];
+        }
+    } elsif( defined($p{'type'})  &&
+            ( (defined($p{'vendor'}) && defined($p{'product'})) || 
+                (defined($p{'bus'}) && defined($p{'slot'}) && defined($p{'function'})) ) ){
+        return $self->get_hostdev_i(%p);
+    }
+    return;
+}
+sub get_hostdev_i {
+    my $self = shift;
+    my %p = @_;
+
+    if( defined($p{'type'})  &&
+            ( (defined($p{'vendor'}) && defined($p{'product'})) || 
+                (defined($p{'bus'}) && defined($p{'slot'}) && defined($p{'function'})) ) ){
+        if( my $hostdevs = $self->{'Hostdev'} ){
+            my $i = 0;
+            for my $HD (@$hostdevs){
+                if( (($p{'type'} eq 'usb') && ($HD->{'type'} eq $p{'type'}) && ($HD->{'vendor'} eq $p{'vendor'}) && ($HD->{'product'} eq $p{'product'})) ||
+                    (($p{'type'} eq 'pci') && ($HD->{'type'} eq $p{'type'}) && ($HD->{'bus'} eq $p{'bus'}) && ($HD->{'slot'} eq $p{'slot'}) && ($HD->{'function'} eq $p{'function'})) ){
+                    return wantarray() ? ($i,$HD) : $HD;
+                }
+                $i++;
+            }
+        }
+    }
+    return;
+}
+
+sub init_hostdev {
+    my $self = shift;
+
+    delete $self->{'Hostdev'} if( $self->{'Hostdev'} );
+
+}
+
+=item add_hostdev
+
+    # For USB
+    my $HD = $VM->add_hostdev( type=>'usb', vendor=>..., product=>... );
+    # For PCI
+    my $HD = $VM->add_hostdev( type=>'pci', bus=>..., slot=>..., function=>... );
+
+=cut
+
+sub add_hostdev {
+    my $self = shift;
+    my %p = @_;
+
+    # initialize if not defined 
+    $self->{'Hostdev'} = [] if( !$self->{'Hostdev'} );
+
+    $p{'i'} = scalar(@{$self->{'Hostdev'}});  # fs index
+
+    my $hd = \%p;
+    push @{$self->{'Hostdev'}}, $hd;
+    return $hd;
+}
+
+
+=item del_hostdev
+
+    my $HD = $VM->del_hostdev( i=>$i ); 
+
+=cut
+
+sub del_hostdev {
+    my $self = shift;
+    my %p = @_;
+    my $i = $p{'i'};
+    if( defined $i ){
+        if( my $Hostdev = $self->{'Hostdev'} ){
+            my $n = scalar(@$Hostdev);
+            for(my $c=0;$c<$n;$c++){
+                if( $c > $i ){
+                    $Hostdev->[$c]->{'i'} = $c-1;
+                }
+            }
+            # get fs
+            my $D = $Hostdev->[$i];
+            # delete from array
+            splice(@$Hostdev,$i,1);
+            return $D;
+        }
+    }
+    return;
+}
+
+# last_hostdev
+#   return last hostdev
+#
+sub last_hostdev {
+    my $self = shift;
+    if( $self->{'Hostdev'} ){
+        my $i = scalar(@{$self->{'Hostdev'}})-1;  # hostdev index
+        if( my $HD = $self->{'Hostdev'}->[$i] ){
+            return $HD;
+        }
+    }
+    return;
+}
+
+sub count_hostdev {
+    my $self = shift;
+    if( $self->{'Hostdev'} ){
+        return scalar(@{$self->{'Hostdev'}});
+    }
+    return;
+}
+
 =item get_network
 
     my $Network = $VM->get_network( i=>$i ); 
@@ -549,7 +673,7 @@ sub todomain {
     my $self = shift;
 
     my %D = ();
-    for my $f (qw( name uuid description memory vcpu cpuset on_reboot on_poweroff on_crash features arch )){
+    for my $f (qw( name uuid description memory vcpu cpuset on_reboot on_poweroff on_crash features arch cpu )){
         $D{"$f"} = $self->{"$f"};
     }
     if( $self->{'kernel'} ){
@@ -624,6 +748,20 @@ sub get_todevices {
     }
     $D{'input'} = \@input if( @input );
 
+    my @controllers = ();
+    if( $self->{'Controllers'} ){
+        my $arr_controllers = $self->{'Controllers'};
+        push(@controllers,@$arr_controllers);
+    }
+    my @channels = ();
+    if( $self->{'Channels'} ){
+        my $arr_channels = $self->{'Channels'};
+        push(@channels,@$arr_channels);
+    }
+    # TODO $p{'virtio-channel-path'} = $cn{'source'}{'path'};
+    $D{'controller'} = \@controllers;
+    $D{'channel'} = \@channels;
+
     for my $H ( @{$self->{'Disks'}} ){
         my $DD = $H->todevice();
         push @{$D{'disk'}}, $DD;
@@ -654,6 +792,26 @@ sub get_todevices {
         }
     }
     
+    if( my $hostdev = $self->{'Hostdev'} ){
+        for my $H ( @$hostdev ){
+            my %DH = ();
+            for my $k (keys %$H){
+                if( $k eq 'vendor' or 
+                            $k eq 'product'){
+                    $DH{'source'}{"$k"}{'id'} = $H->{"$k"};
+                } elsif( $k eq 'bus' or 
+                            $k eq 'device' or
+                            $k eq 'slot' or
+                            $k eq 'function'){
+                    $DH{'source'}{'address'}{"$k"} = $H->{"$k"};
+                } else {
+                    $DH{"$k"} = $H->{"$k"};
+                }
+            }
+            push @{$D{'hostdev'}}, \%DH;
+        }
+    }
+    
     return wantarray() ? %D : \%D; 
 }
 
@@ -674,6 +832,22 @@ sub loadfromxml {
     my $disks = delete $p{'_disks_'};
     my $network = delete $p{'_network_'};
     my $filesystem = delete $p{'_filesystem_'};
+    my $hostdev = delete $p{'_hostdev_'};
+
+    # test if controller and channel exists, if so add its path.    
+    if( defined $p{'_controller_'} ){
+        my @controllers = @{ $p{'_controller_'} };
+        delete $p{'_controller_'};
+
+        $p{'Controllers'} = [@controllers];
+    }
+    
+    if( defined $p{'_channel_'} ){
+        my @channels = @{ $p{'_channel_'} };
+        delete $p{'_channel_'};
+
+        $p{'Channels'} = [@channels];
+    }
 
     # virtual machine create
     my $vm = ref($self) ? $self->setfields(%p) : $self->new(%p);
@@ -711,6 +885,14 @@ sub loadfromxml {
         $vm->{'Filesystem'} = [];
         for my $F (@$filesystem){
             $vm->add_filesystem(%$F);
+        }
+    }
+
+    # add hostdev
+    if( $hostdev ){
+        $vm->{'Hostdev'} = [];
+        for my $F (@$hostdev){
+            $vm->add_hostdev(%$F);
         }
     }
 
@@ -791,6 +973,29 @@ sub xml_domain_parser {
                     $D{'features'}{"$tn"} = 1;
                 }
             }
+        } elsif( $nname eq 'cpu' ){
+            my %A = $self->xml_domain_parser_get_attr($ch);
+            for my $ccpu ($ch->getChildNodes()){
+                my $tc = $ccpu->getNodeName();
+                if( $tc eq 'vendor' ){
+                    eval{ $A{"vendor"} = $ccpu->getFirstChild->toString(); };
+                } elsif( $tc eq 'model' ){
+                    eval{ $A{"model"} = $ccpu->getFirstChild->toString(); };
+                    my %Am = $self->xml_domain_parser_get_attr($ccpu);
+                    $A{'model_fallback'} = $Am{'fallback'} if( $Am{'fallback'} );
+                } elsif( $tc eq 'numa' ){
+                    my @cells = ();
+                    for my $ccell ($ccpu->getChildNode()){
+                        my %Ac = $self->xml_domain_parser_get_attr($ccell);
+                        push(@cells,\%Ac);
+                    }
+                    $A{'numa'} = [@cells] if( @cells );
+                } elsif( $tc ne '#text' ){
+                    my %Ae = $self->xml_domain_parser_get_attr($ccpu);
+                    $A{"$tc"} = { %Ae };
+                }
+            }
+            $D{'cpu'} = \%A;
         } elsif( $nname eq 'devices' ){
             for my $cdev ($ch->getChildNodes()){
                 my $tn = $cdev->getNodeName();
@@ -877,6 +1082,50 @@ sub xml_domain_parser {
                     } elsif( $A{'type'} eq "tablet" ){
                         $D{"tablet_bus"} = $A{'bus'} || 'usb';
                     }
+                } elsif( $tn eq "hostdev" ){
+                    my %H = $self->xml_domain_parser_get_attr($cdev);
+                    for my $cdi ($cdev->getChildNodes()){
+                        my $ti = $cdi->getNodeName();
+                        if( $ti eq 'source' ){
+                            for my $cds ($cdi->getChildNodes()){
+                                my $ts = $cds->getNodeName();
+                                if( $ts eq 'vendor' ){
+                                    my %A = $self->xml_domain_parser_get_attr($cds);
+                                    $H{'vendor'} = $A{'id'} if( $A{'id'} );
+                                } elsif( $ts eq 'product' ){
+                                    my %A = $self->xml_domain_parser_get_attr($cds);
+                                    $H{'product'} = $A{'id'} if( $A{'id'} );
+                                } elsif( $ts eq 'address' ){
+                                    my %A = $self->xml_domain_parser_get_attr($cds);
+                                    $H{'bus'} = $A{'bus'} if( $A{'bus'} );
+                                    $H{'device'} = $A{'device'} if( $A{'device'} );
+                                    $H{'slot'} = $A{'slot'} if( $A{'slot'} );
+                                    $H{'function'} = $A{'function'} if( $A{'function'} );
+                                }
+                            }
+                        } elsif( $ti eq 'boot' ){
+                            my %A = $self->xml_domain_parser_get_attr($cdi);
+                            $H{'boot'}{'order'} = $A{'order'} if( $A{'order'} );
+                        } elsif( $ti eq 'rom' ){
+                            my %A = $self->xml_domain_parser_get_attr($cdi);
+                            $H{'rom'}{'bar'} = $A{'bar'} if( $A{'bar'} );
+                            $H{'rom'}{'file'} = $A{'file'} if( $A{'file'} );
+                        }
+                    }
+                    push(@{$D{'_hostdev_'}},\%H);
+                } elsif( $tn eq "controller" ){
+                    my %C = $self->xml_domain_parser_get_attr($cdev);
+                    push(@{$D{'_controller_'}},\%C);
+                } elsif( $tn eq "channel" ){
+                    my %C = $self->xml_domain_parser_get_attr($cdev);
+                    for my $cdc ($cdev->getChildNodes()){
+                        my $ts = $cdc->getNodeName();
+                        if( $ts ne '#text' ){
+                            my %CC = $self->xml_domain_parser_get_attr($cdc);
+                            $C{"$ts"} = { %CC };
+                        }
+                    }
+                    push(@{$D{'_channel_'}},\%C);
                 }
             }
         }
@@ -1165,8 +1414,8 @@ sub ovf_import {
                                                             my $lvdevice;
                                                             my $LV = $LVInfo{"$lvn"};
                                                             if( !$LV ){# create it
-                                                                $size = VirtAgent::Disk::get_sparsefiles_apparentsize( $disk_path ) if( !$size );
-                                                                my $E = VirtAgent::Disk->lvcreate($lv,$vg,$size);
+                                                                $size = VirtAgent::Disk::get_disk_size( $disk_path ) if( !$size );
+                                                                my $E = VirtAgent::Disk->lvcreate($lv,$vg,$size,$fmt);
                                                                 if( !isError($E) && $E->{'_obj_'} ){
                                                                     $LV = $E->{'_obj_'};
                                                                 } else {
@@ -1265,6 +1514,7 @@ sub ovf_import {
         my $disks = delete $VM->{'_disks_'};
         my $network = delete $VM->{'_network_'};
         my $filesystem = delete $VM->{'_filesystem_'};
+        my $hostdev = delete $VM->{'_hostdev_'};
 
         # virtual machine create
         my $vm = ref($self) ? $self->setfields(%$VM,%arg) : $self->new(%$VM,%arg);
@@ -1305,6 +1555,14 @@ sub ovf_import {
             $vm->{'Filesystem'} = [];
             for my $F (@$filesystem){
                 $vm->add_filesystem(%$F);
+            }
+        }
+
+        # add hostdev
+        if( $hostdev ){
+            $vm->{'Hostdev'} = [];
+            for my $F (@$hostdev){
+                $vm->add_hostdev(%$F);
             }
         }
 
@@ -1394,7 +1652,7 @@ sub ovf_export {
 
                     $Attr{'ovf:capacity'} = $D->get_size();
                     $Attr{'ovf:populateSize'} = $D->get_usagesize();
-                    $Attr{'ovf:format'} = 'raw';
+                    $Attr{'ovf:format'} = $D->get_format() || $D->get_drivertype() || "raw";
                     # $Attr{'ovf:capacityAllocationUnits'}
 
                     push(@Disks, $X->Disk( \%Attr ) );
@@ -1497,6 +1755,7 @@ sub ovf_export {
                     
                     my $rasdAutomaticAllocation = 'rasd:AutomaticAllocation';
                     my $rasdCaption = 'rasd:Caption';
+                    my $rasdAddress = 'rasd:Address';
                     my $rasdConnection = 'rasd:Connection';
                     my $rasdDescription = 'rasd:Description';
                     my $rasdElementName = 'rasd:ElementName';
@@ -1514,11 +1773,14 @@ sub ovf_export {
                         push(@Item, $X->$rasdResourceSubType($N->{'model'}));
                     }
 
+                    # mac-address as Address
+                    push(@Item, $X->$rasdAddress($N->{'macaddr'}));
+
                     my $name;
                     if( $N->{'type'} eq 'bridge' ){
                         $name = $N->{'bridge'};
                     } elsif( $N->{'type'} eq 'network' ){
-                        $name = $N->{'network'};
+                        $name = $N->{'network'} || $N->{'name'} || $N->{'bridge'};
                     }
                     push(@Item, $X->$rasdConnection("$name"));
                     push(@Item, $X->$rasdDescription("$name ?"));
@@ -1827,7 +2089,8 @@ sub get_filename {
     if( !$self->{'_filename'} ){
         my $path = $self->get_path();
 
-        my (undef,undef,$fname) = ( $path =~ m/(\/?(\w+\/)+)(\w+(.\w+)?)/ );
+        my @lpath = split(/\//,$path);
+        my $fname = pop(@lpath);
         $fname .= ".img" if( $fname !~ m/\.\w+$/ ); # append ext
 
         $self->{'_filename'} = $fname;
@@ -1839,12 +2102,7 @@ sub get_size {
     my $self = shift;
     if( !$self->{'_size'} ){
         my $path = $self->get_path();
-        $path = readlink($path) if( -l "$path" );   # get real path if link 
-        if( -b "$path" ){
-            $self->{'_size'} = VirtAgent::Disk::size_blockdev($path);
-        } else {
-            $self->{'_size'} = VirtAgent::Disk::get_sparsefiles_apparentsize($path);
-        }
+        $self->{'_size'} = VirtAgent::Disk::get_disk_size($path);
     }
     return $self->{'_size'};
 }
@@ -1852,12 +2110,7 @@ sub get_usagesize {
     my $self = shift;
     if( !$self->{'_usagesize'} ){
         my $path = $self->get_path();
-        $path = readlink($path) if( -l "$path" );   # get real path if link 
-        if( -b "$path" ){
-            $self->{'_usagesize'} = $self->{'_size'};
-        } else {
-            $self->{'_usagesize'} = VirtAgent::Disk::get_sparsefiles_usagesize($path);
-        }
+        $self->{'_usagesize'} = VirtAgent::Disk::get_disk_usagesize($path);
     }
     return $self->{'_usagesize'};
 }
@@ -1913,7 +2166,7 @@ sub new {
         }
 
         if( $N{'type'} eq "bridge" ){
-            $N{'bridge'} = $p{'bridge'} || VirtAgent::Network->defaultbridge();
+            $N{'name'} = $N{'bridge'} = $p{'bridge'} || VirtAgent::Network->defaultbridge();
         } elsif( $N{'type'} eq "network" ){
             $N{'name'} = $p{'name'} || "default";
         }

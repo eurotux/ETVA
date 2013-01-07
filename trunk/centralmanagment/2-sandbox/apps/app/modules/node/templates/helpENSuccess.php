@@ -2,6 +2,7 @@
 <a id="help-vmachine-main"><h1>Options for server management</h1></a>
 <p>You have the following options for the management of virtual servers:</p>
 <ul>
+    <li><a href="#help_edit_node">Edit node</a></li>
     <li><a href="#help_virtual_machine_add">Add a new server</a></li>
     <li><a href="#help_vmachine_edit">Edit server</a></li>
     <li><a href="#help-vmachine-remove">Remove server</a></li>
@@ -12,6 +13,27 @@
 <br/>
 <hr/>
 
+<a id="help_edit_node"><h1>Edit node</h1></a>
+<p>Editing a node allow us to change the following configurations:</p>
+
+<ul>
+    <li><a href="#help-edit-name">Node name</a></li>
+    <li><a href="#help-edit-fencing">Enable <em>fencing</em> configuration</a></li>
+</ul>
+<br/>
+<hr/>
+
+<a id="help-edit-name"><h2>Node name</h2></a>
+<p>In this form we can change the name of <em>node</em>.</em></p>
+<p><b>Note: </b>Then must be start by char and must contain chars, numbers, hyphen and </em>underscore</em>.</p>
+<a href="#help_edit_node"><div>Index</div></a>
+<hr/>
+
+<a id="help-edit-fencing"><h2>Enable <em>fencing</em> configuration</h2></a>
+<p>In this options we can activate <em>fencing</em> device for the node management.
+To enable this we need configure the parameters based on the following types of devices: bladecenter, virsh, ilo, ipmilan, rsa.</p>
+<a href="#help_edit_node"><div>Index</div></a>
+<hr/>
 
 <a id="help_virtual_machine_add"><h1>Add server wizard</h1></a>
 <p>The server creation wizard enables you to create virtual machines.
@@ -185,7 +207,7 @@ In this panel we can change the name, memory, keymap options, and boot parameter
 <p>
 Selecting a server and then clicking <em>Migrate server</em> is possible to migrate a machine from one node to another since they share the same storage. The migration of a virtual machine is made in offline mode.
 </p>
-<p><b>Note: </b>This option is only available on <em>ETVM</em> version.
+<p><b>Note: </b>This option is only available on <em>Enterprise</em> version.
 </p>
 <a href="#help-vmachine-main"><div>Index</div></a>
 <hr/>

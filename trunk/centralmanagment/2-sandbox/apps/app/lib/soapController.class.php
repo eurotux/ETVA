@@ -29,6 +29,7 @@ class soapController extends sfController {
                                                         'state'=>'integer');
 
         $this->__typedef['ArraySuccess'] = array('success'=>'boolean');
+        $this->__typedef['ArraySuccessAndReason'] = array('success'=>'boolean', 'reason'=>'string' );
 
         /*
          * Initialize virtual agent data in DB
@@ -127,6 +128,16 @@ class soapController extends sfController {
         $this->__dispatch_map['updateVirtAgentServers'] = array(
                                                         'in'    => array('uuid'=>'string',
                                                                         'vms'=>'{urn:soapController}ArrayOfStrings'),
+                                                        'out'   => array('return'=>"{urn:soapController}ArraySuccessAndReason")
+        );
+
+        /*
+         * Return virtual machines (servers) that are on DB and that are in conflit
+         *
+         */
+        $this->__dispatch_map['syncVirtAgentServers'] = array(
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'vms'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
@@ -134,6 +145,12 @@ class soapController extends sfController {
          * updates statistics logs RRA files
          */
         $this->__dispatch_map['updateVirtAgentLogs'] = array(
+                                                        'in'    => array('uuid'=>'string',
+                                                                        'data'=>'{urn:soapController}ArrayOfStrings'),
+                                                        'out'   => array('return'=>"{urn:soapController}ArraySuccess")
+        );
+
+        $this->__dispatch_map['updateVirtAgentGAInfo'] = array(
                                                         'in'    => array('uuid'=>'string',
                                                                         'data'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
@@ -165,9 +182,6 @@ class soapController extends sfController {
                                                                         'vms'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
-
-
-
     }
 
 
@@ -298,11 +312,18 @@ class soapController extends sfController {
                 'state'=>$data->state);
 
         $request_array = array('request'=>array_merge($node_array,array('method'=>'initializeVirtAgent')));
-
         $this->request->setParameter('etva_node', $node_array);
 
         $action = $this->getAction('node','soapCreate');
         $result = $action->executeSoapCreate($this->request);
+        
+        # add to result the CM public key
+        $ssh_file = sfConfig::get('app_sshkey_pubfile');
+        if( file_exists($ssh_file) ){
+            $handle = fopen($ssh_file, 'r');
+            $data = fread($handle, filesize($ssh_file));
+            $result['cmpubkey'] = $data;
+        }
 
         $response_array = array('response'=>$result);
 
@@ -372,7 +393,35 @@ class soapController extends sfController {
         return $result;
 
     }
+    function syncVirtAgentServers($node_uuid, $vms)
+    {
 
+        $this->request->setParameter('uuid', $node_uuid);
+        $this->request->setParameter('action', 'domains_sync');
+        $this->request->setParameter('vms',$vms);
+
+        $data = $this->request->getParameterHolder();
+        $all_data = $data->getAll();
+        $all_data['module'] = 'server';
+        $all_data['action'] = 'soapUpdate';
+        $all_data['method'] = 'syncVirtAgentServers';
+
+        $request_array = array('request'=>$all_data);
+
+        $action = $this->getAction('server','soapUpdate');
+        $result = $action->executeSoapUpdate($this->request);
+
+        $response_array = array('response'=>$result);
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
+
+        return $result;
+
+    }
 
     function updateVirtAgentServersStats($node_uuid, $vms)
     {
@@ -386,6 +435,36 @@ class soapController extends sfController {
         $all_data['module'] = 'server';
         $all_data['action'] = 'soapUpdate';
         $all_data['method'] = 'updateVirtAgentServersStats';
+
+        $request_array = array('request'=>$all_data);
+
+        $action = $this->getAction('server','soapUpdate');
+        $result = $action->executeSoapUpdate($this->request);
+
+        $response_array = array('response'=>$result);
+        $all_params = array_merge($request_array,$response_array);
+
+        // log function called
+        $dispatcher = sfContext::getInstance()->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, sfConfig::get('app_virtsoap_log'),$all_params));
+
+
+        return $result;
+
+    }
+
+    function updateVirtAgentGAInfo($node_uuid, $vms)
+    {
+
+        $this->request->setParameter('uuid', $node_uuid);
+        $this->request->setParameter('action', 'domains_gainfo');
+        $this->request->setParameter('vms',$vms);
+
+        $data = $this->request->getParameterHolder();
+        $all_data = $data->getAll();
+        $all_data['module'] = 'server';
+        $all_data['action'] = 'soapUpdate';
+        $all_data['method'] = 'updateVirtAgentGAInfo';
 
         $request_array = array('request'=>$all_data);
 
@@ -582,40 +661,42 @@ class soapController extends sfController {
                 if($etva_server = $etva_node->retrieveServerByName($server_name)){
 
 
-                /*
-                 * store network info in RRA file
-                 */
-                $server_network_data = $server_data->network;
-                /*
-                 * create file per network device
-                 */
-                foreach($server_network_data as $intfname=>$intfdata){
+                if(isset($server_data->network)){
+                    /*
+                     * store network info in RRA file
+                     */
+                    $server_network_data = $server_data->network;
+                    /*
+                     * create file per network device
+                     */
+                    foreach($server_network_data as $intfname=>$intfdata){
 
-                    $macaddr = $intfdata->macaddr;
-                    $etva_network = $etva_server->retrieveByMac($macaddr);
-                    if($etva_network){
-                        $target = $etva_network->getTarget();
+                        $macaddr = $intfdata->macaddr;
+                        $etva_network = $etva_server->retrieveByMac($macaddr);
+                        if($etva_network){
+                            $target = $etva_network->getTarget();
 
 
-                        // if target not in network table of the DB
-                        if($target!=$intfname){
-                            $etva_network->updateTarget($intfname);
+                            // if target not in network table of the DB
+                            if($target!=$intfname){
+                                $etva_network->updateTarget($intfname);
+                            }
+
+
+                            $tx = $intfdata->tx_bytes;
+                            $rx = $intfdata->rx_bytes;
+
+                            $intf_sort = array($rx,$tx);
+
+                            $mac_strip = str_replace(':','',$macaddr);
+                            // create log file
+                            $server_network_rra = new ServerNetworkRRA($node_uuid,$etva_server->getUuid(),$mac_strip);
+                            //send/update file information
+                            $return = $server_network_rra->update($intf_sort);
                         }
 
 
-                        $tx = $intfdata->tx_bytes;
-                        $rx = $intfdata->rx_bytes;
-
-                        $intf_sort = array($rx,$tx);
-
-                        $mac_strip = str_replace(':','',$macaddr);
-                        // create log file
-                        $server_network_rra = new ServerNetworkRRA($node_uuid,$etva_server->getUuid(),$mac_strip);
-                        //send/update file information
-                        $return = $server_network_rra->update($intf_sort);
                     }
-
-
                 }// end server networks
 
 

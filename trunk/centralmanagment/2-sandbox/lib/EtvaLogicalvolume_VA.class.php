@@ -15,9 +15,14 @@ class EtvaLogicalvolume_VA
     //const LVCLONE  = 'clonedisk_may_fork';
     const LVCLONE  = 'lvclone_may_fork';
 
-    const CREATESNAPSHOT = 'createsnapshot';
+    const CREATESNAPSHOT = 'createsnapshot_may_fork';
+    const REVERTSNAPSHOT = 'revertsnapshot_may_fork';
+    const CONVERTFORMAT = 'convertformat_may_fork';
 
     const LVINIT = 'lvinit';
+
+    const GET_SYNC_LOGICALVOLUMES = 'getlvs_arr';
+    const GET_SYNC_DEVICESTABLE = 'device_table';
 
     public function EtvaLogicalvolume_VA(EtvaLogicalvolume $etva_lv = null)
     {
@@ -48,14 +53,13 @@ class EtvaLogicalvolume_VA
 
         // send soap request
         $response = $etva_node->soapSend($method,$params);
-        $result = $this->processCloneResponse($etva_node,$response,$method);
-        return $result;
+        return $this->processCommonResponse($etva_node,$response,$method,EtvaLogicalvolumePeer::_OK_CREATECLONE_,EtvaLogicalvolumePeer::_ERR_CREATECLONE_,array('name'=>$lv->getLv()));
     }
 
     /*
      * send lvcreate
      */
-    public function send_create(EtvaNode $etva_node,$size)
+    public function send_create(EtvaNode $etva_node,$size,$format='',$persnapshotusage=null)
     {        
         $method = self::LVCREATE;
 
@@ -69,7 +73,9 @@ class EtvaLogicalvolume_VA
         $params = array(
                     'lv'    => $is_DiskFile ? $etva_node->getStoragedir().'/'.$lv : $lv,
                     'vg'    => $vg,
-                    'size'  => $size);
+                    'size'  => $size,
+                    'format'=> $format);
+        if( $persnapshotusage ) $params['usagesize'] = Etva::MB_to_Byteconvert($size) * ( 1 - ($persnapshotusage/100) );
         
         $response = $etva_node->soapSend($method,$params);
         $result = $this->processResponse($etva_node, $response, $method);
@@ -127,7 +133,6 @@ class EtvaLogicalvolume_VA
             return $error;
 
         }
-
 
         // prepare soap info....
 
@@ -275,6 +280,81 @@ class EtvaLogicalvolume_VA
 
 
     }
+    /*
+     * send revertsnapshot
+     */
+    public function send_revertsnapshot(EtvaNode $etva_node, EtvaLogicalvolume $etva_lv)
+    {
+        $method = self::REVERTSNAPSHOT;
+
+        $etva_slv = $this->etva_lv;
+
+        /*
+         * check if is not system lv
+         */
+        /*if($etva_lv->getMounted()){
+
+            $msg = Etva::getLogMessage(array('name'=>$lv), EtvaLogicalvolumePeer::_ERR_SYSTEM_LV_);
+            $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_SYSTEM_LV_,array('%name%'=>$lv));
+
+            $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify system log
+            $message = Etva::getLogMessage(array('name'=>$lv,'size'=>$size,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_RESIZE_);
+            sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(), 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            return $error;
+        }*/
+        
+
+        // TODO testing can do snapshot
+
+
+        // prepare soap info....
+
+        $lvdevice = $etva_lv->getLvdevice();                
+        $slvdevice = $etva_slv->getLvdevice();
+        
+        $params = array(
+                        'olv'   => $lvdevice,
+                        'slv'   => $slvdevice );
+
+        // send soap request
+        $response = $etva_node->soapSend($method,$params);
+        $result = $this->processCommonResponse($etva_node,$response,$method,EtvaLogicalvolumePeer::_OK_REVERTSNAPSHOT_,EtvaLogicalvolumePeer::_ERR_REVERTSNAPSHOT_,array('name'=>$etva_slv->getLv()));
+        return $result;
+    }
+    /*
+     * send convertformat
+     */
+    public function send_convertformat(EtvaNode $etva_node, $format)
+    {
+        $method = self::CONVERTFORMAT;
+
+        $etva_lv = $this->etva_lv;
+
+        // TODO testing can do convert
+
+
+        // prepare soap info....
+
+        $lvdevice = $etva_lv->getLvdevice();                
+        
+        $params = array(
+                        'olv'   => $lvdevice,
+                        'dlv'   => $lvdevice,
+                        'format'  => $format);
+
+        // send soap request
+        $response = $etva_node->soapSend($method,$params);
+        $result = $this->processCommonResponse($etva_node,$response,$method,EtvaLogicalvolumePeer::_OK_CONVERT_,EtvaLogicalvolumePeer::_ERR_CONVERT_,array('name'=>$etva_lv->getLv()));
+        if( $result['success'] ){
+            //update logical, volume group and physical sizes
+            $etva_lv->setFormat($format);
+            $etva_lv->save();
+        }
+        return $result;
+    }
 
     /*
      * process response for LVREMOVE, LVCREATE, CREATESNAPSHOT
@@ -298,7 +378,7 @@ class EtvaLogicalvolume_VA
                                 break;
             case self::CREATESNAPSHOT :
                                 $msg_ok_type = EtvaLogicalvolumePeer::_OK_CREATESNAPSHOT_;
-                                $msg_err_type = EtvaLogicalvolumePeer::_ERR_CREATESNAPSHOT_;                                
+                                $msg_err_type = EtvaLogicalvolumePeer::_ERR_CREATESNAPSHOT_;
                                 break;
         }
 
@@ -388,7 +468,7 @@ class EtvaLogicalvolume_VA
                 if(!empty($bulk_update)){
                     $errors = $this->get_missing_lv_devices();
                     $msg_i18n = $errors ? $errors['message'] :
-                                    sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>''));
+                                    sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>' processResponse'));
                     $response = array( 'success'=>false, 'agent'=>$etva_node->getName(), 'info'=>$msg_i18n, 'msg_i18n'=>$msg_i18n );
                     $ok = 0;
                 }
@@ -445,41 +525,24 @@ class EtvaLogicalvolume_VA
     }
 
      /*
-      * process response for LVCLONE
+      * process response for REVERTSNAPSHOT, CREATECLONE, CONVERT
       */
-    public function processCloneResponse( $etva_node, $response, $method ){
-        $ok = 1;
-        $etva_lv = $this->etva_lv;
-        $lv = $etva_lv->getLv();
-
-        $msg_ok_type = EtvaLogicalvolumePeer::_OK_CREATECLONE_;
-        $msg_err_type = EtvaLogicalvolumePeer::_ERR_CREATECLONE_;                                
-
+    public function processCommonResponse( $etva_node, $response, $method, $msg_ok_type, $msg_err_type, $msg_args=array() ){
         if($response['success']){
 
             $response_decoded = (array) $response['response'];            
             $returned_object = (array) $response_decoded['_obj_'];
 
-            //notify system log
-            $message = Etva::getLogMessage(array('name'=>$lv), $msg_ok_type);
-            $msg_i18n = sfContext::getInstance()->getI18N()->__($msg_ok_type,array('%name%'=>$lv));
+            $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
+                                                            $msg_ok_type, $msg_args,
+                                                            null,array(),EtvaEventLogger::INFO);
 
-            sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(), 'event.log',array('message' => $message)));
-            
-            $result = array('success'=>true, 'agent'=>$response['agent'], 'response'=>$msg_i18n );
-
+            $result = array('success'=>true,'agent'=>$response['agent'],'response'=>$msg_i18n);
             return  $result;
         } else {
-            $result = $response;            
-
-            $errors = $this->get_missing_lv_devices();
-            $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$response['info']), $msg_err_type);
-
-            $msg_i18n = sfContext::getInstance()->getI18N()->__($msg_err_type,array('%name%'=>$lv,'%info%'=>$response['info']));
-            $result['error'] = $msg_i18n;
-        
-            sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($response['agent'], 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-        
+            $msg_args['info'] = $response['info'];
+            $msg_i18n = Etva::makeNotifyLogMessage($response['agent'], $msg_err_type, $msg_args);
+            $result = array('success'=>false,'agent'=>$response['agent'],'error'=>$msg_i18n,'info'=>$msg_i18n);
             return  $result;
         }
     }
@@ -529,7 +592,7 @@ class EtvaLogicalvolume_VA
                 if(!empty($bulk_update)){
                     $errors = $this->get_missing_lv_devices();
                     $msg_i18n = $errors ? $errors['message'] :
-                                    sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>''));
+                                    sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>'processResizeResponse'));
                     $response = array( 'success'=>false, 'agent'=>$etva_node->getName(), 'info'=>$msg_i18n, 'msg_i18n'=>$msg_i18n );
                     $ok = 0;
                 }
@@ -584,24 +647,45 @@ class EtvaLogicalvolume_VA
         $etva_cluster = $etva_node->getEtvaCluster();
         $logical_names = array();
 
-        /*
-         * check shared lvs consistency
-         */
-        $consist = $this->check_shared_consistency($etva_node,$lvs);        
-        $consist_dtable = $this->check_shared_devicetable_consistency($etva_node,$dtable,$bulk_dtable);
+        $errors = array();
 
-        if(!$consist || !$consist_dtable){
-            $errors = $this->get_missing_lv_devices($etva_node);
-            $inconsistent_message = $errors ? $errors['message'] :
-                            sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>''));
+        /*
+         * check lv consistency
+         */
+        $check_res = $this->check_consistency($etva_node,$lvs,$dtable,$bulk_dtable);
+        if( !$check_res['success'] ){
+            $errors = $check_res['errors'];
+
+            $inconsistent_message = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>''));
 
             $etva_node->setErrorMessage(self::LVINIT);
 
             $message = Etva::getLogMessage(array('info'=>$inconsistent_message), EtvaLogicalvolumePeer::_ERR_SOAPUPDATE_);
             sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(),'event.log',array('message' =>$message,'priority'=>EtvaEventLogger::ERR)));
 
-            return array('success'=>false,'error'=>$errors);
+            // dont stop process
+            //return array('success'=>false,'error'=>$errors);
         }
+
+        /*
+         * check shared lvs consistency
+         */
+        /*$consist = $this->check_shared_consistency($etva_node,$lvs);        
+        $consist_dtable = $this->check_shared_devicetable_consistency($etva_node,$dtable,$bulk_dtable);
+
+        if(!$consist || !$consist_dtable){
+            $errors = $this->get_missing_lv_devices($etva_node);
+            $inconsistent_message = $errors ? $errors['message'] :
+                            sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>'initialize'));
+
+            $etva_node->setErrorMessage(self::LVINIT);
+
+            $message = Etva::getLogMessage(array('info'=>$inconsistent_message), EtvaLogicalvolumePeer::_ERR_SOAPUPDATE_);
+            sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(),'event.log',array('message' =>$message,'priority'=>EtvaEventLogger::ERR)));
+
+            // dont stop process
+            //return array('success'=>false,'error'=>$errors);
+        }*/
 
         foreach($lvs as $lvInfo)
         {
@@ -611,6 +695,8 @@ class EtvaLogicalvolume_VA
                 // set mounted 0 when not mounted
                 if( !isset($lv_info[EtvaLogicalvolume::MOUNTED_MAP]) )
                     $lv_info[EtvaLogicalvolume::MOUNTED_MAP] = 0;
+
+                //error_log("device " . $lv_info[EtvaLogicalvolume::LVDEVICE_MAP] . " EtvaLogicalvolume::MOUNTED_MAP " . $lv_info[EtvaLogicalvolume::MOUNTED_MAP]);
 
                 $lv_dev = $lv_info[EtvaLogicalvolume::LVDEVICE_MAP];
                 $lv_type = $lv_info[EtvaLogicalvolume::STORAGE_TYPE_MAP];
@@ -625,54 +711,63 @@ class EtvaLogicalvolume_VA
                 //get volume group based on node, type, uuid and vg
                 $etva_volgroup = EtvaVolumegroupPeer::retrieveByNodeTypeUUIDVg($etva_node->getId(), $vg_type, $vg_uuid, $vg_name);
 
-                if($lv_type == EtvaLogicalvolume::STORAGE_TYPE_LOCAL_MAP){
-                    $etva_logicalvol = EtvaLogicalvolumePeer::retrieveByNodeTypeLvDevice($etva_node->getId(), $lv_type, $lv_dev);
-                }else{
-                    $etva_logicalvol = EtvaLogicalvolumePeer::retrieveByUUID($lv_uuid);
+                if( $etva_volgroup ){
+
+                    if($lv_type == EtvaLogicalvolume::STORAGE_TYPE_LOCAL_MAP){
+                        $etva_logicalvol = EtvaLogicalvolumePeer::retrieveByNodeTypeLvDevice($etva_node->getId(), $lv_type, $lv_dev);
+                    }else{
+                        $etva_logicalvol = EtvaLogicalvolumePeer::retrieveByUUID($lv_uuid);
+                    }
+
+                    if(!$etva_logicalvol){ // no lv in db...so create new one
+                        $etva_node_logicalvol = new EtvaNodeLogicalvolume();
+                        $etva_logicalvol = new EtvaLogicalvolume();
+
+                    }
+                    else{
+                        //if lv already in DB we need to make sure if already exists association with node. if not create new one
+                        $etva_node_logicalvol = EtvaNodeLogicalvolumePeer::retrieveByPK($etva_node->getId(), $etva_logicalvol->getId());
+                        if(!$etva_node_logicalvol) $etva_node_logicalvol = new EtvaNodeLogicalvolume();
+                    }
+
+
+                    $etva_logicalvol->initData($lv_info);
+                    $etva_logicalvol->setEtvaVolumegroup($etva_volgroup);
+                    $etva_logicalvol->setEtvaCluster($etva_cluster);
+                    $etva_logicalvol->save();
+
+                    $etva_node_logicalvol->setEtvaLogicalvolume($etva_logicalvol);
+                    $etva_node_logicalvol->setEtvaNode($etva_node);
+                    $etva_node_logicalvol->save();
+
+                    
+                    $logical_names[] = $etva_logicalvol->getLv();
                 }
-
-                if(!$etva_logicalvol){ // no lv in db...so create new one
-                    $etva_node_logicalvol = new EtvaNodeLogicalvolume();
-                    $etva_logicalvol = new EtvaLogicalvolume();
-
-                }
-                else{
-                    //if lv already in DB we need to make sure if already exists association with node. if not create new one
-                    $etva_node_logicalvol = EtvaNodeLogicalvolumePeer::retrieveByPK($etva_node->getId(), $etva_logicalvol->getId());
-                    if(!$etva_node_logicalvol) $etva_node_logicalvol = new EtvaNodeLogicalvolume();
-                }
-
-
-                $etva_logicalvol->initData($lv_info);
-                $etva_logicalvol->setEtvaVolumegroup($etva_volgroup);
-                $etva_logicalvol->setEtvaCluster($etva_cluster);
-
-                $etva_node_logicalvol->setEtvaLogicalvolume($etva_logicalvol);
-                $etva_node_logicalvol->setEtvaNode($etva_node);
-                $etva_node_logicalvol->save();
-
-                
-                $logical_names[] = $etva_logicalvol->getLv();
             }
         }
 
-        /*
-         * check if is an appliance restore operation...
-         */
-        $apli = new Appliance();
-        $action = $apli->getStage(Appliance::RESTORE_STAGE);
-        if($action) $apli->setStage(Appliance::RESTORE_STAGE,Appliance::VA_UPDATE_LVS);
+        if( !empty($errors) ){
+            // if have some errors, return it
+            return array('success'=>false,'error'=>$errors);
+        } else {
+            /*
+             * check if is an appliance restore operation...
+             */
+            $apli = new Appliance();
+            $action = $apli->getStage(Appliance::RESTORE_STAGE);
+            if($action) $apli->setStage(Appliance::RESTORE_STAGE,Appliance::VA_UPDATE_LVS);
 
-        $etva_node->clearErrorMessage(self::LVINIT);
+            $etva_node->clearErrorMessage(self::LVINIT);
 
 
-        $message = Etva::getLogMessage(array('info'=>implode(', ',$logical_names)), EtvaLogicalvolumePeer::_OK_SOAPUPDATE_);
-        sfContext::getInstance()->getEventDispatcher()->notify(
-            new sfEvent($etva_node->getName(),
-                        'event.log',
-                        array('message' =>$message)
-            ));
-        return array('success'=>true,'response'=>$logical_names);
+            $message = Etva::getLogMessage(array('info'=>implode(', ',$logical_names)), EtvaLogicalvolumePeer::_OK_SOAPUPDATE_);
+            sfContext::getInstance()->getEventDispatcher()->notify(
+                new sfEvent($etva_node->getName(),
+                            'event.log',
+                            array('message' =>$message)
+                ));
+            return array('success'=>true,'response'=>$logical_names);
+        }
     }
 
     
@@ -689,7 +784,7 @@ class EtvaLogicalvolume_VA
         $etva_cluster->soapSend('device_suspend',array('device'=>$lvdevice));
 
         // get device table from all nodes
-        $dt_response = $etva_node->soapSend('device_table',array('device'=>$lvdevice));
+        $dt_response = $etva_node->soapSend(self::GET_SYNC_DEVICESTABLE,array('device'=>$lvdevice));
 
         if( $dt_response['success'] ){
 
@@ -721,7 +816,7 @@ class EtvaLogicalvolume_VA
      * bulk cluster update info
      *
      */
-    public function send_update($etva_node)
+    public function send_update($etva_node, $all=false, $shared=true)
     {        
 
         $mutex = new Mutex();
@@ -734,12 +829,22 @@ class EtvaLogicalvolume_VA
          */
         $etva_cluster = $etva_node->getEtvaCluster();
 
-        $bulk_responses = $etva_cluster->soapSend('getlvs',array('force'=>1),$etva_node);
-
-        $bulk_response_dtable = $etva_cluster->soapSend('device_table');
+        $bulk_responses = array();
+        $bulk_response_dtable = array();
+        if( $shared ){
+            if( $all ){
+                $bulk_responses = $etva_cluster->soapSend(self::GET_SYNC_LOGICALVOLUMES,array('force'=>1));
+            } else {
+                $bulk_responses = $etva_cluster->soapSend(self::GET_SYNC_LOGICALVOLUMES,array('force'=>1),$etva_node);
+            }
+            $bulk_response_dtable = $etva_cluster->soapSend(self::GET_SYNC_DEVICESTABLE);
+        } else {
+            $node_id = $etva_node->getId();
+            $bulk_responses[$node_id] = $etva_node->soapSend(self::GET_SYNC_LOGICALVOLUMES,array('force'=>1));
+            $bulk_response_dtable[$node_id] = $etva_node->soapSend(self::GET_SYNC_DEVICESTABLE);
+        }
 
         $errors = array();
-
         foreach($bulk_responses as $node_id =>$node_response){
 
             if($node_response['success']){ //response received ok
@@ -864,7 +969,9 @@ class EtvaLogicalvolume_VA
             $clvdev = str_replace("-","--",$clvdev); 
             $clvdev = str_replace("/","-",$clvdev); 
             $re_clvdev = "/" . $clvdev . ":/"; 
-            $lv_dtable = preg_grep($re_clvdev,$lvs_1stdtable); 
+            $lv_dtable_aux = preg_grep($re_clvdev,$lvs_1stdtable); 
+            // ignore snapshots
+            $lv_dtable = preg_grep("/(?:(?! snapshot ).)/",$lv_dtable_aux);
             $shared_lvs_1stdtable = array_merge($shared_lvs_1stdtable,$lv_dtable);
         }
 
@@ -907,17 +1014,17 @@ class EtvaLogicalvolume_VA
             $name_lvs = array();
             if( $etva_node ){
                 $return['debug_errors'] = $this->missing_lvs[$etva_node->getId()];
-                $names_lvs[] = implode(', ',$return['debug_errors']['devices']);
+                $name_lvs[] = $return['debug_errors']['name'] . ': ' . implode(', ',$return['debug_errors']['devices']);
             } else {
                 $return['debug_errors'] = $this->missing_lvs;
                 foreach($return['debug_errors'] as $node_id=>$error_data)
                 {
-                    $names_lvs[] = $error_data['name'] . ': ' . implode(', ',$error_data['devices']);
+                    $name_lvs[] = $error_data['name'] . ': ' . implode(', ',$error_data['devices']);
 
                 }
             }
             
-            $return['info'] = $return['message'] = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>implode(', ',$name_lvs)));
+            $return['info'] = $return['message'] = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>' missing lvs: ' . implode(', ',$name_lvs)));
 
         } elseif( $this->missing_dtable ){
             $name_devices = array();
@@ -932,7 +1039,7 @@ class EtvaLogicalvolume_VA
                 }
             }
 
-            $return['info'] = $return['message'] = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>implode(', ',$name_devices)));
+            $return['info'] = $return['message'] = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>' missing device: ' . implode(', ',$name_devices)));
         }
         return $return;
     }
@@ -959,12 +1066,15 @@ class EtvaLogicalvolume_VA
 
             $is_FileDiskVG = ($vgname == sfConfig::get('app_volgroup_disk_flag')) ? true : false;
 
+            // init
+            $inconsistent = 0;
+
             // look at logical volumes list
             $found_lvm = 0;
             foreach( $sync_node_lvs as $hlv ){
                 $arr_hlv = (array)$hlv;
                 if($arr_hlv[EtvaLogicalvolume::STORAGE_TYPE_MAP] == $lv->getStorageType()){
-                    if( isset($arr_hlv[EtvaLogicalvolume::UUID_MAP]) ){
+                    if( $arr_hlv[EtvaLogicalvolume::UUID_MAP] ){
                         if( $arr_hlv[EtvaLogicalvolume::UUID_MAP] == $uuid )
                             $found_lvm = 1;
                     } else {
@@ -974,7 +1084,7 @@ class EtvaLogicalvolume_VA
                 }
             }
 
-            $inconsistent = ( $found_lvm ) ? 0 : 1;
+            $inconsistent = $inconsistent || !$found_lvm;
             if( !$found_lvm ) $error['not_found_lvm'] = 1;
 
             if( !$is_FileDiskVG ){  // if not file disk volume
@@ -994,7 +1104,7 @@ class EtvaLogicalvolume_VA
 
                 // check if found
                 $found_node_dt = ( empty($node_lv_dtable) ) ? 0 : 1;
-                $inconsistent = ( $found_lvm && $found_node_dt ) ? 0 : 1;
+                $inconsistent = $inconsistent || !$found_node_dt;
 
                 if( !$found_node_dt ) $error['not_found_node_device_table'] = 1;
             }
@@ -1038,6 +1148,9 @@ class EtvaLogicalvolume_VA
             $etva_vg = $lv->getEtvaVolumegroup();
             $vgname = $etva_vg->getVg();
 
+            // init
+            $inconsistent = 0;
+
             // look at logical volumes list
             $found_lvm = 0;
             foreach( $sync_node_lvs as $hlv ){
@@ -1053,7 +1166,7 @@ class EtvaLogicalvolume_VA
                 }
             }
 
-            $inconsistent = ( $found_lvm ) ? 0 : 1;
+            $inconsistent = $inconsistent || !$found_lvm;
             if( !$found_lvm ) $error['not_found_lvm'] = 1;
 
             // look at devices table
@@ -1072,7 +1185,7 @@ class EtvaLogicalvolume_VA
             // check if found
             $found_node_dt = ( empty($node_lv_dtable) ) ? 0 : 1;
 
-            $inconsistent = ( $found_lvm && $found_node_dt ) ? 0 : 1;
+            $inconsistent = $inconsistent || !$found_node_dt;
 
             if( !$found_node_dt ) $error['not_found_node_device_table'] = 1;
 
@@ -1098,7 +1211,7 @@ class EtvaLogicalvolume_VA
                     $found_all_nodes_dt = $found_all_nodes_dt && $found && $is_eq;
                 }
             }
-            $inconsistent = ( $found_lvm && $found_node_dt && $found_all_nodes_dt ) ? 0 : 1;
+            $inconsistent = $inconsistent || !$found_all_nodes_dt;
             if( !$found_all_nodes_dt ) $error['not_found_all_nodes_device_table'] = 1;
 
             // update data-base
@@ -1138,7 +1251,7 @@ class EtvaLogicalvolume_VA
             $return = array( 'success'=>true );
         }
 
-        return $return; //($node_inconsistent) ? false : true;
+        return $return;
     }
     public function fix_consistency(EtvaNode $etva_node)
     {
@@ -1226,5 +1339,14 @@ class EtvaLogicalvolume_VA
 
             return  $result;
         }
+    }
+    public function unregister(EtvaNode $etva_node){
+
+        $etva_logicalvol = $this->etva_lv;
+
+        // delete it
+        $etva_logicalvol->delete();
+
+        return array( 'success'=>true );
     }
 }
