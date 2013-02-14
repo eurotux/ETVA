@@ -233,11 +233,14 @@ class viewActions extends sfActions
       $proxyhost1_arr = split(':',$proxyhost1);
       $proxyhost1 = $proxyhost1_arr[0];
 
-      $proxyport1 = 80;
+      $proxyport1 = $request->isSecure() ? 443 : 80;
+      //$proxyport1 = 80;
       if( $proxyhost1_arr[1] ) $proxyport1 = $proxyhost1_arr[1];
 
       $this->proxyhost1 = $proxyhost1;
       $this->proxyport1 = $proxyport1;
+
+      $this->socketFactory = $request->isSecure() ? 'AuthHTTPSConnectSSLSocketFactory' : 'AuthHTTPConnectSocketFactory';
 
       $this->host = $etva_node->getIp();
 

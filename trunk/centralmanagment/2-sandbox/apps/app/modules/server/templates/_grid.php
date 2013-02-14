@@ -497,6 +497,7 @@ $store_id = json_encode($js_grid['pk']);
                     },
                     {text: <?php echo json_encode(__('Open console')) ?>,
                     ref: '../consoleBtn',
+                    iconCls: 'icon-open-console',
                     disabled:true,
                         handler:function(){
 
@@ -524,6 +525,7 @@ $store_id = json_encode($js_grid['pk']);
                     ,{
                         xtype:'splitbutton',
                         ref: '../startBtn',
+                        iconCls: 'icon-vm-start',
                         disabled:true,
                         scope:this,
                         text: <?php echo json_encode(__('Start server')) ?>,
@@ -604,6 +606,7 @@ $store_id = json_encode($js_grid['pk']);
                         xtype:'splitbutton',
                         text: <?php echo json_encode(__('Stop server')) ?>,
                         ref: '../stopBtn',
+                        iconCls: 'icon-vm-stop',
                         disabled:true,
                         scope:this,
                         handler: function(item) {
@@ -788,6 +791,7 @@ $store_id = json_encode($js_grid['pk']);
                     {
                         text: <?php echo json_encode(__('Snapshots')) ?>,
                         ref: '../snapshotsBtn',
+                        iconCls: 'icon-vm-snapshots',
                         disabled:true,
                         url:<?php echo(json_encode(url_for('server/Server_Snapshots')))?>,
                         call:'Server.Snapshots',
@@ -813,6 +817,7 @@ $store_id = json_encode($js_grid['pk']);
                     <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
                     ,{text: <?php echo json_encode(__('Migrate server')) ?>,
                         ref: '../migrateBtn',
+                        iconCls: 'go-action',
                         disabled:true,
                         url:<?php echo(json_encode(url_for('server/Server_Migrate')))?>,
                         call:'Server.Migrate',

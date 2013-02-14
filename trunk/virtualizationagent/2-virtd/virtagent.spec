@@ -52,6 +52,7 @@ Requires: perl-Class-Inspector
 
 Requires:  logrotate
 Requires:  which
+Requires: /usr/bin/timeout
 
 %description
 Virtualization Agent

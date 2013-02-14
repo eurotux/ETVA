@@ -282,6 +282,7 @@ class myUser extends sfGuardSecurityUser
           if ($rk && $rk->getSfGuardUser())
           {
             $this->signIn($rk->getSfGuardUser());
+            $this->initVncToken();
           }
         }
       }

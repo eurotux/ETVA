@@ -67,6 +67,7 @@ Group:      Applications/Web
 Requires:   %{name}
 Requires:   openssl
 Requires:   mod_ssl
+Requires:   httpd >= 2.2.11-9
 
 %description https
 HTTPS configuration files of ETVA
@@ -213,9 +214,9 @@ cd /srv/etva-centralmanagement
 _ACRONYM=`grep 'acronym' apps/app/config/config.yml`;
 
 if [ "$_ACRONYM" == "" ]; then
-    echo "  acronym: ETVA" >> apps/app/config/config.yml 
+    echo "  acronym: UNITBOX" >> apps/app/config/config.yml 
 else
-    %{__perl} -pi -e 's/acronym:.*/acronym: ETVA/' apps/app/config/config.yml
+    %{__perl} -pi -e 's/acronym:.*/acronym: UNITBOX/' apps/app/config/config.yml
 fi
 
 # change title

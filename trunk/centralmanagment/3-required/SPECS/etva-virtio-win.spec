@@ -1,7 +1,7 @@
 Summary: Perl module that implements for Version Objects
 Name: etva-virtio-win
 Version: 0.1
-Release: 30
+Release: 52
 License: GPLv2
 URL: http://linux-kvm.com/
 Packager: Nuno Fernandes <npf@eurotux.com>
@@ -40,6 +40,9 @@ mkisofs -r -R -J -p "Eurotux Informatica S.A." -A "KVM GPLPv %{version}-%{releas
 /usr/share/etva-isos/*
 
 %changelog
+* Mon Feb 11 2013 Carlos Rodrigues <cmar@eurotux.com> - 0.1-52-1
+- Update virtio drivers to 0.1-52.
+
 * Sun Jul 29 2012 Nuno Fernandes <npf@eurotux.com> - 0.1-30-1
 - Update virtio drivers to 0.1-30.
 

@@ -5,7 +5,7 @@
 <param name="Scaling factor" value="Auto">
 <param name="Open new window" value="Yes">
 Java 1.5 or higher plugin required.
-<param name="SocketFactory" value="AuthHTTPConnectSocketFactory">
+<param name="SocketFactory" value="<?php echo $socketFactory ?>">
 <param name="PROXYHOST1" value="<?php echo $proxyhost1 ?>">
 <param name="PROXYPORT1" value="<?php echo $proxyport1 ?>">
 <param name="PROXYUSERNAME" value="<?php echo($username); ?>">

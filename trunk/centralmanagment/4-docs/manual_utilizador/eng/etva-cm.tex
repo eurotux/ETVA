@@ -1,8 +1,8 @@
 \chapter{\textsf{\acronym}}
 \section*{Description}
-The \emph{Eurotux Virtualization Appliance} is a centralized tool that allows the management of available resources on a network. It consists of a Linux distribution pre-installed and configured, which allows you to manage servers' resources.
+\emph{NUXIS} is a centralized tool that allows the management of available resources on a network. It consists of a Linux distribution pre-installed and configured, which allows you to manage servers' resources.
 
-The \acronym is divided into two functional blocks:
+The NUXIS is divided into two functional blocks:
 
 \begin{itemize}
 	\item \emph{Central Management} (CM)
@@ -12,7 +12,7 @@ The \acronym is divided into two functional blocks:
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.35]{screenshots/etva_blocos.png}
-	\caption{\acronym architecture}
+	\caption{NUXIS architecture}
 	\label{fig:etva_blocos}
 	\end{center}
 \end{figure}
@@ -22,14 +22,14 @@ The \emph{Virtualization Agents} are responsible for processing the requests bet
 
 Within a virtualization server there may be virtual machines with \emph{Management Agents}. These type agent enables the managing of existing services/applications on the virtual machine (see Figure \ref{fig:etva_blocos}).
 
-In the \acronym, there are several virtualization servers (nodes) that communicate with the CM. The initial network configuration is performed, using VLANs through the \emph{One time setup wizard} as shown in Figure \ref{fig:first_time_wizard}.
+In the NUXIS, there are several virtualization servers (nodes) that communicate with the CM. The initial network configuration is performed, using VLANs through the \emph{One time setup wizard} as shown in Figure \ref{fig:first_time_wizard}.
 
-In this particular version, the model of \acronym consists of a single virtualization server where the CM and VA are pre-installed. The node's network configuration in this model consists of four network interfaces: Internet, LAN, DMZ and Management.
+In this particular version, the model of NUXIS consists of a single virtualization server where the CM and VA are pre-installed. The node's network configuration in this model consists of four network interfaces: Internet, LAN, DMZ and Management.
 
 \begin{figure}[H]
     \begin{center}
 	\includegraphics[scale=0.4]{screenshots/etva_standard.png}
-	\caption{\acronym model}
+	\caption{UnitBox NUXIS model}
 	\label{fig:etva_standard}
 	\end{center}
 \end{figure}
@@ -47,7 +47,7 @@ Then the appliance should boot from de cd drive, and we can see the installation
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.6]{screenshots/install_etva1.png}
-	\caption{ETVA installation menu}
+	\caption{NUXIS installation menu}
 	\label{fig:boot_install_screen_standard}
 	\end{center}
 \end{figure}
@@ -64,7 +64,7 @@ Then, by selecting the option \emph{"Install ETVA-SMB KVM-(This will erase all d
     \includegraphics[scale=0.4]{screenshots/install_etva8.png}
     \includegraphics[scale=0.4]{screenshots/install_etva9.png}
     \includegraphics[scale=0.4]{screenshots/install_etva10.png}
-\caption{\acronym installation process}
+\caption{NUXIS installation process}
 	\label{fig:installation_standard}
 	\end{center}
 \end{figure}
@@ -74,7 +74,7 @@ After the installation, the appliance boot must be done from the hard drive and 
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.5]{screenshots/install_etva11.png}
-	\caption{\acronym boot menu}
+	\caption{NUXIS boot menu}
 	\label{fig:boot_screen_standard}
 	\end{center}
 \end{figure}
@@ -83,8 +83,8 @@ At the end of the installation, connect a network cable in your PC and in the ap
 
 \begin{figure}[H]
 	\begin{center}
-	\includegraphics[scale=0.12]{screenshots/appliance_back_identifica.jpg}
-	\caption{\acronym version - Management ports}
+	\includegraphics[scale=0.30]{screenshots/appliance_back_g2.jpg}
+	\caption{UnitBox version - Management ports}
 	\label{fig:back_standard}
 	\end{center}
 \end{figure}

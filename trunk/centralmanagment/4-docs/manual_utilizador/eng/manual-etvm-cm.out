@@ -1,46 +1,55 @@
 \BOOKMARK [0][]{chapter.1}{1 NUXIS }{}
-\BOOKMARK [0][]{chapter.2}{2 Central Management}{}
-\BOOKMARK [1][]{section.2.1}{2.1 First access}{chapter.2}
-\BOOKMARK [1][]{section.2.2}{2.2 Default cluster}{chapter.2}
-\BOOKMARK [2][]{subsection.2.2.1}{2.2.1 Nodes}{section.2.2}
-\BOOKMARK [2][]{subsection.2.2.2}{2.2.2 Networks}{section.2.2}
-\BOOKMARK [3][]{subsubsection.2.2.2.1}{2.2.2.1 Network administration}{subsection.2.2.2}
-\BOOKMARK [3][]{subsubsection.2.2.2.2}{2.2.2.2 MAC address pool management}{subsection.2.2.2}
-\BOOKMARK [3][]{subsubsection.2.2.2.3}{2.2.2.3 Virtual machines' network interfaces management}{subsection.2.2.2}
-\BOOKMARK [1][]{section.2.3}{2.3 Virtual cluster}{chapter.2}
-\BOOKMARK [1][]{section.2.4}{2.4 Virtualization server}{chapter.2}
-\BOOKMARK [2][]{subsection.2.4.1}{2.4.1 Node information}{section.2.4}
-\BOOKMARK [2][]{subsection.2.4.2}{2.4.2 Servers}{section.2.4}
-\BOOKMARK [3][]{subsubsection.2.4.2.1}{2.4.2.1 Add virtual machine}{subsection.2.4.2}
-\BOOKMARK [3][]{subsubsection.2.4.2.2}{2.4.2.2 Edit virtual machine}{subsection.2.4.2}
-\BOOKMARK [3][]{subsubsection.2.4.2.3}{2.4.2.3 Remove virtual machine}{subsection.2.4.2}
-\BOOKMARK [3][]{subsubsection.2.4.2.4}{2.4.2.4 Connect to a virtual machine over VNC}{subsection.2.4.2}
-\BOOKMARK [3][]{subsubsection.2.4.2.5}{2.4.2.5 Start/stop virtual machine}{subsection.2.4.2}
-\BOOKMARK [3][]{subsubsection.2.4.2.6}{2.4.2.6 Migrate virtual machine}{subsection.2.4.2}
-\BOOKMARK [3][]{subsubsection.2.4.2.7}{2.4.2.7 Snapshots}{subsection.2.4.2}
-\BOOKMARK [2][]{subsection.2.4.3}{2.4.3 Storage}{section.2.4}
-\BOOKMARK [3][]{subsubsection.2.4.3.1}{2.4.3.1 Physical Volumes administration}{subsection.2.4.3}
-\BOOKMARK [3][]{subsubsection.2.4.3.2}{2.4.3.2 Volume groups administration}{subsection.2.4.3}
-\BOOKMARK [3][]{subsubsection.2.4.3.3}{2.4.3.3 Logical volumes administration}{subsection.2.4.3}
-\BOOKMARK [2][]{subsection.2.4.4}{2.4.4 Node Load}{section.2.4}
-\BOOKMARK [2][]{subsection.2.4.5}{2.4.5 Shutdown node}{section.2.4}
-\BOOKMARK [1][]{section.2.5}{2.5 Virtual machine}{chapter.2}
-\BOOKMARK [2][]{subsection.2.5.1}{2.5.1 Server information}{section.2.5}
-\BOOKMARK [2][]{subsection.2.5.2}{2.5.2 Statistics}{section.2.5}
-\BOOKMARK [2][]{subsection.2.5.3}{2.5.3 Services}{section.2.5}
-\BOOKMARK [2][]{subsection.2.5.4}{2.5.4 Virtio drivers}{section.2.5}
-\BOOKMARK [1][]{section.2.6}{2.6 Tools}{chapter.2}
-\BOOKMARK [2][]{subsection.2.6.1}{2.6.1 Import OVF}{section.2.6}
-\BOOKMARK [2][]{subsection.2.6.2}{2.6.2 Export OVF}{section.2.6}
-\BOOKMARK [2][]{subsection.2.6.3}{2.6.3 ISO manager}{section.2.6}
-\BOOKMARK [2][]{subsection.2.6.4}{2.6.4 Nodes' agent monitor}{section.2.6}
-\BOOKMARK [2][]{subsection.2.6.5}{2.6.5 System events log}{section.2.6}
-\BOOKMARK [1][]{section.2.7}{2.7 System administration}{chapter.2}
-\BOOKMARK [2][]{subsection.2.7.1}{2.7.1 One time set wizard}{section.2.7}
-\BOOKMARK [2][]{subsection.2.7.2}{2.7.2 Virtual cluster management}{section.2.7}
-\BOOKMARK [3][]{subsubsection.2.7.2.1}{2.7.2.1 Virtual cluster setup wizard}{subsection.2.7.2}
-\BOOKMARK [3][]{subsubsection.2.7.2.2}{2.7.2.2 Moving a node between datacenters}{subsection.2.7.2}
-\BOOKMARK [3][]{subsubsection.2.7.2.3}{2.7.2.3 Authorize node}{subsection.2.7.2}
-\BOOKMARK [2][]{subsection.2.7.3}{2.7.3 System Preferences}{section.2.7}
-\BOOKMARK [2][]{subsection.2.7.4}{2.7.4 Users, groups and permission administration}{section.2.7}
-\BOOKMARK [2][]{subsection.2.7.5}{2.7.5 Shutdown Central Management}{section.2.7}
+\BOOKMARK [0][]{chapter.2}{2 Installation}{}
+\BOOKMARK [1][]{section.2.1}{2.1 Enterprise version}{chapter.2}
+\BOOKMARK [0][]{chapter.3}{3 Central Management}{}
+\BOOKMARK [1][]{section.3.1}{3.1 First access}{chapter.3}
+\BOOKMARK [1][]{section.3.2}{3.2 Default cluster}{chapter.3}
+\BOOKMARK [2][]{subsection.3.2.1}{3.2.1 Nodes}{section.3.2}
+\BOOKMARK [2][]{subsection.3.2.2}{3.2.2 Networks}{section.3.2}
+\BOOKMARK [3][]{subsubsection.3.2.2.1}{3.2.2.1 Network administration}{subsection.3.2.2}
+\BOOKMARK [3][]{subsubsection.3.2.2.2}{3.2.2.2 MAC address pool management}{subsection.3.2.2}
+\BOOKMARK [3][]{subsubsection.3.2.2.3}{3.2.2.3 Virtual machines' network interfaces management}{subsection.3.2.2}
+\BOOKMARK [1][]{section.3.3}{3.3 Virtual cluster}{chapter.3}
+\BOOKMARK [1][]{section.3.4}{3.4 Virtualization server}{chapter.3}
+\BOOKMARK [2][]{subsection.3.4.1}{3.4.1 Node information}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.2}{3.4.2 Servers}{section.3.4}
+\BOOKMARK [3][]{subsubsection.3.4.2.1}{3.4.2.1 Add virtual machine}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.2}{3.4.2.2 Edit virtual machine}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.3}{3.4.2.3 Remove virtual machine}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.4}{3.4.2.4 Connect to a virtual machine over VNC}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.5}{3.4.2.5 Start/stop virtual machine}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.6}{3.4.2.6 Migrate virtual machine}{subsection.3.4.2}
+\BOOKMARK [3][]{subsubsection.3.4.2.7}{3.4.2.7 Snapshots}{subsection.3.4.2}
+\BOOKMARK [2][]{subsection.3.4.3}{3.4.3 Storage}{section.3.4}
+\BOOKMARK [3][]{subsubsection.3.4.3.1}{3.4.3.1 Physical Volumes administration}{subsection.3.4.3}
+\BOOKMARK [3][]{subsubsection.3.4.3.2}{3.4.3.2 Volume groups administration}{subsection.3.4.3}
+\BOOKMARK [3][]{subsubsection.3.4.3.3}{3.4.3.3 Logical volumes administration}{subsection.3.4.3}
+\BOOKMARK [2][]{subsection.3.4.4}{3.4.4 Node Load}{section.3.4}
+\BOOKMARK [2][]{subsection.3.4.5}{3.4.5 Shutdown node}{section.3.4}
+\BOOKMARK [1][]{section.3.5}{3.5 Virtual machine}{chapter.3}
+\BOOKMARK [2][]{subsection.3.5.1}{3.5.1 Server information}{section.3.5}
+\BOOKMARK [2][]{subsection.3.5.2}{3.5.2 Statistics}{section.3.5}
+\BOOKMARK [2][]{subsection.3.5.3}{3.5.3 Services}{section.3.5}
+\BOOKMARK [2][]{subsection.3.5.4}{3.5.4 Virtio drivers}{section.3.5}
+\BOOKMARK [1][]{section.3.6}{3.6 Tools}{chapter.3}
+\BOOKMARK [2][]{subsection.3.6.1}{3.6.1 Import OVF}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.2}{3.6.2 Export OVF}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.3}{3.6.3 ISO manager}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.4}{3.6.4 Nodes' agent monitor}{section.3.6}
+\BOOKMARK [2][]{subsection.3.6.5}{3.6.5 System events log}{section.3.6}
+\BOOKMARK [1][]{section.3.7}{3.7 System administration}{chapter.3}
+\BOOKMARK [2][]{subsection.3.7.1}{3.7.1 One time set wizard}{section.3.7}
+\BOOKMARK [2][]{subsection.3.7.2}{3.7.2 Virtual cluster management}{section.3.7}
+\BOOKMARK [3][]{subsubsection.3.7.2.1}{3.7.2.1 Virtual cluster setup wizard}{subsection.3.7.2}
+\BOOKMARK [3][]{subsubsection.3.7.2.2}{3.7.2.2 Moving a node between datacenters}{subsection.3.7.2}
+\BOOKMARK [3][]{subsubsection.3.7.2.3}{3.7.2.3 Authorize node}{subsection.3.7.2}
+\BOOKMARK [2][]{subsection.3.7.3}{3.7.3 System Preferences}{section.3.7}
+\BOOKMARK [2][]{subsection.3.7.4}{3.7.4 Users, groups and permission administration}{section.3.7}
+\BOOKMARK [2][]{subsection.3.7.5}{3.7.5 Shutdown Central Management}{section.3.7}
+\BOOKMARK [0][]{chapter.4}{4 Appendix}{}
+\BOOKMARK [1][]{section.4.1}{4.1 Changelog}{chapter.4}
+\BOOKMARK [2][]{subsection.4.1.1}{4.1.1 Release 1.0}{section.4.1}
+\BOOKMARK [2][]{subsection.4.1.2}{4.1.2 Release 1.0.1}{section.4.1}
+\BOOKMARK [2][]{subsection.4.1.3}{4.1.3 Release 1.1}{section.4.1}
+\BOOKMARK [2][]{subsection.4.1.4}{4.1.4 Release 1.2.0}{section.4.1}
+\BOOKMARK [2][]{subsection.4.1.5}{4.1.5 Release 1.2.1}{section.4.1}

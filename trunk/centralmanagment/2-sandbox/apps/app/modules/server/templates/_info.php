@@ -141,6 +141,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     {
                         text: <?php echo json_encode(__('Open console')) ?>,
                         ref: '../consoleBtn',
+                        iconCls: 'icon-open-console',
                         disabled:false,scope:this,
                         hidden:true,
                         handler:function(){
@@ -156,6 +157,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     ,{
                         xtype:'splitbutton',
                         ref: '../startBtn',
+                        iconCls: 'icon-vm-start',
                         disabled: true,
                         hidden:true,
                         scope:this,
@@ -241,6 +243,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         xtype:'splitbutton',
                         text: <?php echo json_encode(__('Stop server')) ?>,
                         ref: '../stopBtn',
+                        iconCls: 'icon-vm-stop',
                         disabled:false,
                         hidden:true,
                         scope:this,
@@ -391,6 +394,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     {
                         text: <?php echo json_encode(__('Snapshots')) ?>,
                         ref: '../snapshotsBtn',
+                        iconCls: 'icon-vm-snapshots',
                         disabled:false,
                         hidden:true,
                         url:<?php echo(json_encode(url_for('server/Server_Snapshots')))?>,
@@ -414,6 +418,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
                     {
                         ref: '../migrateBtn',
+                        iconCls: 'go-action',
                         disabled:false,
                         hidden:true,
                         url:<?php echo(json_encode(url_for('server/Server_Migrate')))?>,

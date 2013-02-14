@@ -23,6 +23,8 @@ class EtvaLogicalvolume_VA
 
     const GET_SYNC_LOGICALVOLUMES = 'getlvs_arr';
     const GET_SYNC_DEVICESTABLE = 'device_table';
+    const GET_SYNC_DEVICESLOADTABLE = 'device_loadtable_wrap';
+    const GET_SYNC_DEVICESREMOVE = 'device_remove';
 
     public function EtvaLogicalvolume_VA(EtvaLogicalvolume $etva_lv = null)
     {
@@ -781,7 +783,7 @@ class EtvaLogicalvolume_VA
         $lvdevice = $this->etva_lv->getLvdevice();
 
         // suspend device on all nodes
-        $etva_cluster->soapSend('device_suspend',array('device'=>$lvdevice));
+        //$etva_cluster->soapSend('device_suspend',array('device'=>$lvdevice));
 
         // get device table from all nodes
         $dt_response = $etva_node->soapSend(self::GET_SYNC_DEVICESTABLE,array('device'=>$lvdevice));
@@ -791,11 +793,11 @@ class EtvaLogicalvolume_VA
             $device_table = $dt_response['response'];
 
             // load table in each node
-            $etva_cluster->soapSend('device_loadtable',array('device'=>$lvdevice,'table'=>$device_table),$etva_node);
+            $etva_cluster->soapSend(self::GET_SYNC_DEVICESLOADTABLE,array('device'=>$lvdevice,'table'=>$device_table),$etva_node);
         }
 
         // resume device on all nodes
-        $etva_cluster->soapSend('device_resume',array('device'=>$lvdevice));
+        //$etva_cluster->soapSend('device_resume',array('device'=>$lvdevice));
 
     }
 
@@ -809,7 +811,7 @@ class EtvaLogicalvolume_VA
         $lvdevice = $this->etva_lv->getLvdevice();
 
         // remove device in each node
-        $etva_cluster->soapSend('device_remove',array('device'=>$lvdevice),$etva_node);
+        $etva_cluster->soapSend(self::GET_SYNC_DEVICESREMOVE,array('device'=>$lvdevice),$etva_node);
     }
 
     /*

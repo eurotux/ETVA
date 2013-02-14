@@ -137,6 +137,7 @@ sub opPeriodic5Secs {
 
 sub terminate_agent {
     my $self = shift;
+    plog("VirtAgentSOAP terminate_agent") if( &debug_level() > 7 );
     ETVA::Agent::SOAPFork->terminate_agent();
     VirtAgentInterface->exit_handler();
 }

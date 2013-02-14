@@ -439,11 +439,11 @@ class networkActions extends sfActions
             $c->add($column, $val);
         }  
 
-        error_log($c->toString());
+        //error_log($c->toString());
 
         //get vlans from cluster
         if(!$vlan_flag && !$server_flag){// && !$server_flag && $cid){
-            error_log('!(!$vlan_flag && !$server_flag)');
+            //error_log('!(!$vlan_flag && !$server_flag)');
             foreach($etva_vlans as $etva_vlan){
                 if($this->getRequestParameter('query')){
                     $c->addOr(EtvaNetworkPeer::VLAN_ID, $etva_vlan->getId());
@@ -458,7 +458,8 @@ class networkActions extends sfActions
         // add server criteria
         $this->addServerCriteria($c);
 
-        error_log($c->toString());
+        //error_log($c->toString());
+
         $etva_network_list = EtvaNetworkPeer::doSelectJoinEtvaServer($c);
 
 

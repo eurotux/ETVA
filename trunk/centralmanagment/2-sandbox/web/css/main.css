@@ -35,6 +35,10 @@ html, body {
     background: transparent url(../images/nuxis_205.png) no-repeat;
 }
 
+#header h1.UNITBOX{
+    background: transparent url(../images/unitbox_205.png) no-repeat;
+}
+
 .x-form-display-field{
     font-size:11px;
     padding-top:2px;
@@ -887,6 +891,21 @@ background-image:url(../images/icons/leaf.gif) !important;
 .icon-open-download {
 	background-image:url(../images/silk/icons/application_put.png) ! important;
 }
+.icon-open-console{
+     background-image:url(../images/silk/icons/application_xp_terminal.png) !important;
+}
+.icon-vm-start{
+     background-image:url(../images/silk/icons/control_play_blue.png) !important;
+}
+.icon-vm-stop{
+     background-image:url(../images/silk/icons/control_stop_blue.png) !important;
+}
+.icon-vm-snapshots{
+     background-image:url(../images/silk/icons/camera.png) !important;
+}
+.icon-vm-migrate{
+     background-image:url(../images/silk/icons/control_stop_blue.png) !important;
+}
 .icon-refresh {
 	background-image:url(../images/silk/icons/arrow_refresh.png) ! important;
 }
@@ -1229,6 +1248,10 @@ li.x-menu-list-item div {
 
 .header-login.NUXIS{
     background: transparent url(../images/nuxis_410.png) no-repeat;
+}
+
+.header-login.UNITBOX{
+    background: transparent url(../images/unitbox_410.png) no-repeat;
 }
 
 .footer-login{

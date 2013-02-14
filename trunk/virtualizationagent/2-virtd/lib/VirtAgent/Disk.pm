@@ -59,6 +59,10 @@ my $LIMIT_SIZE_DISK_PERC = 0.999;    # limit size disk percentage of disk free
 
 my $san_config_file = $ENV{'san_conf_file'} || "/etc/sysconfig/etva-vdaemon/san_file.conf";
 
+my $DEFAULT_TIMEOUT_SECONDS = 300;      # default value of timeout for timeout command
+my $BULK_QEMU_IMG_INFO_TIMEOUT = 10;    # timeout value for bulk qemu_img command
+
+
 # Disk Devices
 #   name => { info }
 my %DiskDevices = ();
@@ -865,7 +869,8 @@ sub lvinfo {
 
     %LVInfo = ( );
 
-    my $opts = "lv_uuid,lv_name,lv_attr,lv_major,lv_minor,lv_kernel_major,lv_kernel_minor,lv_size,seg_count,origin,snap_percent,copy_percent,move_pv,lv_tags,segtype,stripes,stripesize,chunksize,seg_start,seg_size,seg_tags,devices,regionsize,mirror_log,modules,convert_lv,vg_name";
+    #my $opts = "lv_uuid,lv_name,lv_attr,lv_major,lv_minor,lv_kernel_major,lv_kernel_minor,lv_size,seg_count,origin,snap_percent,copy_percent,move_pv,lv_tags,segtype,stripes,stripesize,chunksize,seg_start,seg_size,seg_tags,devices,regionsize,mirror_log,modules,convert_lv,vg_name";
+    my $opts = "lv_uuid,lv_name,vg_name,lv_attr,lv_major,lv_minor,lv_kernel_major,lv_kernel_minor,lv_size,seg_count,origin";
     open(I,"lvs --separator=';' --units=b --noheadings --options=$opts 2>/dev/null|");
 
     my @hf = split(/,/,$opts);
@@ -990,6 +995,17 @@ sub lvinfo {
     return wantarray() ? %LVInfo: \%LVInfo;
 }
 
+# timeout_cmd
+sub timeout_cmd {
+    my ($ts,$force) = @_;
+
+    my $args = "";
+    $ts = $DEFAULT_TIMEOUT_SECONDS if( !$ts );
+    $args = "--signal=SIGKILL" if( $force );
+    
+    return "timeout $args $ts";
+}
+
 # qemu_img_cmd : return qemu-img command path
 sub qemu_img_cmd {
     return "/usr/bin/qemu-img";
@@ -1064,9 +1080,13 @@ sub qemu_img_info_bulk_cmd {
     my ($L) = @_;
     my $blk_cmd = "";
     for my $D (@$L){
-        $blk_cmd .= &qemu_img_cmd() . " info $D->{'device'};" . "\n";
+        # ignore none active volumes
+        next if( defined($D->{'state'}) && ($D->{'state'} ne 'a') );
+
+        # call qemu-img info with timeout
+        $blk_cmd .= &timeout_cmd($BULK_QEMU_IMG_INFO_TIMEOUT,1) . " " . &qemu_img_cmd() . " info $D->{'device'};" . "\n";
     }
-    plog( " qemu_img_info_bulkc_cmd=$blk_cmd ") if( &debug_level > 7 );
+    plog( " qemu_img_info_bulk_cmd=$blk_cmd ") if( &debug_level > 7 );
     my @lines = ();
     if( $blk_cmd ){
         open(P,"( $blk_cmd )|");
@@ -1084,7 +1104,7 @@ sub qemu_img_info_bulk {
         for my $D (@$L){
             my $go_process = 0;
             for (@lines){
-                if( m#image: $D->{'device'}# ){
+                if( m#^image: $D->{'device'}$# ){
                     $go_process = 1;
                     next;
                 }
@@ -3334,6 +3354,31 @@ sub device_remove {
     }
 
     return retOk("_OK_DEVICE_REMOVE_","Device successfully removed.");
+}
+
+# wrapper for device_remove
+sub device_remove_wrap {
+    my $self = shift;
+
+    my $E = $self->device_suspend( @_ );
+    unless( isError($E) ){
+        $E = $self->device_remove( @_ );
+
+        $E = $self->device_resume( @_ );
+    }
+    return wantarray() ? %$E : $E;
+}
+
+sub device_loadtable_wrap {
+    my $self = shift;
+
+    my $E = $self->device_suspend( @_ );
+    unless( isError($E) ){
+        $E = $self->device_loadtable( @_ );
+
+        $E = $self->device_resume( @_ );
+    }
+    return wantarray() ? %$E : $E;
 }
 
 sub lookup_fc_devices {

@@ -83,19 +83,23 @@ sub sigchld_handler {
     # wait for die pid
     my $dead_pid = waitpid(-1,&WNOHANG);
 
-    my @aux_CHILD_PIDS = grep { $_ != $dead_pid } @CHILD_PIDS;
-    
-    my $need_update = (scalar(@CHILD_PIDS) != scalar(@aux_CHILD_PIDS)) ? 1 : 0;
-    
-    @CHILD_PIDS = @aux_CHILD_PIDS;
+    if( $dead_pid > 0 ){
+        plogNow(" sigchld_handler wait dead pid=$dead_pid") if(&debug_level() > 5);
 
-    if( $need_update ){
-        if( $DISPATCHER ){
-            eval "require $DISPATCHER";
-            if( !$@ ){
-                eval {
-                    $DISPATCHER->do_need_update();
-                };
+        my @aux_CHILD_PIDS = grep { $_ != $dead_pid } @CHILD_PIDS;
+        
+        my $need_update = (scalar(@CHILD_PIDS) != scalar(@aux_CHILD_PIDS)) ? 1 : 0;
+        
+        @CHILD_PIDS = @aux_CHILD_PIDS;
+
+        if( $need_update ){
+            if( $DISPATCHER ){
+                eval "require $DISPATCHER";
+                if( !$@ ){
+                    eval {
+                        $DISPATCHER->do_need_update();
+                    };
+                }
             }
         }
     }
@@ -104,12 +108,17 @@ sub sigchld_handler {
 sub terminate_agent {
     my $self = shift;
 
-    plog "$self terminate_agent: You want me to stop, eh!?n" if(&debug_level);
+    plog "$self terminate_agent: You want me to stop, eh!?";
 
     for my $cpid (@CHILD_PIDS){
+        plog "$self killing pid $cpid... ";
         kill SIGHUP, $cpid;
         sleep(2);
-        waitpid(-1,&WNOHANG);
+        if( waitpid(-1,&WNOHANG)  < 0 ){    # wait until timed out or no more pids
+            plog "$self no more pids to kill...";
+            last;
+        }
+        plog "$self killing pid $cpid... done";
     }
 }
 
@@ -178,7 +187,7 @@ sub processdata {
             $self->set_imchild();   # mark as child
         } else {
             $self->set_imparent();  # mark as parent
-            plog "fork...\n" if(&debug_level > 5);
+            plogNow "fork... pid=$runproc \n" if(&debug_level > 5);
             push(@CHILD_PIDS,$runproc);  # put in queue
         }
     }

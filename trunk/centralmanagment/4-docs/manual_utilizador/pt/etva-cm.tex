@@ -1,8 +1,8 @@
 \chapter{\textsf{\acronym}}
 \section*{Descrição}
-A \emph{Eurotux Virtualization Appliance} é uma ferramenta de gestão centralizada de recursos disponíveis numa rede. Consiste numa distribuição linux pré-instalada e configurada que permite fazer a gestão via rede de servidores e seus recursos.
+O NUXIS é uma ferramenta de gestão centralizada de recursos disponíveis numa rede. Consiste numa distribuição linux pré-instalada e configurada, que permite fazer a gestão via rede de servidores e seus recursos.
 
-O \acronym encontra-se dividido principalmente em dois blocos funcionais:
+O NUXIS encontra-se dividido principalmente em dois blocos funcionais:
 
 \begin{itemize}
 	\item \emph{Central Management} (CM)
@@ -12,7 +12,7 @@ O \acronym encontra-se dividido principalmente em dois blocos funcionais:
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.35]{screenshots/etva_blocos.png}
-	\caption{Esquema geral do \acronym}
+	\caption{Esquema geral do NUXIS}
 	\label{fig:etva_blocos}
 	\end{center}
 \end{figure}
@@ -22,11 +22,11 @@ Os \emph{Virtualization Agents} são responsáveis pelo processamento dos pedido
 
 Dentro de um servidor de virtualização(\emph{node}) poderão existir máquinas virtuais com \emph{Management Agents}. Estes agentes, permitem a gestão ao nível dos serviços/aplicações instalados numa máquina virtual (ver figura \ref{fig:etva_blocos} ).
 
-Nesta versão em particular, o modelo do \acronym consiste num único servidor de virtualização onde se encontram instalados o CM e o VA. A configuração da rede do \emph{node} neste modelo consiste em quatro interfaces de rede: Internet, LAN, DMZ e Management.
+Nesta versão em particular, o modelo do NUXIS consiste num único servidor de virtualização onde se encontram instalados o CM e o VA. A configuração da rede do \emph{node} neste modelo consiste em quatro interfaces de rede: Internet, LAN, DMZ e Management.
 \begin{figure}[H]
     \begin{center}
 	\includegraphics[scale=0.4]{screenshots/etva_standard.png}
-	\caption{Modelo \acronym}
+	\caption{Modelo NUXIS do UnitBox}
 	\label{fig:etva_standard}
 	\end{center}
 \end{figure}
@@ -44,7 +44,7 @@ Depois deverá ser iniciado o boot a partir do cd e teremos a seguinte imagem:
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.6]{screenshots/install_etva1.png}
-	\caption{Menu de instalação da versão ETVA Standard}
+	\caption{Menu de instalação da versão Standard}
 	\label{fig:boot_install_screen_standard}
 	\end{center}
 \end{figure}
@@ -61,7 +61,7 @@ De seguida, seleccionando a opção \emph{"Install ETVA-SMB-KVM (This will erase
     \includegraphics[scale=0.4]{screenshots/install_etva8.png}
     \includegraphics[scale=0.4]{screenshots/install_etva9.png}
     \includegraphics[scale=0.4]{screenshots/install_etva10.png}
-\caption{Instação da versão \acronym}
+\caption{Instação da versão standard}
 	\label{fig:installation_standard}
 	\end{center}
 \end{figure}
@@ -71,7 +71,7 @@ Depois da instalação efectuada o arranque deverá ser efectuado a partir do di
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.5]{screenshots/install_etva11.png}
-	\caption{Menu de boot da versão \acronym}
+	\caption{Menu de boot da versão standard}
 	\label{fig:boot_screen_standard}
 	\end{center}
 \end{figure}
@@ -80,8 +80,8 @@ No final da instalação deve-se ligar um cabo de rede do nosso PC de acesso à 
 
 \begin{figure}[H]
 	\begin{center}
-	\includegraphics[scale=0.12]{screenshots/appliance_back_identifica.jpg}
-	\caption{Identificação das portas a ligar na versão \acronym}
+	\includegraphics[scale=0.30]{screenshots/appliance_back_g2.jpg}
+	\caption{Identificação das portas a ligar na versão standard}
 	\label{fig:back_standard}
 	\end{center}
 \end{figure}

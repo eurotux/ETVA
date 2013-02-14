@@ -561,6 +561,7 @@ sub get_ip {
         ($cm_uri !~ m/127\.0\.0\.1/) &&
         ( $cm_uri =~ m/^(http|https):\/\/([^\/]+)\// ) ){
         my ($cm_ip) = ($2);
+        $cm_ip =~ s/:\d+$// if( $cm_ip =~ m/:\d+$/ ); # if has port
         # convert to ip
         $cm_ip = inet_ntoa(inet_aton($cm_ip)) if( $cm_ip !~ m/\d+\.\d+\.\d+\.\d+/ );
         my ($e,$m) = cmd_exec("ip route get $cm_ip");
@@ -602,34 +603,64 @@ sub get_ip {
 }
 sub get_cmip {
 
+    my $port = 80;
     my $ip = "127.0.0.1";
 
-    my $fc = $CONF{'CFG_FILE'} || $ENV{'CFG_FILE'} || "/etc/sysconfig/etva-vdaemon/noavahi";
-    $fc =~ s/^(\.?\.?\/([^\/]+\/)*)?[^\/]+$/$1noavahi/;
-    if( !-e "$fc" ){
-        # avahi-browse -l -f -t _etva._tcp -r|grep address|awk {'print $3'}|sed -e 's/\[//g' -e 's/\]//g'
-        # x.x.x.x
-        if( -x "/usr/bin/avahi-browse" ){
-            open(PH,q#/usr/bin/avahi-browse -l -f -t _etva._tcp -r|grep address|awk {'print $3'}|sed -e 's/\[//g' -e 's/\]//g' |#);
-            while(<PH>){
-                chomp;
-                if( /(\d+\.\d+\.\d+\.\d+)/ ){
-                    $ip = $1;
-                    last;
+    my $cm_uri = $CONF{'cm_uri'};
+
+    # get ip from route to cm_uri
+    if( $cm_uri && ($cm_uri !~ m/localhost/) &&
+        ($cm_uri !~ m/127\.0\.0\.1/) &&
+        ( $cm_uri =~ m/^(http|https):\/\/([^\/]+)\// ) ){
+
+        my ($proto,$cm_ip) = ($1,$2);
+        $port = ($proto eq 'https') ? 443 : 80;   # testing port
+
+        if( $cm_ip =~ m/:(\d+)$/ ){
+            $port = $1;     # different port
+            $cm_ip =~ s/:\d+$//;
+        }
+
+        # convert to ip
+        $cm_ip = inet_ntoa(inet_aton($cm_ip)) if( $cm_ip !~ m/\d+\.\d+\.\d+\.\d+/ );
+        $ip = $cm_ip;
+
+    } else {
+        my $fc = $CONF{'CFG_FILE'} || $ENV{'CFG_FILE'} || "/etc/sysconfig/etva-vdaemon/noavahi";
+        $fc =~ s/^(\.?\.?\/([^\/]+\/)*)?[^\/]+$/$1noavahi/;
+        if( !-e "$fc" ){
+            # avahi-browse -l -f -t _etva._tcp -r|grep address|awk {'print $3'}|sed -e 's/\[//g' -e 's/\]//g'
+            # x.x.x.x
+            if( -x "/usr/bin/avahi-browse" ){
+                #open(PH,q#/usr/bin/avahi-browse -l -f -t _etva._tcp -r|grep address|awk {'print $3'}|sed -e 's/\[//g' -e 's/\]//g' |#);
+                open(PH,q#/usr/bin/avahi-browse -l -f -t _etva._tcp -r| grep "address\|port" |awk {'print $1 " = " $3 '} |sed -e 's/\[//g' -e 's/\]//g' |#);
+                while(<PH>){
+                    chomp;
+                    if( /address = (\d+\.\d+\.\d+\.\d+)/ ){
+                        $ip = $1;
+                    } elsif( /port = (\d+)/ ){
+                        $port = $1;
+                        last;
+                    }
                 }
+                close(PH);
             }
-            close(PH);
         }
     }
-
-    return $ip;
+    return wantarray ? ($ip,$port) : $ip;
 }
 sub get_cmuri {
 
     my $cmuri = "http://localhost/soapapi.php";
-    my $ip = &get_cmip();
+    my ($ip,$port) = &get_cmip();
     if( $ip && $ip ne '127.0.0.1' ){
-        $cmuri = "http://$ip/soapapi.php";
+        if( $port == 443 ){
+            $cmuri = "https://$ip/soapapi.php";
+        } elsif( $port != 80 ){
+            $cmuri = "http://$ip:$port/soapapi.php";
+        } else {
+            $cmuri = "http://$ip/soapapi.php";
+        }
     }
     return $cmuri;
 }
@@ -1127,6 +1158,7 @@ sub getmacaddr {
     my $cm_uri = $CONF{'cm_uri'};
     if( $cm_uri =~ m/^(http|https):\/\/([^\/]+)\// ){
         my ($cm_ip) = ($2);
+        $cm_ip =~ s/:\d+$// if( $cm_ip =~ m/:\d+$/ ); # if has port
         # convert to ip
         $cm_ip = inet_ntoa(inet_aton($cm_ip)) if( $cm_ip !~ m/\d+\.\d+\.\d+\.\d+/ );
         my ($e,$m) = cmd_exec("ip route get $cm_ip");
@@ -1234,6 +1266,21 @@ sub getproc {
     $P{'cmdline'} = <PF>;
     close(PF);
     return wantarray() ? %P : \%P;
+}
+
+# exec function call with timeout
+sub timeout_call {
+    my ($time,$call,@args) = @_;
+    my $res;
+    eval {
+        local $SIG{ALRM} = sub { die "Timeout!\n"; };
+        alarm($time);
+        $res = &$call(@args);
+        alarm(0);
+    };
+    plog "timeout_call timed out! $@" if( $@ && $@ =~ m/Timeout/ );
+
+    return $res;
 }
 
 1;

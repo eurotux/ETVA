@@ -4,8 +4,14 @@ baseurl=http://etrepos.eurotux.com/redhat/el$releasever/en/$basearch/etva/
 gpgcheck=0
 enabled=1
 
-[nuxis-devel]
+[nuxis-cr]
 name=Nuxis-$releasever - Updates
 baseurl=http://etrepos.eurotux.com/redhat/el$releasever/en/$basearch/etva-devel/
+gpgcheck=0
+enabled=0
+
+[nuxis-devel]
+name=Nuxis-$releasever - Devel repository
+baseurl=http://etrepos.eurotux.com/redhat/el$releasever/en/$basearch/etva-cr/
 gpgcheck=0
 enabled=0

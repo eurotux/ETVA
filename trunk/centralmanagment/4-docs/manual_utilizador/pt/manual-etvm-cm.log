@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=pdflatex 2012.7.13)  30 NOV 2012 14:25
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=pdflatex 2012.7.13)  13 FEB 2013 15:04
 entering extended mode
  %&-line parsing enabled.
 **manual-etvm-cm
@@ -506,7 +506,7 @@ LaTeX Info: Redefining \pageref on input line 26.
 
 
 Using optional text marked with etvm. 
-<include/img/logo.png, id=187, 311.9655pt x 246.6816pt>
+<include/img/logo.png, id=223, 311.9655pt x 246.6816pt>
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
@@ -524,8 +524,8 @@ File: uni-0.def 2004/10/17 UCS: Unicode data U+0000..U+00FF
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 13.67995pt on input line 28.
 
-<include/img/logo_PME_excelencia_11.png, id=188, 845.1575pt x 1195.46625pt>
-File: include/img/logo_PME_excelencia_11.png Graphic file (type png)
+<include/img/logo_PME_excelencia_12.png, id=224, 136.3494pt x 172.4844pt>
+File: include/img/logo_PME_excelencia_12.png Graphic file (type png)
 
 <use include/img/logo_PME_excelencia_11.png> [1
 
@@ -546,7 +546,7 @@ File: t1txtt.fd 2000/12/15 v3.1
 
 ]
 LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
-(Font)              scaled to size 23.63593pt on input line 59.
+(Font)              scaled to size 23.63593pt on input line 63.
 
 (./manual-etvm-cm.toc
 LaTeX Font Info:    Try loading font information for OT1+txr on input line 4.
@@ -609,7 +609,7 @@ LaTeX Font Warning: Font shape `OMS/txss/m/n' undefined
 (Font)              using `OMS/txsy/m/n' instead
 (Font)              for symbol `textbullet' on input line 8.
 
-<screenshots/etva_blocos.png, id=439, 1259.76529pt x 661.76646pt>
+<screenshots/etva_blocos.png, id=516, 1259.76529pt x 661.76646pt>
 File: screenshots/etva_blocos.png Graphic file (type png)
 
 <use screenshots/etva_blocos.png>
@@ -621,7 +621,7 @@ File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [7
 
  <./screenshots/etva_blocos.png (PNG copy)>]
-<screenshots/etva_enterprise.png, id=451, 597.23125pt x 465.74pt>
+<screenshots/etva_enterprise.png, id=527, 597.23125pt x 465.74pt>
 File: screenshots/etva_enterprise.png Graphic file (type png)
 
 <use screenshots/etva_enterprise.png>)
@@ -629,6 +629,164 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [8 <./screenshots/etva_enterprise.png (PNG copy)>] 
 (./chap-cm.tex
 Cap\'{\i }tulo 2.
+
+<screenshots/install/nuxis_enterprise_install_01.png, id=533, 483.30562pt x 361
+.35pt>
+File: screenshots/install/nuxis_enterprise_install_01.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_01.png>
+<screenshots/install/nuxis_enterprise_install_02.png, id=534, 543.53062pt x 302
+.63063pt>
+File: screenshots/install/nuxis_enterprise_install_02.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_02.png>
+<screenshots/install/nuxis_enterprise_install_03.png, id=535, 544.28343pt x 302
+.63063pt>
+File: screenshots/install/nuxis_enterprise_install_03.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_03.png>
+<screenshots/install/nuxis_enterprise_install_04.png, id=536, 543.53062pt x 302
+.63063pt>
+File: screenshots/install/nuxis_enterprise_install_04.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_04.png>
+<screenshots/install/nuxis_enterprise_install_05.png, id=537, 542.025pt x 302.6
+3063pt>
+File: screenshots/install/nuxis_enterprise_install_05.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_05.png>
+<screenshots/install/nuxis_enterprise_install_06.png, id=538, 542.025pt x 302.6
+3063pt>
+File: screenshots/install/nuxis_enterprise_install_06.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_06.png>
+<screenshots/install/nuxis_enterprise_install_07.png, id=539, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_07.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_07.png>
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [10
+
+ <./screenshots/install/nuxis_enterprise_install_01.png (PNG copy)>]
+<screenshots/install/nuxis_enterprise_install_08.png, id=545, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_08.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_08.png>
+<screenshots/install/nuxis_enterprise_install_09.png, id=546, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_09.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_09.png>
+<screenshots/install/nuxis_enterprise_install_10.png, id=547, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_10.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_10.png>
+<screenshots/install/nuxis_enterprise_install_11.png, id=548, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_11.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_11.png>
+<screenshots/install/nuxis_enterprise_install_12.png, id=549, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_12.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_12.png>
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [11 <./screenshots/install/nuxis_enterprise_install_
+02.png (PNG copy)> <./screenshots/install/nuxis_enterprise_install_03.png (PNG 
+copy)> <./screenshots/install/nuxis_enterprise_install_04.png (PNG copy)> <./sc
+reenshots/install/nuxis_enterprise_install_05.png (PNG copy)> <./screenshots/in
+stall/nuxis_enterprise_install_06.png (PNG copy)> <./screenshots/install/nuxis_
+enterprise_install_07.png (PNG copy)>]
+<screenshots/install/nuxis_enterprise_install_13.png, id=555, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_13.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_13.png>
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [12 <./screenshots/install/nuxis_enterprise_install_
+08.png (PNG copy)> <./screenshots/install/nuxis_enterprise_install_09.png (PNG 
+copy)> <./screenshots/install/nuxis_enterprise_install_10.png (PNG copy)> <./sc
+reenshots/install/nuxis_enterprise_install_11.png (PNG copy)> <./screenshots/in
+stall/nuxis_enterprise_install_12.png (PNG copy)>]
+<screenshots/install/nuxis_enterprise_install_14.png, id=561, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_14.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_14.png>
+<screenshots/install/nuxis_enterprise_install_15.png, id=562, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_15.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_15.png>
+<screenshots/install/nuxis_enterprise_install_16.png, id=563, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_16.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_16.png>
+<screenshots/install/nuxis_enterprise_install_17.png, id=564, 541.27219pt x 300
+.3722pt>
+File: screenshots/install/nuxis_enterprise_install_17.png Graphic file (type pn
+g)
+ <use screenshots/install/nuxis_enterprise_install_17.png>
+<screenshots/install/nuxis_enterprise_pos_install_18.png, id=565, 481.8pt x 362
+.85562pt>
+File: screenshots/install/nuxis_enterprise_pos_install_18.png Graphic file (typ
+e png)
+ <use screenshots/install/nuxis_enterprise_pos_install_18.png>
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [13 <./screenshots/install/nuxis_enterprise_install_
+13.png (PNG copy)> <./screenshots/install/nuxis_enterprise_install_14.png (PNG 
+copy)> <./screenshots/install/nuxis_enterprise_install_15.png (PNG copy)> <./sc
+reenshots/install/nuxis_enterprise_install_16.png (PNG copy)> <./screenshots/in
+stall/nuxis_enterprise_install_17.png (PNG copy)>]
+<screenshots/install/nuxis_enterprise_pos_install_19.png, id=572, 541.27219pt x
+ 300.3722pt>
+File: screenshots/install/nuxis_enterprise_pos_install_19.png Graphic file (typ
+e png)
+ <use screenshots/install/nuxis_enterprise_pos_install_19.png>
+<screenshots/install/nuxis_enterprise_pos_install_20.png, id=573, 541.27219pt x
+ 300.3722pt>
+File: screenshots/install/nuxis_enterprise_pos_install_20.png Graphic file (typ
+e png)
+ <use screenshots/install/nuxis_enterprise_pos_install_20.png>
+<screenshots/install/nuxis_enterprise_pos_install_21.png, id=574, 756.57657pt x
+ 511.9125pt>
+File: screenshots/install/nuxis_enterprise_pos_install_21.png Graphic file (typ
+e png)
+ <use screenshots/install/nuxis_enterprise_pos_install_21.png>
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [14 <./screenshots/install/nuxis_enterprise_pos_inst
+all_18.png (PNG copy)> <./screenshots/install/nuxis_enterprise_pos_install_19.p
+ng (PNG copy)> <./screenshots/install/nuxis_enterprise_pos_install_20.png (PNG 
+copy)>]
+<screenshots/install/nuxis_enterprise_wiz_install_22.png, id=580, 756.57657pt x
+ 510.40688pt>
+File: screenshots/install/nuxis_enterprise_wiz_install_22.png Graphic file (typ
+e png)
+ <use screenshots/install/nuxis_enterprise_wiz_install_22.png>
+<screenshots/install/nuxis_enterprise_wiz_install_28.png, id=582, 755.82375pt x
+ 511.15968pt>
+File: screenshots/install/nuxis_enterprise_wiz_install_28.png Graphic file (typ
+e png)
+ <use screenshots/install/nuxis_enterprise_wiz_install_28.png>
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [15 <./screenshots/install/nuxis_enterprise_pos_inst
+all_21.png> <./screenshots/install/nuxis_enterprise_wiz_install_22.png>])
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [16 <./screenshots/install/nuxis_enterprise_wiz_inst
+all_28.png>] (./chap-cm.tex
+Cap\'{\i }tulo 3.
 LaTeX Font Info:    Font shape `T1/txss/bx/it' in size <12> not available
 (Font)              Font shape `T1/txss/bx/sl' tried instead on input line 8.
 LaTeX Font Info:    Font shape `T1/txss/bx/sl' will be
@@ -638,7 +796,7 @@ Overfull \hbox (5.85373pt too wide) in paragraph at lines 10--11
 []\T1/txss/m/n/12 Área de breve no-ti-fi-ca-ção acerca dos even-
  []
 
-<screenshots/principal_nuxis.png, id=459, 1028.34187pt x 489.32813pt>
+<screenshots/principal_nuxis.png, id=598, 1028.34187pt x 489.32813pt>
 File: screenshots/principal_nuxis.png Graphic file (type png)
 
 <use screenshots/principal_nuxis.png>
@@ -665,7 +823,7 @@ LaTeX Font Info:    Font shape `T1/txss/bx/it' in size <10> not available
 LaTeX Font Info:    Font shape `T1/txss/bx/sl' will be
 (Font)              scaled to size 9.49997pt on input line 37.
 
-<screenshots/login_nuxis.png, id=471, 271.0125pt x 158.84344pt>
+<screenshots/login_nuxis.png, id=610, 271.0125pt x 158.84344pt>
 File: screenshots/login_nuxis.png Graphic file (type png)
 
 <use screenshots/login_nuxis.png>
@@ -677,8 +835,8 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 62--65
  []
 
 File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png> [11 <./screenshots/login_nuxis.png (PNG copy)>]
-<screenshots/main_nodes.png, id=481, 1028.34187pt x 443.40656pt>
+<use include/img/logo.png> [19 <./screenshots/login_nuxis.png (PNG copy)>]
+<screenshots/main_nodes.png, id=621, 1028.34187pt x 443.40656pt>
 File: screenshots/main_nodes.png Graphic file (type png)
 
 <use screenshots/main_nodes.png>
@@ -686,7 +844,7 @@ Overfull \hbox (2.02834pt too wide) in paragraph at lines 91--94
  [] 
  []
 
-<screenshots/main_networks.png, id=482, 850.67813pt x 350.05782pt>
+<screenshots/main_networks.png, id=622, 850.67813pt x 350.05782pt>
 File: screenshots/main_networks.png Graphic file (type png)
 
 <use screenshots/main_networks.png>
@@ -701,54 +859,54 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 127--130
 []$ 
  []
 
-<screenshots/network_create.png, id=491, 299.1175pt x 181.67876pt>
+<screenshots/network_create.png, id=631, 299.1175pt x 181.67876pt>
 File: screenshots/network_create.png Graphic file (type png)
 
 <use screenshots/network_create.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [13 <./screenshots/main_networks.png (PNG copy)> <.
 /screenshots/network_create.png (PNG copy)>] <screenshots/networks_macpool.png,
- id=499, 500.87125pt x 430.60875pt>
+ id=638, 500.87125pt x 430.60875pt>
 File: screenshots/networks_macpool.png Graphic file (type png)
 
 <use screenshots/networks_macpool.png>
-<screenshots/nics.png, id=500, 704.6325pt x 303.1325pt>
+<screenshots/nics.png, id=639, 704.6325pt x 303.1325pt>
 File: screenshots/nics.png Graphic file (type png)
 
 <use screenshots/nics.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [14 <./screenshots/networks_macpool.png (PNG copy)>
 ]
-<screenshots/cluster_edit.png, id=509, 360.59718pt x 271.76532pt>
+<screenshots/cluster_edit.png, id=648, 360.59718pt x 271.76532pt>
 File: screenshots/cluster_edit.png Graphic file (type png)
 
 <use screenshots/cluster_edit.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [15 <./screenshots/nics.png (PNG copy)>]
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [16 <./screenshots/cluster_edit.png>] <screenshots/
-node_edit.png, id=526, 365.11406pt x 305.64188pt>
+ <use include/img/logo.png> [24 <./screenshots/cluster_edit.png>] <screenshots/
+node_edit.png, id=665, 365.11406pt x 305.64188pt>
 File: screenshots/node_edit.png Graphic file (type png)
 
 <use screenshots/node_edit.png>
-<screenshots/node_conn.png, id=527, 404.51125pt x 376.40625pt>
+<screenshots/node_conn.png, id=666, 404.51125pt x 376.40625pt>
 File: screenshots/node_conn.png Graphic file (type png)
 
 <use screenshots/node_conn.png>
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [17 <./screenshots/node_edit.png (PNG copy)>]
-<screenshots/node_maintenance.png, id=534, 420.82219pt x 79.79813pt>
+ <use include/img/logo.png> [25 <./screenshots/node_edit.png (PNG copy)>]
+<screenshots/node_maintenance.png, id=674, 420.82219pt x 79.79813pt>
 File: screenshots/node_maintenance.png Graphic file (type png)
 
 <use screenshots/node_maintenance.png>
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [18 <./screenshots/node_conn.png (PNG copy)> <./scr
-eenshots/node_maintenance.png (PNG copy)>] <screenshots/node_info.png, id=541, 
+ <use include/img/logo.png> [26 <./screenshots/node_conn.png (PNG copy)> <./scr
+eenshots/node_maintenance.png (PNG copy)>] <screenshots/node_info.png, id=681, 
 883.04906pt x 326.72063pt>
 File: screenshots/node_info.png Graphic file (type png)
 
 <use screenshots/node_info.png>
-<screenshots/node_servers.png, id=542, 852.18375pt x 346.29375pt>
+<screenshots/node_servers.png, id=682, 727.96968pt x 320.69812pt>
 File: screenshots/node_servers.png Graphic file (type png)
 
 <use screenshots/node_servers.png>
@@ -758,25 +916,25 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 314--317
 []$ 
  []
 
-<screenshots/server_createwiz.png, id=549, 805.0075pt x 454.69875pt>
+<screenshots/server_createwiz.png, id=688, 805.0075pt x 454.69875pt>
 File: screenshots/server_createwiz.png Graphic file (type png)
 
 <use screenshots/server_createwiz.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [20 <./screenshots/node_servers.png (PNG copy)> <./
 screenshots/server_createwiz.png (PNG copy)>] <screenshots/server_createwiz_nam
-e.png, id=555, 805.0075pt x 453.695pt>
+e.png, id=694, 805.0075pt x 453.695pt>
 File: screenshots/server_createwiz_name.png Graphic file (type png)
 
 <use screenshots/server_createwiz_name.png>
-<screenshots/server_createwiz_memory.png, id=556, 807.015pt x 455.7025pt>
+<screenshots/server_createwiz_memory.png, id=695, 807.015pt x 455.7025pt>
 File: screenshots/server_createwiz_memory.png Graphic file (type png)
 
 <use screenshots/server_createwiz_memory.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-[21 <./screenshots/server_createwiz_name.png (PNG copy)>]
-<screenshots/server_createwiz_processor.png, id=562, 805.0075pt x 453.695pt>
+[29 <./screenshots/server_createwiz_name.png (PNG copy)>]
+<screenshots/server_createwiz_processor.png, id=701, 805.0075pt x 453.695pt>
 File: screenshots/server_createwiz_processor.png Graphic file (type png)
 
 <use screenshots/server_createwiz_processor.png>
@@ -784,7 +942,7 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [22 <./screenshots/server_createwiz_memory.png (PNG copy)> <./screenshots/serve
 r_createwiz_processor.png (PNG copy)>]
-<screenshots/server_createwiz_storage.png, id=569, 804.00375pt x 454.69875pt>
+<screenshots/server_createwiz_storage.png, id=708, 804.00375pt x 454.69875pt>
 File: screenshots/server_createwiz_storage.png Graphic file (type png)
 
 <use screenshots/server_createwiz_storage.png>
@@ -792,21 +950,21 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 390--393
 []$ 
  []
 
-<screenshots/server_createwiz_hostnet.png, id=570, 805.0075pt x 453.695pt>
+<screenshots/server_createwiz_hostnet.png, id=709, 805.0075pt x 453.695pt>
 File: screenshots/server_createwiz_hostnet.png Graphic file (type png)
 
 <use screenshots/server_createwiz_hostnet.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-[23 <./screenshots/server_createwiz_storage.png (PNG copy)>]
-<screenshots/server_createwiz_startup.png, id=577, 805.0075pt x 455.7025pt>
+[31 <./screenshots/server_createwiz_storage.png (PNG copy)>]
+<screenshots/server_createwiz_startup.png, id=717, 805.0075pt x 455.7025pt>
 File: screenshots/server_createwiz_startup.png Graphic file (type png)
 
 <use screenshots/server_createwiz_startup.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-[24 <./screenshots/server_createwiz_hostnet.png (PNG copy)>]
-<screenshots/server_createwiz_finish.png, id=583, 720.6925pt x 449.68pt>
+[32 <./screenshots/server_createwiz_hostnet.png (PNG copy)>]
+<screenshots/server_createwiz_finish.png, id=723, 720.6925pt x 449.68pt>
 File: screenshots/server_createwiz_finish.png Graphic file (type png)
 
 <use screenshots/server_createwiz_finish.png>
@@ -818,11 +976,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 444--447
 []$ 
  []
 
-<screenshots/server_edit_general.png, id=591, 603.0028pt x 341.02406pt>
+<screenshots/server_edit_general.png, id=730, 603.0028pt x 341.02406pt>
 File: screenshots/server_edit_general.png Graphic file (type png)
 
 <use screenshots/server_edit_general.png>
-<screenshots/server_edit_interfaces.png, id=592, 603.75563pt x 341.02406pt>
+<screenshots/server_edit_interfaces.png, id=731, 603.75563pt x 341.02406pt>
 File: screenshots/server_edit_interfaces.png Graphic file (type png)
 
 <use screenshots/server_edit_interfaces.png>
@@ -833,7 +991,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 473--476
 []$ 
  []
 
-<screenshots/server_edit_disks.png, id=598, 603.0028pt x 338.01282pt>
+<screenshots/server_edit_disks.png, id=737, 603.0028pt x 338.01282pt>
 File: screenshots/server_edit_disks.png Graphic file (type png)
 
 <use screenshots/server_edit_disks.png>
@@ -841,14 +999,14 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 488--491
 []$ 
  []
 
-<screenshots/server_edit_devices.png, id=599, 603.75563pt x 340.27126pt>
+<screenshots/server_edit_devices.png, id=738, 603.75563pt x 340.27126pt>
 File: screenshots/server_edit_devices.png Graphic file (type png)
 
 <use screenshots/server_edit_devices.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [27 <./screenshots/server_edit_interfaces.png (PNG 
 copy)> <./screenshots/server_edit_disks.png (PNG copy)>]
-<screenshots/server_edit_otheroptions.png, id=605, 602.25pt x 340.27126pt>
+<screenshots/server_edit_otheroptions.png, id=744, 602.25pt x 340.27126pt>
 File: screenshots/server_edit_otheroptions.png Graphic file (type png)
 
 <use screenshots/server_edit_otheroptions.png>
@@ -856,14 +1014,14 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 514--519
 []$ 
  []
 
-<screenshots/server_edit_ha.png, id=606, 603.0028pt x 342.5297pt>
+<screenshots/server_edit_ha.png, id=745, 603.0028pt x 342.5297pt>
 File: screenshots/server_edit_ha.png Graphic file (type png)
 
 <use screenshots/server_edit_ha.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [28 <./screenshots/server_edit_devices.png (PNG cop
 y)> <./screenshots/server_edit_otheroptions.png (PNG copy)>]
-<screenshots/server_remove.png, id=612, 282.05376pt x 150.5625pt>
+<screenshots/server_remove.png, id=751, 282.05376pt x 150.5625pt>
 File: screenshots/server_remove.png Graphic file (type png)
 
 <use screenshots/server_remove.png>
@@ -874,22 +1032,46 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 552--556
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [29 <./screenshots/server_edit_ha.png (PNG copy)> <.
 /screenshots/server_remove.png (PNG copy)>]
-<screenshots/server_start.png, id=619, 705.38531pt x 322.95656pt>
+Overfull \hbox (853.85097pt too wide) in paragraph at lines 565--565
+ []\T1/txtt/m/n/12 Network Error: sun.security.validator.ValidatorException: PK
+IX path building failed: sun.security.provider.certpath.SunCertPathBuilderExcep
+tion: unable to find valid certification path to requested target[] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 567--567
+\T1/txtt/m/n/10 technotes / tools / solaris / keytool . html$[][] \T1/txss/m/n/
+10 e [][]$\T1/txtt/m/n/10 http : / / docs . oracle . com / javase / 7 / docs / 
+technotes /
+ []
+
+
+Overfull \hbox (123.05238pt too wide) in paragraph at lines 574--574
+ []\T1/txtt/m/n/12 keytool -import -keystore $JAVA_HOME/lib/security/jssecacert
+s -file servidor-certificado[] 
+ []
+
+
+Overfull \hbox (15.95259pt too wide) in paragraph at lines 574--574
+ []\T1/txtt/m/n/12 # Nota: para o caso da keystore sem password usar a password
+ "changeit"[] 
+ []
+
+<screenshots/server_start.png, id=761, 731.73375pt x 330.48468pt>
 File: screenshots/server_start.png Graphic file (type png)
 
 <use screenshots/server_start.png>
-<screenshots/server_migrate.png, id=620, 294.34969pt x 112.92188pt>
+<screenshots/server_migrate.png, id=762, 294.34969pt x 112.92188pt>
 File: screenshots/server_migrate.png Graphic file (type png)
 
 <use screenshots/server_migrate.png>
-Overfull \hbox (31.64815pt too wide) in paragraph at lines 594--597
+File: include/img/logo.png Graphic file (type png)
+ <use include/img/logo.png> [38 <./screenshots/server_start.png (PNG copy)>]
+Overfull \hbox (31.64815pt too wide) in paragraph at lines 616--619
 []$ 
  []
 
-File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png> [30 <./screenshots/server_start.png> <./screenshots/
-server_migrate.png (PNG copy)>]
-<screenshots/server_snapshots.png, id=627, 325.215pt x 241.65282pt>
+<screenshots/server_snapshots.png, id=770, 325.215pt x 241.65282pt>
 File: screenshots/server_snapshots.png Graphic file (type png)
 
 <use screenshots/server_snapshots.png>
@@ -897,14 +1079,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 627--630
 []$ 
  []
 
-<screenshots/node_storage.png, id=628, 796.47563pt x 387.69844pt>
+<screenshots/node_storage.png, id=776, 796.47563pt x 387.69844pt>
 File: screenshots/node_storage.png Graphic file (type png)
 
 <use screenshots/node_storage.png>
-File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [31 <./screenshots/server_snapshots.png (PNG copy)>
-]
-<screenshots/node_storage_device_ctx.png, id=635, 442.65375pt x 204.01219pt>
+<screenshots/node_storage_device_ctx.png, id=777, 442.65375pt x 204.01219pt>
 File: screenshots/node_storage_device_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_device_ctx.png>
@@ -912,20 +1091,21 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 663--666
 []$ 
  []
 
-File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png> [32 <./screenshots/node_storage.png (PNG copy)> <./s
-creenshots/node_storage_device_ctx.png (PNG copy)>]
-<screenshots/node_storage_device_search.png, id=641, 441.90094pt x 356.83313pt>
+
+<screenshots/node_storage_device_search.png, id=783, 441.90094pt x 356.83313pt>
 File: screenshots/node_storage_device_search.png Graphic file (type png)
 <use screenshots/node_storage_device_search.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-[33 <./screenshots/node_storage_device_search.png (PNG copy)>]
-<screenshots/node_storage_vg_ctx.png, id=647, 440.39531pt x 226.59656pt>
+[41 <./screenshots/node_storage_device_ctx.png (PNG copy)>]
+<screenshots/node_storage_vg_ctx.png, id=789, 440.39531pt x 226.59656pt>
 File: screenshots/node_storage_vg_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_vg_ctx.png>
-<screenshots/storage_vg_create.png, id=648, 593.21625pt x 352.31625pt>
+File: include/img/logo.png Graphic file (type png)
+ <use include/img/logo.png> [42 <./screenshots/node_storage_device_search.png (
+PNG copy)> <./screenshots/node_storage_vg_ctx.png (PNG copy)>]
+<screenshots/storage_vg_create.png, id=795, 593.21625pt x 352.31625pt>
 File: screenshots/storage_vg_create.png Graphic file (type png)
 
 <use screenshots/storage_vg_create.png>
@@ -933,14 +1113,14 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 732--735
 []$ 
  []
 
-File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png> [34 <./screenshots/node_storage_vg_ctx.png (PNG copy
-)> <./screenshots/storage_vg_create.png (PNG copy)>]
-<screenshots/storage_vg_extend.png, id=654, 786.94pt x 366.36874pt>
+<screenshots/storage_vg_extend.png, id=796, 786.94pt x 366.36874pt>
 File: screenshots/storage_vg_extend.png Graphic file (type png)
 
 <use screenshots/storage_vg_extend.png>
-<screenshots/node_storage_vg_search.png, id=656, 329.73187pt x 321.45094pt>
+File: include/img/logo.png Graphic file (type png)
+ <use include/img/logo.png> [43 <./screenshots/storage_vg_create.png (PNG copy)
+>]
+<screenshots/node_storage_vg_search.png, id=804, 329.73187pt x 321.45094pt>
 File: screenshots/node_storage_vg_search.png Graphic file (type png)
 
 <use screenshots/node_storage_vg_search.png>
@@ -948,11 +1128,11 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [35 <./screenshots/storage_vg_extend.png (PNG copy)> <./screenshots/node_storag
 e_vg_search.png (PNG copy)>]
-<screenshots/node_storage_lv_ctx.png, id=662, 384.6872pt x 359.09157pt>
+<screenshots/node_storage_lv_ctx.png, id=810, 384.6872pt x 359.09157pt>
 File: screenshots/node_storage_lv_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_lv_ctx.png>
-<screenshots/storage_lv_create.png, id=663, 325.96782pt x 182.93344pt>
+<screenshots/storage_lv_create.png, id=811, 325.96782pt x 182.93344pt>
 File: screenshots/storage_lv_create.png Graphic file (type png)
 
 <use screenshots/storage_lv_create.png>
@@ -963,11 +1143,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 796--799
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [36 <./screenshots/node_storage_lv_ctx.png (PNG copy
 )> <./screenshots/storage_lv_create.png (PNG copy)>]
-<screenshots/storage_lv_resize.png, id=669, 359.3425pt x 198.7425pt>
+<screenshots/storage_lv_resize.png, id=817, 359.3425pt x 198.7425pt>
 File: screenshots/storage_lv_resize.png Graphic file (type png)
 
 <use screenshots/storage_lv_resize.png>
-<screenshots/node_storage_lv_search.png, id=670, 325.96782pt x 177.66376pt>
+<screenshots/node_storage_lv_search.png, id=818, 325.96782pt x 177.66376pt>
 File: screenshots/node_storage_lv_search.png Graphic file (type png)
 
 <use screenshots/node_storage_lv_search.png>
@@ -979,66 +1159,66 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 837--840
 []$ 
  []
 
-<screenshots/shutdownnode.png, id=677, 347.79938pt x 239.39438pt>
+<screenshots/shutdownnode.png, id=824, 347.79938pt x 239.39438pt>
 File: screenshots/shutdownnode.png Graphic file (type png)
 
 <use screenshots/shutdownnode.png>
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [38 <./screenshots/shutdownnode.png (PNG copy)>]
-<screenshots/server_info.png, id=690, 852.18375pt x 349.305pt>
+ <use include/img/logo.png> [47 <./screenshots/shutdownnode.png (PNG copy)>]
+<screenshots/server_info.png, id=837, 727.96968pt x 322.95656pt>
 File: screenshots/server_info.png Graphic file (type png)
 
 <use screenshots/server_info.png>
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [39 <./screenshots/server_info.png (PNG copy)>]
-<screenshots/server_stats_memUsage.png, id=696, 675.27281pt x 323.70938pt>
+ <use include/img/logo.png> [48 <./screenshots/server_info.png (PNG copy)>]
+<screenshots/server_stats_memUsage.png, id=843, 675.27281pt x 323.70938pt>
 File: screenshots/server_stats_memUsage.png Graphic file (type png)
 
 <use screenshots/server_stats_memUsage.png>
-<screenshots/server_stats_nodeLoad.png, id=697, 787.94376pt x 434.62375pt>
+<screenshots/server_stats_nodeLoad.png, id=844, 787.94376pt x 434.62375pt>
 File: screenshots/server_stats_nodeLoad.png Graphic file (type png)
 
 <use screenshots/server_stats_nodeLoad.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [40 <./screenshots/server_stats_memUsage.png (PNG c
 opy)> <./screenshots/server_stats_nodeLoad.png (PNG copy)>]
-<screenshots/server_stats_nodeLoadRange.png, id=705, 650.43pt x 355.3275pt>
+<screenshots/server_stats_nodeLoadRange.png, id=853, 650.43pt x 355.3275pt>
 File: screenshots/server_stats_nodeLoadRange.png Graphic file (type png)
 
 <use screenshots/server_stats_nodeLoadRange.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-[41 <./screenshots/server_stats_nodeLoadRange.png (PNG copy)>]
-<screenshots/virtio/virtio_4.png, id=714, 801.99625pt x 447.6725pt>
+[50 <./screenshots/server_stats_nodeLoadRange.png (PNG copy)>]
+<screenshots/virtio/virtio_4.png, id=862, 801.99625pt x 447.6725pt>
 File: screenshots/virtio/virtio_4.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_4.png>
-<screenshots/virtio/virtio_7.png, id=715, 801.99625pt x 449.68pt>
+<screenshots/virtio/virtio_7.png, id=863, 801.99625pt x 449.68pt>
 File: screenshots/virtio/virtio_7.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_7.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [42 <./screenshots/virtio/virtio_4.png (PNG copy)>]
 
-<screenshots/virtio/virtio_5.png, id=723, 764.8575pt x 339.2675pt>
+<screenshots/virtio/virtio_5.png, id=871, 725.71124pt x 322.20375pt>
 File: screenshots/virtio/virtio_5.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_5.png>
-<screenshots/virtio/virtio_10.png, id=725, 508.90125pt x 454.69875pt>
+<screenshots/virtio/virtio_10.png, id=873, 508.90125pt x 454.69875pt>
 File: screenshots/virtio/virtio_10.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_10.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [43 <./screenshots/virtio/virtio_7.png (PNG copy)> 
 <./screenshots/virtio/virtio_5.png (PNG copy)>] <screenshots/virtio/virtio_16.p
-ng, id=733, 803.0pt x 449.68pt>
+ng, id=880, 803.0pt x 449.68pt>
 File: screenshots/virtio/virtio_16.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_16.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [44 <./screenshots/virtio/virtio_10.png (PNG copy)>
  <./screenshots/virtio/virtio_16.png (PNG copy)>] <screenshots/ovf_import.png, 
-id=739, 803.0pt x 403.5075pt>
+id=886, 803.0pt x 403.5075pt>
 File: screenshots/ovf_import.png Graphic file (type png)
 
 <use screenshots/ovf_import.png>
@@ -1046,42 +1226,42 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 1028--1031
 []$ 
  []
 
-<screenshots/ovf_import_file.png, id=741, 800.9925pt x 401.5pt>
+<screenshots/ovf_import_file.png, id=888, 800.9925pt x 401.5pt>
 File: screenshots/ovf_import_file.png Graphic file (type png)
 
 <use screenshots/ovf_import_file.png>
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [45 <./screenshots/ovf_import.png (PNG copy)>]
-<screenshots/ovf_import_resume.png, id=747, 903.375pt x 437.635pt>
+ <use include/img/logo.png> [54 <./screenshots/ovf_import.png (PNG copy)>]
+<screenshots/ovf_import_resume.png, id=894, 903.375pt x 437.635pt>
 File: screenshots/ovf_import_resume.png Graphic file (type png)
 
 <use screenshots/ovf_import_resume.png>
-<screenshots/ovf_import_eula.png, id=748, 902.37125pt x 437.635pt>
+<screenshots/ovf_import_eula.png, id=895, 902.37125pt x 437.635pt>
 File: screenshots/ovf_import_eula.png Graphic file (type png)
 
 <use screenshots/ovf_import_eula.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [46 <./screenshots/ovf_import_file.png (PNG copy)> 
 <./screenshots/ovf_import_resume.png (PNG copy)>] <screenshots/ovf_import_name.
-png, id=754, 903.375pt x 439.6425pt>
+png, id=902, 903.375pt x 439.6425pt>
 File: screenshots/ovf_import_name.png Graphic file (type png)
 
 <use screenshots/ovf_import_name.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [47 <./screenshots/ovf_import_eula.png (PNG copy)>]
 
-<screenshots/ovf_import_storage.png, id=760, 801.99625pt x 399.4925pt>
+<screenshots/ovf_import_storage.png, id=908, 801.99625pt x 399.4925pt>
 File: screenshots/ovf_import_storage.png Graphic file (type png)
 
 <use screenshots/ovf_import_storage.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [48 <./screenshots/ovf_import_name.png (PNG copy)>]
 
-<screenshots/ovf_import_networks.png, id=766, 801.99625pt x 400.49625pt>
+<screenshots/ovf_import_networks.png, id=914, 801.99625pt x 400.49625pt>
 File: screenshots/ovf_import_networks.png Graphic file (type png)
 
 <use screenshots/ovf_import_networks.png>
-<screenshots/ovf_import_finish.png, id=767, 797.98125pt x 398.48875pt>
+<screenshots/ovf_import_finish.png, id=915, 797.98125pt x 398.48875pt>
 File: screenshots/ovf_import_finish.png Graphic file (type png)
 
 <use screenshots/ovf_import_finish.png>
@@ -1092,11 +1272,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1131--1134
 []$ 
  []
 
-<screenshots/ovf_export.png, id=774, 400.49625pt x 197.73875pt>
+<screenshots/ovf_export.png, id=921, 400.49625pt x 197.73875pt>
 File: screenshots/ovf_export.png Graphic file (type png)
 
 <use screenshots/ovf_export.png>
-<screenshots/iso_manager.png, id=775, 734.745pt x 292.09125pt>
+<screenshots/iso_manager.png, id=922, 734.745pt x 292.09125pt>
 File: screenshots/iso_manager.png Graphic file (type png)
 
 <use screenshots/iso_manager.png>
@@ -1107,7 +1287,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1168--1172
 []$ 
  []
 
-<screenshots/events_log.png, id=781, 943.525pt x 372.39125pt>
+<screenshots/events_log.png, id=928, 943.525pt x 372.39125pt>
 File: screenshots/events_log.png Graphic file (type png)
 
 <use screenshots/events_log.png>
@@ -1119,8 +1299,8 @@ File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [51 <./screenshots/iso_manager.png (PNG copy)>]
 File: include/img/logo.png Graphic file (type png)
 
-<use include/img/logo.png> [52 <./screenshots/events_log.png (PNG copy)>]
-<screenshots/first_time_wizard.png, id=793, 613.29124pt x 523.9575pt>
+<use include/img/logo.png> [61 <./screenshots/events_log.png (PNG copy)>]
+<screenshots/first_time_wizard.png, id=941, 613.29124pt x 523.9575pt>
 File: screenshots/first_time_wizard.png Graphic file (type png)
 
 <use screenshots/first_time_wizard.png>
@@ -1128,21 +1308,21 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1230--1233
 []$ 
  []
 
-<screenshots/cluster-context.png, id=795, 710.655pt x 372.39125pt>
+<screenshots/cluster-context.png, id=943, 710.655pt x 372.39125pt>
 File: screenshots/cluster-context.png Graphic file (type png)
 
 <use screenshots/cluster-context.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [53 <./screenshots/first_time_wizard.png (PNG copy)
 >]
-<screenshots/cluster_config.png, id=803, 609.27625pt x 519.9425pt>
+<screenshots/cluster_config.png, id=951, 609.27625pt x 519.9425pt>
 File: screenshots/cluster_config.png Graphic file (type png)
 
 <use screenshots/cluster_config.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [54 <./screenshots/cluster-context.png (PNG copy)>]
 
-<screenshots/cluster-move.png, id=812, 669.50125pt x 344.28625pt>
+<screenshots/cluster-move.png, id=960, 669.50125pt x 344.28625pt>
 File: screenshots/cluster-move.png Graphic file (type png)
 
 <use screenshots/cluster-move.png>
@@ -1151,51 +1331,50 @@ Overfull \hbox (7.92645pt too wide) in paragraph at lines 1301--1301
  []
 
 File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png> [55 <./screenshots/cluster_config.png (PNG copy)>]
-<screenshots/cluster-auth.png, id=821, 702.625pt x 469.755pt>
+<use include/img/logo.png> [64 <./screenshots/cluster_config.png (PNG copy)>]
+<screenshots/cluster-auth.png, id=968, 702.625pt x 469.755pt>
 File: screenshots/cluster-auth.png Graphic file (type png)
 
 <use screenshots/cluster-auth.png>
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [56 <./screenshots/cluster-move.png (PNG copy)>]
-<screenshots/cluster-auth1.png, id=827, 301.125pt x 85.31876pt>
+ <use include/img/logo.png> [65 <./screenshots/cluster-move.png (PNG copy)>]
+<screenshots/cluster-auth1.png, id=974, 301.125pt x 85.31876pt>
 File: screenshots/cluster-auth1.png Graphic file (type png)
 
 <use screenshots/cluster-auth1.png>
-<screenshots/preferences_general.png, id=829, 801.99625pt x 500.87125pt>
+<screenshots/preferences_general.png, id=976, 801.99625pt x 500.87125pt>
 File: screenshots/preferences_general.png Graphic file (type png)
 
 <use screenshots/preferences_general.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [57 <./screenshots/cluster-auth.png (PNG copy)> <./
 screenshots/cluster-auth1.png (PNG copy)>] <screenshots/preferences_conn.png, i
-d=835, 803.0pt x 499.8675pt>
+d=982, 803.0pt x 499.8675pt>
 File: screenshots/preferences_conn.png Graphic file (type png)
 
 <use screenshots/preferences_conn.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [58 <./screenshots/preferences_general.png (PNG cop
 y)>]
-<screenshots/permissions/user.png, id=842, 945.5325pt x 599.23875pt>
+<screenshots/permissions/user.png, id=990, 945.5325pt x 599.23875pt>
 File: screenshots/permissions/user.png Graphic file (type png)
 
 <use screenshots/permissions/user.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [59 <./screenshots/preferences_conn.png (PNG copy)>
 ]
-<screenshots/permissions/context_dc.png, id=851, 672.5125pt x 398.48875pt>
+<screenshots/permissions/context_dc.png, id=999, 672.5125pt x 398.48875pt>
 File: screenshots/permissions/context_dc.png Graphic file (type png)
 
 <use screenshots/permissions/context_dc.png>
-<screenshots/permissions/context_server.png, id=852, 640.3925pt x 328.22626pt>
+<screenshots/permissions/context_server.png, id=1000, 640.3925pt x 328.22626pt>
 File: screenshots/permissions/context_server.png Graphic file (type png)
-
 <use screenshots/permissions/context_server.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [60 <./screenshots/permissions/user.png (PNG copy)> <./screenshots/permissions/
 context_dc.png (PNG copy)>]
-<screenshots/permissions/server_window.png, id=858, 507.8975pt x 386.44376pt>
+<screenshots/permissions/server_window.png, id=1006, 507.8975pt x 386.44376pt>
 File: screenshots/permissions/server_window.png Graphic file (type png)
 
 <use screenshots/permissions/server_window.png>
@@ -1212,7 +1391,30 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1389--1389
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [61 <./screenshots/permissions/context_server.png (
 PNG copy)> <./screenshots/permissions/server_window.png (PNG copy)>]
-AED: lastpage setting LastPage (./manual-etvm-cm.aux)
+(./appendix.tex
+Cap\'{\i }tulo 4.
+File: include/img/logo.png Graphic file (type png)
+<use include/img/logo.png> [71
+
+]
+Overfull \hbox (133.3147pt too wide) in paragraph at lines 52--53
+[]\T1/txss/m/n/12 bug fix - cor-rec-ção na con-fi-gu-ra-ção do pa-râ-me-tro VLA
+N Name-Type (VLAN_NAME_TYPE_PLUS_VID_NO_PAD)
+ []
+
+File: include/img/logo.png Graphic file (type png)
+<use include/img/logo.png> [72]
+File: include/img/logo.png Graphic file (type png)
+ <use include/img/logo.png> [73]
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [74]
+File: include/img/logo.png Graphic file (type png)
+ <use include/img/logo.png> [75])
+AED: lastpage setting LastPage
+File: include/img/logo.png Graphic file (type png)
+ <use include/img/logo.png> [76]
+(./manual-etvm-cm.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
@@ -1221,11 +1423,11 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 7968 strings out of 256216
- 113683 string characters out of 1917072
- 184674 words of memory out of 1500000
- 10780 multiletter control sequences out of 10000+200000
- 79303 words of font info for 129 fonts, out of 1200000 for 2000
+ 7611 strings out of 256216
+ 112515 string characters out of 1917072
+ 173444 words of memory out of 1500000
+ 10366 multiletter control sequences out of 10000+200000
+ 79625 words of font info for 130 fonts, out of 1200000 for 2000
  645 hyphenation exceptions out of 8191
  51i,16n,51p,756b,657s stack positions out of 5000i,500n,6000p,200000b,15000s
 {/usr/share/texmf/fonts/enc/dvips/base/8r.enc}</usr/share/texmf/fonts/type1/p
@@ -1234,9 +1436,9 @@ ublic/txfonts/t1xtt.pfb></usr/share/texmf/fonts/type1/public/txfonts/txsy.pfb><
 pe1/urw/helvetic/uhvb8a.pfb></usr/share/texmf/fonts/type1/urw/helvetic/uhvr8a.p
 fb></usr/share/texmf/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texmf/font
 s/type1/urw/times/utmr8a.pfb>
-Output written on manual-etvm-cm.pdf (69 pages, 2964700 bytes).
+Output written on manual-etvm-cm.pdf (76 pages, 2934722 bytes).
 PDF statistics:
- 931 PDF objects out of 1000 (max. 8388607)
- 191 named destinations out of 1000 (max. 131072)
- 772 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1250 PDF objects out of 1440 (max. 8388607)
+ 227 named destinations out of 1000 (max. 131072)
+ 959 words of extra memory for PDF output out of 10000 (max. 10000000)
 
