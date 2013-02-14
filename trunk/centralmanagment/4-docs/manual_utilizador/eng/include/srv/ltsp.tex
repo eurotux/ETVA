@@ -1,0 +1,61 @@
+\subsection{Serviço LTSP}
+
+O \emph{LTSP} é um serviço de implementação de clientes \emph{desktop} minimalista para ambientes Linux.
+
+
+Os ficheiros de configuração estão localizados em:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/etc/ltsp/
+\end{Verbatim}
+
+O \emph{root} para os \emph{thin-clients} está localizado em:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/opt/ltsp/
+\end{Verbatim}
+
+Os clientes ligam-se por \emph{PXE}, por isso é necessário o \emph{DHCP} estar activo e fornecer acesso \emph{PXE} por \emph{TFTP} em que as configurações podem ser feitas em:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+/var/lib/tftpboot/ltsp/
+\end{Verbatim}
+
+Para activar os serviços deve-se correr os seguintes commandos:
+\begin{Verbatim}[commandchars=\\\{\}]
+
+for service in xinetd ltsp-dhcpd rpcbind nfs sshd; \
+do
+    service $service start;
+done
+
+for server in ldminfod nbdrootd nbdswapd tftp;
+do
+    service $server start;
+done
+
+\end{Verbatim}
+
+Para actualizar a \emph{root} dos \emph{thin-clients} deve-se correr os seguintes commandos:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+
+setarch i386 chroot /opt/ltsp/i386
+
+yum update
+ltsp-rewrap-latest-kernel
+
+exit
+
+ltsp-update-kernels
+
+\end{Verbatim}
+
+A instalação de uma nova \emph{root} de \emph{thin-clients} pode ser feita da seguinte forma:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+ltsp-build-client --kickstart=/etc/ltsp/kickstart/ltsp-i386.ks  --chroot=nova-i386
+\end{Verbatim}
+
+Informações adicionais podem ser obtidas em:\\ \begin{normalsize}\sffamily\href{http://www.ltsp.org}{www.ltsp.org}\end{normalsize}
+

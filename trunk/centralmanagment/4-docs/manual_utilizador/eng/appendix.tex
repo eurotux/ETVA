@@ -1,0 +1,164 @@
+\chapter{Appendix}
+
+\section{Changelog}
+
+\subsection{Release 1.0}
+
+\begin{itemize}
+\item feature - Multiple datacenter support (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/209}{\#209})
+\item bug fix - OVF network import
+\item bug fix - several fixes on browser interface (ExtJS)
+\item bug fix - devices consistency check
+\item bug fix - "resize" and "remove" logical volume messages
+\item bug fix - consistency check when cloning a logical volume
+\item bug fix - user permissions in server context
+\item feature - better debug messages (on nodes)
+\item bug fix - Servers' state check: unassigned VMs filtered
+\item feature - crons reviewed for failure notification
+\item bug fix - refresh button of the tree that lists all Nodes/Servers
+\item bug fix - VMs icons after a state change
+\item bug fix - logrotate configuration
+\item feature - NRPE Plugin for Nagios integration (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/272}{\#272})
+\item improvement - Symfony ORM updated to version 1.6
+\item bug fix - refresh of the "not mounted" logical volumes
+\item bug fix - total number of fork in the VA
+\item improvement - interface translations
+\item feature - diagnostic mechanism (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/189}{\#189})
+\item feature - validator for the location field available during the installation of paravirtualized VMs (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/193}{\#193})
+\item bug fix - virtagent memory leak (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/179}{\#179})
+\item feature - servers with autostart
+\end{itemize}
+
+\subsection{Release 1.0.1}
+
+\begin{itemize}
+\item bug fix - PAE and APIC defined by default (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/400}{\#400})
+\item bug fix - update mounted logical volume (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/392}{\#392})
+\item bug fix - LVM compatibility commands (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/311}{\#311})
+\item bug fix - read-only devices (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/311}{\#311})
+\item bug fix - mounted flag and swap devices (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/311}{\#311})
+\item bug fix - ccis/c* devices (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/311}{\#311})
+\item bug fix - parser for pvinfo devices (/dev/mapper/...) (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/311}{\#311})
+\item bug fix - consistency check on devices (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/320}{\#320})
+\item bug fix - default gateway setting when a new network is added (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/372}{\#372})
+\item bug fix - SOAP commands to unauthorized nodes (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/333}{\#333})
+\item bug fix - Boot from logical volume option (new server wizard) (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/373}{\#373})
+\item bug fix - choose from available mac-addresses on server network interfaces configuration (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/371}{\#371})
+\item bug fix - network boot scripts (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/332}{\#332})
+\item bug fix - mouse bus for paravirtualized servers (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/341}{\#341})
+\item bug fix - VLAN Name-Type configuration VLAN\_NAME\_TYPE\_PLUS\_VID\_NO\_PAD (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/328}{\#328})
+\item bug fix - cluster node election reviewed. (errors in logical volumes creation on cluster context) (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/323}{\#323})
+\item bug fix - concurrent logical volume creation (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/301}{\#301})
+\item bug fix - IE9 compatibility errors (JS) (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/307}{\#307})
+\item bug fix - field validation on server wizard (KVM) (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/309}{\#309})
+\item bug fix - netmask calculation for network interfaces (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/315}{\#315})
+\item bug fix - user permissions in cluster level (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/397}{\#397})
+\item bug fix - Virtagent IP address (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/409}{\#409})
+\item bug fix - logical volume clone in two steps (1 - lv create; 2 - lv clone) (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/391}{\#391} and \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/393}{\#393})
+\item bug fix - disallowance of 'dev' named networks (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/379}{\#379})
+\item bug fix - server info panel changed to include the disk type and network interface model (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/405}{\#405})
+\item bug fix - improved error messages (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/382}{\#382})
+\item bug fix - bus=xen when device=cdrom and hypervisor for xen (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/381}{\#381})
+\item bug fix - Anaconda's selinux doesn't work. SeLinux? disabled in postscript. (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/410}{\#410})
+\end{itemize}
+
+\subsection{Release 1.1}
+
+\begin{itemize}
+\item bug fix - problem with VMs without state identified as notrunning when really are running (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/386}{\#386})
+\item bug fix - problem in changing the agent's hostname (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/434}{\#434})
+\item bug fix - problem generating CA certificate's cn (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/432}{\#432})
+\item bug fix - fix spec to correct certificates (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/436}{\#436} and \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/472}{\#472})
+\item bug fix - increase dom0\_mem to 1500MB (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/411}{\#411})
+\item bug fix - fix xend-config to allow migration of vms (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/437}{\#437})
+\item bug fix - problem adding physical volumes to volume group (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/440}{\#440})
+\item bug fix - xen driver support to nics in Xen+HVM (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/446}{\#446})
+\item bug fix - automatic start of vms that are marked as 'running' (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/460}{\#460})
+\item bug fix - conflict in disk type of shared harddisks between vms (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/462}{\#462})
+\item bug fix - error removing harddisk from vm (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/463}{\#463})
+\item bug fix - error opening Mac Pool in vm creation wizard (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/465}{\#465})
+\item bug fix - nos paths do physical disks (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/471}{\#471})
+\item bug fix - physical disk initialization (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/473}{\#473})
+\item bug fix - context menus in storage (pvs,vgs,lvs) (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/474}{\#474})
+\item bug fix - move vm while node is down (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/412}{\#412})
+\item enhancement - update kvm to 0.15.0 (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/316}{\#316})
+\item enhancement - update xen to 4.1.2 (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/420}{\#420})
+\item enhancement - update virtio-win to 0.1-22 (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/424}{\#424})
+\item enhancement - add feature for specify CPU sockets, cores and threads (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/425}{\#425})
+\item enhancement - Add windows xen drivers (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/427}{\#427})
+\item enhancement - upgrade libvirt to 0.9.4
+\item enhancement - Allow the creation of vms without harddisk (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/292}{\#292})
+\item enhancement - pass-through of USB and PCI devices (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/300}{\#300})
+\item enhancement - Allow the creation of vms without nics (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/308}{\#308} and \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/345}{\#345})
+\item enhancement - Windows and Linux guest agent (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/353}{\#353})
+\item enhancement - VM Priority Restart (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/355}{\#355})
+\item enhancement - Rebrand Nuxis (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/422}{\#422})
+\item enhancement - VM High-available (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/431}{\#431})
+\item enhancement - Node High availability (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/430}{\#430})
+\item enhancement - harddisk search (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/258}{\#258})
+\item enhancement - Node shutdown (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/205}{\#205})
+\item enhancement - Allow vm edit while it is running (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/461}{\#461})
+\item enhancement - Change the type of vm (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/399}{\#399})
+\item enhancement - Define APIC, ACPI and PAE of the VM (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/374}{\#374})
+\item enhancement - Menu start/stop vm in treeview (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/347}{\#347})
+\item enhancement - Order logical volumes (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/343}{\#343})
+\item enhancement - Improve storage management (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/325}{\#325}, \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/329}{\#329}, \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/331}{\#331} and \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/335}{\#335})
+\item enhancement - Search new physical disks (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/247}{\#247})
+\item enhancement - Allow resizing vm disks while running (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/228}{\#228})
+\item enhancement - Support the installation of RedHat? 6, Ubuntu e Debian in XEN-PV (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/288}{\#288} and \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/321}{\#321})
+\end{itemize}
+
+\subsection{Release 1.2.0}
+
+\begin{itemize}
+\item bug fix - Flags pae, acpi, apic (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/520}{\#520})
+\item bug fix - edit live server change os to windows (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/510}{\#510})
+\item bug fix - boot by cdrom on VMs with HVM (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/518}{\#518})
+\item bug fix - Problem installing Centos 6 guest VM on Xen+HVM (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/446}{\#446})
+\item bug fix - USB pass-through problems (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/413}{\#413})
+\item bug fix - Migrate in mode live (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/531}{\#531})
+\item enhancement - Update virtio drivers to 0.1-30 (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/503}{\#503})
+\item enhancement - rename default datacenter (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/368}{\#368})
+\item enhancement - start server with console (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/287}{\#287})
+\item enhancement - create/convert disks with format (raw, qcow2, qcow, cow, vmdk) (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/479}{\#479})
+\item enhancement - datacenter permissions on datacenter level (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/398}{\#398})
+\item enhancement - ovf import: allow mac-address configuration (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/370}{\#370})
+\item enhancement - Snapshots and backups using snapshots (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/127}{\#127})
+\item enhancement - Node High-available without Spare Node (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/514}{\#514})
+\item enhancement - VM Admission Gate (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/513}{\#513})
+\end{itemize}
+
+\subsection{Release 1.2.1}
+
+\begin{itemize}
+\item bug fix - edit server (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/557}{\#557})
+\item bug fix - boot from disk on XEN PV (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/560}{\#560})
+\item bug fix - user permissions (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/546}{\#546} see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/547}{\#547})
+\item bug fix - edit datacenter (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/558}{\#558})
+\item bug fix - save connectivity preferences (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/564}{\#564}, see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/581}{\#581} and \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/584}{\#584})
+\item bug fix - edit server live mode (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/570}{\#570} and \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/569}{\#569})
+\item bug fix - edit server and change cdrom on XEN+HVM (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/574}{\#574})
+\item bug fix - issues with USB passthrough (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/568}{\#568})
+\item bug fix - issues server HA (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/563}{\#563})
+\item bug fix - ETVA::NetworkTools::fix\_hostname\_resolution (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/516}{\#516})
+\item bug fix - start VM (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/554}{\#554})
+\item bug fix - disks interface of edit server (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/501}{\#501})
+\item bug fix - remove datacenter (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/572}{\#572})
+\item bug fix - remove server and disk (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/571}{\#571})
+\item bug fix - problem with create datacenter (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/565}{\#565})
+\item bug fix - problems when don't have snapshots support (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/550}{\#550})
+\item bug fix - issues with update and install scripts (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/542}{\#542} and \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/527}{\#527})
+\item bug fix - requires qemu-img > 0.14 (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/548}{\#548})
+\item bug fix - edit server to change VM type (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/543}{\#543})
+\item bug fix - missing icons on server menu (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/578}{\#578})
+\item bug fix - on call for scan of Fiber-channel disks (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/593}{\#593})
+\item bug fix - problem with LV names (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/595}{\#595})
+\item bug fix - VNC console with HTTPS/SSL connection (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/597}{\#597})
+\item bug fix - xend configuration to accept live migrate connections (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/599}{\#599})
+\item bug fix - remove/resize lv when agent restarts (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/604}{\#604})
+\item bug fix - agent lock after restarts (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/607}{\#607})
+\item bug fix - on detect LV format function caused by names conflict (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/608}{\#608})
+\item bug fix - mount etva\_iso call after CM URL changed (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/611}{\#611})
+\item bug fix - problems with VNC console authentication (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/612}{\#612})
+\item bug fix - agent doesn't restart properly (see \href{https://srcmaster.eurotux.com/pm/p/etva/ticket/614}{\#614})
+\end{itemize}
