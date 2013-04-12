@@ -5,7 +5,7 @@
  
      def drawFrame(self):
 -        self.welcomeText = _("Welcome to %s") % (productName,)
-+        self.welcomeText = _("Welcome to ETVA")
++        self.welcomeText = _("Welcome to NUXIS")
          self.screen.drawRootText (0, 0, self.welcomeText)
  	self.screen.drawRootText (len(_(self.welcomeText)), 0,
                                    (self.screen.width -

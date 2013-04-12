@@ -54,6 +54,14 @@ class EtvaServerLogical extends BaseEtvaServerLogical {
             $arr['%format%'] = $lv->getFormat();
             $disk_map_va .= ',format=%format%';
         }
+        if( $lv->getStorageType()!=EtvaLogicalvolume::STORAGE_TYPE_LOCAL_MAP ){
+            /*
+             * set driver cache = none for not local storage
+             *  improve this doing configuration on interface
+             */
+            $arr['%drivercache%'] = 'none';
+            $disk_map_va .= ',drivercache=%drivercache%';
+        }
 
         return strtr($disk_map_va, $arr);
 

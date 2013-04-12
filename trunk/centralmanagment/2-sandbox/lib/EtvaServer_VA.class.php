@@ -348,6 +348,10 @@ class EtvaServer_VA
         if( $etva_server->getVmState() == 'running' )
             $params['live'] = 1;
 
+        # if don't has snapshots and try to change name, send force_to_change_name= flag
+        if( !$orig_server->getHassnapshots() && ($orig_server->getName() != $etva_server->getName()) )
+            $params['force_to_change_name'] = 1;
+
         if( !$etva_server->getUnassigned() )
             $response = $etva_node->soapSend($method,$params);
         else
@@ -399,7 +403,7 @@ class EtvaServer_VA
         $etva_server->save();
 
         //update node mem available
-        if( $etva_server->getVmState() != 'stop' ){  // only if not stopped
+        if ($etva_server->isRunning()) {
             $mult = 1;
             $cur_avail = $etva_node->getMemfree();        
             if($etva_server->getMem()<$orig_server->getMem()) $mult = -1;
@@ -623,6 +627,13 @@ class EtvaServer_VA
 
         if(!$preCond['success']) return $preCond;
 
+        // mark state as migrating...
+        $etva_server = $this->etva_server;
+        $bkp_server_state = $etva_server->getVmState();
+        $etva_server->setVmState(EtvaServer::STATE_MIGRATING);
+
+        $etva_server->save();
+
         $response = $from_etva_node->soapSend($method,$params);
         $result = $this->processMigrateResponse($from_etva_node, $to_etva_node, $response, $method);
 
@@ -633,6 +644,11 @@ class EtvaServer_VA
             $cur_free = $cur_avail + Etva::MB_to_Byteconvert($this->etva_server->getMem());
             $from_etva_node->setMemfree($cur_free);
             $from_etva_node->save();
+        } else { // if not success
+            // rollback state 
+            // TODO improve this...
+            $etva_server->setVmState($bkp_server_state);
+            $etva_server->save();
         }
         return $result;
     }
@@ -1073,9 +1089,10 @@ class EtvaServer_VA
         $etva_server->assignTo($etva_node);
 
         //update agent free memory only if not stopped
-        if( $etva_server->getVmState() != 'stop' ){
+        if ($etva_server->isRunning()) {
             $cur_avail = $etva_node->getMemfree();
             $cur_free = $cur_avail - Etva::MB_to_Byteconvert($etva_server->getMem());
+            error_log("reloadVm name=".$etva_server->getName()." state=".$etva_server->getVmState()." mem=".Etva::MB_to_Byteconvert($etva_server->getMem())." cur_free=".$cur_free);
             $etva_node->setMemfree($cur_free);
             $etva_node->save();
         }
@@ -1122,8 +1139,8 @@ class EtvaServer_VA
 
         }
 
-        //update agent free memory only if not stopped
-        if( $etva_server->getVmState() != 'stop' ){
+        //update agent free memory only if is running
+        if ($etva_server->isRunning()) {
             $cur_avail = $etva_node->getMemfree();
             $cur_free = $cur_avail - Etva::MB_to_Byteconvert($etva_server->getMem());
             $etva_node->setMemfree($cur_free);
@@ -1132,7 +1149,7 @@ class EtvaServer_VA
 
 
         // force the server to stop
-        $etva_server->setVmState('stop');
+        $etva_server->setVmState(EtvaServer::STATE_STOP);
         $etva_server->setState(0);
 
         $etva_server->save();

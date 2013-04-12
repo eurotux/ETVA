@@ -123,7 +123,6 @@ class EtvaNode_VA
             $s->save();
         }
         $msg = sprintf('Reset guest agent state for all servers.');
-        error_log($node->getName().": ".$msg);
         // add log message
         Etva::makeNotifyLogMessage($node->getName(),$msg,array(),null,array(),EtvaEventLogger::INFO);
     }
@@ -1032,15 +1031,17 @@ class EtvaNode_VA
             $server_va = new EtvaServer_VA($etva_server);
             $response = array();
             $etva_tonode = $etva_sparenode;
-            if( !$etva_node ){
+            if( !$etva_tonode ){
                 $list_nodes_toassign = $etva_server->listNodesAssignTo(true);
                 if( count($list_nodes_toassign) )
                     $etva_tonode = $list_nodes_toassign[0];    // get first
             }
             if( $etva_tonode ){
                 if( !$off && ($etva_server->getVmState() == 'running') ){
+                    error_log("migrate server=".$etva_server->getName()." to node=".$etva_tonode->getName());
                     $response = $server_va->send_migrate($this->etva_node, $etva_tonode);
                 } else {
+                    error_log("move server=".$etva_server->getName()." to node=".$etva_tonode->getName());
                     $response = $server_va->send_move($this->etva_node, $etva_tonode);
 
                     // start it server is running or has autostart  or has HA or has priority HA
@@ -1051,11 +1052,14 @@ class EtvaNode_VA
                 }
                 if( $response['success'] ){
                     Etva::makeNotifyLogMessage($this->etva_node->getName(),sprintf('Server %s migrate ok',$etva_server->getName()),array(),null,array(),EtvaEventLogger::INFO);
+                    error_log(sprintf('Server %s migrate ok',$etva_server->getName()));
                 } else {
                     Etva::makeNotifyLogMessage($this->etva_node->getName(),sprintf('Server %s migrate nok',$etva_server->getName()));
+                    error_log(sprintf('Server %s migrate nok',$etva_server->getName()));
                 }
             } else {
                     Etva::makeNotifyLogMessage($this->etva_node->getName(),sprintf('Can\'t migrate server %s. No node free available.',$etva_server->getName()));
+                    error_log(sprintf('Can\'t migrate server %s. No node free available.',$etva_server->getName()));
             }
         }
     }

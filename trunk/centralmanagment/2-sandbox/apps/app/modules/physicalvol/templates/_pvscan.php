@@ -95,7 +95,7 @@ pvwin.scanForm.Main = function(node_id, level) {
                                                     });// end conn
 
                                                     var scanparams = myparams;
-                                                    //scanparams['scan'] = true;
+                                                    scanparams['scan'] = true;
                                                     scanparams['force'] = true;
                                                     conn.request({
                                                         url: <?php echo json_encode(url_for('physicalvol/jsonScanDiskDevices'))?>,

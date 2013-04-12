@@ -162,6 +162,9 @@ Server.Migrate.Window = function(config) {
         Ext.getCmp('view-nodes-panel').removeNode(sId);
         Ext.getCmp('view-main-panel').remove('view-center-panel-'+sId);
 
+        Ext.getCmp('view-nodes-panel').reload({'server_id':sId});
+
+
 //        if(Ext.getCmp(this.parent) && Ext.getCmp(this.parent).isVisible())
 //            Ext.getCmp(this.parent).fireEvent('refresh');
         
@@ -173,7 +176,7 @@ Server.Migrate.Window = function(config) {
 Ext.extend(Server.Migrate.Window, Ext.Window,{
     tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-vmachine-migrate',autoLoad:{ params:'mod=server'},title: <?php echo json_encode(__('Migrate Server Help')) ?>});}}],
     loadData:function(src){
-        this.items.get(0).loadRecord(src);        
+        this.items.get(0).loadRecord(src);
         
     }        
 });

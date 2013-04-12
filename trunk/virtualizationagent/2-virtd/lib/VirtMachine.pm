@@ -733,7 +733,7 @@ sub get_todevices {
         $D{'graphics'}{'keymap'} = $keymap;
     }
     if( $D{'graphics'} &&
-	(!$D{'graphics'}{'port'} || ( $D{'graphics'}{'port'} <= 0 ) ) ){
+            (!$D{'graphics'}{'port'} || ( $D{'graphics'}{'port'} <= 0 ) ) ){
         $D{'graphics'}{'autoport'} = 'yes';
     }
 
@@ -1038,6 +1038,7 @@ sub xml_domain_parser {
                             my %C = $self->xml_domain_parser_get_attr($cdd);
                             $A{'drivername'} = $C{'name'};
                             $A{'drivertype'} = $C{'type'} if( $C{'type'} );
+                            $A{'drivercache'} = $C{'cache'} if( $C{'cache'} );
                         }
                     }
                     push(@{$D{'_disks_'}},\%A);
@@ -1995,7 +1996,8 @@ sub new {
         $D{'size'} = $p{'size'};
         $D{'device'} = $p{'device'} || "disk";
         $D{'drivername'} = $p{'drivername'};
-        $D{'drivertype'} = $p{'drivertype'};
+        $D{'drivertype'} = $p{'drivertype'} if( $p{'drivertype'} );
+        $D{'drivercache'} = $p{'drivercache'} if( $p{'drivercache'} );
         $D{'target'} = $p{'target'};
         $D{'readonly'} = $p{'readonly'} ? 1:0;
 
@@ -2039,9 +2041,12 @@ sub todevice {
                 'device' => $self->{'device'},
                 'source' => { "$typeattr" => $self->{'path'} },
                 );
-    $D{'driver'} = { 'name' => $self->{'drivername'},
-                        'type' => $self->{'drivertype'}
-                    } if( $self->{'drivername'} );
+    if( $self->{'drivername'} ){
+        $D{'driver'} = { 'name' => $self->{'drivername'} };
+
+        $D{'driver'}{'type'} = $self->{'drivertype'} if( $self->{'drivertype'} );
+        $D{'driver'}{'cache'} = $self->{'drivercache'} if( $self->{'drivercache'} );
+    }
     if( $self->{'target'} ){
         $D{'target'} = { 'dev' => $self->{'target'} };
         $D{'target'}{'bus'} = $self->{'bus'} if( $self->{'bus'} );

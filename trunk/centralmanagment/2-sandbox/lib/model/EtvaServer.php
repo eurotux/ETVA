@@ -15,6 +15,8 @@ class EtvaServer extends BaseEtvaServer
     const RUNNING = 'running';
     const STATE_RUNNING = 'running';
     const STATE_STOP = 'stop';
+    const STATE_SHUTOFF = 'shutoff';
+    const STATE_MIGRATING = 'migrating';
     const STATE_OK = 1;
     const STATE_NOK = 0;
 
@@ -548,6 +550,22 @@ class EtvaServer extends BaseEtvaServer
         if($v!='running') $this->setState(0);
         return parent::setVmState($v);
 	} 
+
+    /*
+     * test if server is running or is stop
+     */
+    public function isRunning()
+    {
+        if ($this->getVmState() === self::STATE_RUNNING)    return true;
+        if (!$this->isStop()) return true;
+        return false;
+    }
+    public function isStop()
+    {
+        if ($this->getVmState() === self::STATE_STOP)    return true;
+        if ($this->getVmState() === self::STATE_SHUTOFF) return true;
+        return false;
+    }
   
     /*
      * getEtvaNetworks: redefined parent method for correct order (EtvaNetworkPeer::PORT)

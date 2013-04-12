@@ -1,11 +1,21 @@
 Name: anaconda
-Version: 11.1.2.224
-Release: 10.el5.centos.1
+Version: 11.1.2.259
+Release: 2
 License: GPL
 Summary: Graphical system installer
 Group: Applications/System
 Source: anaconda-%{version}.tar.bz2
-BuildPreReq: kudzu-devel >= 1.2.57.1.26-1, pciutils-devel >= 3.1.7-3
+Patch1: anaconda-centos-syslinux-msg.patch
+Patch2: anaconda-centos-installclasses-2.patch
+Patch3: anaconda-centos-regkey.patch
+Patch4: anaconda-centos-centos-branding-po_files_5.6.patch
+Patch5: anaconda-centos-inst-type.patch
+Patch6: anaconda-centos-task.patch
+Patch7: anaconda-centos-removeStatusText.patch
+Patch20: anaconda-etva-rollout.patch
+Patch21: anaconda-etva-welcome.patch
+
+BuildPreReq: kudzu-devel >= 1.2.57.1.26-7, pciutils-devel >= 3.1.7-3
 BuildPreReq: bzip2-devel, e2fsprogs-devel, python-devel, gtk2-devel
 BuildPreReq: rpm-python >= 4.2-0.61, newt-devel, rpm-devel, gettext >= 0.11
 BuildPreReq: rhpl, booty, libxml2-python, zlib-devel, elfutils-devel
@@ -14,7 +24,7 @@ BuildPreReq: libXxf86misc-devel, intltool >= 0.31.2-3, python-urlgrabber
 BuildPreReq: pykickstart >= 0.43.8, yum >= 2.9.2, device-mapper >= 1.01.05-3, 
 BuildPreReq: libsepol-devel
 BuildPreReq: pango-devel, pirut, libXt-devel, slang-devel >= 2.0.6-2
-BuildPreReq: libdhcp-devel >= 1.20-10, mkinitrd-devel >= 5.1.2-1
+BuildPreReq: libdhcp-devel >= 1.20-13, mkinitrd-devel >= 5.1.2-1
 BuildPreReq: audit-libs-devel, libnl-devel >= 1.0-0.10.pre5.5
 BuildPreReq: libdhcp6client >= 1.0.10-17
 %ifnarch s390 s390x
@@ -22,7 +32,7 @@ BuildPreReq: iscsi-initiator-utils >= 6.2.0.871-0.0
 %endif
 Requires: rpm-python >= 4.2-0.61, rhpl >= 0.170, booty
 Requires: parted >= 1.7.1, pyparted >= 1.7.2
-Requires: kudzu >= 1.2.57.1.26-1, yum >= 2.9.2, pirut >= 1.1.0
+Requires: kudzu >= 1.2.57.1.26-7, yum >= 2.9.2, pirut >= 1.1.0
 Requires: libxml2-python, python-urlgrabber
 Requires: system-logos, pykickstart, system-config-date
 Requires: device-mapper >= 1.01.05-3
@@ -36,15 +46,6 @@ Requires: rhpxl >= 0.25
 %endif
 Obsoletes: anaconda-images <= 10
 Url: http://fedoraproject.org/wiki/Anaconda
-Patch1: anaconda-centos-syslinux-msg.patch
-Patch2: anaconda-centos-installclasses-2.patch
-Patch3: anaconda-centos-regkey.patch
-Patch4: anaconda-centos-centos-branding-po_files_5.6.patch
-Patch5: anaconda-centos-inst-type.patch
-Patch6: anaconda-centos-task.patch
-Patch7: anaconda-centos-removeStatusText.patch
-Patch20: anaconda-etva-rollout.patch
-Patch21: anaconda-etva-welcome.patch
 
 BuildRoot: %{_tmppath}/anaconda-%{PACKAGE_VERSION}
 
@@ -60,7 +61,7 @@ Requires: libxml2-python, python, rpm-python >= 4.2-0.61
 Requires: anaconda = %{version}-%{release}
 Requires: createrepo >= 0.4.3-3.1, squashfs-tools, mkisofs
 %ifarch %{ix86} x86_64
-Requires: syslinux
+Requires: syslinux, syslinux-perl
 %endif
 %ifarch s390 s390x
 Requires: openssh
@@ -145,12 +146,303 @@ fi
 %triggerun -- anaconda < 8.0-1
 /sbin/chkconfig --del reconfig >/dev/null 2>&1 || :
 
-%changelog*
-* Tue May 10 2011 Nuno Fernandes <npf@eurotux.com> 11.1.2.224-10.el5.centos
+%changelog
+* Mon Feb 11 2013 Nuno Fernandes <npf@eurotux.com> 11.1.2.259-2
 - Roll in ETVA Changes
 
-* Thu Feb  3 2011 Karanbir Singh <kbsingh@centos.org> 11.1.2.224-1.el5.centos
-- Roll in CentOS Branding changes
+* Thu Jan 10 2013 Karanbir Singh <kbsingh@centos.org> 11.1.2.259-1.el5.centos
+- Build for CentOS-5.9
+
+* Tue Nov 14 2012 Radek Vykydal <rvykydal@redhat.com> 11.1.2.259-1
+- Revert 5737408dd5293e5d003d552d3ea919c01417d9d4 targeting gfs support (vpodzime)
+  Related: rhbz#754213
+- Revert 64aa1c709a30f3fb6604a2dde13d780fabdcc4af targeting gfs support (vpodzime)
+  Related: rhbz#754213
+
+* Tue Nov 13 2012 Radek Vykydal <rvykydal@redhat.com> 11.1.2.258-1
+- Add extra modules that are not in the kernel package (vpodzime)
+  Related: rhbz#754213
+
+* Thu Nov 8 2012 Radek Vykydal <rvykydal@redhat.com> 11.1.2.257-2
+- Require syslinux-perl in anaconda (rvykydal)
+  Related: rhbz#872225
+
+* Wed Nov 7 2012 Radek Vykydal <rvykydal@redhat.com> 11.1.2.257-1
+- Include syslinux-perl from split syslinux package (rvykydal)
+  Resolves: rhbz#872225
+- Don't remove files from the kmod-gfs package (vpodzime)
+  Related: rhbz#754213
+
+* Wed Sep 19 2012 Radek Vykydal <rvykydal@redhat.com> 11.1.2.256-1
+- Create /dev/* symlinks after we mount tmpfs on /dev (vpodzime)
+  Resolves: rhbz#784159
+
+* Mon Sep 17 2012 David Cantrell <dcantrell@redhat.com> 11.1.2.255-1
+- Increase size of diskboot.img (jkeating)
+  Resolves: rhbz#812719
+- Disable Encryption on SW RAID (bcl)
+  Resolves: rhbz#771901
+
+* Tue Aug 21 2012 Radek Vykydal <rvykydal@redhat.com> 11.1.2.254-1
+- Load and probe hyperv bus (VM_BUS) (#824880)
+  Related: rhbz#824880
+
+* Fri Aug 10 2012 Radek Vykydal <rvykydal@redhat.com> 11.1.2.253-2
+- New kudzu is needed to support in-box MS PV drivers (rvykydal)
+  Related: rhbz#824880
+
+* Fri Jul 27 2012 Martin Gracik <mgracik@redhat.com> 11.1.2.253-1
+- Syslinux changed paths from /usr/lib to /usr/share (mgracik)
+  Resolves: rhbz#843290
+- Install and enable openibd service if IPoIB is used (rvykydal)
+  Resolves: rhbz#788871
+- Do not add unresolvable hostname to 127.0.0.1 of /etc/hosts (rvykydal)
+  Resolves: rhbz#750681
+- Fix NFS mounting (jkeating)
+  Resolves: rhbz#841136
+- Add the Hyper-V drivers (mgracik)
+  Resolves: rhbz#824880
+- Comment out the fstab lines with unknown filesystem rather then ignoring them (vpodzime)
+  Resolves: rhbz#754213
+
+* Wed Jun 27 2012 Martin Gracik <mgracik@redhat.com> 11.1.2.252-1
+- Add gfs support (vpodzime)
+  Resolves: rhbz#754213
+- Fix handling of invalid bios disks (jkeating)
+  Resolves: rhbz#819721
+
+* Mon Jun 18 2012 Martin Gracik <mgracik@redhat.com> 11.1.2.251-2
+- Change limit for ext[34] to 16T and use mkfs.ext3 when formating ext3 (vpodzime)
+  Resolves: rhbz#769287
+- Close dialogs as canceled if Esc is hit (vpodzime)
+  Resolves: rhbz#773573
+- Do not remove filesystem labels set in kickstart (mgraciK)
+  Resolves: rhbz#797075
+- getFilename takes no loglevel parameter (mgracik)
+  Resolves: rhbz#760496
+- Add link to /proc/self/fd in /dev (mgracik)
+  Resolves: rhbz#784159
+
+* Fri Dec 23 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.250-1
+- Check if the anaconda attribute is set in YumSorter (mgracik)
+  Related: rhbz#756707
+
+* Wed Dec 21 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.249-1
+- Don't add packages from @conflicts group as dependencies (mgracik)
+  Resolves: rhbz#756707
+- Do not create new iSCSI target when 'Esc' is hit (vpodzime)
+  Resolves: rhbz#768082
+- Do not add drive when 'Esc' is hit in the Advanced Storage Options dialog (vpodzime)
+  Related: rhbz#768082
+- Do nothing when 'Esc' is hit in partition dialog (vpodzime)
+  Resolves: rhbz#758106
+
+* Tue Nov 15 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.248-1
+- Handle %posttrans RPMCALLBACK_INST_OPEN_FILE properly (rvykydal)
+  Resolves: rhbz#506361
+
+* Wed Nov 02 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.247-1
+- Ignore duplicate opening of rpm package file (rvykydal)
+  Resolves: rhbz#506361
+
+* Thu Oct 27 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.246-1
+- Make sure fstype exists before we try to test it (mgracik)
+  Resolves: rhbz#718123
+- Update getMaxLVSize from lvm1 to lvm2 (dlehman)
+  Resolves: rhbz#695299
+- Fix "ignoredisk --only-use=___" handling (dcantrell)
+  Resolves: rhbz#738186
+- We need portmap on all arches because of new NFS (msivak)
+  Resolves: rhbz#742889 
+
+* Thu Oct 20 2011 Martin Sivak <msivak@redhat.com> 11.1.2.245-2
+- New kudzu is needed to detect FusionIO devices
+  Resolves: rhbz#707563
+
+* Tue Oct 04 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.245-1
+- Initialize useIPv6 device setting (rvykydal)
+  Resolves: rhbz#713120
+- Accept dotted-quad netmask for IPv4 in loader UI (rvykydal)
+  Resolves: rhbz#719578
+
+* Fri Sep 23 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.244-1
+- Remove old labels before labeling disk entries (mgracik)
+  Resolves: rhbz#566668
+- Honor kickstart key command for upgrade (rvykydal)
+  Resolves: rhbz#477748
+- Shorten long NIC descriptions to 60. (akozumpl)
+  Related: rhbz#660684
+- infiniband: bump kudzu version to the one that knows about IB. (akozumpl)
+  Related: rhbz#695388
+  Related: rhbz#660684
+- infiniband: textual representation of an infiniband MAC is up to 60 bytes.
+  (akozumpl)
+  Related: rhbz#660684
+- infiniband: some drivers imply other drivers (akozumpl)
+  Related: rhbz#660684
+- Do not strip trailing zeros from XFS labels (dcantrell)
+  Resolves: rhbz#571513
+- Remove call to detailedMessageWindow (dcantrell)
+  Resolves: rhbz#712443
+
+* Wed Sep 14 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.243-2
+- Require latest libdhcp (dcantrell)
+  Resolves: rhbz#737161
+
+* Wed Sep 07 2011 Martin Gracik <mgracik@redhat.com> 11.1.2.243-1
+- Suppress critical errors when guessing release notes names (akozumpl)
+  Resolves: rhbz#707143
+- Add the Solarflare network module (mgracik)
+  Resolves: rhbz#714243
+- Create /var/{log,run/rhsm} for subscription-manager (dcantrell)
+  Resolves: rhbz#708121
+- Sanitize DASD device specifications (dcantrell)
+  Resolves: rhbz#689470
+- Add /dev/stdin, /dev/stdout, /dev/stderr to initrd.img (dcantrell)
+  Resolves: rhbz#684220
+- Single quote values in show_parms() in linuxrc.s390 (dcantrell)
+  Resolves: rhbz#681219
+- Make execWithRedirect() append to the files. (akozumpl)
+  Resolves: rhbz#702024
+- iscsi: with ibft, wait for link with waitForLink(). (akozumpl)
+  Resolves: rhbz#727774
+- Fix pa_IN translation data (dcantrell)
+  Resolves: rhbz#711363
+- Don't import partedUtils in list-harddrives-stub (mgracik)
+  Resolves: rhbz#709880
+- BR libdhcp-1.20-12 (dcantrell)
+  Related: rhbz#694570
+- And document the --no-ssh parameter, too. (clumens)
+  Resolves: rhbz#703082
+- Add --no-ssh to the generated anaconda-ks.cfg. (clumens)
+  Resolves: rhbz#703081
+
+* Mon Jun 27 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.242-1
+- Bump the implementation limit on the number of modules in modLoaded (akozumpl)
+  Resolves: rhbz#716836
+
+* Fri Jun 24 2011 David Cantrell <dcantrell@redhat.com> 11.1.2.241-1
+- Load all kernel crypto modules, do not include testmgr modules (dcantrel)
+  Resolves: rhbz#703782
+
+* Tue Jun 21 2011 David Cantrell <dcantrell@redhat.com> 11.1.2.240-1
+- Include all kernel crypto modules for LUKS devices
+  Resolves: rhbz#703782
+
+* Mon Jun 6 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.239-1
+- Create /dev nodes after DUDs are processed (msivak)
+  Resolves: rhbz#707563
+
+* Thu Jun 2 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.238-1
+- edit partition UI: do not create the "Encrypt" check button twice. (akozumpl)
+  Resolves: rhbz#709361
+
+* Tue May 31 2011 David Cantrell <dcantrell@redhat.com> 11.1.2.237-1
+- Add driver for Intel Patsburg SAS Controller Unit driver. (dcantrel)
+  Resolves: rhbz#707790
+
+* Fri May 20 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.236-1
+- Remove a worthless, traceback-causing line.
+  Related: rhbz#572862
+
+* Tue May 17 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.235-1
+- Add "rhsm" to the list of things-to-link-into-/etc (wwoods)
+  Resolves: #670973
+
+* Fri May 13 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.234-1
+- libz.so.1 is in /lib now (akozumpl)
+  Resolves: rhbz#704151
+- Add more files required by subscription_manager (wwoods)
+  Resolves: rhbz#670973
+- correctly include /usr/share/rhsm/subscription_manager (wwoods)
+  Related: rhbz#670973
+
+* Thu May 12 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.233-1
+- fix uninitialized self.inum in rhel.py:repoIsAllowed() (akozumpl)
+  Resolves: rhbz#703253
+- Use static busybox, not busybox-anaconda (mgracik)
+  Resolves: rhbz#500527
+- Disable iscsi on s390x (akozumpl)
+  Resolves: rhbz#703135
+
+* Thu Apr 28 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.232-1
+- Do not show "missing media" message when unknown media is needed for package. (msivak)
+  Resolves: rhbz#617262
+- Perform group removals at the beginning of every transaction (clumens)
+  Resolves: rhbz#642224
+- Filter kickstart-provided repos through the installation key (clumens)
+  Resolves: rhbz#452983
+
+* Mon Apr 11 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.231-1
+- Run subscription-manager 'product-id' plugin during install (wwoods)
+  Resolves: rhbz#670973
+- infiniband: drivers for Mellanox, QLogic and IBM cards. (akozumpl)
+  Related: rhbz#660684
+
+* Thu Apr 7 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.230-1
+- Fix AttributeError (no str.rpartition in python 2.4)
+  Resolves: rhbz#693655
+- Add busybox to initrd
+  Resolves: rhbz#500527
+- Ensure kernel-xen is the default kernel for Xen guests
+  Resolves: rhbz#480031
+
+* Fri Apr 1 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.229-1
+- Fix shlex traceback if pxeboot cmdline ends in a quote (wwoods)
+  Resolves: rhbz#500198
+- Honor kickstart noipv6 option for media installs (rvykydal)
+  Resolves: rhbz#677653
+- Quote ETHTOOL_OPTS value in stage 2 (mmatsuya)
+  Resolves: rhbz#674473
+- Fix ZeroDivisionError with tiny management LUNs (wwoods)
+  Resolves: rhbz#636984
+- Write OPTIONS for s390x net devs on non-network install methods (dcantrell)
+  Resolves: rhbz#649301
+
+* Fri Mar 18 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.228-1
+- Include and initialize the IP over Infiniband module. (akozumpl)
+  Related: rhbz#660684
+
+* Fri Mar 11 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.227-1
+- Fix waiting for a cdrom with a ks file to come up. (akozumpl)
+  Resolves: rhbz#658398
+- When the back button is pressed, undo deps. (mmatsuya)
+  Resolves: rhbz#603177
+- Add global vars to retain parsed /proc/cmdline (bcl)
+  Related: rhbz#569883
+- Convert earlyModuleLoad to use cmdline_argv (bcl)
+  Related: rhbz#569883
+- Check blacklist= for the module name before loading it (bcl)
+  Related: rhbz#569883
+- Write /tmp/anaconda.conf (bcl)
+  Related: rhbz#569883
+- Copy module blacklist to target system (bcl)
+  Resolves: rhbz#569883
+- Allow blocking the ssh port through kickstart (clumens)
+  Resolves: rhbz#485086
+- Use tune4fs for ext4 filesystems (bcl)
+  Resolves: rhbz#616184
+- Add tune4fs to install images (bcl)
+  Resolves: rhbz#616184
+- Set selinux context on iptables files (bcl)
+  Resolves: rhbz#658084
+
+* Thu Mar 3 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.226-1
+- Use getDiskPart() from bootyutil. (akozumpl)
+  Related: rhbz#572862
+- Validate the user-chosen name of an mpath device. (akozumpl)
+  Related: rhbz#572862
+- Do not lose selection in the bootloader's drive order dialog (akozumpl)
+  Resolves: rhbz#583837
+- Make sure we select the right net device when iBFT is used (mmatsuya)
+  Signed-Off-By: Martin Sivak <msivak@redhat.com>
+  Resolves: rhbz#643774
+- Use DISPATCH_NOOP if we go back to the doReIPL step (mgracik)
+  Resolves: rhbz#654685
+
+* Fri Feb 25 2011 Ales Kozumplik <akozumpl@redhat.com> 11.1.2.225-1
+- CD -> disc in the required media message (clumens).
+  Resolves: rhbz#641412
 
 * Mon Dec 20 2010 Radek Vykydal <dcantrell@redhat.com> 11.1.2.224-1
 - noeject overrides kickstart eject (bcl)

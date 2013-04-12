@@ -60,6 +60,7 @@ EOF;
 
     // reset VM state
     EtvaServerQuery::create()
+                        ->filterByVmState(EtvaServer::STATE_MIGRATING,Criteria::NOT_EQUAL)
                         ->update(array('VmState'=>EtvaServer::STATE_STOP));
 
     $nodes = EtvaNodeQuery::create()
@@ -79,8 +80,10 @@ EOF;
                 $server_data = (array) $server;
                 $etva_server = $node->retrieveServerByName($server_data['name']);
                 if($etva_server){
-                    $etva_server->setVmState($server_data['state']);
-                    $etva_server->save();
+                    if ($etva_server->getVmState() !== EtvaServer::STATE_MIGRATING) {   // only if not in migrating mode
+                        $etva_server->setVmState($server_data['state']);
+                        $etva_server->save();
+                    }
                 }
 
             }

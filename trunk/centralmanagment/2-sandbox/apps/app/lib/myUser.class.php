@@ -21,15 +21,19 @@ class myUser extends sfGuardSecurityUser
         $vncToken = EtvaVncTokenPeer::retrieveByPK($user_name);
         if(!$vncToken) $vncToken = new EtvaVncToken();
 
-        // generate new data
+        $token_timeout = sfConfig::get('app_setting_vnc_token_timeout');    // default 3600 seconds
+        if ($vncToken->getUpdatedAt("c") < date("c",time() - $token_timeout))
+        {
+            // generate new data
 
-        $tokens = self::generatePairToken();
+            $tokens = self::generatePairToken();
 
-        $vncToken->setUserId($user_id);
-        $vncToken->setUsername($user_name);
-        $vncToken->setToken($tokens[0]);
-        $vncToken->setEnctoken($tokens[1]);
-        $vncToken->save();
+            $vncToken->setUserId($user_id);
+            $vncToken->setUsername($user_name);
+            $vncToken->setToken($tokens[0]);
+            $vncToken->setEnctoken($tokens[1]);
+            $vncToken->save();
+        }
 
     }
 
@@ -282,7 +286,6 @@ class myUser extends sfGuardSecurityUser
           if ($rk && $rk->getSfGuardUser())
           {
             $this->signIn($rk->getSfGuardUser());
-            $this->initVncToken();
           }
         }
       }

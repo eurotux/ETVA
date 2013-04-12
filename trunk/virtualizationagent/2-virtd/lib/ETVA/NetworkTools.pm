@@ -11,19 +11,50 @@ use File::Copy;
 # etva conf dir
 my $etva_config_dir = $ENV{'etva_conf_dir'} || "/etc/sysconfig/etva-vdaemon/config";
 
-my $SYSTEM_CONFIG_NETWORK_CMD;
+# read_file_lines(file)
+sub read_file_lines {
+    my ($file) = @_;
+    my @lines = ();
+    open(READ_FILE,"$file");
+    while(<READ_FILE>){
+        chomp;
+        push(@lines,$_);
+    }
+    close(READ_FILE);
+    return wantarray() ? @lines : \@lines;
+}
+# flush_file_lines(file,lines, [eol])
+sub flush_file_lines {
+    my ($file,$lines,$eol) = @_;
+    if( $lines ){
+        $eol ||= "\n";
+        my $tmpfile = ETVA::DebugLog::rand_logfile("$file","tmp");
+        open(FLUSH_FILE, ">$tmpfile");
+        foreach my $line (@$lines) {
+            (print FLUSH_FILE $line,$eol) ||
+                ETVA::DebugLog::pdebuglog("Error file write $tmpfile: $!");
+        }
+        close(FLUSH_FILE);
+        rename($tmpfile, $file) || ETVA::DebugLog::pdebuglog("Error replace file $file with $tmpfile: $!");
+        unlink($tmpfile);
+    }
+}
+# replace_file_lines(file,line,newlines)
+sub replace_file_line {
+    my ($file,$i,@newlines) = @_;
+    my $lines = &read_file_lines($file);
+    if( @newlines ){
+        splice(@$lines,$i,@newlines);
+    } else {
+        splice(@$lines,$i,1);
+    }
+    &flush_file_lines($file,$lines);
+}
 
 # read_pipe_lines(cmd)
 sub read_pipe_lines {
     my ($cmd) = @_;
-    my @lines = ();
-    open(READ_PIPE,"$cmd |");
-    while(<READ_PIPE>){
-        chomp;
-        push(@lines,$_);
-    }
-    close(READ_PIPE);
-    return wantarray() ? @lines : \@lines;
+    return &read_file_lines("$cmd |");
 }
 # flush_pipe_lines(cmd,lines, [eol])
 sub flush_pipe_lines {
@@ -47,70 +78,90 @@ sub flush_pipe_lines {
     }
 }
 
-sub read_system_config_network_cmd {
-    if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
-    } else {
-        if( !$SYSTEM_CONFIG_NETWORK_CMD ){
-            $SYSTEM_CONFIG_NETWORK_CMD = &read_pipe_lines('/usr/sbin/system-config-network-cmd -e');
-        }
-        return wantarray() ? @$SYSTEM_CONFIG_NETWORK_CMD : $SYSTEM_CONFIG_NETWORK_CMD;
-    }
-}
-sub flush_system_config_network_cmd {
-    if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
-    } elsif( $SYSTEM_CONFIG_NETWORK_CMD ){
-        &flush_pipe_lines('/usr/sbin/system-config-network-cmd -ci',$SYSTEM_CONFIG_NETWORK_CMD);
-        $SYSTEM_CONFIG_NETWORK_CMD = 0;
-    }
-}
-
-sub replace_system_config_network_cmd {
-    my (@lines) = @_;
-    if( my $read_lines = &read_system_config_network_cmd() ){
-        for my $line (@lines){
-            my ($o,$nv) = ref($line) ? @$line : $line;
-            $nv = $nv ? "${o}${nv}" : "${o}";
-            my $re = $o; $re =~ s/\./\\./g;
-            if( !grep { s/^${re}.*$/$nv/ } @$read_lines ){
-                push(@$read_lines,"${nv}");
-            }
-        }
-        &flush_system_config_network_cmd();
-    }
-}
-
 # write DNS config
 sub change_dns {
     my (%p) = @_;
-    if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        #die "system-config-network-cmd tool doest exists!\n";
-        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
-    } else {
-        my @lines = ();
 
-        push(@lines, ['ProfileList.default.DNS.Hostname=',$p{'hostname'}]) if( defined $p{'hostname'} );
-        push(@lines, ['ProfileList.default.DNS.Domainname=',$p{'domainname'}]) if( defined $p{'domainname'} );
-        push(@lines, ['ProfileList.default.DNS.PrimaryDNS=',$p{'primarydns'}]) if( defined $p{'primarydns'} );
-        push(@lines, ['ProfileList.default.DNS.SecondaryDNS=',$p{'secondarydns'}]) if( defined $p{'secondarydns'} );
-        push(@lines, ['ProfileList.default.DNS.TertiaryDNS=',$p{'tertiarydns'}]) if( defined $p{'tertiarydns'} );
+    if( defined $p{'hostname'} ){
+        my $already_there = 0;
+        my @lines_network = ();
+        my $bkp_network = &read_file_lines("/etc/sysconfig/network");
+        for my $l (@$bkp_network){
+            if( $l =~ m/^HOSTNAME=/i ){
+                $already_there = 1;
+                $l = "HOSTNAME=$p{'hostname'}";
+            }
+            push(@lines_network,$l);
+        }
+        push(@lines_network,"HOSTNAME=$p{'hostname'}") if( !$already_there );
+        &flush_file_lines("/etc/sysconfig/network",\@lines_network);
+    }
 
+    if( defined($p{'domainname'}) ||
+            defined($p{'primarydns'}) ||
+            defined($p{'secondarydns'}) ||
+            defined($p{'tertiarydns'}) ){
+        my @lines_resolv = ();
+
+        my $bkp_resolv = &read_file_lines("/etc/resolv.conf");
+
+        my $has_searchlist = 0;
         my @searchlist = ();
-        if( my $sl = $p{'searchlist'} ){
-            @searchlist = ref($sl) ? @$sl : split(/,/,$sl);
-        } elsif( grep { /searchlist/ } keys %p ){
-            my @lk = grep { /searchlist\.\d+/ } keys %p;
-            for my $i ( sort map { /searchlist\.(\d+)/ } @lk ){
-                push(@searchlist, $p{"searchlist.$i"});
+        if( grep { /searchlist/ } keys %p ){
+            $has_searchlist = 1;
+            if( my $sl = $p{'searchlist'} ){
+                @searchlist = ref($sl) ? @$sl : split(/,/,$sl);
+            } else {
+                for my $i ( sort map { /searchlist\.(\d+)/ } keys %p ){
+                    $searchlist[$i-1] = $p{"searchlist.$i"};
+                }
             }
         }
-        if( @searchlist ){
-            for(my $i=0; $i<scalar(@searchlist); $i++){
-                push @lines, ["ProfileList.default.DNS.SearchList.$i=", $searchlist[$i]];
+
+        my $domain_c = 0;
+        my $nameserver_c = 0;
+        my $searchlist_c = 0;
+        for my $l (@$bkp_resolv){
+            if( $l =~ m/^domain/ ){
+                $domain_c++;
+                if( defined $p{'domainname'} ){
+                    $l = ( $p{'domainname'} ) ? "domain $p{'domainname'}" : "";
+                }
+            } elsif( $l =~ m/^nameserver/ ){
+                $nameserver_c++;
+                if( $nameserver_c==1 && defined($p{'primarydns'}) ){
+                    $l = ($p{'primarydns'}) ? "nameserver $p{'primarydns'}" : "";
+                }
+                if( $nameserver_c==2 && defined($p{'secondarydns'}) ){
+                    $l = ($p{'secondarydns'}) ? "nameserver $p{'secondarydns'}" : "";
+                }
+                if( $nameserver_c==3 && defined($p{'tertiarydns'}) ){
+                    $l = ($p{'tertiarydns'}) ? "nameserver $p{'tertiarydns'}" : "";
+                }
+            } elsif( $l =~ m/^search/ ){
+                $searchlist_c++;
+
+                if( $has_searchlist ){
+                    $l = "";    # clean up
+                    if( @searchlist ){
+                        my @sl = split(/\s+/,$l);
+                        shift(@sl); # drop search
+                        for(my $i=0; $i<scalar(@sl); $i++){
+                            $searchlist[$i] = defined($searchlist[$i]) ? $searchlist[$i] : $sl[$i];
+                        }
+                        $l = "search " . join(" ",@searchlist);
+                    }
+                }
             }
+            push(@lines_resolv,$l);
         }
-        &replace_system_config_network_cmd( @lines );
+        push(@lines_resolv,"domain $p{'domainname'}") if( !$domain_c && defined($p{'domainname'}) );
+        push(@lines_resolv,"nameserver $p{'primarydns'}") if( $nameserver_c<1 && defined($p{'primarydns'}) );
+        push(@lines_resolv,"nameserver $p{'secondarydns'}") if( $nameserver_c<2 && defined($p{'secondarydns'}) );
+        push(@lines_resolv,"nameserver $p{'tertiarydns'}") if( $nameserver_c<3 && defined($p{'tertiarydns'}) );
+        push(@lines_resolv,"search " . join(" ",@searchlist)) if( !$searchlist_c && @searchlist );
+
+        &flush_file_lines("/etc/resolv.conf",\@lines_resolv);
     }
 }
 
@@ -170,37 +221,52 @@ sub active_ip_conf {
 sub change_if_conf {
     my (%p) = @_;
 
-    if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
-    } else {
-        if( $p{'if'} ){
-            if( !$p{'type'} ){
-                if( -e "/sys/class/net/$p{'if'}/bridge" ){
-                    $p{'type'} = 'bridge';
-                } elsif( -e "/sys/class/net/$p{'if'}/bonding" ){
-                    $p{'type'} = 'BOND';
-                } else {
-                    $p{'type'} = 'Ethernet';
+    if( $p{'if'} ){
+        if( !$p{'type'} ){
+            if( -e "/sys/class/net/$p{'if'}/bridge" ){
+                $p{'type'} = 'bridge';
+            } elsif( -e "/sys/class/net/$p{'if'}/bonding" ){
+                $p{'type'} = 'BOND';
+            } else {
+                $p{'type'} = 'Ethernet';
+            }
+        }
+
+        my $if_cfg_file = "/etc/sysconfig/network-scripts/ifcfg-$p{'if'}";
+        my $ok = 0;
+
+        my @lines = &read_file_lines($if_cfg_file);
+        if( !@lines ){
+            push(@lines,"DEVICE=$p{'if'}");
+            push(@lines,"TYPE=$p{'type'}");
+        }
+
+        if( defined($p{'ip'}) && defined($p{'netmask'}) ){
+            if( !grep { s/^IPADDR=.*$/IPADDR=$p{'ip'}/ } @lines ){
+                push(@lines,"IPADDR=$p{'ip'}");
+            }
+            if( !grep { s/^NETMASK=.*$/NETMASK=$p{'netmask'}/ } @lines ){
+                push(@lines, "NETMASK=$p{'netmask'}");
+            }
+            if( defined $p{'gateway'} ){
+                if( !grep { s/^GATEWAY=.*$/GATEWAY=$p{'gateway'}/ } @lines){
+                    push(@lines, "GATEWAY=$p{'gateway'}");
                 }
             }
-            my $ok = 0;
-            my @lines = ();
-            if( defined($p{'ip'}) && defined($p{'netmask'}) ){
-                push(@lines, ["DeviceList.$p{'type'}.$p{'if'}.IP=",$p{'ip'}]);
-                push(@lines, ["DeviceList.$p{'type'}.$p{'if'}.Netmask=",$p{'netmask'}]);
-                push(@lines, ["DeviceList.$p{'type'}.$p{'if'}.Gateway=",$p{'gateway'}]) if( defined $p{'gateway'} );
-                $ok = 1;
-            }
-            if( defined $p{'bootproto'} ){
-                push(@lines, ["DeviceList.$p{'type'}.$p{'if'}.BootProto=",$p{'bootproto'}]);
-                $ok = 1;
-            }
-            &replace_system_config_network_cmd( @lines );
-
-            return $ok ? 1 : 0;
-        } else {
-            ETVA::DebugLog::pdebuglog "interface not defined!\n";
+            $ok = 1;
         }
+        if( defined $p{'bootproto'} ){
+            if( !grep { s/^BOOTPROTO=.*$/BOOTPROTO=$p{'bootproto'}/ } @lines ){
+                push(@lines,"BOOTPROTO=$p{'bootproto'}");
+            }
+            $ok = 1;
+        }
+
+        &flush_file_lines($if_cfg_file,\@lines);
+
+        return $ok ? 1 : 0;
+    } else {
+        ETVA::DebugLog::pdebuglog "interface not defined!\n";
     }
     return 0;
 }
@@ -271,7 +337,7 @@ sub get_ip_conf {
     my ($if,$ip) = @_;
 
     if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
+        print STDERR "system-config-network-cmd tool doest exists!\n";
     } else {
         my $re_if;
         my $re_ip = $ip ? $ip : '\d+.\d+.\d+.\d+';
@@ -310,92 +376,40 @@ sub get_ip_conf {
     }
 }
 
-# get hosts list
-sub get_hosts_list {
-
-    my @l = ();
-    if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
-    } else {
-        my %HostsList = ();
-        open(F,"/usr/sbin/system-config-network-cmd -e |");
-        while(<F>){
-            if( /ProfileList\.default\.HostsList\.(\d+)\.([^=]+)=(.+)/ ){
-                my ($n,$k,$v) = ($1,$2,$3);
-                $HostsList{"$n"} = { 'id'=>$n } if( !$HostsList{"$n"} );
-                $HostsList{"$n"}{"$k"} = $v;
-            }
-        }
-        close(F);
-
-        @l = sort { $a->{'id'} <=> $b->{'id'} } values %HostsList;
-    }
-
-    return wantarray() ? @l : \@l;
-}
-# set hosts list
-sub set_hosts_list {
-    my @l = @_;
-
-    if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        ETVA::DebugLog::pdebuglog "system-config-network-cmd tool doest exists!\n";
-    } else {
-        my $c = 1;
-        my @lines = ();
-        for my $H (@l){
-            for my $k (keys %$H){
-                next if( $k eq 'id' );  # ignore id key
-                my $v = $H->{"$k"};
-                push(@lines, ["ProfileList.default.HostsList.$c.$k=",$v]);
-            }
-            $c++;
-        }
-        &replace_system_config_network_cmd( @lines );
-    }
-}
-# add host to hosts list
-sub add_hosts_list {
-    my ($name,$ip,$comment,@alias) = @_;
-
-    my @l = &get_hosts_list();
-    my %Host = ( 'Hostname'=>$name, 'IP'=>$ip, 'Comment'=>$comment );
-    my $c = 1;
-    for my $a (@alias){
-        $Host{"AliasList.$c"} = $a;
-    }
-    push(@l, \%Host );
-
-    &set_hosts_list(@l);
-}
-# change host of hosts list
-sub change_hosts_list {
-    my ($name,$ip,$comment,@alias) = @_;
-
-    my @l = &get_hosts_list();
-
-    my %Host = ( 'Hostname'=>$name, 'IP'=>$ip, 'Comment'=>$comment );
-    my $c = 1;
-    for my $a (@alias){
-        $Host{"AliasList.$c"} = $a;
-    }
-    for(my $i=0; $i<scalar(@l); $i++){
-        if( $l[$i]{'Hostname'} eq $Host{'Hostname'} ){
-            $l[$i] = \%Host;
-        }
-    }
-    &set_hosts_list(@l);
-}
-
+# fix_hostname_resolution(hostname,ip) - replace ip for hostname
 sub fix_hostname_resolution {
     my ($hostname,$ip) = @_;
-    my @H = grep { $_->{'Hostname'} eq $hostname } &get_hosts_list();
-    if( !@H ){
-        &add_hosts_list($hostname,$ip);
-    } else {
-        if( ! grep  { $_->{'IP'} eq $ip } @H ){    # change it
-            &change_hosts_list($hostname,$ip);
+
+    my $already_there = 0;
+    my $bkp = &read_file_lines("/etc/hosts");
+    my @lines = ();
+    for my $l (@$bkp){
+
+        my $line = "";
+
+        my $comment = "";
+        $comment = $1 if( $l =~ s/#(.*)$//g );
+        $l =~ s/\s+$//g;
+
+        my @hosts = split(/\s+/,$l);
+        if( my $ipaddr = shift(@hosts) ){
+            my @hs = grep { $_ ne $hostname } @hosts;
+            if( (scalar(@hosts) > scalar(@hs)) && ($ipaddr ne $ip) ){
+                $line = $ipaddr . "\t" . join(" ",@hs) if( @hs );
+            } else {
+                if( (scalar(@hosts) > scalar(@hs)) && ($ipaddr eq $ip) ){
+                    $already_there = 1;    # if same ip don't need to change
+                }
+                $line = $ipaddr . "\t" . join(" ",@hosts);
+            }
         }
+
+        $line .= " #$comment" if( $comment );
+        push(@lines, $line) if( $line );
     }
+    push(@lines, "$ip\t$hostname") if( !$already_there );    # don't add if already there
+
+    &flush_file_lines("/etc/hosts",\@lines);
 }
 
 1;

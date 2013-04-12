@@ -1,8 +1,10 @@
 #!/bin/bash
 
-VM=`dmesg | grep -i qemu`
+QEMU=`dmesg | grep -i qemu`
+VMWARE=`lspci | grep -i vmware`
+VIRTUALBOX=`lspci | grep -i virtualbox`
 
-if [ "$VM" == "" ]; then
+if [ "$QEMU" == "" -a "$VMWARE" == "" -a "$VIRTUALBOX" == "" ]; then
     cd /srv/lcdagent
     exec > /var/log/lcdagent/lcdagent.log 2>&1
     CFG_FILE="/etc/sysconfig/lcdagent/lcdagent.ini" \

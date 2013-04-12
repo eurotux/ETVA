@@ -251,6 +251,8 @@ class serverActions extends sfActions
             $server_array['unassigned'] = true;
         }
 
+        $server_array['vm_is_running'] = ($etva_server->isRunning()) ? true : false;
+
         $all_shared = $etva_server->isAllSharedLogicalvolumes();
         $server_array['all_shared_disks'] = $all_shared;
 
@@ -2451,10 +2453,11 @@ class serverActions extends sfActions
                         $agent_server_port = $server->getAgentPort();
                         $agent_tmpl = $server->getAgentTmpl();
                         $vm_state = $server->getVmState();
+                        $vm_is_running = $server->isRunning() ? true : false;
 
                         $cls_server = 'no-active';
 
-                        if($vm_state=='running')
+                        if($vm_is_running)
                         {
                             $has_servers_running = true;
                             if($aoncontextmenugent_server_port)
@@ -2480,7 +2483,7 @@ class serverActions extends sfActions
                         $has_disks = $server->hasEtvaServerLogicals();
                         $has_devs = $server->hasDevices();
 
-                        $srv_iconCls = ( $vm_state=='running' ) ? 'icon-vm-stat-ok': 'icon-vm-stat-nok';
+                        $srv_iconCls = ( $vm_is_running ) ? 'icon-vm-stat-ok': 'icon-vm-stat-nok';
                         $join_cls_server = $cls_server." ".$srv_iconCls;
 
                         # check if vm has etasp info
@@ -2492,7 +2495,7 @@ class serverActions extends sfActions
                             'text'=>$server->getName(),'type'=>'server','id'=>$child_id,'node_id'=>$node->getID(),
                             'state'=>$state_server,'agent_tmpl'=>$agent_tmpl,'cls'=>$join_cls_server,
                             'url'=> $this->getController()->genUrl('server/view?id='.$server->getID()),
-                            'vm_state'=>$vm_state,'unassigned'=>false,'all_shared'=>$all_shared,
+                            'vm_state'=>$vm_state,'vm_is_running'=>$vm_is_running,'unassigned'=>false,'all_shared'=>$all_shared,
                             'has_snapshots'=>$has_snapshots,'has_disks'=>$has_disks, 'has_devices'=>$has_devs,
                             'leaf'=>true, 'draggable'=>($perm_dc && $server->canMove()), 'qtip'=>$srv_qtip,
                             'ga_state'=>$server->getGaState(), 'ga_info'=>$server->getGaInfo(), 
@@ -2531,10 +2534,11 @@ class serverActions extends sfActions
                     $agent_server_port = $server->getAgentPort();
                     $agent_tmpl = $server->getAgentTmpl();
                     $vm_state = $server->getVmState();
+                    $vm_is_running = $server->isRunning() ? true : false;
 
                     $cls_server = 'no-active';
 
-                    if($vm_state=='running')
+                    if($vm_is_running)
                     {
                         $has_servers_running = true;
                         if($aoncontextmenugent_server_port)
@@ -2566,7 +2570,7 @@ class serverActions extends sfActions
                         array_push($nodes_toassign_arr,$node->getId());
                     }
 
-                    $srv_iconCls = ( $vm_state=='running' ) ? 'icon-vm-stat-ok': 'icon-vm-stat-nok';
+                    $srv_iconCls = ( $vm_is_running ) ? 'icon-vm-stat-ok': 'icon-vm-stat-nok';
                     $join_cls_server = $cls_server." ".$srv_iconCls;
 
                     # check if vm has etasp info
@@ -2578,7 +2582,7 @@ class serverActions extends sfActions
                         'text'=>$server->getName(),'type'=>'server','id'=>$child_id,'node_id'=>null,
                         'state'=>$state_server,'agent_tmpl'=>$agent_tmpl,'cls'=>$join_cls_server,
                         'url'=> $this->getController()->genUrl('server/view?id='.$server->getID()),
-                        'vm_state'=>$vm_state,'unassigned'=>true,'all_shared'=>$all_shared,
+                        'vm_state'=>$vm_state,'vm_is_running'=>$vm_is_running,'unassigned'=>true,'all_shared'=>$all_shared,
                         'has_snapshots'=>$has_snapshots,'has_disks'=>$has_disks, 'has_devices'=>$has_devs,
                         'nodes_toassign'=>$nodes_toassign_arr, //json_encode($nodes_toassign_arr),
                         'leaf'=>true, 'draggable'=>$draggable, 'qtip'=>$srv_qtip,
@@ -2889,15 +2893,28 @@ class serverActions extends sfActions
                                             //error_log(sprintf('node_servers id=%s name=%s priority_ha=%s',$node_server->getId(),$node_server->getName(),$node_server->getPriorityHa()));
                                             $server_uuid = $node_server->getUuid();
 
-                                            if( !$node_server->getUnassigned() ){   // assigned only
-                                                if(isset($vms_uuids[$server_uuid]))
-                                                {
-                                                    $node_server->setVmState($vms_uuids[$server_uuid]['state']);
-                                                    if( isset($vms_uuids[$server_uuid]['has_snapshots']) ){ // set snapshots flags
-                                                        $node_server->setHassnapshots($vms_uuids[$server_uuid]['has_snapshots']);
+                                            if(!$node_server->getUnassigned()){    // assigned only
+                                                                                   // and is not migrating
+                                                if ($node_server->getVmState() !== EtvaServer::STATE_MIGRATING) {
+                                                    if(isset($vms_uuids[$server_uuid]))
+                                                    {
+                                                        $node_server->setVmState($vms_uuids[$server_uuid]['state']);
+                                                        if( isset($vms_uuids[$server_uuid]['has_snapshots']) ){ // set snapshots flags
+                                                            $node_server->setHassnapshots($vms_uuids[$server_uuid]['has_snapshots']);
+                                                        }
+                                                        $node_server->save();
+                                                    }else{
+                                                        $message_s = sprintf('Node %s could not check state for virtual machine %s(%s)', $etva_node->getName(),$node_server->getName(),$server_uuid);
+                                                        $not_affected++;
+                                                        $this->dispatcher->notify(
+                                                            new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                                                                array('message' => $message_s,'priority'=>EtvaEventLogger::ERR)));
+                                                        error_log($message_s);
                                                     }
-                                                    $node_server->save();
-                                                }else $not_affected++;
+                                                } else {
+                                                    $message_s = sprintf('Node %s could not check state for virtual machine %s(%s) beacuse is migrating', $etva_node->getName(),$node_server->getName(),$server_uuid);
+                                                    error_log($message_s);
+                                                }
                                             }
                                         }
 

@@ -1,6 +1,6 @@
-diff -Naur anaconda-11.1.2.224.orig/installclasses/custom.py anaconda-11.1.2.224/installclasses/custom.py
---- anaconda-11.1.2.224.orig/installclasses/custom.py	2010-12-20 17:06:23.000000000 +0000
-+++ anaconda-11.1.2.224/installclasses/custom.py	1970-01-01 01:00:00.000000000 +0100
+diff -Naur anaconda-11.1.2.259.orig/installclasses/custom.py anaconda-11.1.2.259/installclasses/custom.py
+--- anaconda-11.1.2.259.orig/installclasses/custom.py	2012-11-14 12:25:50.000000000 +0000
++++ anaconda-11.1.2.259/installclasses/custom.py	1970-01-01 01:00:00.000000000 +0100
 @@ -1,27 +0,0 @@
 -from installclass import BaseInstallClass
 -from rhpl.translate import N_
@@ -29,9 +29,9 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/custom.py anaconda-11.1.2.224
 -
 -    def __init__(self, expert):
 -	BaseInstallClass.__init__(self, expert)
-diff -Naur anaconda-11.1.2.224.orig/installclasses/etva.py anaconda-11.1.2.224/installclasses/etva.py
---- anaconda-11.1.2.224.orig/installclasses/etva.py	1970-01-01 01:00:00.000000000 +0100
-+++ anaconda-11.1.2.224/installclasses/etva.py	2011-05-10 16:54:26.000000000 +0100
+diff -Naur anaconda-11.1.2.259.orig/installclasses/etva.py anaconda-11.1.2.259/installclasses/etva.py
+--- anaconda-11.1.2.259.orig/installclasses/etva.py	1970-01-01 01:00:00.000000000 +0100
++++ anaconda-11.1.2.259/installclasses/etva.py	2013-02-11 11:02:15.000000000 +0000
 @@ -0,0 +1,153 @@
 +from installclass import BaseInstallClass
 +import rhpl
@@ -186,9 +186,9 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/etva.py anaconda-11.1.2.224/i
 +        # minimally set up tasks in case no key is provided
 +        # self.tasks = self.taskMap[productPath.lower()]
 +
-diff -Naur anaconda-11.1.2.224.orig/installclasses/fedora.py anaconda-11.1.2.224/installclasses/fedora.py
---- anaconda-11.1.2.224.orig/installclasses/fedora.py	2010-12-20 17:06:23.000000000 +0000
-+++ anaconda-11.1.2.224/installclasses/fedora.py	1970-01-01 01:00:00.000000000 +0100
+diff -Naur anaconda-11.1.2.259.orig/installclasses/fedora.py anaconda-11.1.2.259/installclasses/fedora.py
+--- anaconda-11.1.2.259.orig/installclasses/fedora.py	2012-11-14 12:25:50.000000000 +0000
++++ anaconda-11.1.2.259/installclasses/fedora.py	1970-01-01 01:00:00.000000000 +0100
 @@ -1,42 +0,0 @@
 -from installclass import BaseInstallClass
 -from rhpl.translate import N_,_
@@ -232,66 +232,10 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/fedora.py anaconda-11.1.2.224
 -
 -    def __init__(self, expert):
 -	BaseInstallClass.__init__(self, expert)
-diff -Naur anaconda-11.1.2.224.orig/installclasses/personal_desktop.py anaconda-11.1.2.224/installclasses/personal_desktop.py
---- anaconda-11.1.2.224.orig/installclasses/personal_desktop.py	2010-12-20 17:06:23.000000000 +0000
-+++ anaconda-11.1.2.224/installclasses/personal_desktop.py	1970-01-01 01:00:00.000000000 +0100
-@@ -1,52 +0,0 @@
--from installclass import BaseInstallClass
--from rhpl.translate import N_, _
--from constants import *
--import os
--import iutil
--from fsset import *
--
--class InstallClass(BaseInstallClass):
--    # name has underscore used for mnemonics, strip if you dont need it
--    id = "personal desktop"
--    name = N_("_Personal Desktop")
--    pixmap = "workstation.png"
--    _description = N_("Perfect for personal computers or laptops, select this "
--		     "installation type to install a graphical desktop "
--		     "environment and create a system ideal for home "
--		     "or desktop use.")
--    
--    pkgstext = N_("\tDesktop shell (GNOME)\n"
--                  "\tOffice suite (OpenOffice.org)\n"
--                  "\tWeb browser \n"
--                  "\tEmail (Evolution)\n"
--                  "\tInstant messaging\n"
--                  "\tSound and video applications\n"
--                  "\tGames\n")
--    
--
--    showLoginChoice = 0
--    sortPriority = 1
--    hidden = 1
--
--    def setSteps(self, dispatch):
--	BaseInstallClass.setSteps(self, dispatch);
--	dispatch.skipStep("partition")
--        dispatch.skipStep("desktopchoice", skip = 0)
--        dispatch.skipStep("package-selection", skip = 1)
--
--    def setGroupSelection(self, anaconda):
--	BaseInstallClass.__init__(self, anaconda.backend)
--
--        anaconda.backend.unselectAll()
--
--        anaconda.backend.selectGroup("workstation-common", asMeta = 1)
--        anaconda.backend.selectGroup("gnome-desktop")
--        anaconda.backend.selectGroup("compat-arch-support", asMeta = 1, missingOk = 1)
--
--    def setInstallData(self, anaconda):
--	BaseInstallClass.setInstallData(self, anaconda)
--        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
--                                                CLEARPART_TYPE_LINUX)
--
--    def __init__(self, expert):
--	BaseInstallClass.__init__(self, expert)
-diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py anaconda-11.1.2.224/installclasses/rhel.py
---- anaconda-11.1.2.224.orig/installclasses/rhel.py	2011-05-10 16:48:34.000000000 +0100
-+++ anaconda-11.1.2.224/installclasses/rhel.py	1970-01-01 01:00:00.000000000 +0100
-@@ -1,135 +0,0 @@
+diff -Naur anaconda-11.1.2.259.orig/installclasses/rhel.py anaconda-11.1.2.259/installclasses/rhel.py
+--- anaconda-11.1.2.259.orig/installclasses/rhel.py	2013-02-11 10:41:36.000000000 +0000
++++ anaconda-11.1.2.259/installclasses/rhel.py	1970-01-01 01:00:00.000000000 +0100
+@@ -1,160 +0,0 @@
 -from installclass import BaseInstallClass
 -import rhpl
 -from rhpl.translate import N_,_
@@ -299,6 +243,7 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py anaconda-11.1.2.224/i
 -from flags import flags
 -import os
 -import iutil
+-import string
 -import types
 -try:
 -    import instnum
@@ -360,27 +305,50 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py anaconda-11.1.2.224/i
 -	dispatch.skipStep("partition")
 -	dispatch.skipStep("regkey", skip = 1)        
 -
+-    # for rhel, look up the given name and determine if it is allowed
+-    # by the package key
+-    def repoIsAllowed(self, repoName):
+-        if not self.inum or not instnum:
+-            return True
+-
+-        name = repoName.lower()
+-        prod = self.inum.get_product()
+-        controlledRepos = map(string.lower, instnum.encodingMaps[instnum.IN_OPTIONS][prod].values())
+-        for (k, lst) in instnum.encodingMaps[instnum.IN_REPO][prod].items():
+-            for repo in lst:
+-                if not type(repo) == types.StringType:
+-                    continue
+-
+-                controlledRepos.append(repo.lower())
+-
+-        if name not in controlledRepos:
+-            return True
+-
+-        allowedRepos = map(string.lower, self.inum.get_repos()) + \
+-                       map(string.lower, self.inum.get_repos_dict().keys())
+-        return name in allowedRepos
+-
 -    def handleRegKey(self, key, intf, interactive = True):
 -        self.repopaths = { "base": "%s" %(productPath,) }
 -        self.tasks = self.taskMap[productPath.lower()]
 -        self.installkey = key
 -
 -        try:
--            inum = instnum.InstNum(key)
+-            self.inum = instnum.InstNum(key)
 -        except Exception, e:
 -            if True or not BETANAG: # disable hack keys for non-beta
 -                # make sure the log is consistent
 -                log.info("repopaths is %s" %(self.repopaths,))
 -                raise
 -            else:
--                inum = None
+-                self.inum = None
 -
--        if inum is not None:
+-        if self.inum is not None:
 -            # make sure the base products match
--            if inum.get_product_string().lower() != productPath.lower():
+-            if self.inum.get_product_string().lower() != productPath.lower():
 -                raise ValueError, "Installation number incompatible with media"
 -
--            for name, path in inum.get_repos_dict().items():
+-            for name, path in self.inum.get_repos_dict().items():
 -                # virt is only supported on i386/x86_64.  so, let's nuke it
 -                # from our repo list on other arches unless you boot with
 -                # 'linux debug'
@@ -422,15 +390,16 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py anaconda-11.1.2.224/i
 -    def __init__(self, expert):
 -	BaseInstallClass.__init__(self, expert)
 -
+-        self.inum = None
 -        self.repopaths = { "base": "%s" %(productPath,) }
 -
 -        # minimally set up tasks in case no key is provided
 -        # self.tasks = self.taskMap[productPath.lower()]
 -
-diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py.orig anaconda-11.1.2.224/installclasses/rhel.py.orig
---- anaconda-11.1.2.224.orig/installclasses/rhel.py.orig	2011-05-10 16:48:34.000000000 +0100
-+++ anaconda-11.1.2.224/installclasses/rhel.py.orig	1970-01-01 01:00:00.000000000 +0100
-@@ -1,140 +0,0 @@
+diff -Naur anaconda-11.1.2.259.orig/installclasses/rhel.py.orig anaconda-11.1.2.259/installclasses/rhel.py.orig
+--- anaconda-11.1.2.259.orig/installclasses/rhel.py.orig	2013-02-11 10:41:36.000000000 +0000
++++ anaconda-11.1.2.259/installclasses/rhel.py.orig	1970-01-01 01:00:00.000000000 +0100
+@@ -1,165 +0,0 @@
 -from installclass import BaseInstallClass
 -import rhpl
 -from rhpl.translate import N_,_
@@ -438,6 +407,7 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py.orig anaconda-11.1.2.
 -from flags import flags
 -import os
 -import iutil
+-import string
 -import types
 -try:
 -    import instnum
@@ -502,7 +472,30 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py.orig anaconda-11.1.2.
 -    def setSteps(self, dispatch):
 -	BaseInstallClass.setSteps(self, dispatch);
 -	dispatch.skipStep("partition")
--	dispatch.skipStep("regkey", skip = 0)        
+-	dispatch.skipStep("regkey", skip = 1)        
+-
+-    # for rhel, look up the given name and determine if it is allowed
+-    # by the package key
+-    def repoIsAllowed(self, repoName):
+-        if not self.inum or not instnum:
+-            return True
+-
+-        name = repoName.lower()
+-        prod = self.inum.get_product()
+-        controlledRepos = map(string.lower, instnum.encodingMaps[instnum.IN_OPTIONS][prod].values())
+-        for (k, lst) in instnum.encodingMaps[instnum.IN_REPO][prod].items():
+-            for repo in lst:
+-                if not type(repo) == types.StringType:
+-                    continue
+-
+-                controlledRepos.append(repo.lower())
+-
+-        if name not in controlledRepos:
+-            return True
+-
+-        allowedRepos = map(string.lower, self.inum.get_repos()) + \
+-                       map(string.lower, self.inum.get_repos_dict().keys())
+-        return name in allowedRepos
 -
 -    def handleRegKey(self, key, intf, interactive = True):
 -        self.repopaths = { "base": "%s" %(productPath,) }
@@ -510,21 +503,21 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py.orig anaconda-11.1.2.
 -        self.installkey = key
 -
 -        try:
--            inum = instnum.InstNum(key)
+-            self.inum = instnum.InstNum(key)
 -        except Exception, e:
 -            if True or not BETANAG: # disable hack keys for non-beta
 -                # make sure the log is consistent
 -                log.info("repopaths is %s" %(self.repopaths,))
 -                raise
 -            else:
--                inum = None
+-                self.inum = None
 -
--        if inum is not None:
+-        if self.inum is not None:
 -            # make sure the base products match
--            if inum.get_product_string().lower() != productPath.lower():
+-            if self.inum.get_product_string().lower() != productPath.lower():
 -                raise ValueError, "Installation number incompatible with media"
 -
--            for name, path in inum.get_repos_dict().items():
+-            for name, path in self.inum.get_repos_dict().items():
 -                # virt is only supported on i386/x86_64.  so, let's nuke it
 -                # from our repo list on other arches unless you boot with
 -                # 'linux debug'
@@ -566,94 +559,9 @@ diff -Naur anaconda-11.1.2.224.orig/installclasses/rhel.py.orig anaconda-11.1.2.
 -    def __init__(self, expert):
 -	BaseInstallClass.__init__(self, expert)
 -
+-        self.inum = None
 -        self.repopaths = { "base": "%s" %(productPath,) }
 -
 -        # minimally set up tasks in case no key is provided
 -        self.tasks = self.taskMap[productPath.lower()]
 -
-diff -Naur anaconda-11.1.2.224.orig/installclasses/server.py anaconda-11.1.2.224/installclasses/server.py
---- anaconda-11.1.2.224.orig/installclasses/server.py	2010-12-20 17:06:23.000000000 +0000
-+++ anaconda-11.1.2.224/installclasses/server.py	1970-01-01 01:00:00.000000000 +0100
-@@ -1,39 +0,0 @@
--from installclass import BaseInstallClass
--from rhpl.translate import *
--from constants import *
--import os
--import iutil
--
--class InstallClass(BaseInstallClass):
--
--    # name has underscore used for mnemonics, strip if you dont need it
--    id = "server"
--    name = N_("_Server")
--    pixmap = "server.png"
--    _description = N_("Select this installation type if you would like to "
--		     "set up file sharing, print sharing, and Web services. "
--		     "Additional services can also be enabled, and you "
--		     "can choose whether or not to install a graphical "
--		     "environment.")
--    
--    sortPriority = 10
--    showLoginChoice = 1
--    hidden = 1
--
--    def setSteps(self, dispatch):
--	BaseInstallClass.setSteps(self, dispatch);
--
--    def setGroupSelection(self, anaconda):
--	BaseInstallClass.__init__(self, anaconda.backend)
--
--        anaconda.backend.unselectAll()
--        anaconda.backend.selectGroup("server", asMeta = 1)
--        anaconda.backend.selectGroup("compat-arch-support", asMeta = 1, missingOk = 1)
--
--    def setInstallData(self, anaconda):
--	BaseInstallClass.setInstallData(self, anaconda)
--        BaseInstallClass.setDefaultPartitioning(self, anaconda.id.partitions,
--                                                CLEARPART_TYPE_ALL)
--
--    def __init__(self, expert):
--	BaseInstallClass.__init__(self, expert)
-diff -Naur anaconda-11.1.2.224.orig/installclasses/workstation.py anaconda-11.1.2.224/installclasses/workstation.py
---- anaconda-11.1.2.224.orig/installclasses/workstation.py	2010-12-20 17:06:23.000000000 +0000
-+++ anaconda-11.1.2.224/installclasses/workstation.py	1970-01-01 01:00:00.000000000 +0100
-@@ -1,39 +0,0 @@
--import personal_desktop
--from rhpl.translate import N_, _
--import os
--
--class InstallClass(personal_desktop.InstallClass):
--    # name has underscore used for mnemonics, strip if you dont need it
--    id = "workstation"
--    name = N_("_Workstation")
--    pixmap = "workstation.png"
--    _description = N_("This option installs a graphical desktop "
--		     "environment with tools for software "
--		     "development and system administration. ")
--
--    pkgstext = N_("\tDesktop shell (GNOME)\n"
--                  "\tOffice suite (OpenOffice.org)\n"
--                  "\tWeb browser \n"
--                  "\tEmail (Evolution)\n"
--                  "\tInstant messaging\n"
--                  "\tSound and video applications\n"
--                  "\tGames\n"
--                  "\tSoftware Development Tools\n"
--                  "\tAdministration Tools\n")
--    
--
--    sortPriority = 2
--    showLoginChoice = 0
--    hidden = 1
--
--    def setGroupSelection(self, anaconda):
--        personal_desktop.InstallClass.setGroupSelection(self, anaconda.backend)
--        anaconda.backend.selectGroup("emacs")
--        anaconda.backend.selectGroup("gnome-software-development")
--	anaconda.backend.selectGroup("x-software-development")
--        anaconda.backend.selectGroup("development-tools")
--        anaconda.backend.selectGroup("compat-arch-support", asMeta = 1, missingOk = 1)
--        anaconda.backend.selectGroup("compat-arch-development", asMeta = 1, missingOk = 1)
--        
--    def __init__(self, expert):
--	personal_desktop.InstallClass.__init__(self, expert)

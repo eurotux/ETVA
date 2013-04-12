@@ -2371,6 +2371,15 @@
         <target>Opções de recursos</target>
       </trans-unit>
 
+      <trans-unit id="server_cant_change_name_is_running">
+        <source>Can't change the name with server running!</source>
+        <target>Não é possível alterar o nome com o servidor correr!</target>
+      </trans-unit>
+      <trans-unit id="server_cant_change_name_has_snapshots">
+        <source>Can't change the name when server has snapshots!</source>
+        <target>Não é possível alterar o nome quando o servidor tem snapshots!</target>
+      </trans-unit>
+
       <!-- NETWORK INTERFACES -->
       <!--                    -->
       <trans-unit id="loading_network_interfaces">

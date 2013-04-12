@@ -49,6 +49,8 @@ use Data::Dumper;
 
 use POSIX qw(strftime);
 
+use version 0.77;
+
 my $CONF;
 my $UUID;
 my $MAXMEM;         # max memory in bytes
@@ -383,8 +385,10 @@ sub domainStats {
         }
 
         my $has_snapshots = 0;
-        if( my $lsnaps = $self->domainListSnapshots($dom) ){
-            $has_snapshots = 1 if( !isError($lsnaps) && @$lsnaps );
+        if( &haveSnapshotSupport() ){
+            if( my $lsnaps = $self->domainListSnapshots($dom) ){
+                $has_snapshots = 1 if( !isError($lsnaps) && @$lsnaps );
+            }
         }
         push @stats, {
                         "id" => $dom->get_id(),
@@ -1135,7 +1139,7 @@ sub vmMigrate {
     # perfome migration live
     $flags |= Sys::Virt::Domain::MIGRATE_LIVE if( $p{'live'} );
     # perfome other cases
-    if( $Sys::Virt::VERSION ge '0.2.3' ){
+    if( version->new($Sys::Virt::VERSION) ge version->new('0.2.3') ){
         eval {
             no strict;
             $flags |= Sys::Virt::Domain::MIGRATE_PEER2PEER if( $p{'peer2peer'} );
@@ -1146,15 +1150,25 @@ sub vmMigrate {
             use strict;
         };
     }
-    if( $Sys::Virt::VERSION gt '0.2.4' ){
-        # only available on libvirt 8.1
+    if( version->new($Sys::Virt::VERSION) ge version->new('0.9.4') ){
+        # only available on libvirt 0.9.4
         eval {
             no strict;
             $flags |= Sys::Virt::Domain::MIGRATE_NON_SHARED_DISK if( $p{'non_shared_disk'} );
             $flags |= Sys::Virt::Domain::MIGRATE_NON_SHARED_INC if( $p{'non_shared_inc'} );
+            $flags |= Sys::Virt::Domain::MIGRATE_CHANGE_PROTECTION if( $p{'change_protection'} );
             use strict;
         };
     }
+    if( version->new($Sys::Virt::VERSION) ge version->new('0.9.11') ){
+        # only available on libvirt 0.9.11
+        eval {
+            no strict;
+            $flags |= Sys::Virt::Domain::MIGRATE_UNSAFE if( $p{'unsafe'} );
+            use strict;
+        };
+    }
+    plog "unsafe mode on flags=$flags version=$Sys::Virt::VERSION" if( $p{'unsafe'} );
 
     my $dname = $p{'dname'};
     my $bw = $p{'bandwidth'};
@@ -1244,6 +1258,9 @@ sub haveVirshCreateSnapshotSupport {
         }
     }
     return $HAVEVIRSHCREATESNAPSHOTSUPPORT;
+}
+sub haveSnapshotSupport {
+    return &haveVirshCreateSnapshotSupport();
 }
 sub create_snapshot {
     my $self = shift;

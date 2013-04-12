@@ -31,15 +31,7 @@ class networkActions extends sfActions
 
         $sid = $request->getParameter('sid');
 
-        //convert server id in cluster id
-        $dc_c = new Criteria();         
-        $dc_c->addJoin(EtvaNodePeer::ID, EtvaServerPeer::NODE_ID);
-        $dc_c->add(EtvaServerPeer::ID, $sid, Criteria::EQUAL);
-        $node = EtvaNodePeer::doSelectOne($dc_c);
-        $cluster_id = $node->getClusterId();
-
         $networks = json_decode($request->getParameter('networks'),true);
-        
 
         if(!$etva_server = EtvaServerPeer::retrieveByPK($sid)){
 
@@ -62,6 +54,9 @@ class networkActions extends sfActions
                 return $this->renderText($error);
         }
         
+        //get cluster id from server
+        $cluster_id = $etva_server->getClusterId();
+
         $etva_node = $etva_server->getEtvaNode();
         
         $method = 'detachall_interfaces';
@@ -402,11 +397,8 @@ class networkActions extends sfActions
 
         $sid = $this->getRequestParameter('sid');
         if($sid){
-            $dc_c = new Criteria();             //convert server id in cluster id
-            $dc_c->addJoin(EtvaNodePeer::ID, EtvaServerPeer::NODE_ID);
-            $dc_c->add(EtvaServerPeer::ID, $sid, Criteria::EQUAL);
-            $node = EtvaNodePeer::doSelectOne($dc_c);
-            $cid = $node->getClusterId();
+            $server = EtvaServerPeer::retrieveByPK($sid);
+            $cid = $server->getClusterId();
         }else{
 
             // get cluster id

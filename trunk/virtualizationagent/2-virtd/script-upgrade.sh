@@ -24,6 +24,11 @@ fixlibvirtguestsconf(){
     perl -pi -e 's/#SHUTDOWN_TIMEOUT=0/SHUTDOWN_TIMEOUT=120/' /etc/sysconfig/libvirt-guests
 }
 
+fixhosts(){
+     perl -ni -e 'print if( !$CHECK{$_}++ );' /etc/hosts
+}
+
+fixhosts;
 verifycertificates;
 fixlibvirtguestsconf;
 

@@ -929,6 +929,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                 var form = this.getForm();
 
                 var name = form.findField('name');
+                form.findField('name').el.set({qtip: '' });
                 /*
                  * load memory data
                  */
@@ -994,6 +995,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
                 if( data['vm_state'] == 'running' ){
                     form.findField('name').setDisabled(true);
+                    form.findField('name').el.set({qtip: <?php echo json_encode(__('Can\'t change the name with server running!')) ?>});
                     if(data['vm_type']!='pv'){
                         form.findField('mem').setDisabled(true);
                         form.findField('node_ncpus').setDisabled(true);
@@ -1004,6 +1006,11 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                         form.findField('cdrom_ckb').setDisabled(true);
                         form.findField('cdromextra_ckb').setDisabled(true);
                     }
+                }
+                if( data['hasSnapshots'] ){
+                    form.findField('name').setDisabled(true);
+                    form.findField('name').el.set({qtip: <?php echo json_encode(__('Can\'t change the name when server has snapshots!')) ?>});
+;
                 }
                 if(data['vm_type']=='pv'){
                     Ext.getCmp('server-edit-devices').setDisabled(true);

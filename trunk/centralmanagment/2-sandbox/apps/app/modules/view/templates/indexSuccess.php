@@ -112,21 +112,21 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                 var new_css_state = '';
                 var remove_css_state = [];
 
-                if((data['vm_state']=='running' && (data['agent_port'] && data['state'])) ||
-                   (data['vm_state']=='running' && !data['agent_port']) ){
+                if((data['vm_is_running']==true && (data['agent_port'] && data['state'])) ||
+                   (data['vm_is_running']==true && !data['agent_port']) ){
                    new_css_state = ['active','icon-vm-stat-ok'];
                    remove_css_state = ['some-active','no-active','icon-vm-stat-nok'];
                 }
 
-                if((data['vm_state']=='running' && (data['agent_port'] && !data['state'])) ||
-                   (data['vm_state']!='running' && (data['agent_port'] && data['state'])) ){
+                if((data['vm_is_running']==true && (data['agent_port'] && !data['state'])) ||
+                   (data['vm_is_running']!=true && (data['agent_port'] && data['state'])) ){
                    new_css_state = ['some-active','icon-vm-stat-ok'];
                    remove_css_state = ['active','no-active','icon-vm-stat-nok'];
                 }
                 
 
-                if((data['vm_state']!='running' && (data['agent_port'] && !data['state'])) ||
-                   (data['vm_state']!='running' && !data['agent_port']) ){
+                if((data['vm_is_running']!=true && (data['agent_port'] && !data['state'])) ||
+                   (data['vm_is_running']!=true && !data['agent_port']) ){
                    new_css_state = ['no-active','icon-vm-stat-nok'];
                    remove_css_state = ['active','some-active','icon-vm-stat-ok'];
                 }                
@@ -638,8 +638,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             var server_name = e.dropNode.text;
                             var record = {data:{'id':server_id,'name':server_name, 'nodes_cb': e.target.text , 'target_name': e.target.text , 'target_id': e.target.attributes.id}};
 
-                            var type = (e.dropNode.attributes.vm_state == 'running') ? 'migrate' : 'move';
-                            var text = (e.dropNode.attributes.vm_state == 'running') ?
+                            var type = (e.dropNode.attributes.vm_is_running) ? 'migrate' : 'move';
+                            var text = (e.dropNode.attributes.vm_is_running) ?
                                             <?php echo json_encode(__('Migrate server')) ?>
                                             : <?php echo json_encode(__('Move server')) ?>;
 
@@ -1423,10 +1423,10 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                     this.menu.btn_stop_server.hide();
                                     this.menu.btn_stop_server.clearTooltip();
                                 }else{
-                                    if(node.attributes.vm_state == 'running'){
+                                    if(node.attributes.vm_is_running){
                                         this.menu.btn_start_server.hide();
                                         this.menu.btn_stop_server.show();
-                                    }else if(node.attributes.vm_state == 'stop'){
+                                    }else{
                                         this.menu.btn_stop_server.hide();
                                         this.menu.btn_start_server.show();
                                     }
@@ -2021,7 +2021,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                         var params = { 'id':server_id, 'nodes_cb':node_id };
 
-                        var type = (srv.attributes.vm_state=='running')?  'migrate' : 'move';
+                        var type = (srv.attributes.vm_is_running)?  'migrate' : 'move';
                         Server.Migrate.Call(this,params,type,
                                                     function(){
                                                         console.log(server_name + ' migrate ok');

@@ -78,20 +78,15 @@ sub AUTOLOAD {
 
 sub sigchld_handler {
 
-    plog "ETVA::Agent::SOAPFork sigchld_handler..." if(&debug_level() > 5);
+    plog "ETVA::Agent::SOAPFork sigchld_handler..." if( &debug_level() > 5);
 
     # wait for die pid
     my $dead_pid = waitpid(-1,&WNOHANG);
 
     if( $dead_pid > 0 ){
-        plogNow(" sigchld_handler wait dead pid=$dead_pid") if(&debug_level() > 5);
+        my $need_update = &chld_dies_handler($dead_pid);
 
-        my @aux_CHILD_PIDS = grep { $_ != $dead_pid } @CHILD_PIDS;
-        
-        my $need_update = (scalar(@CHILD_PIDS) != scalar(@aux_CHILD_PIDS)) ? 1 : 0;
-        
-        @CHILD_PIDS = @aux_CHILD_PIDS;
-
+=com
         if( $need_update ){
             if( $DISPATCHER ){
                 eval "require $DISPATCHER";
@@ -102,7 +97,27 @@ sub sigchld_handler {
                 }
             }
         }
+=cut
     }
+}
+
+sub chld_exists {
+    my ($dead_pid) = @_;
+    return grep { $_ == $dead_pid } @CHILD_PIDS;
+}
+
+sub chld_dies_handler {
+    my ($dead_pid) = @_;
+
+    plogNow("ETVA::Agent::SOAPFork chld_dies_handler dead pid=$dead_pid") if( &debug_level() > 5);
+
+    my @aux_CHILD_PIDS = grep { $_ != $dead_pid } @CHILD_PIDS;
+    
+    my $need_update = (scalar(@CHILD_PIDS) != scalar(@aux_CHILD_PIDS)) ? 1 : 0;
+    
+    @CHILD_PIDS = @aux_CHILD_PIDS;
+
+    return $need_update;
 }
 
 sub terminate_agent {
@@ -110,16 +125,18 @@ sub terminate_agent {
 
     plog "$self terminate_agent: You want me to stop, eh!?";
 
-    for my $cpid (@CHILD_PIDS){
-        plog "$self killing pid $cpid... ";
-        kill SIGHUP, $cpid;
-        sleep(2);
-        if( waitpid(-1,&WNOHANG)  < 0 ){    # wait until timed out or no more pids
-            plog "$self no more pids to kill...";
-            last;
-        }
-        plog "$self killing pid $cpid... done";
-    }
+    ETVA::Utils::timeout_call(30, sub { 
+	    for my $cpid (@CHILD_PIDS){
+		plog "$self killing pid $cpid... ";
+		kill SIGHUP, $cpid;
+		sleep(2);
+		if( waitpid(-1,&WNOHANG)  < 0 ){    # wait until timed out or no more pids
+		    plog "$self no more pids to kill...";
+		    last;
+		}
+		plog "$self killing pid $cpid... done";
+	    }
+	} );    # wait until timed out 
 }
 
 # rewrite new method
@@ -134,9 +151,9 @@ sub new {
         $DISPATCHER = $p{'_dispatcher'} if( $p{'_dispatcher'} );
 
         # call both chld handlers
-        my $chldhandler = $p{'_chldhandler_'};
-        $p{'_chldhandler_'} = $chldhandler ? sub { &$chldhandler(); &sigchld_handler; }
-                                    : \&sigchld_handler;
+        #my $chldhandler = $p{'_chldhandler_'};
+        #$p{'_chldhandler_'} = $chldhandler ? sub { &$chldhandler(); &sigchld_handler; }
+        #                            : \&sigchld_handler;
 
         $self = $self->SUPER::new( %p );
 
@@ -331,16 +348,16 @@ plog "Failed while unmarshaling the request: $@" if( &debug_level );
 
 plog  "paramas Dump=",Dumper(\%params),"\n" if( &debug_level > 3 );
     eval {
-        my $res = $self->$method(%params);
-        if( defined $res ){ # response only if return somethin
-            #$res = {} if( not defined $res );
-plog  "result Dumper=",Dumper($res),"\n" if( &debug_level > 3 );
-            if( ref($res) eq 'HASH' && $res->{'_error_'} ){
-                $response = $self->make_response_fault( $rtype,$typeuri,$res->{'_errorcode_'},
-                                                        $res->{'_errorstring_'},
-                                                        $res->{'_errordetail_'});
+        my $res_out = $self->$method(%params);
+        if( defined $res_out ){ # response only if return somethin
+            #$res_out = {} if( not defined $res_out );
+plog  "result Dumper=",Dumper($res_out),"\n" if( &debug_level > 3 );
+            if( ref($res_out) eq 'HASH' && $res_out->{'_error_'} ){
+                $response = $self->make_response_fault( $rtype,$typeuri,$res_out->{'_errorcode_'},
+                                                        $res_out->{'_errorstring_'},
+                                                        $res_out->{'_errordetail_'});
             } else {
-                $response = $self->make_response($rtype,$typeuri, $method, $res);
+                $response = $self->make_response($rtype,$typeuri, $method, $res_out);
             }
         }
     };

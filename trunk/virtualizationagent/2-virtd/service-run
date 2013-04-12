@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exec 2>&1
+
 cd /srv/etva-vdaemon
 DEBUG_FILE="/var/log/etva-vdaemon/virtd.log" \
     exec /usr/bin/perl -I./lib/ virtd

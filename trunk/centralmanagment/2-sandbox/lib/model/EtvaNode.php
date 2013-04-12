@@ -518,12 +518,18 @@ class EtvaNode extends BaseEtvaNode
     }
 
     public function canAssignServer( EtvaServer $server ){
+        $server_mem = Etva::MB_to_Byteconvert($server->getMem());
         if( ($this->getCputotal() >= $server->getVcpu()) &&
-            ($this->getMemfree() > $server->getMem()) &&
+            ($this->getMaxMem() > $server_mem) &&
             !$server->getDevices_VA() &&
             !$server->getHasSnapshots() ){
-            return true;
+            if (($server->getVmState() !== EtvaServer::RUNNING) ||
+                    ($this->getMemfree() > $server_mem)){
+                error_log("canAssignServer OK node=".$this->getName()." server=".$server->getName()." vmstate=".$server->getVmState()." maxmem=".$this->getMaxMem()." memfree=".$this->getMemfree()." server_mem=".$server_mem);
+                return true;
+            }
         }
+        error_log("canAssignServer NOK node=".$this->getName()." server=".$server->getName()." vmstate=".$server->getVmState()." maxmem=".$this->getMaxMem()." memfree=".$this->getMemfree()." server_mem=".$server_mem);
         return false;
     }
 

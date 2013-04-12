@@ -2,7 +2,7 @@
 %define nagios_plugins /usr/lib64/nagios/plugins  
 
 Name: etva-centralmanagement
-Version: 1.2.1
+Version: 1.2.2
 Release: 2536
 Summary: ETVA Central Management
 License: GPL
@@ -111,6 +111,7 @@ rm -rf $RPM_BUILD_ROOT;
 
 %{__mv} httpd_etvacm.conf $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/httpd_etvacm.conf;
 %{__mv} https_etvacm.conf $RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d/https_etvacm.conf.disabled;
+
 %{__mv} php_etva.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.d/php_etva.ini; #set php timezone
 
 %{__mv} etva-model.conf.smb $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/etva-model.conf;
@@ -136,6 +137,12 @@ rm -rf $RPM_BUILD_ROOT
 # disable selinux
 if [ -f /etc/selinux/config ]; then
     perl -npe 's/^SELINUX=.*/SELINUX=disabled/' -i /etc/selinux/config
+fi
+
+# fix date.timezone forced
+if [ -f /etc/sysconfig/clock ]; then
+    _TIMEZONE=`grep "ZONE" /etc/sysconfig/clock | sed -e 's/ZONE="\([^"]\+\)"/\1/'`;
+    sed -i -e "s#^;\?date.timezone = .*#date.timezone = \"$_TIMEZONE\"#" /etc/php.d/php_etva.ini
 fi
 
 cd /srv/etva-centralmanagement
@@ -346,7 +353,7 @@ fi
 %attr(0755,apache,apache) /var/run/etva_etvm
 
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/httpd_etvacm.conf
-%{_sysconfdir}/php.d/php_etva.ini
+%config(noreplace) %{_sysconfdir}/php.d/php_etva.ini
 %{_sysconfdir}/cron.d/etva
 %{_sysconfdir}/avahi/services/etva.service
 

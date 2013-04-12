@@ -23,11 +23,8 @@ class macActions extends sfActions
     {
         $sid = $request->getParameter('sid');
         if($sid){
-            $dc_c = new Criteria();             //convert server id in cluster id
-            $dc_c->addJoin(EtvaNodePeer::ID, EtvaServerPeer::NODE_ID);
-            $dc_c->add(EtvaServerPeer::ID, $sid, Criteria::EQUAL);
-            $node = EtvaNodePeer::doSelectOne($dc_c);
-            $this->cid = $node->getClusterId();
+            $server = EtvaServerPeer::retrieveByPK($sid);
+            $this->cid = $server->getClusterId();
         }else{
             $this->cid = $request->getParameter('cid');
         }

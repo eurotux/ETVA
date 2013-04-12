@@ -59,6 +59,9 @@ use ETVA::Client::SOAP::HTTP;
 use POSIX;
 use Data::Dumper;
 
+my $AgentClass = 'VirtAgentSOAP';
+my $Dispatcher = 'VirtAgentInterface';
+
 # Config load from config file
 my $CONF = { "CFG_FILE"=>"/etc/sysconfig/etva-vdaemon/virtd.conf" };
 
@@ -79,14 +82,14 @@ start agent
 
 sub launch_agent {
     # default active SOAP 
-#    my $class = 'ETVA::Agent::SOAP';
-    my $class = 'VirtAgentSOAP';
+    #my $class = 'ETVA::Agent::SOAP';
+    my $class = $AgentClass || 'VirtAgentSOAP';
 
     # TODO JSON requests not implemented 
     # can answer to JSON request
-    #$class = 'ETVA::Agent::JSON' if( $CONF->{'JSON'} );
+    #$class = $AgentClass = 'ETVA::Agent::JSON' if( $CONF->{'JSON'} );
 
-    my $dispatcher = 'VirtAgentInterface';
+    my $dispatcher = $Dispatcher || 'VirtAgentInterface';
 
     eval "require $dispatcher;";
     if( $@ ){
@@ -105,6 +108,7 @@ sub launch_agent {
     $C{'_alarmhandler_'} = $C{'_keepalive_handler'} = \&keepalive_handler;
     $C{'_termhandler_'} = \&term_handler;
     $C{'_chldhandler_'} = \&chld_handler;
+    #$SIG{'CHLD'} = \&chld_handler;
 
     # initialization agent
 	my $agent = $class->new( %C );
@@ -447,8 +451,69 @@ sub term_handler {
 sub chld_handler {
     plogNow "[info] - virtd - receiving chld signal..." if( &debug_level > 5 );
 
-    my $kpid = waitpid(-1,&WNOHANG);
-    if( $kpid == $GA_PID ){
+    #ETVA::Utils::timeout_call(30, sub { 
+        # don't change $! and $? outside handler
+        local ($!, $?);
+
+        # wait for die pid
+        my $dead_pid = waitpid(-1,&WNOHANG);
+
+        while($dead_pid > 0){
+
+            #last unless WIFEXITED($?);
+            #last unless &chld_exists($dead_pid);
+
+            plogNow(" sigchld_handler wait dead pid=$dead_pid") if( &debug_level() > 5);
+            &chld_dies_handler($dead_pid);
+
+            $dead_pid = waitpid(-1,&WNOHANG);
+        }
+    #});
+
+    # don't change $! and $? outside handler
+    #local ($!, $?);
+
+    # wait for die pid
+    #my $dead_pid = waitpid(-1,&WNOHANG);
+
+    #return if( $dead_pid == -1 );
+    #return unless WIFEXITED($?);
+    #return unless &chld_exists($dead_pid);
+
+    #plogNow(" sigchld_handler wait dead pid=$dead_pid") if( &debug_level() > 5);
+
+    #&chld_dies_handler($dead_pid);
+}
+
+sub chld_exists {
+    my ($dead_pid) = @_;
+    if( defined($GA_PID) && ($dead_pid == $GA_PID) ){
+        return 1;
+    }
+
+    my $cc = $AgentClass->can('chld_exists');
+    if( $cc ){
+        return &$cc($dead_pid);
+    }
+
+    return 0;
+}
+sub chld_dies_handler {
+    my ($dead_pid) = @_;
+    if( defined($GA_PID) ){
+        &chld_handler_GA($dead_pid);
+    }
+
+    my $ch = $AgentClass->can('chld_dies_handler');
+    if( $ch ){
+        &$ch($dead_pid);
+    }
+}
+
+sub chld_handler_GA {
+    my ($kpid) = @_;
+
+    if( defined($GA_PID) && ($kpid == $GA_PID) ){
         plogNow "[info] - virtd - guest agent die... deamon go terminate!";
 
         $RUNNING = 0;

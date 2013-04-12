@@ -13,7 +13,7 @@ class myUserFilter extends sfFilter
         $user    = $this->getContext()->getUser();
         
         if ($user->isAuthenticated()){
-            //$user->initVncToken();
+            $user->initVncToken();
         }
         
         // Execute next filter

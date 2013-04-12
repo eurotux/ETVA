@@ -4,39 +4,136 @@ package NetworkTools;
 
 use strict;
 use File::Copy;
+use Digest::MD5 qw(md5_hex);
 
 # etva conf dir
 my $etva_config_dir = $ENV{'etva_conf_dir'} || "/etc/sysconfig/etva-vdaemon/config";
 
+# aux funcs
+sub rand_logfile {
+    my ($pr,$ext) = @_;
+    $ext = '.log' if( !$ext );
+    my $randtok = substr(md5_hex( rand(time()) ),0,5);
+    return $pr ? "$pr.$randtok.$ext" : "$randtok.$ext";
+}
+
+sub pdebuglog {
+	print STDERR @_;
+}
+# end aux funcs
+
+# read_file_lines(file)
+sub read_file_lines {
+    my ($file) = @_;
+    my @lines = ();
+    open(READ_FILE,"$file");
+    while(<READ_FILE>){
+        chomp;
+        push(@lines,$_);
+    }
+    close(READ_FILE);
+    return wantarray() ? @lines : \@lines;
+}
+# flush_file_lines(file,lines, [eol])
+sub flush_file_lines {
+    my ($file,$lines,$eol) = @_;
+    if( $lines ){
+        $eol ||= "\n";
+        my $tmpfile = &rand_logfile("$file","tmp");
+        open(FLUSH_FILE, ">$tmpfile");
+        foreach my $line (@$lines) {
+            (print FLUSH_FILE $line,$eol) ||
+                &pdebuglog("Error file write $tmpfile: $!");
+        }
+        close(FLUSH_FILE);
+        rename($tmpfile, $file) || &pdebuglog("Error replace file $file with $tmpfile: $!");
+        unlink($tmpfile);
+    }
+}
 # write DNS config
 sub change_dns {
     my (%p) = @_;
-    if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        #die "system-config-network-cmd tool doest exists!\n";
-        print STDERR "system-config-network-cmd tool doest exists!\n";
-    } else {
-        open(P,"| /usr/sbin/system-config-network-cmd -i 2>/dev/null");
-        print P 'ProfileList.default.DNS.Hostname=',$p{'hostname'},"\n" if( defined $p{'hostname'} );
-        print P 'ProfileList.default.DNS.Domainname=',$p{'domainname'},"\n" if( defined $p{'domainname'} );
-        print P 'ProfileList.default.DNS.PrimaryDNS=',$p{'primarydns'},"\n" if( defined $p{'primarydns'} );
-        print P 'ProfileList.default.DNS.SecondaryDNS=',$p{'secondarydns'},"\n" if( defined $p{'secondarydns'} );
-        print P 'ProfileList.default.DNS.TertiaryDNS=',$p{'tertiarydns'},"\n" if( defined $p{'tertiarydns'} );
 
+    if( defined $p{'hostname'} ){
+        my $already_there = 0;
+        my @lines_network = ();
+        my $bkp_network = &read_file_lines("/etc/sysconfig/network");
+        for my $l (@$bkp_network){
+            if( $l =~ m/^HOSTNAME=/i ){
+                $already_there = 1;
+                $l = "HOSTNAME=$p{'hostname'}";
+            }
+            push(@lines_network,$l);
+        }
+        push(@lines_network,"HOSTNAME=$p{'hostname'}") if( !$already_there );
+        &flush_file_lines("/etc/sysconfig/network",\@lines_network);
+    }
+
+    if( defined($p{'domainname'}) ||
+            defined($p{'primarydns'}) ||
+            defined($p{'secondarydns'}) ||
+            defined($p{'tertiarydns'}) ){
+        my @lines_resolv = ();
+
+        my $bkp_resolv = &read_file_lines("/etc/resolv.conf");
+
+        my $has_searchlist = 0;
         my @searchlist = ();
-        if( my $sl = $p{'searchlist'} ){
-            @searchlist = ref($sl) ? @$sl : split(/,/,$sl);
-        } elsif( grep { /searchlist/ } keys %p ){
-            my @lk = grep { /searchlist\.\d+/ } keys %p;
-            for my $i ( sort map { /searchlist\.(\d+)/ } @lk ){
-                push(@searchlist, $p{"searchlist.$i"});
+        if( grep { /searchlist/ } keys %p ){
+            $has_searchlist = 1;
+            if( my $sl = $p{'searchlist'} ){
+                @searchlist = ref($sl) ? @$sl : split(/,/,$sl);
+            } else {
+                for my $i ( sort map { /searchlist\.(\d+)/ } keys %p ){
+                    $searchlist[$i-1] = $p{"searchlist.$i"};
+                }
             }
         }
-        if( @searchlist ){
-            for(my $i=0; $i<scalar(@searchlist); $i++){
-                print P 'ProfileList.default.DNS.SearchList.',$i,'=',$searchlist[$i],"\n"; 
+
+        my $domain_c = 0;
+        my $nameserver_c = 0;
+        my $searchlist_c = 0;
+        for my $l (@$bkp_resolv){
+            if( $l =~ m/^domain/ ){
+                $domain_c++;
+                if( defined $p{'domainname'} ){
+                    $l = ( $p{'domainname'} ) ? "domain $p{'domainname'}" : "";
+                }
+            } elsif( $l =~ m/^nameserver/ ){
+                $nameserver_c++;
+                if( $nameserver_c==1 && defined($p{'primarydns'}) ){
+                    $l = ($p{'primarydns'}) ? "nameserver $p{'primarydns'}" : "";
+                }
+                if( $nameserver_c==2 && defined($p{'secondarydns'}) ){
+                    $l = ($p{'secondarydns'}) ? "nameserver $p{'secondarydns'}" : "";
+                }
+                if( $nameserver_c==3 && defined($p{'tertiarydns'}) ){
+                    $l = ($p{'tertiarydns'}) ? "nameserver $p{'tertiarydns'}" : "";
+                }
+            } elsif( $l =~ m/^search/ ){
+                $searchlist_c++;
+
+                if( $has_searchlist ){
+                    $l = "";    # clean up
+                    if( @searchlist ){
+                        my @sl = split(/\s+/,$l);
+                        shift(@sl); # drop search
+                        for(my $i=0; $i<scalar(@sl); $i++){
+                            $searchlist[$i] = defined($searchlist[$i]) ? $searchlist[$i] : $sl[$i];
+                        }
+                        $l = "search " . join(" ",@searchlist);
+                    }
+                }
             }
+            push(@lines_resolv,$l);
         }
-        close(P);
+        push(@lines_resolv,"domain $p{'domainname'}") if( !$domain_c && defined($p{'domainname'}) );
+        push(@lines_resolv,"nameserver $p{'primarydns'}") if( $nameserver_c<1 && defined($p{'primarydns'}) );
+        push(@lines_resolv,"nameserver $p{'secondarydns'}") if( $nameserver_c<2 && defined($p{'secondarydns'}) );
+        push(@lines_resolv,"nameserver $p{'tertiarydns'}") if( $nameserver_c<3 && defined($p{'tertiarydns'}) );
+        push(@lines_resolv,"search " . join(" ",@searchlist)) if( !$searchlist_c && @searchlist );
+
+        &flush_file_lines("/etc/resolv.conf",\@lines_resolv);
     }
 }
 
@@ -96,37 +193,52 @@ sub active_ip_conf {
 sub change_if_conf {
     my (%p) = @_;
 
-    if( ! -x "/usr/sbin/system-config-network-cmd" ){
-        print STDERR "system-config-network-cmd tool doest exists!\n";
-    } else {
-        if( $p{'if'} ){
-            if( !$p{'type'} ){
-                if( -e "/sys/class/net/$p{'if'}/bridge" ){
-                    $p{'type'} = 'bridge';
-                } elsif( -e "/sys/class/net/$p{'if'}/bonding" ){
-                    $p{'type'} = 'BOND';
-                } else {
-                    $p{'type'} = 'Ethernet';
+    if( $p{'if'} ){
+        if( !$p{'type'} ){
+            if( -e "/sys/class/net/$p{'if'}/bridge" ){
+                $p{'type'} = 'bridge';
+            } elsif( -e "/sys/class/net/$p{'if'}/bonding" ){
+                $p{'type'} = 'BOND';
+            } else {
+                $p{'type'} = 'Ethernet';
+            }
+        }
+
+        my $if_cfg_file = "/etc/sysconfig/network-scripts/ifcfg-$p{'if'}";
+        my $ok = 0;
+
+        my @lines = &read_file_lines($if_cfg_file);
+        if( !@lines ){
+            push(@lines,"DEVICE=$p{'if'}");
+            push(@lines,"TYPE=$p{'type'}");
+        }
+
+        if( defined($p{'ip'}) && defined($p{'netmask'}) ){
+            if( !grep { s/^IPADDR=.*$/IPADDR=$p{'ip'}/ } @lines ){
+                push(@lines,"IPADDR=$p{'ip'}");
+            }
+            if( !grep { s/^NETMASK=.*$/NETMASK=$p{'netmask'}/ } @lines ){
+                push(@lines, "NETMASK=$p{'netmask'}");
+            }
+            if( defined $p{'gateway'} ){
+                if( !grep { s/^GATEWAY=.*$/GATEWAY=$p{'gateway'}/ } @lines){
+                    push(@lines, "GATEWAY=$p{'gateway'}");
                 }
             }
-            my $ok = 0;
-            open(P,"| /usr/sbin/system-config-network-cmd -i 2>/dev/null");
-            if( defined($p{'ip'}) && defined($p{'netmask'}) ){
-                print P "DeviceList.$p{'type'}.",$p{'if'},'.IP=',$p{'ip'},"\n";
-                print P "DeviceList.$p{'type'}.",$p{'if'},'.Netmask=',$p{'netmask'},"\n";
-                print P "DeviceList.$p{'type'}.",$p{'if'},'.Gateway=',$p{'gateway'},"\n" if( defined $p{'gateway'} );
-                $ok = 1;
-            }
-            if( defined $p{'bootproto'} ){
-                print P "DeviceList.$p{'type'}.",$p{'if'},'.BootProto=',$p{'bootproto'},"\n";
-                $ok = 1;
-            }
-            close(P);
-
-            return $ok ? 1 : 0;
-        } else {
-            print STDERR "interface not defined!\n";
+            $ok = 1;
         }
+        if( defined $p{'bootproto'} ){
+            if( !grep { s/^BOOTPROTO=.*$/BOOTPROTO=$p{'bootproto'}/ } @lines ){
+                push(@lines,"BOOTPROTO=$p{'bootproto'}");
+            }
+            $ok = 1;
+        }
+
+        &flush_file_lines($if_cfg_file,\@lines);
+
+        return $ok ? 1 : 0;
+    } else {
+        pdebuglog "interface not defined!\n";
     }
     return 0;
 }

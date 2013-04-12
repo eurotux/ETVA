@@ -39,6 +39,7 @@ BEGIN {
                     str2size prettysize convertsize
                     list_processes find_procname
                     debug_level debug_inc debug_dec set_debug_level
+                    get_os_release
                      );
 }
 
@@ -97,7 +98,8 @@ sub now {
 sub nowStr {
     my ($secs,$fmt) = @_;
     $fmt ||= '%Y-%m-%d %H:%M:%S';
-    return  strftime($fmt,localtime(now($secs)));    
+    my $strtime = strftime($fmt,localtime(now($secs)));    
+    return $strtime;
 }
 
 sub retErr {
@@ -887,6 +889,21 @@ sub decode_content {
     return $cnt;
 }
 
+my %ValidSoapTypes = ( 'string'=> 'string', 'float'=>'float', 'integer'=>'int', 'int'=>'int', 'Boolean'=>'boolean' );
+sub parseSoapType {
+    my ($value) = @_;
+    my $type = 'string';
+    if( $value =~ m/^(\w+)\((.+)\)$/ ){
+        my ($t,$v) = ($1,$2);
+        my $lc_t = lc($t);
+        if( $ValidSoapTypes{"$lc_t"} ){
+            $type = $ValidSoapTypes{"$lc_t"};
+            $value = $v;
+        }
+    }
+
+    return wantarray() ? ($value,$type) : $type;
+}
 sub make_soap_args {
     my ($serializer,@args) = @_;
 
@@ -904,7 +921,8 @@ sub make_soap_args {
 #            $attr{"xsi:nil"} = "true" if( !$c );
             push(@rargs, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
         } else {
-            push(@rargs, SOAP::Data->name( $k => $v )); 
+            my ($value,$type) = &parseSoapType($v);
+            push(@rargs, SOAP::Data->name( $k => $value )->type($type)); 
         }
     }
 
@@ -928,7 +946,8 @@ sub make_soap {
 #                $attr{"xsi:nil"} = "true" if( !$c );
                 push(@sres, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
             } else {
-                push(@sres, SOAP::Data->name( $k => $v )); 
+                my ($value,$type) = &parseSoapType($v);
+                push(@sres, SOAP::Data->name( $k => $value )->type($type)); 
             }
         }
         push(@res, @sres);
@@ -1282,5 +1301,33 @@ sub timeout_call {
 
     return $res;
 }
+
+sub sigchldignore_call {
+    my ($call,@args) = @_;
+
+    my $bkp_chld_handler = $SIG{CHLD};
+    $SIG{CHLD} = 'DEFAULT';
+
+    my @res = &$call(@args);
+
+    $SIG{CHLD} = $bkp_chld_handler;
+
+    return wantarray() ? @res : \@res;
+}
+
+# get release name and version
+my ($OSRELEASE_NAME,$OSRELEASE_VERSION);
+sub get_os_release {
+    if( !defined($OSRELEASE_NAME) && !defined($OSRELEASE_VERSION) ){
+        open(RELEASE_FH,"/etc/redhat-release");
+        my $lines = <RELEASE_FH>;
+        my @fl = split(/\s/,$lines);
+        $OSRELEASE_VERSION = $fl[-2];
+        $OSRELEASE_NAME = join(" ",@fl[0..scalar(@fl)-4]);
+        close(RELEASE_FH);
+    }
+    return wantarray() ? ($OSRELEASE_NAME,$OSRELEASE_VERSION) : $OSRELEASE_NAME;
+}
+
 
 1;

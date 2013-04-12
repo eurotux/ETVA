@@ -52,12 +52,17 @@ class EtvaNodePeer extends BaseEtvaNodePeer
 
     static function getWithServers()
     {
-        $criteria = new Criteria();
+        /*$criteria = new Criteria();
         $criteria->addJoin(self::ID, EtvaServerPeer::NODE_ID, Criteria::LEFT_JOIN);
         //$criteria->addJoin(EtvaServerPeer::SF_GUARD_GROUP_ID, sfContext::getInstance()->getUser()->getGroupsId(), Criteria::IN);
         $criteria->setDistinct();
-        return self::doSelect($criteria);
-
+        return self::doSelect($criteria);*/
+        return EtvaNodeQuery::create()
+                        ->useEtvaServerAssignQuery('ServerAssign',Criteria::LEFT_JOIN)
+                            ->filterByNodeId(self::ID)
+                        ->endUse()
+                        ->distinct()
+                        ->find();
     }
 
 

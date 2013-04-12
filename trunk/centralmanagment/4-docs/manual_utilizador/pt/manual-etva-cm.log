@@ -1,4 +1,4 @@
-This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=pdflatex 2012.7.13)  13 FEB 2013 15:04
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=pdflatex 2012.7.13)  11 APR 2013 18:08
 entering extended mode
  %&-line parsing enabled.
 **manual-etva-cm
@@ -700,7 +700,7 @@ LaTeX Info: Redefining \pageref on input line 25.
 
 
 Using optional text marked with etva. 
-<include/img/logo.png, id=447, 311.9655pt x 246.6816pt>
+<include/img/logo.png, id=451, 311.9655pt x 246.6816pt>
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
@@ -715,7 +715,7 @@ LaTeX Font Info:    Font shape `T1/txss/m/sl' will be
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 13.67995pt on input line 27.
 
-<include/img/logo_PME_excelencia_12.png, id=448, 136.3494pt x 172.4844pt>
+<include/img/logo_PME_excelencia_12.png, id=452, 136.3494pt x 172.4844pt>
 File: include/img/logo_PME_excelencia_12.png Graphic file (type png)
 
 <use include/img/logo_PME_excelencia_11.png> [1
@@ -975,6 +975,11 @@ Overfull \hbox (1.34512pt too wide) detected at line 111
  [][][]\T1/txss/m/n/12 133[][]
  []
 
+
+Overfull \hbox (1.34512pt too wide) detected at line 112
+ [][][]\T1/txss/m/n/12 134[][]
+ []
+
 )
 \tf@toc=\write5
 \openout5 = `manual-etva-cm.toc'.
@@ -1216,7 +1221,7 @@ LaTeX Font Warning: Font shape `OMS/txss/m/n' undefined
 (Font)              using `OMS/txsy/m/n' instead
 (Font)              for symbol `textbullet' on input line 8.
 
-<screenshots/etva_blocos.png, id=970, 1259.76529pt x 661.76646pt>
+<screenshots/etva_blocos.png, id=975, 1259.76529pt x 661.76646pt>
 File: screenshots/etva_blocos.png Graphic file (type png)
 
 <use screenshots/etva_blocos.png>
@@ -1228,46 +1233,46 @@ File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [11
 
  <./screenshots/etva_blocos.png (PNG copy)>]
-<screenshots/etva_standard.png, id=980, 548.40176pt x 735.45354pt>
+<screenshots/etva_standard.png, id=985, 548.40176pt x 735.45354pt>
 File: screenshots/etva_standard.png Graphic file (type png)
 
 <use screenshots/etva_standard.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [12 <./screenshots/etva_standard.png (PNG copy)>]
 Cap\'{\i }tulo 2.
-<screenshots/install_etva1.png, id=986, 481.8pt x 362.85562pt>
+<screenshots/install_etva1.png, id=991, 481.8pt x 362.85562pt>
 File: screenshots/install_etva1.png Graphic file (type png)
 
 <use screenshots/install_etva1.png>
-<screenshots/install_etva2.png, id=987, 542.025pt x 301.8778pt>
+<screenshots/install_etva2.png, id=992, 542.025pt x 301.8778pt>
 File: screenshots/install_etva2.png Graphic file (type png)
 
 <use screenshots/install_etva2.png>
-<screenshots/install_etva3.png, id=988, 542.025pt x 301.8778pt>
+<screenshots/install_etva3.png, id=993, 542.025pt x 301.8778pt>
 File: screenshots/install_etva3.png Graphic file (type png)
 
 <use screenshots/install_etva3.png>
-<screenshots/install_etva4.png, id=989, 542.025pt x 301.125pt>
+<screenshots/install_etva4.png, id=994, 542.025pt x 301.125pt>
 File: screenshots/install_etva4.png Graphic file (type png)
 
 <use screenshots/install_etva4.png>
-<screenshots/install_etva5.png, id=990, 542.025pt x 301.8778pt>
+<screenshots/install_etva5.png, id=995, 542.025pt x 301.8778pt>
 File: screenshots/install_etva5.png Graphic file (type png)
 
 <use screenshots/install_etva5.png>
-<screenshots/install_etva6.png, id=991, 542.025pt x 302.63063pt>
+<screenshots/install_etva6.png, id=996, 542.025pt x 302.63063pt>
 File: screenshots/install_etva6.png Graphic file (type png)
 
 <use screenshots/install_etva6.png>
-<screenshots/install_etva8.png, id=992, 542.025pt x 301.8778pt>
+<screenshots/install_etva8.png, id=997, 542.025pt x 301.8778pt>
 File: screenshots/install_etva8.png Graphic file (type png)
 
 <use screenshots/install_etva8.png>
-<screenshots/install_etva9.png, id=993, 542.025pt x 289.08pt>
+<screenshots/install_etva9.png, id=998, 542.025pt x 289.08pt>
 File: screenshots/install_etva9.png Graphic file (type png)
 
 <use screenshots/install_etva9.png>
-<screenshots/install_etva10.png, id=994, 542.025pt x 301.125pt>
+<screenshots/install_etva10.png, id=999, 542.025pt x 301.125pt>
 File: screenshots/install_etva10.png Graphic file (type png)
 
 <use screenshots/install_etva10.png>
@@ -1275,7 +1280,7 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [13
 
  <./screenshots/install_etva1.png (PNG copy)>]
-<screenshots/install_etva11.png, id=1001, 481.8pt x 362.85562pt>
+<screenshots/install_etva11.png, id=1006, 481.8pt x 362.85562pt>
 File: screenshots/install_etva11.png Graphic file (type png)
 
 <use screenshots/install_etva11.png>
@@ -1284,7 +1289,7 @@ File: include/img/logo.png Graphic file (type png)
 s/install_etva3.png> <./screenshots/install_etva4.png> <./screenshots/install_e
 tva5.png> <./screenshots/install_etva6.png> <./screenshots/install_etva8.png> <
 ./screenshots/install_etva9.png> <./screenshots/install_etva10.png>]
-<screenshots/appliance_back_g2.jpg, id=1016, 1441.385pt x 452.69125pt>
+<screenshots/appliance_back_g2.jpg, id=1021, 1441.385pt x 452.69125pt>
 File: screenshots/appliance_back_g2.jpg Graphic file (type jpg)
 
 <use screenshots/appliance_back_g2.jpg>)
@@ -1302,7 +1307,7 @@ Overfull \hbox (5.85373pt too wide) in paragraph at lines 10--11
 []\T1/txss/m/n/12 Área de breve no-ti-fi-ca-ção acerca dos even-
  []
 
-<screenshots/principal.png, id=1024, 835.62187pt x 456.20438pt>
+<screenshots/principal.png, id=1029, 835.62187pt x 456.20438pt>
 File: screenshots/principal.png Graphic file (type png)
 
 <use screenshots/principal.png>
@@ -1323,7 +1328,7 @@ LaTeX Font Info:    Font shape `T1/txss/bx/it' in size <10> not available
 LaTeX Font Info:    Font shape `T1/txss/bx/sl' will be
 (Font)              scaled to size 9.49997pt on input line 37.
 
-<screenshots/login_unitbox.png, id=1032, 306.39468pt x 184.43906pt>
+<screenshots/login_unitbox.png, id=1037, 306.39468pt x 184.43906pt>
 File: screenshots/login_unitbox.png Graphic file (type png)
 
 <use screenshots/login_unitbox.png>
@@ -1336,7 +1341,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 62--65
 
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [17 <./screenshots/login_unitbox.png (PNG copy)>]
-<screenshots/main_nodes.png, id=1042, 1028.34187pt x 443.40656pt>
+<screenshots/main_nodes.png, id=1047, 1028.34187pt x 443.40656pt>
 File: screenshots/main_nodes.png Graphic file (type png)
 
 <use screenshots/main_nodes.png>
@@ -1344,7 +1349,7 @@ Overfull \hbox (2.02834pt too wide) in paragraph at lines 91--94
  [] 
  []
 
-<screenshots/main_networks.png, id=1043, 850.67813pt x 350.05782pt>
+<screenshots/main_networks.png, id=1048, 850.67813pt x 350.05782pt>
 File: screenshots/main_networks.png Graphic file (type png)
 
 <use screenshots/main_networks.png>
@@ -1359,25 +1364,25 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 127--130
 []$ 
  []
 
-<screenshots/network_create.png, id=1052, 299.1175pt x 181.67876pt>
+<screenshots/network_create.png, id=1057, 299.1175pt x 181.67876pt>
 File: screenshots/network_create.png Graphic file (type png)
 
 <use screenshots/network_create.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [19 <./screenshots/main_networks.png (PNG copy)> <.
 /screenshots/network_create.png (PNG copy)>] <screenshots/networks_macpool.png,
- id=1060, 500.87125pt x 430.60875pt>
+ id=1065, 500.87125pt x 430.60875pt>
 File: screenshots/networks_macpool.png Graphic file (type png)
 
 <use screenshots/networks_macpool.png>
-<screenshots/nics.png, id=1061, 704.6325pt x 303.1325pt>
+<screenshots/nics.png, id=1066, 704.6325pt x 303.1325pt>
 File: screenshots/nics.png Graphic file (type png)
 
 <use screenshots/nics.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [20 <./screenshots/networks_macpool.png (PNG copy)>
 ]
-<screenshots/cluster_edit.png, id=1070, 360.59718pt x 271.76532pt>
+<screenshots/cluster_edit.png, id=1075, 360.59718pt x 271.76532pt>
 File: screenshots/cluster_edit.png Graphic file (type png)
 
 <use screenshots/cluster_edit.png>
@@ -1385,28 +1390,28 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [21 <./screenshots/nics.png (PNG copy)>]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [22 <./screenshots/cluster_edit.png>] <screenshots/
-node_edit.png, id=1087, 365.11406pt x 305.64188pt>
+node_edit.png, id=1092, 365.11406pt x 305.64188pt>
 File: screenshots/node_edit.png Graphic file (type png)
 
 <use screenshots/node_edit.png>
-<screenshots/node_conn.png, id=1088, 404.51125pt x 376.40625pt>
+<screenshots/node_conn.png, id=1093, 404.51125pt x 376.40625pt>
 File: screenshots/node_conn.png Graphic file (type png)
 
 <use screenshots/node_conn.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [23 <./screenshots/node_edit.png (PNG copy)>]
-<screenshots/node_maintenance.png, id=1095, 420.82219pt x 79.79813pt>
+<screenshots/node_maintenance.png, id=1100, 420.82219pt x 79.79813pt>
 File: screenshots/node_maintenance.png Graphic file (type png)
 
 <use screenshots/node_maintenance.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [24 <./screenshots/node_conn.png (PNG copy)> <./scr
-eenshots/node_maintenance.png (PNG copy)>] <screenshots/node_info.png, id=1102,
+eenshots/node_maintenance.png (PNG copy)>] <screenshots/node_info.png, id=1107,
  883.04906pt x 326.72063pt>
 File: screenshots/node_info.png Graphic file (type png)
 
 <use screenshots/node_info.png>
-<screenshots/node_servers.png, id=1103, 727.96968pt x 320.69812pt>
+<screenshots/node_servers.png, id=1108, 727.96968pt x 320.69812pt>
 File: screenshots/node_servers.png Graphic file (type png)
 
 <use screenshots/node_servers.png>
@@ -1416,25 +1421,25 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 314--317
 []$ 
  []
 
-<screenshots/server_createwiz.png, id=1110, 805.0075pt x 454.69875pt>
+<screenshots/server_createwiz.png, id=1115, 805.0075pt x 454.69875pt>
 File: screenshots/server_createwiz.png Graphic file (type png)
 
 <use screenshots/server_createwiz.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [26 <./screenshots/node_servers.png (PNG copy)> <./
 screenshots/server_createwiz.png (PNG copy)>] <screenshots/server_createwiz_nam
-e.png, id=1116, 805.0075pt x 453.695pt>
+e.png, id=1121, 805.0075pt x 453.695pt>
 File: screenshots/server_createwiz_name.png Graphic file (type png)
 
 <use screenshots/server_createwiz_name.png>
-<screenshots/server_createwiz_memory.png, id=1117, 807.015pt x 455.7025pt>
+<screenshots/server_createwiz_memory.png, id=1122, 807.015pt x 455.7025pt>
 File: screenshots/server_createwiz_memory.png Graphic file (type png)
 
 <use screenshots/server_createwiz_memory.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [27 <./screenshots/server_createwiz_name.png (PNG copy)>]
-<screenshots/server_createwiz_processor.png, id=1123, 805.0075pt x 453.695pt>
+<screenshots/server_createwiz_processor.png, id=1128, 805.0075pt x 453.695pt>
 File: screenshots/server_createwiz_processor.png Graphic file (type png)
 
 <use screenshots/server_createwiz_processor.png>
@@ -1442,7 +1447,7 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [28 <./screenshots/server_createwiz_memory.png (PNG copy)> <./screenshots/serve
 r_createwiz_processor.png (PNG copy)>]
-<screenshots/server_createwiz_storage.png, id=1130, 804.00375pt x 454.69875pt>
+<screenshots/server_createwiz_storage.png, id=1135, 804.00375pt x 454.69875pt>
 File: screenshots/server_createwiz_storage.png Graphic file (type png)
 
 <use screenshots/server_createwiz_storage.png>
@@ -1450,21 +1455,21 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 390--393
 []$ 
  []
 
-<screenshots/server_createwiz_hostnet.png, id=1131, 805.0075pt x 453.695pt>
+<screenshots/server_createwiz_hostnet.png, id=1136, 805.0075pt x 453.695pt>
 File: screenshots/server_createwiz_hostnet.png Graphic file (type png)
 
 <use screenshots/server_createwiz_hostnet.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [29 <./screenshots/server_createwiz_storage.png (PNG copy)>]
-<screenshots/server_createwiz_startup.png, id=1138, 805.0075pt x 455.7025pt>
+<screenshots/server_createwiz_startup.png, id=1143, 805.0075pt x 455.7025pt>
 File: screenshots/server_createwiz_startup.png Graphic file (type png)
 
 <use screenshots/server_createwiz_startup.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [30 <./screenshots/server_createwiz_hostnet.png (PNG copy)>]
-<screenshots/server_createwiz_finish.png, id=1144, 720.6925pt x 449.68pt>
+<screenshots/server_createwiz_finish.png, id=1149, 720.6925pt x 449.68pt>
 File: screenshots/server_createwiz_finish.png Graphic file (type png)
 
 <use screenshots/server_createwiz_finish.png>
@@ -1476,11 +1481,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 444--447
 []$ 
  []
 
-<screenshots/server_edit_general.png, id=1152, 603.0028pt x 341.02406pt>
+<screenshots/server_edit_general.png, id=1157, 603.0028pt x 341.02406pt>
 File: screenshots/server_edit_general.png Graphic file (type png)
 
 <use screenshots/server_edit_general.png>
-<screenshots/server_edit_interfaces.png, id=1153, 603.75563pt x 341.02406pt>
+<screenshots/server_edit_interfaces.png, id=1158, 603.75563pt x 341.02406pt>
 File: screenshots/server_edit_interfaces.png Graphic file (type png)
 
 <use screenshots/server_edit_interfaces.png>
@@ -1491,7 +1496,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 473--476
 []$ 
  []
 
-<screenshots/server_edit_disks.png, id=1159, 603.0028pt x 338.01282pt>
+<screenshots/server_edit_disks.png, id=1164, 603.0028pt x 338.01282pt>
 File: screenshots/server_edit_disks.png Graphic file (type png)
 
 <use screenshots/server_edit_disks.png>
@@ -1499,14 +1504,14 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 488--491
 []$ 
  []
 
-<screenshots/server_edit_devices.png, id=1160, 603.75563pt x 340.27126pt>
+<screenshots/server_edit_devices.png, id=1165, 603.75563pt x 340.27126pt>
 File: screenshots/server_edit_devices.png Graphic file (type png)
 
 <use screenshots/server_edit_devices.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [33 <./screenshots/server_edit_interfaces.png (PNG 
 copy)> <./screenshots/server_edit_disks.png (PNG copy)>]
-<screenshots/server_edit_otheroptions.png, id=1166, 602.25pt x 340.27126pt>
+<screenshots/server_edit_otheroptions.png, id=1171, 602.25pt x 340.27126pt>
 File: screenshots/server_edit_otheroptions.png Graphic file (type png)
 
 <use screenshots/server_edit_otheroptions.png>
@@ -1514,14 +1519,14 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 514--519
 []$ 
  []
 
-<screenshots/server_edit_ha.png, id=1167, 603.0028pt x 342.5297pt>
+<screenshots/server_edit_ha.png, id=1172, 603.0028pt x 342.5297pt>
 File: screenshots/server_edit_ha.png Graphic file (type png)
 
 <use screenshots/server_edit_ha.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [34 <./screenshots/server_edit_devices.png (PNG cop
 y)> <./screenshots/server_edit_otheroptions.png (PNG copy)>]
-<screenshots/server_remove.png, id=1173, 282.05376pt x 150.5625pt>
+<screenshots/server_remove.png, id=1178, 282.05376pt x 150.5625pt>
 File: screenshots/server_remove.png Graphic file (type png)
 
 <use screenshots/server_remove.png>
@@ -1557,11 +1562,11 @@ Overfull \hbox (15.95259pt too wide) in paragraph at lines 574--574
  "changeit"[] 
  []
 
-<screenshots/server_start.png, id=1182, 731.73375pt x 330.48468pt>
+<screenshots/server_start.png, id=1187, 731.73375pt x 330.48468pt>
 File: screenshots/server_start.png Graphic file (type png)
 
 <use screenshots/server_start.png>
-<screenshots/server_migrate.png, id=1183, 294.34969pt x 112.92188pt>
+<screenshots/server_migrate.png, id=1188, 294.34969pt x 112.92188pt>
 File: screenshots/server_migrate.png Graphic file (type png)
 
 <use screenshots/server_migrate.png>
@@ -1571,7 +1576,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 616--619
 []$ 
  []
 
-<screenshots/server_snapshots.png, id=1191, 325.215pt x 241.65282pt>
+<screenshots/server_snapshots.png, id=1196, 325.215pt x 241.65282pt>
 File: screenshots/server_snapshots.png Graphic file (type png)
 
 <use screenshots/server_snapshots.png>
@@ -1582,11 +1587,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 649--652
 []$ 
  []
 
-<screenshots/node_storage.png, id=1198, 796.47563pt x 387.69844pt>
+<screenshots/node_storage.png, id=1203, 796.47563pt x 387.69844pt>
 File: screenshots/node_storage.png Graphic file (type png)
 
 <use screenshots/node_storage.png>
-<screenshots/node_storage_device_ctx.png, id=1199, 442.65375pt x 204.01219pt>
+<screenshots/node_storage_device_ctx.png, id=1204, 442.65375pt x 204.01219pt>
 File: screenshots/node_storage_device_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_device_ctx.png>
@@ -1598,7 +1603,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 685--688
  []
 
 
-<screenshots/node_storage_device_search.png, id=1205, 441.90094pt x 356.83313pt
+<screenshots/node_storage_device_search.png, id=1210, 441.90094pt x 356.83313pt
 >
 File: screenshots/node_storage_device_search.png Graphic file (type png)
  <use screenshots/node_storage_device_search.png>
@@ -1606,11 +1611,11 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [39 <./screenshots/node_storage_device_ctx.png (PNG copy)> <./screenshots/node_
 storage_device_search.png (PNG copy)>]
-<screenshots/node_storage_vg_ctx.png, id=1211, 440.39531pt x 226.59656pt>
+<screenshots/node_storage_vg_ctx.png, id=1216, 440.39531pt x 226.59656pt>
 File: screenshots/node_storage_vg_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_vg_ctx.png>
-<screenshots/storage_vg_create.png, id=1212, 593.21625pt x 352.31625pt>
+<screenshots/storage_vg_create.png, id=1217, 593.21625pt x 352.31625pt>
 File: screenshots/storage_vg_create.png Graphic file (type png)
 
 <use screenshots/storage_vg_create.png>
@@ -1621,11 +1626,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 754--757
 []$ 
  []
 
-<screenshots/storage_vg_extend.png, id=1218, 786.94pt x 366.36874pt>
+<screenshots/storage_vg_extend.png, id=1223, 786.94pt x 366.36874pt>
 File: screenshots/storage_vg_extend.png Graphic file (type png)
 
 <use screenshots/storage_vg_extend.png>
-<screenshots/node_storage_vg_search.png, id=1220, 329.73187pt x 321.45094pt>
+<screenshots/node_storage_vg_search.png, id=1225, 329.73187pt x 321.45094pt>
 File: screenshots/node_storage_vg_search.png Graphic file (type png)
 
 <use screenshots/node_storage_vg_search.png>
@@ -1633,11 +1638,11 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [41 <./screenshots/storage_vg_extend.png (PNG copy)> <./screenshots/node_storag
 e_vg_search.png (PNG copy)>]
-<screenshots/node_storage_lv_ctx.png, id=1226, 384.6872pt x 359.09157pt>
+<screenshots/node_storage_lv_ctx.png, id=1231, 384.6872pt x 359.09157pt>
 File: screenshots/node_storage_lv_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_lv_ctx.png>
-<screenshots/storage_lv_create.png, id=1227, 325.96782pt x 182.93344pt>
+<screenshots/storage_lv_create.png, id=1232, 325.96782pt x 182.93344pt>
 File: screenshots/storage_lv_create.png Graphic file (type png)
 
 <use screenshots/storage_lv_create.png>
@@ -1648,11 +1653,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 818--821
 []$ 
  []
 
-<screenshots/storage_lv_resize.png, id=1233, 359.3425pt x 198.7425pt>
+<screenshots/storage_lv_resize.png, id=1238, 359.3425pt x 198.7425pt>
 File: screenshots/storage_lv_resize.png Graphic file (type png)
 
 <use screenshots/storage_lv_resize.png>
-<screenshots/node_storage_lv_search.png, id=1234, 325.96782pt x 177.66376pt>
+<screenshots/node_storage_lv_search.png, id=1239, 325.96782pt x 177.66376pt>
 File: screenshots/node_storage_lv_search.png Graphic file (type png)
 
 <use screenshots/node_storage_lv_search.png>
@@ -1664,66 +1669,66 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 837--840
 []$ 
  []
 
-<screenshots/shutdownnode.png, id=1241, 347.79938pt x 239.39438pt>
+<screenshots/shutdownnode.png, id=1246, 347.79938pt x 239.39438pt>
 File: screenshots/shutdownnode.png Graphic file (type png)
 
 <use screenshots/shutdownnode.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [44 <./screenshots/shutdownnode.png (PNG copy)>]
-<screenshots/server_info.png, id=1254, 727.96968pt x 322.95656pt>
+<screenshots/server_info.png, id=1259, 727.96968pt x 322.95656pt>
 File: screenshots/server_info.png Graphic file (type png)
 
 <use screenshots/server_info.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [45 <./screenshots/server_info.png (PNG copy)>]
-<screenshots/server_stats_memUsage.png, id=1260, 675.27281pt x 323.70938pt>
+<screenshots/server_stats_memUsage.png, id=1265, 675.27281pt x 323.70938pt>
 File: screenshots/server_stats_memUsage.png Graphic file (type png)
 
 <use screenshots/server_stats_memUsage.png>
-<screenshots/server_stats_nodeLoad.png, id=1261, 787.94376pt x 434.62375pt>
+<screenshots/server_stats_nodeLoad.png, id=1266, 787.94376pt x 434.62375pt>
 File: screenshots/server_stats_nodeLoad.png Graphic file (type png)
 
 <use screenshots/server_stats_nodeLoad.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [46 <./screenshots/server_stats_memUsage.png (PNG c
 opy)> <./screenshots/server_stats_nodeLoad.png (PNG copy)>]
-<screenshots/server_stats_nodeLoadRange.png, id=1269, 650.43pt x 355.3275pt>
+<screenshots/server_stats_nodeLoadRange.png, id=1274, 650.43pt x 355.3275pt>
 File: screenshots/server_stats_nodeLoadRange.png Graphic file (type png)
 
 <use screenshots/server_stats_nodeLoadRange.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [47 <./screenshots/server_stats_nodeLoadRange.png (PNG copy)>]
-<screenshots/virtio/virtio_4.png, id=1278, 801.99625pt x 447.6725pt>
+<screenshots/virtio/virtio_4.png, id=1283, 801.99625pt x 447.6725pt>
 File: screenshots/virtio/virtio_4.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_4.png>
-<screenshots/virtio/virtio_7.png, id=1279, 801.99625pt x 449.68pt>
+<screenshots/virtio/virtio_7.png, id=1284, 801.99625pt x 449.68pt>
 File: screenshots/virtio/virtio_7.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_7.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [48 <./screenshots/virtio/virtio_4.png (PNG copy)>]
 
-<screenshots/virtio/virtio_5.png, id=1287, 725.71124pt x 322.20375pt>
+<screenshots/virtio/virtio_5.png, id=1292, 725.71124pt x 322.20375pt>
 File: screenshots/virtio/virtio_5.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_5.png>
-<screenshots/virtio/virtio_10.png, id=1289, 508.90125pt x 454.69875pt>
+<screenshots/virtio/virtio_10.png, id=1294, 508.90125pt x 454.69875pt>
 File: screenshots/virtio/virtio_10.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_10.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [49 <./screenshots/virtio/virtio_7.png (PNG copy)> 
 <./screenshots/virtio/virtio_5.png (PNG copy)>] <screenshots/virtio/virtio_16.p
-ng, id=1297, 803.0pt x 449.68pt>
+ng, id=1302, 803.0pt x 449.68pt>
 File: screenshots/virtio/virtio_16.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_16.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [50 <./screenshots/virtio/virtio_10.png (PNG copy)>
  <./screenshots/virtio/virtio_16.png (PNG copy)>] <screenshots/ovf_import.png, 
-id=1303, 803.0pt x 403.5075pt>
+id=1308, 803.0pt x 403.5075pt>
 File: screenshots/ovf_import.png Graphic file (type png)
 
 <use screenshots/ovf_import.png>
@@ -1731,42 +1736,42 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 1028--1031
 []$ 
  []
 
-<screenshots/ovf_import_file.png, id=1305, 800.9925pt x 401.5pt>
+<screenshots/ovf_import_file.png, id=1310, 800.9925pt x 401.5pt>
 File: screenshots/ovf_import_file.png Graphic file (type png)
 
 <use screenshots/ovf_import_file.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [51 <./screenshots/ovf_import.png (PNG copy)>]
-<screenshots/ovf_import_resume.png, id=1311, 903.375pt x 437.635pt>
+<screenshots/ovf_import_resume.png, id=1316, 903.375pt x 437.635pt>
 File: screenshots/ovf_import_resume.png Graphic file (type png)
 
 <use screenshots/ovf_import_resume.png>
-<screenshots/ovf_import_eula.png, id=1312, 902.37125pt x 437.635pt>
+<screenshots/ovf_import_eula.png, id=1317, 902.37125pt x 437.635pt>
 File: screenshots/ovf_import_eula.png Graphic file (type png)
 
 <use screenshots/ovf_import_eula.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [52 <./screenshots/ovf_import_file.png (PNG copy)> 
 <./screenshots/ovf_import_resume.png (PNG copy)>] <screenshots/ovf_import_name.
-png, id=1318, 903.375pt x 439.6425pt>
+png, id=1323, 903.375pt x 439.6425pt>
 File: screenshots/ovf_import_name.png Graphic file (type png)
 
 <use screenshots/ovf_import_name.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [53 <./screenshots/ovf_import_eula.png (PNG copy)>]
 
-<screenshots/ovf_import_storage.png, id=1324, 801.99625pt x 399.4925pt>
+<screenshots/ovf_import_storage.png, id=1329, 801.99625pt x 399.4925pt>
 File: screenshots/ovf_import_storage.png Graphic file (type png)
 
 <use screenshots/ovf_import_storage.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [54 <./screenshots/ovf_import_name.png (PNG copy)>]
 
-<screenshots/ovf_import_networks.png, id=1330, 801.99625pt x 400.49625pt>
+<screenshots/ovf_import_networks.png, id=1335, 801.99625pt x 400.49625pt>
 File: screenshots/ovf_import_networks.png Graphic file (type png)
 
 <use screenshots/ovf_import_networks.png>
-<screenshots/ovf_import_finish.png, id=1331, 797.98125pt x 398.48875pt>
+<screenshots/ovf_import_finish.png, id=1336, 797.98125pt x 398.48875pt>
 File: screenshots/ovf_import_finish.png Graphic file (type png)
 
 <use screenshots/ovf_import_finish.png>
@@ -1777,11 +1782,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1131--1134
 []$ 
  []
 
-<screenshots/ovf_export.png, id=1338, 400.49625pt x 197.73875pt>
+<screenshots/ovf_export.png, id=1343, 400.49625pt x 197.73875pt>
 File: screenshots/ovf_export.png Graphic file (type png)
 
 <use screenshots/ovf_export.png>
-<screenshots/iso_manager.png, id=1339, 734.745pt x 292.09125pt>
+<screenshots/iso_manager.png, id=1344, 734.745pt x 292.09125pt>
 File: screenshots/iso_manager.png Graphic file (type png)
 
 <use screenshots/iso_manager.png>
@@ -1792,7 +1797,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1168--1172
 []$ 
  []
 
-<screenshots/events_log.png, id=1345, 943.525pt x 372.39125pt>
+<screenshots/events_log.png, id=1350, 943.525pt x 372.39125pt>
 File: screenshots/events_log.png Graphic file (type png)
 
 <use screenshots/events_log.png>
@@ -1805,7 +1810,7 @@ File: include/img/logo.png Graphic file (type png)
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [58 <./screenshots/events_log.png (PNG copy)>]
-<screenshots/first_time_wizard.png, id=1357, 613.29124pt x 523.9575pt>
+<screenshots/first_time_wizard.png, id=1362, 613.29124pt x 523.9575pt>
 File: screenshots/first_time_wizard.png Graphic file (type png)
 
 <use screenshots/first_time_wizard.png>
@@ -1813,39 +1818,39 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1230--1233
 []$ 
  []
 
-<screenshots/preferences_general.png, id=1358, 801.99625pt x 500.87125pt>
+<screenshots/preferences_general.png, id=1363, 801.99625pt x 500.87125pt>
 File: screenshots/preferences_general.png Graphic file (type png)
 
 <use screenshots/preferences_general.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [59 <./screenshots/first_time_wizard.png (PNG copy)
 >]
-<screenshots/preferences_conn.png, id=1364, 803.0pt x 499.8675pt>
+<screenshots/preferences_conn.png, id=1369, 803.0pt x 499.8675pt>
 File: screenshots/preferences_conn.png Graphic file (type png)
 
 <use screenshots/preferences_conn.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [60 <./screenshots/preferences_general.png (PNG cop
 y)>]
-<screenshots/permissions/user.png, id=1371, 945.5325pt x 599.23875pt>
+<screenshots/permissions/user.png, id=1376, 945.5325pt x 599.23875pt>
 File: screenshots/permissions/user.png Graphic file (type png)
 
 <use screenshots/permissions/user.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [61 <./screenshots/preferences_conn.png (PNG copy)>
 ]
-<screenshots/permissions/context_dc.png, id=1381, 672.5125pt x 398.48875pt>
+<screenshots/permissions/context_dc.png, id=1386, 672.5125pt x 398.48875pt>
 File: screenshots/permissions/context_dc.png Graphic file (type png)
 
 <use screenshots/permissions/context_dc.png>
-<screenshots/permissions/context_server.png, id=1382, 640.3925pt x 328.22626pt>
+<screenshots/permissions/context_server.png, id=1387, 640.3925pt x 328.22626pt>
 File: screenshots/permissions/context_server.png Graphic file (type png)
 <use screenshots/permissions/context_server.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [62 <./screenshots/permissions/user.png (PNG copy)> <./screenshots/permissions/
 context_dc.png (PNG copy)>]
-<screenshots/permissions/server_window.png, id=1388, 507.8975pt x 386.44376pt>
+<screenshots/permissions/server_window.png, id=1393, 507.8975pt x 386.44376pt>
 File: screenshots/permissions/server_window.png Graphic file (type png)
 
 <use screenshots/permissions/server_window.png>
@@ -1856,7 +1861,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1374--1377
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [63 <./screenshots/permissions/context_server.png (P
 NG copy)> <./screenshots/permissions/server_window.png (PNG copy)>]
-<screenshots/appliancedisplay.jpg, id=1395, 783.92876pt x 410.53375pt>
+<screenshots/appliancedisplay.jpg, id=1400, 783.92876pt x 410.53375pt>
 File: screenshots/appliancedisplay.jpg Graphic file (type jpg)
 
 <use screenshots/appliancedisplay.jpg>)
@@ -1864,7 +1869,7 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [64 <./screenshots/appliancedisplay.jpg>] (./chap-a
 gents.tex
 Cap\'{\i }tulo 4.
-(./ETFW.tex <screenshots/etfw/etfwmain.png, id=1401, 790.955pt x 514.92375pt>
+(./ETFW.tex <screenshots/etfw/etfwmain.png, id=1406, 790.955pt x 514.92375pt>
 File: screenshots/etfw/etfwmain.png Graphic file (type png)
 
 <use screenshots/etfw/etfwmain.png>
@@ -1872,51 +1877,51 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [65
 
 ]
-<screenshots/etfw/etfw_wizard_01.png, id=1407, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_01.png, id=1412, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_01.png>
-<screenshots/etfw/etfw_wizard_02.png, id=1408, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_02.png, id=1413, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_02.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_02.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [66 <./screenshots/etfw/etfwmain.png> <./screenshot
 s/etfw/etfw_wizard_01.png>]
-<screenshots/etfw/etfw_wizard_03.png, id=1416, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_03.png, id=1421, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_03.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_03.png>
-<screenshots/etfw/etfw_wizard_04.png, id=1417, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_04.png, id=1422, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_04.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_04.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [67 <./screenshots/etfw/etfw_wizard_02.png> <./scre
 enshots/etfw/etfw_wizard_03.png>]
-<screenshots/etfw/etfw_wizard_05.png, id=1426, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_05.png, id=1431, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_05.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_05.png>
-<screenshots/etfw/etfw_wizard_06.png, id=1427, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_06.png, id=1432, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_06.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_06.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [68 <./screenshots/etfw/etfw_wizard_04.png> <./scre
 enshots/etfw/etfw_wizard_05.png>]
-<screenshots/etfw/etfw_wizard_07.png, id=1435, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_07.png, id=1440, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_07.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_07.png>
-<screenshots/etfw/etfw_wizard_08.png, id=1436, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_08.png, id=1441, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_08.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_08.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [69 <./screenshots/etfw/etfw_wizard_06.png> <./scre
 enshots/etfw/etfw_wizard_07.png>]
-<screenshots/etfw/etfw_wizard_09.png, id=1444, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_09.png, id=1449, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_09.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_09.png>
@@ -1927,11 +1932,11 @@ LaTeX Font Info:    Font shape `T1/txss/bx/sl' will be
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [70 <./screenshots/etfw/etfw_wizard_08.png> <./scre
 enshots/etfw/etfw_wizard_09.png>]
-<screenshots/etfw/etfw_network_interfaces_01.png, id=1452, 994.71625pt x 567.11
+<screenshots/etfw/etfw_network_interfaces_01.png, id=1457, 994.71625pt x 567.11
 874pt>
 File: screenshots/etfw/etfw_network_interfaces_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_interfaces_01.png>
-<screenshots/etfw/etfw_network_interfaces_02.png, id=1453, 994.71625pt x 567.11
+<screenshots/etfw/etfw_network_interfaces_02.png, id=1458, 994.71625pt x 567.11
 874pt>
 File: screenshots/etfw/etfw_network_interfaces_02.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_interfaces_02.png>
@@ -1939,11 +1944,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [71 <./screenshots/etfw/etfw_network_interfaces_01.p
 ng>]
-<screenshots/etfw/etfw_network_interfaces_03.png, id=1460, 777.90625pt x 476.78
+<screenshots/etfw/etfw_network_interfaces_03.png, id=1465, 777.90625pt x 476.78
 125pt>
 File: screenshots/etfw/etfw_network_interfaces_03.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_interfaces_03.png>
-<screenshots/etfw/etfw_network_interfaces_04.png, id=1461, 777.90625pt x 476.78
+<screenshots/etfw/etfw_network_interfaces_04.png, id=1466, 777.90625pt x 476.78
 125pt>
 File: screenshots/etfw/etfw_network_interfaces_04.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_interfaces_04.png>
@@ -1951,7 +1956,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [72 <./screenshots/etfw/etfw_network_interfaces_02.p
 ng> <./screenshots/etfw/etfw_network_interfaces_03.png>]
-<screenshots/etfw/etfw_network_routing_01.png, id=1469, 994.71625pt x 567.11874
+<screenshots/etfw/etfw_network_routing_01.png, id=1474, 994.71625pt x 567.11874
 pt>
 File: screenshots/etfw/etfw_network_routing_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_routing_01.png>
@@ -1959,11 +1964,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [73 <./screenshots/etfw/etfw_network_interfaces_04.p
 ng> <./screenshots/etfw/etfw_network_routing_01.png>]
-<screenshots/etfw/etfw_network_routing_02.png, id=1478, 994.71625pt x 567.11874
+<screenshots/etfw/etfw_network_routing_02.png, id=1483, 994.71625pt x 567.11874
 pt>
 File: screenshots/etfw/etfw_network_routing_02.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_routing_02.png>
-<screenshots/etfw/etfw_network_hostaddresses_01.png, id=1479, 994.71625pt x 567
+<screenshots/etfw/etfw_network_hostaddresses_01.png, id=1484, 994.71625pt x 567
 .11874pt>
 File: screenshots/etfw/etfw_network_hostaddresses_01.png Graphic file (type png
 )
@@ -1972,7 +1977,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [74 <./screenshots/etfw/etfw_network_routing_02.png>
 ]
-<screenshots/etfw/etfw_network_dnsclient_01.png, id=1486, 994.71625pt x 567.118
+<screenshots/etfw/etfw_network_dnsclient_01.png, id=1491, 994.71625pt x 567.118
 74pt>
 File: screenshots/etfw/etfw_network_dnsclient_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_dnsclient_01.png>
@@ -1980,19 +1985,19 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [75 <./screenshots/etfw/etfw_network_hostaddresses_0
 1.png> <./screenshots/etfw/etfw_network_dnsclient_01.png>]
-<screenshots/etfw/etfw_firewall_01.png, id=1494, 994.71625pt x 567.11874pt>
+<screenshots/etfw/etfw_firewall_01.png, id=1499, 994.71625pt x 567.11874pt>
 File: screenshots/etfw/etfw_firewall_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_firewall_01.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [76 <./screenshots/etfw/etfw_firewall_01.png>]
-<screenshots/etfw/etfw_firewall_02.png, id=1501, 995.72pt x 568.1225pt>
+<screenshots/etfw/etfw_firewall_02.png, id=1506, 995.72pt x 568.1225pt>
 File: screenshots/etfw/etfw_firewall_02.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_firewall_02.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [77 <./screenshots/etfw/etfw_firewall_02.png>]
-<screenshots/etfw/etfw_firewall_03.png, id=1508, 823.075pt x 724.7075pt>
+<screenshots/etfw/etfw_firewall_03.png, id=1513, 823.075pt x 724.7075pt>
 File: screenshots/etfw/etfw_firewall_03.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_firewall_03.png>
@@ -2000,26 +2005,26 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [78 <./screenshots/etfw/etfw_firewall_03.png>]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [79]
-<screenshots/etfw/etfw_firewall_04.png, id=1521, 994.71625pt x 565.11125pt>
+<screenshots/etfw/etfw_firewall_04.png, id=1526, 994.71625pt x 565.11125pt>
 File: screenshots/etfw/etfw_firewall_04.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_firewall_04.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [80 <./screenshots/etfw/etfw_firewall_04.png>]
-<screenshots/etfw/etfw_dhcp_wizard_01.png, id=1528, 994.71625pt x 567.11874pt>
+<screenshots/etfw/etfw_dhcp_wizard_01.png, id=1533, 994.71625pt x 567.11874pt>
 File: screenshots/etfw/etfw_dhcp_wizard_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_dhcp_wizard_01.png>
-<screenshots/etfw/etfw_dhcp_subnets_01.png, id=1529, 994.71625pt x 567.11874pt>
+<screenshots/etfw/etfw_dhcp_subnets_01.png, id=1534, 994.71625pt x 567.11874pt>
 File: screenshots/etfw/etfw_dhcp_subnets_01.png Graphic file (type png)
 <use screenshots/etfw/etfw_dhcp_subnets_01.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [81 <./screenshots/etfw/etfw_dhcp_wizard_01.png>]
-<screenshots/etfw/etfw_dhcp_subnets_02.png, id=1536, 922.44624pt x 651.43375pt>
+<screenshots/etfw/etfw_dhcp_subnets_02.png, id=1541, 922.44624pt x 651.43375pt>
 File: screenshots/etfw/etfw_dhcp_subnets_02.png Graphic file (type png)
 <use screenshots/etfw/etfw_dhcp_subnets_02.png>
-<screenshots/etfw/etfw_dhcp_interfaces_01.png, id=1537, 993.7125pt x 565.11125p
+<screenshots/etfw/etfw_dhcp_interfaces_01.png, id=1542, 993.7125pt x 565.11125p
 t>
 File: screenshots/etfw/etfw_dhcp_interfaces_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_dhcp_interfaces_01.png>
@@ -2027,11 +2032,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [82 <./screenshots/etfw/etfw_dhcp_subnets_01.png> <.
 /screenshots/etfw/etfw_dhcp_subnets_02.png>]
-<screenshots/etfw/etfw_dhcp_texteditor_01.png, id=1545, 993.7125pt x 570.13pt>
+<screenshots/etfw/etfw_dhcp_texteditor_01.png, id=1550, 993.7125pt x 570.13pt>
 File: screenshots/etfw/etfw_dhcp_texteditor_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_dhcp_texteditor_01.png>
-<screenshots/etfw/etfw_dhcp_leases_01.png, id=1546, 993.7125pt x 565.11125pt>
+<screenshots/etfw/etfw_dhcp_leases_01.png, id=1551, 993.7125pt x 565.11125pt>
 File: screenshots/etfw/etfw_dhcp_leases_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_dhcp_leases_01.png>
@@ -2039,13 +2044,13 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [83 <./screenshots/etfw/etfw_dhcp_interfaces_01.png> <./screenshots/etfw/etfw_d
 hcp_texteditor_01.png>]
-<screenshots/etfw/etfw_squid_wizard_01.png, id=1554, 994.71625pt x 567.11874pt>
+<screenshots/etfw/etfw_squid_wizard_01.png, id=1559, 994.71625pt x 567.11874pt>
 File: screenshots/etfw/etfw_squid_wizard_01.png Graphic file (type png)
 <use screenshots/etfw/etfw_squid_wizard_01.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [84 <./screenshots/etfw/etfw_dhcp_leases_01.png>]
-<screenshots/etfw/etfw_squid_portsnetworking_01.png, id=1561, 994.71625pt x 716
+<screenshots/etfw/etfw_squid_portsnetworking_01.png, id=1566, 994.71625pt x 716
 .6775pt>
 File: screenshots/etfw/etfw_squid_portsnetworking_01.png Graphic file (type png
 )
@@ -2053,7 +2058,7 @@ File: screenshots/etfw/etfw_squid_portsnetworking_01.png Graphic file (type png
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [85 <./screenshots/etfw/etfw_squid_wizard_01.png>]
-<screenshots/etfw/etfw_squid_accesscontrol_01.png, id=1569, 994.71625pt x 564.1
+<screenshots/etfw/etfw_squid_accesscontrol_01.png, id=1574, 994.71625pt x 564.1
 075pt>
 File: screenshots/etfw/etfw_squid_accesscontrol_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_accesscontrol_01.png>
@@ -2061,11 +2066,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [86 <./screenshots/etfw/etfw_squid_portsnetworking_0
 1.png>]
-<screenshots/etfw/etfw_squid_accesscontrol_02.png, id=1576, 994.71625pt x 564.1
+<screenshots/etfw/etfw_squid_accesscontrol_02.png, id=1581, 994.71625pt x 564.1
 075pt>
 File: screenshots/etfw/etfw_squid_accesscontrol_02.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_accesscontrol_02.png>
-<screenshots/etfw/etfw_squid_accesscontrol_03.png, id=1577, 996.72375pt x 564.1
+<screenshots/etfw/etfw_squid_accesscontrol_03.png, id=1582, 996.72375pt x 564.1
 075pt>
 File: screenshots/etfw/etfw_squid_accesscontrol_03.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_accesscontrol_03.png>
@@ -2073,7 +2078,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [87 <./screenshots/etfw/etfw_squid_accesscontrol_01.
 png> <./screenshots/etfw/etfw_squid_accesscontrol_02.png>]
-<screenshots/etfw/etfw_squid_accesscontrol_04.png, id=1585, 995.72pt x 565.1112
+<screenshots/etfw/etfw_squid_accesscontrol_04.png, id=1590, 995.72pt x 565.1112
 5pt>
 File: screenshots/etfw/etfw_squid_accesscontrol_04.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_accesscontrol_04.png>
@@ -2081,7 +2086,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [88 <./screenshots/etfw/etfw_squid_accesscontrol_03.
 png> <./screenshots/etfw/etfw_squid_accesscontrol_04.png>]
-<screenshots/etfw/etfw_squid_authenticationprograms_01.png, id=1593, 993.7125pt
+<screenshots/etfw/etfw_squid_authenticationprograms_01.png, id=1598, 993.7125pt
  x 716.6775pt>
 File: screenshots/etfw/etfw_squid_authenticationprograms_01.png Graphic file (t
 ype png)
@@ -2090,11 +2095,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [89 <./screenshots/etfw/etfw_squid_authenticationpro
 grams_01.png>]
-<screenshots/etfw/etfw_squid_othercaches_01.png, id=1600, 994.71625pt x 565.111
+<screenshots/etfw/etfw_squid_othercaches_01.png, id=1605, 994.71625pt x 565.111
 25pt>
 File: screenshots/etfw/etfw_squid_othercaches_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_othercaches_01.png>
-<screenshots/etfw/etfw_squid_othercaches_02.png, id=1601, 852.18375pt x 615.298
+<screenshots/etfw/etfw_squid_othercaches_02.png, id=1606, 852.18375pt x 615.298
 75pt>
 File: screenshots/etfw/etfw_squid_othercaches_02.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_othercaches_02.png>
@@ -2102,7 +2107,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [90 <./screenshots/etfw/etfw_squid_othercaches_01.pn
 g>]
-<screenshots/etfw/etfw_squid_example_time_01_01.png, id=1608, 993.7125pt x 583.
+<screenshots/etfw/etfw_squid_example_time_01_01.png, id=1613, 993.7125pt x 583.
 17876pt>
 File: screenshots/etfw/etfw_squid_example_time_01_01.png Graphic file (type png
 )
@@ -2111,12 +2116,12 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [91 <./screenshots/etfw/etfw_squid_othercaches_02.pn
 g>]
-<screenshots/etfw/etfw_squid_example_time_01_02.png, id=1616, 994.71625pt x 584
+<screenshots/etfw/etfw_squid_example_time_01_02.png, id=1621, 994.71625pt x 584
 .1825pt>
 File: screenshots/etfw/etfw_squid_example_time_01_02.png Graphic file (type png
 )
  <use screenshots/etfw/etfw_squid_example_time_01_02.png>
-<screenshots/etfw/etfw_squid_example_time_02_01.png, id=1617, 995.72pt x 582.17
+<screenshots/etfw/etfw_squid_example_time_02_01.png, id=1622, 995.72pt x 582.17
 5pt>
 File: screenshots/etfw/etfw_squid_example_time_02_01.png Graphic file (type png
 )
@@ -2125,12 +2130,12 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [92 <./screenshots/etfw/etfw_squid_example_time_01_0
 1.png> <./screenshots/etfw/etfw_squid_example_time_01_02.png>]
-<screenshots/etfw/etfw_squid_example_time_02_02.png, id=1625, 995.72pt x 583.17
+<screenshots/etfw/etfw_squid_example_time_02_02.png, id=1630, 995.72pt x 583.17
 876pt>
 File: screenshots/etfw/etfw_squid_example_time_02_02.png Graphic file (type png
 )
  <use screenshots/etfw/etfw_squid_example_time_02_02.png>
-<screenshots/etfw/etfw_squid_example_acessoip_01.png, id=1626, 995.72pt x 584.1
+<screenshots/etfw/etfw_squid_example_acessoip_01.png, id=1631, 995.72pt x 584.1
 825pt>
 File: screenshots/etfw/etfw_squid_example_acessoip_01.png Graphic file (type pn
 g)
@@ -2139,12 +2144,12 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [93 <./screenshots/etfw/etfw_squid_example_time_02_0
 1.png> <./screenshots/etfw/etfw_squid_example_time_02_02.png>]
-<screenshots/etfw/etfw_squid_example_acessoip_02.png, id=1634, 994.71625pt x 58
+<screenshots/etfw/etfw_squid_example_acessoip_02.png, id=1639, 994.71625pt x 58
 3.17876pt>
 File: screenshots/etfw/etfw_squid_example_acessoip_02.png Graphic file (type pn
 g)
  <use screenshots/etfw/etfw_squid_example_acessoip_02.png>
-<screenshots/etfw/etfw_squid_example_urlregexp_01.png, id=1635, 994.71625pt x 5
+<screenshots/etfw/etfw_squid_example_urlregexp_01.png, id=1640, 994.71625pt x 5
 84.1825pt>
 File: screenshots/etfw/etfw_squid_example_urlregexp_01.png Graphic file (type p
 ng)
@@ -2153,7 +2158,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [94 <./screenshots/etfw/etfw_squid_example_acessoip_
 01.png> <./screenshots/etfw/etfw_squid_example_acessoip_02.png>]
-<screenshots/etfw/etfw_squid_example_urlregexp_02.png, id=1643, 887.315pt x 550
+<screenshots/etfw/etfw_squid_example_urlregexp_02.png, id=1648, 887.315pt x 550
 .055pt>
 File: screenshots/etfw/etfw_squid_example_urlregexp_02.png Graphic file (type p
 ng)
@@ -2162,24 +2167,24 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [95 <./screenshots/etfw/etfw_squid_example_urlregexp
 _01.png> <./screenshots/etfw/etfw_squid_example_urlregexp_02.png>]
-<screenshots/etfw/etfw_snmp_01.png, id=1651, 792.9625pt x 513.92pt>
+<screenshots/etfw/etfw_snmp_01.png, id=1656, 792.9625pt x 513.92pt>
 File: screenshots/etfw/etfw_snmp_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_snmp_01.png>) (./ETMS.tex
-<screenshots/etms/etms_main_info.png, id=1655, 944.52875pt x 327.2225pt>
+<screenshots/etms/etms_main_info.png, id=1660, 944.52875pt x 327.2225pt>
 File: screenshots/etms/etms_main_info.png Graphic file (type png)
 
 <use screenshots/etms/etms_main_info.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [96 <./screenshots/etfw/etfw_snmp_01.png>]
-<screenshots/etms/etms_criar_dominio_1.png, id=1664, 941.5175pt x 324.21124pt>
+<screenshots/etms/etms_criar_dominio_1.png, id=1669, 941.5175pt x 324.21124pt>
 File: screenshots/etms/etms_criar_dominio_1.png Graphic file (type png)
 
 <use screenshots/etms/etms_criar_dominio_1.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [97 <./screenshots/etms/etms_main_info.png (PNG copy)>]
-<screenshots/etms/etms_criar_dominio_2.png, id=1672, 605.26125pt x 323.2075pt>
+<screenshots/etms/etms_criar_dominio_2.png, id=1677, 605.26125pt x 323.2075pt>
 File: screenshots/etms/etms_criar_dominio_2.png Graphic file (type png)
 
 <use screenshots/etms/etms_criar_dominio_2.png>
@@ -2191,18 +2196,18 @@ i-zar no ar-ma-ze-na-mento de emails(Ex: 1000000000
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [98 <./screenshots/etms/etms_criar_dominio_1.png (PN
 G copy)> <./screenshots/etms/etms_criar_dominio_2.png (PNG copy)>]
-<screenshots/etms/etms_delete_domain.png, id=1681, 938.50626pt x 325.215pt>
+<screenshots/etms/etms_delete_domain.png, id=1686, 938.50626pt x 325.215pt>
 File: screenshots/etms/etms_delete_domain.png Graphic file (type png)
 
 <use screenshots/etms/etms_delete_domain.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [99 <./screenshots/etms/etms_delete_domain.png (PNG copy)>]
-<screenshots/etms/etms_gerir_mailboxes.png, id=1688, 943.525pt x 327.2225pt>
+<screenshots/etms/etms_gerir_mailboxes.png, id=1693, 943.525pt x 327.2225pt>
 File: screenshots/etms/etms_gerir_mailboxes.png Graphic file (type png)
 
 <use screenshots/etms/etms_gerir_mailboxes.png>
-<screenshots/etms/etms_domain_details.png, id=1690, 943.525pt x 329.23pt>
+<screenshots/etms/etms_domain_details.png, id=1695, 943.525pt x 329.23pt>
 File: screenshots/etms/etms_domain_details.png Graphic file (type png)
 
 <use screenshots/etms/etms_domain_details.png>
@@ -2210,11 +2215,11 @@ File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [100 <./screenshots/etms/etms_gerir_mailboxes.png (PNG copy)> <./screenshots/et
 ms/etms_domain_details.png (PNG copy)>]
-<screenshots/etms/etms_criar_alias_dominio.png, id=1698, 941.5175pt x 326.21875
+<screenshots/etms/etms_criar_alias_dominio.png, id=1703, 941.5175pt x 326.21875
 pt>
 File: screenshots/etms/etms_criar_alias_dominio.png Graphic file (type png)
  <use screenshots/etms/etms_criar_alias_dominio.png>
-<screenshots/etms/etms_criar_alias_dominio_success.png, id=1699, 941.5175pt x 3
+<screenshots/etms/etms_criar_alias_dominio_success.png, id=1704, 941.5175pt x 3
 26.21875pt>
 File: screenshots/etms/etms_criar_alias_dominio_success.png Graphic file (type 
 png)
@@ -2226,7 +2231,7 @@ g (PNG copy)> <./screenshots/etms/etms_criar_alias_dominio_success.png (PNG cop
 y)>]
 File: screenshots/etms/etms_gerir_mailboxes.png Graphic file (type png)
  <use screenshots/etms/etms_gerir_mailboxes.png>
-<screenshots/etms/etms_criar_mailbox.png, id=1711, 605.26125pt x 389.455pt>
+<screenshots/etms/etms_criar_mailbox.png, id=1716, 605.26125pt x 389.455pt>
 File: screenshots/etms/etms_criar_mailbox.png Graphic file (type png)
 
 <use screenshots/etms/etms_criar_mailbox.png>
@@ -2236,22 +2241,22 @@ File: include/img/logo.png Graphic file (type png)
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [103 <./screenshots/etms/etms_criar_mailbox.png (PN
 G copy)>]
-<screenshots/etms/etms_mb_pass_ed.png, id=1729, 606.265pt x 404.51125pt>
+<screenshots/etms/etms_mb_pass_ed.png, id=1734, 606.265pt x 404.51125pt>
 File: screenshots/etms/etms_mb_pass_ed.png Graphic file (type png)
 
 <use screenshots/etms/etms_mb_pass_ed.png>
-<screenshots/etms/etms_alias_create.png, id=1732, 607.26875pt x 407.5225pt>
+<screenshots/etms/etms_alias_create.png, id=1737, 607.26875pt x 407.5225pt>
 File: screenshots/etms/etms_alias_create.png Graphic file (type png)
 
 <use screenshots/etms/etms_alias_create.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 [104 <./screenshots/etms/etms_mb_pass_ed.png (PNG copy)>]
-<screenshots/etms/etms_alias_mailbox_delete.png, id=1740, 604.2575pt x 404.5112
+<screenshots/etms/etms_alias_mailbox_delete.png, id=1745, 604.2575pt x 404.5112
 5pt>
 File: screenshots/etms/etms_alias_mailbox_delete.png Graphic file (type png)
  <use screenshots/etms/etms_alias_mailbox_delete.png>
-<screenshots/etms/etms_alias_mailbox_delete_2.png, id=1741, 604.2575pt x 401.5p
+<screenshots/etms/etms_alias_mailbox_delete_2.png, id=1746, 604.2575pt x 401.5p
 t>
 File: screenshots/etms/etms_alias_mailbox_delete_2.png Graphic file (type png)
  <use screenshots/etms/etms_alias_mailbox_delete_2.png>
@@ -2260,22 +2265,22 @@ File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [105 <./screenshots/etms/etms_alias_create.png (PNG 
 copy)> <./screenshots/etms/etms_alias_mailbox_delete.png (PNG copy)> <./screens
 hots/etms/etms_alias_mailbox_delete_2.png (PNG copy)>]
-<screenshots/etms/etms_forwarding_mb_del.png, id=1749, 605.26125pt x 403.5075pt
+<screenshots/etms/etms_forwarding_mb_del.png, id=1754, 605.26125pt x 403.5075pt
 >
 File: screenshots/etms/etms_forwarding_mb_del.png Graphic file (type png)
  <use screenshots/etms/etms_forwarding_mb_del.png>
-<screenshots/etms/etms_free_mb.png, id=1752, 586.19pt x 261.97874pt>
+<screenshots/etms/etms_free_mb.png, id=1757, 586.19pt x 261.97874pt>
 File: screenshots/etms/etms_free_mb.png Graphic file (type png)
 
 <use screenshots/etms/etms_free_mb.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [106 <./screenshots/etms/etms_forwarding_mb_del.png
  (PNG copy)>]
-<screenshots/etms/etms_mb_space.png, id=1759, 943.525pt x 328.22626pt>
+<screenshots/etms/etms_mb_space.png, id=1764, 943.525pt x 328.22626pt>
 File: screenshots/etms/etms_mb_space.png Graphic file (type png)
 
 <use screenshots/etms/etms_mb_space.png>
-<screenshots/etms/etms_mb_del.png, id=1762, 944.52875pt x 327.2225pt>
+<screenshots/etms/etms_mb_del.png, id=1767, 944.52875pt x 327.2225pt>
 File: screenshots/etms/etms_mb_del.png Graphic file (type png)
 
 <use screenshots/etms/etms_mb_del.png>)
@@ -2289,7 +2294,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 14--17
 []$ 
  []
 
-<screenshots/etvoip_pbx.png, id=1773, 792.9625pt x 274.02374pt>
+<screenshots/etvoip_pbx.png, id=1778, 792.9625pt x 274.02374pt>
 File: screenshots/etvoip_pbx.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx.png>
@@ -2297,13 +2302,13 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 36--39
 []$ 
  []
 
-<screenshots/etvoip_pbx_extensions.png, id=1774, 794.97pt x 274.02374pt>
+<screenshots/etvoip_pbx_extensions.png, id=1779, 794.97pt x 274.02374pt>
 File: screenshots/etvoip_pbx_extensions.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_extensions.png>
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [109 <./screenshots/etvoip_pbx.png (PNG copy)>]
-<screenshots/etvoip_pbx_extensions_sip.png, id=1781, 696.6025pt x 275.0275pt>
+<screenshots/etvoip_pbx_extensions_sip.png, id=1786, 696.6025pt x 275.0275pt>
 File: screenshots/etvoip_pbx_extensions_sip.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_extensions_sip.png>
@@ -2320,7 +2325,7 @@ File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [111]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png> [112]
-<screenshots/etvoip_pbx_extensions_remove.png, id=1800, 795.97375pt x 272.01625
+<screenshots/etvoip_pbx_extensions_remove.png, id=1805, 795.97375pt x 272.01625
 pt>
 File: screenshots/etvoip_pbx_extensions_remove.png Graphic file (type png)
  <use screenshots/etvoip_pbx_extensions_remove.png>
@@ -2328,11 +2333,11 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 169--172
 []$ 
  []
 
-<screenshots/etvoip_pbx_trunks.png, id=1801, 794.97pt x 276.03125pt>
+<screenshots/etvoip_pbx_trunks.png, id=1806, 794.97pt x 276.03125pt>
 File: screenshots/etvoip_pbx_trunks.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_trunks.png>
-<screenshots/etvoip_pbx_trunks_iax.png, id=1802, 903.375pt x 540.0175pt>
+<screenshots/etvoip_pbx_trunks_iax.png, id=1807, 903.375pt x 540.0175pt>
 File: screenshots/etvoip_pbx_trunks_iax.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_trunks_iax.png>
@@ -2378,11 +2383,11 @@ Overfull \hbox (53.44841pt too wide) in paragraph at lines 246--247
 
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [115]
-<screenshots/etvoip_pbx_trunks_remove.png, id=1822, 795.97375pt x 275.0275pt>
+<screenshots/etvoip_pbx_trunks_remove.png, id=1827, 795.97375pt x 275.0275pt>
 File: screenshots/etvoip_pbx_trunks_remove.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_trunks_remove.png>
-<screenshots/etvoip_pbx_outbound_routes.png, id=1823, 862.22125pt x 369.38pt>
+<screenshots/etvoip_pbx_outbound_routes.png, id=1828, 862.22125pt x 369.38pt>
 File: screenshots/etvoip_pbx_outbound_routes.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_outbound_routes.png>
@@ -2397,14 +2402,14 @@ rên-te-sis (neste exem-
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [117 <./screenshots/etvoip_pbx_outbound_routes.png (
 PNG copy)>]
-<screenshots/etvoip_pbx_outbound_routes_add.png, id=1835, 1003.75pt x 403.5075p
+<screenshots/etvoip_pbx_outbound_routes_add.png, id=1840, 1003.75pt x 403.5075p
 t>
 File: screenshots/etvoip_pbx_outbound_routes_add.png Graphic file (type png)
  <use screenshots/etvoip_pbx_outbound_routes_add.png>
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [118]
-<screenshots/etvoip_pbx_outbound_routes_remove.png, id=1844, 796.9775pt x 276.0
+<screenshots/etvoip_pbx_outbound_routes_remove.png, id=1849, 796.9775pt x 276.0
 3125pt>
 File: screenshots/etvoip_pbx_outbound_routes_remove.png Graphic file (type png)
 
@@ -2414,7 +2419,7 @@ File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [119 <./screenshots/etvoip_pbx_outbound_routes_add.p
 ng (PNG copy)> <./screenshots/etvoip_pbx_outbound_routes_remove.png (PNG copy)>
 ]
-<screenshots/etvoip_pbx_inbound_routes.png, id=1850, 865.2325pt x 370.38374pt>
+<screenshots/etvoip_pbx_inbound_routes.png, id=1855, 865.2325pt x 370.38374pt>
 File: screenshots/etvoip_pbx_inbound_routes.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_inbound_routes.png>
@@ -2426,11 +2431,11 @@ Overfull \hbox (9.68997pt too wide) in paragraph at lines 397--398
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [120 <./screenshots/etvoip_pbx_inbound_routes.png (P
 NG copy)>]
-<screenshots/etvoip_pbx_inbound_routes_add.png, id=1857, 702.625pt x 262.9825pt
+<screenshots/etvoip_pbx_inbound_routes_add.png, id=1862, 702.625pt x 262.9825pt
 >
 File: screenshots/etvoip_pbx_inbound_routes_add.png Graphic file (type png)
  <use screenshots/etvoip_pbx_inbound_routes_add.png>
-<screenshots/etvoip_pbx_inbound_routes_remove.png, id=1861, 866.23625pt x 372.3
+<screenshots/etvoip_pbx_inbound_routes_remove.png, id=1866, 866.23625pt x 372.3
 9125pt>
 File: screenshots/etvoip_pbx_inbound_routes_remove.png Graphic file (type png)
  <use screenshots/etvoip_pbx_inbound_routes_remove.png>)
@@ -2439,15 +2444,15 @@ File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [121 <./screenshots/etvoip_pbx_inbound_routes_add.pn
 g (PNG copy)> <./screenshots/etvoip_pbx_inbound_routes_remove.png (PNG copy)>]
 (./Primavera.tex
-<screenshots/primavera/primaverainstall_01.png, id=1868, 427.5975pt x 288.07625
+<screenshots/primavera/primaverainstall_01.png, id=1873, 427.5975pt x 288.07625
 pt>
 File: screenshots/primavera/primaverainstall_01.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_01.png>
-<screenshots/primavera/primaverainstall_02.png, id=1869, 428.60126pt x 288.0762
+<screenshots/primavera/primaverainstall_02.png, id=1874, 428.60126pt x 288.0762
 5pt>
 File: screenshots/primavera/primaverainstall_02.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_02.png>
-<screenshots/primavera/primaverainstall_03.png, id=1870, 427.5975pt x 288.07625
+<screenshots/primavera/primaverainstall_03.png, id=1875, 427.5975pt x 288.07625
 pt>
 File: screenshots/primavera/primaverainstall_03.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_03.png>
@@ -2455,11 +2460,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [122 <./screenshots/primavera/primaverainstall_01.pn
 g> <./screenshots/primavera/primaverainstall_02.png>]
-<screenshots/primavera/primaverainstall_04.png, id=1878, 427.5975pt x 288.07625
+<screenshots/primavera/primaverainstall_04.png, id=1883, 427.5975pt x 288.07625
 pt>
 File: screenshots/primavera/primaverainstall_04.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_04.png>
-<screenshots/primavera/primaverainstall_05.png, id=1879, 669.50125pt x 331.2375
+<screenshots/primavera/primaverainstall_05.png, id=1884, 669.50125pt x 331.2375
 pt>
 File: screenshots/primavera/primaverainstall_05.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_05.png>
@@ -2473,11 +2478,11 @@ File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png> [123 <./screenshots/primavera/primaverainstall_03.pn
 g> <./screenshots/primavera/primaverainstall_04.png> <./screenshots/primavera/p
 rimaverainstall_05.png>]
-<screenshots/primavera/primaverainterface_01.png, id=1888, 790.955pt x 457.71pt
+<screenshots/primavera/primaverainterface_01.png, id=1893, 790.955pt x 457.71pt
 >
 File: screenshots/primavera/primaverainterface_01.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_01.png>
-<screenshots/primavera/primaverainterface_02.png, id=1889, 801.99625pt x 449.68
+<screenshots/primavera/primaverainterface_02.png, id=1894, 801.99625pt x 449.68
 pt>
 File: screenshots/primavera/primaverainterface_02.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_02.png>
@@ -2485,15 +2490,15 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [124 <./screenshots/primavera/primaverainterface_01.
 png> <./screenshots/primavera/primaverainterface_02.png>]
-<screenshots/primavera/primaverainterface_03.png, id=1897, 801.99625pt x 449.68
+<screenshots/primavera/primaverainterface_03.png, id=1902, 801.99625pt x 449.68
 pt>
 File: screenshots/primavera/primaverainterface_03.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_03.png>
-<screenshots/primavera/primaverainterface_04.png, id=1898, 804.00375pt x 451.68
+<screenshots/primavera/primaverainterface_04.png, id=1903, 804.00375pt x 451.68
 75pt>
 File: screenshots/primavera/primaverainterface_04.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_04.png>
-<screenshots/primavera/primaverainterface_05.png, id=1899, 791.95876pt x 455.70
+<screenshots/primavera/primaverainterface_05.png, id=1904, 791.95876pt x 455.70
 25pt>
 File: screenshots/primavera/primaverainterface_05.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_05.png>
@@ -2501,11 +2506,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [125 <./screenshots/primavera/primaverainterface_03.
 png> <./screenshots/primavera/primaverainterface_04.png>]
-<screenshots/primavera/primaverainterface_06.png, id=1907, 785.93625pt x 454.69
+<screenshots/primavera/primaverainterface_06.png, id=1912, 785.93625pt x 454.69
 875pt>
 File: screenshots/primavera/primaverainterface_06.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_06.png>
-<screenshots/primavera/primaverainterface_07.png, id=1908, 785.93625pt x 454.69
+<screenshots/primavera/primaverainterface_07.png, id=1913, 785.93625pt x 454.69
 875pt>
 File: screenshots/primavera/primaverainterface_07.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_07.png>
@@ -2513,11 +2518,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [126 <./screenshots/primavera/primaverainterface_05.
 png> <./screenshots/primavera/primaverainterface_06.png>]
-<screenshots/primavera/primaverainterface_08.png, id=1916, 785.93625pt x 454.69
+<screenshots/primavera/primaverainterface_08.png, id=1921, 785.93625pt x 454.69
 875pt>
 File: screenshots/primavera/primaverainterface_08.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_08.png>
-<screenshots/primavera/primaverainterface_09.png, id=1917, 785.93625pt x 454.69
+<screenshots/primavera/primaverainterface_09.png, id=1922, 785.93625pt x 454.69
 875pt>
 File: screenshots/primavera/primaverainterface_09.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_09.png>
@@ -2525,7 +2530,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [127 <./screenshots/primavera/primaverainterface_07.
 png> <./screenshots/primavera/primaverainterface_08.png>]
-<screenshots/primavera/primaverainterface_10.png, id=1926, 785.93625pt x 454.69
+<screenshots/primavera/primaverainterface_10.png, id=1931, 785.93625pt x 454.69
 875pt>
 File: screenshots/primavera/primaverainterface_10.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_10.png>)) (./appendix.tex
@@ -2551,11 +2556,13 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png> [132]
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [133])
-AED: lastpage setting LastPage
+ <use include/img/logo.png> [133]
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png> [134]
-(./manual-etva-cm.aux)
+
+<use include/img/logo.png> [134]) AED: lastpage setting LastPage
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png> [135] (./manual-etva-cm.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
@@ -2564,10 +2571,10 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 8335 strings out of 256216
- 133844 string characters out of 1917072
+ 8338 strings out of 256216
+ 133886 string characters out of 1917072
  178073 words of memory out of 1500000
- 10806 multiletter control sequences out of 10000+200000
+ 10807 multiletter control sequences out of 10000+200000
  82718 words of font info for 133 fonts, out of 1200000 for 2000
  645 hyphenation exceptions out of 8191
  51i,16n,51p,926b,559s stack positions out of 5000i,500n,6000p,200000b,15000s
@@ -2577,9 +2584,9 @@ ublic/txfonts/t1xtt.pfb></usr/share/texmf/fonts/type1/public/txfonts/txsy.pfb><
 pe1/urw/helvetic/uhvb8a.pfb></usr/share/texmf/fonts/type1/urw/helvetic/uhvr8a.p
 fb></usr/share/texmf/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texmf/font
 s/type1/urw/times/utmr8a.pfb>
-Output written on manual-etva-cm.pdf (134 pages, 13539788 bytes).
+Output written on manual-etva-cm.pdf (135 pages, 13568117 bytes).
 PDF statistics:
- 2210 PDF objects out of 2487 (max. 8388607)
- 419 named destinations out of 1000 (max. 131072)
- 1782 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2249 PDF objects out of 2487 (max. 8388607)
+ 421 named destinations out of 1000 (max. 131072)
+ 1790 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -362,6 +362,36 @@ sub loaddiskdev {
     return wantarray ? %res : \%res;
 }
 
+# get uuid from scsi
+sub scsi_id_uuid{
+    my ($name) = @_;
+
+    my $blockdev = "/block/$name";
+    my $cmd = "/sbin/scsi_id -p 0x83 -g -s $blockdev"; 
+    my ($release,$version) = &get_os_release();
+    if( $release eq 'Fedora' ){
+        my $device = "/dev/$name";
+        $cmd = "/usr/lib/udev/scsi_id --page=0x83 --whitelisted --device=$device"; 
+    } elsif( (($release eq 'CentOS') && (int($version) >= 6)) ||
+		(($release =~ m/Red Hat/) && (int($version) >= 6)) ){
+        my $device = "/dev/$name";
+        $cmd = "/lib/udev/scsi_id --page=0x83 --whitelisted --device=$device"; 
+    }
+
+    plog(" DEBUG scsi_id_uuid cmd=$cmd ") if( &debug_level > 7 );
+
+    # get blockid (uuid)
+    open(SCSIID_FH,"$cmd |"); 
+    my $uuid = <SCSIID_FH>;    # read one single line
+    chomp($uuid);
+    close(SCSIID_FH);
+
+    return $uuid;
+}
+sub get_device_uuid {
+    return &scsi_id_uuid(@_);
+}
+
 # Physical devices
 sub phydev {
 
@@ -405,12 +435,8 @@ sub phydev {
             close(L);
         }
 
-        my $blockdev = "/block/$name";
         # get blockid (uuid)
-        open(S,"/sbin/scsi_id -p 0x83 -g -s $blockdev |"); 
-        my $uuid = <S>;    # read one single line
-        chomp($uuid);
-        close(S);
+        my $uuid = &get_device_uuid($name);
 
         # only if have universal uniq id
         if( $uuid ){
@@ -524,6 +550,21 @@ sub libparted_updatedevinfo {
     }
 }
 
+# read out put of multipath
+sub read_multipathd {
+    my ($cmd) = @_;
+    my @lines = ();
+    open(READ_MULTIPATHD,"echo \"$cmd\" | /sbin/multipathd -k |");
+    while(<READ_MULTIPATHD>){
+        chomp;
+        s/multipathd> //;   # clean multipathd
+        s/$cmd//;   # clean command
+        push(@lines,$_) if( $_ );
+    }
+    close(READ_MULTIPATHD);
+    return wantarray() ? @lines : \@lines;
+}
+
 # multipath maps info
 sub pathmapsinfo {
 
@@ -534,13 +575,16 @@ sub pathmapsinfo {
 
         # get info from multipathd
         # TODO must be active
-        open(M,'echo "show maps" | /sbin/multipathd -k |');
-        my $hmap = <M>;
-        chomp($hmap);
+        my @mlines = &read_multipathd("show maps");
+        my $hmap = shift(@mlines);
         my @hf = split(/\s+/,trim($hmap));
-        shift(@hf); # drop first
-        while(<M>){
-            chomp;
+
+        if( scalar(@hf) < 3 ){ # 2nd line
+            $hmap = shift(@mlines);
+            @hf = split(/\s+/,trim($hmap));
+        }
+
+        foreach(@mlines){
             my $lmap = $_;
             my @lf = split(/\s+/,$lmap);
             if( scalar(@lf) == scalar(@hf) ){
@@ -556,10 +600,9 @@ sub pathmapsinfo {
                 $PathMaps{"$uuid"} = \%DMap;
             }
         }
-        close(M);
 
         # get devices from topology
-        open(T,'echo "show maps topology" | /sbin/multipathd -k |');
+        my @mlines_t = &read_multipathd("show maps topology");
 #multipathd> mpath0 (3600a0b800050817400000bab4cc017ec) dm-2  IBM,1814      FAStT
 #[size=100G][features=0       ][hwhandler=1 rdac   ][rw        ]
 #\_ round-robin 0 [prio=100][enabled]
@@ -569,28 +612,53 @@ sub pathmapsinfo {
 # \_ 5:0:1:1 sdc 8:32  [active][ghost] 
 # \_ 6:0:1:1 sde 8:64  [active][ghost] 
 #multipathd> 
+
+
+#multipathd> mpath3 (3600a0b8000320d5e00001a834f7bdc49) dm-0 IBM,1814      FAStT
+#size=169G features='1 queue_if_no_path' hwhandler='1 rdac' wp=rw
+#|-+- policy='round-robin 0' prio=6 status=active
+#| |- 5:0:0:2 sdf 8:80  active ready running
+#| `- 4:0:0:2 sdc 8:32  active ready running
+#`-+- policy='round-robin 0' prio=1 status=enabled
+#  |- 5:0:1:2 sdi 8:128 active ghost running
+#  `- 4:0:1:2 sdh 8:112 active ghost running
+#mpath2 (3600a0b8000320d5e00001a804f7bdc31) dm-1 IBM,1814      FAStT
+#size=110G features='1 queue_if_no_path' hwhandler='1 rdac' wp=rw
+#|-+- policy='round-robin 0' prio=6 status=active
+#| |- 5:0:0:1 sde 8:64  active ready running
+#| `- 4:0:0:1 sdb 8:16  active ready running
+#`-+- policy='round-robin 0' prio=1 status=enabled
+#  |- 5:0:1:1 sdg 8:96  active ghost running
+#  `- 4:0:1:1 sdd 8:48  active ghost running
+#multipathd>
+
         my $p_uuid;
-        while(<T>){
-            chomp;
-            s/multipathd> //;   # clean multipathd
-            if( /^(\w+)\s+\((\w+)\)\s+(\S+)\s+(\S+)\s+(\S+)$/ ){
+        foreach(@mlines_t){
+            if( /(\w+)\s+\((\w+)\)\s+(\S+)\s+(\S+)(\s+(\S+))?/ ){
                 #mpath0 (3600a0b800050817400000bab4cc017ec) dm-2  IBM,1814      FAStT
-                my ($n,$i,$d,$v,$m) = ($1,$2,$3,$4,$5);
+                #create: mpath0 (36000eb3b55860573000000000000002d) dm-2  LEFTHAND,iSCSIDisk
+                my ($n,$i,$d,$v,$m) = ($1,$2,$3,$4,$6);
                 $p_uuid = $i;   # mark process
                 if( !$PathMaps{"$p_uuid"} ){
                     $PathMaps{"$p_uuid"} = { 'uuid'=>"$p_uuid", 'name'=>$n, 'device'=>"/dev/mapper/$n" };
                 }
                 $PathMaps{"$p_uuid"}{'vendor'} = $v;
                 $PathMaps{"$p_uuid"}{'model'} = $m;
-            } elsif( /^\[([^\]]+)\[([^\]]+)\]\[([^\]]+)\]\[([^\]]+)\]$/ ){
+            } elsif( /^\[size=([^\]]+)\[features=([^\]]+)\]\[hwhandler=([^\]]+)\]\[([^\]]+)\]$/ ||
+                        /^size=(\S+)\s+features='?([^']+)'\s+hwhandler='?([^']+)'\s+wp=(\S+)$/ ){
                 #[size=100G][features=0       ][hwhandler=1 rdac   ][rw        ]
+                #size=110G features='1 queue_if_no_path' hwhandler='1 rdac' wp=rw
                 if( $p_uuid && $PathMaps{"$p_uuid"} ){
                     ( $PathMaps{"$p_uuid"}{'size'}, $PathMaps{"$p_uuid"}{'features'},
                        $PathMaps{"$p_uuid"}{'hwhandler'},$PathMaps{"$p_uuid"}{'permissions'})
                                 = ($1,$2,$3,$4);
                 }
-            } elsif( /^\\_\s+(\S+)\s+(\d+)\s+\[(\S+)\]\[(\w+)\]$/ ){
+            } elsif( /^\\_\s+(\S+)\s+(\d+)\s+\[(\S+)\]\[(\w+)\]$/ ||
+                        /^\|-\+-\s+policy='(\S+)\s+(\d+)'\s+(\S+)\s+status=(\w+)$/ ||
+                        /^\`-\+-\s+policy='(\S+)\s+(\d+)'\s+(\S+)\s+status=(\w+)$/ ){
                 #\_ round-robin 0 [prio=100][enabled]
+                #|-+- policy='round-robin 0' prio=6 status=active
+                #`-+- policy='round-robin 0' prio=1 status=enabled
                 #my ($sp,$si,$pp,$ps) = ($1,$2,$3,$4);
                 if( $p_uuid && $PathMaps{"$p_uuid"} ){
                     my %G = ( 'scheduling_policy'=>$1, 'sp_unknown_digit'=>$2,
@@ -602,8 +670,12 @@ sub pathmapsinfo {
                         push( @{$PathMaps{"$p_uuid"}{'group'}}, \%G );
                     }
                 }
-            } elsif( /^\s+\\_\s+(\d+):(\d+):(\d+):(\d+)\s+(\w+)\s+(\d+):(\d+)\s+\[(\w+)\]\[(\w+)\]\s*$/ ){
+            } elsif( /^\s+\\_\s+(\d+):(\d+):(\d+):(\d+)\s+(\w+)\s+(\d+):(\d+)\s+\[(\w+)\]\[(\w+)\]\s*$/ ||
+                        /^\s+\\|-\s+(\d+):(\d+):(\d+):(\d+)\s+(\w+)\s+(\d+):(\d+)\s+(\w+)\s+(\w+)/ ||
+                        /^\s+\\`-\s+(\d+):(\d+):(\d+):(\d+)\s+(\w+)\s+(\d+):(\d+)\s+(\w+)\s+(\w+)/ ){
                 # \_ 6:0:0:1 sdd 8:48  [active][ready] 
+                #  |- 5:0:1:1 sdg 8:96  active ghost running
+                #  `- 4:0:1:1 sdd 8:48  active ghost running
                 #my ($h,$c,$i,$l, $d, $ma,$mi, $ds,$ps) = ($1,$2,$3,$4, $5, $6,$7, $8,$9);
                 my %D = ( 'host'=>$1, 'channel'=>$2, 'id'=>$3, 'lun'=>$4,
                             'devnode'=>$5, 'major'=>$6, 'minor'=>$7,
@@ -622,7 +694,6 @@ sub pathmapsinfo {
                 }
             }
         }
-        close(T);
     }
     return wantarray() ? %PathMaps : \%PathMaps;
 }
@@ -1404,11 +1475,17 @@ sub update_devices {
         my $minor = $AllDiskDevices{"$dn"}{"minor"};
         $BDPhy{"${major}:${minor}"} = $dn;
         if( my $uuid = &isDevicePathFromMultipath($AllDiskDevices{"$dn"}) ){
+            $AllDiskDevices{"$dn"}{"type"} = "SAN";    # type SAN
             $AllDiskDevices{"$dn"}{"multipath"} = 1;    # mark as using multipath
-            $AllDiskDevices{"$dn"}{"mpathdevice"} = 1;
             $AllDiskDevices{"$dn"}{"devmapper"} = $PathMaps{"$uuid"}{"device"};
             $AllDiskDevices{"$dn"}{"multipathname"} = $PathMaps{"$uuid"}{"name"};
-            push(@{$PathMaps{"$uuid"}{"phydevices"}},$AllDiskDevices{"$dn"});
+            if($PathMaps{"$uuid"}{sysfs} ne $AllDiskDevices{"$dn"}{'name'}){
+                
+                $AllDiskDevices{"$dn"}{"mpathdevice"} = 1;
+                if( grep { $_->{'devnode'} eq $AllDiskDevices{"$dn"}{'name'} } @{$PathMaps{"$uuid"}{'devices'}} ){
+                    push(@{$PathMaps{"$uuid"}{"phydevices"}},$AllDiskDevices{"$dn"});
+                }
+            }
         }
         if( $PVInfo{"$dn"} ){
             $PVInfo{"$dn"}{"pvinit"} = 1;    # initialized
@@ -1753,7 +1830,7 @@ sub ignore_diskdevice {
 #    if( $D->{'mpathsysdev'} ){
 #        $ignore = 1;
 #    }
-    if( $D->{'mpathdevice'} ){
+    if( $D->{'mpathdevice'} && !$D->{'mpathsysdev'} ){
         $ignore = 1;
     }
     if( !-e "$D->{device}" ){
@@ -3170,9 +3247,10 @@ sub device_table {
     $op_target = "--target $p{'target'}" if( $p{'target'} );
 
     my $dmsetup_cmd = &dmsetup_cmd();
-    open(C,"$dmsetup_cmd table $op_target $device 2>/dev/null|");
+
+    open(DMSETUP_TABLE,"$dmsetup_cmd table $op_target $device 2>/dev/null|");
     my @table = ();
-    while(<C>){
+    while(<DMSETUP_TABLE>){
         my $nl = $_;
         chomp($nl);
         if( !$p{'nouuid'} ){
@@ -3186,7 +3264,7 @@ sub device_table {
         }
         push(@table,$nl);
     }
-    close(C);
+    close(DMSETUP_TABLE);
 
     return wantarray() ? @table : \@table;
 }
@@ -3269,7 +3347,7 @@ sub device_loadtable {
     my $table = [];
     if( $table = $p{'table'} ){
         my $dmsetup_cmd = &dmsetup_cmd();
-        open(C,"| $dmsetup_cmd load $device 2>/dev/null");
+        open(DMSETUP_LOAD,"| $dmsetup_cmd load $device 2>/dev/null");
         for my $l (@$table){
             while( my ($tok) = ( $l =~ m/{(.+)}/ ) ){ # resolve major:minor to device/uuid
                 my %q = ( $tok =~ m/\/dev\// ) ? ('device'=>$tok) : ('uuid'=>$tok);
@@ -3279,9 +3357,9 @@ sub device_loadtable {
                 }
             }
             plog("device_loadtable: $l") if( &debug_level > 3 );
-            print C $l,$/;
+            print DMSETUP_LOAD $l,$/;
         }
-        close(C);
+        close(DMSETUP_LOAD);
     } else {
         return retErr("_ERR_DEVICE_LOADTABLE_","Error load device table: no table specified");
     }
@@ -3412,6 +3490,8 @@ EOF
 
     # load disk dev info
     $self->loaddiskdev(1);
+
+    return retOk("_OK_LOOKUP_FC_DEVICES_","Lookup FC devices with success.");
 }
 
 ####################################################################
@@ -3469,8 +3549,7 @@ sub get_fc_partitions {
         while(<$f>) {
             chomp;
             if(my ($disk) = /^\s*\d+\s+\d+\s+\d+\s+(sd[a-z]+)$/) {
-                my $uid = `scsi_id -p 0x83 -g -s /block/$disk`;
-                chomp($uid);
+                my $uid = &get_device_uuid($disk);
                 if(exists $p->{$uid}) {
                     push(@{$p->{$uid}}, $disk);
                 } else {

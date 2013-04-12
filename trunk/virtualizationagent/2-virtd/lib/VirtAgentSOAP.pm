@@ -100,14 +100,15 @@ sub opPeriodic5Secs {
                             uuid=>$self->{'uuid'},
                             'vms'=>$vms
                         );
+        plogNow("updateVirtAgentServersStats receive stats");
         plog("updateVirtAgentServersStats ",Dumper($R)) if( &debug_level > 7 );
 
         unless( $R && !$R->{'_error_'} && ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
             if( $R->{'return'}{'reason'} eq '_servers_inconsistency_' ){    # if we get servers inconsistency
                 $restart = 1;   # do restart
-                plog("something wrong with update domains stats... servers info is inconsistent... is going restart...");
+                plogNow("something wrong with update domains stats... servers info is inconsistent... is going restart...");
             } else {
-                plog("something wrong with update domains stats...");
+                plogNow("something wrong with update domains stats...");
             }
         }
     }

@@ -37,6 +37,7 @@ BEGIN {
     require VirtAgent::Disk;
     require VirtAgent::Network;
     require VirtAgent::Storage;
+    require VirtAgent::Devices;
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $CRLF $AUTOLOAD);
     $VERSION = '0.0.1';
     @ISA = qw( VirtAgent VirtAgent::Disk VirtAgent::Network VirtAgent::Storage );
@@ -46,7 +47,6 @@ BEGIN {
 use ETVA::Utils;
 use ETVA::NetworkTools;
 use ETVA::ArchiveTar;
-use ETVA::Devices;
 
 use GuestAgent::Client;
 use GuestAgent::MessageFactory;
@@ -499,14 +499,20 @@ sub get_loadvm_disks_params {
             $D{'device'} = $p{'diskdevice'} || $p{'disk'}{'device'};
             $D{'drivertype'} = $p{'diskdrivertype'} || $p{'disk'}{'drivertype'};
             $D{'drivername'} = $p{'diskdrivername'} || $p{'disk'}{'drivername'};
+            $D{'drivercache'} = $p{'diskdrivercache'} || $p{'disk'}{'drivercache'};
             $D{'target'} = $p{'disktarget'} || $p{'disk'}{'target'};
             $D{'readonly'} = $p{'diskreadonly'} || $p{'disk'}{'readonly'};
             $D{'node'} = $p{'disknode'} || $p{'disk'}{'node'};
             $D{'bus'} = $p{'diskbus'} || $p{'disk'}{'bus'};
 
-            if( !$D{'drivertype'} && !$D{'drivername'} && ($p{'diskformat'} || $p{'disk'}{'format'}) ){
+            if( !$D{'drivername'} &&
+                    ($p{'diskdrivercache'} || $p{'disk'}{'drivercache'} || $D{'drivertype'} || $p{'diskformat'} || $p{'disk'}{'format'}) ){
                 if( $self->get_hypervisor_type() eq 'kvm' ){
                     $D{'drivername'} = "qemu";
+                } elsif( $self->get_hypervisor_type() =~ m/xen/ ){
+                    $D{'drivername'} = "tap";
+                }
+                if( $p{'diskformat'} || $p{'disk'}{'format'} ){
                     $D{'drivertype'} = $p{'diskformat'} || $p{'disk'}{'format'};
                 }
             }
@@ -923,11 +929,15 @@ sub prep_disk_params {
                                                         sub {
                                                             my (%D) = @_;
                                                             my $format = delete($D{'format'});
-                                                            if( !$D{'drivertype'} && !$D{'drivername'} && $format ){
+                                                            if( !$D{'drivername'} &&
+                                                                ($format || $D{'drivertype'} || $D{'drivercache'}) ){
                                                                 if( $hypervisor_type eq 'kvm' ){
                                                                     $D{'drivername'} = "qemu";
-                                                                    $D{'drivertype'} = $format;
+                                                                } elsif( $hypervisor_type =~ m/xen/ ){
+                                                                    $D{'drivername'} = "tap";
                                                                 }
+
+                                                                $D{'drivertype'} = $format if( $format );
                                                             }
                                                             return wantarray() ? %D : \%D;
 
@@ -1565,7 +1575,12 @@ sub vmReload {
             # undefine previous xml definition
             # #127 - 28/08/2012
             # CMAR: dont undefine domain to preserve domain snapshots
-            #$self->undefDomain( 'uuid'=>$uuid, 'name'=>$name );
+            #
+            # #625 - 13/02/2013
+            # CMAR - for name change should undefine domain
+            if( ($name ne $p{'name'}) && $p{'force_to_change_name'} ){
+                $self->undefDomain( 'uuid'=>$uuid, 'name'=>$name );
+            }
         }
         $VM = $newVM;   # change object
 
@@ -2236,14 +2251,20 @@ sub attach_disk {
             $D{'device'} = $p{'diskdevice'} || $p{'disk'}{'device'};
             $D{'drivertype'} = $p{'diskdrivertype'} || $p{'disk'}{'drivertype'};
             $D{'drivername'} = $p{'diskdrivername'} || $p{'disk'}{'drivername'};
+            $D{'drivercache'} = $p{'diskdrivercache'} || $p{'disk'}{'drivercache'};
             $D{'target'} = $p{'disktarget'} || $p{'disk'}{'target'};
             $D{'readonly'} = $p{'diskreadonly'} || $p{'disk'}{'readonly'};
             $D{'node'} = $p{'disknode'} || $p{'disk'}{'node'};
             $D{'bus'} = $p{'diskbus'} || $p{'disk'}{'bus'};
 
-            if( !$D{'drivertype'} && !$D{'drivername'} && ($p{'diskformat'} || $p{'disk'}{'format'}) ){
+            if( !$D{'drivername'} &&
+                    ($p{'diskdrivercache'} || $p{'disk'}{'drivercache'} || $D{'drivertype'} || $p{'diskformat'} || $p{'disk'}{'format'}) ){
                 if( $self->get_hypervisor_type() eq 'kvm' ){
                     $D{'drivername'} = "qemu";
+                } elsif( $self->get_hypervisor_type() =~ m/xen/ ){
+                    $D{'drivername'} = "tap";
+                }
+                if( $p{'diskformat'} || $p{'disk'}{'format'} ){
                     $D{'drivertype'} = $p{'diskformat'} || $p{'disk'}{'format'};
                 }
             }
@@ -2282,6 +2303,7 @@ sub attach_disk {
                             'device' => $D->{'device'},
                             'drivertype' => $D->{'drivertype'},
                             'drivername' => $D->{'drivername'},
+                            'drivercache' => $D->{'drivercache'},
                             'target' => $D->{'target'},
                             'readonly' => $D->{'readonly'},
                             'node' => $D->{'node'},
@@ -3659,7 +3681,7 @@ sub os_loader {
     if( !$p{'os'}{'loader'} ){
         $p{'os'}{'type'} = $self->os_type(%p);
 
-        if( $p{'os'}{'type'} eq 'hvm' ){
+        if( ($p{'os'}{'type'} eq 'hvm') && ($self->get_hypervisor_type() =~ m/xen/) ){
             return $p{'os'}{'loader'} = '/usr/lib/xen/boot/hvmloader';
         }
     }
@@ -3690,10 +3712,16 @@ sub domains_stats {
 
     for my $d (@ls){
         if( $d->{'id'} && ( $d->{'name'} ne 'Domain-0' ) ){
+            plogNow("domains_stats name=",$d->{'name'}," uuid=",$d->{'uuid'}," state=",$d->{'state'}) if( &debug_level > 5 );
+
             if( my $VM = $self->getVM( $d->{'uuid'} ) ){
                 $VM->set_state( $d->{'state'} );    # update state
+                plogNow("domains_stats name=",$d->{'name'}," uuid=",$d->{'uuid'}," state=",$d->{'state'}," ...Found") if( &debug_level > 5 );
+
                 $self->setVM( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name(), 'VM'=>$VM );
                 push(@gls,$d);
+            } else {
+                plogNow("domains_stats name=",$d->{'name'}," uuid=",$d->{'uuid'}," state=",$d->{'state'}," ...Not Found") if( &debug_level > 5 );
             }
         }
     }
@@ -3772,18 +3800,26 @@ sub migrate_vm {
     
     my %E = $self->vmMigrate(%p);
     if( !isError(%E) ){
-        my $VM = $self->getVM(%p, 'force'=>1 ); # force to get actualized
-        if( $VM ){  # if exists
+        plogNow("migrate_vm delete VM exists") if( &debug_level > 5 );
+        $self->delVM( %p ); # delete VM
+        plogNow("migrate_vm check if VM exists") if( &debug_level > 5 );
+        #my $VM = $self->getVM(%p, 'force'=>1 ); # force to get actualized
+        my $VM = $self->getVM(%p); # force to get actualized
+        if( $VM ){  # if still there
             my $uuid = $VM->get_uuid();
             my $name = $VM->get_name();
 
+            plogNow("migrate_vm check if domain exists") if( &debug_level > 5 );
             my $dom = $self->getDomain( 'uuid'=>$uuid, 'name'=>$name );
-            if( isError($dom) ){        # not found
+            if( !isError($dom) ){        # if we can get it
+
+                plogNow("migrate_vm still there uuid=$uuid name=$name") if( &debug_level > 5 );
                                         # destroyed at source
                 $self->delVM( 'uuid'=>$uuid, 'name'=>$name );
             }
         }
     }
+    plogNow("migrate_vm .... end.") if( &debug_level > 5 );
     return wantarray() ? %E : \%E; 
 }
 
@@ -4360,6 +4396,9 @@ sub _change_ip {
                 # change ip address
                 $CONF->{'IP'} = $CONF->{'LocalIP'} = $ipaddr;
 
+                # change hosts
+                ETVA::NetworkTools::fix_hostname_resolution($CONF->{'name'}, $CONF->{'IP'} || $CONF->{'LocalIP'} || '127.0.0.1');
+
             } else {
                 return retErr("_ERR_CHANGE_IP_","change ip config fail!");
             }
@@ -4431,7 +4470,7 @@ sub shutdown {
 sub get_pci_devices{
     my $self = shift;
     my %hostdev = ();
-    my @devices = ETVA::Devices::pci_dev_list();
+    my @devices = VirtAgent::Devices::pci_dev_list();
 
 #    plog(Dumper(\@devices));
     return wantarray() ? @devices : \@devices; 
@@ -4439,7 +4478,7 @@ sub get_pci_devices{
 
 sub get_usb_devices{
     my $self = shift;
-    my @devices = ETVA::Devices::usb_dev_list();
+    my @devices = VirtAgent::Devices::usb_dev_list();
     return wantarray() ? @devices : \@devices; 
 }
 
