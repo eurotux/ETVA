@@ -8,6 +8,8 @@ class EtvaLogicalvolume extends BaseEtvaLogicalvolume
     const VOLUMEGROUP_MAP = 'volumegroup';
     const SIZE_MAP = 'size';
     const FREESIZE_MAP = 'freesize';
+    const VIRTUALSIZE_MAP = 'virtual_size';
+    const SIZESNAPSHOTS_MAP = 'size_of_snapshots';
     const LV_MAP = 'lv_name';
     const LVDEVICE_MAP = 'lvdevice';    
     const WRITEABLE_MAP = 'writeable';
@@ -21,16 +23,20 @@ class EtvaLogicalvolume extends BaseEtvaLogicalvolume
 
     const STORAGE_TYPE_MAP = 'type';
     const STORAGE_TYPE_LOCAL_MAP = 'local';
+
+    const PER_USAGESNAPSHOTS_CRITICAL = 0.90;
+    const PER_USAGESNAPSHOTS_WARNING = 0.80;
     
     /*
      * used to process soap comm data
      */
     public function initData($arr)
 	{
-
         if(array_key_exists(self::UUID_MAP, $arr)) $this->setUuid($arr[self::UUID_MAP]);
         if(array_key_exists(self::SIZE_MAP, $arr)) $this->setSize($arr[self::SIZE_MAP]);
         if(array_key_exists(self::FREESIZE_MAP, $arr)) $this->setFreesize($arr[self::FREESIZE_MAP]);
+        if(array_key_exists(self::VIRTUALSIZE_MAP, $arr)) $this->setVirtualSize($arr[self::VIRTUALSIZE_MAP]);
+        if(array_key_exists(self::SIZESNAPSHOTS_MAP, $arr)) $this->setSizeSnapshots($arr[self::SIZESNAPSHOTS_MAP]);
 
         if(array_key_exists(self::LV_MAP, $arr)) $this->setLv($arr[self::LV_MAP]);
         if(array_key_exists(self::LVDEVICE_MAP, $arr)) $this->setLvdevice($arr[self::LVDEVICE_MAP]);
@@ -42,7 +48,16 @@ class EtvaLogicalvolume extends BaseEtvaLogicalvolume
         if(array_key_exists(self::SNAPSHOT_MAP, $arr)) $this->setSnapshot($arr[self::SNAPSHOT_MAP]);
         if(array_key_exists(self::ORIGIN_MAP, $arr)) $this->setOrigin($arr[self::ORIGIN_MAP]);
         if(array_key_exists(self::FORMAT_MAP, $arr)) $this->setFormat($arr[self::FORMAT_MAP]);
-        if(array_key_exists(self::HAVESNAPSHOTS_MAP, $arr)) $this->setHaveSnapshots($arr[self::HAVESNAPSHOTS_MAP]);
+        //if(array_key_exists(self::HAVESNAPSHOTS_MAP, $arr)) $this->setHaveSnapshots($arr[self::HAVESNAPSHOTS_MAP]);
+
+        //error_log("EtvaLogicalVolume initData=".print_r($arr,true));
+        if( array_key_exists('has_snapshots',$arr) && $arr['has_snapshots'] ){
+            $size = $arr['size'];
+            $virtual_size = $arr['virtual_size'];
+            $size_of_snapshots = $arr['size_of_snapshots'];
+
+            error_log("EtvaLogicalVolume initData device=".$this->getLvdevice()." has snapshots size=$size virtual_size=$virtual_size size_of_snapshots=$size_of_snapshots");
+        }
 
 //        if (array_key_exists(self::VOLUMEGROUP_MAP, $arr)) $this->setVolumegroup($arr[self::VOLUMEGROUP_MAP]);
 
@@ -172,4 +187,10 @@ class EtvaLogicalvolume extends BaseEtvaLogicalvolume
         
     }
     
+    public function getPerUsageSnapshots()
+	{
+        $diff_size_for_snapshots = $this->getSize() - $this->getVirtualSize();
+        $per_usage_snapshots = $diff_size_for_snapshots > 0 ? ($this->getSizeSnapshots() / $diff_size_for_snapshots) : 0;
+        return $per_usage_snapshots;
+    }
 }

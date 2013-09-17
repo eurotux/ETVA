@@ -16,14 +16,14 @@ Summary: %{product_family} release file
 Name: nuxis-release
 Epoch: 10
 Version: 5
-Release: 8.el5.nuxis
+Release: 9.el5.nuxis
 License: GPL
 Group: System Environment/Base
 Source: centos-release-%{builtin_release_version}.tar.gz
 Source1: nuxis.repo
 
 Obsoletes: rawhide-release redhat-release-as redhat-release-es redhat-release-ws redhat-release-de comps 
-Obsoletes: rpmdb-redhat redhat-release whitebox-release fedora-release sl-release enterprise-release
+Obsoletes: rpmdb-redhat redhat-release whitebox-release fedora-release sl-release enterprise-release centos-release
 Provides: centos-release redhat-release yumconf etva-release nuxis-release
 Requires: centos-release-notes
 

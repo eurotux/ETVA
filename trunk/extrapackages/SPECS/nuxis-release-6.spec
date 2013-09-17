@@ -2,16 +2,16 @@
 %define product_family ETVA
 %define release_name Final
 %define base_release_version 6
-%define full_release_version 6.2
+%define full_release_version 6.4
 
 Name:           nuxis-release
 Version:        %{base_release_version}
-Release:        0%{?dist}.6
+Release:        0%{?dist}.7
 Summary:        %{product_family} release file
 Group:          System Environment/Base
 License:        GPLv2
-Obsoletes:      rawhide-release redhat-release-as redhat-release-es redhat-release-ws redhat-release-de comps rpmdb-redhat fedora-release redhat-release
-Provides:	redhat-release etva-release nuxis-release
+Obsoletes:      rawhide-release redhat-release-as redhat-release-es redhat-release-ws redhat-release-de comps rpmdb-redhat fedora-release redhat-release centos-release
+Provides:	redhat-release etva-release nuxis-release centos-release
 Source0:        centos-release-6-0.tar.gz
 Source1: nuxis.repo
 

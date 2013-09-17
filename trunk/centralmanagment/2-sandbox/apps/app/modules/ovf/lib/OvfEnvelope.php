@@ -447,9 +447,10 @@ class OvfItemEthernet
         if( $this->address )
             $result['Mac'] = $this->address;
         if( $this->network ){
-            $etva_vlan = EtvaVlanPeer::retrieveByName($this->network);
-            $result['Vlan'] = $etva_vlan->getName();
-            $result['VlanId'] = $etva_vlan->getId();
+            if( $etva_vlan = EtvaVlanPeer::retrieveByName($this->network) ){
+                $result['Vlan'] = $etva_vlan->getName();
+                $result['VlanId'] = $etva_vlan->getId();
+            }
         }
 		return $result;
     }

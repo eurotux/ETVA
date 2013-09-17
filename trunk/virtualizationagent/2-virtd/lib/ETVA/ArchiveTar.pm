@@ -9,6 +9,8 @@ require Exporter;
 use Package::Constants;
 use MIME::Base64 qw(encode_base64);
 
+use Cwd qw(abs_path);
+
 use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
             $DO_NOT_USE_PREFIX $HAS_PERLIO $HAS_IO_STRING $SAME_PERMISSIONS
             $INSECURE_EXTRACT_MODE $ZERO_PAD_NUMBERS @ISA @EXPORT
@@ -169,7 +171,7 @@ sub package_size {
         $pkgsize += $F->{'size'};
         $pkgsize += length( TAR_PAD->( $F->{'size'} ) ) if( $F->{'size'} % BLOCK );
     }
-    $pkgsize += length( TAR_END x 2 );
+    #$pkgsize += length( TAR_END x 2 );
     return $pkgsize;
 }
 
@@ -196,7 +198,7 @@ sub write {
         my $toklen = 512;
         my $fh;
         if( -b "$fpath" ){
-            open($fh,"/bin/dd if=$fpath 2>/dev/null|");
+            open($fh,"/bin/dd if=$fpath bs=4M 2>/dev/null|");
         } elsif( -e "$fpath" ){
             open($fh,"$fpath");
             binmode($fh);
@@ -220,7 +222,8 @@ sub write {
         print $handle TAR_PAD->( $size ) if $size % BLOCK;
     }
 
-    print $handle TAR_END x 2;
+    # CMAR: see #737 - remove this to prevent wrong size of big files
+    #print $handle TAR_END x 2;
 
     close($handle) if( $file );
 }
@@ -254,7 +257,7 @@ sub _filetype {
 sub size_blockdev {
     my ($dev) = @_;
     if( -l "$dev" ){
-        $dev = readlink $dev;
+        $dev = abs_path($dev);
     }
     if( -b "$dev" ){
         my ($rdev) = (lstat $dev)[6];
@@ -333,7 +336,7 @@ sub add_file {
         chksum      => CHECK_SUM,
         type        => $type,
         linkname    => ($type == SYMLINK and CAN_READLINK)
-                            ? readlink $path
+                            ? abs_path($path)
                             : '',
         magic       => MAGIC,
         version     => TAR_VERSION,

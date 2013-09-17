@@ -130,14 +130,14 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
         });
 
         this.tbar = [
-                    {
+                    /*{
                         text: <?php echo json_encode(__('Add server wizard')) ?>,
                         ref: '../addwizardBtn',
                         disabled:true,
                         hidden:true,
                         iconCls: 'icon-add',
                         handler: View.clickHandler
-                    },
+                    },*/
                     {
                         text: <?php echo json_encode(__('Open console')) ?>,
                         ref: '../consoleBtn',
@@ -544,7 +544,8 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                                 ,{name:'size', type:'int'}
                                 ,{name:'pos', type:'int'}
                                 ,{name:'disk_type', type:'string'}
-                                ,{name:'storage_type', type:'string'}],
+                                ,{name:'storage_type', type:'string'}
+                                ,{name:'per_usage_snapshots', type:'string'}],
                             totalProperty: 'total',
                             root: 'data',
                             listeners:{
@@ -564,10 +565,20 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
         var disk_cols = [
                 new Ext.grid.RowNumberer(),
-                {id:'lv', header: <?php echo json_encode(__('Name')) ?>, sortable: false, dataIndex: 'lv'},
-                {header: <?php echo json_encode(__('Size')) ?>, sortable: true, dataIndex: 'size',renderer:function(v){return Ext.util.Format.fileSize(v);}}
-                ,{header: <?php echo json_encode(__('Type')) ?>,dataIndex: 'disk_type'}
-                ,{header: <?php echo json_encode(__('Storage type')) ?>,dataIndex: 'storage_type'}
+                {id:'lv', header: __('Name'), sortable: false, dataIndex: 'lv'},
+                {header: __('Size'), sortable: true, dataIndex: 'size',renderer:function(v){return Ext.util.Format.fileSize(v);}}
+                ,{header: __('Type'),dataIndex: 'disk_type'}
+                ,{header: __('Storage type'),dataIndex: 'storage_type'}
+                ,{header: __('Usage snapshots'),dataIndex: 'per_usage_snapshots',
+                            renderer: function (value, metadata, record, rowIndex, colIndex, store) {
+                                if( record.json.per_usage > 0 && record.json.per_usage < 1 ){
+                                    if( value>=<?php echo EtvaLogicalvolume::PER_USAGESNAPSHOTS_CRITICAL ?> ) metadata.attr = 'style="background-color: red;color:white;"';
+                                    else if( value>=<?php echo EtvaLogicalvolume::PER_USAGESNAPSHOTS_WARNING ?> ) metadata.attr = 'style="background-color: yellow;color:white;"';
+                                    else metadata.attr = 'style="background-color: green;color:white;"';
+                                    return String.format("{0}%",Math.round(value*100));
+                                } else return '&#160;';
+                            }
+                 }
         ];
 
         this.disk_grid = new Ext.grid.GridPanel({
@@ -577,7 +588,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                             store: disk_store,
                             columns: disk_cols,
                             loadMask: true,
-                            viewConfig: {forceFit:true},
+                            //viewConfig: {forceFit:true},
                             stripeRows: true,
                             autoExpandColumn: 'lv',
                             bbar: new Ext.ux.grid.TotalCountBar({
@@ -699,7 +710,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                 var response = Ext.decode(resp.responseText);
                 
                 if(response['datacenter']){
-                    this.addwizardBtn.show();
+                    //this.addwizardBtn.show();
                     this.editBtn.show();
                     if(this.migrateBtn){
                         this.migrateBtn.show();
@@ -716,7 +727,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         this.stopBtn.show();
 
                     }else{
-                        this.addwizardBtn.hide();
+                        //this.addwizardBtn.hide();
                         this.editBtn.hide();
                         if(this.migrateBtn){
                             this.migrateBtn.hide();
@@ -773,7 +784,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                 var can_create_vms = data.can_create_vms;
                 var not_running_msg = <?php echo json_encode(__('VirtAgent should be running to enable this menu')) ?>;
 
-                if( !data.unassigned ){
+                /*if( !data.unassigned ){
                     this.addwizardBtn.setDisabled(!can_create_vms || (nodeState!=<?php echo json_encode(EtvaNode::NODE_ACTIVE); ?>));
                     this.addwizardBtn.url = <?php echo(json_encode(url_for('server/wizard?nid=')))?>+node_id;
 
@@ -789,8 +800,8 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     else
                     {
                         this.addwizardBtn.el.child('button:first').dom.qtip = not_running_msg;
-                    }                
-                }
+                    }               
+                }*/
 
                 /*
                  * check vm state

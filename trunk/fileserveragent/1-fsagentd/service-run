@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd /srv/etva-fsagent
+exec > /var/log/etva-fsagent/fsagentd.log 2>&1
+exec /usr/bin/perl -I./lib fsagentd
+
+

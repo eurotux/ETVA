@@ -39,6 +39,10 @@ class EtvaSettingPeer extends BaseEtvaSettingPeer {
     const _SMTP_KEY_        = 'smtpkey';
     const _SMTP_SECURITY_   = 'smtpsecurity_type';
 
+    const _ALERT_EMAIL_   = 'alert_email';
+    const _ALERT_EMAIL_FROM_   = 'alert_email_from';
+    const _ALERT_SUBJECT_PREFIX_   = 'alert_subject_prefix';
+
     public static function addDefault($param){
         $default = sfConfig::get('app_setting_'.$param);
         if(isset($default)){

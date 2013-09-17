@@ -173,12 +173,180 @@ class ovfActions extends sfActions
 
     }
 
+    private function jsonImportCheck(sfWebRequest $request)
+    {
+        $nid = $request->getParameter('nid');
+        $import_data = json_decode($request->getParameter('import'),true);
 
+        $server = $import_data;
+        $server['name'] = $import_data['name'];
+        $server['vm_type'] = $import_data['vm_type'];
+
+        if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
+
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify event log
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+            $message = Etva::getLogMessage(array('info'=>$node_log), OvfEnvelope_VA::_ERR_IMPORT_);
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            return $error;
+        }
+
+
+        /*
+         * check if name is unique
+         */
+        if($etva_server = EtvaServerPeer::retrieveByName($server['name'])){
+
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_EXIST_,array('%name%'=>$server['name']));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify event log
+            $server_log = Etva::getLogMessage(array('name'=>$server['name']), EtvaServerPeer::_ERR_EXIST_);
+            $message = Etva::getLogMessage(array('info'=>$server_log), OvfEnvelope_VA::_ERR_IMPORT_);
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            return $error;
+            
+        }
+
+        if( isset($import_data['disks']) ){
+            $disks = $import_data['disks'];
+            foreach($disks as $id => $info){
+                $vg = $info['vg'];
+                $lv = $info['lv'];
+                
+                if($etva_lv = $etva_node->retrieveLogicalvolumeByLv($lv)){
+
+                    $msg_type = $is_DiskFile ? EtvaLogicalvolumePeer::_ERR_DISK_EXIST_ : EtvaLogicalvolumePeer::_ERR_LV_EXIST_;
+                    $msg = Etva::getLogMessage(array('name'=>$lv), $msg_type);
+                    $msg_i18n = $this->getContext()->getI18N()->__($msg_type,array('%name%'=>$lv));
+
+
+                    $error = array('success'=>false,
+                               'agent'=>$etva_node->getName(),
+                               'error'=>$msg_i18n,
+                               'info'=>$msg_i18n);
+
+                    //notify system log
+                    $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), OvfEnvelope_VA::_ERR_IMPORT_);
+                    $this->dispatcher->notify(
+                        new sfEvent($error['agent'], 'event.log',
+                            array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+                    return $error;
+                }
+
+                if(!$etva_vg = $etva_node->retrieveVolumegroupByVg($vg)){
+
+                    $msg = Etva::getLogMessage(array('name'=>$vg), EtvaVolumegroupPeer::_ERR_NOTFOUND_);
+                    $msg_i18n = $this->getContext()->getI18N()->__(EtvaVolumegroupPeer::_ERR_NOTFOUND_,array('%name%'=>$vg));
+
+                    $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n, 'info'=>$msg_i18n);
+
+                    //notify system log
+                    $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), OvfEnvelope_VA::_ERR_IMPORT_);
+                    $this->dispatcher->notify(
+                        new sfEvent($error['agent'], 'event.log',
+                            array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+                    return $error;
+                }
+            }
+        }
+
+        if( isset($import_data['networks']) ){
+            $networks = $import_data['networks'];
+            $networks_va = $import_data['networks'];
+
+            // check if networks are available
+            foreach ($networks as $network){
+
+                $etva_vlan = EtvaVlanPeer::retrieveByPk($network['vlan_id']);
+                $etva_mac = EtvaMacPeer::retrieveByMac($network['mac']);
+
+                /*
+                 * TODO improve this to add Mac Address to the pool
+                 */
+
+                if(!$etva_mac || !$etva_vlan){
+
+                    $msg = Etva::getLogMessage(array(), EtvaNetworkPeer::_ERR_);
+                    $msg_i18n = $this->getContext()->getI18N()->__(EtvaNetworkPeer::_ERR_,array());
+
+                    if( !$etva_mac ){
+                        $msg = Etva::getLogMessage(array('%mac%'=>$network['mac']), EtvaMacPeer::_ERR_INVALID_MAC_);
+                        $msg_i18n = $this->getContext()->getI18N()->__(EtvaMacPeer::_ERR_INVALID_MAC_,array('%mac%'=>$network['mac']));
+                    }
+
+                    $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+                    //notify event log
+                    $message = Etva::getLogMessage(array('name'=>$server['name'],'info'=>$msg), OvfEnvelope_VA::_ERR_IMPORT_);
+                    $this->dispatcher->notify(
+                        new sfEvent($error['agent'], 'event.log',
+                            array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+                    return $error;
+                }
+
+                if($etva_mac->getInUse()){
+
+                    $msg = Etva::getLogMessage(array('%name%'=>$etva_mac->getMac()), EtvaMacPeer::_ERR_ASSIGNED_);
+                    $msg_i18n = $this->getContext()->getI18N()->__(EtvaMacPeer::_ERR_ASSIGNED_,array('%name%'=>$etva_mac->getMac()));
+
+                    $error = array('success'=>false,'agent'=>$etva_node->getName(),'info'=>$msg_i18n,'error'=>$msg_i18n);
+
+                    //notify event log
+                    $message = Etva::getLogMessage(array('name'=>$server['name'],'info'=>$msg), OvfEnvelope_VA::_ERR_IMPORT_);
+                    $this->dispatcher->notify(
+                        new sfEvent($error['agent'], 'event.log',
+                            array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+                    return $error;
+                }
+            }
+        }
+        
+        $msg_i18n = $this->getContext()->getI18N()->__(OvfEnvelope_VA::_OK_OVF_IMPORT_VALIDATION_,array());
+        $message = Etva::getLogMessage(array(), OvfEnvelope_VA::_OK_OVF_IMPORT_VALIDATION_);
+        $this->dispatcher->notify(new sfEvent($etva_node->getName(), 'event.log', array('message' => $message)));
+
+        $result = array('success'=>true,
+                        'agent'=>$response['agent'],
+                        'response'=>$msg_i18n);
+
+        return $result;
+
+    }
+    public function executeJsonImportCheck(sfWebRequest $request)
+    {
+        $result = $this->jsonImportCheck($request);
+
+        // if is a CLI soap request return json encoded data
+        if(sfConfig::get('sf_environment') == 'soap') return json_encode($result);
+
+        // if is browser request return text renderer
+        if( !$result['success'] ){
+            $error = $this->setJsonError($result);
+            return $this->renderText($error);
+        } else {
+            $return = json_encode($result);
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+            return  $this->renderText($return);                               
+        }
+    }
     public function executeJsonImport(sfWebRequest $request)
     {
-        //$this->getUser()->shutdown();
-        //session_write_close();
-
         $nid = $request->getParameter('nid');
         $import_data = json_decode($request->getParameter('import'),true);
 
@@ -194,6 +362,17 @@ class ovfActions extends sfActions
         $import_data['uuid'] = $server['uuid'];
         $import_data['vnc_keymap'] = $server['vnc_keymap'];
         
+        // import validation check
+        $result = $this->jsonImportCheck($request);
+
+        if( !$result['success'] ){
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($result);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($result);
+            return $this->renderText($error);
+        }
 
         if(!$etva_node = EtvaNodePeer::retrieveByPK($nid)){
 
@@ -217,32 +396,6 @@ class ovfActions extends sfActions
 
         }
 
-
-        /*
-         * check if name is unique
-         */
-        if($etva_server = EtvaServerPeer::retrieveByName($server['name'])){
-
-            $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_EXIST_,array('%name%'=>$server['name']));
-
-            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
-
-            //notify event log
-            $server_log = Etva::getLogMessage(array('name'=>$server['name']), EtvaServerPeer::_ERR_EXIST_);
-            $message = Etva::getLogMessage(array('info'=>$server_log), OvfEnvelope_VA::_ERR_IMPORT_);
-            $this->dispatcher->notify(
-                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-
-            // if is a CLI soap request return json encoded data
-            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
-
-            // if is browser request return text renderer
-            $error = $this->setJsonError($error);
-            return $this->renderText($error);
-            
-        }
-
         $disks = $import_data['disks'];
         $collVgs = array();
         foreach($disks as $id => $info){
@@ -262,7 +415,7 @@ class ovfActions extends sfActions
                            'info'=>$msg_i18n);
 
                 //notify system log
-                $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_CREATE_);
+                $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), OvfEnvelope_VA::_ERR_IMPORT_);
                 $this->dispatcher->notify(
                     new sfEvent($error['agent'], 'event.log',
                         array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
@@ -277,7 +430,6 @@ class ovfActions extends sfActions
 
             }
 
-
             if(!$etva_vg = $etva_node->retrieveVolumegroupByVg($vg)){
 
                 $msg = Etva::getLogMessage(array('name'=>$vg), EtvaVolumegroupPeer::_ERR_NOTFOUND_);
@@ -286,7 +438,7 @@ class ovfActions extends sfActions
                 $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n, 'info'=>$msg_i18n);
 
                 //notify system log
-                $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_CREATE_);
+                $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), OvfEnvelope_VA::_ERR_IMPORT_);
                 $this->dispatcher->notify(
                     new sfEvent($error['agent'], 'event.log',
                         array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
@@ -306,7 +458,6 @@ class ovfActions extends sfActions
             $import_data['disks'][$id]['lv'] = $is_DiskFile ? $etva_node->getStoragedir().'/'.$lv : $lv;
 
             $collVgs[$vg] = $etva_vg;
-
         }
 
 
@@ -317,22 +468,31 @@ class ovfActions extends sfActions
         // check if networks are available
         foreach ($networks as $network){
 
-            $etva_vlan = EtvaVlanPeer::retrieveByPk($network['vlan_id']);
-            $import_data['networks'][$i]['network'] = $etva_vlan->getName();
-            $import_data['networks'][$i]['macaddr'] = $network['mac'];
+            if( $etva_vlan = EtvaVlanPeer::retrieveByPk($network['vlan_id']) ){
+                $import_data['networks'][$i]['network'] = $etva_vlan->getName();
+                $import_data['networks'][$i]['macaddr'] = $network['mac'];
+            }
             
             $etva_mac = EtvaMacPeer::retrieveByMac($network['mac']);
 
+            /*
+             * TODO improve this to add Mac Address to the pool
+             */
 
             if(!$etva_mac || !$etva_vlan){
 
                 $msg = Etva::getLogMessage(array(), EtvaNetworkPeer::_ERR_);
                 $msg_i18n = $this->getContext()->getI18N()->__(EtvaNetworkPeer::_ERR_,array());
 
-                $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n);
+                if( !$etva_mac ){
+                    $msg = Etva::getLogMessage(array('%mac%'=>$network['mac']), EtvaMacPeer::_ERR_INVALID_MAC_);
+                    $msg_i18n = $this->getContext()->getI18N()->__(EtvaMacPeer::_ERR_INVALID_MAC_,array('%mac%'=>$network['mac']));
+                }
+
+                $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
                 //notify event log
-                $message = Etva::getLogMessage(array('name'=>$server['name'],'info'=>$msg), EtvaServerPeer::_ERR_CREATE_);
+                $message = Etva::getLogMessage(array('name'=>$server['name'],'info'=>$msg), OvfEnvelope_VA::_ERR_IMPORT_);
                 $this->dispatcher->notify(
                     new sfEvent($error['agent'], 'event.log',
                         array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
@@ -354,7 +514,7 @@ class ovfActions extends sfActions
                 $error = array('success'=>false,'agent'=>$etva_node->getName(),'info'=>$msg_i18n,'error'=>$msg_i18n);
 
                 //notify event log
-                $message = Etva::getLogMessage(array('name'=>$server['name'],'info'=>$msg), EtvaServerPeer::_ERR_CREATE_);
+                $message = Etva::getLogMessage(array('name'=>$server['name'],'info'=>$msg), OvfEnvelope_VA::_ERR_IMPORT_);
                 $this->dispatcher->notify(
                     new sfEvent($error['agent'], 'event.log',
                         array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
@@ -376,8 +536,6 @@ class ovfActions extends sfActions
         
         $env = new OvfEnvelope_VA();
         $env->fromArray($import_data);
-               
-
 
         /* get server copy VA server representation */
         $params = $env->_VA();

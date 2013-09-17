@@ -167,12 +167,20 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
                         },
                         // TODO
                         //   resize pv
-                        //   {id:'pv-resize',
-                        //     iconCls:'go-action',
-                        //     text:'Resize volume',
-                        //     scope: this,
-                        //     handler:this.pvresize
-                        //    },
+                        /*{id:'pv-resize',
+                            ref: 'pv_resize',
+                            iconCls:'go-action',
+                            text:'Resize volume',
+                            scope: this,
+                            handler:this.pvresize
+                        },*/
+                        {id:'pv-expand',
+                            ref: 'pv_expand',
+                            iconCls:'go-action',
+                            text: <?php echo json_encode(__('Expand physical volume')) ?>,
+                            scope: this,
+                            handler:this.pvexpand
+                        },
                         {ref:'pv_remove',
                             iconCls:'go-action',
                             text: <?php echo json_encode(__('Uninitialize physical volume')) ?>,
@@ -205,6 +213,7 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
                 this.ctxNode.ui.addClass('x-node-ctx');
                 this.menu.pv_create.setDisabled(node.attributes.cls.match(/dev-pv/) || node.attributes.cls.match(/-inc/) || childItems==0);
                 this.menu.pv_remove.setDisabled(node.attributes.cls.match(/dev-pd/) || node.attributes.cls.match(/-inc/) || childItems==0);
+                this.menu.pv_expand.setDisabled(node.attributes.cls.match(/-inc/) || childItems==0);
                 this.menu.pv_unregister.setDisabled( !node.attributes.cls.match(/-inc/) && (node.attributes.cls.match(/dev-pv/) || childItems==0) );
                 this.menu.showAt(e.getXY());
             }
@@ -327,77 +336,176 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
 
             win.show();
         },
-        // uninitialize physical volume
-        // unsets physical volume info for the device
+        // expand physical volume
+        // expand size of physical volume
         // args device ID
-        pvremove:function(){
+        pvexpand:function(){
             var ctx = this.ctxNode;
             var tree = ctx.getOwnerTree();
 
-            var myparams = {};
-            var myurl = '';
+            Ext.MessageBox.show({
+                    title: <?php echo json_encode(__('Expand physical volume')) ?>,
+                    msg: String.format(<?php echo json_encode(__('Do you want expand physical volume {0} ?')) ?>,ctx.attributes.device),
+                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    fn: function(btn){
 
-//                params: {'nid':this.node_id,'dev':ctx.attributes.device},
-            if(this.level == 'cluster'){
-                myparams = {'cid':this.tree_node_id, 'dev':ctx.attributes.device, 'level':this.level};
-            }else if(this.level == 'node'){
-                myparams = {'nid':this.tree_node_id, 'dev':ctx.attributes.device, 'level':this.level};
-            }else{
-                myparams = {'nid':this.node_id, 'dev':ctx.attributes.device}
-            }
-            if( ctx.attributes['uuid'] )
-                myparams['uuid'] = ctx.attributes['uuid'];
-            if( ctx.attributes['device'] )
-                myparams['dev'] = ctx.attributes['device'];
+                        if(btn=='yes'){
 
-            var conn = new Ext.data.Connection({
-                listeners:{
-                    beforerequest:function(){
-                        Ext.MessageBox.show({
-                            title: <?php echo json_encode(__('Please wait...')) ?>,
-                            msg: <?php echo json_encode(__('Uninitializing physical volume...')) ?>,
-                            width:300,
-                            wait:true
-                        });
+                            var myparams = {};
+                            var myurl = '';
 
+                //                params: {'nid':this.node_id,'dev':ctx.attributes.device},
+                            if(this.level == 'cluster'){
+                                myparams = {'cid':this.tree_node_id, 'dev':ctx.attributes.device, 'level':this.level};
+                            }else if(this.level == 'node'){
+                                myparams = {'nid':this.tree_node_id, 'dev':ctx.attributes.device, 'level':this.level};
+                            }else{
+                                myparams = {'nid':this.node_id, 'dev':ctx.attributes.device}
+                            }
+                            if( ctx.attributes['uuid'] )
+                                myparams['uuid'] = ctx.attributes['uuid'];
+                            if( ctx.attributes['device'] )
+                                myparams['dev'] = ctx.attributes['device'];
+
+                            var conn = new Ext.data.Connection({
+                                listeners:{
+                                    beforerequest:function(){
+                                        Ext.MessageBox.show({
+                                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                                            msg: <?php echo json_encode(__('Expanding physical volume...')) ?>,
+                                            width:300,
+                                            wait:true
+                                        });
+
+                                    },
+                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                    ,requestexception:function(c,r,o){
+                                                        Ext.MessageBox.hide();
+                                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+
+                                }
+                            });
+
+                            conn.request({
+                                url: <?php echo json_encode(url_for('physicalvol/jsonExpand'))?>,
+                                //params: {'nid':this.node_id,'dev':ctx.attributes.device},
+                                params: myparams,
+                                scope:this,
+                                success: function(resp,opt){
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+
+                                    Ext.ux.Logger.info(response['agent'], response['response']);
+
+                                    tree.root.reload(function(){
+
+                                        tree.getNodeById(ctx.parentNode.id).expand(false,false,
+                                                                function(){tree.getNodeById(ctx.id).select();}
+                                                                );
+
+                                    });
+                                },
+                                failure: function(resp,opt) {
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+
+                                    Ext.Msg.show({
+                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                        buttons: Ext.MessageBox.OK,
+                                        msg: String.format(<?php echo json_encode(__('Unable to expand {0}!')) ?>,ctx.attributes.device)+'<br>'+response['info'],
+                                        icon: Ext.MessageBox.ERROR});
+                                }
+
+                            });// END Ajax request
+                        }
                     },
-                    requestcomplete:function(){Ext.MessageBox.hide();}
-                    ,requestexception:function(c,r,o){
-                                        Ext.MessageBox.hide();
-                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
-
-                }
+                    scope:this,
+                    icon: Ext.MessageBox.QUESTION
             });
 
-            conn.request({
-                url: <?php echo json_encode(url_for('physicalvol/jsonUninit'))?>,
-                //params: {'nid':this.node_id,'dev':ctx.attributes.device},
-                params: myparams,
-                scope:this,
-                success: function(resp,opt){
-                    var response = Ext.util.JSON.decode(resp.responseText);
+        }// end pvexpand
+        // uninitialize physical volume
+        // unsets physical volume info for the device
+        // args device ID
+        ,pvremove:function(){
+            var ctx = this.ctxNode;
+            var tree = ctx.getOwnerTree();
 
-                    Ext.ux.Logger.info(response['agent'], response['response']);
+            Ext.MessageBox.show({
+                    title: <?php echo json_encode(__('Uninitialize physical volume')) ?>,
+                    msg: String.format(<?php echo json_encode(__('Uninitialize physical volume {0} ?')) ?>,ctx.attributes.device),
+                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    fn: function(btn){
 
-                    tree.root.reload(function(){
+                        if(btn=='yes'){
 
-                        tree.getNodeById(ctx.parentNode.id).expand(false,false,
-                                                function(){tree.getNodeById(ctx.id).select();}
-                                                );
+                            var myparams = {};
+                            var myurl = '';
 
-                    });
-                },
-                failure: function(resp,opt) {
-                    var response = Ext.util.JSON.decode(resp.responseText);
+                //                params: {'nid':this.node_id,'dev':ctx.attributes.device},
+                            if(this.level == 'cluster'){
+                                myparams = {'cid':this.tree_node_id, 'dev':ctx.attributes.device, 'level':this.level};
+                            }else if(this.level == 'node'){
+                                myparams = {'nid':this.tree_node_id, 'dev':ctx.attributes.device, 'level':this.level};
+                            }else{
+                                myparams = {'nid':this.node_id, 'dev':ctx.attributes.device}
+                            }
+                            if( ctx.attributes['uuid'] )
+                                myparams['uuid'] = ctx.attributes['uuid'];
+                            if( ctx.attributes['device'] )
+                                myparams['dev'] = ctx.attributes['device'];
 
-                    Ext.Msg.show({
-                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
-                        buttons: Ext.MessageBox.OK,
-                        msg: String.format(<?php echo json_encode(__('Unable to uninitialize {0}!')) ?>,ctx.attributes.device)+'<br>'+response['info'],
-                        icon: Ext.MessageBox.ERROR});
-                }
+                            var conn = new Ext.data.Connection({
+                                listeners:{
+                                    beforerequest:function(){
+                                        Ext.MessageBox.show({
+                                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                                            msg: <?php echo json_encode(__('Uninitializing physical volume...')) ?>,
+                                            width:300,
+                                            wait:true
+                                        });
 
-            });// END Ajax request
+                                    },
+                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                    ,requestexception:function(c,r,o){
+                                                        Ext.MessageBox.hide();
+                                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+
+                                }
+                            });
+
+                            conn.request({
+                                url: <?php echo json_encode(url_for('physicalvol/jsonUninit'))?>,
+                                //params: {'nid':this.node_id,'dev':ctx.attributes.device},
+                                params: myparams,
+                                scope:this,
+                                success: function(resp,opt){
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+
+                                    Ext.ux.Logger.info(response['agent'], response['response']);
+
+                                    tree.root.reload(function(){
+
+                                        tree.getNodeById(ctx.parentNode.id).expand(false,false,
+                                                                function(){tree.getNodeById(ctx.id).select();}
+                                                                );
+
+                                    });
+                                },
+                                failure: function(resp,opt) {
+                                    var response = Ext.util.JSON.decode(resp.responseText);
+
+                                    Ext.Msg.show({
+                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                        buttons: Ext.MessageBox.OK,
+                                        msg: String.format(<?php echo json_encode(__('Unable to uninitialize {0}!')) ?>,ctx.attributes.device)+'<br>'+response['info'],
+                                        icon: Ext.MessageBox.ERROR});
+                                }
+
+                            });// END Ajax request
+                        }
+                    },
+                    scope:this,
+                    icon: Ext.MessageBox.QUESTION
+            });
 
         }// end pvremove
         // scan new physical devices
@@ -1305,6 +1413,21 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
 
                         if(v) return Ext.util.Format.fileSize(v);
                         else return '&#160;';
+                    }
+                })
+            },
+            {
+                header: __('Usage snapshots'),
+                align: 'center',
+                width: 100,
+                dataIndex: 'per_usage_snapshots',
+                sortType: function(node) {
+                    var per = parseFloat(node.attributes.per_usage_snapshots);
+                    return per;
+                },
+                tpl: new Ext.XTemplate('{per_usage_snapshots:this.formatPercentage}', {
+                    formatPercentage: function(v) {
+                        return String.format("{0}%",Math.round(v*100));
                     }
                 })
             }]

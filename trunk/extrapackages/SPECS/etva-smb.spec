@@ -1,6 +1,6 @@
 Name: etva-smb
 Summary: ETVA smb related files
-Version: 1.2.2
+Version: 2.0.0
 Release: 11%{?dist}
 Group: System Environment/Base
 License: Copyright © 2010-2011 Eurotux Informatica S.A.  All rights reserved.
@@ -37,6 +37,10 @@ if [ "$1" == "1" ]; then
     if [ ! -e "%{_sysconfdir}/sysconfig/lcdproc/lcdproc.conf" ]; then
         cp -f %{_sysconfdir}/sysconfig/lcdproc/lcdproc.conf.new %{_sysconfdir}/sysconfig/lcdproc/lcdproc.conf
     fi
+
+	# Modifica user e group do qemu
+	%{__perl} -pi -e "s/^#?user = .*/user = \"root\"/" %{_sysconfdir}/libvirt/qemu.conf
+	%{__perl} -pi -e "s/^#?group = .*/group = \"root\"/" %{_sysconfdir}/libvirt/qemu.conf
 
     # Alterar o shutdown dos guest e timeout
 	%{__perl} -pi -e 's/#ON_BOOT=start/ON_BOOT=ignore/' %{_sysconfdir}/sysconfig/libvirt-guests

@@ -35,7 +35,117 @@ In the \acronym, there are several virtualization servers (nodes) that communica
 This user's manual describes the configuration management tool (CM - \emph{Central Management}). 
 
 \pagebreak
-%\chapter{\textsf{Instalação}}
-%\label{chp:installation}
-%
-%\pagebreak
+\chapter{\textsf{Installation}}
+\label{chp:installation}
+\section{Enterprise version}
+
+To make installation we need to use CD-ROM with NUXIS ISO installation and boot the server from it.
+
+For enterprise version, we need one server to install manager interface (\emph{Central Management}) and do installation on each virtualization server.
+
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.4]{screenshots/install/nuxis/bootmenu.png}
+	\caption{Enterprise version menu installation}
+	\label{fig:boot_install_screen_enterprise}
+	\end{center}
+\end{figure}
+
+In both cases, we need boot by CD-ROM and choose \emph{Install NUXIS-ENTERPRISE} option to do the installation step-by-step.
+
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.3]{screenshots/install/nuxis/boot_installer.png}
+	\includegraphics[scale=0.3]{screenshots/install/nuxis/load_installer_01.png}
+	%\includegraphics[scale=0.4]{screenshots/install/nuxis/load_installer_02.png}
+	\includegraphics[scale=0.3]{screenshots/install/nuxis/wizard_install_01.png}
+    \caption{Enterprise version installation - Startup}
+	\label{fig:installation_enterprise_02}
+	\end{center}
+\end{figure}
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/wizard_install_02.png}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/wizard_install_03.png}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/wizard_install_04.png}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/wizard_install_05.png}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/wizard_install_06.png}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/wizard_install_07.png}
+    \caption{Enterprise version installation - Configuration}
+	\label{fig:installation_enterprise_03}
+	\end{center}
+\end{figure}
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/packages_selection_01.png}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/packages_selection_02.png}
+    \caption{Enterprise version installation - Packages}
+	\label{fig:installation_enterprise_05}
+	\end{center}
+\end{figure}
+
+
+On packages interface we should choose \emph{Nuxis Central Management} package for management interface installation, \emph{Nuxis Kernel Virtual Machine} for virtualization server with KVM support and \emph{Nuxis Xen Virtual Machine} for server with XEN support.
+
+\begin{figure}[H]
+	\begin{center}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/start_install.png}
+	\includegraphics[scale=0.2]{screenshots/install/nuxis/install_progress_02.png}
+	\includegraphics[scale=0.4]{screenshots/install/nuxis/install_reboot.png}
+    \caption{Enterprise version installation - complete installation}
+	\label{fig:installation_enterprise_06}
+	\end{center}
+\end{figure}
+
+At the end of installation, we start up the server and proceed to network configuration.
+
+\begin{figure}[H]
+	\begin{center}
+    \includegraphics[scale=0.4]{screenshots/install/nuxis/pos_install_bootmenu.png}
+    \caption{Configuration after installation - Boot}
+	\label{fig:installation_enterprise_pos_01}
+	\end{center}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{center}
+    \includegraphics[scale=0.3]{screenshots/install/nuxis/login.png}
+    \includegraphics[scale=0.3]{screenshots/install/nuxis/configure_network.png}
+    \caption{Configuration after installation - Login and network configuration}
+	\label{fig:installation_enterprise_pos_02}
+	\end{center}
+\end{figure}
+
+For network configuration, we should acess to server console with login \emph{root} and password and set the IP address.
+
+\begin{figure}[H]
+	\begin{center}
+    \includegraphics[scale=0.4]{screenshots/install/nuxis/nuxis_enterprise_pos_install_21.png}
+    \caption{Configuration after installation - Authentication}
+	\label{fig:installation_enterprise_pos_03}
+	\end{center}
+\end{figure}
+
+Next we access to web inteface with IP address and authentication with user \emph{admin} and default \emph{password} (\emph{admin}).
+
+\begin{figure}[H]
+	\begin{center}
+    \includegraphics[scale=0.4]{screenshots/install/nuxis/nuxis_enterprise_wiz_install_22.png}
+    \caption{Configuration after installation - First time configuration}
+	\label{fig:installation_enterprise_wiz_01}
+	\end{center}
+\end{figure}
+
+On first time configuration, we should change the admin password, generate MAC pool, change conectivity preferences and configure network (see \ref{fig:first_time_wizard}).
+
+\begin{figure}[H]
+	\begin{center}
+    \includegraphics[scale=0.4]{screenshots/install/nuxis/nuxis_enterprise_wiz_install_28.png}
+    \caption{Configuration after installation - Virtualization server}
+	\label{fig:installation_enterprise_wiz_02}
+	\end{center}
+\end{figure}
+
+After configure management interface and after install the virtualizations servers, it should be possible to see the servers registered on interface and authorize them (with right click menu) to allow the management.
+
+\pagebreak

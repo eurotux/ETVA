@@ -81,7 +81,9 @@ class EtvaNode extends BaseEtvaNode
 		}		
         
         $criteria->add(EtvaNodeLogicalvolumePeer::NODE_ID, $this->getId());
-        $criteria->add(EtvaLogicalvolumePeer::LV,'etva-isos',Criteria::NOT_EQUAL);
+        $criteria->addAnd(EtvaLogicalvolumePeer::LV,'etva-isos',Criteria::NOT_EQUAL);
+        $criteria->addAnd(EtvaLogicalvolumePeer::LV,'etva_isos',Criteria::NOT_EQUAL);
+        $criteria->addAnd(EtvaLogicalvolumePeer::LV,'etvaisos',Criteria::NOT_EQUAL);
         $criteria->addJoin(EtvaNodeLogicalvolumePeer::LOGICALVOLUME_ID, EtvaLogicalvolumePeer::ID);        
         $criteria->addAscendingOrderByColumn(EtvaLogicalvolumePeer::LV);
 

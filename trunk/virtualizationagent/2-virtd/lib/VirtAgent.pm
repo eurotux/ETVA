@@ -385,7 +385,7 @@ sub domainStats {
         }
 
         my $has_snapshots = 0;
-        if( &haveSnapshotSupport() ){
+        if( &haveSnapshotSupport($dom) ){
             if( my $lsnaps = $self->domainListSnapshots($dom) ){
                 $has_snapshots = 1 if( !isError($lsnaps) && @$lsnaps );
             }
@@ -1245,22 +1245,66 @@ sub restoreDomain {
 # create snapshots
 my $HAVEVIRSHCREATESNAPSHOTSUPPORT;
 sub haveVirshCreateSnapshotSupport {
-    my ($err) = @_;
+    my ($err,$dom) = @_;
+    if( !$dom && (ref($err) eq 'Sys::Virt::Domain') ){
+        $dom = $err;
+        $err = "";
+    }
     if( $err =~ m/error: this function is not supported by the connection driver/ ){
+        plogNow(" haveVirshCreateSnapshotSupport $err ");
         $HAVEVIRSHCREATESNAPSHOTSUPPORT = 0;
     }
     if( not defined $HAVEVIRSHCREATESNAPSHOTSUPPORT ){
         my ($e,$m) = cmd_exec("virsh help");
-        if( $e == 0 && ( $m =~ m/snapshot-create/gs ) ){
-            $HAVEVIRSHCREATESNAPSHOTSUPPORT = 1;
-        } else {
-            $HAVEVIRSHCREATESNAPSHOTSUPPORT = 0;
+        if( $e == 0 && ( $m =~ m/snapshot-create/gs ) && ( $m =~ m/snapshot-list/gs ) ){
+            if( ref($dom) eq 'Sys::Virt::Domain' ){
+                my $name = $dom->get_name();
+                my ($e,$m) = cmd_exec("virsh snapshot-list $name");
+                if( $m =~ m/this function is not supported by the connection driver/ ){
+                    plogNow(" haveVirshCreateSnapshotSupport $m ");
+                    $HAVEVIRSHCREATESNAPSHOTSUPPORT = 0;
+                } else {
+                    $HAVEVIRSHCREATESNAPSHOTSUPPORT = 1;
+                }
+            }
         }
     }
     return $HAVEVIRSHCREATESNAPSHOTSUPPORT;
 }
+# snapshots support
+my $HAVESYSVIRTSNAPSHOTSUPPORT;
+sub haveSysVirtSnapshotSupport {
+    my ($err,$dom) = @_;
+    if( !$dom && (ref($err) eq 'Sys::Virt::Domain') ){
+        $dom = $err;
+        $err = "";
+    }
+    if( $err =~ m/this function is not supported by the connection driver/ ){
+        plogNow(" haveSysVirtSnapshotSupport $err ");
+        $HAVESYSVIRTSNAPSHOTSUPPORT = 0;
+    }
+    if( not defined $HAVESYSVIRTSNAPSHOTSUPPORT ){
+        if( ref($dom) eq 'Sys::Virt::Domain' ){
+            if( $dom->can("create_snapshot") ){
+                eval {
+                    $dom->list_snapshots();
+                };
+                if( $@ ){
+                    $err = $@;
+                    if( $err =~ m/this function is not supported by the connection driver/ ){
+                        plogNow(" haveSysVirtSnapshotSupport $err ");
+                        $HAVESYSVIRTSNAPSHOTSUPPORT = 0;
+                    }
+                } else {
+                    $HAVESYSVIRTSNAPSHOTSUPPORT = 1;
+                }
+            }
+        }
+    }
+    return $HAVESYSVIRTSNAPSHOTSUPPORT;
+}
 sub haveSnapshotSupport {
-    return &haveVirshCreateSnapshotSupport();
+    return &haveSysVirtSnapshotSupport(@_) || &haveVirshCreateSnapshotSupport(@_);
 }
 sub create_snapshot {
     my $self = shift;
@@ -1413,6 +1457,9 @@ sub domainListSnapshots {
 
     my @list = ();
     if( $dom ){
+        if( !&haveSnapshotSupport($dom) ){
+            return retErr('_ERR_LIST_SNAPSHOTS_',"libvirt doesn't support snapshots");
+        }
         if( $dom->can("create_snapshot") ){
             my @snapshots = ();
             eval {
@@ -1666,6 +1713,16 @@ sub genXMLDomain {
             }
         }
         push(@dom_params, $X->cpu(@cpu_params) ) if( @cpu_params );
+    }
+    # clock
+    if( my $C = $params{'clock'} ){
+        my @clock_params = ();
+
+        # get attributes
+        my $clock_attrs = getAttrs($C);
+        push(@clock_params,$clock_attrs) if( $clock_attrs );
+
+        push(@dom_params, $X->clock(@clock_params) ) if( @clock_params );
     }
 
 #    open FILE, ">>/tmp/debug.txt" or die $!;
@@ -1986,6 +2043,9 @@ sub get_osparams_xml {
             push(@os_params, $X->boot( {'dev'=>$params{'os'}{'bootdev'}} ) );
         } else {
             push(@os_params, $X->boot( {'dev'=>'hd'} ) );
+        }
+        if( $params{'os'}{'bootmenu'} ){
+            push(@os_params, $X->bootmenu( {'enable'=>'yes'} ) );
         }
     }
     

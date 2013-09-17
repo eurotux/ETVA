@@ -207,6 +207,7 @@ Ovf.ImportWizard.Cards = function(){
                     };
                         
             var name_tpl = [
+                    {xtype:'hidden',name:'vm_type',ref:'vm_type'},
                     {
                         xtype:'hidden',
                         name:'hypervisor',
@@ -262,9 +263,6 @@ Ovf.ImportWizard.Cards = function(){
                         })
                         ,listeners:{
                                 select:{scope:this, fn:function(combo, record, index) {                                    
-                                    var node_id = record.get('Id');
-                                    var conf = {'id':node_id, 'level':'node'};
-                                    Ext.getCmp('ovfnetwork_cardPanel').confGrid(conf);
 
                                     this.hypervisor.setValue(record.get('hypervisor'));
                                     this.node_memory.setValue(record.get('maxmem'));
@@ -338,6 +336,7 @@ Ovf.ImportWizard.Cards = function(){
                         
                         var form_data = this.getSubmitData();
                         var vm_type = form_data['vm_type'];                        
+                        this.vm_type.setValue(vm_type);
 
                         /*
                          * check networks type
@@ -371,22 +370,29 @@ Ovf.ImportWizard.Cards = function(){
                         var vm_interfaces = interfaces[vm_type] ? interfaces[vm_type] : '';                        
 
                         var ovf_networks = this.wizard.cardPanel.ovf_networks;
+
+                        var node_id = this.nodes_cb.getValue();
+                        var conf = {'id':node_id, 'level':'node','vm_type': vm_type};
+                        Ext.getCmp('ovfnetwork_cardPanel').confGrid(conf);
+
                         var networks_store = ovf_networks.ovfnetworks_grid.getStore();
                         var network_compat = 1;
+
+                        var default_intf_mode = vm_interfaces[0];
+                        if( !default_intf_mode ) default_intf_mode = 'rtl8139';
 
                         networks_store.each(function(f){
                             var data = f.data;
                             var indexOf = vm_interfaces.indexOf(data['intf_model']);
                             
-                            if(indexOf==-1 && data['intf_model']!='') network_compat = 0;
-                            else if(data['intf_model']=='' && vm_type!='pv') data['intf_model'] = 'rtl8139';
+                            if(indexOf==-1 && data['intf_model']!=''){
+                                network_compat = 0;
+                                data['intf_model'] = default_intf_mode;
+                            /*}else if(data['intf_model']=='' && vm_type!='pv'){
+                                data['intf_model'] = default_intf_mode;*/
+                            }
                             
                         });
-                        
-                        if(!network_compat){
-                            this.hasLoaded = false;
-                            msg += <?php echo json_encode(__('VM type selected does not support network interfaces drivers defined in OVF.')) ?>+'<br>';
-                        }
                         
 
                         /*
@@ -421,8 +427,12 @@ Ovf.ImportWizard.Cards = function(){
                         var vm_disks = disks[vm_type] ? disks[vm_type] : '';                        
 
                         var ovf_disks = this.wizard.cardPanel.ovf_storage;
+                        ovf_disks.disk_cb.getStore().filter('type',vm_type);
                         var disks_store = ovf_disks.ovfstorage_grid.getStore();
                         var disks_compat = 1;
+
+                        var default_disk_bus = vm_disks[0];
+                        if( !default_disk_bus ) default_disk_bus = 'ide';
 
                         disks_store.each(function(f){
                             var data = f.data;                            
@@ -430,24 +440,49 @@ Ovf.ImportWizard.Cards = function(){
 
                             if(indexOf==-1){
                                 disks_compat = 0;
+                                data['bus'] = default_disk_bus;
                             }
+                            data['disk_type'] = data['bus']
                         });
 
-                        if(!disks_compat){
+                        if(!network_compat && !disks_compat){
+                            this.hasLoaded = false;
+                            msg += <?php echo json_encode(__('The model of network interfaces and disk defined in OVF is not suitable for VM type choosed.')) ?> +'<br>';
+                        } else if(!network_compat){
+                            this.hasLoaded = false;
+                            msg += <?php echo json_encode(__('The model of network interfaces defined in OVF is not suitable for VM type choosed.')) ?> +'<br>';
+                        } else if(!disks_compat){
                             this.hasLoaded = false;                            
-                            msg += <?php echo json_encode(__('VM type selected does not support disk drivers defined in OVF.')) ?> +'<br>';
+                            msg += <?php echo json_encode(__('The model of disk defined in OVF is not suitable for VM type choosed.')) ?> +'<br>';
                         }
 
                         if(!this.hasLoaded)
                         {
-                            Ext.Msg.show({
-                                title: String.format(<?php echo json_encode(__('Error {0}')) ?>,'<?php echo sfConfig::get('config_acronym'); ?>'),
-                                buttons: Ext.MessageBox.OK,
-                                msg: msg+ <?php echo json_encode(__('Could not continue!')) ?>,
-                                icon: Ext.MessageBox.ERROR});
-                            
+                            Ext.MessageBox.confirm(
+                                String.format(<?php echo json_encode(__('OVF Import')) ?>,'<?php echo sfConfig::get('config_acronym'); ?>'),
+                                msg+ <?php echo json_encode(__('Would you like to continue?')) ?>,
+                                function(btn){
+                                    if(btn=='yes'){
+                                        this.hasLoaded = true;
+                                        var next_index = this.getNext();
+                                        this.wizard.cardPanel.getLayout().setActiveItem(next_index);
+                                    }
+                                },
+                                this);
                         }                        
 
+                        this.hasLoaded = false;
+                        Ovf.ImportWizard.Validation(this.wizard,
+                                            function(resp,opt){
+                                                this.hasLoaded = true;
+                                                var next_index = this.getNext();
+                                                this.wizard.cardPanel.getLayout().setActiveItem(next_index);
+                                            },
+                                            function(resp,opt){
+                                                this.hasLoaded = false;
+                                                console.log('Ovf.ImportWizard.Validation fail');
+                                                console.log(resp);
+                                            }, this);
                     }
                     ,previousclick:function(){
                         this.hasLoaded = true;
@@ -575,6 +610,31 @@ Ovf.ImportWizard.Cards = function(){
                 ,anchor:'80%'
             });// end vgcombo
 
+            this.disk_cb = new Ext.form.ComboBox({
+                triggerAction: 'all',
+                clearFilterOnReset:false,
+                lastQuery:'',
+                store: new Ext.data.ArrayStore({                
+                        fields: ['type','value', 'name'],
+                        data : <?php
+                                    /*
+                                     * build interfaces model dynamic
+                                     */
+                                    $disks_drivers = sfConfig::get('app_disks');
+                                    $disks_elem = array();
+
+                                    foreach($disks_drivers as $hyper =>$drivers)
+                                        foreach($drivers as $driver)
+                                            $disks_elem[] = '['.json_encode($hyper).','.json_encode($driver).','.json_encode($driver).']';
+                                            echo '['.implode(',',$disks_elem).']'."\n";
+                                ?>
+                        }),
+                displayField:'name',
+                mode:'local',
+                valueField: 'value',
+                forceSelection: true
+            });
+          
             var cm = new Ext.grid.ColumnModel([
                 new Ext.grid.RowNumberer(),
                 {
@@ -612,6 +672,19 @@ Ovf.ImportWizard.Cards = function(){
                     }),
                     width: 120
                     ,renderer: function(val){return '<span ext:qtip="'+__('Click to edit')+'">' + val + '</span>';}
+                },
+                {
+                    id:'disk_type',
+                    header: "Type",
+                    dataIndex: 'disk_type',
+                    fixed:true,            
+                    allowBlank: false,
+                    width: 150,            
+                    editor: this.disk_cb,
+                    renderer:function(value,meta,rec){
+                        if(!value){ return String.format('<b>{0}</b>',<?php echo json_encode(__('Select type...')) ?>);}
+                        else{ rec.commit(true); return value;}
+                    }
                 }
             ]);
 
@@ -790,6 +863,29 @@ Ovf.ImportWizard.Cards = function(){
                             html: <?php echo json_encode(__('Storage')) ?>
                         },tpl
                     ]
+                ,listeners:{
+                    beforehide:function(cp){
+                        if(cp.hasLoaded) return true;
+                        else return false;
+                    },                    
+                    nextclick:function(){
+                        this.hasLoaded = false;
+                        Ovf.ImportWizard.Validation(this.wizard,
+                                            function(resp,opt){
+                                                this.hasLoaded = true;
+                                                var next_index = this.getNext();
+                                                this.wizard.cardPanel.getLayout().setActiveItem(next_index);
+                                            },
+                                            function(resp,opt){
+                                                this.hasLoaded = false;
+                                                console.log('Ovf.ImportWizard.Validation fail');
+                                                console.log(resp);
+                                            }, this);
+                    },
+                    previousclick:function(){
+                        this.hasLoaded = true;
+                    }
+                }
             });
 
             ovfstorage_cardPanel.superclass.initComponent.call(this);
@@ -882,6 +978,29 @@ Ovf.ImportWizard.Cards = function(){
                         }
                         
                     ]
+                ,listeners:{
+                    beforehide:function(cp){
+                        if(cp.hasLoaded) return true;
+                        else return false;
+                    },                    
+                    nextclick:function(){
+                        this.hasLoaded = false;
+                        Ovf.ImportWizard.Validation(this.wizard,
+                                            function(resp,opt){
+                                                this.hasLoaded = true;
+                                                var next_index = this.getNext();
+                                                this.wizard.cardPanel.getLayout().setActiveItem(next_index);
+                                            },
+                                            function(resp,opt){
+                                                this.hasLoaded = false;
+                                                console.log('Ovf.ImportWizard.Validation fail');
+                                                console.log(resp);
+                                            }, this);
+                    },
+                    previousclick:function(){
+                        this.hasLoaded = true;
+                    }
+                }
             });
 
 
@@ -890,11 +1009,7 @@ Ovf.ImportWizard.Cards = function(){
             this.ovfnetworks_panel.on({                   
                 render:{scope:this,
                     fn:function(p){
-                        if(typeof Network !='undefined' && typeof Network.ManageInterfacesGrid !='undefined'){
-                            var grid = this.addGrid();
-                            this.ovfnetworks_panel.add(grid);                            
-
-                        }else{
+                        if(typeof Network =='undefined' || typeof Network.ManageInterfacesGrid =='undefined'){
                             this.ovfnetworks_panel.load({
                                 url:<?php echo json_encode(url_for('network/Network_ManageInterfacesGrid')); ?>
                                 ,scripts:true
@@ -914,7 +1029,10 @@ Ovf.ImportWizard.Cards = function(){
         }
         ,confGrid:function(conf){
             var grid = this.addGrid(conf);
-            this.ovfnetworks_panel.add(grid);                                       
+
+            this.ovfnetworks_panel.removeAll(); // remove old ones
+
+            this.ovfnetworks_panel.add(grid);
             this.ovfnetworks_panel.doLayout();
 
             (this.ovfnetworks_grid).getStore().loadData(this.nets);
@@ -922,10 +1040,11 @@ Ovf.ImportWizard.Cards = function(){
 
         }
         ,addGrid:function(conf){
-            var gridConf = {ref:'../ovfnetworks_grid',vm_type:'pv',border:false};
+            var gridConf = {ref:'../ovfnetworks_grid',vm_type:this.vm_type,border:false};
             if(conf){
                 gridConf.node_id = conf.id;
                 gridConf.level = conf.level;
+                gridConf.vm_type = conf.vm_type;
             }
 
             var grid = new Network.ManageInterfacesGrid(gridConf);
@@ -1291,12 +1410,73 @@ Ovf.ImportWizard.Save = function(wizard) {
 
         }
     }); // END Ajax request
+}
 
+Ovf.ImportWizard.Validation = function(wizard, fn_success, fn_failure, a_scope ) {
 
+    if( !a_scope ) a_scope = this;
 
+    var wizPanel = wizard.cardPanel;
+    var ovf_source = wizPanel.ovf_source;
+    var ovf_source_data = ovf_source.getSubmitData();
+    var ovf_url = ovf_source_data.url;
 
+    var ovf_name = wizPanel.ovf_name;
+    var ovf_name_data = ovf_name.getSubmitData();
+    var name = ovf_name_data.name;
+    var description = ovf_name_data.description;
+    var vm_type = ovf_name_data.vm_type;
+    var vm_os = ovf_name_data.vm_os;
+    var node_id = ovf_name_data.node_id;
 
+    var send_data = {
+            'url': ovf_url
+            ,'name': name
+            ,'description': description
+            ,'vm_type': vm_type
+            ,'vm_os': vm_os
+        };
 
+    if( wizard.getCardPosition(a_scope) >= wizard.getCardPosition(wizPanel.ovf_storage) ){
+        var ovf_storage = wizPanel.ovf_storage;
+        var ovf_storage_data = ovf_storage.getSubmitData();
+        var disks = ovf_storage_data.disks;
+        send_data['disks'] = disks;
+    }
+
+    if( wizard.getCardPosition(a_scope) >= wizard.getCardPosition(wizPanel.ovf_networks) ){
+        var ovf_networks = wizPanel.ovf_networks;
+        var ovf_networks_data = ovf_networks.getSubmitData();
+        var networks = ovf_networks_data.networks;
+        send_data['networks'] = networks;
+    }
+
+    var conn = new Ext.data.Connection({
+            listeners:{
+                // wait message.....
+                beforerequest:function(){
+                    Ext.MessageBox.show({
+                        title: <?php echo json_encode(__('Please wait...')) ?>,
+                        msg: <?php echo json_encode(__('Check import information...')) ?>,
+                        width:300,
+                        wait:true,
+                        modal: true
+                    });
+                },// on request complete hide message
+                requestcomplete:function(){Ext.MessageBox.hide();}
+                ,requestexception:function(c,r,o){
+                    Ext.MessageBox.hide();
+                    Ext.Ajax.fireEvent('requestexception',c,r,o);}
+            }
+    });// end conn
+
+    conn.request({
+        url: <?php echo json_encode(url_for('ovf/jsonImportCheck',false)); ?>,
+        params: {'nid':node_id,'import': Ext.encode(send_data)},      
+        scope: a_scope,
+        success: fn_success,
+        failure: fn_failure
+    }); // END Ajax request
 }
 
 Ovf.ImportWizard.Main = function(config) {

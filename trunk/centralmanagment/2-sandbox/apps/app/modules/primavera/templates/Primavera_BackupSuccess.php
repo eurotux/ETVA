@@ -22,7 +22,6 @@ Primavera.Backup.TabPanel = new Ext.extend( Ext.TabPanel, {
                         store: new Ext.data.Store({
                             url:<?php echo json_encode(url_for('primavera/json'))?>,
                             baseParams: {id:this.service_id,method:'primavera_listbackupplans'},
-                            //autoLoad: true,
                             reader: new Ext.data.JsonReader(
                                             {
                                                 idProperty: 'id'
@@ -221,14 +220,13 @@ Primavera.Backup.TabPanel = new Ext.extend( Ext.TabPanel, {
                                     displayField: 'name',
                                     name: 'periodo',
                                     fieldLabel: __('Periodo'),
-                                    value: __('daily'),
+                                    value: 'diario',
                                     store: new Ext.data.ArrayStore({
                                         fields: [
                                             'id',
                                             'name'
                                         ],
-                                        sortInfo:{field:'name',direction:'ASC'},
-                                        data: [ [__('daily'),__('Daily')],[__('weekly'),__('Weekly')],[__('monthly'),__('Monthly')] ]
+                                        data: [ ['diario',__('Daily')],['semanal',__('Weekly')],['mensal',__('Monthly')] ]
                                     })
                                 }),
                                 {
@@ -300,7 +298,7 @@ Primavera.Backup.TabPanel = new Ext.extend( Ext.TabPanel, {
                                     beforerequest:function(){
                                         Ext.MessageBox.show({
                                             title: <?php echo json_encode(__('Please wait...')) ?>,
-                                            msg: <?php echo json_encode(__('Backup...')) ?>,
+                                            msg: <?php echo json_encode(__('Saving backup plan...')) ?>,
                                             width:300,
                                             wait: true,
                                             modal: false
@@ -422,7 +420,7 @@ Primavera.Backup.TabPanel = new Ext.extend( Ext.TabPanel, {
                                     beforerequest:function(){
                                         Ext.MessageBox.show({
                                             title: <?php echo json_encode(__('Please wait...')) ?>,
-                                            msg: <?php echo json_encode(__('Backup...')) ?>,
+                                            msg: <?php echo json_encode(__('Doing backup...')) ?>,
                                             width:300,
                                             wait: true,
                                             modal: false
@@ -521,6 +519,8 @@ Primavera.Backup.TabPanel = new Ext.extend( Ext.TabPanel, {
 
                     Ext.getCmp('combo-companies').store.loadData(data_c,false);
                     Ext.getCmp('combo-companies').store.sort('db','ASC');
+
+                    Ext.getCmp('grid-backup-plans').store.reload();
                 }
             }
             ,failure: function(resp,opt) {
@@ -533,8 +533,6 @@ Primavera.Backup.TabPanel = new Ext.extend( Ext.TabPanel, {
                         icon: Ext.MessageBox.ERROR});
             }
         });// END Ajax request
-
-        Ext.getCmp('grid-backup-plans').store.reload();
     }
 });
 

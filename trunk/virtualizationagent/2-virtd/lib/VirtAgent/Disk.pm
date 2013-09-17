@@ -61,6 +61,7 @@ my $san_config_file = $ENV{'san_conf_file'} || "/etc/sysconfig/etva-vdaemon/san_
 
 my $DEFAULT_TIMEOUT_SECONDS = 300;      # default value of timeout for timeout command
 my $BULK_QEMU_IMG_INFO_TIMEOUT = 10;    # timeout value for bulk qemu_img command
+my $SCSI_ID_TIMEOUT = 10;               # timeout value for scsi_id command
 
 
 # Disk Devices
@@ -346,7 +347,7 @@ sub loaddiskdev {
     }
 
     # multipath map info
-    if( $force || !%PathMaps ){ pathmapsinfo(); }
+    if( $force || !%PathMaps ){ pathmapsinfo(@_); }
 
     if( $force || !%SANDev ){ sandevconf(); }
 
@@ -373,15 +374,19 @@ sub scsi_id_uuid{
         my $device = "/dev/$name";
         $cmd = "/usr/lib/udev/scsi_id --page=0x83 --whitelisted --device=$device"; 
     } elsif( (($release eq 'CentOS') && (int($version) >= 6)) ||
-		(($release =~ m/Red Hat/) && (int($version) >= 6)) ){
+            (($release =~ m/Red Hat/) && (int($version) >= 6)) ||
+            (($release eq 'ETVA') && (int($version) >= 6)) ||
+            (($release eq 'Nuxis') && (int($version) >= 6)) ){
         my $device = "/dev/$name";
         $cmd = "/lib/udev/scsi_id --page=0x83 --whitelisted --device=$device"; 
     }
 
-    plog(" DEBUG scsi_id_uuid cmd=$cmd ") if( &debug_level > 7 );
+    my $timeout_cmd = &timeout_cmd($SCSI_ID_TIMEOUT,1) . " " . $cmd;
+
+    plog(" DEBUG scsi_id_uuid cmd=$timeout_cmd release=$release version=$version") if( &debug_level > 7 );
 
     # get blockid (uuid)
-    open(SCSIID_FH,"$cmd |"); 
+    open(SCSIID_FH,"$timeout_cmd |"); 
     my $uuid = <SCSIID_FH>;    # read one single line
     chomp($uuid);
     close(SCSIID_FH);
@@ -569,7 +574,7 @@ sub read_multipathd {
 sub pathmapsinfo {
 
     # testing multipath
-    if( &havemultipath() ){
+    if( &havemultipath(@_) ){
 
         %PathMaps = ();
 
@@ -1174,20 +1179,34 @@ sub qemu_img_info_bulk {
         my @lines = &qemu_img_info_bulk_cmd($L);
         for my $D (@$L){
             my $go_process = 0;
-            for (@lines){
-                if( m#^image: $D->{'device'}$# ){
+            for( my $i=0; $i<scalar(@lines); $i++ ){
+                my $l = $lines[$i];
+                if( $l =~ m#^image: $D->{'device'}$# ){
                     $go_process = 1;
                     next;
                 }
                 if( $go_process ){
-                    last if( /image:/ );             # is next image
-                    plog($_) if( &debug_level > 9 );
-                    if( /Snapshot list:/ ){     # go to snapshot list
+                    last if( $l =~ m/image:/ );             # is next image
+                    plog($l) if( &debug_level > 9 );
+                    if( $l =~ m/Snapshot list:/ ){     # go to snapshot list
                         # TODO process snapshots list
                         $D->{'has_snapshots'} = 1;
+                        my $c = $i;
+                        $c++; # ignore next row
+                        # 1         win2k3-teste1          447M 2012-12-14 12:30:47  381:22:43.296
+                        for( $c++; $c<scalar(@lines); $c++ ){
+                            $l = $lines[$c];
+                            if( $l =~ m/^\d+\s+.+\s+(\d+\w)\s+\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\s+\d+:\d+:\d+\.\d+$/ ){
+                                my $s_size = $1;
+                                $D->{'size_of_snapshots'} += str2size($s_size);
+                            } else {
+                                last;
+                            }
+                        }
+                        plog( "qemu_img_info_bulk device=$D->{device} has_snapshots=$D->{has_snapshots} size_of_snapshots=$D->{size_of_snapshots}" );
                         last;
                     }
-                    $D = &qemu_img_info_parseline($_,$D);
+                    $D = &qemu_img_info_parseline($l,$D);
                 }
             }
             $D = &qemu_img_info_formatsize($D);
@@ -1253,7 +1272,8 @@ sub activate_lvs {
     for my $L (values %LVInfo){
         if( $L->{'state'} eq '-' ){
             # if not active then activate it
-            my ($e,$m) = cmd_exec("lvchange","-ay",$L->{'device'});
+            my $lvdevice = $L->{'lvdevice'} || $L->{'device'};
+            my ($e,$m) = cmd_exec("lvchange","-ay",$lvdevice);
         }
     }
 }
@@ -1398,13 +1418,13 @@ sub get_sparsefiles_apparentsize {
 # get disk size and usage size
 sub get_file_disk_size {
     my ($path) = @_;
-    $path = readlink($path) if( -l "$path" );   # get real path if link 
+    $path = abs_path($path) if( -l "$path" );   # get real path if link 
     my $D = qemu_img_info( { 'device'=>"$path" } );
     return ($D->{'virtual_size'},$D->{'disk_size'});
 }
 sub get_disk_size {
     my ($path) = @_;
-    $path = readlink($path) if( -l "$path" );   # get real path if link 
+    $path = abs_path($path) if( -l "$path" );   # get real path if link 
     if( -b "$path" ){
         if( my $LV = __PACKAGE__->getlv( 'device'=> $path ) ){
             return $LV->{'size'}
@@ -1413,12 +1433,14 @@ sub get_disk_size {
         }
     } else {
         my ($vsize,$usize) = &get_file_disk_size($path);
+
+        return $usize if( $usize > $vsize );    # for small disks when have snapshots usize could be great then vsize
         return $vsize;
     }
 }
 sub get_disk_usagesize {
     my ($path) = @_;
-    $path = readlink($path) if( -l "$path" );   # get real path if link 
+    $path = abs_path($path) if( -l "$path" );   # get real path if link 
     if( -b "$path" ){
         return &get_disk_size($path);
     } else {
@@ -1531,8 +1553,17 @@ sub update_devices {
             if( -e "$blockdir/ro" ){
                 open(FRO,"$blockdir/ro");
                 my $ro = <FRO>;
-                $AllDiskDevices{"$dn"}{'readonly'} = int($ro) ? 1 : 0;
                 close(FRO);
+                $AllDiskDevices{"$dn"}{'readonly'} = int($ro) ? 1 : 0;
+            }
+
+            # detect media changeable/ejectable devices like CD-ROM
+            if( -e "$blockdir/events" ){
+                open(BDE,"$blockdir/events");
+                my $events = <BDE>;
+                close(BDE);
+                $AllDiskDevices{"$dn"}{'media_changeable'} = ( $events =~ m/media_change/gs )? 1 : 0;
+                $AllDiskDevices{"$dn"}{'ejectable'} = ( $events =~ m/eject/gs )? 1 : 0;
             }
         }
 
@@ -1812,7 +1843,7 @@ sub insert_disk {
 sub cp_devicehash {
     my ($D,@fields) = @_;
     if( !@fields ){
-        @fields = qw( pvinit size freesize logical device allocatable exported mounted mountpoint partition partitioned uuid pv_uuid mp_uuid pv pvsize pvfreesize vg vgsize vgfreesize lv type lvm swap nopartitions fs_type dtype type diskdevice major minor);  
+        @fields = qw( pvinit size freesize logical device allocatable exported mounted mountpoint partition partitioned uuid pv_uuid mp_uuid pv pvsize pvfreesize vg vgsize vgfreesize lv type lvm swap nopartitions fs_type dtype type diskdevice major minor multipath);  
     }
     my %H = ();
     for my $k (@fields){
@@ -1874,6 +1905,21 @@ sub ignore_diskdevice {
 
     # ignore readonly device
     if( $D->{'readonly'} ){
+        $ignore = 9;
+    }
+
+    # ignore cdrom
+    if( $D->{'cdrom'} ){
+        $ignore = 9;
+    }
+
+    # ignore media changeable device
+    if( $D->{'media_changeable'} ){
+        $ignore = 9;
+    }
+
+    # ignore ejectable device
+    if( $D->{'ejectable'} ){
         $ignore = 9;
     }
 
@@ -1981,22 +2027,107 @@ resize physical volume
 sub pvresize {
     my $self = shift;
     my ($device,$size) = my %p = @_;
-    $device = $p{"device"} if( $p{"device"} );
-    $size = $p{"size"} if( $p{"size"} );
+    if( $p{'device'} || $p{'size'} ){
+        $device = $p{"device"};
+        $size = $p{"size"};
+    }
     my @pd = split(/\//,$device);
     my $dn = pop(@pd);
 
     $self->loaddiskdev();
 
     if( my $PV = $self->getpv(%p, 'name'=>"$dn") ){
-        $device = $PV->{'device'};
-        my ($e,$m) = cmd_exec("pvresize","--setphysicalvolumesize",$size,$device);
+        $device = $PV->{'pv'} || $PV->{'device'};
+        my @a_size = ();
+        push( @a_size, "--setphysicalvolumesize", $size ) if( $size );
+        my ($e,$m) = cmd_exec("pvresize",@a_size,$device);
         $self->loaddiskdev(1);  # update disk device info
         unless( $e == 0 ){
             return retErr("_ERR_DISK_PVRESIZE_","Error resizing physical volume.");
         }
         $PV = $self->getpv(%p, 'name'=>"$dn");
         return retOk("_OK_PVRESIZE_","Physical volume successfully resized.","_RET_OBJ_",$PV);
+    } else {
+        return retErr("_INVALID_PV_","Invalid physical volume.");
+    }
+}
+
+sub get_mp_disks {
+	my $dev = shift();
+	my @res;
+
+	# get mp info
+	open(PROC, "/sbin/multipath -ll $dev|") or die "Can't execute multipath: $!\n";
+	while(my $line = <PROC>) {
+		if($line =~ /\d+:\d+:\d+:\d+\s+(\w+)\s+\d+:\d+\s+[\[\]\w]+/) {
+			push(@res, $1) if(-b "/dev/$1");
+		}
+	}
+	close(PROC);
+
+	# test if there are 4 paths
+	unless(scalar(@res) == 4) {
+		plog "Can't find 4 paths for $dev:\n";
+		plog Dumper(\@res);
+        return;
+	}
+
+	return(@res);
+}
+
+sub expand_mp_dev {
+	my ($dev, @disks) = @_;
+
+	plog `/sbin/multipath -ll $dev | grep size`;
+
+	for my $disk (@disks) {
+		my $file = "/sys/block/$disk/device/rescan";
+		plog "Expanding device $disk...\n";
+		
+		open(DISK, ">", $file) or die "Can't open $file: $!\n";
+		print DISK "1\n";
+		close(DISK);
+		
+		plog "done\n";
+	}
+	plog "Expanding mp $dev...\n";
+	cmd_exec("/sbin/multipathd -k'resize map $dev'");
+	plog `/sbin/multipath -ll $dev | grep size`;
+	plog "done\n";
+}
+
+sub deviceresize {
+    my $self = shift;
+    my ($device) = my %p = @_;
+    $device = $p{"device"} if( $p{"device"} );
+    my @pd = split(/\//,$device);
+    my $dn = pop(@pd);
+
+    $self->loaddiskdev();
+
+    if( my $PD = $self->getphydev(%p, 'name'=>$dn) ){ 
+        $device = $PD->{'device'};
+        if( $PD->{'multipath'} ){
+            if( my @mp_disks = &get_mp_disks( $device ) ){
+                &expand_mp_dev($device, @mp_disks);
+            } else {
+                return retErr("_ERR_DEVICERESIZE_","Invalid number of disks.");
+            }
+        }
+
+        if( my $PV = $self->getpv(%p, 'name'=>"$dn") ){
+            my $E = $self->pvresize(%p);
+            if( isError($E) ){
+                return retErr("_ERR_DEVICERESIZE_","Error resize physical volume.");
+            }
+        }
+
+        # update disk device info
+        $self->loaddiskdev(1);
+        $PD = $self->getphydev( %p, 'name'=>$dn );
+
+        return retOk("_OK_DEVICERESIZE_","Physical volume successfully resized.","_RET_OBJ_",$PD);
+
     } else {
         return retErr("_INVALID_PV_","Invalid physical volume.");
     }
@@ -2581,12 +2712,13 @@ sub lvremove {
 
             $_ok_msg_ ||= "Special logical volume successfully removed.";
         } else {
-            my ($e,$m) = cmd_exec("lvremove","-f",$LV->{'device'});
+            my $lvdevice = $LV->{'lvdevice'} || $LV->{'device'};
+            my ($e,$m) = cmd_exec("lvremove","-f",$lvdevice);
 
             $self->loaddiskdev(1);  # update disk device info
             unless( $e == 0 ){
                 # send error if LV remove not successful
-                unless( !$self->getlv( 'device'=>$LV->{'device'}, %p ) ){
+                unless( !$self->getlv( 'device'=>$lvdevice, %p ) ){
                     return retErr("_ERR_DISK_LVREMOVE_","Error remove logical volume.");
                 }
             }
@@ -2678,7 +2810,7 @@ sub lvresize {
             }
             return retOk("_OK_LVRESIZE_","Special logical volume successfully resized.","_RET_OBJ_",$LV);
         } else {
-            $lv = $LV->{'device'} if( !$lv );
+            $lv = $LV->{'lvdevice'} || $LV->{'device'} if( !$lv );
             my ($e,$m) = cmd_exec("lvresize","-f","-L",$size,$lv);
 
             $self->loaddiskdev(1);  # update disk device info
@@ -3157,7 +3289,8 @@ sub backupsnapshot {
 #   testing multipath support
 #
 sub havemultipath {
-    if( not defined $HAVEMULTIPATH ){
+    my ($force) = @_;
+    if( $force || (not defined $HAVEMULTIPATH) ){
         my ($e,$m) = cmd_exec("echo 'show maps' | /sbin/multipathd -k");
         if( $e == 0 && ( $m ne 'multipathd> multipathd> ' ) ){
             $HAVEMULTIPATH = 1;
@@ -3514,7 +3647,7 @@ sub detect_fcs {
             close(FILE);
 
             # TODO improve this
-            next unless($str =~ /qlogic/i || $str =~ /FC Expansion Card/i || $str =~ /QLE220/ || $str =~ /Fibre Channel Mezzanine HBA/);
+            next unless($str =~ /qlogic/i || $str =~ /FC Expansion Card/i || $str =~ /QLE220/ || $str =~ /Fibre Channel .*Mezzanine HBA/);
 
             push(@res, $d);
         }

@@ -7,6 +7,8 @@ class EtvaMacPeer extends BaseEtvaMacPeer
 
     const _ERR_AT_LEAST_MACS_ = 'Should have at least %num% macs available in pool';
     
+    const _ERR_INVALID_MAC_   = 'Invalid mac address %mac%.';
+
     public static function retrieveByMac($mac)
 	{
 

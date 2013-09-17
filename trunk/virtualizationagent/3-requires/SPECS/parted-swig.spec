@@ -2,7 +2,7 @@
 
 Name:           parted-swig
 Version:        0.1.20020731
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        bindings for libparted
 License:        GPL
 Group:          Development/Libraries
@@ -17,7 +17,7 @@ BuildRequires:  redhat-release
 
 # RHEL-6
 %if 0%{?rhel} == 6
-BuildRequires: chrpath
+BuildRequires: chrpath perl-ExtUtils-MakeMaker
 %endif
 
 %description
@@ -56,6 +56,9 @@ rm -rf $RPM_BUILD_ROOT
 #%{_mandir}/man3/*
 
 %changelog
+* Mon Nov 05 2012 Nuno Fernandes <npf@eurotux.com> 0.1.20020731-3build2
+- In rhel6 require perl-ExtUtils-MakeMaker
+
 * Thu Nov 17 2011 Nuno Fernandes <npf@eurotux.com> 0.1.20020731-2build2
 - Support for centos6
 

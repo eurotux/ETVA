@@ -71,6 +71,12 @@ class sfGuardUserActions extends basesfGuardUserActions
             return $this->renderText($error);
         }
 
+        // remove existing permissions for the given user
+        $users = EtvaPermissionUserQuery::create()
+                    ->filterByUserId($id)
+                    ->delete();
+
+
         $sf_user->delete();
         $result = array('success'=>true);
         $return = json_encode($result);
@@ -96,24 +102,25 @@ class sfGuardUserActions extends basesfGuardUserActions
 
         try{
 
-            // remove existing permissions for the given user
-            $c = new Criteria();
-            $c->add(EtvaPermissionUserPeer::USER_ID, $request->getParameter('id'), Criteria::EQUAL);
-            $g_p = EtvaPermissionUserPeer::doSelect($c);   //filter user permissions
+            if( $perm_list = $request->getParameter('sf_guard_user_permission_list') ){
+                // remove existing permissions for the given user
+                $c = new Criteria();
+                $c->add(EtvaPermissionUserPeer::USER_ID, $request->getParameter('id'), Criteria::EQUAL);
+                $g_p = EtvaPermissionUserPeer::doSelect($c);   //filter user permissions
 
-            foreach ($g_p as $p){
-                $p->delete();
-            }
+                foreach ($g_p as $p){
+                    $p->delete();
+                }
 
-            // add new permission set
-            $perm_list = $request->getParameter('sf_guard_user_permission_list');
-            $perm_list_dec = json_decode($perm_list);
+                // add new permission set
+                $perm_list_dec = json_decode($perm_list);
 
-            foreach ($perm_list_dec as $object){
-                $g_p = new EtvaPermissionUser();
-                $g_p->setUserId($request->getParameter('id'));
-                $g_p->setEtvapermId($object);
-                $g_p->save();
+                foreach ($perm_list_dec as $object){
+                    $g_p = new EtvaPermissionUser();
+                    $g_p->setUserId($request->getParameter('id'));
+                    $g_p->setEtvapermId($object);
+                    $g_p->save();
+                }
             }
 
         }catch(Exception $e){
@@ -124,12 +131,19 @@ class sfGuardUserActions extends basesfGuardUserActions
         }
 
         if(!$result['success']){
+
             $error = $this->setJsonError($result);
             return $this->renderText($error);
         }
-        $result = json_encode($result);
+
+        $msg_i18n = $this->getContext()->getI18N()->__('User saved successfully');
+        $response = array('success'=>true,
+                            'agent' =>  'Central Management',
+                            'response'  => $msg_i18n,
+                            'user_id' => $result['object']['Id'] );
+        $return = json_encode($response);
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
-        return $this->renderText($result);
+        return $this->renderText($return);
 
     }
 
@@ -174,10 +188,20 @@ class sfGuardUserActions extends basesfGuardUserActions
 //    foreach($permissions as $permission)
 //        $permission_ids[] = $permission->getId();
     
+    $user_service_list = array();
+    $etva_user_service = EtvaUserServiceQuery::create()
+                            ->filterByUserId($id)
+                            ->useEtvaServiceQuery("EtvaService","INNER JOIN")
+                            ->endUse()
+                            ->find();
+    foreach($etva_user_service as $uservice){
+        array_push($user_service_list, array( 'service_id'=>$uservice->getServiceId(), 'extra'=>$uservice->getExtra() ));
+    }
     
     $elements = array_merge($user_info,$profile_info,
                             array('sf_guard_user_group_list'=>$group_ids),
-                            array('sf_guard_user_permission_list'=>$permission_ids));
+                            array('sf_guard_user_permission_list'=>$permission_ids),
+                            array('user_service_list'=>$user_service_list));
     
     $final = array('success' => true, 'data'  => $elements);
     $result = json_encode($final);
@@ -317,7 +341,7 @@ class sfGuardUserActions extends basesfGuardUserActions
         if($form->isValid())
         {
             try{
-                $form->save();
+                $user = $form->save();
             }catch(Exception $e){
                 $response = array('success' => false,
                               'error'   => 'Could not perform operation',
@@ -326,8 +350,7 @@ class sfGuardUserActions extends basesfGuardUserActions
                 return $response;
             }
             
-            return array('success'=>true);
-
+            return array('success'=>true, 'object'=>$user->toArray());
         }
         else
         {
@@ -351,6 +374,64 @@ class sfGuardUserActions extends basesfGuardUserActions
         $error = json_encode($info);
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $error;
+
+    }
+
+    public function executeJsonUpdateUserService(sfWebRequest $request)
+    {
+        $isAjax = $request->isXmlHttpRequest();
+
+        if(!$isAjax) return $this->redirect('@homepage');
+
+
+        $id = $request->getParameter('id');
+
+        if(!$sf_user = sfGuardUserPeer::retrieveByPK($id)){
+            $msg_i18n = $this->getContext()->getI18N()->__(sfGuardUserPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$id));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+        $service_id = $request->getParameter('service_id');
+
+        //$this->forward404Unless($etva_service = EtvaServicePeer::retrieveByPk($service_id), sprintf('Object etva_service does not exist (%s).', $service_id));
+
+        if( !EtvaServicePeer::retrieveByPk($service_id) ){
+
+
+            $msg_i18n = $this->getContext()->getI18N()->__('Object etva_service does not exist (%service_id%).',array('%service_id%'=>$service_id));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+        }
+
+
+        $etva_user_service = EtvaUserServicePeer::retrieveByPK($id,$service_id);
+        if( !$etva_user_service ){
+            $etva_user_service = new EtvaUserService();
+            $etva_user_service->setUserId($id);
+            $etva_user_service->setServiceId($service_id);
+        }
+
+        $extra = $request->getParameter('extra');
+
+        $etva_user_service->setExtra($extra);
+        $etva_user_service->save();
+
+        $msg_i18n = $this->getContext()->getI18N()->__('User and service saved successfully');
+        $response = array('success'=>true,
+                            'agent' =>  'Central Management',
+                            'response'  => $msg_i18n,
+                            'user_id' => $id, 'service_id'=>$service_id );
+        $return = json_encode($response);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
 
     }
 

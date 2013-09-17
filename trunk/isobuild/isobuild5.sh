@@ -117,7 +117,7 @@ cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralma
 
 # Cria o iso
 mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table \
--V "ETVM $ETVMVER" -p "Eurotux Informatica S.A." -A "ETVM $ETVMVER - `date '+%Y-%m-%d'`" \
+-V "NUXIS-INSTALL" -p "Eurotux Informatica S.A." -A "ETVM $ETVMVER - `date '+%Y-%m-%d'`" \
 -b isolinux/isolinux.bin -c isolinux/boot.cat -x "lost+found" -o $ISOFILE $DIRDEST
 
 # Implant MD5

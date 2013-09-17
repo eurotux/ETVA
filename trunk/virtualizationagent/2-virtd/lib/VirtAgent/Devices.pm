@@ -158,7 +158,7 @@ sub usb_devs_dir{
         if($row =~ /^(\/.*)\/.*/){
             push @devdirs, $1;
         }else{
-            if($row == 0){
+            if( eval("0x$row") == 0x0 ){
                 pop @devdirs;
             }
         }

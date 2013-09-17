@@ -1,5 +1,5 @@
 Name:           lcdagent
-Version:        1.2.2
+Version:        2.0.0
 Release: 4103
 Summary:        LCD Agent
 License:        GPL
@@ -27,6 +27,7 @@ Requires:  perl(SOAP::Lite)
 Requires:  system-config-network-tui
 Requires:  dhclient
 Requires:  coreutils initscripts bridge-utils util-linux net-tools
+Requires:  virt-what
 
 %description
 LCD Agent
@@ -35,6 +36,17 @@ LCD Agent
 %setup -q -n lcdagent-%{version}-%{release}
 
 #%build
+
+%post
+if [ "$1"x = "1"x ]; then
+	/sbin/chkconfig --add lcdagent
+	/sbin/chkconfig --level 3 lcdagent on
+fi
+
+%preun
+if [ "$1"x = "0"x ]; then
+	/sbin/chkconfig --del lcdagent
+fi
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -51,6 +63,7 @@ cp -rf lcdagent.ini $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/lcdagent/lcdagent.in
 
 mkdir -p $RPM_BUILD_ROOT/service/lcdagent
 cp service-run $RPM_BUILD_ROOT/service/lcdagent/run
+touch $RPM_BUILD_ROOT/service/lcdagent/down
 mkdir -p $RPM_BUILD_ROOT/service/lcdagent/log
 echo -e '#!/bin/bash\nexec multilog t ./main' > $RPM_BUILD_ROOT/service/lcdagent/log/run
 chmod 755 $RPM_BUILD_ROOT/service/lcdagent/log/run
@@ -60,6 +73,10 @@ cp -rf logrotate-lcdagent $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/lcdagent
 
 mkdir -p $RPM_BUILD_ROOT/var/log/lcdagent
 touch $RPM_BUILD_ROOT/var/log/lcdagent/lcdagent.log
+
+# Install startup scripts
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/init.d/
+cp -rf lcdagent.init $RPM_BUILD_ROOT%{_sysconfdir}/init.d/lcdagent
 
 #/bin/sh gendoc.sh
 
@@ -76,14 +93,19 @@ rm -rf $RPM_BUILD_ROOT
 #%doc AUTHORS CHANGES LICENSE README
 /srv/lcdagent
 /service/lcdagent
-/var/log/lcdagent/lcdagent.log
+%dir /var/log/lcdagent
+%ghost /var/log/lcdagent/lcdagent.log
 %{_sysconfdir}/sysconfig/lcdagent/
 %{_sysconfdir}/logrotate.d/lcdagent
 %config(noreplace) %{_sysconfdir}/sysconfig/lcdagent/lcdagent.ini
 #%{_mandir}
 #%doc doc/html doc/wiki
+%attr(0755,root,root) %{_sysconfdir}/init.d/lcdagent
 
 %changelog
+* Sun May 26 2013 Nuno Fernandes <npf@eurotux.com> 0.2
+- ghost the log file. Add initscript. Post and pre scripts
+
 * Thu Feb 24 2009 Carlos Rodrigues <cmar@eurotux.com> 0.1
 - Created by me
 

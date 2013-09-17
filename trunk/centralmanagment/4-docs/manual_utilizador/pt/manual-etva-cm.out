@@ -1,111 +1,112 @@
-\BOOKMARK [0][]{chapter.1}{1 UnitBox }{}
-\BOOKMARK [0][]{chapter.2}{2 Instala\347\343o}{}
-\BOOKMARK [1][]{section.2.1}{2.1 Vers\343o standard}{chapter.2}
-\BOOKMARK [0][]{chapter.3}{3 Central Management}{}
-\BOOKMARK [1][]{section.3.1}{3.1 Primeiro acesso}{chapter.3}
-\BOOKMARK [1][]{section.3.2}{3.2 Main}{chapter.3}
-\BOOKMARK [2][]{subsection.3.2.1}{3.2.1 Nodes}{section.3.2}
-\BOOKMARK [2][]{subsection.3.2.2}{3.2.2 Redes}{section.3.2}
-\BOOKMARK [3][]{subsubsection.3.2.2.1}{3.2.2.1 Administra\347\343o das redes}{subsection.3.2.2}
-\BOOKMARK [3][]{subsubsection.3.2.2.2}{3.2.2.2 Gest\343o da pool de endere\347os MAC}{subsection.3.2.2}
-\BOOKMARK [3][]{subsubsection.3.2.2.3}{3.2.2.3 Gest\343o das interfaces de rede das m\341quinas virtuais}{subsection.3.2.2}
-\BOOKMARK [1][]{section.3.3}{3.3 Datacenter virtual}{chapter.3}
-\BOOKMARK [1][]{section.3.4}{3.4 Servidor de virtualiza\347\343o}{chapter.3}
-\BOOKMARK [2][]{subsection.3.4.1}{3.4.1 Informa\347\343o do n\363}{section.3.4}
-\BOOKMARK [2][]{subsection.3.4.2}{3.4.2 Servidores}{section.3.4}
-\BOOKMARK [3][]{subsubsection.3.4.2.1}{3.4.2.1 Adicionar m\341quina virtual}{subsection.3.4.2}
-\BOOKMARK [3][]{subsubsection.3.4.2.2}{3.4.2.2 Editar m\341quina virtual}{subsection.3.4.2}
-\BOOKMARK [3][]{subsubsection.3.4.2.3}{3.4.2.3 Remover m\341quina virtual}{subsection.3.4.2}
-\BOOKMARK [3][]{subsubsection.3.4.2.4}{3.4.2.4 Abrir m\341quina virtual numa consola VNC}{subsection.3.4.2}
-\BOOKMARK [3][]{subsubsection.3.4.2.5}{3.4.2.5 Iniciar/parar m\341quina virtual}{subsection.3.4.2}
-\BOOKMARK [3][]{subsubsection.3.4.2.6}{3.4.2.6 Migrar m\341quina virtual}{subsection.3.4.2}
-\BOOKMARK [3][]{subsubsection.3.4.2.7}{3.4.2.7 Snapshots}{subsection.3.4.2}
-\BOOKMARK [2][]{subsection.3.4.3}{3.4.3 Armazenamento}{section.3.4}
-\BOOKMARK [3][]{subsubsection.3.4.3.1}{3.4.3.1 Administra\347\343o de Physical Volumes}{subsection.3.4.3}
-\BOOKMARK [3][]{subsubsection.3.4.3.2}{3.4.3.2 Administra\347\343o de Volume Groups}{subsection.3.4.3}
-\BOOKMARK [3][]{subsubsection.3.4.3.3}{3.4.3.3 Administra\347\343o de Logical Volumes}{subsection.3.4.3}
-\BOOKMARK [2][]{subsection.3.4.4}{3.4.4 Desligar n\363}{section.3.4}
-\BOOKMARK [1][]{section.3.5}{3.5 M\341quina virtual}{chapter.3}
-\BOOKMARK [2][]{subsection.3.5.1}{3.5.1 Informa\347\343o do servidor}{section.3.5}
-\BOOKMARK [2][]{subsection.3.5.2}{3.5.2 Estat\355sticas}{section.3.5}
-\BOOKMARK [2][]{subsection.3.5.3}{3.5.3 Servi\347os}{section.3.5}
-\BOOKMARK [2][]{subsection.3.5.4}{3.5.4 Drivers Virtio}{section.3.5}
-\BOOKMARK [1][]{section.3.6}{3.6 Ferramentas}{chapter.3}
-\BOOKMARK [2][]{subsection.3.6.1}{3.6.1 Importar OVF}{section.3.6}
-\BOOKMARK [2][]{subsection.3.6.2}{3.6.2 Exportar OVF}{section.3.6}
-\BOOKMARK [2][]{subsection.3.6.3}{3.6.3 Gestor de ISOs}{section.3.6}
-\BOOKMARK [2][]{subsection.3.6.4}{3.6.4 Monitoriza\347\343o do agente dos nodes}{section.3.6}
-\BOOKMARK [2][]{subsection.3.6.5}{3.6.5 Registo de eventos do sistema}{section.3.6}
-\BOOKMARK [1][]{section.3.7}{3.7 Administra\347\343o do sistema}{chapter.3}
-\BOOKMARK [2][]{subsection.3.7.1}{3.7.1 Assistente de configura\347\343o inicial}{section.3.7}
-\BOOKMARK [2][]{subsection.3.7.2}{3.7.2 Alterar prefer\352ncias}{section.3.7}
-\BOOKMARK [2][]{subsection.3.7.3}{3.7.3 Administra\347\343o de utilizadores, grupos e permiss\365es}{section.3.7}
-\BOOKMARK [2][]{subsection.3.7.4}{3.7.4 Desligar a appliance}{section.3.7}
-\BOOKMARK [0][]{chapter.4}{4 Management Agents}{}
-\BOOKMARK [1][]{section.4.1}{4.1 ETFW}{chapter.4}
-\BOOKMARK [2][]{subsection.4.1.1}{4.1.1 Network setup Wizard}{section.4.1}
-\BOOKMARK [2][]{subsection.4.1.2}{4.1.2 Edi\347\343o de Rede - Network}{section.4.1}
-\BOOKMARK [3][]{subsubsection.4.1.2.1}{4.1.2.1 Interfaces de rede}{subsection.4.1.2}
-\BOOKMARK [3][]{subsubsection.4.1.2.2}{4.1.2.2 Routing and gateways}{subsection.4.1.2}
-\BOOKMARK [3][]{subsubsection.4.1.2.3}{4.1.2.3 Host Addresses}{subsection.4.1.2}
-\BOOKMARK [3][]{subsubsection.4.1.2.4}{4.1.2.4 Hostname and DNS Client}{subsection.4.1.2}
-\BOOKMARK [2][]{subsection.4.1.3}{4.1.3 Regras Firewall}{section.4.1}
-\BOOKMARK [3][]{subsubsection.4.1.3.1}{4.1.3.1 Tabela Filter - Packet Filtering}{subsection.4.1.3}
-\BOOKMARK [3][]{subsubsection.4.1.3.2}{4.1.3.2 Tabela NAT - Network address translation}{subsection.4.1.3}
-\BOOKMARK [3][]{subsubsection.4.1.3.3}{4.1.3.3 Tabela Mangle - Packet alteration}{subsection.4.1.3}
-\BOOKMARK [2][]{subsection.4.1.4}{4.1.4 Servidor DHCP}{section.4.1}
-\BOOKMARK [2][]{subsection.4.1.5}{4.1.5 Servidor SQUID}{section.4.1}
-\BOOKMARK [3][]{subsubsection.4.1.5.1}{4.1.5.1 Ports and Networking}{subsection.4.1.5}
-\BOOKMARK [3][]{subsubsection.4.1.5.2}{4.1.5.2 Access Control}{subsection.4.1.5}
-\BOOKMARK [3][]{subsubsection.4.1.5.3}{4.1.5.3 Authentication Programs}{subsection.4.1.5}
-\BOOKMARK [3][]{subsubsection.4.1.5.4}{4.1.5.4 Other Caches}{subsection.4.1.5}
-\BOOKMARK [3][]{subsubsection.4.1.5.5}{4.1.5.5 Exemplos de utiliza\347\343o}{subsection.4.1.5}
-\BOOKMARK [2][]{subsection.4.1.6}{4.1.6 Servidor SNMP}{section.4.1}
-\BOOKMARK [1][]{section.4.2}{4.2 ETMS}{chapter.4}
-\BOOKMARK [2][]{subsection.4.2.1}{4.2.1 Separador 1 - Servi\347o}{section.4.2}
-\BOOKMARK [2][]{subsection.4.2.2}{4.2.2 Separador 2 - Gerir Dom\355nios}{section.4.2}
-\BOOKMARK [3][]{subsubsection.4.2.2.1}{4.2.2.1 Cria\347\343o de um Dom\355nio}{subsection.4.2.2}
-\BOOKMARK [3][]{subsubsection.4.2.2.2}{4.2.2.2 Edi\347\343o de um Dom\355nio}{subsection.4.2.2}
-\BOOKMARK [3][]{subsubsection.4.2.2.3}{4.2.2.3 Remo\347\343o de um Dom\355nio}{subsection.4.2.2}
-\BOOKMARK [2][]{subsection.4.2.3}{4.2.3 Gerir Caixas de Correio}{section.4.2}
-\BOOKMARK [3][]{subsubsection.4.2.3.1}{4.2.3.1 Op\347\343o Detalhes}{subsection.4.2.3}
-\BOOKMARK [3][]{subsubsection.4.2.3.2}{4.2.3.2 Cria\347\343o de Alias}{subsection.4.2.3}
-\BOOKMARK [3][]{subsubsection.4.2.3.3}{4.2.3.3 Remo\347\343o de Alias}{subsection.4.2.3}
-\BOOKMARK [2][]{subsection.4.2.4}{4.2.4 Separador 3 - Gerir Caixas de Correio}{section.4.2}
-\BOOKMARK [3][]{subsubsection.4.2.4.1}{4.2.4.1 Pesquisar Caixas de Correio}{subsection.4.2.4}
-\BOOKMARK [3][]{subsubsection.4.2.4.2}{4.2.4.2 Cria\347\343o de uma Caixa de Correio}{subsection.4.2.4}
-\BOOKMARK [3][]{subsubsection.4.2.4.3}{4.2.4.3 Edi\347\343o de uma Caixa de Correio}{subsection.4.2.4}
-\BOOKMARK [3][]{subsubsection.4.2.4.4}{4.2.4.4 Alterar a Palavra-Chave}{subsection.4.2.4}
-\BOOKMARK [3][]{subsubsection.4.2.4.5}{4.2.4.5 Defini\347\343o de Alias para a Caixa de Correio}{subsection.4.2.4}
-\BOOKMARK [3][]{subsubsection.4.2.4.6}{4.2.4.6 Defini\347\343o de Caixas de Correio para Encaminhamento}{subsection.4.2.4}
-\BOOKMARK [3][]{subsubsection.4.2.4.7}{4.2.4.7 Caixas de Correio Dispon\355veis}{subsection.4.2.4}
-\BOOKMARK [3][]{subsubsection.4.2.4.8}{4.2.4.8 Op\347\343o Detalhes}{subsection.4.2.4}
-\BOOKMARK [3][]{subsubsection.4.2.4.9}{4.2.4.9 Remo\347\343o de uma Caixa de Correio}{subsection.4.2.4}
-\BOOKMARK [1][]{section.4.3}{4.3 ETVOIP}{chapter.4}
-\BOOKMARK [2][]{subsection.4.3.1}{4.3.1 Extens\365es}{section.4.3}
-\BOOKMARK [3][]{subsubsection.4.3.1.1}{4.3.1.1 Adicionar Extens\343o}{subsection.4.3.1}
-\BOOKMARK [3][]{subsubsection.4.3.1.2}{4.3.1.2 Editar extens\343o}{subsection.4.3.1}
-\BOOKMARK [3][]{subsubsection.4.3.1.3}{4.3.1.3 Remover extens\343o}{subsection.4.3.1}
-\BOOKMARK [2][]{subsection.4.3.2}{4.3.2 Trunks}{section.4.3}
-\BOOKMARK [3][]{subsubsection.4.3.2.1}{4.3.2.1 Adicionar Trunk}{subsection.4.3.2}
-\BOOKMARK [3][]{subsubsection.4.3.2.2}{4.3.2.2 Editar trunk}{subsection.4.3.2}
-\BOOKMARK [3][]{subsubsection.4.3.2.3}{4.3.2.3 Remover trunk}{subsection.4.3.2}
-\BOOKMARK [2][]{subsection.4.3.3}{4.3.3 Rotas de Sa\355da}{section.4.3}
-\BOOKMARK [3][]{subsubsection.4.3.3.1}{4.3.3.1 Adicionar Rota}{subsection.4.3.3}
-\BOOKMARK [3][]{subsubsection.4.3.3.2}{4.3.3.2 Editar rota}{subsection.4.3.3}
-\BOOKMARK [3][]{subsubsection.4.3.3.3}{4.3.3.3 Remover rota}{subsection.4.3.3}
-\BOOKMARK [2][]{subsection.4.3.4}{4.3.4 Rotas de Entrada}{section.4.3}
-\BOOKMARK [3][]{subsubsection.4.3.4.1}{4.3.4.1 Adicionar rota}{subsection.4.3.4}
-\BOOKMARK [3][]{subsubsection.4.3.4.2}{4.3.4.2 Editar rota}{subsection.4.3.4}
-\BOOKMARK [3][]{subsubsection.4.3.4.3}{4.3.4.3 Remover rota}{subsection.4.3.4}
-\BOOKMARK [1][]{section.4.4}{4.4 Primavera}{chapter.4}
-\BOOKMARK [2][]{subsection.4.4.1}{4.4.1 Instala\347\343o}{section.4.4}
-\BOOKMARK [2][]{subsection.4.4.2}{4.4.2 Interface}{section.4.4}
-\BOOKMARK [0][]{chapter.5}{5 Anexos}{}
-\BOOKMARK [1][]{section.5.1}{5.1 Changelog}{chapter.5}
-\BOOKMARK [2][]{subsection.5.1.1}{5.1.1 Release 1.0}{section.5.1}
-\BOOKMARK [2][]{subsection.5.1.2}{5.1.2 Release 1.0.1}{section.5.1}
-\BOOKMARK [2][]{subsection.5.1.3}{5.1.3 Release 1.1.0}{section.5.1}
-\BOOKMARK [2][]{subsection.5.1.4}{5.1.4 Release 1.2.0}{section.5.1}
-\BOOKMARK [2][]{subsection.5.1.5}{5.1.5 Release 1.2.1}{section.5.1}
-\BOOKMARK [2][]{subsection.5.1.6}{5.1.6 Release 1.2.2}{section.5.1}
+\BOOKMARK [0][]{chapter.1}{1 UnitBox }{}% 1
+\BOOKMARK [0][]{chapter.2}{2 Instala\347\343o}{}% 2
+\BOOKMARK [1][]{section.2.1}{2.1 Vers\343o standard}{chapter.2}% 3
+\BOOKMARK [0][]{chapter.3}{3 Central Management}{}% 4
+\BOOKMARK [1][]{section.3.1}{3.1 Primeiro acesso}{chapter.3}% 5
+\BOOKMARK [1][]{section.3.2}{3.2 Main}{chapter.3}% 6
+\BOOKMARK [2][]{subsection.3.2.1}{3.2.1 Nodes}{section.3.2}% 7
+\BOOKMARK [2][]{subsection.3.2.2}{3.2.2 Redes}{section.3.2}% 8
+\BOOKMARK [3][]{subsubsection.3.2.2.1}{3.2.2.1 Administra\347\343o das redes}{subsection.3.2.2}% 9
+\BOOKMARK [3][]{subsubsection.3.2.2.2}{3.2.2.2 Gest\343o da pool de endere\347os MAC}{subsection.3.2.2}% 10
+\BOOKMARK [3][]{subsubsection.3.2.2.3}{3.2.2.3 Gest\343o das interfaces de rede das m\341quinas virtuais}{subsection.3.2.2}% 11
+\BOOKMARK [1][]{section.3.3}{3.3 Datacenter virtual}{chapter.3}% 12
+\BOOKMARK [1][]{section.3.4}{3.4 Servidor de virtualiza\347\343o}{chapter.3}% 13
+\BOOKMARK [2][]{subsection.3.4.1}{3.4.1 Informa\347\343o do n\363}{section.3.4}% 14
+\BOOKMARK [2][]{subsection.3.4.2}{3.4.2 Servidores}{section.3.4}% 15
+\BOOKMARK [3][]{subsubsection.3.4.2.1}{3.4.2.1 Adicionar m\341quina virtual}{subsection.3.4.2}% 16
+\BOOKMARK [3][]{subsubsection.3.4.2.2}{3.4.2.2 Editar m\341quina virtual}{subsection.3.4.2}% 17
+\BOOKMARK [3][]{subsubsection.3.4.2.3}{3.4.2.3 Remover m\341quina virtual}{subsection.3.4.2}% 18
+\BOOKMARK [3][]{subsubsection.3.4.2.4}{3.4.2.4 Abrir m\341quina virtual numa consola VNC}{subsection.3.4.2}% 19
+\BOOKMARK [3][]{subsubsection.3.4.2.5}{3.4.2.5 Iniciar/parar m\341quina virtual}{subsection.3.4.2}% 20
+\BOOKMARK [3][]{subsubsection.3.4.2.6}{3.4.2.6 Migrar m\341quina virtual}{subsection.3.4.2}% 21
+\BOOKMARK [3][]{subsubsection.3.4.2.7}{3.4.2.7 Snapshots}{subsection.3.4.2}% 22
+\BOOKMARK [2][]{subsection.3.4.3}{3.4.3 Armazenamento}{section.3.4}% 23
+\BOOKMARK [3][]{subsubsection.3.4.3.1}{3.4.3.1 Administra\347\343o de Physical Volumes}{subsection.3.4.3}% 24
+\BOOKMARK [3][]{subsubsection.3.4.3.2}{3.4.3.2 Administra\347\343o de Volume Groups}{subsection.3.4.3}% 25
+\BOOKMARK [3][]{subsubsection.3.4.3.3}{3.4.3.3 Administra\347\343o de Logical Volumes}{subsection.3.4.3}% 26
+\BOOKMARK [2][]{subsection.3.4.4}{3.4.4 Desligar n\363}{section.3.4}% 27
+\BOOKMARK [1][]{section.3.5}{3.5 M\341quina virtual}{chapter.3}% 28
+\BOOKMARK [2][]{subsection.3.5.1}{3.5.1 Informa\347\343o do servidor}{section.3.5}% 29
+\BOOKMARK [2][]{subsection.3.5.2}{3.5.2 Estat\355sticas}{section.3.5}% 30
+\BOOKMARK [2][]{subsection.3.5.3}{3.5.3 Servi\347os}{section.3.5}% 31
+\BOOKMARK [2][]{subsection.3.5.4}{3.5.4 Drivers Virtio}{section.3.5}% 32
+\BOOKMARK [1][]{section.3.6}{3.6 Ferramentas}{chapter.3}% 33
+\BOOKMARK [2][]{subsection.3.6.1}{3.6.1 Importar OVF}{section.3.6}% 34
+\BOOKMARK [2][]{subsection.3.6.2}{3.6.2 Exportar OVF}{section.3.6}% 35
+\BOOKMARK [2][]{subsection.3.6.3}{3.6.3 Gestor de ISOs}{section.3.6}% 36
+\BOOKMARK [2][]{subsection.3.6.4}{3.6.4 Monitoriza\347\343o do agente dos nodes}{section.3.6}% 37
+\BOOKMARK [2][]{subsection.3.6.5}{3.6.5 Registo de eventos do sistema}{section.3.6}% 38
+\BOOKMARK [1][]{section.3.7}{3.7 Administra\347\343o do sistema}{chapter.3}% 39
+\BOOKMARK [2][]{subsection.3.7.1}{3.7.1 Assistente de configura\347\343o inicial}{section.3.7}% 40
+\BOOKMARK [2][]{subsection.3.7.2}{3.7.2 Alterar prefer\352ncias}{section.3.7}% 41
+\BOOKMARK [2][]{subsection.3.7.3}{3.7.3 Administra\347\343o de utilizadores, grupos e permiss\365es}{section.3.7}% 42
+\BOOKMARK [2][]{subsection.3.7.4}{3.7.4 Desligar a appliance}{section.3.7}% 43
+\BOOKMARK [0][]{chapter.4}{4 Management Agents}{}% 44
+\BOOKMARK [1][]{section.4.1}{4.1 ETFW}{chapter.4}% 45
+\BOOKMARK [2][]{subsection.4.1.1}{4.1.1 Network setup Wizard}{section.4.1}% 46
+\BOOKMARK [2][]{subsection.4.1.2}{4.1.2 Edi\347\343o de Rede - Network}{section.4.1}% 47
+\BOOKMARK [3][]{subsubsection.4.1.2.1}{4.1.2.1 Interfaces de rede}{subsection.4.1.2}% 48
+\BOOKMARK [3][]{subsubsection.4.1.2.2}{4.1.2.2 Routing and gateways}{subsection.4.1.2}% 49
+\BOOKMARK [3][]{subsubsection.4.1.2.3}{4.1.2.3 Host Addresses}{subsection.4.1.2}% 50
+\BOOKMARK [3][]{subsubsection.4.1.2.4}{4.1.2.4 Hostname and DNS Client}{subsection.4.1.2}% 51
+\BOOKMARK [2][]{subsection.4.1.3}{4.1.3 Regras Firewall}{section.4.1}% 52
+\BOOKMARK [3][]{subsubsection.4.1.3.1}{4.1.3.1 Tabela Filter - Packet Filtering}{subsection.4.1.3}% 53
+\BOOKMARK [3][]{subsubsection.4.1.3.2}{4.1.3.2 Tabela NAT - Network address translation}{subsection.4.1.3}% 54
+\BOOKMARK [3][]{subsubsection.4.1.3.3}{4.1.3.3 Tabela Mangle - Packet alteration}{subsection.4.1.3}% 55
+\BOOKMARK [2][]{subsection.4.1.4}{4.1.4 Servidor DHCP}{section.4.1}% 56
+\BOOKMARK [2][]{subsection.4.1.5}{4.1.5 Servidor SQUID}{section.4.1}% 57
+\BOOKMARK [3][]{subsubsection.4.1.5.1}{4.1.5.1 Ports and Networking}{subsection.4.1.5}% 58
+\BOOKMARK [3][]{subsubsection.4.1.5.2}{4.1.5.2 Access Control}{subsection.4.1.5}% 59
+\BOOKMARK [3][]{subsubsection.4.1.5.3}{4.1.5.3 Authentication Programs}{subsection.4.1.5}% 60
+\BOOKMARK [3][]{subsubsection.4.1.5.4}{4.1.5.4 Other Caches}{subsection.4.1.5}% 61
+\BOOKMARK [3][]{subsubsection.4.1.5.5}{4.1.5.5 Exemplos de utiliza\347\343o}{subsection.4.1.5}% 62
+\BOOKMARK [2][]{subsection.4.1.6}{4.1.6 Servidor SNMP}{section.4.1}% 63
+\BOOKMARK [1][]{section.4.2}{4.2 ETMS}{chapter.4}% 64
+\BOOKMARK [2][]{subsection.4.2.1}{4.2.1 Separador 1 - Servi\347o}{section.4.2}% 65
+\BOOKMARK [2][]{subsection.4.2.2}{4.2.2 Separador 2 - Gerir Dom\355nios}{section.4.2}% 66
+\BOOKMARK [3][]{subsubsection.4.2.2.1}{4.2.2.1 Cria\347\343o de um Dom\355nio}{subsection.4.2.2}% 67
+\BOOKMARK [3][]{subsubsection.4.2.2.2}{4.2.2.2 Edi\347\343o de um Dom\355nio}{subsection.4.2.2}% 68
+\BOOKMARK [3][]{subsubsection.4.2.2.3}{4.2.2.3 Remo\347\343o de um Dom\355nio}{subsection.4.2.2}% 69
+\BOOKMARK [2][]{subsection.4.2.3}{4.2.3 Gerir Caixas de Correio}{section.4.2}% 70
+\BOOKMARK [3][]{subsubsection.4.2.3.1}{4.2.3.1 Op\347\343o Detalhes}{subsection.4.2.3}% 71
+\BOOKMARK [3][]{subsubsection.4.2.3.2}{4.2.3.2 Cria\347\343o de Alias}{subsection.4.2.3}% 72
+\BOOKMARK [3][]{subsubsection.4.2.3.3}{4.2.3.3 Remo\347\343o de Alias}{subsection.4.2.3}% 73
+\BOOKMARK [2][]{subsection.4.2.4}{4.2.4 Separador 3 - Gerir Caixas de Correio}{section.4.2}% 74
+\BOOKMARK [3][]{subsubsection.4.2.4.1}{4.2.4.1 Pesquisar Caixas de Correio}{subsection.4.2.4}% 75
+\BOOKMARK [3][]{subsubsection.4.2.4.2}{4.2.4.2 Cria\347\343o de uma Caixa de Correio}{subsection.4.2.4}% 76
+\BOOKMARK [3][]{subsubsection.4.2.4.3}{4.2.4.3 Edi\347\343o de uma Caixa de Correio}{subsection.4.2.4}% 77
+\BOOKMARK [3][]{subsubsection.4.2.4.4}{4.2.4.4 Alterar a Palavra-Chave}{subsection.4.2.4}% 78
+\BOOKMARK [3][]{subsubsection.4.2.4.5}{4.2.4.5 Defini\347\343o de Alias para a Caixa de Correio}{subsection.4.2.4}% 79
+\BOOKMARK [3][]{subsubsection.4.2.4.6}{4.2.4.6 Defini\347\343o de Caixas de Correio para Encaminhamento}{subsection.4.2.4}% 80
+\BOOKMARK [3][]{subsubsection.4.2.4.7}{4.2.4.7 Caixas de Correio Dispon\355veis}{subsection.4.2.4}% 81
+\BOOKMARK [3][]{subsubsection.4.2.4.8}{4.2.4.8 Op\347\343o Detalhes}{subsection.4.2.4}% 82
+\BOOKMARK [3][]{subsubsection.4.2.4.9}{4.2.4.9 Remo\347\343o de uma Caixa de Correio}{subsection.4.2.4}% 83
+\BOOKMARK [1][]{section.4.3}{4.3 ETVOIP}{chapter.4}% 84
+\BOOKMARK [2][]{subsection.4.3.1}{4.3.1 Extens\365es}{section.4.3}% 85
+\BOOKMARK [3][]{subsubsection.4.3.1.1}{4.3.1.1 Adicionar Extens\343o}{subsection.4.3.1}% 86
+\BOOKMARK [3][]{subsubsection.4.3.1.2}{4.3.1.2 Editar extens\343o}{subsection.4.3.1}% 87
+\BOOKMARK [3][]{subsubsection.4.3.1.3}{4.3.1.3 Remover extens\343o}{subsection.4.3.1}% 88
+\BOOKMARK [2][]{subsection.4.3.2}{4.3.2 Trunks}{section.4.3}% 89
+\BOOKMARK [3][]{subsubsection.4.3.2.1}{4.3.2.1 Adicionar Trunk}{subsection.4.3.2}% 90
+\BOOKMARK [3][]{subsubsection.4.3.2.2}{4.3.2.2 Editar trunk}{subsection.4.3.2}% 91
+\BOOKMARK [3][]{subsubsection.4.3.2.3}{4.3.2.3 Remover trunk}{subsection.4.3.2}% 92
+\BOOKMARK [2][]{subsection.4.3.3}{4.3.3 Rotas de Sa\355da}{section.4.3}% 93
+\BOOKMARK [3][]{subsubsection.4.3.3.1}{4.3.3.1 Adicionar Rota}{subsection.4.3.3}% 94
+\BOOKMARK [3][]{subsubsection.4.3.3.2}{4.3.3.2 Editar rota}{subsection.4.3.3}% 95
+\BOOKMARK [3][]{subsubsection.4.3.3.3}{4.3.3.3 Remover rota}{subsection.4.3.3}% 96
+\BOOKMARK [2][]{subsection.4.3.4}{4.3.4 Rotas de Entrada}{section.4.3}% 97
+\BOOKMARK [3][]{subsubsection.4.3.4.1}{4.3.4.1 Adicionar rota}{subsection.4.3.4}% 98
+\BOOKMARK [3][]{subsubsection.4.3.4.2}{4.3.4.2 Editar rota}{subsection.4.3.4}% 99
+\BOOKMARK [3][]{subsubsection.4.3.4.3}{4.3.4.3 Remover rota}{subsection.4.3.4}% 100
+\BOOKMARK [1][]{section.4.4}{4.4 Primavera}{chapter.4}% 101
+\BOOKMARK [2][]{subsection.4.4.1}{4.4.1 Instala\347\343o}{section.4.4}% 102
+\BOOKMARK [2][]{subsection.4.4.2}{4.4.2 Interface}{section.4.4}% 103
+\BOOKMARK [1][]{section.4.5}{4.5 Servidor de ficheiros}{chapter.4}% 104
+\BOOKMARK [0][]{chapter.5}{5 Anexos}{}% 105
+\BOOKMARK [1][]{section.5.1}{5.1 Changelog}{chapter.5}% 106
+\BOOKMARK [2][]{subsection.5.1.1}{5.1.1 Release 1.0}{section.5.1}% 107
+\BOOKMARK [2][]{subsection.5.1.2}{5.1.2 Release 1.0.1}{section.5.1}% 108
+\BOOKMARK [2][]{subsection.5.1.3}{5.1.3 Release 1.1.0}{section.5.1}% 109
+\BOOKMARK [2][]{subsection.5.1.4}{5.1.4 Release 1.2.0}{section.5.1}% 110
+\BOOKMARK [2][]{subsection.5.1.5}{5.1.5 Release 1.2.1}{section.5.1}% 111
+\BOOKMARK [2][]{subsection.5.1.6}{5.1.6 Release 1.2.2}{section.5.1}% 112

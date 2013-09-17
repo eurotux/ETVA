@@ -51,7 +51,9 @@ EOF;
             if($result['action'] == Appliance::LOGIN_BACKUP) $result['txt'] = 'Could not login!';
             if($result['action'] == Appliance::DB_BACKUP) $result['txt'] = 'DB backup error...';
             if($result['action'] == Appliance::MA_BACKUP) $result['txt'] = 'MA backup error...';
-            $message = 'The backup failed, reason: ' . $result['txt'];
+            $reason = $result['info'];
+            if( $result['txt'] ) $reason = $result['txt'];
+            $message = 'The backup failed, reason: ' . $reason;
             $context->getEventDispatcher()->notify(
                 new sfEvent($this->name, 'event.log',
                     array('message' => $message,'priority'=>EtvaEventLogger::ERR)));

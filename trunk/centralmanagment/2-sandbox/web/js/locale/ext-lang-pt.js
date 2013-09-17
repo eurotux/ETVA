@@ -13,7 +13,7 @@
  * 31 January 2008
  */
 
-Ext.UpdateManager.defaults.indicatorText = '<div class="loading-indicator">Carregando...</div>';
+Ext.UpdateManager.defaults.indicatorText = '<div class="loading-indicator">A carregar...</div>';
 
 if(Ext.View){
    Ext.View.prototype.emptyText = "";
@@ -32,7 +32,7 @@ if(Ext.form.Field){
 }
 
 if(Ext.LoadMask){
-    Ext.LoadMask.prototype.msg = "Carregando...";
+    Ext.LoadMask.prototype.msg = "A carregar...";
 }
 
 Date.monthNames = [
@@ -142,7 +142,7 @@ if(Ext.form.DateField){
 
 if(Ext.form.ComboBox){
    Ext.apply(Ext.form.ComboBox.prototype, {
-      loadingText       : "Carregando...",
+      loadingText       : "A carregar...",
       valueNotFoundText : undefined
    });
 }

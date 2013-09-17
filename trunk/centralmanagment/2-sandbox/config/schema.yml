@@ -127,6 +127,8 @@ propel:
     lvdevice: { type: VARCHAR, size: '255' }
     size: { type: BIGINT }
     freesize: { type: BIGINT }
+    virtual_size: { type: BIGINT }
+    size_snapshots: { type: BIGINT }
     storage_type: { type: VARCHAR, size: '255' }
     writeable: { type: INTEGER }
     in_use: { type: INTEGER, default: '0' }
@@ -208,3 +210,23 @@ propel:
     _attributes: { phpName: EtvaServerAssign }
     server_id: { type: INTEGER, primaryKey: true, required: true, foreignTable: server, foreignReference: id, onDelete: cascade }
     node_id: { type: INTEGER, required: true, foreignTable: node, foreignReference: id, onDelete: cascade }
+  pool:
+    _attributes: { phpName: EtvaPool }
+    id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    cluster_id: { type: INTEGER, required: true, foreignTable: cluster, foreignReference: id, onDelete: restrict }
+    name: { type: VARCHAR, size: '255' }
+    uuid: { type: VARCHAR, size: '255', required: true }
+    pool_type: { type: VARCHAR, size: '255' }
+    shared: { type: INTEGER, required: true, default: '0' }
+    source_device: { type: VARCHAR, size: '255' }
+    source_host: { type: VARCHAR, size: '255' }
+    source_dir: { type: VARCHAR, size: '255' }
+    source_format: { type: VARCHAR, size: '255' }
+    target_path: { type: VARCHAR, size: '255' }
+    capacity: { type: INTEGER }
+    allocation: { type: INTEGER }
+    available: { type: INTEGER }
+  node_pool:
+    _attributes: { phpName: EtvaNodePool }
+    node_id: { type: INTEGER, primaryKey: true, required: true, foreignTable: node, foreignReference: id, onDelete: cascade }
+    pool_id: { type: INTEGER, primaryKey: true, required: true, foreignTable: pool, foreignReference: id, onDelete: cascade }

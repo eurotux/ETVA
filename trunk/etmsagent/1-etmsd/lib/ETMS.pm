@@ -897,13 +897,17 @@ sub create_user{
 	plog $res;
 	plog "Exit code: $e\n";
 	unless($e == 0){
-        if( $res !~ m/User \S+ created successfully/ ){
-            return retErr("create_user", $res, 1);
-        }
+		if( $res !~ m/User \S+ created successfully/ ){
+		    my $msg_err = $res;
+		    if( $res =~ m/Error: (.+)\r?\n/ ){
+			$msg_err = $1;
+		    }
+		    return retErr("create_user", $msg_err);
+		}
 	}
 
 	if($res =~ /(error.*)/i){
-		return retErr('user', $1, 1);
+		return retErr('user', $1);
 	}
 	
 #	print Dumper %params;
@@ -925,18 +929,31 @@ sub create_user{
 	$params{'user_name'} = $params{'user_name'}.'@'.$params{'domain'};
 	&edit_user("", %params);
 
-	return retOk('user', 'Mailbox created successful', '1');	
+	return retOk('user', 'Mailbox created successful');
 }
 
 sub get_user{
-	my($domain, $mail) = @_;
-	my @users = &get_users($domain);
-	
-	foreach my $userRef (@users){
-		if($userRef->{"MAIL"} eq $mail){
-#			print Dumper($userRef);
-			return $userRef;
-		}
+    my $self = shift;
+	my($domain, $mail, $user_name) = my %params = @_;
+    if( $params{'domain'}  || $params{'mail'} ){
+        $domain = $params{'domain'};
+        $mail = $params{'mail'};
+        $user_name = $params{'user_name'};
+        if( $user_name ){
+            $mail = join('@',${user_name},${domain});
+        }
+    }
+    print STDERR "get_user mail=$mail domain=$domain","\n";
+    if( $mail ){
+        my @users = $self->get_users('domain'=>$domain);
+        
+        foreach my $userRef (@users){
+            if( ($userRef->{"MAIL"} eq $mail) || 
+                    ($userRef->{"user_name"} eq $mail) ){
+    #			print Dumper($userRef);
+                return $userRef;
+            }
+        }
 	}
 }
 

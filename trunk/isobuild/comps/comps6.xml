@@ -94,7 +94,7 @@
     <default>true</default>
     <uservisible>true</uservisible>
     <packagelist>
-      <packagereq type="mandatory">qemu-kvm</packagereq>
+      <packagereq type="mandatory">kvm</packagereq>
       <packagereq type="mandatory">virtagent</packagereq>
       <packagereq type="mandatory">etva-enterprise</packagereq>
     </packagelist>
@@ -106,8 +106,6 @@
     <default>true</default>
     <uservisible>true</uservisible>
     <packagelist>
-      <packagereq type="mandatory">kernel-xen</packagereq>
-      <packagereq type="mandatory">kernel-ml</packagereq>
       <packagereq type="mandatory">xen</packagereq>
       <packagereq type="mandatory">virtagent</packagereq>
       <packagereq type="mandatory">etva-enterprise</packagereq>

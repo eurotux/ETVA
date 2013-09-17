@@ -1,14 +1,13 @@
 #!/bin/bash
 
-QEMU=`dmesg | grep -i qemu`
-VMWARE=`lspci | grep -i vmware`
-VIRTUALBOX=`lspci | grep -i virtualbox`
-
-if [ "$QEMU" == "" -a "$VMWARE" == "" -a "$VIRTUALBOX" == "" ]; then
+# only run lcdagent on real hardware
+if [ "`virt-what`" != "" ]; then # virtual machine
+    touch /service/lcdagent/down /service/lcdagent/log/down
+    svc -d /service/lcdagent/log
+    svc -d /service/lcdagent
+else
     cd /srv/lcdagent
     exec > /var/log/lcdagent/lcdagent.log 2>&1
     CFG_FILE="/etc/sysconfig/lcdagent/lcdagent.ini" \
-        exec /usr/bin/perl lcdagentd
-else
-    touch /service/lcdagent/down && svc -dk /service/lcdagent
+	exec /usr/bin/perl lcdagentd
 fi

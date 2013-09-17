@@ -3,6 +3,7 @@
 Ext.ns("Setting");
 
 Setting.Form = Ext.extend(Ext.form.FormPanel, {    
+    monitorValid: true,
     labelWidth:130,
     border:false
     /* build connectivity tab layout */
@@ -22,7 +23,7 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
 
     }
     ,initComponent:function() {
-        this.get_data = ['vnc_keymap','eventlog_flush'];
+        this.get_data = ['vnc_keymap','eventlog_flush','alert_email','alert_subject_prefix'];
         this.fetch = Ext.ux.util.clone(this.get_data);
         this.fetch.push('networks');
 
@@ -102,7 +103,6 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
 
 
         var config = {
-            monitorValid:true,
             items:[{xtype:'tabpanel',activeItem:0,deferredRender:false,
              anchor: '100% 100%',
              defaults:{
@@ -116,6 +116,27 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
                     title: <?php echo json_encode(__('General')) ?>,
                     defaults:{layout:'form',border:true,autoScroll:true},
                     items:[
+                        {
+                            xtype: 'fieldset',
+                            title: <?php echo json_encode(__('Alert options')) ?>,
+                            collapsible: false,
+                            items: [
+                                {
+                                    xtype : 'textfield',
+                                    width : 200,
+                                    fieldLabel: <?php echo json_encode(__('Email')) ?>,
+                                    name : 'alert_email',
+                                    allowBlank: false
+                                }
+                                ,{
+                                    xtype : 'textfield',
+                                    width : 400,
+                                    fieldLabel: <?php echo json_encode(__('Subject prefix')) ?>,
+                                    name : 'alert_subject_prefix',
+                                    allowBlank: true
+                                }
+                            ]
+                        },
                         {
                             xtype: 'fieldset',
                             title: <?php echo json_encode(__('VNC options')) ?>,
@@ -170,6 +191,18 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
                 conn_tab
             ]}]
         };
+
+
+        this.buttons = [{
+                        text: __('Save'),
+                        formBind:true,
+                        scope: this,
+                        handler: this.onSave
+                    },
+                    {text: __('Cancel'),
+                        scope: this,
+                        handler:function(){(this.ownerCt).close()}
+                 }];
 
         // apply config
         Ext.apply(this, Ext.apply(this.initialConfig, config));
@@ -297,8 +330,6 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
                 timeout:10000,
                 failure:function(response) {
 
-                    console.log(response);
-
                     if((response.status==-1) && cm_ip){
                         this.redirect(cm_ip);
                         return;
@@ -367,7 +398,7 @@ Setting.Main = function(config) {
     var windowHeight = viewerSize.height * 0.97;
     var windowWidth = viewerSize.width * 0.97;
     windowHeight = Ext.util.Format.round(windowHeight,0);
-    windowHeight = (windowHeight > 400) ? 400 : windowHeight;
+    windowHeight = (windowHeight > 440) ? 440 : windowHeight;
 
     windowWidth = Ext.util.Format.round(windowWidth,0);
     windowWidth = (windowWidth > 800) ? 800 : windowWidth;
@@ -392,15 +423,6 @@ Setting.Main = function(config) {
                     new Setting.Form({region:'center',url:<?php echo json_encode(url_for('setting/jsonSetting'))?>})
                 ],
                 tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-settings-main',autoLoad:{ params:'mod=setting'},title: <?php echo json_encode(__('Preferences Help')) ?>});}}]
-                ,buttons:[{
-                    text: __('Save'),
-                    handler:function(){
-                        this.ownerCt.ownerCt.get(0).onSave({});}
-                    },
-                    {text: __('Cancel'),
-                     handler:function(){
-                        win.close();}
-                 }]
              ,listeners:{                 
                  'close':function(){Ext.EventManager.removeResizeListener(resizeFunc);}
              }
@@ -435,7 +457,7 @@ Setting.Main = function(config) {
         var windowWidth = viewerSize.width * 0.97;
 
         windowHeight = Ext.util.Format.round(windowHeight,0);
-        windowHeight = (windowHeight > 400) ? 400 : windowHeight;
+        windowHeight = (windowHeight > 440) ? 440 : windowHeight;
 
         windowWidth = Ext.util.Format.round(windowWidth,0);
         windowWidth = (windowWidth > 800) ? 800 : windowWidth;

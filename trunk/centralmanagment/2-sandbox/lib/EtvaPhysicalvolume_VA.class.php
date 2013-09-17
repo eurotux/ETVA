@@ -10,6 +10,7 @@ class EtvaPhysicalvolume_VA
 
     const PVCREATE = 'pvcreate';
     const PVREMOVE = 'pvremove';
+    const DEVICERESIZE = 'deviceresize';
 
     const PVINIT = 'pvinit';
     const GET_SYNC_DISKDEVICES = 'hash_phydisks';
@@ -703,4 +704,57 @@ class EtvaPhysicalvolume_VA
 
         return $return; //($node_inconsistent) ? false : true;
     }
+
+    /*
+     * send deviceresize
+     */
+    public function send_expand(EtvaNode $etva_node)
+    {
+        
+        $msg_ok_type = EtvaPhysicalvolumePeer::_OK_EXPAND_;
+        $msg_err_type = EtvaPhysicalvolumePeer::_ERR_EXPAND_;
+
+        $method = self::DEVICERESIZE;
+        $etva_pv_uuid = $this->etva_pv->getUuid();
+        $etva_pv_type = $this->etva_pv->getStorageType();
+        $etva_pv_device = $this->etva_pv->getDevice();
+        $params = array('device' => $etva_pv_device, 'uuid' => $etva_pv_uuid);
+
+        // check if physical volume is shared
+        $shared = ($this->etva_pv->getStorageType() != EtvaPhysicalvolume::STORAGE_TYPE_LOCAL_MAP);
+
+        $etva_cluster = $etva_node->getEtvaCluster();
+
+        $bulk_responses = array();
+        if( $shared ){
+            // call resize at all nodes
+            $bulk_responses = $etva_cluster->soapSend($method,$params);
+        } else {
+            $node_id = $etva_node->getId();
+            // call resize
+            $bulk_responses[$node_id] = $etva_node->soapSend($method,$params);
+        }
+
+        // sync physical volumes size
+        $errors = $this->send_update($etva_node);
+        if( !empty($errors) ){
+            $result = array('success'=>false, 'errors'=>$errors);
+
+            $msg_i18n = Etva::makeNotifyLogMessage($etva_node->getName(),
+                                                    $msg_err_type,array('name'=>$this->etva_pv->getName(),'info'=>''));
+            $result['error'] = $msg_i18n;
+            return  $result;
+        } else {
+            //notify system log
+            $message = Etva::getLogMessage(array('name'=>$this->etva_pv->getName()), $msg_ok_type);
+            $msg_i18n = sfContext::getInstance()->getI18N()->__($msg_ok_type,array('%name%'=>$this->etva_pv->getName()));
+            
+            sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(), 'event.log',array('message' => $message)));
+            
+            $result = array('success'=>true, 'agent'=>$etva_node->getName(), 'response'=>$msg_i18n);
+
+            return  $result;
+        }
+    }
+
 }

@@ -1,0 +1,183 @@
+#!/usr/bin/perl
+# Copywrite Eurotux 2013
+# 
+# CMAR 2013/08/09 (cmar@eurotux.com)
+
+=pod
+
+=head1 NAME
+
+fsagentd - File Server daemon
+
+=head1 SYNOPSIS
+
+    ./fsagentd
+
+=head1 DESCRIPTION
+
+    main
+
+        load configuration
+
+        start agent
+
+            create new agent ETVA::Agent::SOAP using ETFS as dispatcher
+
+            $Agent->mainLoop()
+
+                create Socket to Listen
+
+                register on Central Management
+
+                register alarm at T_ALARM seconds to send keep alive alert to Central Management
+
+                accept connections from clients
+
+=head1 METHODS
+
+=over 4
+
+=cut
+
+use strict;
+
+use ETVA::Agent::SOAPFork;
+use ETVA::Client::SOAP::HTTP;
+use ETVA::Utils;
+
+use Samba;
+
+use Data::Dumper;
+
+my %CONF = ( "CFG_FILE"=>"/etc/sysconfig/etva-fsagent/fsagentd.conf" );
+
+
+=item launch_agent
+start agent
+
+    create ETVA::Agent::SOAP instance with Samba dispatcher module
+
+=cut
+
+sub launch_agent {
+
+    # get network interface to initialize agent with macaddress
+    $CONF{'macaddr'} = ETVA::Utils::getmacaddr();
+
+    # register func handlers
+    $CONF{'_register_handler'} = \&register_handler;
+
+    my $dispatcher = $CONF{'_dispatcher'} = "Samba";
+
+    my $Agent = ETVA::Agent::SOAPFork->new( %CONF );
+
+    $Agent->mainLoop();
+}
+sub register_handler {
+    my ($agent) = @_;
+
+    my $dispatcher = $agent->{'_dispatcher'};
+
+    # initialized on CentralManagement 
+    if( $agent->{'cm_uri'} ){
+
+        my $now = nowStr();
+        plogNow("init Agent with macaddr=",$agent->{'macaddr'});
+
+        my $R = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                        -> call( $agent->{'cm_namespace'},
+                                 "initAgentServices",
+                                    name=>'ETFS',
+                                    ip=>$agent->{'LocalIP'},
+                                    port=>$agent->{'LocalPort'},
+                                    macaddr=>$agent->{'macaddr'},
+                                    services=>[{'name'=>'main'}]
+                                );
+        if( !$R || $R->{'_error_'} ){
+                plogNow("Cant connect to CentralManagement.\nInitialization Agent 'etfs' aborted!");
+        } else {
+            if( ref($R->{'return'}) && $R->{'return'}{'success'} && ( $R->{'return'}{'success'} ne 'false' )){
+                plogNow("ETFS Agent register with success on CentralManagement");
+
+                plogNow Dumper($R);
+                # Reset
+                if( $R->{'return'}{'reset'} ){
+                    my $response = $dispatcher->set_backupconf( '_url'=>"$R->{'return'}{'backup_url'}" );
+
+                    # send reset/restore ok
+                    if(!isError($response)){
+                        my $reset_ok = $response;
+                        my $RR = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
+                            -> call( $agent->{'cm_namespace'},
+                                        'restoreManagAgent',
+                                        macaddr=>$agent->{'macaddr'},
+                                        ok=>{ 'oktype'=>$reset_ok->{'_oktype_'}, 'okmsg'=>$reset_ok->{'_okmsg_'} }
+                                    );
+                    }
+                }
+            }else{
+                plogNow("ETFS Agent NOT registered with success on CentralManagement");
+            }
+        }      
+    }
+}
+
+=item main
+
+simple startup
+
+=over
+
+=item *
+
+load configuration stuff
+
+=item *
+
+launch agent
+
+=back
+
+=cut
+
+# simple startup
+sub main {
+    $CONF{"CFG_FILE"} = $ENV{'CFG_FILE'} if( $ENV{'CFG_FILE'} );
+    loadfunc();
+    launch_agent();
+}
+
+sub loadfunc {
+    %CONF = ETVA::Utils::get_conf(1,$CONF{"CFG_FILE"});
+}
+
+main();
+1;
+
+=back
+
+=pod
+
+=head1 BUGS
+
+...
+
+=head1 AUTHORS
+
+...
+
+=head1 COPYRIGHT
+
+...
+
+=head1 LICENSE
+
+...
+
+=head1 SEE ALSO
+
+C<http://libvirt.org>
+L<ETVA::Agent>, L<ETVA::Agent::SOAP>, L<ETVA::Agent::JSON>
+L<ETVA::Client>, L<ETVA::Client::SOAP>, L<ETVA::Client::SOAP::HTTP>
+
+=cut

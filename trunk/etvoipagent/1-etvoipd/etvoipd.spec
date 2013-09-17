@@ -1,5 +1,5 @@
 Name: etva-etvoip
-Version: 1.2.2
+Version: 2.0.0
 Release: beta
 Summary: ETVOIP Agent
 License: GPL

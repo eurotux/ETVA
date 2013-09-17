@@ -21,6 +21,8 @@ class OvfEnvelope_VA{
     const _ERR_PARSING_ = 'Could not parse OVF %url%';
     const _ERR_IMPORT_   = 'Could not import OVF. %info%';
 
+    const _OK_OVF_IMPORT_VALIDATION_ = 'Ovf import validation ok.';
+
     public function OvfEnvelope_VA(){
         $this->disks = array();
     }

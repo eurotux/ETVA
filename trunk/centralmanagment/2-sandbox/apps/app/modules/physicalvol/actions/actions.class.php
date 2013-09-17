@@ -1034,4 +1034,94 @@ class physicalvolActions extends sfActions
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($return);
     }
+
+    /**
+   * Expanad the physical volume
+   *
+   * Expand size of physical volume,
+   *
+   * $request may contain the following keys:
+   * - nid: virt agent node ID
+   * - dev: device name Ex: /dev/sdb1
+   *
+   * Returns json array('success'=>true,'response'=>$resp) on success
+   *  <br>or<br>
+   * json array('success'=>false,'error'=>$error) on error
+   *
+   */
+    public function executeJsonExpand(sfWebRequest $request)
+    {
+        $nid = $request->getParameter('nid');
+        $dev = $request->getParameter('dev');        
+        $etva_node = EtvaNodePeer::getOrElectNode($request);
+
+        if(!$etva_node){
+
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify system log
+            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
+            $message = Etva::getLogMessage(array('name'=>$dev,'info'=>$node_log), EtvaPhysicalvolumePeer::_ERR_UNINIT_);
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            // if is browser request return text renderer
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+
+        }        
+
+        // get DB info        
+        if(!$etva_pv = $etva_node->retrievePhysicalvolumeByDevice($dev)){
+
+            $msg = Etva::getLogMessage(array('name'=>$etva_node->getName(),'dev'=>$dev), EtvaNodePeer::_ERR_NODEV_);
+            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NODEV_,array('%name%'=>$etva_node->getName(),'%dev%'=>$dev));
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify system log
+            $message = Etva::getLogMessage(array('name'=>$dev,'info'=>$msg), EtvaPhysicalvolumePeer::_ERR_UNINIT_);
+            $this->dispatcher->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            // if is a CLI soap request return json encoded data
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
+
+            $error = $this->setJsonError($error);
+            return $this->renderText($error);
+
+        }
+
+        /*
+         * send physical volume to VA
+         */
+        $pv_va = new EtvaPhysicalvolume_VA($etva_pv);
+        $response = $pv_va->send_expand($etva_node);
+
+
+        if($response['success'])
+        {
+            $return = json_encode($response);
+
+            // if the request is made throught soap request...
+            if(sfConfig::get('sf_environment') == 'soap') return $return;
+            // if is browser request return text renderer
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+            return  $this->renderText($return);
+
+
+        }else{
+
+            if(sfConfig::get('sf_environment') == 'soap') return json_encode($response);
+
+            $return = $this->setJsonError($response);
+            return  $this->renderText($return);
+        }
+    }
 }

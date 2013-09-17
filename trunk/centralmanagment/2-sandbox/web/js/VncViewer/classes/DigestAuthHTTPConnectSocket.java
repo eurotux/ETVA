@@ -17,22 +17,15 @@ class DigestAuthHTTPConnectSocket extends Socket {
     // Connect to the specified HTTP proxy
     //super();
     super(proxyHost, proxyPort);
-    //Socket s = new Socket(proxyHost, proxyPort);
 
-    //this.connect( new InetSocketAddress(proxyHost,proxyPort));
     // Send the CONNECT request and Authentication
-    /*
-    s.getOutputStream().write(("CONNECT " + host + ":" + port +
-			     " HTTP/1.0"+
-			     "\r\n\r\n").getBytes());
-    */
     this.getOutputStream().write(("CONNECT " + host + ":" + port +
                      " HTTP/1.0" + "\r\n" +
                      "Proxy-Authorization: Basic " + 
                             Base64.base64Encode(
                                 username + ":" + password
-                            ) + 
-                     "\r\n\r\n").getBytes());
+                            ) +
+                     "\r\n").getBytes());
 
     // Read the first line of the response
     DataInputStream is = new DataInputStream(this.getInputStream());

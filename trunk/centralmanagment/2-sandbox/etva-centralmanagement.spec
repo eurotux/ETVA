@@ -2,7 +2,7 @@
 %define nagios_plugins /usr/lib64/nagios/plugins  
 
 Name: etva-centralmanagement
-Version: 1.2.2
+Version: 2.0.0
 Release: 2536
 Summary: ETVA Central Management
 License: GPL
@@ -227,7 +227,7 @@ else
 fi
 
 # change title
-%{__perl} -pi -e 's/^\s+title:.*/    title: Eurotux Virtual Appliance ( ETVA )/' apps/app/config/view.yml
+%{__perl} -pi -e 's/^\s+title:.*/    title: UnitBox - Eurotux/' apps/app/config/view.yml
 
 if [ "$1" == "1" ]; then
 	# inicializa ligacao mysql e insere dados

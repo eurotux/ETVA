@@ -7,7 +7,7 @@
 Summary: Apache HTTP Server
 Name: httpd
 Version: 2.2.11
-Release: 8
+Release: 9
 URL: http://httpd.apache.org/
 Source0: http://www.apache.org/dist/httpd/httpd-%{version}.tar.gz
 Source1: index.html
@@ -38,6 +38,7 @@ Patch26: httpd-2.2.9-suenable.patch
 # Bug fixes
 Patch54: httpd-2.2.0-authnoprov.patch
 Patch55: httpd-2.2.4-oldflush.patch
+Patch56: httpd-2.2.11-proxyconnectsslfix.patch
 License: ASL 2.0
 Group: System Environment/Daemons
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
@@ -126,6 +127,7 @@ Security (TLS) protocols.
 
 %patch54 -p1 -b .authnoprov
 %patch55 -p1 -b .oldflush
+%patch56 -p1 -b .proxyconnectsslfix
 
 # Patch in vendor/release string
 sed "s/@RELEASE@/%{vstring}/" < %{PATCH20} | patch -p1
@@ -482,6 +484,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/httpd/build/*.sh
 
 %changelog
+* Thu Feb 07 2013 Nuno Fernandes <npf@eurotux.com> 2.2.11-9
+- add httpd-2.2.11-proxyconnectsslfix.patch
+
 * Tue Mar 17 2009 Joe Orton <jorton@redhat.com> 2.2.11-8
 - fix pidfile in httpd.logrotate (thanks to Rainer Traut)
 - don't build mod_mem_cache or mod_file_cache

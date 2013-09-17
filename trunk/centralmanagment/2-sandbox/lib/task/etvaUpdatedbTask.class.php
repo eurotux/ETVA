@@ -66,6 +66,9 @@ EOF;
             case 12:    // version 1.2
                 $this->upgradeToV12($dbfile);
                 break;
+            case 13:    // version 1.3
+                $this->upgradeToV13($dbfile);
+                break;
             case 20:    // version 2.0
                 $this->upgradeToV20($dbfile);
                 break;
@@ -122,6 +125,11 @@ EOF;
 
     $output = shell_exec("perl utils/pl/upDBv12.pl $dbdata"); 
     echo $output;
+  }
+  private function upgradeToV13($dbdata){
+    $this->log("[INFO] Upgrading database to version 1.3!");
+    $this->log($dbdata);
+    $this->log("[INFO] ... nothing to do...");
   }
 
   private function upgradeToV20($dbdata){

@@ -40,7 +40,7 @@ if [ ! -f "$SSHKEY" ]; then
 fi
 
 if [ "$DEBUGFILE" == "" ]; then
-    DEBUGFILE="/var/log/etva_etvm/debug.log";
+    DEBUGFILE="/var/log/etva_etvm/check-node-functions-debug.log";
 fi
 
 checknode(){
@@ -135,7 +135,7 @@ restartnode(){
             RESTARTSTATE="NOK ";
         fi
     else
-        CHECK_1=`exec_fence 4 $@`;
+        CHECK_1=`check_fence_status 4 $@`;
 
         echo " [DEBUG] restartnode CHECK_1= $CHECK_1" >>$DEBUGFILE;
 
@@ -170,7 +170,7 @@ poweroffnode(){
     if [ $? -eq 0 ] ; then
         POWEROFFSTATE="OK ";
     else
-        CHECK_1=`exec_fence 4 $@`;
+        CHECK_1=`check_fence_status 4 $@`;
 
         echo " [DEBUG] poweroffnode CHECK_1= $CHECK_1" >>$DEBUGFILE;
 
@@ -207,5 +207,22 @@ exec_fence() {
     if [ "$cmd" != "" ]; then
         echo "[DEBUG] exec_fence: $cmd" >>$DEBUGFILE;
         eval "timeout $FENCETIMEOUT $cmd";
+    fi
+}
+check_fence_status() {
+    CHECK_1=`exec_fence $@`;
+
+    echo " [DEBUG] check_fence_status CHECK_1= $CHECK_1" >>$DEBUGFILE;
+
+    TEST_1=`echo "$CHECK_1" | grep "Success"`;
+
+    if [ "$TEST_1" != "" ]; then
+        echo "check_fence_status Success";
+    fi
+
+    TEST_2=`echo "$CHECK_1" | grep "Done"`;
+
+    if [ "$TEST_2" != "" ]; then
+        echo "check_fence_status Success";
     fi
 }

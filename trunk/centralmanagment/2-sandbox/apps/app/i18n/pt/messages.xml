@@ -56,6 +56,10 @@
         <source>Passwords do not match</source>
         <target>Passwords não conferem</target>
       </trans-unit>
+      <trans-unit id="pwd_not_match">
+        <source>Passwords doesn't match</source>
+        <target>Passwords não coincidem</target>
+      </trans-unit>
       <trans-unit id="set_pwd">
         <source>Set new password!</source>
         <target>Alterar password!</target>
@@ -280,6 +284,10 @@
         <target>Permissões alteradas com sucesso (utilizadores/grupos)</target>
       </trans-unit>
 
+      <trans-unit id="finish_createuser_wiz">
+        <source>Thank you! Your data has been collected.&lt;br&gt;When you click on the "Finish" button, new user will be created.</source>
+        <target>Obrigado! Todos os dados foram recolhidos.&lt;br&gt;Ao clicar em "Finalizar" o novo utilizador será criado.</target>
+      </trans-unit>
       <trans-unit id="add_group">
         <source>Add group</source>
         <target>Adicionar grupo</target>
@@ -359,6 +367,10 @@
       <trans-unit id="removing_user">
         <source>Removing user...</source>
         <target>A remover utilizador...</target>
+      </trans-unit>
+      <trans-unit id="err_remove_user">
+        <source>Unable to delete user!</source>
+        <target>Não foi possível remover o utilizador!</target>
       </trans-unit>
       <trans-unit id="unable_remove_user">
         <source>Unable to remove user</source>
@@ -624,11 +636,281 @@
 
       <!--                                  -->
 
+      <!-- user creation wizard -->
+      <!--      -->
+      <trans-unit id="user_creation_wz">
+        <source>User creation wizard</source>
+        <target>Assistente de criação de utilizador</target>
+      </trans-unit>
+
+      <trans-unit id="user_permissions">
+        <source>User permissions</source>
+        <target>Permissões de utilizador</target>
+      </trans-unit>
+
+      <trans-unit id="user_etvoip">
+        <source>User ETVOIP</source>
+        <target>Utilizador ETVOIP</target>
+      </trans-unit>
+
+      <trans-unit id="user_etms">
+        <source>User ETMailServer</source>
+        <target>Utilizador ETMailServer</target>
+      </trans-unit>
+
+      <trans-unit id="user_primavera">
+        <source>User Primavera</source>
+        <target>Utilizador Primavera</target>
+      </trans-unit>
+
+      <trans-unit id="user_creation_wz_welcom">
+        <source>Welcome to the user creation utility.&lt;br&gt;Follow the steps to create a new user.</source>
+        <target>Bem-vindo à ferramenta de criação de utilizador.&lt;br&gt;Siga os próximos passos para criar um novo utilizador.</target>
+      </trans-unit>
+
+      <trans-unit id="user_creation_wz_username">
+        <source>Username</source>
+        <target>Utilizador</target>
+      </trans-unit>
+
+      <trans-unit id="user_crete">
+        <source>User create</source>
+        <target>Criar utilizador</target>
+      </trans-unit>
+
+      <trans-unit id="user_etvoip_info">
+        <source>ETVOIP user information</source>
+        <target>Informação do utilizador ETVOIP</target>
+      </trans-unit>
+
+      <trans-unit id="user_etms_info">
+        <source>ETMailServer user information</source>
+        <target>Informação do utilizador ETMailServer</target>
+      </trans-unit>
+
+      <trans-unit id="user_primavera_info">
+        <source>Primavera user information</source>
+        <target>Informação do utilizador Primavera</target>
+      </trans-unit>
+
+      <trans-unit id="check_user_etvoip_info">
+        <source>Enable ETVOIP user information?</source>
+        <target>Activar informação do utilizador ETVOIP?</target>
+      </trans-unit>
+
+      <trans-unit id="check_user_etms_info">
+        <source>Enable ETMailServer user information?</source>
+        <target>Activar informação do utilizador ETMailServer?</target>
+      </trans-unit>
+
+      <trans-unit id="check_user_primavera_info">
+        <source>Enable Primavera user information?</source>
+        <target>Activar informação do utilizador Primavera?</target>
+      </trans-unit>
+
+      <trans-unit id="new_windows_user_primavera">
+        <source>New Windows user</source>
+        <target>Novo utilizador Windows</target>
+      </trans-unit>
+      <trans-unit id="creating_windows_user_primavera">
+        <source>Creating Windows user...</source>
+        <target>A criar utilizador Windows...</target>
+      </trans-unit>
+      <trans-unit id="created_windows_user_primavera">
+        <source>User created.</source>
+        <target>Utilizador criado.</target>
+      </trans-unit>
+      <trans-unit id="error_creating_windows_user_primavera">
+        <source>Unable to create Windows User!</source>
+        <target>Não foi possível criar o utilizador Windows!</target>
+      </trans-unit>
+      <trans-unit id="error_windows_user_primavera_exists">
+        <source>User already exists.</source>
+        <target>Utilizador já existe.</target>
+      </trans-unit>
+      <trans-unit id="error_windows_user_primavera_invalidpasswod">
+        <source>Error create user. Invalid password.</source>
+        <target>Erro ao criar utilizador. Password inválida.</target>
+      </trans-unit>
+
+      <!-- ETFS -->
+      <trans-unit id="add_shared_folder">
+        <source>Add shared folder</source>
+        <target>Adicionar partilha</target>
+      </trans-unit>
+      <trans-unit id="add_shared_printer">
+        <source>Add shared printer</source>
+        <target>Adicionar impressora</target>
+      </trans-unit>
+      <trans-unit id="edit_share">
+        <source>Edit share</source>
+        <target>Editar partilha</target>
+      </trans-unit>
+      <trans-unit id="remove_share">
+        <source>Remove share</source>
+        <target>Remover partilha</target>
+      </trans-unit>
+      <trans-unit id="remove_share_wait">
+        <source>Remove share...</source>
+        <target>A remover partilha...</target>
+      </trans-unit>
+      <trans-unit id="file_server_title">
+        <source>File Server</source>
+        <target>Servidor de Ficheiros</target>
+      </trans-unit>
+      <trans-unit id="general_options">
+        <source>General options</source>
+        <target>Opções gerais</target>
+      </trans-unit>
+      <trans-unit id="edit_global_configuration_2">
+        <source>Edit Global configuration</source>
+        <target>Editar configuração global</target>
+      </trans-unit>
+      <trans-unit id="edit_global_configuration">
+        <source>Edit global configuration</source>
+        <target>Editar configuração global</target>
+      </trans-unit>
+      <trans-unit id="client_status">
+        <source>Client status</source>
+        <target>Estado do cliente</target>
+      </trans-unit>
+      <trans-unit id="show_client_status">
+        <source>Show client status</source>
+        <target>Mostrar estado do cliente</target>
+      </trans-unit>
+      <trans-unit id="start_service">
+        <source>Start service</source>
+        <target>Iniciar serviço</target>
+      </trans-unit>
+      <trans-unit id="stop_service">
+        <source>Stop service</source>
+        <target>Parar serviço</target>
+      </trans-unit>
+      <trans-unit id="apply_current_configuration">
+        <source>Apply current configuration</source>
+        <target>Aplicar configuração atual</target>
+      </trans-unit>
+      <trans-unit id="start_file_server_service">
+        <source>Start file server service</source>
+        <target>Iniciar serviço de servidor de ficheiros</target>
+      </trans-unit>
+      <trans-unit id="stop_file_server_service">
+        <source>Stop file server service</source>
+        <target>Parar serviço de servidor de ficheiros</target>
+      </trans-unit>
+      <trans-unit id="apply_configuration">
+        <source>Apply configuration</source>
+        <target>Aplicar configuração</target>
+      </trans-unit>
+      <trans-unit id="apply_configuration_tooltip">
+        <source>Click this button to apply current changes configuration on the file server service</source>
+        <target>Clicar neste botão para aplicar as alterações da configuração no serviço do servidor de ficheiros</target>
+      </trans-unit>
+      <trans-unit id="show_client_status_tooltip">
+        <source>Show all client connections and status</source>
+        <target>Mostra o estado de todas as conexões de cliente</target>
+      </trans-unit>
+      <trans-unit id="share_not_found">
+        <source>Share '%name%' not found</source>
+        <target>Partilha '%name%' não encontrada</target>
+      </trans-unit>
+      <trans-unit id="saving_global_configuration">
+        <source>Saving global configuration...</source>
+        <target>A guardar configuração global...</target>
+      </trans-unit>
+      <trans-unit id="err_saving_global_configuration">
+        <source>Error saving global configuration!</source>
+        <target>Erro ao guardar configuração global!</target>
+      </trans-unit>
+      <trans-unit id="invalid_sharename">
+        <source>Invalid share name!</source>
+        <target>Nome de partilha inválido!</target>
+      </trans-unit>
+      <trans-unit id="err_invalid_sharename">
+        <source>Error invalid share name</source>
+        <target>Erro de nome de partilha inválido</target>
+      </trans-unit>
+      <trans-unit id="saving_share_info">
+        <source>Saving share info...</source>
+        <target>A guardar informação da partilha...</target>
+      </trans-unit>
+      <trans-unit id="err_saving_share">
+        <source>Error saving share!</source>
+        <target>Erro ao guardar partilha!</target>
+      </trans-unit>
+      <trans-unit id="err_invalid_username">
+        <source>Error invalid username!</source>
+        <target>Erro de nome de utilizador inválido!</target>
+      </trans-unit>
+      <trans-unit id="invalid_username">
+        <source>Invalid username!</source>
+        <target>Nome de utilizador inválido!</target>
+      </trans-unit>
+      <trans-unit id="saving_user_info">
+        <source>Saving user info...</source>
+        <target>A guardar informação do utilizador...</target>
+      </trans-unit>
+      <trans-unit id="err_saving_user">
+        <source>Error saving user!</source>
+        <target>Erro ao guardar informação do utilizador!</target>
+      </trans-unit>
+      <trans-unit id="saving_configuration">
+        <source>Saving configuration...</source>
+        <target>A guardar configuração...</target>
+      </trans-unit>
+      <trans-unit id="err_saving_configuration">
+        <source>Error saving configuration!</source>
+        <target>Erro ao guardar configuração!</target>
+      </trans-unit>
+      <trans-unit id="test_join_to_ad_ok">
+        <source>Test join to AD OK!</source>
+        <target>Test de adicionar à AD OK!</target>
+      </trans-unit>
+      <trans-unit id="err_no_share_selected">
+        <source>Error no share selected</source>
+        <target>Erro nenhuma partilha seleccionada</target>
+      </trans-unit>
+      <trans-unit id="err_no_share_selected_update_msg">
+        <source>No share selected for update!</source>
+        <target>Nenhuma partilha seleccionada para actualizar!</target>
+      </trans-unit>
+      <trans-unit id="err_no_share_selected_delete_msg">
+        <source>No share selected for delete!</source>
+        <target>Nenhuma partilha seleccionada para remover!</target>
+      </trans-unit>
+      <trans-unit id="ask_if_want_delete_share">
+        <source>Are you sure you want delete share {0}?</source>
+        <target>Tem a certeza que pretende remover a partilha {0}?</target>
+      </trans-unit>
+      <trans-unit id="error_no_user_selected">
+        <source>Error no user selected</source>
+        <target>Editar partilha</target>
+      </trans-unit>
+      <trans-unit id="err_no_user_selected_update_msg">
+        <source>No user selected for update!</source>
+        <target>Nenhum utilizador seleccionado para actualizar!</target>
+      </trans-unit>
+      <trans-unit id="err_no_user_selected_delete_msg">
+        <source>No user selected for delete!</source>
+        <target>Nenhum utilizador seleccionado para remover!</target>
+      </trans-unit>
+      <trans-unit id="ask_if_want_delete_user">
+        <source>Are you sure you want delete user {0}?</source>
+        <target>Tem a certeza que pretende remover o utilizador {0}?</target>
+      </trans-unit>
+
+
+      <!--                                  -->
+
       <!-- MAIN -->
       <!--      -->
       <trans-unit id="sysadmin">
         <source>System Administration</source>
         <target>Administração do sistema</target>
+      </trans-unit>
+      <trans-unit id="nuxis_sysadmin_users">
+        <source>Nuxis Users administration</source>
+        <target>Administração de utilizadores Nuxis</target>
       </trans-unit>
       <trans-unit id="sysadmin_users_perms">
         <source>Users and permissions administration</source>
@@ -729,6 +1011,111 @@
       <trans-unit id="lv_convert_ok_msg">
         <source>Logical volume %name% converted successfully.</source>
         <target>Logical volume %name% convertido com sucesso.</target>
+      </trans-unit>
+
+      <trans-unit id="storage_pool_not_found">
+        <source>Storage pool %name% could not be found</source>
+        <target>Não foi possível encontrar o storage pool %name%</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_created_ok">
+        <source>Storage pool %name%  created successfully.</source>
+        <target>Storage pool %name% criado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_created_err">
+        <source>Storage pool %name% could not be created. %info%</source>
+        <target>Não foi possível criar o storage pool %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_remove_err">
+        <source>Storage pool %name% could not be removed. %info%</source>
+        <target>Não foi possível remover o storage pool %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_remove_ok">
+        <source>Storage pool %name% removed successfully.</source>
+        <target>Storage pool %name% removido com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_reload_ok">
+        <source>Storage pool %name%  reloaded successfully.</source>
+        <target>Storage pool %name% recarregado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_reload_err">
+        <source>Storage pool %name% could not be reloaded. %info%</source>
+        <target>Não foi possível recarregar o storage pool %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_creating">
+        <source>Creating storage pool...</source>
+        <target>A criar storage pool...</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_reloading_err">
+        <source>Error reloading storage pool {0}!</source>
+        <target>Erro ao recarregar storage pool {0}!</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_creating_err">
+        <source>Unable to create storage pool {0}!</source>
+        <target>Não foi possível criar storage pool {0}!</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_new_button">
+        <source>New storage pool</source>
+        <target>Nova storage pool</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_help">
+        <source>Storage Pool Help</source>
+        <target>Ajuda Storage Pool</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_help">
+        <source>Storage iSCSI Help</source>
+        <target>Ajuda Storage iSCSI</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_reload_tit">
+        <source>Reload storage pool</source>
+        <target>Recarregar storage pool</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_reload_wait">
+        <source>Reload storage pool...</source>
+        <target>A recarregar storage pool...</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_reload_err_wait">
+        <source>Unable to reload storage pool {0}!</source>
+        <target>Não foi possível recarregar storage pool {0}!</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_remove_tit">
+        <source>Remove storage pool</source>
+        <target>Remover storage pool</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_remove_wait">
+        <source>Remove storage pool...</source>
+        <target>A remover storage pool...</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_remove_err_wait">
+        <source>Unable to remove storage pool {0}!</source>
+        <target>Não foi possível remover storage pool {0}!</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_create_warn">
+        <source>Storage pool {0} created with some errors. See info panel.</source>
+        <target>Storage pool {0} criada com alguns erros. Ver painel de informação.</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_reload_warn">
+        <source>Storage pool {0} reloaded with some errors. See info panel.</source>
+        <target>Storage pool {0} recarregada com alguns erros. Ver painel de informação.</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_remove_warn">
+        <source>Storage pool {0} removed with some errors. See info panel.</source>
+        <target>Storage pool {0} removida com alguns erros. Ver painel de informação.</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_create_tit_warn">
+        <source>Create storage pool</source>
+        <target>Criar storage pool</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_reload_tit_warn">
+        <source>Reload storage pool</source>
+        <target>Recarregar storage pool</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_remove_tit_warn">
+        <source>Remove storage pool</source>
+        <target>Remover storage pool</target>
+      </trans-unit>
+      <trans-unit id="storage_pool_sources_searching">
+        <source>Searching for sources of</source>
+        <target>A procurar sources de</target>
       </trans-unit>
 
       <!-- NETWORKS -->
@@ -860,7 +1247,11 @@
       </trans-unit>
       <trans-unit id="mac_assinged">
         <source>Mac address %name% already assigned</source>
-        <target>Endereço MAC já atribuido</target>
+        <target>Endereço MAC %name% já atribuido</target>
+      </trans-unit>
+      <trans-unit id="err_invalid_mac">
+        <source>Invalid mac address %mac%.</source>
+        <target>Endereço mac %mac% inválido.</target>
       </trans-unit>
       <trans-unit id="nics_problem">
         <source>Network interfaces problem.</source>
@@ -1101,6 +1492,34 @@
       <trans-unit id="pv_unregister_ok">
         <source>Physical device %name% unregistered successfully</source>
         <target>Physical device %name% desregistado com sucesso</target>
+      </trans-unit>
+      <trans-unit id="pv_expanding">
+        <source>Expanding physical volume...</source>
+        <target>A expandir o physical volume...</target>
+      </trans-unit>
+      <trans-unit id="pv_expand_ok">
+        <source>Device %name% expanded successfully</source>
+        <target>Device %name% expandido com sucesso</target>
+      </trans-unit>
+      <trans-unit id="pv_expand_err">
+        <source>Device %name% could not be expanded. %info%</source>
+        <target>O device %name% não pode ser expandido. %info%</target>
+      </trans-unit>
+      <trans-unit id="pv_expand_menu">
+        <source>Expand volume</source>
+        <target>Expandir volume</target>
+      </trans-unit>
+      <trans-unit id="pv_expand_tit">
+        <source>Expand physical volume</source>
+        <target>Expandir physical volume</target>
+      </trans-unit>
+      <trans-unit id="pv_expand_question">
+        <source>Do you want expand physical volume {0} ?</source>
+        <target>Pretende expandir o physical volume {0} ?</target>
+      </trans-unit>
+      <trans-unit id="err_pv_expand">
+        <source>Unable to expand {0}!</source>
+        <target>Não foi possível expandir {0}!</target>
       </trans-unit>
       <trans-unit id="add_physicaldevice">
         <source>Add physical device</source>
@@ -1732,7 +2151,7 @@
       </trans-unit>
       <trans-unit id="node_moving_to_maintenance_mode">
         <source>Node is moving to maintenance mode...</source>
-        <target>O nó está sendo colocado em manutenção...</target>
+        <target>A colocar o nó em manutenção...</target>
       </trans-unit>
       <trans-unit id="node_maintenance">
         <source>Maintenance</source>
@@ -2566,6 +2985,14 @@
         <source>Updated system settings</source>
         <target>Preferências atualizadas</target>
       </trans-unit>
+      <trans-unit id="alert_options">
+        <source>Alert options</source>
+        <target>Opções alerta</target>
+      </trans-unit>
+      <trans-unit id="subject_prefix">
+        <source>Subject prefix</source>
+        <target>Prefixo assunto</target>
+      </trans-unit>
 
       <!-- OVF -->
       <!--     -->
@@ -2639,15 +3066,31 @@
       </trans-unit>
       <trans-unit id="vm_type_interfaces_not_supported">
         <source>VM type selected does not support network interfaces drivers defined in OVF.</source>
-        <target>Tipo de máquina virtual seleccionado não suporta drivers das interfaces definidas no OVF.</target>
+        <target>Tipo de máquina virtual selecionado não suporta drivers das interfaces definidas no OVF.</target>
       </trans-unit>
-      <trans-unit id="vm_type_interfaces_not_supported">
+      <trans-unit id="vm_type_disk_not_supported">
         <source>VM type selected does not support disk drivers defined in OVF.</source>
-        <target>Tipo de máquina virtual seleccionado não suporta drivers dos discos definidos no OVF.</target>
+        <target>Tipo de máquina virtual selecionado não suporta drivers dos discos definidos no OVF.</target>
       </trans-unit>
       <trans-unit id="could_not_continue">
         <source>Could not continue!</source>
         <target>Não é possível continuar!</target>
+      </trans-unit>
+      <trans-unit id="interfaces_not_suitable_for_vm_type">
+        <source>The model of network interfaces defined in OVF is not suitable for VM type choosed.</source>
+        <target>O modelo das interfaces de rede definido no OVF não é apropriado para o tipo de máquina virtual selecionado.</target>
+      </trans-unit>
+      <trans-unit id="disks_not_suitable_for_vm_type">
+        <source>The model of disk defined in OVF is not suitable for VM type choosed.</source>
+        <target>O modelo de disco definido no OVF não é apropriado para o tipo de máquina virtual selecionado.</target>
+      </trans-unit>
+      <trans-unit id="interfaces_disks_not_suitable_for_vm_type">
+        <source>The model of network interfaces and disk defined in OVF is not suitable for VM type choosed.</source>
+        <target>O modelo das interfaces de rede e disco definido no OVF não é apropriado para o tipo de máquina virtual selecionado.</target>
+      </trans-unit>
+      <trans-unit id="would_you_like_to_continue">
+        <source>Would you like to continue?</source>
+        <target>Pretende continuar?</target>
       </trans-unit>
       <trans-unit id="product">
         <source>Product</source>
@@ -3179,9 +3622,9 @@
         <source>Backup plans</source>
         <target>Planos de backup</target>
       </trans-unit>
-      <trans-unit id="remove_backup_plan">
+      <trans-unit id="remove_backup_plan_tit">
         <source>Remove backup plan</source>
-        <target>Remove plano de backup</target>
+        <target>Remover plano de backup</target>
       </trans-unit>
       <trans-unit id="new_backup_plan">
         <source>New backup plan</source>
@@ -3195,17 +3638,89 @@
         <source>Full backup</source>
         <target>Backup integral</target>
       </trans-unit>
-      <trans-unit id="restore">
+      <trans-unit id="restore_tit">
         <source>Restore</source>
         <target>Restauro</target>
       </trans-unit>
-      <trans-unit id="stop_primavera">
+      <trans-unit id="restore">
+        <source>Restore...</source>
+        <target>A restaurar...</target>
+      </trans-unit>
+      <trans-unit id="restore_success">
+        <source>Restore success.</source>
+        <target>Restauro efectuado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="backup_success">
+        <source>Backup success.</source>
+        <target>Backup efectuado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="stop_primavera_tit">
         <source>Stop Primavera</source>
         <target>Parar Primavera</target>
       </trans-unit>
+      <trans-unit id="stop_primavera">
+        <source>Stop Primavera...</source>
+        <target>A parar Primavera...</target>
+      </trans-unit>
+      <trans-unit id="primavera_stopped">
+        <source>Primavera stopped.</source>
+        <target>Primavera parado.</target>
+      </trans-unit>
+      <trans-unit id="primavera_started">
+        <source>Primavera started.</source>
+        <target>Primavera iniciado.</target>
+      </trans-unit>
       <trans-unit id="start_primavera">
+        <source>Start Primavera...</source>
+        <target>A iniciar Primavera...</target>
+      </trans-unit>
+      <trans-unit id="stop_primavera_question">
+        <source>Do you wan't stop Primavera?</source>
+        <target>Pretende parar o Primavera?</target>
+      </trans-unit>
+      <trans-unit id="start_primavera_question">
+        <source>Do you wan't start Primavera?</source>
+        <target>Pretende iniciar o Primavera?</target>
+      </trans-unit>
+      <trans-unit id="doing_backup">
+        <source>Doing backup...</source>
+        <target>A efectuar backup...</target>
+      </trans-unit>
+      <trans-unit id="saving_backup_plan">
+        <source>Saving backup plan...</source>
+        <target>A guardar plano de backup...</target>
+      </trans-unit>
+      <trans-unit id="start_primavera_tit">
         <source>Start Primavera</source>
         <target>Iniciar Primavera</target>
+      </trans-unit>
+      <trans-unit id="loading_">
+        <source>Loading...</source>
+        <target>A carregar...</target>
+      </trans-unit>
+      <trans-unit id="loading_backup_primavera_info">
+        <source>Loading backup info...</source>
+        <target>A carregar informação de backup...</target>
+      </trans-unit>
+      <trans-unit id="remove_backup_question">
+        <source>Are you sure you want delete backup plan {0}?</source>
+        <target>Tem a certeza que pretende remover o plano de backup {0}?</target>
+      </trans-unit>
+      <trans-unit id="saving_user">
+        <source>Saving user info...</source>
+        <target>A guardar informação do utilizador...</target>
+      </trans-unit>
+      <trans-unit id="remove_user">
+        <source>Remove user...</source>
+        <target>A remover utilizador...</target>
+      </trans-unit>
+      <trans-unit id="new_user">
+        <source>New user...</source>
+        <target>A criar novo utilizador...</target>
+      </trans-unit>
+      <trans-unit id="error_create_new_user">
+        <source>Error create new user!</source>
+        <target>Erro ao criar novo utilizador!</target>
       </trans-unit>
       <trans-unit id="change_ip">
         <source>Change IP</source>
@@ -3215,6 +3730,30 @@
         <source>Users</source>
         <target>Utilizadores</target>
       </trans-unit>
+      <trans-unit id="delete_user_ok">
+        <source>Delete user ok.</source>
+        <target>Utilizador removido com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="insert_user_ok">
+        <source>Insert user ok.</source>
+        <target>Utilizador inserido com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="update_user_ok">
+        <source>Update user ok.</source>
+        <target>Utilizador actualizado com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="insert_backup_plan_ok">
+        <source>Insert backup plan ok.</source>
+        <target>Plano de backup inserido com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="backup_plan_removed">
+        <source>Backup plan removed.</source>
+        <target>Plano de backup removido com sucesso.</target>
+      </trans-unit>
+      <trans-unit id="remove_backup_plan">
+        <source>Remove backup plan...</source>
+        <target>A remover plano de backup...</target>
+      </trans-unit>
       <trans-unit id="delete_user_question">
         <source>Are you sure you want delete user {0}?</source>
         <target>Tem a certeza que pretende apagar o utilizador {0}?</target>
@@ -3222,6 +3761,51 @@
       <trans-unit id="manage_preferences">
         <source>Manage Preferences</source>
         <target>Gerir Preferências</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_profiles_available">
+        <source>Profiles available</source>
+        <target>Perfis desponíveis</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_companiesprofiles_permissions">
+        <source>Companies/Profiles that user has access</source>
+        <target>Empresas/Perfis a que o utilizador tem acesso</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_applicationsmodules_permissions">
+        <source>Applications/Modules that user has access</source>
+        <target>Aplicações/Módulos a que o utilizador tem acesso</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_update_user_applications_ok">
+        <source>Update user aplicacoes ok.</source>
+        <target>Aplicações do utilizador actualizadas com sucesso.</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_update_user_permissions_ok">
+        <source>Update user permissoes ok.</source>
+        <target>Permissões do utilizador actualizadas com sucesso</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_update_user_aplications_err">
+        <source>Error saving user applications!</source>
+        <target>Erro ao guardar aplicações do utilizador!</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_update_user_aplications_msg">
+        <source>Saving user applications...</source>
+        <target>A guardar aplicações do utilizador...</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_update_user_permissions_err">
+        <source>Error saving user permissions!</source>
+        <target>Erro ao guardar permissões do utilizador!</target>
+      </trans-unit>
+
+      <trans-unit id="primavera_update_user_permissions_msg">
+        <source>Saving user permissions...</source>
+        <target>A guardar permissões do utilizador...</target>
       </trans-unit>
 
       <!-- HELP -->
@@ -3543,6 +4127,68 @@
             <source>Boot from filesystem was disabled. &lt;/br&gt; Please confirm if the boot options are correct.</source>
             <target>O arranque pelo sistema de ficheiros foi desabilitado. &lt;/br&gt; Por favor confirme se as definições de arraque estão correctas.</target>
         </trans-unit>
+
+        <trans-unit id="all">
+            <source>All</source>
+            <target>Todos</target>
+        </trans-unit>
+
+      <trans-unit id="generic_creating">
+        <source>Creating</source>
+        <target>A criar</target>
+      </trans-unit>
+      <trans-unit id="generic_reloading_err">
+        <source>Error reloading</source>
+        <target>Erro ao recarregar</target>
+      </trans-unit>
+      <trans-unit id="generic_creating_err">
+        <source>Unable to create</source>
+        <target>Não foi possível criar</target>
+      </trans-unit>
+      <trans-unit id="generic_new_button">
+        <source>New</source>
+        <target>Nova</target>
+      </trans-unit>
+      <trans-unit id="generic_help">
+        <source>Help</source>
+        <target>Ajuda</target>
+      </trans-unit>
+      <trans-unit id="generic_reload_tit">
+        <source>Reload</source>
+        <target>Recarregar</target>
+      </trans-unit>
+      <trans-unit id="generic_reload_wait">
+        <source>Reloading</source>
+        <target>A recarregar</target>
+      </trans-unit>
+      <trans-unit id="generic_reload_err_wait">
+        <source>Unable to reload</source>
+        <target>Não foi possível recarregar</target>
+      </trans-unit>
+      <trans-unit id="generic_remove_tit">
+        <source>Remove</source>
+        <target>Remover</target>
+      </trans-unit>
+      <trans-unit id="generic_remove_err_wait">
+        <source>Unable to remove</source>
+        <target>Não foi possível remover</target>
+      </trans-unit>
+      <trans-unit id="generic_create_warn">
+        <source>created with some errors. See info panel.</source>
+        <target>criada com alguns erros. Ver painel de informação.</target>
+      </trans-unit>
+      <trans-unit id="generic_reload_warn">
+        <source>reloaded with some errors. See info panel.</source>
+        <target>recarregada com alguns erros. Ver painel de informação.</target>
+      </trans-unit>
+      <trans-unit id="generic_remove_warn">
+        <source>removed with some errors. See info panel.</source>
+        <target>removida com alguns erros. Ver painel de informação.</target>
+      </trans-unit>
+      <trans-unit id="generic_create_tit_warn">
+        <source>Create</source>
+        <target>Criar</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

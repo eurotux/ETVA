@@ -25,6 +25,7 @@
     bastando seleccionar a opção <em>Remover inicialização do physical volume</em> no sub-menu de contexto do <em>physical volume</em>.
 </p>
 <p><b>Nota </b>Só é permitido remover um <em>physical volume</em> se este não pertencer a nenhum <em>volume group</em>.</p>
+
 <a href="#help-physical-vol"><div>Início</div></a>
 <hr/>
 

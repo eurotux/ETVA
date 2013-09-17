@@ -122,7 +122,8 @@ class sfGuardPermissionActions extends BasesfGuardPermissionActions
                           'error'   => 'Could not perform operation',
                           'agent'   =>'Central Management',
                           'info'    => 'Could not perform operation');
-            return $response;
+            $error = $this->setJsonError($response);
+            return $this->renderText($error);
         }
 
         $msg_i18n = $this->getContext()->getI18N()->__('User/groups permissions edited successfully');
@@ -135,6 +136,235 @@ class sfGuardPermissionActions extends BasesfGuardPermissionActions
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
         return $this->renderText($result);
     }
+    public function executeJsonAddUserPermissions(sfWebRequest $request)
+    {
+        $isAjax = $request->isXmlHttpRequest();
+
+        if(!$isAjax) return $this->redirect('@homepage');
+
+        $level = $request->getParameter('level');
+        $user_id = $request->getParameter('user_id');
+        $p_permtype = $request->getParameter('permtype');
+
+        $p_list_data = $request->getParameter('etva_permission_list');
+        $p_list = json_decode($p_list_data, true);
+
+        // if has node level, find clusterid
+        try{
+            $this->addUserPermissions($user_id, $p_permtype, $level, $p_list);
+
+        }catch(Exception $e){
+            $response = array('success' => false,
+                          'error'   => 'Could not perform operation',
+                          'agent'   =>'Central Management',
+                          'info'    => 'Could not perform operation');
+            return $response;
+        }
+
+        $msg_i18n = $this->getContext()->getI18N()->__('User permissions added successfully');
+
+        $result = array('success'=>true,
+                            'agent' =>  'Central Management',
+                            'response'  => $msg_i18n 
+            );
+        $result = json_encode($result);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($result);
+    }
+    public function executeJsonUserPermissions(sfWebRequest $request)
+    {
+        $isAjax = $request->isXmlHttpRequest();
+
+        if(!$isAjax) return $this->redirect('@homepage');
+
+        $user_id = $request->getParameter('user_id');
+
+        $users_cluster_perms_arr = array();
+        $users_cluster_perms = EtvaPermissionClusterQuery::create()
+                                ->useEtvaPermissionQuery()
+                                    ->useEtvaPermissionUserQuery()
+                                        ->filterByUserId($user_id)
+                                    ->endUse()
+                                ->endUse()
+                                ->find();
+        foreach( $users_cluster_perms as $uperm ){
+            array_push($users_cluster_perms_arr, $uperm->getClusterId());
+        }
+
+        $users_server_perms_arr = array();
+        $users_server_perms = EtvaPermissionServerQuery::create()
+                                ->useEtvaPermissionQuery()
+                                    ->useEtvaPermissionUserQuery()
+                                        ->filterByUserId($user_id)
+                                    ->endUse()
+                                ->endUse()
+                                ->find();
+        foreach( $users_server_perms as $uperm ){
+            array_push($users_server_perms_arr, $uperm->getServerId());
+        }
+
+        $result = array('success'=>true,
+                            'data'=>array( 'user_cluster_permissions'=>$users_cluster_perms_arr,
+                                            'user_server_permissions'=>$users_server_perms_arr ),
+            );
+        $return = json_encode($result);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+    }
+    private function addGroupPermission($group_id, $p_permtype, $level, $id)
+    {
+        // get permission for the server/cluster and type
+        if($level == 'cluster'){
+            $perm = EtvaPermissionQuery::create()
+                ->filterByPermType($p_permtype)
+                ->useEtvaPermissionClusterQuery()
+                    ->filterByClusterId($id)
+                ->endUse()
+                ->findOne();
+        }elseif($level == 'server'){
+            $perm = EtvaPermissionQuery::create()
+                ->filterByPermType($p_permtype)
+                ->useEtvaPermissionServerQuery()
+                    ->filterByServerId($id)
+                ->endUse()
+                ->findOne();
+        }
+
+        // check if permission already exist
+        if(!$perm){
+            //create a new permission
+            $perm = new EtvaPermission();
+            $perm->setDescription('auto_generated');
+            $perm->setPermType($p_permtype);
+            $perm->setName('auto_'.$level.'_'.$id);
+            $perm->save();
+
+            if($level == 'cluster'){
+
+                //associate new permission to datacenter
+                $perm_dc = new EtvaPermissionCluster();
+                $perm_dc->setClusterId($id);
+                $perm_dc->setEtvaPermission($perm);
+                $perm_dc->save();
+            }elseif($level == 'server'){
+
+                //associate new permission to server 
+                $perm_srv = new EtvaPermissionServer();
+                $perm_srv->setServerId($id);
+                $perm_srv->setEtvaPermission($perm);
+                $perm_srv->save();
+            }
+        }
+        // add new group set
+        $new_g = new EtvaPermissionGroup();
+        $new_g->setGroupId($group_id);
+        $new_g->setEtvaPermission($perm);
+        $new_g->save();
+    }
+    private function addGroupPermissions($group_id, $p_permtype, $level, $p_list)
+    {
+        if($level == 'cluster'){
+            $group_perms = EtvaPermissionGroupQuery::create()
+                ->filterByGroupId($group_id)
+                ->useEtvaPermissionQuery()
+                    ->filterByPermType($p_permtype)
+                    ->useEtvaPermissionClusterQuery()
+                    ->endUse()
+                ->endUse()
+                ->find();
+            $group_perms->delete();
+        }elseif($level == 'server'){
+            $group_perms = EtvaPermissionGroupQuery::create()
+                ->filterByGroupId($group_id)
+                ->useEtvaPermissionQuery()
+                    ->filterByPermType($p_permtype)
+                    ->useEtvaPermissionServerQuery()
+                    ->endUse()
+                ->endUse()
+                ->find();
+            $group_perms->delete();
+        }
+
+        foreach($p_list as $id){
+            $this->addGroupPermission($group_id,$p_permtype,$level,$id);
+        }
+    }
+
+    public function executeJsonAddGroupPermissions(sfWebRequest $request)
+    {
+        $isAjax = $request->isXmlHttpRequest();
+
+        if(!$isAjax) return $this->redirect('@homepage');
+
+        $level = $request->getParameter('level');
+        $group_id = $request->getParameter('group_id');
+        $p_permtype = $request->getParameter('permtype');
+
+        $p_list_data = $request->getParameter('etva_permission_list');
+        $p_list = json_decode($p_list_data, true);
+
+        // if has node level, find clusterid
+        try{
+            $this->addGroupPermissions($group_id, $p_permtype, $level, $p_list);
+        }catch(Exception $e){
+            $response = array('success' => false,
+                          'error'   => 'Could not perform operation',
+                          'agent'   =>'Central Management',
+                          'info'    => 'Could not perform operation');
+            $error = $this->setJsonError($response);
+            return $this->renderText($error);
+        }
+
+        $msg_i18n = $this->getContext()->getI18N()->__('Group permissions added successfully');
+
+        $result = array('success'=>true,
+                            'agent' =>  'Central Management',
+                            'response'  => $msg_i18n 
+            );
+        $result = json_encode($result);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($result);
+    }
+    public function executeJsonGroupPermissions(sfWebRequest $request)
+    {
+        $isAjax = $request->isXmlHttpRequest();
+
+        if(!$isAjax) return $this->redirect('@homepage');
+
+        $group_id = $request->getParameter('group_id');
+
+        $groups_cluster_perms_arr = array();
+        $groups_cluster_perms = EtvaPermissionClusterQuery::create()
+                                ->useEtvaPermissionQuery()
+                                    ->useEtvaPermissionGroupQuery()
+                                        ->filterByGroupId($group_id)
+                                    ->endUse()
+                                ->endUse()
+                                ->find();
+        foreach( $groups_cluster_perms as $gperm ){
+            array_push($groups_cluster_perms_arr, $gperm->getClusterId());
+        }
+
+        $groups_server_perms_arr = array();
+        $groups_server_perms = EtvaPermissionServerQuery::create()
+                                ->useEtvaPermissionQuery()
+                                    ->useEtvaPermissionGroupQuery()
+                                        ->filterByGroupId($group_id)
+                                    ->endUse()
+                                ->endUse()
+                                ->find();
+        foreach( $groups_server_perms as $gperm ){
+            array_push($groups_server_perms_arr, $gperm->getServerId());
+        }
+
+        $result = array('success'=>true,
+                            'data'=>array( 'group_cluster_permissions'=>$groups_cluster_perms_arr,
+                                            'group_server_permissions'=>$groups_server_perms_arr ),
+            );
+        $return = json_encode($result);
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+        return $this->renderText($return);
+    }
 
     /*
      * Cleans empty, autogenerated permissions
@@ -146,7 +376,7 @@ class sfGuardPermissionActions extends BasesfGuardPermissionActions
             $perms = EtvaPermissionQuery::create()
                 ->filterByDescription('auto_generated')
                 ->filterByPermType($p_permtype)
-                ->useEtvaPermissionClusterQuery()
+                ->useEtvaPermissionClusterQuery('EtvaPermissionCluster','LEFT JOIN')
                     ->filterByClusterId($id)
                 ->endUse()
                 ->find();
@@ -155,7 +385,7 @@ class sfGuardPermissionActions extends BasesfGuardPermissionActions
             $perms = EtvaPermissionQuery::create()
                 ->filterByDescription('auto_generated')
                 ->filterByPermType($p_permtype)
-                ->useEtvaPermissionServerQuery()
+                ->useEtvaPermissionServerQuery('EtvaPermissionServer','LEFT JOIN')
                     ->filterByServerId($id)
                 ->endUse()
                 ->find();
@@ -343,6 +573,86 @@ class sfGuardPermissionActions extends BasesfGuardPermissionActions
             $new_g->setUserId($new_user_id);
             $new_g->setEtvaPermission($perm);
             $new_g->save();
+        }
+    }
+
+    private function addUserPermission($user_id, $p_permtype, $level, $id)
+    {
+        // get permission for the server/cluster and type
+        if($level == 'cluster'){
+            $perm = EtvaPermissionQuery::create()
+                ->filterByPermType($p_permtype)
+                ->useEtvaPermissionClusterQuery()
+                    ->filterByClusterId($id)
+                ->endUse()
+                ->findOne();
+        }elseif($level == 'server'){
+            $perm = EtvaPermissionQuery::create()
+                ->filterByPermType($p_permtype)
+                ->useEtvaPermissionServerQuery()
+                    ->filterByServerId($id)
+                ->endUse()
+                ->findOne();
+        }
+
+        // check if permission already exist
+        if(!$perm){
+            //create a new permission
+            $perm = new EtvaPermission();
+            $perm->setDescription('auto_generated');
+            $perm->setPermType($p_permtype);
+            $perm->setName('auto_'.$level.'_'.$id);
+            $perm->save();
+
+            if($level == 'cluster'){
+
+                //associate new permission to datacenter
+                $perm_dc = new EtvaPermissionCluster();
+                $perm_dc->setClusterId($id);
+                $perm_dc->setEtvaPermission($perm);
+                $perm_dc->save();
+            }elseif($level == 'server'){
+
+                //associate new permission to server 
+                $perm_srv = new EtvaPermissionServer();
+                $perm_srv->setServerId($id);
+                $perm_srv->setEtvaPermission($perm);
+                $perm_srv->save();
+            }
+        }
+        // add new user set
+        $new_g = new EtvaPermissionUser();
+        $new_g->setUserId($user_id);
+        $new_g->setEtvaPermission($perm);
+        $new_g->save();
+    }
+
+    private function addUserPermissions($user_id, $p_permtype, $level, $p_list)
+    {
+        if($level == 'cluster'){
+            $user_perms = EtvaPermissionUserQuery::create()
+                ->filterByUserId($user_id)
+                ->useEtvaPermissionQuery()
+                    ->filterByPermType($p_permtype)
+                    ->useEtvaPermissionClusterQuery()
+                    ->endUse()
+                ->endUse()
+                ->find();
+            $user_perms->delete();
+        }elseif($level == 'server'){
+            $user_perms = EtvaPermissionUserQuery::create()
+                ->filterByUserId($user_id)
+                ->useEtvaPermissionQuery()
+                    ->filterByPermType($p_permtype)
+                    ->useEtvaPermissionServerQuery()
+                    ->endUse()
+                ->endUse()
+                ->find();
+            $user_perms->delete();
+        }
+
+        foreach($p_list as $id){
+            $this->addUserPermission($user_id,$p_permtype,$level,$id);
         }
     }
 
@@ -727,7 +1037,8 @@ class sfGuardPermissionActions extends BasesfGuardPermissionActions
                               'error'   => 'Could not perform operation',
                               'agent'   =>sfConfig::get('config_acronym'),
                               'info'    => 'Could not perform operation');
-                return $response;
+                $error = $this->setJsonError($response);
+                return $this->renderText($error);
             }
 
             return array('success'=>true);

@@ -185,6 +185,29 @@ sub get_feature {
 
 =item get_disk
 
+    # get cdrom defined on object or get from Disks
+
+    my $path = $VM->get_cdrom( ); 
+
+=cut
+
+sub get_cdrom {
+    my $self = shift;
+    if( defined($self->{'cdrom'}) ){
+        if( my $disks = $self->{'Disks'} ){
+            for my $VD (@$disks){
+                if( $VD->get_device() eq 'cdrom' ){
+                    $self->{'cdrom'} = $VD->get_path();
+                    last;
+                }
+            }
+        }
+    }
+    return $self->{'cdrom'};
+}
+
+=item get_disk
+
     my $Disk = $VM->get_disk( i=>$i ); 
 
 =cut
@@ -673,7 +696,7 @@ sub todomain {
     my $self = shift;
 
     my %D = ();
-    for my $f (qw( name uuid description memory vcpu cpuset on_reboot on_poweroff on_crash features arch cpu )){
+    for my $f (qw( name uuid description memory vcpu cpuset on_reboot on_poweroff on_crash features arch cpu clock )){
         $D{"$f"} = $self->{"$f"};
     }
     if( $self->{'kernel'} ){
@@ -690,6 +713,7 @@ sub todomain {
     $D{'os'}{'pxe'} = $self->{'pxe'} || $self->{'os_pxe'} if( $self->{'pxe'} ||  $self->{'os_pxe'});
     $D{'os'}{'install'} = $self->{'install'} || $self->{'os_install'} if( $self->{'install'} ||  $self->{'os_install'});
     $D{'os'}{'bootdev'} = $self->{'bootdev'} || $self->{'os_bootdev'} if( $self->{'bootdev'} ||  $self->{'os_bootdev'});
+    $D{'os'}{'bootmenu'} = $self->{'bootmenu'} || $self->{'os_bootmenu'} if( $self->{'bootmenu'} ||  $self->{'os_bootmenu'});
     $D{'boot'}{'loader'} = 1 if( $self->{'bootloader'} );
 
     if( my $devices = $self->get_todevices() ){
@@ -965,7 +989,7 @@ sub xml_domain_parser {
                 }
             }
         } elsif( $nname eq 'clock' ){
-            $D{'clock'} = $self->xml_domain_parser_get_attr($ch)->{'offset'};
+            $D{'clock'}{'offset'} = $self->xml_domain_parser_get_attr($ch)->{'offset'};
         } elsif( $nname eq 'features' ){
             for my $cdev ($ch->getChildNodes()){
                 my $tn = $cdev->getNodeName();
@@ -1232,6 +1256,20 @@ sub ovf_import {
     my $env_disks_path_dir;
     my $env_ovf_url;
 
+    sub ovf_get_disk_file {
+        my ($disk_url,$disk_path,$fmt) = @_;
+
+        plog "GET $disk_url to $disk_path";
+        my $rc = LWP::Simple::getstore("$disk_url","$disk_path");
+        if( is_error($rc) || !-e "$disk_path" ){
+            my $E = retErr('_ERR_OVF_IMPORT_',"Error get disk ($disk_url status=$rc) ");
+            return $E;
+        }
+        if( $fmt =~ m/vmdk/ ){
+        # TODO convert to raw using qemu-img
+        }
+        return retOk('_OK_OVF_IMPORT_',"Get disk file with success.");
+    }
     sub ovf_xml_parser {
 
         my ($xml,$url,$dir,$lDisks,$lNetwork) = @_;
@@ -1270,7 +1308,7 @@ sub ovf_import {
             } elsif( $n eq 'DiskSection' ){
                 for my $disk_ch ($ch->getChildNodes()){
                     if( $disk_ch->getNodeName() eq 'Disk' ){
-                        my $fmt = $disk_ch->getAttributeNode('format') ? $disk_ch->getAttributeNode('format')->getValue() : "vmdk";
+                        my $fmt = $disk_ch->getAttributeNode('format') ? $disk_ch->getAttributeNode('format')->getValue() : "raw";
                         my $disk_id = $disk_ch->getAttributeNode('diskId')->getValue();
                         my $file_ref = $disk_ch->getAttributeNode('fileRef')->getValue();
                         $disk_section->{"$disk_id"} = [ $file_ref, $fmt ];
@@ -1361,7 +1399,6 @@ sub ovf_import {
                                     my $fmt = "raw";
                                     if( $disk->{'path'} ){
                                         my $ref;
-                                        $fmt = "vmdk";
                                         my $disk_ref;
                                         if( $disk->{'path'} =~ m/\/disk\/(\w+)/ ){
                                             $disk_ref = $1;
@@ -1393,18 +1430,8 @@ sub ovf_import {
 
                                                         # TODO add lock
 
-                                                        plog "GET $disk_url to $disk_path";
-                                                        my $rc = LWP::Simple::getstore("$disk_url","$disk_path");
-                                                        if( is_error($rc) || !-e "$disk_path" ){
-                                                            my $E = retErr('_ERR_OVF_IMPORT_',"Error get disk ($disk_url status=$rc) ");
-                                                            unlink $disk_path;  # remove disk file
-                                                            return $E;
-                                                        }
-                                                        if( $fmt =~ m/vmdk/ ){
-                                                        # TODO convert to raw using qemu-img
-                                                        }
-
                                                         if( $P->{'lv'} ){
+                                                            plog( "ovf_import lv=$P->{'lv'} size=$P->{'size'}" );
                                                             my $vg = delete $P->{'vg'};
                                                             my $lv = delete $P->{'lv'};
                                                             my @lvp = split(/\//,$lv);
@@ -1415,7 +1442,7 @@ sub ovf_import {
                                                             my $lvdevice;
                                                             my $LV = $LVInfo{"$lvn"};
                                                             if( !$LV ){# create it
-                                                                $size = VirtAgent::Disk::get_disk_size( $disk_path ) if( !$size );
+
                                                                 my $E = VirtAgent::Disk->lvcreate($lv,$vg,$size,$fmt);
                                                                 if( !isError($E) && $E->{'_obj_'} ){
                                                                     $LV = $E->{'_obj_'};
@@ -1428,31 +1455,38 @@ sub ovf_import {
 
                                                             if( $lvdevice ){
                                                                 push(@LVS,$LV);
-                                                                my ($e,$m) = cmd_exec("/bin/dd if=$disk_path of=$lvdevice conv=notrunc"); 
-                                                                unless( $e == 0 ){
-                                                                    plog "Error write disk file to logical-volume: ".$m;
-                                                                    
-                                                                    # TODO testing error for false-positive
-#                                                                    my $E = retErr('_ERR_OVF_IMPORT_',"Error write disk file to logical-volume: ".$m);
-#                                                                    return $E;
-#                                                                    next; # ignore
-                                                                }
+
                                                                 unlink $disk_path;
 
                                                                 # set disk path with lv device path
                                                                 $disk_path = $lvdevice;
+
+                                                                # get disk file from OVF directly to lv device
+                                                                my $E = &ovf_get_disk_file($disk_url,$disk_path,$fmt);
+                                                                if( isError($E) ){
+                                                                    return $E;
+                                                                }
+
                                                             } else {
                                                                 plog "logical volume '$lv' invalid!";
                                                                 my $E = retErr('_ERR_OVF_IMPORT_',"logical volume '$lv' invalid!");
-                                                                unlink $disk_path;  # remove disk file
                                                                 return $E;
                                                                 next;
                                                             }
+                                                        } else {
+                                                            # get disk file from OVF
+                                                            my $E = &ovf_get_disk_file($disk_url,$disk_path,$fmt);
+                                                            if( isError($E) ){
+                                                                unlink $disk_path;  # remove disk file
+                                                                return $E;
+                                                            }
+
                                                         }
                                                     } else {
                                                         plog "$disk_path already there!";
                                                     }
 
+                                                    plog("ovf_import _disks_ 'path'=>$disk_path, 'format'=>$fmt, 'bus'=>$bus");
                                                     push(@{$VM{"_disks_"}}, { 'path'=>$disk_path, 'format'=>$fmt, 'bus'=>$bus, %$P });
                                                 }
                                             }
@@ -1605,6 +1639,9 @@ sub ovf_export {
                 my $c = 1;
                 my $tokfiledisk = "filedisk";
                 for my $D (@$Disks){
+
+                    next if( $D->get_device() eq 'cdrom' ); # ignore CDROM
+
                     my %Attr = ();
 
                     my $fileid = $Attr{'ovf:id'} = "${tokfiledisk}$c";
@@ -1645,6 +1682,8 @@ sub ovf_export {
                 my $tokvmdisk = "vmdisk";
                 my $tokfiledisk = "filedisk";
                 for my $D (@$Disks){
+                    next if( $D->get_device() eq 'cdrom' ); # ignore CDROM
+
                     my %Attr = ();
 
                     my $fileref = "${tokfiledisk}$c";
@@ -1653,7 +1692,7 @@ sub ovf_export {
 
                     $Attr{'ovf:capacity'} = $D->get_size();
                     $Attr{'ovf:populateSize'} = $D->get_usagesize();
-                    $Attr{'ovf:format'} = $D->get_format() || $D->get_drivertype() || "raw";
+                    $Attr{'ovf:format'} = $D->get_format() || "raw";
                     # $Attr{'ovf:capacityAllocationUnits'}
 
                     push(@Disks, $X->Disk( \%Attr ) );
@@ -1804,6 +1843,9 @@ sub ovf_export {
                 my $c = 1;
                 my $tokvmdisk = "vmdisk";
                 for my $D (@$Disks){
+
+                    next if( $D->get_device() eq 'cdrom' ); # ignore CDROM
+
                     my $rasdAutomaticAllocation = 'rasd:AutomaticAllocation';
                     my $rasdCaption = 'rasd:Caption';
                     my $rasdDescription = 'rasd:Description';
@@ -1977,6 +2019,8 @@ BEGIN {
 use ETVA::Utils;
 use VirtAgent;
 
+use Cwd qw(abs_path);
+
 =item new
 
     my $VD = VirtDisk->new( path=>$path, size=>$s, target=>$t );
@@ -1992,7 +2036,7 @@ sub new {
         my %D = %p;
 
         my $path = $D{'path'} = $p{'path'};
-        $path = readlink($path) if( -l "$path" );   # get real path if link 
+        $path = abs_path($path) if( -l "$path" );   # get real path if link 
         $D{'size'} = $p{'size'};
         $D{'device'} = $p{'device'} || "disk";
         $D{'drivername'} = $p{'drivername'};

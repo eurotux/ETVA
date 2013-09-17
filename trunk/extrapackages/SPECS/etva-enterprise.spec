@@ -1,6 +1,6 @@
 Name: etva-enterprise
 Summary: ETVA enterprise related files
-Version: 1.2.2
+Version: 2.0.0
 Release: 11%{?dist}
 Group: System Environment/Base
 Source0: lvm.conf
@@ -43,6 +43,10 @@ if [ "$1" == "1" ]; then
 	%{__perl} -pi -e "s/^#listen_tls = 0/listen_tls = 1/" %{_sysconfdir}/libvirt/libvirtd.conf
 	# Coloca o libvirt em listening mode
 	%{__perl} -pi -e 's/#LIBVIRTD_ARGS="--listen"/LIBVIRTD_ARGS="--listen"/' %{_sysconfdir}/sysconfig/libvirtd
+
+	# Modifica user e group do qemu
+	%{__perl} -pi -e "s/^#?user = .*/user = \"root\"/" %{_sysconfdir}/libvirt/qemu.conf
+	%{__perl} -pi -e "s/^#?group = .*/group = \"root\"/" %{_sysconfdir}/libvirt/qemu.conf
 
     # Alterar o shutdown dos guest e timeout
 	%{__perl} -pi -e 's/#ON_BOOT=start/ON_BOOT=ignore/' %{_sysconfdir}/sysconfig/libvirt-guests

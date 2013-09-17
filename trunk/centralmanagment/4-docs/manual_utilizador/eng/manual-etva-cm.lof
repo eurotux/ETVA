@@ -1,178 +1,197 @@
 \select@language {english}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces NUXIS architecture}}{11}{figure.1.1}
-\contentsline {figure}{\numberline {1.2}{\ignorespaces UnitBox NUXIS model}}{12}{figure.1.2}
+\contentsline {figure}{\numberline {1.1}{\ignorespaces NUXIS architecture}}{12}{figure.1.1}
+\contentsline {figure}{\numberline {1.2}{\ignorespaces UnitBox NUXIS model}}{13}{figure.1.2}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces NUXIS installation menu}}{13}{figure.2.1}
-\contentsline {figure}{\numberline {2.2}{\ignorespaces NUXIS installation process}}{14}{figure.2.2}
-\contentsline {figure}{\numberline {2.3}{\ignorespaces NUXIS boot menu}}{15}{figure.2.3}
-\contentsline {figure}{\numberline {2.4}{\ignorespaces UnitBox version - Management ports}}{15}{figure.2.4}
+\contentsline {figure}{\numberline {2.1}{\ignorespaces NUXIS installation menu}}{14}{figure.2.1}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces NUXIS installation process}}{15}{figure.2.2}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces NUXIS boot menu}}{16}{figure.2.3}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces UnitBox version - Management ports}}{16}{figure.2.4}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Layout principal}}{16}{figure.3.1}
-\contentsline {figure}{\numberline {3.2}{\ignorespaces Authentication window}}{17}{figure.3.2}
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Central Management nodes view}}{18}{figure.3.3}
-\contentsline {figure}{\numberline {3.4}{\ignorespaces System networks view and virtual machines' interfaces}}{19}{figure.3.4}
-\contentsline {figure}{\numberline {3.5}{\ignorespaces Add network window}}{20}{figure.3.5}
-\contentsline {figure}{\numberline {3.6}{\ignorespaces MAC pool creation window}}{20}{figure.3.6}
-\contentsline {figure}{\numberline {3.7}{\ignorespaces Virtual machine interfaces (management window)}}{21}{figure.3.7}
-\contentsline {figure}{\numberline {3.8}{\ignorespaces Edit cluster}}{22}{figure.3.8}
-\contentsline {figure}{\numberline {3.9}{\ignorespaces Edit node}}{23}{figure.3.9}
-\contentsline {figure}{\numberline {3.10}{\ignorespaces Agent connectivity configuration}}{24}{figure.3.10}
-\contentsline {figure}{\numberline {3.11}{\ignorespaces Node maintenance}}{24}{figure.3.11}
-\contentsline {figure}{\numberline {3.12}{\ignorespaces Node's information}}{25}{figure.3.12}
-\contentsline {figure}{\numberline {3.13}{\ignorespaces Node's virtual machines}}{26}{figure.3.13}
-\contentsline {figure}{\numberline {3.14}{\ignorespaces Add server wizard - Welcome}}{26}{figure.3.14}
-\contentsline {figure}{\numberline {3.15}{\ignorespaces Add server wizard - Virtual machine name}}{27}{figure.3.15}
-\contentsline {figure}{\numberline {3.16}{\ignorespaces Add server wizard - Memory}}{28}{figure.3.16}
-\contentsline {figure}{\numberline {3.17}{\ignorespaces Add server wizard - Processors}}{28}{figure.3.17}
-\contentsline {figure}{\numberline {3.18}{\ignorespaces Add server wizard - Storage}}{29}{figure.3.18}
-\contentsline {figure}{\numberline {3.19}{\ignorespaces Add server wizard - Host network}}{30}{figure.3.19}
-\contentsline {figure}{\numberline {3.20}{\ignorespaces Add server wizard - Startup}}{31}{figure.3.20}
-\contentsline {figure}{\numberline {3.21}{\ignorespaces Add server wizard - Finished!}}{31}{figure.3.21}
-\contentsline {figure}{\numberline {3.22}{\ignorespaces Edit server - General}}{32}{figure.3.22}
-\contentsline {figure}{\numberline {3.23}{\ignorespaces Edit server - Network interfaces}}{33}{figure.3.23}
-\contentsline {figure}{\numberline {3.24}{\ignorespaces Edit server - Disks}}{33}{figure.3.24}
-\contentsline {figure}{\numberline {3.25}{\ignorespaces Edit server - Devices}}{34}{figure.3.25}
-\contentsline {figure}{\numberline {3.26}{\ignorespaces Edit server - Other options}}{34}{figure.3.26}
-\contentsline {figure}{\numberline {3.27}{\ignorespaces Edit server - High availability}}{35}{figure.3.27}
-\contentsline {figure}{\numberline {3.28}{\ignorespaces Remove server window}}{35}{figure.3.28}
-\contentsline {figure}{\numberline {3.29}{\ignorespaces Virtual machine boot parameters}}{36}{figure.3.29}
-\contentsline {figure}{\numberline {3.30}{\ignorespaces Virtual machine migration}}{36}{figure.3.30}
-\contentsline {figure}{\numberline {3.31}{\ignorespaces Snapshots}}{37}{figure.3.31}
-\contentsline {figure}{\numberline {3.32}{\ignorespaces Information about node's storage}}{38}{figure.3.32}
-\contentsline {figure}{\numberline {3.33}{\ignorespaces Context menu of a physical volume}}{38}{figure.3.33}
-\contentsline {figure}{\numberline {3.34}{\ignorespaces Scan \emph {physical devices} }}{39}{figure.3.34}
-\contentsline {figure}{\numberline {3.35}{\ignorespaces Context menu of a volume group}}{39}{figure.3.35}
-\contentsline {figure}{\numberline {3.36}{\ignorespaces Create volume group window}}{40}{figure.3.36}
-\contentsline {figure}{\numberline {3.37}{\ignorespaces Volume group extension}}{41}{figure.3.37}
-\contentsline {figure}{\numberline {3.38}{\ignorespaces Scan \emph {volume groups}}}{41}{figure.3.38}
-\contentsline {figure}{\numberline {3.39}{\ignorespaces Logical volume context menu}}{42}{figure.3.39}
-\contentsline {figure}{\numberline {3.40}{\ignorespaces Create a new logical volume window}}{42}{figure.3.40}
-\contentsline {figure}{\numberline {3.41}{\ignorespaces Resize of a volume group}}{43}{figure.3.41}
-\contentsline {figure}{\numberline {3.42}{\ignorespaces Scan \emph {logical volumes}}}{43}{figure.3.42}
-\contentsline {figure}{\numberline {3.43}{\ignorespaces Node load}}{44}{figure.3.43}
-\contentsline {figure}{\numberline {3.44}{\ignorespaces Node usage statistics - CPU load}}{45}{figure.3.44}
-\contentsline {figure}{\numberline {3.45}{\ignorespaces Shutting down a node}}{45}{figure.3.45}
-\contentsline {figure}{\numberline {3.46}{\ignorespaces Information about the virtual machine}}{46}{figure.3.46}
-\contentsline {figure}{\numberline {3.47}{\ignorespaces Virtual machine cpu load}}{47}{figure.3.47}
-\contentsline {figure}{\numberline {3.48}{\ignorespaces Virtual machine network interfaces}}{47}{figure.3.48}
-\contentsline {figure}{\numberline {3.49}{\ignorespaces Virtual machine memory usage}}{48}{figure.3.49}
-\contentsline {figure}{\numberline {3.50}{\ignorespaces Virtual machine disk input/output}}{48}{figure.3.50}
-\contentsline {figure}{\numberline {3.51}{\ignorespaces Driver's - iso selection}}{50}{figure.3.51}
-\contentsline {figure}{\numberline {3.52}{\ignorespaces Set logical volume (drivers virtio)}}{50}{figure.3.52}
-\contentsline {figure}{\numberline {3.53}{\ignorespaces Set the startup disk}}{51}{figure.3.53}
-\contentsline {figure}{\numberline {3.54}{\ignorespaces Windows - driver update}}{51}{figure.3.54}
-\contentsline {figure}{\numberline {3.55}{\ignorespaces Change the disk driver to virtio}}{52}{figure.3.55}
-\contentsline {figure}{\numberline {3.56}{\ignorespaces OVF import wizard - Welcome}}{53}{figure.3.56}
-\contentsline {figure}{\numberline {3.57}{\ignorespaces OVF import wizard - Source OVF file}}{53}{figure.3.57}
-\contentsline {figure}{\numberline {3.58}{\ignorespaces OVF import wizard - OVF details}}{54}{figure.3.58}
-\contentsline {figure}{\numberline {3.59}{\ignorespaces OVF import wizard - License}}{54}{figure.3.59}
-\contentsline {figure}{\numberline {3.60}{\ignorespaces OVF import wizard - Name and location}}{55}{figure.3.60}
-\contentsline {figure}{\numberline {3.61}{\ignorespaces OVF import wizard - Storage}}{56}{figure.3.61}
-\contentsline {figure}{\numberline {3.62}{\ignorespaces OVF import wizard - Network interfaces}}{56}{figure.3.62}
-\contentsline {figure}{\numberline {3.63}{\ignorespaces OVF import wizard - Finished!}}{57}{figure.3.63}
-\contentsline {figure}{\numberline {3.64}{\ignorespaces OVF export window}}{57}{figure.3.64}
-\contentsline {figure}{\numberline {3.65}{\ignorespaces Iso management panel}}{58}{figure.3.65}
-\contentsline {figure}{\numberline {3.66}{\ignorespaces System events log window}}{59}{figure.3.66}
-\contentsline {figure}{\numberline {3.67}{\ignorespaces One time setup wizard}}{60}{figure.3.67}
-\contentsline {figure}{\numberline {3.68}{\ignorespaces System preferences window - General panel}}{61}{figure.3.68}
-\contentsline {figure}{\numberline {3.69}{\ignorespaces System preferences window - Connectivity tab}}{61}{figure.3.69}
-\contentsline {figure}{\numberline {3.70}{\ignorespaces Users' and permissions' administration}}{62}{figure.3.70}
-\contentsline {figure}{\numberline {3.71}{\ignorespaces Permission option in node's context}}{63}{figure.3.71}
-\contentsline {figure}{\numberline {3.72}{\ignorespaces Permission option in server's context}}{63}{figure.3.72}
-\contentsline {figure}{\numberline {3.73}{\ignorespaces Changing servers' access permissions}}{64}{figure.3.73}
-\contentsline {figure}{\numberline {3.74}{\ignorespaces UnitBox display and buttons}}{65}{figure.3.74}
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Layout principal}}{17}{figure.3.1}
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Authentication window}}{18}{figure.3.2}
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Central Management nodes view}}{19}{figure.3.3}
+\contentsline {figure}{\numberline {3.4}{\ignorespaces System networks view and virtual machines' interfaces}}{20}{figure.3.4}
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Add network window}}{21}{figure.3.5}
+\contentsline {figure}{\numberline {3.6}{\ignorespaces MAC pool creation window}}{21}{figure.3.6}
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Virtual machine interfaces (management window)}}{22}{figure.3.7}
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Edit cluster}}{23}{figure.3.8}
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Edit node}}{24}{figure.3.9}
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Agent connectivity configuration}}{25}{figure.3.10}
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Node maintenance}}{25}{figure.3.11}
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Node's information}}{26}{figure.3.12}
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Node's virtual machines}}{27}{figure.3.13}
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Add server wizard - Welcome}}{27}{figure.3.14}
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Add server wizard - Virtual machine name}}{28}{figure.3.15}
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Add server wizard - Memory}}{29}{figure.3.16}
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Add server wizard - Processors}}{29}{figure.3.17}
+\contentsline {figure}{\numberline {3.18}{\ignorespaces Add server wizard - Storage}}{30}{figure.3.18}
+\contentsline {figure}{\numberline {3.19}{\ignorespaces Add server wizard - Host network}}{31}{figure.3.19}
+\contentsline {figure}{\numberline {3.20}{\ignorespaces Add server wizard - Startup}}{32}{figure.3.20}
+\contentsline {figure}{\numberline {3.21}{\ignorespaces Add server wizard - Finished!}}{32}{figure.3.21}
+\contentsline {figure}{\numberline {3.22}{\ignorespaces Edit server - General}}{33}{figure.3.22}
+\contentsline {figure}{\numberline {3.23}{\ignorespaces Edit server - Network interfaces}}{34}{figure.3.23}
+\contentsline {figure}{\numberline {3.24}{\ignorespaces Edit server - Disks}}{34}{figure.3.24}
+\contentsline {figure}{\numberline {3.25}{\ignorespaces Edit server - Devices}}{35}{figure.3.25}
+\contentsline {figure}{\numberline {3.26}{\ignorespaces Edit server - Other options}}{35}{figure.3.26}
+\contentsline {figure}{\numberline {3.27}{\ignorespaces Edit server - High availability}}{36}{figure.3.27}
+\contentsline {figure}{\numberline {3.28}{\ignorespaces Remove server window}}{36}{figure.3.28}
+\contentsline {figure}{\numberline {3.29}{\ignorespaces Virtual machine boot parameters}}{37}{figure.3.29}
+\contentsline {figure}{\numberline {3.30}{\ignorespaces Virtual machine migration}}{38}{figure.3.30}
+\contentsline {figure}{\numberline {3.31}{\ignorespaces Snapshots}}{38}{figure.3.31}
+\contentsline {figure}{\numberline {3.32}{\ignorespaces Information about node's storage}}{39}{figure.3.32}
+\contentsline {figure}{\numberline {3.33}{\ignorespaces Context menu of a physical volume}}{40}{figure.3.33}
+\contentsline {figure}{\numberline {3.34}{\ignorespaces Scan \emph {physical devices} }}{40}{figure.3.34}
+\contentsline {figure}{\numberline {3.35}{\ignorespaces \emph {Storage iSCSI} list}}{41}{figure.3.35}
+\contentsline {figure}{\numberline {3.36}{\ignorespaces Set up new \emph {Storage iSCSI} }}{41}{figure.3.36}
+\contentsline {figure}{\numberline {3.37}{\ignorespaces Context menu of a volume group}}{42}{figure.3.37}
+\contentsline {figure}{\numberline {3.38}{\ignorespaces Create volume group window}}{42}{figure.3.38}
+\contentsline {figure}{\numberline {3.39}{\ignorespaces Volume group extension}}{43}{figure.3.39}
+\contentsline {figure}{\numberline {3.40}{\ignorespaces Scan \emph {volume groups}}}{43}{figure.3.40}
+\contentsline {figure}{\numberline {3.41}{\ignorespaces Logical volume context menu}}{44}{figure.3.41}
+\contentsline {figure}{\numberline {3.42}{\ignorespaces Create a new logical volume window}}{45}{figure.3.42}
+\contentsline {figure}{\numberline {3.43}{\ignorespaces Resize of a volume group}}{45}{figure.3.43}
+\contentsline {figure}{\numberline {3.44}{\ignorespaces Scan \emph {logical volumes}}}{46}{figure.3.44}
+\contentsline {figure}{\numberline {3.45}{\ignorespaces Node load}}{46}{figure.3.45}
+\contentsline {figure}{\numberline {3.46}{\ignorespaces Node usage statistics - CPU load}}{47}{figure.3.46}
+\contentsline {figure}{\numberline {3.47}{\ignorespaces Shutting down a node}}{48}{figure.3.47}
+\contentsline {figure}{\numberline {3.48}{\ignorespaces Information about the virtual machine}}{49}{figure.3.48}
+\contentsline {figure}{\numberline {3.49}{\ignorespaces Virtual machine cpu load}}{50}{figure.3.49}
+\contentsline {figure}{\numberline {3.50}{\ignorespaces Virtual machine network interfaces}}{50}{figure.3.50}
+\contentsline {figure}{\numberline {3.51}{\ignorespaces Virtual machine memory usage}}{51}{figure.3.51}
+\contentsline {figure}{\numberline {3.52}{\ignorespaces Virtual machine disk input/output}}{51}{figure.3.52}
+\contentsline {figure}{\numberline {3.53}{\ignorespaces Driver's - iso selection}}{53}{figure.3.53}
+\contentsline {figure}{\numberline {3.54}{\ignorespaces Set logical volume (drivers virtio)}}{53}{figure.3.54}
+\contentsline {figure}{\numberline {3.55}{\ignorespaces Set the startup disk}}{54}{figure.3.55}
+\contentsline {figure}{\numberline {3.56}{\ignorespaces Windows - driver update}}{54}{figure.3.56}
+\contentsline {figure}{\numberline {3.57}{\ignorespaces Change the disk driver to virtio}}{55}{figure.3.57}
+\contentsline {figure}{\numberline {3.58}{\ignorespaces OVF import wizard - Welcome}}{56}{figure.3.58}
+\contentsline {figure}{\numberline {3.59}{\ignorespaces OVF import wizard - Source OVF file}}{56}{figure.3.59}
+\contentsline {figure}{\numberline {3.60}{\ignorespaces OVF import wizard - OVF details}}{57}{figure.3.60}
+\contentsline {figure}{\numberline {3.61}{\ignorespaces OVF import wizard - License}}{57}{figure.3.61}
+\contentsline {figure}{\numberline {3.62}{\ignorespaces OVF import wizard - Name and location}}{58}{figure.3.62}
+\contentsline {figure}{\numberline {3.63}{\ignorespaces OVF import wizard - Storage}}{59}{figure.3.63}
+\contentsline {figure}{\numberline {3.64}{\ignorespaces OVF import wizard - Network interfaces}}{59}{figure.3.64}
+\contentsline {figure}{\numberline {3.65}{\ignorespaces OVF import wizard - Finished!}}{60}{figure.3.65}
+\contentsline {figure}{\numberline {3.66}{\ignorespaces OVF export window}}{60}{figure.3.66}
+\contentsline {figure}{\numberline {3.67}{\ignorespaces Iso management panel}}{61}{figure.3.67}
+\contentsline {figure}{\numberline {3.68}{\ignorespaces System events log window}}{62}{figure.3.68}
+\contentsline {figure}{\numberline {3.69}{\ignorespaces One time setup wizard}}{63}{figure.3.69}
+\contentsline {figure}{\numberline {3.70}{\ignorespaces System preferences window - General panel}}{64}{figure.3.70}
+\contentsline {figure}{\numberline {3.71}{\ignorespaces System preferences window - Connectivity tab}}{64}{figure.3.71}
+\contentsline {figure}{\numberline {3.72}{\ignorespaces Users' and permissions' administration - Manage Users}}{65}{figure.3.72}
+\contentsline {figure}{\numberline {3.73}{\ignorespaces Users' and permissions' administration - Add user (Step 1)}}{65}{figure.3.73}
+\contentsline {figure}{\numberline {3.74}{\ignorespaces Users' and permissions' administration - Add user (User details)}}{66}{figure.3.74}
+\contentsline {figure}{\numberline {3.75}{\ignorespaces Users' and permissions' administration - Add user (User permissions)}}{66}{figure.3.75}
+\contentsline {figure}{\numberline {3.76}{\ignorespaces Users' and permissions' administration - Add user (ETVOIP)}}{67}{figure.3.76}
+\contentsline {figure}{\numberline {3.77}{\ignorespaces Users' and permissions' administration - Add user (ETMailServer)}}{67}{figure.3.77}
+\contentsline {figure}{\numberline {3.78}{\ignorespaces Users' and permissions' administration - Add user (Primavera)}}{67}{figure.3.78}
+\contentsline {figure}{\numberline {3.79}{\ignorespaces Users' and permissions' administration - Add user (Final)}}{68}{figure.3.79}
+\contentsline {figure}{\numberline {3.80}{\ignorespaces Users' and permissions' administration - Manage Groups}}{68}{figure.3.80}
+\contentsline {figure}{\numberline {3.81}{\ignorespaces Permission option in node's context}}{69}{figure.3.81}
+\contentsline {figure}{\numberline {3.82}{\ignorespaces Permission option in server's context}}{69}{figure.3.82}
+\contentsline {figure}{\numberline {3.83}{\ignorespaces Changing servers' access permissions}}{70}{figure.3.83}
+\contentsline {figure}{\numberline {3.84}{\ignorespaces UnitBox display and buttons}}{71}{figure.3.84}
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Main panel}}{67}{figure.4.1}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Welcome}}{67}{figure.4.2}
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Topology setup}}{68}{figure.4.3}
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Configuring the WAN interface}}{68}{figure.4.4}
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Configuring the LAN interface}}{69}{figure.4.5}
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Configuring of the DHCP service for LAN network}}{69}{figure.4.6}
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Configuring SQUID proxy}}{70}{figure.4.7}
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Configuring DMZ interface}}{70}{figure.4.8}
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Configuring DHCP service for DMZ network}}{71}{figure.4.9}
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Completion of the configuration}}{71}{figure.4.10}
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Active interfaces}}{72}{figure.4.11}
-\contentsline {figure}{\numberline {4.12}{\ignorespaces After boot active interfaces}}{73}{figure.4.12}
-\contentsline {figure}{\numberline {4.13}{\ignorespaces Alias interface}}{73}{figure.4.13}
-\contentsline {figure}{\numberline {4.14}{\ignorespaces Alias interface active at boot}}{74}{figure.4.14}
-\contentsline {figure}{\numberline {4.15}{\ignorespaces Active forwarding rules}}{74}{figure.4.15}
-\contentsline {figure}{\numberline {4.16}{\ignorespaces Defined routing rules at startup}}{75}{figure.4.16}
-\contentsline {figure}{\numberline {4.17}{\ignorespaces Address setup}}{76}{figure.4.17}
-\contentsline {figure}{\numberline {4.18}{\ignorespaces DNS client}}{76}{figure.4.18}
-\contentsline {figure}{\numberline {4.19}{\ignorespaces Firewall: Filter table}}{77}{figure.4.19}
-\contentsline {figure}{\numberline {4.20}{\ignorespaces Creating a rule on table \textit {filter} - Chain and action}}{78}{figure.4.20}
-\contentsline {figure}{\numberline {4.21}{\ignorespaces Creating a rule on table \textit {filter} - Condition details}}{79}{figure.4.21}
-\contentsline {figure}{\numberline {4.22}{\ignorespaces Creating a rule on NAT table}}{81}{figure.4.22}
-\contentsline {figure}{\numberline {4.23}{\ignorespaces IP range setup}}{82}{figure.4.23}
-\contentsline {figure}{\numberline {4.24}{\ignorespaces Subnets setup}}{82}{figure.4.24}
-\contentsline {figure}{\numberline {4.25}{\ignorespaces Subnet edit}}{83}{figure.4.25}
-\contentsline {figure}{\numberline {4.26}{\ignorespaces Choose an interface}}{83}{figure.4.26}
-\contentsline {figure}{\numberline {4.27}{\ignorespaces Configuration file edition}}{84}{figure.4.27}
-\contentsline {figure}{\numberline {4.28}{\ignorespaces List of active leases}}{84}{figure.4.28}
-\contentsline {figure}{\numberline {4.29}{\ignorespaces SQUID server setup}}{85}{figure.4.29}
-\contentsline {figure}{\numberline {4.30}{\ignorespaces Port and network configuration}}{86}{figure.4.30}
-\contentsline {figure}{\numberline {4.31}{\ignorespaces Setup of access control policies}}{87}{figure.4.31}
-\contentsline {figure}{\numberline {4.32}{\ignorespaces Creating a new ACL}}{87}{figure.4.32}
-\contentsline {figure}{\numberline {4.33}{\ignorespaces Creating a new external acl}}{88}{figure.4.33}
-\contentsline {figure}{\numberline {4.34}{\ignorespaces Restriction definition - \textit {Proxy restrictions}}}{88}{figure.4.34}
-\contentsline {figure}{\numberline {4.35}{\ignorespaces Authentication Programs}}{89}{figure.4.35}
-\contentsline {figure}{\numberline {4.36}{\ignorespaces Proxies - Other Caches}}{90}{figure.4.36}
-\contentsline {figure}{\numberline {4.37}{\ignorespaces Edit host cache}}{91}{figure.4.37}
-\contentsline {figure}{\numberline {4.38}{\ignorespaces Restrict internal network access only during work hours - Creating ACLs.}}{92}{figure.4.38}
-\contentsline {figure}{\numberline {4.39}{\ignorespaces Restrict internal network access only during work hours - Creating restriction using previously defined ACLs}}{92}{figure.4.39}
-\contentsline {figure}{\numberline {4.40}{\ignorespaces Restrict access only in the morning - Creating ACLs}}{93}{figure.4.40}
-\contentsline {figure}{\numberline {4.41}{\ignorespaces Restrict access only in the morning - Creating restriction using previously defined ACLs}}{93}{figure.4.41}
-\contentsline {figure}{\numberline {4.42}{\ignorespaces Restrict access by IP address - Creating ACLs}}{94}{figure.4.42}
-\contentsline {figure}{\numberline {4.43}{\ignorespaces Restrict access by IP address - Creating restriction using previously defined ACLs}}{94}{figure.4.43}
-\contentsline {figure}{\numberline {4.44}{\ignorespaces Denying access based on a regular expression on the URL - Creating ACLs}}{95}{figure.4.44}
-\contentsline {figure}{\numberline {4.45}{\ignorespaces Denying access based on a regular expression on the URL - Creating restriction using previously defined ACLs}}{95}{figure.4.45}
-\contentsline {figure}{\numberline {4.46}{\ignorespaces SNMP server setup}}{96}{figure.4.46}
-\contentsline {figure}{\numberline {4.47}{\ignorespaces ETMS - Main information panel}}{97}{figure.4.47}
-\contentsline {figure}{\numberline {4.48}{\ignorespaces ETMS - Manage domains panel}}{98}{figure.4.48}
-\contentsline {figure}{\numberline {4.49}{\ignorespaces Add domain}}{99}{figure.4.49}
-\contentsline {figure}{\numberline {4.50}{\ignorespaces Remove domain}}{100}{figure.4.50}
-\contentsline {figure}{\numberline {4.51}{\ignorespaces Manage domain mailboxes}}{101}{figure.4.51}
-\contentsline {figure}{\numberline {4.52}{\ignorespaces Domains' needed space}}{101}{figure.4.52}
-\contentsline {figure}{\numberline {4.53}{\ignorespaces Adding a domain alias}}{102}{figure.4.53}
-\contentsline {figure}{\numberline {4.54}{\ignorespaces Alias created successfully}}{102}{figure.4.54}
-\contentsline {figure}{\numberline {4.55}{\ignorespaces ETMS - Mailbox management panel}}{103}{figure.4.55}
-\contentsline {figure}{\numberline {4.56}{\ignorespaces Adding a mailbox}}{104}{figure.4.56}
-\contentsline {figure}{\numberline {4.57}{\ignorespaces Change mailbox password}}{105}{figure.4.57}
-\contentsline {figure}{\numberline {4.58}{\ignorespaces Add mailbox's alias}}{106}{figure.4.58}
-\contentsline {figure}{\numberline {4.59}{\ignorespaces Remove a mailbox alias - step 1}}{107}{figure.4.59}
-\contentsline {figure}{\numberline {4.60}{\ignorespaces Remove a mailbox alias - step 2}}{107}{figure.4.60}
-\contentsline {figure}{\numberline {4.61}{\ignorespaces Defining forwarding email addresses}}{108}{figure.4.61}
-\contentsline {figure}{\numberline {4.62}{\ignorespaces Available mailboxes}}{108}{figure.4.62}
-\contentsline {figure}{\numberline {4.63}{\ignorespaces Occupied disk space by mailboxes emails}}{109}{figure.4.63}
-\contentsline {figure}{\numberline {4.64}{\ignorespaces Remove mailbox - confirmation question}}{110}{figure.4.64}
-\contentsline {figure}{\numberline {4.65}{\ignorespaces Main ETVOIP panel management}}{111}{figure.4.65}
-\contentsline {figure}{\numberline {4.66}{\ignorespaces Extension management panel}}{112}{figure.4.66}
-\contentsline {figure}{\numberline {4.67}{\ignorespaces Add extension window (SIP)}}{113}{figure.4.67}
-\contentsline {figure}{\numberline {4.68}{\ignorespaces Remove an extension}}{115}{figure.4.68}
-\contentsline {figure}{\numberline {4.69}{\ignorespaces Trunk management panel}}{116}{figure.4.69}
-\contentsline {figure}{\numberline {4.70}{\ignorespaces IAX2 trunk creation window}}{117}{figure.4.70}
-\contentsline {figure}{\numberline {4.71}{\ignorespaces Remove trunk}}{119}{figure.4.71}
-\contentsline {figure}{\numberline {4.72}{\ignorespaces Outbound management panel}}{120}{figure.4.72}
-\contentsline {figure}{\numberline {4.73}{\ignorespaces Add outbound route window}}{121}{figure.4.73}
-\contentsline {figure}{\numberline {4.74}{\ignorespaces Remove outbound route}}{122}{figure.4.74}
-\contentsline {figure}{\numberline {4.75}{\ignorespaces Inbound routes management panel}}{122}{figure.4.75}
-\contentsline {figure}{\numberline {4.76}{\ignorespaces Inbound route creation window}}{123}{figure.4.76}
-\contentsline {figure}{\numberline {4.77}{\ignorespaces Remove inbound route}}{124}{figure.4.77}
-\contentsline {figure}{\numberline {4.78}{\ignorespaces Step 1 - Choosing installation directory}}{125}{figure.4.78}
-\contentsline {figure}{\numberline {4.79}{\ignorespaces Step 2 - Installation progress}}{125}{figure.4.79}
-\contentsline {figure}{\numberline {4.80}{\ignorespaces Step 3 - Agent setup}}{126}{figure.4.80}
-\contentsline {figure}{\numberline {4.81}{\ignorespaces Step 4 - Reboot confirmation}}{126}{figure.4.81}
-\contentsline {figure}{\numberline {4.82}{\ignorespaces Step 5 - Agent startup}}{127}{figure.4.82}
-\contentsline {figure}{\numberline {4.83}{\ignorespaces Service information}}{127}{figure.4.83}
-\contentsline {figure}{\numberline {4.84}{\ignorespaces Listing backup plans}}{128}{figure.4.84}
-\contentsline {figure}{\numberline {4.85}{\ignorespaces Defining a backup plan}}{128}{figure.4.85}
-\contentsline {figure}{\numberline {4.86}{\ignorespaces Performing a backup}}{129}{figure.4.86}
-\contentsline {figure}{\numberline {4.87}{\ignorespaces Restoring process}}{129}{figure.4.87}
-\contentsline {figure}{\numberline {4.88}{\ignorespaces Changing the IP address}}{129}{figure.4.88}
-\contentsline {figure}{\numberline {4.89}{\ignorespaces List of Primavera's users}}{130}{figure.4.89}
-\contentsline {figure}{\numberline {4.90}{\ignorespaces Adding a Primavera user}}{130}{figure.4.90}
-\contentsline {figure}{\numberline {4.91}{\ignorespaces Editing a Primavera user}}{131}{figure.4.91}
-\contentsline {figure}{\numberline {4.92}{\ignorespaces Removing a Primavera user}}{131}{figure.4.92}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Main panel}}{73}{figure.4.1}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Welcome}}{73}{figure.4.2}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Topology setup}}{74}{figure.4.3}
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Configuring the WAN interface}}{74}{figure.4.4}
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Configuring the LAN interface}}{75}{figure.4.5}
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Configuring of the DHCP service for LAN network}}{75}{figure.4.6}
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Configuring SQUID proxy}}{76}{figure.4.7}
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Configuring DMZ interface}}{76}{figure.4.8}
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Configuring DHCP service for DMZ network}}{77}{figure.4.9}
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Completion of the configuration}}{77}{figure.4.10}
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Active interfaces}}{78}{figure.4.11}
+\contentsline {figure}{\numberline {4.12}{\ignorespaces After boot active interfaces}}{79}{figure.4.12}
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Alias interface}}{79}{figure.4.13}
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Alias interface active at boot}}{80}{figure.4.14}
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Active forwarding rules}}{80}{figure.4.15}
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Defined routing rules at startup}}{81}{figure.4.16}
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Address setup}}{82}{figure.4.17}
+\contentsline {figure}{\numberline {4.18}{\ignorespaces DNS client}}{82}{figure.4.18}
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Firewall: Filter table}}{83}{figure.4.19}
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Creating a rule on table \textit {filter} - Chain and action}}{84}{figure.4.20}
+\contentsline {figure}{\numberline {4.21}{\ignorespaces Creating a rule on table \textit {filter} - Condition details}}{85}{figure.4.21}
+\contentsline {figure}{\numberline {4.22}{\ignorespaces Creating a rule on NAT table}}{87}{figure.4.22}
+\contentsline {figure}{\numberline {4.23}{\ignorespaces IP range setup}}{88}{figure.4.23}
+\contentsline {figure}{\numberline {4.24}{\ignorespaces Subnets setup}}{88}{figure.4.24}
+\contentsline {figure}{\numberline {4.25}{\ignorespaces Subnet edit}}{89}{figure.4.25}
+\contentsline {figure}{\numberline {4.26}{\ignorespaces Choose an interface}}{89}{figure.4.26}
+\contentsline {figure}{\numberline {4.27}{\ignorespaces Configuration file edition}}{90}{figure.4.27}
+\contentsline {figure}{\numberline {4.28}{\ignorespaces List of active leases}}{90}{figure.4.28}
+\contentsline {figure}{\numberline {4.29}{\ignorespaces SQUID server setup}}{91}{figure.4.29}
+\contentsline {figure}{\numberline {4.30}{\ignorespaces Port and network configuration}}{92}{figure.4.30}
+\contentsline {figure}{\numberline {4.31}{\ignorespaces Setup of access control policies}}{93}{figure.4.31}
+\contentsline {figure}{\numberline {4.32}{\ignorespaces Creating a new ACL}}{94}{figure.4.32}
+\contentsline {figure}{\numberline {4.33}{\ignorespaces Creating a new external acl}}{94}{figure.4.33}
+\contentsline {figure}{\numberline {4.34}{\ignorespaces Restriction definition - \textit {Proxy restrictions}}}{95}{figure.4.34}
+\contentsline {figure}{\numberline {4.35}{\ignorespaces Authentication Programs}}{96}{figure.4.35}
+\contentsline {figure}{\numberline {4.36}{\ignorespaces Proxies - Other Caches}}{97}{figure.4.36}
+\contentsline {figure}{\numberline {4.37}{\ignorespaces Edit host cache}}{98}{figure.4.37}
+\contentsline {figure}{\numberline {4.38}{\ignorespaces Restrict internal network access only during work hours - Creating ACLs.}}{99}{figure.4.38}
+\contentsline {figure}{\numberline {4.39}{\ignorespaces Restrict internal network access only during work hours - Creating restriction using previously defined ACLs}}{99}{figure.4.39}
+\contentsline {figure}{\numberline {4.40}{\ignorespaces Restrict access only in the morning - Creating ACLs}}{100}{figure.4.40}
+\contentsline {figure}{\numberline {4.41}{\ignorespaces Restrict access only in the morning - Creating restriction using previously defined ACLs}}{100}{figure.4.41}
+\contentsline {figure}{\numberline {4.42}{\ignorespaces Restrict access by IP address - Creating ACLs}}{101}{figure.4.42}
+\contentsline {figure}{\numberline {4.43}{\ignorespaces Restrict access by IP address - Creating restriction using previously defined ACLs}}{101}{figure.4.43}
+\contentsline {figure}{\numberline {4.44}{\ignorespaces Denying access based on a regular expression on the URL - Creating ACLs}}{102}{figure.4.44}
+\contentsline {figure}{\numberline {4.45}{\ignorespaces Denying access based on a regular expression on the URL - Creating restriction using previously defined ACLs}}{102}{figure.4.45}
+\contentsline {figure}{\numberline {4.46}{\ignorespaces SNMP server setup}}{103}{figure.4.46}
+\contentsline {figure}{\numberline {4.47}{\ignorespaces ETMS - Main information panel}}{104}{figure.4.47}
+\contentsline {figure}{\numberline {4.48}{\ignorespaces ETMS - Manage domains panel}}{105}{figure.4.48}
+\contentsline {figure}{\numberline {4.49}{\ignorespaces Add domain}}{106}{figure.4.49}
+\contentsline {figure}{\numberline {4.50}{\ignorespaces Remove domain}}{107}{figure.4.50}
+\contentsline {figure}{\numberline {4.51}{\ignorespaces Manage domain mailboxes}}{108}{figure.4.51}
+\contentsline {figure}{\numberline {4.52}{\ignorespaces Domains' needed space}}{108}{figure.4.52}
+\contentsline {figure}{\numberline {4.53}{\ignorespaces Adding a domain alias}}{109}{figure.4.53}
+\contentsline {figure}{\numberline {4.54}{\ignorespaces Alias created successfully}}{109}{figure.4.54}
+\contentsline {figure}{\numberline {4.55}{\ignorespaces ETMS - Mailbox management panel}}{110}{figure.4.55}
+\contentsline {figure}{\numberline {4.56}{\ignorespaces Adding a mailbox}}{111}{figure.4.56}
+\contentsline {figure}{\numberline {4.57}{\ignorespaces Change mailbox password}}{112}{figure.4.57}
+\contentsline {figure}{\numberline {4.58}{\ignorespaces Add mailbox's alias}}{113}{figure.4.58}
+\contentsline {figure}{\numberline {4.59}{\ignorespaces Remove a mailbox alias - step 1}}{114}{figure.4.59}
+\contentsline {figure}{\numberline {4.60}{\ignorespaces Remove a mailbox alias - step 2}}{114}{figure.4.60}
+\contentsline {figure}{\numberline {4.61}{\ignorespaces Defining forwarding email addresses}}{115}{figure.4.61}
+\contentsline {figure}{\numberline {4.62}{\ignorespaces Available mailboxes}}{115}{figure.4.62}
+\contentsline {figure}{\numberline {4.63}{\ignorespaces Occupied disk space by mailboxes emails}}{116}{figure.4.63}
+\contentsline {figure}{\numberline {4.64}{\ignorespaces Remove mailbox - confirmation question}}{117}{figure.4.64}
+\contentsline {figure}{\numberline {4.65}{\ignorespaces Main ETVOIP panel management}}{118}{figure.4.65}
+\contentsline {figure}{\numberline {4.66}{\ignorespaces Extension management panel}}{119}{figure.4.66}
+\contentsline {figure}{\numberline {4.67}{\ignorespaces Add extension window (SIP)}}{120}{figure.4.67}
+\contentsline {figure}{\numberline {4.68}{\ignorespaces Remove an extension}}{123}{figure.4.68}
+\contentsline {figure}{\numberline {4.69}{\ignorespaces Trunk management panel}}{123}{figure.4.69}
+\contentsline {figure}{\numberline {4.70}{\ignorespaces IAX2 trunk creation window}}{124}{figure.4.70}
+\contentsline {figure}{\numberline {4.71}{\ignorespaces Remove trunk}}{126}{figure.4.71}
+\contentsline {figure}{\numberline {4.72}{\ignorespaces Outbound management panel}}{127}{figure.4.72}
+\contentsline {figure}{\numberline {4.73}{\ignorespaces Add outbound route window}}{128}{figure.4.73}
+\contentsline {figure}{\numberline {4.74}{\ignorespaces Remove outbound route}}{129}{figure.4.74}
+\contentsline {figure}{\numberline {4.75}{\ignorespaces Inbound routes management panel}}{130}{figure.4.75}
+\contentsline {figure}{\numberline {4.76}{\ignorespaces Inbound route creation window}}{131}{figure.4.76}
+\contentsline {figure}{\numberline {4.77}{\ignorespaces Remove inbound route}}{131}{figure.4.77}
+\contentsline {figure}{\numberline {4.78}{\ignorespaces Step 1 - Choosing installation directory}}{132}{figure.4.78}
+\contentsline {figure}{\numberline {4.79}{\ignorespaces Step 2 - Installation progress}}{132}{figure.4.79}
+\contentsline {figure}{\numberline {4.80}{\ignorespaces Step 3 - Agent setup}}{133}{figure.4.80}
+\contentsline {figure}{\numberline {4.81}{\ignorespaces Step 4 - Reboot confirmation}}{133}{figure.4.81}
+\contentsline {figure}{\numberline {4.82}{\ignorespaces Step 5 - Agent startup}}{134}{figure.4.82}
+\contentsline {figure}{\numberline {4.83}{\ignorespaces Service information}}{134}{figure.4.83}
+\contentsline {figure}{\numberline {4.84}{\ignorespaces Listing backup plans}}{135}{figure.4.84}
+\contentsline {figure}{\numberline {4.85}{\ignorespaces Defining a backup plan}}{135}{figure.4.85}
+\contentsline {figure}{\numberline {4.86}{\ignorespaces Performing a backup}}{136}{figure.4.86}
+\contentsline {figure}{\numberline {4.87}{\ignorespaces Restoring process}}{136}{figure.4.87}
+\contentsline {figure}{\numberline {4.88}{\ignorespaces Changing the IP address}}{136}{figure.4.88}
+\contentsline {figure}{\numberline {4.89}{\ignorespaces List of Primavera's users}}{137}{figure.4.89}
+\contentsline {figure}{\numberline {4.90}{\ignorespaces Adding a Primavera user}}{137}{figure.4.90}
+\contentsline {figure}{\numberline {4.91}{\ignorespaces Editing a Primavera user}}{138}{figure.4.91}
+\contentsline {figure}{\numberline {4.92}{\ignorespaces Editing Primavera user permissions}}{139}{figure.4.92}
+\contentsline {figure}{\numberline {4.93}{\ignorespaces Removing a Primavera user}}{139}{figure.4.93}
+\contentsline {figure}{\numberline {4.94}{\ignorespaces File server management interface}}{140}{figure.4.94}
+\contentsline {figure}{\numberline {4.95}{\ignorespaces Edit global configuration}}{140}{figure.4.95}
+\contentsline {figure}{\numberline {4.96}{\ignorespaces Edit global configuration with AD authentication}}{141}{figure.4.96}
+\contentsline {figure}{\numberline {4.97}{\ignorespaces Configuration of AD domain authentication}}{141}{figure.4.97}
+\contentsline {figure}{\numberline {4.98}{\ignorespaces Create/edit shared folder}}{142}{figure.4.98}
+\contentsline {figure}{\numberline {4.99}{\ignorespaces Create/edit shared printer}}{142}{figure.4.99}
+\contentsline {figure}{\numberline {4.100}{\ignorespaces Create/edit user}}{143}{figure.4.100}
+\contentsline {figure}{\numberline {4.101}{\ignorespaces Information about status of users connections}}{143}{figure.4.101}
 \addvspace {10\p@ }

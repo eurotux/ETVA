@@ -2,7 +2,7 @@
 <a id="help-physical-vol"><h1>Devices</h1></a>
 <p>
 Information about physical volumes and its state (A physical volume is a physical device such as a disk).
-In this grid is possible to make the physical volumes' administration, including the following operations:
+In this grid it is possible to make the physical volumes' administration, including the following operations:
 </p>
 
 <ul>

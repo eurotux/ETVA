@@ -9,10 +9,10 @@ Ext.ns("SfGuardGroup");
 SfGuardGroup.GridForm = function(config) {
 
     var groupsGrid = new SfGuardGroup.Grid(config.grid); //load config for grid....
-    var createEdit = new SfGuardGroup.CreateEditForm({width:280,fieldsetConf:{defaults:{width:145}}});
+    var createEdit = new SfGuardGroup.CreateEditForm({width:280,fieldsetConf:{defaults:{width:240}}});
 
     //on save fire grid store update event to store data in db
-    createEdit.on('onSave',function(rec){
+    createEdit.on('onSave',function(rec,data){
         var store = groupsGrid.getStore();
 
         var conn = new Ext.data.Connection({
@@ -39,6 +39,8 @@ SfGuardGroup.GridForm = function(config) {
             scope:this,
             params:rec.data,
             success: function(resp,opt) {
+                var response = Ext.decode(resp.responseText);
+                this.onSaveNext(data,response);
                 store.reload();
                 if(rec.data['id']==null) this.fireEvent('onAdd');
             },
@@ -90,8 +92,8 @@ SfGuardGroup.GridForm = function(config) {
                 ,{
                     region:'east',
                     defaults:{autoScroll:true},
-                    autoScroll:true,
-                    width:300
+                    autoScroll:true
+                    ,width:360
                     ,bodyStyle:'background:transparent;'
                     ,bodyBorder:false
                     ,margins: '3 3 3 3'
@@ -105,9 +107,8 @@ SfGuardGroup.GridForm = function(config) {
         (function(){createEdit.clean();}).defer(100);
         (function(){createEdit.reload();}).defer(100);
     });
-
-
 }
+
 // define public methods
 Ext.extend(SfGuardGroup.GridForm, Ext.Panel, {});
 

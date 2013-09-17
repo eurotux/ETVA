@@ -13,13 +13,13 @@ all:
   # network interfaces hypervisor => driver supported
     interfaces:
       kvm:
-       - rtl8139
-       - e1000
        - virtio
+       - e1000
+       - rtl8139
       hvm:
        - xen
-       - rtl8139
        - e1000
+       - rtl8139
        
   # disks drivers hypervisor => driver supported
     disks:
@@ -50,6 +50,14 @@ all:
         - qcow
         - cow
         - vmdk
+    pool_types:
+        - dir
+        - fs
+        - netfs
+        - disk
+        - iscsi
+        - logical
+  storage_pool_title: 'Storage iSCSI'
   mac:
     default_first_octect: 0x00 #default first three octects for mac pool
     default_second_octect: 0x16
@@ -70,13 +78,16 @@ all:
     eventlog_flush: 14  # remove event records after specified days (two weeks)
                        # if not set in DB this will be used as default value
     vnc_token_timeout: 3600 # timeout for vnc token
+    alert_email: tec@eurotux.com # email to send alerts
+    alert_email_from: nuxis@eurotux.com # email to send alerts
+    alert_subject_prefix: ''
   volgroup:
     disk_flag: __DISK__ # disk flag used to identify volume group that contains only logical volumes that are files
   rra:
     dir: '%SF_DATA_DIR%/rra' 
   sf_guard_plugin:
     import_encrypted_passwords: true
-  dbrequired: 1.2
+  dbrequired: 2.0
   cron:
     alert_dir: '/var/run/etva_etvm'
     log_dir: '/var/log/etva_etvm'

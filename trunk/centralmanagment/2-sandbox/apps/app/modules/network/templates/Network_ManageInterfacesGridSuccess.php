@@ -83,9 +83,43 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                                     baseParams: {'query': Ext.encode(queryMacNotInUse)},
                                     totalProperty: 'total',
                                     root: 'data',
-                                    fields: [{name:'mac',mapping:'Mac'}],
+                                    fields: [{name:'mac',mapping:'Mac'},{name:'in_use',mapping:'InUse'}],
                                     remoteSort: false
                                 });
+        var mac_cb = new Ext.form.ComboBox({
+                            //editable:true,
+                            typeAhead: true,
+                            selectOnFocus: true,
+                            triggerAction:'all',
+                            forceSelection:true,
+                            enableKeyEvents:true,
+                            displayField:'mac',
+                            lazyRender:true,
+                            listClass: 'x-combo-list-small',
+                            //allQuery: Ext.encode(queryMacNotInUse),     // default all query
+                            queryParam: 'mac',
+                            listeners: {
+                                select:{scope:this,fn:function(combo,record,index){
+                                    var record_ = this.getSelectionModel().getSelected();                            
+                                    console.log(record);
+                                    record_.set('mac', record.data['mac']);
+
+                                }}
+                            },// end listeners
+                            displayField:'mac',
+                            valueField: 'mac',
+                            store: storeMacNoInUse
+                });
+        //mac_cb.getStore().filter('in_use','0');
+        //mac_cb.getStore().query('in_use','0');
+        /*mac_cb.getStore().filterBy(function(record){
+                                        console.log(record);
+                                        if( record.data['in_use'] == 0 ){
+                                            return true;
+                                        } else {
+                                            return false;
+                                        }
+                                    });*/
 
         var mac_vlan_cm = new Ext.grid.ColumnModel([
             new Ext.grid.RowNumberer(),
@@ -99,27 +133,7 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                     if(!value){ return String.format('<b>{0}</b>',<?php echo json_encode(__('Select network...')) ?>);}
                     else{ rec.commit(true); return value;}
                 },
-                editor: new Ext.form.ComboBox({
-                    //editable:true,
-                    typeAhead: true,
-                    selectOnFocus: true,
-                    triggerAction:'all',
-                    forceSelection:true,
-                    enableKeyEvents:true,
-                    displayField:'mac',
-                    lazyRender:true,
-                    listClass: 'x-combo-list-small',
-                    //allQuery: Ext.encode(queryMacNotInUse),     // default all query
-                    queryParam: 'mac',
-                    listeners: {
-                        select:{scope:this,fn:function(combo,record,index){
-                            var record_ = this.getSelectionModel().getSelected();                            
-                            record_.set('mac', record.data['mac']);
-
-                        }}
-                    },// end listeners
-                    store: storeMacNoInUse
-                }),
+                editor: mac_cb,
                 allowBlank: false,
                 width: 120,
                 renderer: function(val){return '<span ext:qtip="'+__('Drag and Drop to reorder')+'">' + val + '</span>';}
@@ -128,6 +142,7 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                 header: "Network",
                 dataIndex: 'vlan',
                 width: 130,
+                allowBlank: false,
                 renderer:function(value,meta,rec){
                     if(!value){ return String.format('<b>{0}</b>',<?php echo json_encode(__('Select network...')) ?>);}
                     else{ rec.commit(true); return value;}

@@ -5,7 +5,7 @@ The main frame of Central Management consists in four areas:
 
 \begin{description}
 	\item[Top panel -] This panel provides the necessary menus for main system configuration, such as user administration, ISOs management and the interface that shows the system events.
-	\item[Left panel (\emph{Nodes}) -] This panel lists the real machines/virtualization servers - {\bf\emph{nodes}} - and any existing virtual machines - {\bf\emph{servers}}. The first level of the tree show the system datacenters. After that level we can find the available physical servers, and on the bottom nodes the virtual machines. All functionalities that can be donne on each node of the tree, are described on Section \ref{sec:node}(Node) and in Section \ref{sec:server}(Server). When some node is clicked, its information is loaded and appears on the main panel.
+	\item[Left panel (\emph{Nodes}) -] This panel lists the real machines/virtualization servers - {\bf\emph{nodes}} - and any existing virtual machines - {\bf\emph{servers}}. The first level of the tree show the system datacenters. After that level we can find the available physical servers, and on the bottom nodes the virtual machines. All features that can be done on each node of the tree, are described on Section \ref{sec:node}(Node) and in Section \ref{sec:server}(Server). When some node is clicked, its information is loaded and appears on the main panel.
 	\item[Main panel (at right) -] In this area is displayed the information about the selected node.
 	\item[Information panel (at bottom) -] This areas shows the volatile information about any operations made on the interface. Here we can found the success of the operations.
 \end{description}
@@ -67,7 +67,7 @@ The Figure \ref{fig:login} shows the first displayed frame, that asks the user h
         	\item[Username:] admin
 	        \item[Password:] admin
 	\end{description}
-    For safety reasons the default password should by changed. This can be donne after the first access, on the \textit{first time wizard}.
+    For safety reasons the default password should by changed. This can be done after the first access, on the \textit{first time wizard}.
 
 \end{quote}
 
@@ -201,9 +201,9 @@ In \emph{Edit cluster} it's possible to change the name of \emph{cluster} and al
 When we enable \emph{Node High availability}\footnote{The option \emph{Node High availability} will be enable only if \emph{fencing} configuration is defined for all node (see \ref{para:node_fencing_config})}, we may choose one of this options:
 
 \begin{itemize}
-    \item \emph{Host failures tolerates} - number of hosts in failure that we can garantee high availability with restrictions of resources allocation;
-    \item \emph{Percentage of resources reserved to failover} - percentage of resources reserved to garantee the high availability of critical services;
-    \item \emph{Spare node} - it's define one \emph{spare node} that will be used to garantee the high availability of one of the others nodes. This \emph{spare node} should have necessary resources to ensure the availability of critical virtual servers of fail node.
+    \item \emph{Host failures tolerates} - number of hosts in failure that we can guarantee high availability with restrictions of resources allocation;
+    \item \emph{Percentage of resources reserved to failover} - percentage of resources reserved to guarantee the high availability of critical services;
+    \item \emph{Spare node} - it's define one \emph{spare node} that will be used to guarantee the high availability of one of the others nodes. This \emph{spare node} should have necessary resources to ensure the availability of critical virtual servers of fail node.
 \end{itemize}
 
 The \emph{Node High availability} provides, in failure case, the migration of the virtual servers by priority order (see figure \ref{fig:server_edit_ha}), to keep the services of this virtual servers operational.
@@ -316,7 +316,7 @@ To add a new virtual machine, press the button \emph{Add server wizard}.
 \begin{quote}
 	{\large \bf Note} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
-    The panel options will be enable, if the virtualization agent is running on the \emph{node} (physical machine) and if it is able to stablish a connection with the CM.
+    The panel options will be enable, if the virtualization agent is running on the \emph{node} (physical machine) and if it is able to establish a connection with the CM.
 \end{quote}
  
 
@@ -554,10 +554,33 @@ The \emph{Keep disks} option keeps the hard disks connected to the machine, othe
 Selecting a server and then clicking on button \emph{Open console} is possible to establish a VNC connection with the machine, since the machine is running.
 
 \begin{quote}
-	{\large \bf Note} \\*[-.8pc]
+	{\large \bf Note 1} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
     If the keyboard is mangled you can change the \emph{VNC keymap} through the option \emph{Set keymap} available in parent node context menu.
     Also, the \emph{keymap} can be defined in each server, through the option \emph{Edit server}.
+\end{quote}
+
+\begin{quote}
+	{\large \bf Note 2} \\*[-.8pc]
+	\underline{\hspace{6in}} \\
+
+    When open VNC console with HTTPS we may get the following error:
+
+\begin{verbatim}
+Network Error: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+\end{verbatim}
+
+    In this case, it maybe required to add server certificate to Java \emph{keystore}\footnote{For more information access to the following links: \url{http://docs.oracle.com/javase/7/docs/technotes/tools/solaris/keytool.html} and \url{http://docs.oracle.com/javase/7/docs/technotes/guides/deployment/deployment-guide/jcp.html} }.
+    For do that, we can run this command:
+
+\begin{verbatim}
+keytool -import -keystore $JAVA_HOME/lib/security/jssecacerts -file server-certificate
+
+# Note: for keystore without password we can use "changeit"
+\end{verbatim}
+
+    After that, we need restart the browser.
+
 \end{quote}
 
 \subsubsection{Start/stop virtual machine}
@@ -651,6 +674,7 @@ The \emph{physical volumes} administration consists of the following operations:
 	\item Initialize \emph{physical volume}
     \item Uninitialize \emph{physical volume}
     \item Register/Unregister \emph{physical volume}
+    \item Set up Storage iSCSI
 \end{itemize}
 
 \begin{figure}[H]
@@ -677,7 +701,31 @@ To initialize a \emph{physical volume}, access to the sub-context menu of the de
         \end{center}
 \end{figure}
 
-On ''Scan \emph{physical devices}'' it is possible to run a task on virtualization agent to lookup new disks and to register them on \emph{Central Management}. It is also possible to unregister the physical device on \emph{Central Management} to get it out of system management.
+On ''Scan \emph{physical devices}'' it is possible to run a task on virtualization agent to look-up new disks and to register them on \emph{Central Management}. It is also possible to unregister the physical device on \emph{Central Management} to get it out of system management.
+
+For \emph{storage} \emph{iSCSI} configuration go to ''Scan \emph{physical devices}'' web interface and select ''\emph{Storage iSCSI}'' menu.
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_iscsi_grid.png}
+        \caption{\emph{Storage iSCSI} list}
+        \label{fig:storage_iscsi_grid}
+        \end{center}
+\end{figure}
+
+When we choose this option, we have access to the interface of the figure \ref{fig:storage_iscsi_grid} and we can review all \emph{Storages} connections previously configured and set up another one.
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_iscsi_new.png}
+        \caption{Set up new \emph{Storage iSCSI} }
+        \label{fig:storage_iscsi_new}
+        \end{center}
+\end{figure}
+
+For set up a new \emph{storage iSCSI} connection, we need to provide a name and \emph{IP} address and click on \emph{discovery} for fill ''\emph{Target IQN}'' field. Review all fields filled and click on ''Save'' for to create configuration on node agents.
+
+We have also more options for the \emph{Storage iSCSI} management like reload configuration on all node agents on option ''Reload Storage iSCSI'' and remove configuration on option ''Remove Storage iSCSI''.
 
 % ADMINISTRAÇÃO VOLUME GROUPS
 
@@ -962,7 +1010,7 @@ http://wiki.libvirt.org/page/Virtio
 
 Download the iso with the drivers, available at:
 
-http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/bin/.
+http://alt.fedoraproject.org/pub/alt/virtio-win/stable/.
 
 Upload iso with the drivers - more information in Section \ref{sec:iso_manager}. \textit{Tools}, \textit{ISO Manager}, \textit{upload applet}, select the file and upload. The file should appear in the list of ISOs.
 
@@ -1018,7 +1066,7 @@ Stop the virtual machine and edit the settings by changing the main driver of th
 
 \section{Tools}
 
-In menu \emph{Tools} we can access the folloing options:
+In menu \emph{Tools} we can access the following options:
 \begin{itemize}
 \item Import OVF
 \item Export OVF
@@ -1338,27 +1386,132 @@ In the connectivity tab you're allowed to change the CM IP address and for the L
 \end{figure}
 
 \subsection{Users, groups and permission administration}
-The administration menu is available to the super users the system, and can be found on the top bar (then tools), in \textit{Users' and permissions' administration}.
+The administration menu is available to the super users the system, and can be found on the top bar (then \textit{System Administration}), in \textit{Users' and permissions' administration}.
 
-When we select this option, a window with three following tabs is open:
+When we select this option, a window with two following tabs is open:
 \begin{itemize}
 	\item \textit{User management};
-	\item \textit{Group management};
-	\item \textit{Permission management}.
+	\item \textit{Group management}.
 \end{itemize}
 
-The image \ref{fig:user_admin} illustrates the window that appears. In this window you can set the necessary permissions. Users can be created to access the management interface, and assigned access permissions on virtual machine level, or on cluster cluster level.
-
-To facilitate the assignment of permissions you can set groups. For example, one group can have several associated permissions, and can be assigned to multiple users. This makes adding/removing a set of permissions to users easier.
-
+The image \ref{fig:admin_users} illustrates the window that appears. In this window, users can be created to access the management interface, and assigned access permissions on virtual machine level, or on cluster cluster level.
 
 \begin{figure}[H]
         \begin{center}
-        \includegraphics[scale=0.4]{screenshots/permissions/user.png}
-        \caption{Users' and permissions' administration}
-        \label{fig:user_admin}
+        \includegraphics[scale=0.4]{screenshots/users/admin_users.png}
+        \caption{Users' and permissions' administration - Manage Users}
+        \label{fig:admin_users}
         \end{center}
 \end{figure}
+
+For create new user, there is setup wizard where it can be configured the following user data: name, email, password, group and permissions.
+
+\opt{etvm}{
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/create_user_wiz_01.png}
+        \caption{Users' and permissions' administration - Add user (Step 1)}
+        \label{fig:create_user_wiz_01}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/create_user_wiz_02.png}
+        \caption{Users' and permissions' administration - Add user (User details)}
+        \label{fig:create_user_wiz_02}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/create_user_wiz_03.png}
+        \caption{Users' and permissions' administration - Add user (User permissions)}
+        \label{fig:create_user_wiz_03}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/create_user_wiz_04.png}
+        \caption{Users' and permissions' administration - Add user (Final)}
+        \label{fig:create_user_wiz_04}
+        \end{center}
+\end{figure}
+}
+
+\opt{etva}{
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_01.png}
+        \caption{Users' and permissions' administration - Add user (Step 1)}
+        \label{fig:create_user_wiz_01}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_02.png}
+        \caption{Users' and permissions' administration - Add user (User details)}
+        \label{fig:create_user_wiz_02}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_03.png}
+        \caption{Users' and permissions' administration - Add user (User permissions)}
+        \label{fig:create_user_wiz_03}
+        \end{center}
+\end{figure}
+
+In addition, this setup wizard offer configuration of users for the managements modules in integrated way, like: \textit{ETVOIP}, \textit{ETMailServer} and \textit{Primavera}.
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_04.png}
+        \caption{Users' and permissions' administration - Add user (ETVOIP)}
+        \label{fig:create_user_wiz_04}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_05.png}
+        \caption{Users' and permissions' administration - Add user (ETMailServer)}
+        \label{fig:create_user_wiz_05}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_06.png}
+        \caption{Users' and permissions' administration - Add user (Primavera)}
+        \label{fig:create_user_wiz_06}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_07.png}
+        \caption{Users' and permissions' administration - Add user (Final)}
+        \label{fig:create_user_wiz_07}
+        \end{center}
+\end{figure}
+
+}
+
+To facilitate the assignment of permissions you can set groups. For example, one group can have several associated permissions, and can be assigned to multiple users. This makes adding/removing a set of permissions to users easier.
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/admin_users_groups.png}
+        \caption{Users' and permissions' administration - Manage Groups}
+        \label{fig:admin_users_groups}
+        \end{center}
+\end{figure}
+
 
 In addition, you have another way to assign permissions and/or groups, right clicking the mouse on the desired node/server, as stated on Figures \ref{fig:context_dc}, \ref{fig:context_server} and \ref{fig:server_window}.
 

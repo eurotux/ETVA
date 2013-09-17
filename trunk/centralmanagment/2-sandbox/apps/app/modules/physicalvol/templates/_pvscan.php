@@ -1,3 +1,7 @@
+<?php
+
+include_partial('pool/grid');
+?>
 <script>
 
 Ext.ns("pvwin.scanForm");
@@ -37,7 +41,7 @@ pvwin.scanForm.Main = function(node_id, level) {
                                                         {id: 'uuid', header: __('Uuid'), dataIndex: 'uuid'},
                                                         {header: __('Type'), dataIndex: 'type'},
                                                         {header: __('Device'), dataIndex: 'device'},
-                                                        {header: __('Size'), dataIndex: 'size', renderer: Ext.util.Format.fileSize }
+                                                        {header: __('Size'), dataIndex: 'size', renderer: function(v){ return Ext.util.Format.fileSize(v); } }
                                                         /*,{header: __('Registered'), dataIndex: 'registered'},
                                                         {header: __('Inconsistent'), dataIndex: 'inconsistent'}*/
                                                     ]
@@ -102,7 +106,7 @@ pvwin.scanForm.Main = function(node_id, level) {
                                                         params: scanparams,
                                                         scope:this,
                                                         success: function(resp,opt){
-                                                            this.gridDiskDevices.getStore().reload();
+                                                            this.reload();
                                                         },
                                                         failure: function(resp,opt) {
                                                             var response = Ext.util.JSON.decode(resp.responseText);
@@ -120,11 +124,62 @@ pvwin.scanForm.Main = function(node_id, level) {
                                                 }
                                                 ,scope: this
                                             }
+                                            ,{
+                                                text: <?php echo json_encode(__(sfConfig::get('app_storage_pool_title'))) ?>,
+                                                iconCls: 'go-action',
+                                                handler: function(){
+
+                                                    var win = Ext.getCmp('pool-listgrid-win');
+
+                                                    if(!win){
+                                                        var centerPanel;
+
+                                                        if(this.level == 'cluster' || this.level == 'node'){
+                                                            centerPanel = new poolwin.GridForm.Main(this.node_id, this.level);
+                                                        }else{
+                                                            centerPanel = new poolwin.GridForm.Main(this.node_id);
+                                                        }
+                                                        
+                                                        centerPanel.on('updated',function(){
+                                                            win.close();
+                                                            this.reload({ 'force': true });
+                                                        },this);
+
+                                                        win = new Ext.Window({
+                                                            id: 'pool-listgrid-win',
+                                                            title: <?php echo json_encode(__(sfConfig::get('app_storage_pool_title'))) ?>,
+                                                            width:430,
+                                                            height:320,
+                                                            modal:true,
+                                                            iconCls: 'icon-window',
+                                                            bodyStyle: 'padding:10px;',
+                                                            border:true,
+                                                            layout: 'fit',
+                                                            items: [centerPanel]
+                                                            ,tools: [{
+                                                                id:'help',
+                                                                qtip: __('Help'),
+                                                                handler:function(){
+                                                                    View.showHelp({
+                                                                        anchorid:'help-pool-list',
+                                                                        autoLoad:{ params:'mod=pool'},
+                                                                        title: <?php echo json_encode(__(sfConfig::get('app_storage_pool_title') . ' Help')) ?>
+                                                                    });
+                                                                }
+                                                            }]
+                                                        });
+                                                    }
+
+                                                    win.show();
+                                                    centerPanel.load();
+                                                }
+                                                ,scope: this
+                                            }
                                             ]
                                     ,tools: [{
                                                 id:'refresh',
                                                 handler: function(){
-                                                    this.gridDiskDevices.getStore().reload();
+                                                    this.reload();
                                                 }
                                                 ,scope: this
                                             }]
@@ -182,7 +237,7 @@ pvwin.scanForm.Main = function(node_id, level) {
                                                                     var response = Ext.util.JSON.decode(resp.responseText);
                                                                     Ext.ux.Logger.info(response['agent'],response['response']);                    
                                                                     //this.fireEvent('updated');
-                                                                    this.gridDiskDevices.getStore().reload();
+                                                                    this.reload();
                                                                 },
                                                                 failure: function(resp,opt) {
                                                                     var response = Ext.util.JSON.decode(resp.responseText);
@@ -195,7 +250,7 @@ pvwin.scanForm.Main = function(node_id, level) {
                                                                             msg: String.format(<?php echo json_encode(__('Unable to registe physical device {0}!')) ?>,params['device'])+'<br>'+response['info'],
                                                                             icon: Ext.MessageBox.ERROR});
                                                                     }
-                                                                    this.gridDiskDevices.getStore().reload();
+                                                                    this.reload();
                                                                 }
                                                             });// END Ajax request
                                                         }
@@ -240,7 +295,7 @@ pvwin.scanForm.Main = function(node_id, level) {
                                                                     var response = Ext.util.JSON.decode(resp.responseText);
                                                                     Ext.ux.Logger.info(response['agent'],response['response']);                    
                                                                     //this.fireEvent('updated');
-                                                                    this.gridDiskDevices.getStore().reload();
+                                                                    this.reload();
                                                                 },
                                                                 failure: function(resp,opt) {
                                                                     var response = Ext.util.JSON.decode(resp.responseText);
@@ -253,7 +308,7 @@ pvwin.scanForm.Main = function(node_id, level) {
                                                                             msg: String.format(<?php echo json_encode(__('Unable to unregiste physical device {0}!')) ?>,params['device'])+'<br>'+response['info'],
                                                                             icon: Ext.MessageBox.ERROR});
                                                                     }
-                                                                    this.gridDiskDevices.getStore().reload();
+                                                                    this.reload();
                                                                 }
                                                             });// END Ajax request
                                                         }
@@ -317,6 +372,14 @@ pvwin.scanForm.Main = function(node_id, level) {
 Ext.extend(pvwin.scanForm.Main, Ext.form.FormPanel, {
     // load data
     load: function(node) {
+        this.reload();
+    }
+    ,reload: function(opts){
+        if( opts ){
+            this.gridDiskDevices.getStore().setBaseParam('force', opts['force'] ? true : false );
+        } else {
+            this.gridDiskDevices.getStore().setBaseParam('force', false );
+        }
         this.gridDiskDevices.getStore().reload();
     }
 });

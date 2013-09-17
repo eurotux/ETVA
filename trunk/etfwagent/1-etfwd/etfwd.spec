@@ -1,5 +1,5 @@
 Name:           etva-etfw
-Version:        1.2.2
+Version:        2.0.0
 Release:        beta
 Summary:        ETFW Agent
 License:        GPL

@@ -116,6 +116,22 @@ background-image:url(../images/icons/window.png) !important;
     background-image:url(../images/icons/user_delete.gif) !important;
 }
 
+.icon-share {
+    background-image:url(../images/silk/icons/folder.png) !important;
+}
+
+.icon-share-add {
+    background-image:url(../images/silk/icons/folder_add.png) !important;
+}
+
+.icon-share-edit {
+    background-image:url(../images/silk/icons/folder_edit.png) !important;
+}
+
+.icon-share-delete {
+    background-image:url(../images/silk/icons/folder_delete.png) !important;
+}
+
 .wizard{
      background-image:url(../images/icons/wand.png) !important;
      /* background-position: center center; */
@@ -170,6 +186,9 @@ background-image:url(../images/icons/leaf.gif) !important;
 }
 .devices-folder {
     background-image:url(../images/icons/folder_go.png) !important;
+}
+.devices-folder-error {
+    background-image:url(../images/silk/icons/folder_error.png) !important;
 }
 
 .dev-pd a span{ /* not pv */
@@ -1079,6 +1098,24 @@ background-image:url(../images/icons/leaf.gif) !important;
 .icon-vm-stat-nok .x-tree-node-icon{
 	background-image:url(../images/silk/icons/stop.png) ! important;
 }
+.icon-start{
+     background-image:url(../images/silk/icons/control_play_blue.png) !important;
+}
+.icon-stop{
+     background-image:url(../images/silk/icons/control_stop_blue.png) !important;
+}
+.icon-backup{
+     background-image:url(../images/silk/icons/database_save.png) !important;
+}
+.icon-restore{
+     background-image:url(../images/silk/icons/database_refresh.png) !important;
+}
+.icon-config{
+     background-image:url(../images/silk/icons/cog.png) !important;
+}
+.icon-users{
+     background-image:url(../images/silk/icons/user_add.png) !important;
+}
 .x-form-field-wrap .trigger-tag-add {
 	background-image: url(../img/trigger-tag-add.png);
 	cursor:pointer;
@@ -1286,3 +1323,66 @@ li.x-menu-list-item div {
 {
     background-color: #D9E8FB;
 }
+
+/*
+ * ETFS shares and users animated dataview
+ */
+#etfs-shares-dataview, 
+    #etfs-users-dataview {
+    background-color: #fff;
+    text-shadow: #fff 0 1px 0;
+}
+
+#etfs-shares-dataview ul,
+    #etfs-users-dataview ul {
+    position: relative;
+    display: block;
+    height: auto;
+    font-size: 85%;
+}
+
+#etfs-shares-dataview ul li img,
+    #etfs-users-dataview ul li img {
+    margin-bottom: 1px;
+}
+
+#etfs-shares-dataview ul li,
+    #etfs-users-dataview ul li {
+    float: left;
+    padding: 8px 17px;
+    margin: 5px;
+/*    margin: 10px 0 0 25px;*/
+    text-align: center;
+    line-height: 1.25em;
+    color: #333;
+    height: 113px;
+    width: 112px;
+    overflow: hidden;
+    border-top: 1px solid transparent;
+    cursor: pointer;
+}
+
+#etfs-shares-dataview ul li.x-view-selected,
+    #etfs-users-dataview ul li.x-view-selected {
+    background-color: rgba(100, 100, 100, .15);
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-top: 1px solid rgba(0, 0, 0, .15);
+}
+
+#etfs-shares-dataview ul li img,
+    #etfs-users-dataview ul li img {
+/*    display: block;*/
+}
+
+#etfs-shares-dataview li strong,
+    #etfs-users-dataview li strong {
+    color: #000;
+    display: block;
+}
+
+#etfs-shares-dataview li span,
+    #etfs-users-dataview li span {
+    color: #999;
+}
+

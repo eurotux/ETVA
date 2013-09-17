@@ -35,6 +35,7 @@ BEGIN {
     @EXPORT = qw( );
 }
 
+use Cwd qw(abs_path);
 use File::Path qw( mkpath );
 
 use ETVA::Utils;
@@ -68,8 +69,9 @@ sub findnetdev {
 
     # network physical devices
     my $dir_devices = "/sys/devices";
-    open(F,"/usr/bin/find $dir_devices -name 'net:*'|");
-    while(<F>){
+
+    my @find_lines = `/usr/bin/find $dir_devices -name 'net:*'`;
+    foreach(@find_lines){
         chomp;
         my $netdev_dir = $_;
         my $netdev_address_file = "$netdev_dir/address";
@@ -86,7 +88,6 @@ sub findnetdev {
                                         "phy" => 1
                                     };
     }
-    close(F);
 
     # other devices
     open(E,"/proc/net/dev");
@@ -116,7 +117,7 @@ sub findnetdev {
         }
         if( -e "/sys/class/net/$d/brport" ){
 
-            my $pbr = readlink("/sys/class/net/$d/brport/bridge");
+            my $pbr = abs_path("/sys/class/net/$d/brport/bridge");
             my @pbr = split(/\//,$pbr);
             
             $NetDevices{"$d"}{"bridge"} = pop @pbr;
@@ -216,7 +217,7 @@ sub vlan_todevice {
     my $self = shift;
     my (%p) = @_;
 
-    my $type = $self->vlan_name_type();
+    my $type = $p{'vlantype'} || $self->vlan_name_type();
     if( defined($p{'name'}) && defined($p{'vlanid'}) ){
         return ($type eq "VLAN_NAME_TYPE_PLUS_VID_NO_PAD") ? "vlan$p{'vlanid'}" : "$p{'name'}.$p{'vlanid'}";
     } else {
@@ -241,9 +242,12 @@ sub boot_vlanadd {
         $p{'BOOTPROTO'} = 'static';
         $p{'PHYSDEV'} = $p{'name'} || $p{'phydevice'};
         $p{'DEVICE'} = $p{'device'} = $device;
+
+        # disable NetworkManager
+        $p{'NM_CONTROLLED'} = "no";
         
         open(F,">$cfgfile");
-        for my $k (qw(DEVICE VLAN PHYSDEV ONBOOT BOOTPROTO)){
+        for my $k (qw(DEVICE VLAN PHYSDEV ONBOOT BOOTPROTO NM_CONTROLLED)){
             my $lc_k = lc($k);
             if( $p{"$lc_k"} || $p{"$k"} ){
                 my $v = $p{"$lc_k"} || $p{"$k"};
@@ -252,6 +256,11 @@ sub boot_vlanadd {
             }
         }
         close(F);
+
+        # configure vlan type if is different from actual configuration
+        if( $p{'vlantype'} && ($p{'vlantype'} ne $self->vlan_name_type()) ){
+            cmd_exec("vconfig set_name_type $p{'vlantype'}");
+        }
 
         my ($s,$msg) = cmd_exec("/sbin/ifup",$device);
         unless( $s == 0 || $s == -1 ){
@@ -292,15 +301,17 @@ sub boot_vlanrem {
 sub vlancreate {
     my $self = shift;
     my ($iname,$vlanid) = my %p = @_;
-    $iname = $p{'iname'} if( $p{'iname'} );
-    $vlanid = $p{'vlanid'} if( $p{'vlanid'} );
+    if( $p{'iname'} || $p{'vlanid'} ){
+        $iname = $p{'iname'};
+        $vlanid = $p{'vlanid'};
+    }
 
     if( !%NetDevices ){
         $self->loadnetinfo(1);
     }
 
     if( $NetDevices{$iname} ){
-        my %E = $self->boot_vlanadd( 'name'=>$iname, 'vlanid'=>$vlanid );
+        my %E = $self->boot_vlanadd( 'name'=>$iname, 'vlanid'=>$vlanid, %p );
         unless( !isError(%E) ){
             return wantarray() ? %E : \%E;
         }
@@ -589,9 +600,12 @@ sub boot_addbr {
         $p{'TYPE'} = 'Bridge';
         $p{'BOOTPROTO'} = 'static';
         $p{'DEVICE'} = $p{'device'} = $name;
+
+        # disable NetworkManager
+        $p{'NM_CONTROLLED'} = "no";
         
         open(F,">$cfgfile");
-        for my $k (qw(DEVICE TYPE ONBOOT BOOTPROTO)){
+        for my $k (qw(DEVICE TYPE ONBOOT BOOTPROTO NM_CONTROLLED)){
             my $lc_k = lc($k);
             if( $p{"$lc_k"} || $p{"$k"} ){
                 my $v = $p{"$lc_k"} || $p{"$k"};
@@ -909,7 +923,10 @@ sub boot_chgipaddr {
         my @l = <R>;
         close(R);
 
-        for my $k_uc (qw(IPADDR NETMASK NETWORK BOOTPROTO USERCTL BRIDGE GATEWAY)){
+        # disable NetworkManager
+        $p{'NM_CONTROLLED'} = "no";
+        
+        for my $k_uc (qw(IPADDR NETMASK NETWORK BOOTPROTO USERCTL BRIDGE GATEWAY NM_CONTROLLED)){
             my $k = lc($k_uc);
             my $v = $p{"$k"};
 
@@ -1089,6 +1106,10 @@ sub save_boot_interface {
     if( $p{'address'} && $p{'netmask'} ){
         $conf{'NETWORK'} = make_netaddr($p{'address'},$p{'netmask'});
     }
+    # disable NetworkManager
+    $conf{'NM_CONTROLLED'} = "no";
+
+    # other configuration
     $conf{'BROADCAST'} = $p{'broadcast'} if( defined $p{'broadcast'}  );
     $conf{'GATEWAY'} = $p{'gateway'} if( defined $p{'gateway'} );
     $conf{'MTU'} = $p{'mtu'} if( defined $p{'mtu'} );

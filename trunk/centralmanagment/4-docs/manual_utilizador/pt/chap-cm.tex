@@ -1,7 +1,7 @@
 
 \chapter{\textsf{Central Management}}
 
-A interface principal do Central Management é constituida por quatro áreas:
+A interface principal do Central Management é constituída por quatro áreas:
 
 \begin{description}
 	\item[Painel topo -] Possui menus de acesso a acções do sistema, tais como a administração de utilizadores, gestão de ISOs e visualização das mensagens do sistema.
@@ -70,9 +70,9 @@ A página de autenticação é disponibilizada e deverá ser introduzido o \emph
 
 \end{quote}
 
-No primeiro acesso ao \emph{Central Management} deverá surgir o \emph{Assistente de configuração inicial} que permite efectuar a configuração incial do sistema (ver secção \ref{sec:first_time_wizard}).
+No primeiro acesso ao \emph{Central Management} deverá surgir o \emph{Assistente de configuração inicial} que permite efectuar a configuração inicial do sistema (ver secção \ref{sec:first_time_wizard}).
 
-De seguida, e após a instalação e configuração de um agente virtualização num \emph{node}, este regista-se automáticamente no CM, passando o CM a dispor de mais funcionalidades.
+De seguida, e após a instalação e configuração de um agente virtualização num \emph{node}, este regista-se automaticamente no CM, passando o CM a dispor de mais funcionalidades.
 No painel esquerdo, \emph{Nodes} (ver figura \ref{fig:principal}), surgirá o servidor de virtualização registado no CM e poderá então passar-se a efectuar a gestão desse \emph{node} conforme as opções descritas na secção \ref{sec:node}.
 
 \pagebreak
@@ -144,7 +144,7 @@ A rede adicionada/removida é propagada a todos os \emph{nodes} do CM.
 \subsubsection{Gestão da pool de endereços MAC}
 \label{sec:mac_pool}
 
-Em \emph{Gestão da Pool de MAC} (ver figura \ref{fig:main_networks}), é possivel criar a pool de endereços MAC.
+Em \emph{Gestão da Pool de MAC} (ver figura \ref{fig:main_networks}), é possível criar a pool de endereços MAC.
 Para além de adicionar MACs à pool, pode-se visualizar as redes associadas e os MACs ainda disponíveis da pool.
 
 \begin{figure}[H]
@@ -205,14 +205,14 @@ Ao activarmos a opção \emph{Nó com alta disponibilidade}\footnote{A opção \
 
 O algoritmo de alta disponibilidade prevê que em caso de falha, os servidores são migrados por ordem de prioridade (ver figura \ref{fig:server_edit_ha}), garantido assim a continuidade dos serviços.
 
-A opção \emph{Remover datacenter}, remove informação relativa ao \emph{datacenter} (nós, redes e armazanamento) da base de dados do \emph{Central Management}.
+A opção \emph{Remover datacenter}, remove informação relativa ao \emph{datacenter} (nós, redes e armazenamento) da base de dados do \emph{Central Management}.
 
 % PAINEL NODE
 
 \section{Servidor de virtualização}
 \label{sec:node}
 
-No painel \emph{Nodes} é possivel seleccionar um \emph{node}(servidor de virtualização), e efectuar as seguintes operações:
+No painel \emph{Nodes} é possível seleccionar um \emph{node}(servidor de virtualização), e efectuar as seguintes operações:
 \begin{itemize}
     \item Visualizar informação do \emph{node} (ver secção \ref{sec:nodeinfo})
     \item Gestão de máquinas virtuais (ver secção \ref{sec:servers})
@@ -231,7 +231,7 @@ O sub-menu de contexto de um \emph{node} permite as seguintes operações:
 
 Em \emph{Carregar nó}, é enviado um pedido ao \emph{Central Management} para que o estado do nó seja actualizado. 
 
-A opção \emph{Editar nó} possibilita a edição de alguma propriedades do servidor de virtualização, nomedamente, nome da máquina e configuração de \emph{fencing}.
+A opção \emph{Editar nó} possibilita a edição de alguma propriedades do servidor de virtualização, nomeadamente, nome da máquina e configuração de \emph{fencing}.
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.5]{screenshots/node_edit.png}
@@ -254,14 +254,14 @@ Em \emph{Opções de conectividade}, é possível editar a configuração da int
 
 Em \emph{Alterar keymap}, consoante o item seleccionado, servidor de virtualização ou máquina virtual, é possível definir o keymap padrão usado pelo VNC, ou o keymap específico a uma determinada máquina virtual respectivamente.
 
-Em \emph{Estado do nó}, é possível aceder ao conjunto de opçoes:
+Em \emph{Estado do nó}, é possível aceder ao conjunto de opções:
 \begin{itemize}
     \item Verificar estado - envia ao servidor de virtualização um pedido de verificação do estado da conectividade do agente
     \item Manutenção / Recuperar - Executa operação de manutenção/recuperação de estado 
     \item Desligar - desligar nó (ver secção \ref{sub:desligar_no}).
 \end{itemize}
 
-Na opção \emph{Manutenção} temos a possibilidade de colocar a máquina em estado de manutenação para poder efectuar rotinas de manutenção.
+Na opção \emph{Manutenção} temos a possibilidade de colocar a máquina em estado de manutenção para poder efectuar rotinas de manutenção.
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.45]{screenshots/node_maintenance.png}
@@ -324,7 +324,7 @@ Para adicionar uma nova máquina virtual utiliza-se o botão \emph{Assistente de
 	\label{fig:server_createwiz}
 	\end{center}
 \end{figure}
-Este assistente é constituido pelas seguintes etapas:
+Este assistente é constituído pelas seguintes etapas:
 \begin{description}
 	\item[Nome da máquina virtual:] Nesta etapa define-se o nome da máquina virtual e o tipo de sistema operativo. As opções do sistema operativo variam consoante a especificação do node:
 		\begin{itemize}
@@ -389,7 +389,7 @@ Este assistente é constituido pelas seguintes etapas:
 		\begin{quote}
 			{\large \bf Nota} \\*[-.8pc]
 			\underline{\hspace{6in}} \\
-			Se o \emph{node} não suportar \emph{physical volumes} a opção \emph{Logical volume existente} será desabilitada, uma vez que não é possivel criar \emph{logical volumes}, mas sim apenas ficheiros.
+			Se o \emph{node} não suportar \emph{physical volumes} a opção \emph{Logical volume existente} será desabilitada, uma vez que não é possível criar \emph{logical volumes}, mas sim apenas ficheiros.
 		\end{quote}		
         
         
@@ -549,10 +549,32 @@ A opção \emph{Manter disco} permite manter o disco associado à máquina aquan
 Seleccionando um servidor e de seguida clicando em \emph{Abrir numa consola} é possível estabelecer uma ligação VNC com a máquina, desde que esta esteja a correr.
 
 \begin{quote}
-	{\large \bf Nota} \\*[-.8pc]
+	{\large \bf Nota 1} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
 	Caso o teclado esteja desconfigurado é possível alterar o \emph{keymap} do VNC através da opção \emph{Alterar keymap} no sub-menu de contexto do painel \emph{Nodes}.
     O \emph{keymap} pode ser definido quer ao nível de cada servidor, ou definir um \emph{keymap} de uso geral, o qual será usado por omissão na criação de novas máquinas virtuais.
+\end{quote}
+
+\begin{quote}
+	{\large \bf Nota 2} \\*[-.8pc]
+	\underline{\hspace{6in}} \\
+    Ao aceder à consola VNC via ligação HTTPS pode surgir o seguinte erro:
+
+\begin{verbatim}
+Network Error: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+\end{verbatim}
+
+    Nesse caso, é necessário fazer o download do certificado do servidor e adicioná-lo à \emph{keystore} do Java\footnote{Mais informação consulte a seguinte documentação em: \url{http://docs.oracle.com/javase/7/docs/technotes/tools/solaris/keytool.html} e \url{http://docs.oracle.com/javase/7/docs/technotes/guides/deployment/deployment-guide/jcp.html} }.
+    Para isso, pode-se executar o seguinte comando:
+
+\begin{verbatim}
+keytool -import -keystore $JAVA_HOME/lib/security/jssecacerts -file servidor-certificado
+
+# Nota: para o caso da keystore sem password usar a password "changeit"
+\end{verbatim}
+
+    Após esta alteração é necessário reiniciar o browser.
+
 \end{quote}
 
 \subsubsection{Iniciar/parar máquina virtual}
@@ -617,7 +639,7 @@ Em \emph{Armazenamento} encontra-se a informação relativa aos volumes existent
 Este painel encontra-se divido em três secções:
 
 \begin{description}
-	\item[Physical Devices -] Informação relativa aos \emph{physical volumes}\footnote{Um \emph{physical volume} é um dispositivo fisico, como por exemplo um disco} e seu estado. Permite fazer a administração de \emph{physical volumes} do \emph{node}.
+	\item[Physical Devices -] Informação relativa aos \emph{physical volumes}\footnote{Um \emph{physical volume} é um dispositivo físico, como por exemplo um disco} e seu estado. Permite fazer a administração de \emph{physical volumes} do \emph{node}.
 	\item[Volume Groups -] Lista os \emph{volumes groups}\footnote{Um \emph{volume group} consiste na agregação de diversos \emph{physical volumes} num único volume virtual} existentes no node e seus \emph{physical volumes} associados. Permite fazer operações de administração de \emph{volume groups}.
 	\item[Logical Volumes -] Apresenta a informação dos \emph{logical volumes}\footnote{Um \emph{logical volume} é uma "fatia" de um \emph{volume group}. É usado como sendo uma partição do sistema} do \emph{node}. Área de administração dos \emph{logical volumes}.
 \end{description}
@@ -646,6 +668,7 @@ A administração de \emph{physical volumes} consiste nas seguintes operações:
 	\item Inicialização de um \emph{physical volume}
     \item Remoção da inicialização de um \emph{physical volume}
     \item Registar/Desregistar um \emph{physical volume}
+    \item Configurar Storage iSCSI
 \end{itemize}
 
 \begin{figure}[H]
@@ -669,7 +692,7 @@ Para inicializar um \emph{physical volume} acede-se ao sub-menu de contexto do \
 Os \emph{devices} podem ser agrupados em dois tipos, \emph{local} e \emph{SAN}.
 Os de tipo \emph{local} são identificados como discos locais à máquina real em que estamos aceder, enquanto os de tipo \emph{SAN} são identificados como tipo de discos em \emph{storage} partilhada.
 
-A identificação dos tipos de \emph{devices} \emph{SAN} é feito automáticamente através do serviço \emph{multipath}, pelo que é nécessário que este se encontre devidamente configurado nas máquinas que se encontram ligadas a uma \emph{storage} partilhada.
+A identificação dos tipos de \emph{devices} \emph{SAN} é feito automaticamente através do serviço \emph{multipath}, pelo que é necessário que este se encontre devidamente configurado nas máquinas que se encontram ligadas a uma \emph{storage} partilhada.
 Em alternativa, e no caso de não ser possível usar o \emph{multipath}, pode-se definir, em cada máquina real, a configuração dos \emph{devices} dos discos que se encontram em \emph{storage} partilha.
 Desta forma, cria-se um ficheiro \texttt{/etc/sysconfig/etva-vdaemon/san\_file.conf} com o seguinte formato:
 
@@ -692,13 +715,37 @@ Desta forma, cria-se um ficheiro \texttt{/etc/sysconfig/etva-vdaemon/san\_file.c
 Em ''Procurar \emph{physical devices}'' é possível correr uma tarefa do lado do agente de virtualização que procura discos no sistema e possibilita o registo no \emph{Central Management}.
 Analogamente, é possível remover o registo de um \emph{physical device} do \emph{Central Management}, caso se pretenda que este deixe ser gerido pelo sistema.
 
+Para proceder à configuração de uma \emph{storage} em \emph{iSCSI} deve-se aceder à interface ''Procurar \emph{physical devices}'' e seleccionar o menu ''\emph{Storage iSCSI}''.
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_iscsi_grid.png}
+        \caption{Lista \emph{Storage iSCSI} }
+        \label{fig:storage_iscsi_grid}
+        \end{center}
+\end{figure}
+
+Nesta opção somos confrontados com a janela da figura \ref{fig:storage_iscsi_grid} onde podemos consultar as ligações às \emph{Storages} previamente configuradas e proceder à configuração de uma nova.
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.45]{screenshots/node_storage_iscsi_new.png}
+        \caption{Configurar nova \emph{Storage iSCSI} }
+        \label{fig:storage_iscsi_new}
+        \end{center}
+\end{figure}
+
+Para configurar uma nova ligação de uma \emph{storage iSCSI} definimos uma nome e um endereço \emph{IP} e procedemos ao \emph{discovery} para completar o preenchimento do ''\emph{Target IQN}''. Confirmamos todos os dados de configuração e terminamos com ''Guardar'' para criar a configuração nos agentes.
+
+Estão ainda disponíveis outras opções para gerir a \emph{Storage iSCSI}, como a possibilidade de proceder à actualização da configuração nos agentes com a opção ''Recarregar Storage iSCSI'' e remover a configuração com opção ''Remover Storage iSCSI''.
+
 % ADMINISTRAÇÃO VOLUME GROUPS
 
 \subsubsection{Administração de Volume Groups}
 Na administração de \emph{volumes groups} é permitido:
 \begin{itemize}
 	\item Criar um \emph{volume group}
-	\item Extender um \emph{volume group}
+	\item Estender um \emph{volume group}
 	\item Reduzir um \emph{volume group}
 	\item Remover um \emph{volume group}
     \item Registar/Desregistar um \emph{volume group}
@@ -713,7 +760,7 @@ Na administração de \emph{volumes groups} é permitido:
 \end{figure}
 
 Para criar um \emph{volume group} acede-se ao sub-menu de contexto sobre um qualquer \emph{volume group} e seleccionar \emph{Adicionar volume group}.
-Na janela de criação deverá ser introduzido o nome pretendido e seleccionar um ou mais \emph{physical voumes} disponíveis.
+Na janela de criação deverá ser introduzido o nome pretendido e seleccionar um ou mais \emph{physical volumes} disponíveis.
 
 Um \emph{physical volume} está disponível quando não está alocado a nenhum \emph{volume group} e encontra-se inicializado.
 
@@ -725,9 +772,9 @@ Um \emph{physical volume} está disponível quando não está alocado a nenhum \
         \end{center}
 \end{figure}
 
-Para extender um \emph{volume group} recorre-se ao \emph{drag-n-drop}, ou seja, arrasta-se o \emph{physical volume}, que se pretende adicionar, para cima do \emph{volume group} pretendido.
+Para estender um \emph{volume group} recorre-se ao \emph{drag-n-drop}, ou seja, arrasta-se o \emph{physical volume}, que se pretende adicionar, para cima do \emph{volume group} pretendido.
 
-Na remoção/redução de um \emph{volume group} seleccciona-se o \emph{volume group}/\emph{physical volume} a remover e escolhe-se a opção correspondente do sub-menu de contexto.
+Na remoção/redução de um \emph{volume group} selecciona-se o \emph{volume group}/\emph{physical volume} a remover e escolhe-se a opção correspondente do sub-menu de contexto.
 \begin{quote}
 	{\large \bf Nota} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
@@ -742,7 +789,7 @@ Na remoção/redução de um \emph{volume group} seleccciona-se o \emph{volume g
         \end{center}
 \end{figure}
 
-Na figura \ref{fig:storage_vg_extend} extende-se o \emph{volume group} {\bf black} com o \emph{physival volume} {\bf sdb1}.
+Na figura \ref{fig:storage_vg_extend} estende-se o \emph{volume group} {\bf black} com o \emph{physival volume} {\bf sdb1}.
 
 \begin{figure}[H]
         \begin{center}
@@ -821,7 +868,7 @@ E podemos ainda fazer a conversão dos discos para os vários formatos indicados
 \end{figure}
 
 Em ''Procurar \emph{logical volumes}'' sincroniza os \emph{logical volumes} que se encontram do lado do agente de virtualização e não estão registados no \emph{Central Management}.
-É possível também que existam \emph{logical volumes} que se encontram registados no \emph{Central Management} mas não existam físicamente por alguma razão alheia ao sistema. 
+É possível também que existam \emph{logical volumes} que se encontram registados no \emph{Central Management} mas não existam fisicamente por alguma razão alheia ao sistema. 
 Nestes casos, é possível remover o registo do sistema e voltar a sincronizar os \emph{logical volumes} com a funcionalidade ''Procurar \emph{logical volumes}''.
 
 \subsection{Desligar nó}
@@ -829,8 +876,8 @@ Nestes casos, é possível remover o registo do sistema e voltar a sincronizar o
 Através da interface de gestão, Central Management, é possível desligar um nó físico. Para tal é necessário seguir os seguintes passos:
 
 \begin{itemize}
-\item No painel lateral esquerdo, selecionar o \textit{node} pretendido e aceder ao menu de contexto;
-\item Selecionar a opção \textit{Desligar}.
+\item No painel lateral esquerdo, seleccionar o \textit{node} pretendido e aceder ao menu de contexto;
+\item Seleccionar a opção \textit{Desligar}.
 \end{itemize}
 
 \begin{quote}
@@ -883,7 +930,7 @@ Para além de visualizar informação, este painel permite efectuar as seguintes
 \end{figure}
 
 \subsection{Estatísticas}
-Em \emph{Estatísticas} é possível visualizar gráficamente informação de:
+Em \emph{Estatísticas} é possível visualizar graficamente informação de:
 \begin{itemize}
 	\item Cpu Usage
 	\item Networks
@@ -908,7 +955,7 @@ Em \emph{Estatísticas} é possível visualizar gráficamente informação de:
 	\end{center}
 \end{figure}
 
-Em cada um destes paineis é possível visualizar os dados pelos intervalos pré-definidos:
+Em cada um destes painéis é possível visualizar os dados pelos intervalos pré-definidos:
 \begin{itemize}
 	\item Última hora
 	\item Últimas 2 horas
@@ -916,7 +963,7 @@ Em cada um destes paineis é possível visualizar os dados pelos intervalos pré
 	\item Última semana
 \end{itemize}
 
-Na figura \ref{fig:server_stats_nodeLoad}, visualiza-se a informação de carga do node a que pertence o servidor \emph{etfww} para o intervalo - \emph{Última hora}.
+Na figura \ref{fig:server_stats_nodeLoad}, visualiza-se a informação de carga do node a que pertence o servidor \emph{ETFW} para o intervalo - \emph{Última hora}.
 
 Para visualizar outros intervalos de tempo usa-se \emph{Gerar imagem do gráfico}. A imagem gerada é conforme a figura \ref{fig:server_stats_nodeLoadRange}.
 \begin{figure}[H]
@@ -933,26 +980,26 @@ Em \emph{Serviços}, e caso esteja configurado um MA (\emph{Management Agent}) n
 \subsection{Drivers Virtio}
 Os drivers virtio facilitam a comunicação entre o sistema operativo que corre na máquina virtual, e os diversos componentes de hardware. Entre estes componentes encontram-se os dispositivos de rede e as unidades de armazenamento - discos. Como a utilização dos drivers virtio aumenta o desempenho global do sistema, a sua instalação é recomendada.
 
-Caso o sistema operativo da máquina virtual seja uma distribuição de linux, cujo kernel seja de uma versão igual ou superior 2.6.25, o virtio já é suportado não sendo necessário seguir nenhum procedimento para instalar os drivers. Para tirar partido das vantagens, basta seleccionar o driver virtio no separador \textit{Interfaces de rede} e \textit{Discos} da janela \textit{Editar servidor}.
+Caso o sistema operativo da máquina virtual seja uma distribuição de Linux, cujo kernel seja de uma versão igual ou superior 2.6.25, o virtio já é suportado não sendo necessário seguir nenhum procedimento para instalar os drivers. Para tirar partido das vantagens, basta seleccionar o driver virtio no separador \textit{Interfaces de rede} e \textit{Discos} da janela \textit{Editar servidor}.
 
 Os requisitos para a utilização dos drivers virtio podem ser encontrados em: 
 
 http://wiki.libvirt.org/page/Virtio
 
-\subsubsection*{Instalação em máquinas virtuais windows}
+\subsubsection*{Instalação em máquinas virtuais Windows}
 
-Fazer download do iso com os drivers, disponíveis em:
+Fazer download do ISO com os drivers, disponíveis em:
 
-http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/bin/.
+http://alt.fedoraproject.org/pub/alt/virtio-win/stable/.
 
-Fazer upload do iso com os drivers - mais informações na Secção \ref{sec:iso_manager}. \textit{Ferramentas}, \textit{Gestor de ISOs}, \textit{Applet de upload}, seleccionar o ficheiro e fazer upload, o ficheiro deve aparecer na lista de ISOs.
+Fazer upload do ISO com os drivers - mais informações na Secção \ref{sec:iso_manager}. \textit{Ferramentas}, \textit{Gestor de ISOs}, \textit{Applet de upload}, seleccionar o ficheiro e fazer upload, o ficheiro deve aparecer na lista de ISOs.
 
-De seguida selecionar o servidor onde se pretende instalar os drivers, e escolher a opção \textit{Editar servidor}. Escolher a imagem ISO com os drivers como ilustra a Figura \ref{fig:virtio4}. Ir ao separador \textit{Discos} e atribuir um novo volume, escolhendo o driver virtio - Figura \ref{fig:virtio7}.
+De seguida seleccionar o servidor onde se pretende instalar os drivers, e escolher a opção \textit{Editar servidor}. Escolher a imagem ISO com os drivers como ilustra a Figura \ref{fig:virtio4}. Ir ao separador \textit{Discos} e atribuir um novo volume, escolhendo o driver virtio - Figura \ref{fig:virtio7}.
 
 \begin{figure}[H]
 	\begin{center}
 	\includegraphics[scale=0.5]{screenshots/virtio/virtio_4.png}
-	\caption{Selecionar a imagem com os drivers virtio}
+	\caption{Seleccionar a imagem com os drivers virtio}
 	\label{fig:virtio4}
 	\end{center}
 \end{figure}
@@ -975,9 +1022,9 @@ Definir o arranque do servidor através do disco como ilustra a Figura \ref{fig:
 	\end{center}
 \end{figure}
 
-Com o windows em execução, ir ao gestor de dispositivos. Note que o logical volume acrescentado aparece como na Figura \ref{fig:virtio10}. 
+Com o Windows em execução, ir ao gestor de dispositivos. Note que o logical volume acrescentado aparece como na Figura \ref{fig:virtio10}. 
 
-De seguida, selecionar a opção \textit{Update Driver Software}, \textit{Browse my computer for driver software}, indicar onde se encontram os drivers (na drive de CDs virtual), concluir o procedimento de instalação.
+De seguida, seleccionar a opção \textit{Update Driver Software}, \textit{Browse my computer for driver software}, indicar onde se encontram os drivers (na drive de CDs virtual), concluir o procedimento de instalação.
 
 \begin{figure}[H]
 	\begin{center}
@@ -1019,7 +1066,7 @@ Esta ferramenta permite importar máquinas virtuais no formato OVF (\emph{Open V
 	\end{center}
 \end{figure}
 
-O assistente de importação OVF é constituido pelas seguintes etapas:
+O assistente de importação OVF é constituído pelas seguintes etapas:
 
 \begin{description}
 	\item[Ficheiro OVF de origem:] Nesta etapa define-se o URL do ficheiro OVF a importar (ver figura \ref{fig:ovf_import_file}).
@@ -1087,7 +1134,7 @@ O assistente de importação OVF é constituido pelas seguintes etapas:
 
         Os drivers dos discos suportados para máquinas XEN com ou sem virtualização por hardware são: ide, xen e scsi. Nas máquinas KVM os drivers são: ide, virtio e scsi.
 
-        Os drivers da placa de rede suportados para máquinas em HVM ou KVM são: e1000, rtl8139 e virtio. Numa máquina XEN sem suporte a virtualização nao suporta drivers.
+        Os drivers da placa de rede suportados para máquinas em HVM ou KVM são: e1000, rtl8139 e virtio. Numa máquina XEN sem suporte a virtualização não suporta drivers.
 
         Caso o servidor de virtualização escolhido não suporte os drivers mencionados no OVF a importação não poderá ser efectuada.
 
@@ -1172,13 +1219,13 @@ As operações permitidas são:
 \end{quote}
 
 \subsection{Monitorização do agente dos nodes}
-Esta ferramenta serve para verificar em tempo real a comunicação dos vários nodes com o CM. A verificação é feita periódicamente.
+Esta ferramenta serve para verificar em tempo real a comunicação dos vários nodes com o CM. A verificação é feita periodicamente.
 Para parar a verificação fecha-se o pop-up que surge aquando da activação da ferramenta.
 
 \subsection{Registo de eventos do sistema}
 \label{sec:system_event_reg}
 
-Em \emph{Registo de eventos do sistema} é possível visualizar as interações efectuadas entre o utilizador, nodes, servidores e o CM.
+Em \emph{Registo de eventos do sistema} é possível visualizar as interacções efectuadas entre o utilizador, nodes, servidores e o CM.
 
 \begin{figure}[H]
 	\begin{center}
@@ -1234,12 +1281,12 @@ O assistente de configuração, conforme a figura \ref{fig:first_time_wizard}, c
 
 \opt{etvm}{
 \subsection{Gestão de Datacenters Virtuais}
-Ao selecionar um dos nós base da árvore que surge no painel esquerdo, é apresentado no painel direito os painéis de gestão de datacenter - Figura \ref{fig:cluster-context}. Neles é possível gerir as redes e os volumes de armazenamento partilhados, sempre no contexto do datacenter selecionado.
+Ao seleccionar um dos nós base da árvore que surge no painel esquerdo, é apresentado no painel direito os painéis de gestão de datacenter - Figura \ref{fig:cluster-context}. Neles é possível gerir as redes e os volumes de armazenamento partilhados, sempre no contexto do datacenter seleccionado.
 
 \begin{figure}[H]
         \begin{center}
         \includegraphics[scale=0.6]{screenshots/cluster-context.png}
-        \caption{Paineis de gestão de datacenter}
+        \caption{Painéis de gestão de datacenter}
         \label{fig:cluster-context}
         \end{center}
 \end{figure}
@@ -1279,7 +1326,7 @@ Para mover, arrastar o node pretendido para o datacenter de destino.
 \subsubsection{Aceitar node}
 Quando um node é acrescentado, surge na árvore do painel esquerdo um nó com a cor do texto a azul. Neste caso, para poder fazer a gestão através do \textit{Central Management}, é necessário autoriza-lo.
 
-Para proceder à autorização de um node, selecionar o nó pretendido, e aceder ao menu de contexto (clique com o botão direito do rato). De seguida selecionar a opção \textit{Autorizar}. A Figura \ref{fig:cluster-auth} e \ref{fig:cluster-auth} ilustram o processo.
+Para proceder à autorização de um node, seleccionar o nó pretendido, e aceder ao menu de contexto (clique com o botão direito do rato). De seguida seleccionar a opção \textit{Autorizar}. A Figura \ref{fig:cluster-auth} e \ref{fig:cluster-auth} ilustram o processo.
 
 \begin{figure}[H]
         \begin{center}
@@ -1323,24 +1370,129 @@ No painel \emph{Conectividade} é permitido alterar o IP do CM e da rede LAN cas
 \end{figure}
 
 \subsection{Administração de utilizadores, grupos e permissões}
-O menu de administração de utilizadores está disponível aos \textit{super} utilizadores do sistema, e pode ser encontrado na barra superior de ferramentas, em \textit{Administração de utilizadores e permissões}.
+O menu de administração de utilizadores está disponível aos \textit{super} utilizadores do sistema, e pode ser encontrado na barra superior em \textit{Administração do sistema}, \textit{Administração de utilizadores e permissões}.
 
-Ao seleccionar estar opção, é apresentado ao administrador uma janela com três separadores:  
+Ao seleccionar estar opção, é apresentado ao administrador uma janela com dois separadores:  
 \begin{itemize}
 	\item \textit{Gestão de Utilizadores};
-	\item \textit{Gestão de Grupos};
-	\item \textit{Gestão de Permissões}.
+	\item \textit{Gestão de Grupos}.
 \end{itemize}
 
-A imagem \ref{fig:user_admin} ilustra a janela apresentada. Nesta janela é possível definir as permissões necessárias. Podem ser criados utilizadores para acesso à interface de gestão, e atribuídas permissões para acesso ao nível de máquinas, como ao nível de \textit{cluster}.
+A imagem \ref{fig:admin_users} ilustra a janela apresentada. Nesta janela, podem ser criados utilizadores para acesso à interface de gestão, e atribuídas permissões para acesso ao nível de máquinas virtuais, como ao nível de \textit{datacenter}.
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/admin_users.png}
+        \caption{Administração de utilizadores - Gestão de Utilizadores}
+        \label{fig:admin_users}
+        \end{center}
+\end{figure}
+
+Para adicionar um novo utilizador, existe a possibilidade de executar um assistente passo a passo, que permite preencher os seguintes dados: nome, email, password, grupo e permissões.
+
+\opt{etvm}{
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/create_user_wiz_01.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (Passo 1)}
+        \label{fig:create_user_wiz_01}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/create_user_wiz_02.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (Detalhes do utilizador)}
+        \label{fig:create_user_wiz_02}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/create_user_wiz_03.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (Permissões)}
+        \label{fig:create_user_wiz_03}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/create_user_wiz_04.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (Final)}
+        \label{fig:create_user_wiz_04}
+        \end{center}
+\end{figure}
+}
+
+\opt{etva}{
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_01.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (Passo 1)}
+        \label{fig:create_user_wiz_01}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_02.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (Detalhes do utilizador)}
+        \label{fig:create_user_wiz_02}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_03.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (Permissões)}
+        \label{fig:create_user_wiz_03}
+        \end{center}
+\end{figure}
+
+Além das opções anterior referidas, este assistente passo a passo disponibiliza a configuração dos utilizadores nos módulos de gestão existentes de forma integrada, tais como: \textit{ETVOIP}, \textit{ETMailServer} e \textit{Primavera}.
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_04.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (\textit{ETVoIP})}
+        \label{fig:create_user_wiz_04}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_05.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (\textit{ETMailServer})}
+        \label{fig:create_user_wiz_05}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_06.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (\textit{Primavera})}
+        \label{fig:create_user_wiz_06}
+        \end{center}
+\end{figure}
+
+\begin{figure}[H]
+        \begin{center}
+        \includegraphics[scale=0.4]{screenshots/users/etva/create_user_wiz_07.png}
+        \caption{Administração de utilizadores - Adicionar utilizador (Final)}
+        \label{fig:create_user_wiz_07}
+        \end{center}
+\end{figure}
+
+}
 
 Para facilitar a atribuição de permissões é possível definir grupos. Por exemplo, um grupo pode ter associadas várias permissões, e pode ser atribuído a vários utilizadores. Isto facilita a adição/remoção de permissões a um conjunto de utilizadores.
 
 \begin{figure}[H]
         \begin{center}
-        \includegraphics[scale=0.4]{screenshots/permissions/user.png}
-        \caption{Janela de administração de utilizadores e permissões}
-        \label{fig:user_admin}
+        \includegraphics[scale=0.4]{screenshots/users/admin_users_groups.png}
+        \caption{Administração de utilizadores - Gestão de Grupos}
+        \label{fig:admin_users_groups}
         \end{center}
 \end{figure}
 
@@ -1379,7 +1531,7 @@ Para além da janela de gestão apresentada, é possível atribuir as permissõe
 \opt{etvm}{
     \subsection{Desligar o Central Management}
     Para desligar o Central Management aceder ao menu \textit{Administração do sistema} e escolher a opção \textit{Desligar Central Management}.
-    Responder afimativamente à pergunta de confirmação.
+    Responder afirmativamente à pergunta de confirmação.
 
 \begin{quote}
 	{\large \bf Nota} \\*[-.8pc]
@@ -1394,11 +1546,11 @@ Para além da janela de gestão apresentada, é possível atribuir as permissõe
     
     \begin{itemize}
     \item Aceder ao site do Central Management
-    \item Selecionar o node existente e aceder ao menu de contexto
+    \item Seleccionar o node existente e aceder ao menu de contexto
     \item Escolher a opção shutdown (desligar). Esta opção desliga a appliance e as máquinas virtuais existentes.
     \end{itemize}
 
-    O segundo método pode ser efetuado através dos botões disponíveis na \textit{appliance} (ver imagem \ref{fig:app_display}).
+    O segundo método pode ser efectuado através dos botões disponíveis na \textit{appliance} (ver imagem \ref{fig:app_display}).
 
     \begin{itemize}
     \item No display da appliance, selecionar MENU

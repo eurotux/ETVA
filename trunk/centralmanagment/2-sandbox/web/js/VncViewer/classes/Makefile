@@ -20,6 +20,9 @@ CLASSES = VncViewer.class RfbProto.class AuthPanel.class VncCanvas.class \
 	  HTTPConnectSocket.class ReloginPanel.class \
       AuthHTTPConnectSocketFactory.class AuthHTTPConnectSocket.class \
       BasicAuthHTTPConnectSocket.class DigestAuthHTTPConnectSocket.class \
+	  HTTPSConnectSSLSocketFactory.class \
+	  HTTPSConnectSSLSocket.class AuthHTTPSConnectSSLSocketFactory.class AuthHTTPSConnectSSLSocket.class \
+      BasicAuthHTTPSConnectSSLSocket.class DigestAuthHTTPSConnectSSLSocket.class \
       Base64.class \
 	  InStream.class MemInStream.class ZlibInStream.class
 
@@ -32,6 +35,9 @@ SOURCES = VncViewer.java RfbProto.java AuthPanel.java VncCanvas.java \
 	  HTTPConnectSocket.java ReloginPanel.java \
       AuthHTTPConnectSocketFactory.java AuthHTTPConnectSocket.java \
       BasicAuthHTTPConnectSocket.java DigestAuthHTTPConnectSocket.java \
+	  HTTPSConnectSSLSocketFactory.java \
+	  HTTPSConnectSSLSocket.java AuthHTTPSConnectSSLSocketFactory.java AuthHTTPSConnectSSLSocket.java \
+      BasicAuthHTTPSConnectSSLSocket.java DigestAuthHTTPSConnectSSLSocket.java \
       Base64.java \
 	  InStream.java MemInStream.java ZlibInStream.java
 

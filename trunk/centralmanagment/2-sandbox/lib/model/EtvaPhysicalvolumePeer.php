@@ -39,6 +39,9 @@ class EtvaPhysicalvolumePeer extends BaseEtvaPhysicalvolumePeer
   const _ERR_UNREGISTER_   = 'Physical device %name% could not be unregistered. %info%';
   const _OK_UNREGISTER_   = 'Physical device %name% unregistered successfully';
 
+  const _ERR_EXPAND_   = 'Device %name% could not be expanded. %info%';
+  const _OK_EXPAND_   = 'Device %name% expanded successfully';
+
   public static function retrieveByPv($pv, Criteria $criteria = null)
   {
     if(is_null($criteria )) $criteria = new Criteria();

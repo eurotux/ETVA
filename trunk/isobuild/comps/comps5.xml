@@ -99,7 +99,7 @@
     <uservisible>true</uservisible>
     <packagelist>
       <packagereq type="mandatory">kernel-xen</packagereq>
-      <packagereq type="mandatory">kernel-ml</packagereq>
+      <packagereq type="mandatory">kernel-lt</packagereq>
       <packagereq type="mandatory">xen</packagereq>
       <packagereq type="mandatory">virtagent</packagereq>
       <packagereq type="mandatory">etva-enterprise</packagereq>

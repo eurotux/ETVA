@@ -1,0 +1,5 @@
+http://forum.proxmox.com/threads/6331-Proxmox-Guest-USB-support
+http://social.technet.microsoft.com/wiki/contents/articles/182.how-to-obtain-the-current-version-of-device-console-utility-devcon-exe.aspx
+http://www.ewig-drohendes-versagen.de/?p=755
+http://support.microsoft.com/kb/137890/de
+http://superuser.com/questions/429016/enable-disable-windows-7-device-via-command-line

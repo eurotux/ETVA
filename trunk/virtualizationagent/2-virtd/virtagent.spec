@@ -1,7 +1,7 @@
 %{!?rhel:%define rhel   %(cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//')}
 
 Name:           virtagent
-Version:        1.2.2
+Version:        2.0.0
 Release: 5751
 Summary:        Virtualization Agent
 License:        GPL

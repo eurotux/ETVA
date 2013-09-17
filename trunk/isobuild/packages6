@@ -5,14 +5,12 @@ php-pear-SOAP-*.rpm
 php-pecl-apc-*.src.rpm
 cmake-*.src.rpm
 etva-smb*.src.rpm
-etva-logos*.src.rpm
 etva-enterprise*.src.rpm
 etva-network-profiles*.src.rpm
 etva-virtio-win*.src.rpm
 etva-xen-win*.src.rpm
 nuxis-release-6*.src.rpm
 libxml2-*.src.rpm
-libvirt-*.src.rpm
 perl-Sys-Virt-*.src.rpm
 perl-IPC-SysV-*.src.rpm
 perl-Capture-Tiny-*.src.rpm

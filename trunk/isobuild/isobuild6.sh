@@ -102,18 +102,22 @@ cd $DIRIMG
 cd - > /dev/null
 rm -rf $DIRIMG
 
+# remove unused groups
+perl -pi -e 's#^\@x11##' $DIRDEST/ks.cfg
+perl -pi -e 's#^\@fonts##' $DIRDEST/ks.cfg
 # cria o ks de enterprise
-cat $DIRDEST/ks.cfg | sed -e 's/^# interactive/interactive/g' |egrep -v "^(virtagent|etva-centralmanagement|etva-virtio-win|xen|kernel-xen|kernel-ml|etva-smb|kvm|ignoredisk|clearpart|part|raid|volgroup|logvol)" > $DIRDEST/ks.ent.cfg
+cat $DIRDEST/ks.cfg | sed -e 's/^# interactive/interactive/g' |egrep -v "^(zerombr|virtagent|libvirt|etva-centralmanagement|etva-virtio-win|xen|kernel-xen|etva-smb|kvm|clearpart|part|raid|volgroup|logvol|%include|ignoredisk)" > $DIRDEST/ks.ent.cfg
+cat $DIRDEST/ks.cfg | sed -e 's/^# interactive/interactive/g' |egrep -v "^(zerombr|virtagent|libvirt|etva-centralmanagement|etva-virtio-win|xen|kernel-xen|etva-smb|kvm|clearpart|part|raid|volgroup|logvol|%include|cdrom)" > $DIRDEST/ks.ent.usb.cfg
 # cria o ks de smb
-cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-xen-win|kernel-ml)"> $DIRDEST/ks.smb.kvm.cfg
+cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-xen-win)"> $DIRDEST/ks.smb.kvm.cfg
 cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-virtio-win|spice)"> $DIRDEST/ks.smb.xen.cfg
 # cria o ks de smb-usb
-cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-xen-win|kernel-ml)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.kvm.usb.cfg
-cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-virtio-win|spice)" | sed -e 's/^cdrom/askmethod/g' > $DIRDEST/ks.smb.xen.usb.cfg
+cat $DIRDEST/ks.cfg | egrep -v "xen" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-xen-win)" | sed -e 's/^cdrom//g' > $DIRDEST/ks.smb.kvm.usb.cfg
+cat $DIRDEST/ks.cfg | egrep -v "kvm" |egrep -v "^(etva-enterprise|etva-centralmanagement-ent|etva-centralmanagement-nrpe|etva-virtio-win|spice)" | sed -e 's/^cdrom//g' > $DIRDEST/ks.smb.xen.usb.cfg
 
 # Cria o iso
 mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table \
--V "ETVM 2.0" -p "Eurotux Informatica S.A." -A "ETVM 2.0 - ----/--/--" \
+-V "NUXIS-INSTALL" -p "Eurotux Informatica S.A." -A "ETVM 2.0 - ----/--/--" \
 -b isolinux/isolinux.bin -c isolinux/boot.cat -x "lost+found" -o $ISOFILE $DIRDEST
 
 # Implanta MD5

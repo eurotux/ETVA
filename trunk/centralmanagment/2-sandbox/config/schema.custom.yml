@@ -10,3 +10,8 @@ propel:
   vnc_token:
     _attributes: { phpName: EtvaVncToken }    
     user_id:     { type: integer, foreignTable: sf_guard_user, foreignReference: id, required: true, onDelete: cascade }
+  user_service:
+    _attributes: { phpName: EtvaUserService }
+    user_id:     { type: integer, primaryKey: true, foreignTable: sf_guard_user, foreignReference: id, required: true, onDelete: cascade }
+    service_id:  { type: integer, primaryKey: true, foreignTable: service, foreignReference: id, required: true, onDelete: cascade }
+    extra:       { type: LONGVARCHAR, required: true }

@@ -19,6 +19,14 @@ class EtvaServer extends BaseEtvaServer
     const STATE_MIGRATING = 'migrating';
     const STATE_OK = 1;
     const STATE_NOK = 0;
+    
+    const USAGESNAPSHOTS_STATUS_CRITICAL = -2;
+    const USAGESNAPSHOTS_STATUS_WARNING = -1;
+    const USAGESNAPSHOTS_STATUS_NORMAL = 0;
+
+    const USAGESNAPSHOTS_STATUS_CRITICAL_STR = 'critical';
+    const USAGESNAPSHOTS_STATUS_WARNING_STR = 'warning';
+    const USAGESNAPSHOTS_STATUS_NORMAL_STR = 'normal';
 
     /*
      * update some object data from VA response
@@ -735,5 +743,25 @@ class EtvaServer extends BaseEtvaServer
             }
         }
         return false;
+    }
+    public function getUsageSnapshotsStatus(){
+        $status = self::USAGESNAPSHOTS_STATUS_NORMAL;
+        $server_lvs = $this->getEtvaLogicalvolumes();
+        foreach( $server_lvs as $lv ){
+            if( $lv->getPerUsageSnapshots() >= EtvaLogicalvolume::PER_USAGESNAPSHOTS_CRITICAL ){
+                if( $status > self::USAGESNAPSHOTS_STATUS_CRITICAL )
+                    $status = self::USAGESNAPSHOTS_STATUS_CRITICAL;
+            } else if(  $lv->getPerUsageSnapshots() >= EtvaLogicalvolume::PER_USAGESNAPSHOTS_WARNING ){
+                if( $status > self::USAGESNAPSHOTS_STATUS_WARNING )
+                    $status = self::USAGESNAPSHOTS_STATUS_WARNING;
+            }
+        }
+        return $status;
+    }
+    public function getUsageSnapshotsStatusSTR(){
+        $status = $this->getUsageSnapshotsStatus();
+        if( $status == self::USAGESNAPSHOTS_STATUS_CRITICAL ) return self::USAGESNAPSHOTS_STATUS_CRITICAL_STR;
+        else if( $status == self::USAGESNAPSHOTS_STATUS_WARNING ) return self::USAGESNAPSHOTS_STATUS_WARNING_STR;
+        return self::USAGESNAPSHOTS_STATUS_NORMAL_STR;
     }
 }

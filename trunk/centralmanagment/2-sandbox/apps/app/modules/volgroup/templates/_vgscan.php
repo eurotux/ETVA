@@ -127,7 +127,7 @@ Volgroup.Scan.Main = function(node_id, level) {
                                                     columns: [
                                                         {id: 'uuid', header: __('Uuid'), dataIndex: 'uuid'},
                                                         {header: __('Device'), dataIndex: 'device'},
-                                                        {header: __('Size'), dataIndex: 'size', renderer: Ext.util.Format.fileSize }
+                                                        {header: __('Size'), dataIndex: 'size', renderer: function(v){ return Ext.util.Format.fileSize(v); } }
                                                     ]
                                                 }),
                                     store:new Ext.data.JsonStore({
@@ -186,7 +186,7 @@ Volgroup.Scan.Main = function(node_id, level) {
                                                         {id: 'uuid', header: __('Uuid'), dataIndex: 'uuid'},
                                                         {header: __('Name'), dataIndex: 'name'},
                                                         {header: __('Device'), dataIndex: 'device'},
-                                                        {header: __('Size'), dataIndex: 'size', renderer: Ext.util.Format.fileSize }
+                                                        {header: __('Size'), dataIndex: 'size', renderer: function(v){ return Ext.util.Format.fileSize(v); } }
                                                     ]
                                                 }),
                                     store:new Ext.data.JsonStore({

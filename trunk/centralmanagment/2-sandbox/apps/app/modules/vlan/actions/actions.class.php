@@ -402,6 +402,13 @@ class vlanActions extends sfActions
         $p_level = $this->getRequestParameter('level');
 
         if($p_level){
+
+            if(!$p_cluster_id){
+                $error_msg = 'No cluster id defined.';
+                $error = array('success'=>false,'error'=>$error_msg,'info'=>$error_msg);
+                return $error;
+            }
+
             if($p_level == 'node'){
                 $dc_c = new Criteria(); //convert node id in cluster id
                 $dc_c->add(EtvaNodePeer::ID, $p_cluster_id);

@@ -61,6 +61,8 @@ use Data::Dumper;
 
 use File::Path qw( mkpath rmtree );
 
+use Cwd qw(abs_path);
+
 use POSIX qw/SIGHUP SIGTERM SIGKILL/;
 use POSIX ":sys_wait_h";
 # CMAR 09/11/2010 
@@ -403,6 +405,13 @@ sub vmSetLocation {
                 $VM->set_bootdev( 'network' );
             }
 
+            # enable boot menu
+            if( !defined($p{'bootmenu'}) || ($p{'bootmenu'} ne 'no') ){
+                $VM->set_bootmenu( 'yes' );
+            } else {
+                $VM->set_bootmenu( 'no' );
+            }
+
             # change location or boot from filesystem
             # otherwise no changes applied
 
@@ -507,13 +516,17 @@ sub get_loadvm_disks_params {
 
             if( !$D{'drivername'} &&
                     ($p{'diskdrivercache'} || $p{'disk'}{'drivercache'} || $D{'drivertype'} || $p{'diskformat'} || $p{'disk'}{'format'}) ){
+
+                # determinate the format
+                if( $p{'diskformat'} || $p{'disk'}{'format'} ){
+                    $D{'drivertype'} = $p{'diskformat'} || $p{'disk'}{'format'};
+                }
+
                 if( $self->get_hypervisor_type() eq 'kvm' ){
                     $D{'drivername'} = "qemu";
                 } elsif( $self->get_hypervisor_type() =~ m/xen/ ){
-                    $D{'drivername'} = "tap";
-                }
-                if( $p{'diskformat'} || $p{'disk'}{'format'} ){
-                    $D{'drivertype'} = $p{'diskformat'} || $p{'disk'}{'format'};
+                    # use tap driver name only if specify the format
+                    $D{'drivername'} = "tap" if( $D{'drivertype'} );
                 }
             }
 
@@ -610,6 +623,9 @@ sub vmLoad {
         if( !$p{'no_tablet'} ){
             $A{'tablet_bus'} = $p{'tablet_bus'} || "usb";
         }
+
+        # set clock as localtime
+        $A{'clock'}{'offset'} = 'localtime';
     }
 
     # set cpu information
@@ -795,10 +811,6 @@ sub set_disk_node {
                         $p{'bus'} = 'xen';
                     }
                 }
-            } elsif( $htype eq 'kvm' ){
-                if( !-e "$p{'path'}" ){
-                    $p{'path'} = '/dev/null';
-                }
             }
         }  else {
             if( ( $ostype eq 'hvm')
@@ -931,13 +943,16 @@ sub prep_disk_params {
                                                             my $format = delete($D{'format'});
                                                             if( !$D{'drivername'} &&
                                                                 ($format || $D{'drivertype'} || $D{'drivercache'}) ){
+
+                                                                # determinate the format
+                                                                $D{'drivertype'} = $format if( $format );
+
                                                                 if( $hypervisor_type eq 'kvm' ){
                                                                     $D{'drivername'} = "qemu";
                                                                 } elsif( $hypervisor_type =~ m/xen/ ){
-                                                                    $D{'drivername'} = "tap";
+                                                                    # use tap driver name only if specify the format
+                                                                    $D{'drivername'} = "tap" if( $D{'drivertype'} );
                                                                 }
-
-                                                                $D{'drivertype'} = $format if( $format );
                                                             }
                                                             return wantarray() ? %D : \%D;
 
@@ -2259,13 +2274,17 @@ sub attach_disk {
 
             if( !$D{'drivername'} &&
                     ($p{'diskdrivercache'} || $p{'disk'}{'drivercache'} || $D{'drivertype'} || $p{'diskformat'} || $p{'disk'}{'format'}) ){
+
+                # determinate the format
+                if( $p{'diskformat'} || $p{'disk'}{'format'} ){
+                    $D{'drivertype'} = $p{'diskformat'} || $p{'disk'}{'format'};
+                }
+
                 if( $self->get_hypervisor_type() eq 'kvm' ){
                     $D{'drivername'} = "qemu";
                 } elsif( $self->get_hypervisor_type() =~ m/xen/ ){
-                    $D{'drivername'} = "tap";
-                }
-                if( $p{'diskformat'} || $p{'disk'}{'format'} ){
-                    $D{'drivertype'} = $p{'diskformat'} || $p{'disk'}{'format'};
+                    # use tap driver name only if specify the format
+                    $D{'drivername'} = "tap" if( $D{'drivertype'} );
                 }
             }
 
@@ -3030,10 +3049,11 @@ sub create_network {
             }
 
             $IC{'vlan'} = 1;
-            $IC{'name'} = $ifname;
+            $IC{'if'} = $IC{'name'} = $ifname;
             $IC{'vlanid'} = $vlid;
 
-            my %E = VirtAgent::Network->vlancreate( $ifname, $vlid );
+            # force to create vlan like VLAN_NAME_TYPE_PLUS_VID_NO_PAD vlan type
+            my %E = VirtAgent::Network->vlancreate( 'iname'=>$ifname, 'vlanid'=>$vlid, 'vlantype'=>'VLAN_NAME_TYPE_PLUS_VID_NO_PAD' );
             if( isError(%E) ){
                 # something goes wrong
                 $vn->undefine();
@@ -3117,13 +3137,14 @@ sub create_network {
             VirtAgent::Network->addgateway($N{'bridge'},$BC{'gateway'});
         }
 
+        # CMAR - #745 - do not use scripts
         # write to etva script
-        VirtAgent::Network->add_br_toscript( %BC );
-        if( $IC{'vlan'} ){
-            VirtAgent::Network->add_vlan_toscript( %IC );
-        } else {
-            VirtAgent::Network->add_if_toscript( %IC );
-        }
+        #VirtAgent::Network->add_br_toscript( %BC );
+        #if( $IC{'vlan'} ){
+        #    VirtAgent::Network->add_vlan_toscript( %IC );
+        #} else {
+        #    VirtAgent::Network->add_if_toscript( %IC );
+        #}
 
         # restart brigde interface
         #VirtAgent::Network->ifrestart( 'if'=>$N{'bridge'} );
@@ -3968,14 +3989,44 @@ my @SPoolTypes = qw( dir fs netfs disk iscsi logical );
 
 =cut
 
-sub create_storage_pool {
+sub prep_storage_pool_source_params {
     my $self = shift;
     my (%p) = @_;
 
-    my $vm = $self->vmConnect();
-    if( isError($vm) ){
-        return wantarray() ? %$vm : $vm;
+    my %source = ();
+
+    if( my $device = $p{'source_device'} ){
+        my @ld = ref($device) eq 'ARRAY' ? @$device : ($device);
+        for my $d (@ld){
+            my %D = ( ref($d) ? %$d : ('path'=>$d) );
+            push(@{$source{'device'}}, \%D);
+        }
     }
+    if( $p{'source_directory'} ){
+        $source{'directory'}{'path'} = $p{'source_directory'};
+    }
+    if( $p{'source_dir'} ){
+        $source{'dir'}{'path'} = $p{'source_dir'};
+    }
+    if( $p{'source_adapter'} ){
+        $source{'adapter'}{'name'} = $p{'source_adapter'};
+    }
+    if( $p{'source_host'} ){
+        $source{'host'}{'name'} = $p{'source_host'};
+        $source{'host'}{'port'} = $p{'source_port'} if( $p{'source_port'} );
+    }
+    if( $p{'source_name'} ){
+        $source{'name'} = $p{'source_name'};
+    }
+    if( $p{'source_format'} ){
+        $source{'format'}{'type'} = $p{'source_format'};
+    }
+
+    return wantarray() ? %source : \%source;
+}
+sub prep_storage_pool_params {
+    my $self = shift;
+    my (%p) = @_;
 
     my %pool = ();
 
@@ -3998,31 +4049,8 @@ sub create_storage_pool {
     $pool{'capacity'} = str2size($p{'capacity'}) if( defined $p{'capacity'} );
     $pool{'available'} = str2size($p{'available'}) if( defined $p{'available'} );
 
-    if( my $device = $p{'source_device'} ){
-        my @ld = ref($device) eq 'ARRAY' ? @$device : ($device);
-        for my $d (@ld){
-            my %D = ( ref($d) ? %$d : ('path'=>$d) );
-            push(@{$pool{'source'}{'device'}}, \%D);
-        }
-    }
-    if( $p{'source_directory'} ){
-        $pool{'source'}{'directory'}{'path'} = $p{'source_directory'};
-    }
-    if( $p{'source_dir'} ){
-        $pool{'source'}{'dir'}{'path'} = $p{'source_dir'};
-    }
-    if( $p{'source_adapter'} ){
-        $pool{'source'}{'adapter'}{'name'} = $p{'source_adapter'};
-    }
-    if( $p{'source_host'} ){
-        $pool{'source'}{'host'}{'name'} = $p{'source_host'};
-        $pool{'source'}{'host'}{'port'} = $p{'source_port'} if( $p{'source_port'} );
-    }
-    if( $p{'source_name'} ){
-        $pool{'source'}{'name'} = $p{'source_name'};
-    }
-    if( $p{'source_format'} ){
-        $pool{'source'}{'format'}{'type'} = $p{'source_format'};
+    if( my %source = $self->prep_storage_pool_source_params(%p) ){
+        $pool{'source'} = { %source };
     }
 
     if( $p{'target_path'} || $p{'path'} ){
@@ -4049,7 +4077,24 @@ sub create_storage_pool {
         $pool{'target'}{'encryption'}{'type'} = $p{'target_encryption_type'} || $p{'encryption_type'};
     }
 
+    return wantarray() ? %pool : \%pool;
+}
+
+sub create_storage_pool {
+    my $self = shift;
+    my (%p) = @_;
+
+    my $vm = $self->vmConnect();
+    if( isError($vm) ){
+        return wantarray() ? %$vm : $vm;
+    }
+
     plog "hash=",Dumper(\%p) if( &debug_level > 3 );
+
+    my %pool = $self->prep_storage_pool_params(%p);
+    if( isError(%pool) ){
+        return wantarray() ? %pool : \%pool;
+    }
 
     my $xml = VirtAgent::Storage->gen_xml_storage_pool( %pool );
 
@@ -4071,6 +4116,111 @@ sub create_storage_pool {
     return retOk("_CREATE_STORAGE_POOL_OK_","Storage Pool created successful.","_RET_OBJ_",\%P);
 }
 
+=item find_storage_pool_source
+
+    Find storage pool source
+
+    args:
+
+        type - pool type
+
+        source_device - list of source devices
+        
+        source_host - host
+        
+        source_port - source port
+
+        source_dir - source directory
+
+=cut
+
+sub find_storage_pool_source {
+    my $self = shift;
+    my (%p) = @_;
+
+    my $vm = $self->vmConnect();
+    if( isError($vm) ){
+        return wantarray() ? %$vm : $vm;
+    }
+
+    plog "hash=",Dumper(\%p) if( &debug_level > 3 );
+
+    my $type = $p{'type'};
+    if( !$type ){
+        return retErr("_ERR_FIND_STORAGE_POOL_SOURCE_","Error find storage pool source: no type specified.");
+    }
+    if( ! grep { $type eq $_ } @SPoolTypes ){
+        return retErr("_ERR_FIND_STORAGE_POOL_SOURCE_","Error find storage pool source: invalid type.");
+    }
+
+    my %source = $self->prep_storage_pool_source_params(%p);
+    if( isError(%source) ){
+        return wantarray() ? %source : \%source;
+    }
+
+    my $xml = VirtAgent::Storage->gen_xml_storage_pool_source( 'source'=>{ %source } );
+
+    plog "xml=",$xml if( &debug_level > 3 );
+
+    my $xml_out;
+    
+    eval { $xml_out = $vm->find_storage_pool_sources( $type, $xml ); };
+    if( $@ ){
+        return retErr("_ERR_FIND_STORAGE_POOL_SOURCE_","Error to find storage pool source: $@");
+    }
+
+    plog "xml=",$xml if( &debug_level > 3 );
+
+    return VirtAgent::Storage::xml_storage_pool_source_parser( $xml_out );
+}
+
+=item reload_storage_pool
+
+    Reload storage pool and create if if doesn't exists
+
+    args:
+
+        force - force to create
+
+        uuid - pool uuid
+
+        name - pool name
+
+=cut
+
+sub reload_storage_pool {
+    my $self = shift;
+    my ($sp) = my %p = @_;
+
+    my $vm = $self->vmConnect();
+    if( isError($vm) ){
+        return wantarray() ? %$vm : $vm;
+    }
+
+    if( ref($sp) ne 'Sys::Virt::StoragePool' ){
+        if( $p{'uuid'} ){
+            eval { $sp = $vm->get_storage_pool_by_uuid($p{'uuid'}); };
+        } elsif( $p{'name'} ){
+            eval { $sp = $vm->get_storage_pool_by_name($p{'name'}); };
+        }
+    }
+
+    if( $p{'force'} || !$sp || ( ref($sp) ne 'Sys::Virt::StoragePool' ) ){
+        return $self->create_storage_pool(%p);
+    } else {
+        # TODO do reload ??
+        my $msg = "";
+        eval { $sp->refresh(); };
+        if( $@ ){
+            $msg .= "$@";
+            return retErr("_ERR_RELOAD_STORAGE_POOL_","Error reload storage pool: $msg");
+        }
+    }
+    my %P = $self->storage_pool_to_hash( $sp );
+    return retOk("_RELOAD_STORAGE_POOL_OK_","Storage Pool reloaded successful.","_RET_OBJ_",\%P);
+
+}
+
 =item destroy_storage_pool
 
     Destroy storage pool
@@ -4088,6 +4238,9 @@ sub destroy_storage_pool {
     my ($sp) = my %p = @_;
 
     my $vm = $self->vmConnect();
+    if( isError($vm) ){
+        return wantarray() ? %$vm : $vm;
+    }
 
     if( ref($sp) ne 'Sys::Virt::StoragePool' ){
         if( $p{'uuid'} ){
@@ -4727,7 +4880,12 @@ sub vm_ovf_export {
 
     plog( "fn_ova=$fn_ova fn_ovf=$fn_ovf" );
 
-    my $bkp_randtmpdir = my $bkp_randtmpdir_ori = ETVA::Utils::rand_tmpdir("${TMP_DIR}/.virtd-export-backup-${name}");
+    my ($bkp_randtmpdir, $bkp_randtmpdir_ori);
+
+    if( $p{'location'} || $p{'snapshot'} || $p{'_do_not_generate_tar_'} ){
+        # create tmp dir
+        $bkp_randtmpdir = $bkp_randtmpdir_ori = ETVA::Utils::rand_tmpdir("${TMP_DIR}/.virtd-export-backup-${name}");
+    }
 
     my $tar = new ETVA::ArchiveTar( 'handle'=>$sock );
 
@@ -4747,7 +4905,7 @@ sub vm_ovf_export {
 
         my $oripath = $D->get_path();
         if( -l $oripath ){
-            $oripath = readlink($oripath);
+            $oripath = abs_path($oripath);
         }
         my $fname = $D->get_filename();
 
@@ -4780,7 +4938,7 @@ sub vm_ovf_export {
         &_pos_copy_backup_to_location( %p, 'backup_dir'=>$bkp_randtmpdir );
         rmdir $bkp_randtmpdir_ori if( -d "$bkp_randtmpdir_ori" );   # if exists remove it
     } else {
-        rmtree $bkp_randtmpdir; # remove dir recursively
+        rmtree $bkp_randtmpdir if( -d "$bkp_randtmpdir" ); # remove dir recursively
     }
 
     # no return... must write to socket...

@@ -148,7 +148,103 @@ sub xml_storage_pool_parser {
 
     return wantarray() ? %SP : \%SP;
 }
+sub xml_storage_pool_source_parser {
 
+    my ($xml) = @_;
+
+    my $parser = new XML::DOM::Parser();
+    my $doc = $parser->parse($xml);
+    my $root = $doc->getDocumentElement();
+
+    my %Res = &xml_parser_get_attr($root);
+    for my $ch ($root->getChildNodes()){
+        my $nname = $ch->getNodeName();
+        if( $nname eq 'source' ){
+            my %SP = ();
+            for my $cs ($ch->getChildNodes()){
+                my $tn = $cs->getNodeName();
+                if( $tn eq 'device' ){
+                    # for device
+                    my $at = &xml_parser_get_attr($cs);
+                    $SP{'source'}{"device"} = [] if( !$SP{'source'}{"device"} );
+                    push( @{$SP{'source'}{"device"}}, $at );
+                    $SP{'source_device'} = [] if( !$SP{'source_device'} );
+                    push( @{$SP{'source_device'}}, $at->{'path'} );
+                } elsif( $tn eq 'host' ){
+                    my $at = &xml_parser_get_attr($cs);
+                    $SP{'source'}{"host"} = $at;
+                    $SP{'source_host'} = $at->{'name'};
+                    $SP{'source_port'} = $at->{'port'} if( $at->{'port'} );
+                } elsif( $tn eq 'dir' ){
+                    my $at = &xml_parser_get_attr($cs);
+                    $SP{'source'}{"dir"} = $at;
+                    $SP{'source_dir'} = $at->{'path'};
+                } elsif( $tn eq 'directory' ){
+                    my $at = &xml_parser_get_attr($cs);
+                    $SP{'source'}{"directory"} = $at;
+                    $SP{'source_directory'} = $at->{'path'};
+                } elsif( $tn eq 'adapter' ){
+                    my $at = &xml_parser_get_attr($cs);
+                    $SP{'source'}{"adapter"} = $at;
+                    $SP{'source_adapter'} = $at->{'name'};
+                } elsif( $tn eq 'format' ){
+                    my $at = &xml_parser_get_attr($cs);
+                    $SP{'source'}{"format"} = $at;
+                    $SP{'source_format'} = $at->{'type'};
+                } elsif( $tn eq 'name' ){
+                    $SP{'source_name'} = $SP{'source'}{"name"} = $cs->getFirstChild->toString();
+                }
+            }
+            if( %SP ){
+                $Res{'sources'} = [] if( !$Res{'sources'} );
+                push( @{$Res{'sources'}}, \%SP );
+            }
+        }
+    }
+
+    # Avoid memory leaks - cleanup circular references for garbage collection
+    $doc->dispose;
+
+    return wantarray() ? %Res : \%Res;
+}
+
+sub gen_xml_storage_pool_source {
+    my $self = shift;
+    my (%p) = @_;
+    my $X = XML::Generator->new(':pretty');
+
+    my @source_params = $self->get_storage_pool_source_xml(%p);
+    return sprintf('%s', $X->source( @source_params ));
+}
+sub get_storage_pool_source_xml {
+    my $self = shift;
+    my (%p) = @_;
+
+    my $X = XML::Generator->new(':pretty');
+
+    my $source = $p{'source'};
+
+    my @source_params = ();
+    for my $sk (keys %$source){
+        my $sh = $source->{"$sk"};
+        if( $sk eq 'device' ){
+            if( ref($sh) eq 'ARRAY' ){
+                push(@source_params, map { $X->device( getAttrs($_) ) } @$sh );
+            } else {
+                push(@source_params, $X->device( getAttrs($sh) ) );
+            }
+        } elsif( $sk eq 'directory' ||
+                    $sk eq 'dir' || 
+                    $sk eq 'adapter' || 
+                    $sk eq 'host' ||
+                    $sk eq 'format' ){
+            push(@source_params, $X->${sk}( getAttrs($sh) ) );
+        } elsif( $sk eq 'name' ){
+            push(@source_params, $X->name( $sh ) );
+        }
+    }
+    return wantarray() ? @source_params : \@source_params;
+}
 sub gen_xml_storage_pool {
     my $self = shift;
     my (%p) = @_;
@@ -165,25 +261,7 @@ sub gen_xml_storage_pool {
     push(@pool_params, $X->available( $p{'available'} )) if( defined $p{'available'} );
 
     if( my $source = $p{'source'} ){
-        my @source_params = ();
-        for my $sk (keys %$source){
-            my $sh = $source->{"$sk"};
-            if( $sk eq 'device' ){
-                if( ref($sh) eq 'ARRAY' ){
-                    push(@source_params, map { $X->device( getAttrs($_) ) } @$sh );
-                } else {
-                    push(@source_params, $X->device( getAttrs($sh) ) );
-                }
-            } elsif( $sk eq 'directory' ||
-                        $sk eq 'dir' || 
-                        $sk eq 'adapter' || 
-                        $sk eq 'host' ||
-                        $sk eq 'format' ){
-                push(@source_params, $X->${sk}( getAttrs($sh) ) );
-            } elsif( $sk eq 'name' ){
-                push(@source_params, $X->name( $sh ) );
-            }
-        }
+        my @source_params = $self->get_storage_pool_source_xml(%p);
         push( @pool_params, $X->source( @source_params )) if( @source_params );
     }
     

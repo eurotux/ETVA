@@ -102,10 +102,10 @@ sub new {
         my $chld_handler_ref = $params{'_chldhandler_'} ? 
                                             sub { $params{'_chldhandler_'}->(); &chld_handler(); }
                                             : \&chld_handler;
-        #$SIG{'CHLD'} = $chld_handler_ref;
-        my $sigset_chld = POSIX::SigSet->new( SIGCHLD );
-        my $sigaction_chld = POSIX::SigAction->new($chld_handler_ref, $sigset_chld, &POSIX::SA_NOCLDSTOP);
-        sigaction(SIGCHLD, $sigaction_chld);
+        $SIG{'CHLD'} = $chld_handler_ref;
+        #my $sigset_chld = POSIX::SigSet->new( SIGCHLD );
+        #my $sigaction_chld = POSIX::SigAction->new($chld_handler_ref, $sigset_chld, &POSIX::SA_NOCLDSTOP);
+        #sigaction(SIGCHLD, $sigaction_chld);
 
         $SIG{'USR1'} = \&usr1_handler;
         $SIG{'USR2'} = \&usr2_handler;
@@ -246,10 +246,10 @@ sub mainLoop {
 
 
                     # ignore SIGCHLD
-                    my $sigset = POSIX::SigSet->new(SIGCHLD);    # define the signals to block
-                    my $old_sigset = POSIX::SigSet->new;        # where the old sigmask will be kept
+                    #my $sigset = POSIX::SigSet->new(SIGCHLD);    # define the signals to block
+                    #my $old_sigset = POSIX::SigSet->new;        # where the old sigmask will be kept
 
-                    sigprocmask(SIG_BLOCK, $sigset, $old_sigset);
+                    #sigprocmask(SIG_BLOCK, $sigset, $old_sigset);
 
                     #my $bkp_chld_handler = $SIG{CHLD};
                     #$SIG{CHLD} = 'DEFAULT';
@@ -260,7 +260,7 @@ sub mainLoop {
                     #$SIG{CHLD} = $bkp_chld_handler;
 
                     # recover SIGCHLD
-                    sigprocmask(SIG_UNBLOCK, $old_sigset);
+                    #sigprocmask(SIG_UNBLOCK, $old_sigset);
 
                     # re-activate alarm signal
                     plog( nowStr(), " ", "activate alarm\n"); 
@@ -317,7 +317,7 @@ sub hup_handler {
 sub term_handler {
     &set_runout;
     $EXITSIGNAL = SIGTERM;
-	plog("Agent terminate!");
+	plog("Receive TERM Signal... Agent terminate!");
 }
 
 =item processdata

@@ -269,7 +269,7 @@ $store_id = json_encode($js_grid['pk']);
                 totalProperty: 'total',
                 root: 'data',
                 baseParams: { 'assigned': true },
-                fields: [<?php echo $js_grid['ds'] ?>],
+                fields: [<?php echo $js_grid['ds'] ?>,'node_id'],
                 sortInfo: { field: 'name',
                     direction: 'ASC' },
                 remoteSort: true,
@@ -473,6 +473,7 @@ $store_id = json_encode($js_grid['pk']);
 
             // create the editor grid
             var serverGrid = new Ext.grid.EditorGridPanel({
+                node_id: this.node_id,
                 store: store,
                 cm: cm,
                 plugins:expander,
@@ -713,7 +714,8 @@ $store_id = json_encode($js_grid['pk']);
                         iconCls:'icon-edit-record',                        
                         url:<?php echo(json_encode(url_for('server/Server_Edit')))?>,
                         call:'Server.Edit',
-                        callback:function(item){
+                        scope:this,
+                        callback:function(item,e,grid){
                             var sm = serverGrid.getSelectionModel();
                             var sel = sm.getSelected();
 
@@ -734,11 +736,11 @@ $store_id = json_encode($js_grid['pk']);
                             window.show();
                             
                         },
-                        handler: function(btn){
+                        handler: function(btn,e){
                             
                             var sm = serverGrid.getSelectionModel();
                             if (sm.hasSelection())
-                                View.loadComponent(btn);
+                                View.loadComponent(btn,e,serverGrid);
                             
                             else
                                 Ext.Msg.show({
@@ -978,7 +980,7 @@ $store_id = json_encode($js_grid['pk']);
 
 
 
-            });
+            },this);
 
 
 

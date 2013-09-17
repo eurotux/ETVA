@@ -1,7 +1,7 @@
 Summary: Perl module that implements for Version Objects
 Name: etva-virtio-win
 Version: 0.1
-Release: 52
+Release: 65
 License: GPLv2
 URL: http://linux-kvm.com/
 Packager: Nuno Fernandes <npf@eurotux.com>

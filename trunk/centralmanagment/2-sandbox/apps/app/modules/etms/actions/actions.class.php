@@ -86,7 +86,6 @@ class etmsActions extends sfActions
             $result = $this->setJsonError($info);
         }
 
-
             // $result = json_encode($ret);
 
         $this->getResponse()->setHttpHeader('Content-type', 'application/json; charset=utf-8');
@@ -378,7 +377,7 @@ class etmsActions extends sfActions
                         $elements[] = (array) $data;
                     }
 
-                    $return = array('success'=>true,'value'=>$elements);
+                    $return = array('success'=>true,'value'=>$elements, 'agent'=>$response['agent']);
 
                     break;
                 case 'select_alias':
@@ -389,7 +388,7 @@ class etmsActions extends sfActions
                         $elements[] = array('alias'=>$data);
                     }
 
-                    $return = array('success'=>true,'value'=>$elements);
+                    $return = array('success'=>true,'value'=>$elements, 'agent'=>$response['agent']);
 
                     break;
 
@@ -400,7 +399,7 @@ class etmsActions extends sfActions
                         $elements[] = array('alias'=>$data);
                     }
 
-                    $return = array('success'=>true,'value'=>$elements);
+                    $return = array('success'=>true,'value'=>$elements, 'agent'=>$response['agent']);
                     break;
                 case 'create_user':
                     $elements = array();
@@ -409,7 +408,7 @@ class etmsActions extends sfActions
                         $elements[] = array('alias'=>$data);
                     }
 
-                    $return = array('success'=>true,'value'=>$elements);
+                    $return = array('success'=>true,'value'=>$elements, 'agent'=>$response['agent']);
                     break;
                 case 'delete_user':
                     $elements = array();
@@ -418,7 +417,7 @@ class etmsActions extends sfActions
                         $elements[] = array('alias'=>$data);
                     }
 
-                    $return = array('success'=>true,'value'=>$elements);
+                    $return = array('success'=>true,'value'=>$elements, 'agent'=>$response['agent']);
                     break;
                 case 'select_domain':
                     $elements = array();
@@ -427,8 +426,7 @@ class etmsActions extends sfActions
                         $elements[$dataType] = $data;
                     }
 
-                    $return = array('success'=>true,'value'=>$elements);
-
+                    $return = array('success'=>true,'value'=>$elements, 'agent'=>$response['agent']);
                     break;
                 case 'users_occupied_space':
                     $elements = array();
@@ -437,7 +435,11 @@ class etmsActions extends sfActions
                         $elements[$dataType] = $data;
                     }
 
-                    $return = array('success'=>true,'value'=>$elements);
+                    $return = array('success'=>true,'value'=>$elements, 'agent'=>$response['agent']);
+                    break;
+                default:
+
+                    $return = array('success'=>true, 'value'=>$response_decoded, 'agent'=>$response['agent']);
 
                     break;
             }
@@ -449,7 +451,7 @@ class etmsActions extends sfActions
             $error_details = nl2br($error_details);
             $error = $response['error'];
 
-            $result = array('success'=>false,'error'=>$error,'info'=>$error_details,'faultcode'=>$response['faultcode']);
+            $result = array('success'=>false,'agent'=>$response['agent'],'error'=>$error,'info'=>$error_details,'faultcode'=>$response['faultcode']);
             return $result;
         }
 

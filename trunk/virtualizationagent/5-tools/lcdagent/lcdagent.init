@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# For Red Hat chkconfig
+# chkconfig: - 11 89
+# description: The LCDagent
+
+PATH=/var/qmail/bin:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin
+export PATH
+ID=id
+
+if [ "$1"x = "help"x ]; then
+    cat <<HELP
+   stop -- stops lcdagent service
+  start -- starts lcdagent service
+ status -- displays status of lcdagent service
+restart -- stops and restarts lcdagent service
+HELP
+    exit 0
+fi
+
+if [ "$1"x != "start"x -a "$1"x != "stop"x -a "$1"x != "status"x -a "$1"x != "restart"x ]; then
+   echo "Usage: $0 {start|stop|restart|status|help}"
+   exit 1
+fi
+
+case "$1" in
+   start)
+      echo "Starting lcdagent"
+      rm -f /service/lcdagent/down /service/lcdagent/log/down 2> /dev/null
+      svc -u /service/lcdagent 2> /dev/null
+      svc -u /service/lcdagent/log 2> /dev/null
+
+      if [ -d /var/lock/subsys ]; then
+        touch /var/lock/subsys/lcdagent.lcdagent
+      fi
+      ;;
+   stop)
+      echo "Stopping lcdagent"
+      touch /service/lcdagent/down /service/lcdagent/log/down
+
+      svc -d /service/lcdagent 2> /dev/null
+      svc -d /service/lcdagent/log 2> /dev/null
+
+      if [ -f /var/lock/subsys/lcdagent.lcdagent ]; then
+        rm /var/lock/subsys/lcdagent.lcdagent
+      fi
+      ;;
+   status)
+      svstat /service/lcdagent
+      svstat /service/lcdagent/log
+      ;;
+   restart)
+      $0 stop
+
+      # Wait more than 5 seconds for svscan to stop service.
+      sleep 6
+
+      $0 start
+      ;;
+   *)
+      echo "Usage: $0 {start|stop|restart|status|help}"
+      exit 1
+      ;;
+esac
+
+exit 0
+

@@ -2,7 +2,7 @@
 
 Ext.ns('Server.Edit');
 
-Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {    
+Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
     id: 'server-edit-form',
     border:false
     ,monitorValid:true   

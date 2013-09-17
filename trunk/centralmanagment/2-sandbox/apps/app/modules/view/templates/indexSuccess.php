@@ -3,6 +3,8 @@ use_stylesheet('main.css');
 
 use_javascript('ux/MessageWindow.js'); //plugin for MessageWindows
 
+//use_javascript('ux/DataViewTransition.js'); //plugin for DataViewTransition
+
 use_javascript('ux/ux-form/Ext.ux.ComboBox.js'); //extended combo with reload button
 use_stylesheet('../js/ux/ux-form/css/Spinner.css');
 use_javascript('ux/ux-form/Spinner.js'); //spinner field creation
@@ -52,6 +54,9 @@ use_javascript("ux/treegrid/TreeGridNodeUI.js");
 use_javascript("ux/treegrid/TreeGridLoader.js");
 use_javascript("ux/treegrid/TreeGridColumns.js");
 use_javascript("ux/treegrid/TreeGrid.js");
+
+use_javascript('extjs/ext-util-format.js'); //load some util formats
+
 include_partial('node/storage');
 include_partial('cluster/changename');
 
@@ -195,7 +200,27 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             }
                             <?php endif ?>
                             ,{
-                                text:<?php echo json_encode(__('System preferences')) ?>
+                                text: <?php echo json_encode(__('Users and permissions administration')) ?> 
+                                ,url:<?php echo json_encode(url_for('user/list')); ?>
+                                ,call:'User.List'
+                                ,callback:function(item){
+                                    new User.List.Main({title:item.text});
+                                }
+                                ,handler:this.loadComponent
+                                ,scope:this
+                            /*
+                            },{
+                                text: <?php echo json_encode(__('Users and permissions administration')) ?> 
+                                ,url:<?php echo json_encode(url_for('sfGuardAuth/view')); ?> 
+                                ,call:'SfGuardAuth' 
+                                ,callback:function(item){ 
+                                    new SfGuardAuth.Main({title:item.text}); 
+                                } 
+                                ,handler:this.loadComponent 
+                                ,scope:this 
+                            */
+                            },{ 
+                               text:<?php echo json_encode(__('System preferences')) ?>
                                 ,url:<?php echo json_encode(url_for('setting/view')); ?>
                                 ,call:'Setting.Main'
                                 ,callback:function(item){
@@ -211,16 +236,6 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 ,handler:this.loadComponent
                                 ,scope:this
                                 ,id: 'menuitm-settings'
-                            },
-                            {
-                                text: <?php echo json_encode(__('Users and permissions administration')) ?>
-                                ,url:<?php echo json_encode(url_for('sfGuardAuth/view')); ?>
-                                ,call:'SfGuardAuth'
-                                ,callback:function(item){
-                                    new SfGuardAuth.Main({title:item.text});
-                                }
-                                ,handler:this.loadComponent
-                                ,scope:this
                             },{
                                 text:<?php echo json_encode(__('Shutdown Central Management')) ?>
                                 ,url:<?php echo json_encode(url_for('setting/jsonShutdown')); ?>
@@ -3174,7 +3189,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 			},
 			columns: [
 				{header: 'Name', dataIndex: 'name'},
-				{header: 'Size', dataIndex: 'size',renderer: Ext.util.Format.fileSize},
+				{header: 'Size', dataIndex: 'size',renderer:function(v){ return Ext.util.Format.fileSize(v); } },
 				{header: 'Created', dataIndex: 'ctime', renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s')},
 				{header: 'Modified', dataIndex: 'mtime', renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s')},
 				{header: 'Full Path', dataIndex: 'full_path', hidden: true}
@@ -4409,6 +4424,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
         if(!responseText['agent']) responseText['agent'] = '<?php echo sfConfig::get('config_acronym'); ?>';
 
         var errorResponse = responseText['error'];
+        if(errorResponse.match(/^_/) && responseText['info']) errorResponse = responseText['info'];
         if(!errorResponse) errorResponse = responseText['info'];
         if(!errorResponse) errorResponse = 'Error!';
 

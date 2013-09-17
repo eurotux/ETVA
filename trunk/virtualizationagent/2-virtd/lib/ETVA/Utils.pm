@@ -19,6 +19,7 @@ use IO::Handle;
 use HTML::Entities;
 use SOAP::Lite;
 use File::Path qw( mkpath );
+use File::Copy;
 
 BEGIN {
     # this is the worst damned warning ever, so SHUT UP ALREADY!
@@ -892,7 +893,7 @@ sub decode_content {
 my %ValidSoapTypes = ( 'string'=> 'string', 'float'=>'float', 'integer'=>'int', 'int'=>'int', 'Boolean'=>'boolean' );
 sub parseSoapType {
     my ($value) = @_;
-    my $type = 'string';
+    my $type;
     if( $value =~ m/^(\w+)\((.+)\)$/ ){
         my ($t,$v) = ($1,$2);
         my $lc_t = lc($t);
@@ -900,6 +901,8 @@ sub parseSoapType {
             $type = $ValidSoapTypes{"$lc_t"};
             $value = $v;
         }
+    } elsif( $value =~ m/^\w+$/ ){
+        $type = 'string';
     }
 
     return wantarray() ? ($value,$type) : $type;
@@ -922,7 +925,7 @@ sub make_soap_args {
             push(@rargs, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
         } else {
             my ($value,$type) = &parseSoapType($v);
-            push(@rargs, SOAP::Data->name( $k => $value )->type($type)); 
+	    push(@rargs, SOAP::Data->name( $k => $value )->type($type)); 
         }
     }
 
@@ -946,8 +949,8 @@ sub make_soap {
 #                $attr{"xsi:nil"} = "true" if( !$c );
                 push(@sres, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
             } else {
-                my ($value,$type) = &parseSoapType($v);
-                push(@sres, SOAP::Data->name( $k => $value )->type($type)); 
+		my ($value,$type) = &parseSoapType($v);
+		push(@sres, SOAP::Data->name( $k => $value )->type($type)); 
             }
         }
         push(@res, @sres);
@@ -1327,6 +1330,33 @@ sub get_os_release {
         close(RELEASE_FH);
     }
     return wantarray() ? ($OSRELEASE_NAME,$OSRELEASE_VERSION) : $OSRELEASE_NAME;
+}
+
+# configure ntp for server
+sub configure_ntp {
+    my ($server) = @_;
+    my $ntp_config_file = "/etc/ntp.conf";
+    open(NTPCONFIGFILE,"$ntp_config_file");
+    my @readlines = <NTPCONFIGFILE>;
+    close(NTPCONFIGFILE);
+
+    if( ! grep { /^server\s+${server}/ } @readlines ){
+        push(@readlines, "server $server\n");
+        my $tmp_file = &rand_tmpfile($ntp_config_file);
+        open(TMPNTPCONFIGFILE,">$tmp_file");
+        print TMPNTPCONFIGFILE @readlines;
+        close(TMPNTPCONFIGFILE);
+        # bkp file
+        copy("$ntp_config_file","${ntp_config_file}.bkp");
+        # overwrite tmp file to original file
+        move("$tmp_file","$ntp_config_file");
+
+        # activate ntpd config at boot
+        &cmd_exec("chkconfig ntpd on");
+
+        # restart for activate configuration
+        &cmd_exec("service ntpd restart");
+    }
 }
 
 

@@ -41,7 +41,7 @@ baseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/
 enabled=1
 gpgcheck=0
 gpgkey=
-" >> etc/revisor/conf.d/revisor-c5-x86_64.conf
+" >> etc/revisor/conf.d/revisor-el5-x86_64-updates.conf
 	cat etc/mock/etva-5-x86_64.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\n\n\[groups\]#' > etc/mock/etva-5-x86_64.cfg.new && mv etc/mock/etva-5-x86_64.cfg.new etc/mock/etva-5-x86_64.cfg
 	cat etc/mock/etva-5-x86_64.first.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\n\n\[groups\]#' > etc/mock/etva-5-x86_64.first.cfg.new && mv etc/mock/etva-5-x86_64.first.cfg.new etc/mock/etva-5-x86_64.first.cfg
 elif [ "$JOB_NAME" == "etva6-build" ]; then

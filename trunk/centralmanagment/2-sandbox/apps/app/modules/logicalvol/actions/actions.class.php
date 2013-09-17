@@ -842,6 +842,8 @@ class logicalvolActions extends sfActions
                                 $lv_array = $lv->toArray(BasePeer::TYPE_FIELDNAME);
                                 $lv_array['disk_type'] = $disk_type;
                                 $lv_array['pos'] = $pos;
+                                $lv_array['per_usage'] = $lv_array['virtual_size'] / $lv_array['size'];
+                                $lv_array['per_usage_snapshots'] = $lv->getPerUsageSnapshots();
                                 $lvs[] = $lv_array;
                                 $pos++;
                             }                            
@@ -962,14 +964,19 @@ class logicalvolActions extends sfActions
                                    'snapshot_node_id'=>$etva_lv->getSnapshotNodeId(),
                                    'vm_name'=>$vm_name,'qtip'=>$qtip,'leaf'=>true);
                 } else {
+                    $per_usage = $etva_lv->getVirtualSize() / $etva_lv->getSize();
+                    $lv_iconCls = 'devices-folder';
+                    if( $etva_lv->getPerUsageSnapshots() >= EtvaLogicalvolume::PER_USAGESNAPSHOTS_CRITICAL ) $lv_iconCls = 'devices-folder-error';
                     $lvs[] = array('id'=>$id,'cls'=>$cls,
-                                   'iconCls'=>'devices-folder',
+                                   'iconCls'=>$lv_iconCls,
                                    'text'=>$text,'size'=>$size,
                                    'prettysize'=>$pretty_size,'vgsize'=>$vg_size,
                                    'singleClickExpand'=>true,'type'=>'lv',
                                    'vg'=>$vg,'vgfreesize'=>$vg_freesize,
                                    'format'=>$etva_lv->getFormat(),'uuid'=>$etva_lv->getUuid(),
                                    'vm_state'=>$vm_state,'disabled'=>$disabled,
+                                   'virtual_size'=>$etva_lv->getVirtualSize(),'size_snapshots'=>$etva_lv->getSizeSnapshots(),
+                                   'per_usage'=>$per_usage, 'per_usage_snapshots'=>$etva_lv->getPerUsageSnapshots(),
                                    'vm_name'=>$vm_name,'qtip'=>$qtip,'leaf'=>true);
                 }
             }
@@ -1034,7 +1041,9 @@ class logicalvolActions extends sfActions
         $criteria = new Criteria();
         //$node_lvs = $etva_node->getEtvaLogicalvolumes($criteria);               
         $criteria->add(EtvaNodeLogicalvolumePeer::NODE_ID,$request->getParameter('nid'));
-        $criteria->add(EtvaLogicalvolumePeer::LV,'etva-isos',Criteria::NOT_EQUAL);
+        $criteria->addAnd(EtvaLogicalvolumePeer::LV,'etva-isos',Criteria::NOT_EQUAL);
+        $criteria->addAnd(EtvaLogicalvolumePeer::LV,'etva_isos',Criteria::NOT_EQUAL);
+        $criteria->addAnd(EtvaLogicalvolumePeer::LV,'etvaisos',Criteria::NOT_EQUAL);
         //$criteria->addJoin(EtvaNodeLogicalvolumePeer::LOGICALVOLUME_ID, EtvaLogicalvolumePeer::ID);
         $criteria->addAscendingOrderByColumn(EtvaLogicalvolumePeer::LV);
 
@@ -1102,8 +1111,11 @@ class logicalvolActions extends sfActions
                                    'inconsistent'=>($etva_lv->getInconsistent() || $data_lv->getInconsistent()),
                                    'vm_name'=>$vm_name,'qtip'=>$qtip,'leaf'=>true);
                 } else {
+                    $per_usage = $etva_lv->getVirtualSize() / $etva_lv->getSize();
+                    $lv_iconCls = 'devices-folder';
+                    if( $etva_lv->getPerUsageSnapshots() >= EtvaLogicalvolume::PER_USAGESNAPSHOTS_CRITICAL ) $lv_iconCls = 'devices-folder-error';
                     $lvs[] = array('id'=>$id,'cls'=>$cls,
-                                   'iconCls'=>'devices-folder',
+                                   'iconCls'=>$lv_iconCls,
                                    'text'=>$text,'size'=>$size,
                                    'prettysize'=>$pretty_size,'vgsize'=>$vg_size,
                                    'singleClickExpand'=>true,'type'=>'lv',
@@ -1111,6 +1123,8 @@ class logicalvolActions extends sfActions
                                    'format'=>$etva_lv->getFormat(),'storagetype'=>$etva_vg->getStorageType(),
                                    'vm_state'=>$vm_state,'disabled'=>$disabled,
                                    'inconsistent'=>($etva_lv->getInconsistent() || $data_lv->getInconsistent()),
+                                   'virtual_size'=>$etva_lv->getVirtualSize(),'size_snapshots'=>$etva_lv->getSizeSnapshots(),
+                                   'per_usage'=>$per_usage, 'per_usage_snapshots'=>$etva_lv->getPerUsageSnapshots(),
                                    'vm_name'=>$vm_name,'qtip'=>$qtip,'leaf'=>true);
                 }
             }

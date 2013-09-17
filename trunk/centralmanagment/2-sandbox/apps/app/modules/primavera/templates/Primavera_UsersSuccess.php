@@ -12,36 +12,36 @@ Primavera.Users.Panel = new Ext.extend( Ext.Panel, {
     defaults: { border:false },
     initComponent:function(){
         var service_id = this.service_id;
+
+        var usersGridStore = new Ext.data.Store({
+            url:<?php echo json_encode(url_for('primavera/json'))?>,
+            baseParams: {id:this.service_id,method:'primavera_listusers'},
+            reader: new Ext.data.JsonReader(
+                                {
+                                    idProperty: 'cod'
+                                    ,root: 'data'
+                                    ,fields: [
+                                                {name: 'cod'},
+                                                {name: 'name', mapping: 'Nome'},
+                                                {name: 'email', mapping: 'Email'},
+                                                {name: 'idioma', mapping: 'Idioma'},
+                                                {name: 'perfil', mapping: 'PerfilSugerido'},
+                                                {name: 'suadmin', mapping: 'SuperAdministrador'},
+                                                {name: 'admin', mapping: 'Administrador'},
+                                                {name: 'tecnico', mapping: 'Tecnico'}
+                                            ]
+                                }
+                        )
+        });
         this.items = [
                 new Ext.grid.GridPanel({
-                    id: 'grid-users',
+                    id: 'primavera-users-gridpanel',
                     layout: 'fit',
                     viewConfig: { forceFit: true },
-                    //title: <?php echo json_encode(__('List users')) ?>,
-                    /*width: 720,
-                    height: 560,*/
                     frame: true,
-                    loadMask:true,    
+                    loadMask:true,
                     iconCls: 'icon-grid',
-                    store: new Ext.data.Store({
-                        url:<?php echo json_encode(url_for('primavera/json'))?>,
-                        baseParams: {id:this.service_id,method:'primavera_listusers'},
-                        reader: new Ext.data.JsonReader(
-                                            {
-                                                idProperty: 'cod'
-                                                ,root: 'data'
-                                                ,fields: [
-                                                            {name: 'cod'},
-                                                            {name: 'name', mapping: 'Nome'},
-                                                            {name: 'email', mapping: 'Email'},
-                                                            {name: 'telemovel', mapping: 'Telemovel'},
-                                                            {name: 'suadmin', mapping: 'SuperAdministrador'},
-                                                            {name: 'admin', mapping: 'Administrador'},
-                                                            {name: 'tecnico', mapping: 'Tecnico'}
-                                                        ]
-                                            }
-                                    )
-                    }),
+                    store: usersGridStore,
                     colModel: new Ext.grid.ColumnModel({
                         defaults: {
                             width: 120,
@@ -51,7 +51,8 @@ Primavera.Users.Panel = new Ext.extend( Ext.Panel, {
                             {id: 'cod', header: __('User'), sortable: true, dataIndex: 'cod', width:80 },
                             {header: __('Name'), dataIndex: 'name', width:200},
                             {header: __('Email'), dataIndex: 'email', width:120},
-                            {header: __('Telemovel'), dataIndex: 'telemovel', width:120},
+                            {header: __('Language'), dataIndex: 'idioma', width:120},
+                            {header: __('Profile'), dataIndex: 'perfil', width:120},
                             {header: __('Super Administrator'), dataIndex: 'suadmin', width:60, renderer:function(v){return v ? __('Yes') : __('No');}},
                             {header: __('Administrator'), dataIndex: 'admin', width:60, renderer:function(v){return v ? __('Yes') : __('No');}},
                             {header: __('Tecnico'), dataIndex: 'tecnico', width:60, renderer:function(v){return v ? __('Yes') : __('No');}},
@@ -142,8 +143,8 @@ Primavera.Users.Panel = new Ext.extend( Ext.Panel, {
                                     ref: '../deluserBtn',
                                     iconCls:'icon-user-delete',
                                     disabled: true,
-                                    url: <?php echo(json_encode(url_for('primavera/Primavera_DeleteUser')))?>,
-                                    call:'Primavera.DeleteUser',
+                                    /*url: <?php echo(json_encode(url_for('primavera/Primavera_DeleteUser')))?>,
+                                    call:'Primavera.DeleteUser',*/
                                     scope:this,
                                     handler: function(item) {
                                                         var selected = item.ownerCt.ownerCt.getSelectionModel().getSelected();
@@ -203,35 +204,20 @@ Primavera.Users.Panel = new Ext.extend( Ext.Panel, {
                                                         } // END if selected
                                                     }
                                 }
-                        ]
+                        ],
+                        bbar: new Ext.PagingToolbar({
+                            store: usersGridStore,
+                            displayInfo:true,
+                            pageSize:10
+                        })
+
                 })
             ];
 
         Primavera.Users.Panel.superclass.initComponent.call(this);
     }
     ,loadRecord: function(){
-        /*this.load({url:<?php echo json_encode(url_for('primavera/json'))?>,params:{id:this.service_id,method:'primavera_listusers'} ,waitMsg:'Loading...'
-                        ,success:function(f,a){
-                            if( a.result['data']['users'].length > 0 ){
-                                var users = a.result['data']['users'];
-                                var data = new Array();
-                                for(var i=0; i<users.length; i++){
-                                    var e = new Array(users[i]['cod'],users[i]['Nome'], users[i]['Email'],users[i]['Telemovel']);
-                                    var suadmin = users[i]['SuperAdministrador'] ? __('Yes') : __('No');
-                                    e.push( suadmin );
-                                    var admin = users[i]['Administrador'] ? __('Yes') : __('No');
-                                    e.push( admin );
-                                    var tecnico = users[i]['Tecnico'] ? __('Yes') : __('No');
-                                    e.push( tecnico );
-                                    data.push(e);
-                                }
-                                
-                                Ext.getCmp('grid-users').store.loadData(data);
-                            }
-                        }
-                        ,scope: this
-                    });*/
-        Ext.getCmp('grid-users').store.reload();
+        Ext.getCmp('primavera-users-gridpanel').store.reload();
     }
 });
 
@@ -240,8 +226,8 @@ Primavera.Users.Window = function(config) {
     Ext.apply(this,config);
 
     Primavera.Users.Window.superclass.constructor.call(this, {
-        width:800
-        ,height:600
+        width:600
+        ,height:480
         ,border:false
         ,modal:true
         ,layout:'fit'

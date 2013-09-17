@@ -165,7 +165,7 @@ sub launch_guestagent {
             }
         }
 
-        plog("launch_guestagent: go exit...") if( &debug_level > 3 );
+        plog("launch_guestagent: go exit...");
         POSIX::_exit(0);
     } else {
         $GA_PID = $kidpid;
@@ -265,7 +265,13 @@ sub poll_stats {
                 my $lctime = $tStamps{$dn}{'lastcputime'};
                 my $sctime = $gctime - $lctime;
                 $sctime = 0 if( $sctime < 0 );  # prevent to be negative
-                my $pcpu = $sctime * 100 / ( ($nts - $lts) * 1000 * 1000 * 1000 * $tcpus );
+
+                # total of cpu time
+                my $totalcputime = (($nts - $lts) * 1000 * 1000 * 1000 * $tcpus );
+
+                my $pcpu = 0;
+                $pcpu = $sctime * 100 / $totalcputime if( $totalcputime > 0 );  # test for prevent illegal division
+
                 my $s_pcpu = sprintf('%0.2f',$pcpu);
 
                 plog "domain $dn cpu = $s_pcpu% ($sctime [$gctime] $ncpus) mem = $s_pmem% ($cmem $mmem)" if( &debug_level > 3 );
@@ -439,7 +445,7 @@ sub term_handler {
 
     plog("receive term signal... deamon terminate!");
 
-    plog("...waiting for childs...\n") if( &debug_level > 3 );
+    plog("...waiting for childs...\n");
 
     for my $cpid (@CHILD_PIDS){
         kill SIGHUP, $cpid;
@@ -514,7 +520,7 @@ sub chld_handler_GA {
     my ($kpid) = @_;
 
     if( defined($GA_PID) && ($kpid == $GA_PID) ){
-        plogNow "[info] - virtd - guest agent die... deamon go terminate!";
+        plogNow "[info] - virtd - guest agent die... deamon go terminate! (kpid=$kpid GA_PID=$GA_PID)";
 
         $RUNNING = 0;
 
@@ -605,6 +611,9 @@ sub register_handler {
 
                 # generate server certificates
                 ETVA::Utils::gencerts( $CONF->{'Organization'}, $agent->{'name'} );
+
+                # configure ntp
+                ETVA::Utils::configure_ntp( ETVA::Utils::get_cmip() );
 
                 plog("$now - Agent initialized with success on CentralManagement: id=$agent->{'_cm_insert_id'}");
 
@@ -921,7 +930,7 @@ sub register_handler {
 
 sub keepalive_handler {
 
-    plog( nowStr(), " ", "Keepalive... REGISTER_OK=$REGISTER_OK ... \n");
+    plogNow("Keepalive... REGISTER_OK=$REGISTER_OK ... \n");
 
     if( $REGISTER_OK ){
 

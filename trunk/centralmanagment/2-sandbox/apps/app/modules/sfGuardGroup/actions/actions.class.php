@@ -120,10 +120,15 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
             $error = $this->setJsonError($result);
             return $this->renderText($error);
         }
-        $result = json_encode($result);
 
+        $msg_i18n = $this->getContext()->getI18N()->__('Group saved successfully');
+        $response = array('success'=>true,
+                            'agent' =>  'Central Management',
+                            'response'  => $msg_i18n,
+                            'group_id' => $result['object']['Id'] );
+        $return = json_encode($response);
         $this->getResponse()->setHttpHeader('Content-type', 'application/json');
-        return $this->renderText($result);
+        return $this->renderText($return);
     }
 
     public function executeJsonUpdateField(sfWebRequest $request)
@@ -301,7 +306,7 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
         if($form->isValid())
         {
             try{
-                $form->save();
+                $group = $form->save();
             }catch(Exception $e){
                 $response = array('success' => false,
                               'error'   => 'Could not perform operation',
@@ -310,7 +315,7 @@ class sfGuardGroupActions extends BasesfGuardGroupActions
                 return $response;
             }
 
-            return array('success'=>true);
+            return array('success'=>true, 'object'=>$group->toArray());
 
         }
         else

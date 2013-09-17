@@ -1,0 +1,6 @@
+/var/log/etva-fsagent/fsagentd.log {
+    weekly
+    missingok
+    rotate 4
+    compress
+}

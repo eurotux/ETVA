@@ -50,10 +50,10 @@ Primavera.Main.Form = new Ext.extend( Ext.form.FormPanel, {
                                 },*/
                                 {
                                     items: [
-                                            { fieldLabel: __('N_Empresas'),
+                                            { fieldLabel: __('N. Empresas'),
                                               name: 'nempresas',
                                               xtype:'displayfield' },
-                                            { fieldLabel: __('Seguranca_Activa'),
+                                            { fieldLabel: __('Segurança Activa'),
                                               name: 'segurancaactiva',
                                               xtype:'displayfield' },
                                             { fieldLabel: __('Language'),
@@ -62,16 +62,16 @@ Primavera.Main.Form = new Ext.extend( Ext.form.FormPanel, {
                                             { fieldLabel: __('License'),
                                               name: 'license',
                                               xtype:'displayfield' },
-                                            { fieldLabel: __('N_Utilizadores'),
+                                            { fieldLabel: __('N. Utilizadores'),
                                               name: 'nutilizadores',
                                               xtype:'displayfield' },
-                                            { fieldLabel: __('Seguranca_Pro_Emp_Activa'),
+                                            { fieldLabel: __('Segurança Pro. Emp. Activa'),
                                               name: 'segurancaproempactiva',
                                               xtype:'displayfield' },
-                                            { fieldLabel: __('N_Postos'),
+                                            { fieldLabel: __('N. Postos'),
                                               name: 'npostos',
                                               xtype:'displayfield' },
-                                            { fieldLabel: __('Modo_Seguranca'),
+                                            { fieldLabel: __('Modo Segurança'),
                                               name: 'modoseguranca',
                                               xtype:'displayfield' }
                                     ]
@@ -124,7 +124,7 @@ Primavera.Main.Form = new Ext.extend( Ext.form.FormPanel, {
         this.load({
                     url:<?php echo json_encode(url_for('primavera/json'))?>,
                     params:{id:this.service_id,method:'primavera_info'} ,
-                    waitMsg:'Loading...',
+                    waitMsg: <?php echo json_encode(__('Loading...')) ?>,
                     scope:this,
                     success:function(f,a){
                         var tfree = a.result['data']['totalfreemb'];
@@ -158,6 +158,7 @@ Primavera.Main = function(config){
                     {
                         text: <?php echo json_encode(__('Backup')) ?>,
                         ref: '../backupBtn',
+                        iconCls: 'icon-backup',
                         disabled: false,
                         url: <?php echo(json_encode(url_for('primavera/Primavera_Backup')))?>,
                         call:'Primavera.Backup',
@@ -184,6 +185,7 @@ Primavera.Main = function(config){
                     {
                         text: <?php echo json_encode(__('Restore')) ?>,
                         ref: '../restoreBtn',
+                        iconCls: 'icon-restore',
                         disabled: false,
                         url: <?php echo(json_encode(url_for('primavera/Primavera_Restore')))?>,
                         call:'Primavera.Restore',
@@ -211,6 +213,7 @@ Primavera.Main = function(config){
                     {
                         text: <?php echo json_encode(__('Stop Primavera')) ?>,
                         ref: '../stopBtn',
+                        iconCls: 'icon-stop',
                         disabled: false,
                         scope:this,
                         handler: function(item) {
@@ -218,7 +221,7 @@ Primavera.Main = function(config){
                                                 title: item.text,
                                                 buttons: Ext.MessageBox.YESNOCANCEL,
                                                 scope:this,
-                                                msg: String.format(<?php echo json_encode(__('Stop?')) ?>),
+                                                msg: String.format(<?php echo json_encode(__('Do you wan\'t stop Primavera?')) ?>),
                                                 fn: function(btn){
                                                                 if (btn == 'yes'){
                                                                     var conn = new Ext.data.Connection({
@@ -227,7 +230,7 @@ Primavera.Main = function(config){
                                                                             beforerequest:function(){
                                                                                 Ext.MessageBox.show({
                                                                                     title: <?php echo json_encode(__('Please wait...')) ?>,
-                                                                                    msg: <?php echo json_encode(__('Stop server...')) ?>,
+                                                                                    msg: <?php echo json_encode(__('Stop Primavera...')) ?>,
                                                                                     width:300,
                                                                                     wait:true
                                                                                  //   modal: true
@@ -265,6 +268,7 @@ Primavera.Main = function(config){
                     {
                         text: <?php echo json_encode(__('Start Primavera')) ?>,
                         ref: '../startBtn',
+                        iconCls: 'icon-start',
                         disabled: false,
                         scope:this,
                         handler: function(item) {
@@ -272,7 +276,7 @@ Primavera.Main = function(config){
                                                 title: item.text,
                                                 buttons: Ext.MessageBox.YESNOCANCEL,
                                                 scope:this,
-                                                msg: String.format(<?php echo json_encode(__('Start?')) ?>),
+                                                msg: String.format(<?php echo json_encode(__('Do you wan\'t start Primavera?')) ?>),
                                                 fn: function(btn){
                                                                 if (btn == 'yes'){
                                                                     var conn = new Ext.data.Connection({
@@ -281,7 +285,7 @@ Primavera.Main = function(config){
                                                                             beforerequest:function(){
                                                                                 Ext.MessageBox.show({
                                                                                     title: <?php echo json_encode(__('Please wait...')) ?>,
-                                                                                    msg: <?php echo json_encode(__('Starting server...')) ?>,
+                                                                                    msg: <?php echo json_encode(__('Start Primavera...')) ?>,
                                                                                     width:300,
                                                                                     wait:true
                                                                                  //   modal: true
@@ -320,6 +324,7 @@ Primavera.Main = function(config){
                     {
                         text: <?php echo json_encode(__('Change IP')) ?>,
                         ref: '../chgipBtn',
+                        iconCls: 'icon-config',
                         disabled: false,
                         url: <?php echo(json_encode(url_for('primavera/Primavera_ChangeIP')))?>,
                         call:'Primavera.ChangeIP',
@@ -347,6 +352,7 @@ Primavera.Main = function(config){
                     {
                         text: <?php echo json_encode(__('Users')) ?>,
                         ref: '../usersBtn',
+                        iconCls: 'icon-users',
                         disabled: false,
                         url: <?php echo(json_encode(url_for('primavera/Primavera_Users')))?>,
                         call:'Primavera.Users',
@@ -368,6 +374,20 @@ Primavera.Main = function(config){
                         },
                         handler: function(btn){View.loadComponent(btn);}
                     }
+                    ,'->',
+                    {
+                        text: __('Refresh'),
+                        xtype: 'button',
+                        ref:'../btn_refresh',
+                        tooltip: __('Refresh'),
+                        iconCls: 'x-tbar-loading',
+                        scope:this,
+                        handler: function(button,event)
+                        {                            
+                            var parentCmp = Ext.getCmp((button.scope).id);
+                            parentCmp.fireEvent('refresh',parentCmp);
+                        }
+                    },
                 ];
 
     Primavera.Main.superclass.constructor.call(this, { 

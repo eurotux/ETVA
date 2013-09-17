@@ -162,7 +162,7 @@ Primavera.Restore.Form = new Ext.extend( Ext.form.FormPanel, {
     }
     ,loadRecord: function(){
         this.form.findField('id').setValue(this.service_id);
-        this.load({url:<?php echo json_encode(url_for('primavera/json'))?>,params:{id:this.service_id,method:'primavera_backupinfo'} ,waitMsg:'Loading...'
+        this.load({url:<?php echo json_encode(url_for('primavera/json'))?>,params:{id:this.service_id,method:'primavera_backupinfo'} ,waitMsg:<?php echo json_encode(__('Loading...')) ?>
                         ,success:function(f,a){
                             if( a.result['data']['empresas'].length > 0 ){
                                 var empresas = a.result['data']['empresas'];

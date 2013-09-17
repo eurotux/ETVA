@@ -2113,6 +2113,8 @@ class serverActions extends sfActions
 
             $elements[$i]['has_devices'] = $item->hasDevices();
 
+            if( $nodeID ) $elements[$i]['node_id'] = $nodeID;
+
             $i++;
         }
 

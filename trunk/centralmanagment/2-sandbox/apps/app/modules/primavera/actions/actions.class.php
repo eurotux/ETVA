@@ -46,9 +46,9 @@ class primaveraActions extends sfActions
     {
         $service_id = $request->getParameter('id');
         $etva_service = EtvaServicePeer::retrieveByPK($request->getParameter('id'));
-
         if(!$etva_service){
-            $msg = array('success'=>false,'error'=>'No service with specified id','info'=>'No service with specified id');
+            $msg_i18n = $this->getContext()->getI18N()->__('No service with specified id',array());
+            $msg = array('success'=>false,'error'=>$msg_i18n,'info'=>$msg_i18n);
             $result = $this->setJsonError($msg);
             $this->getResponse()->setHttpHeader('Content-type', 'application/json');
             return $this->renderText($result);
@@ -77,7 +77,8 @@ class primaveraActions extends sfActions
             else
                 $result = $this->setJsonError($ret);
         }else{
-            $info = array('success'=>false,'error'=>'No method implemented! '.$dispatcher_tmpl);
+            $msg_i18n = $this->getContext()->getI18N()->__('No method implemented! %dispatcher%',array('%dispatcher%'=>$dispatcher_tmpl));
+            $info = array('success'=>false,'error'=>$msg_i18n);
             $result = $this->setJsonError($info);
         }
 
@@ -102,7 +103,8 @@ class primaveraActions extends sfActions
         $etva_service = EtvaServicePeer::retrieveByPK($request->getParameter('id'));
 
         if(!$etva_service){
-            $msg = array('success'=>false,'error'=>'No service with specified id','info'=>'No service with specified id');
+            $msg_i18n = $this->getContext()->getI18N()->__('No service with specified id',array());
+            $msg = array('success'=>false,'error'=>$msg_i18n,'info'=>$msg_i18n);
             $result = $this->setJsonError($msg);
             $this->getResponse()->setHttpHeader('Content-type', 'application/json');
             return $this->renderText($result);
@@ -123,7 +125,8 @@ class primaveraActions extends sfActions
         if( !$response['success'] && ( $response['faultactor']!='socket_read' ) ){
             $result = json_decode($response);
         } else {
-            $res = array('success'=>true,'agent'=>$response['agent'], 'response'=>'change ip ok');
+            $msg_i18n = $this->getContext()->getI18N()->__('Change IP ok.',array());
+            $res = array('success'=>true,'agent'=>$response['agent'], 'response'=>$msg_i18n);
             $result = json_decode($res);
         }
 
@@ -158,9 +161,20 @@ class primaveraActions extends sfActions
     public function executePrimavera_EditUser(sfWebRequest $request)
     {
     }
-
-    public function Primavera_main(EtvaServer $etva_server, $method, $params,$mode, $service_id)
+    public function executePrimavera_WindowsNewUser(sfWebRequest $request)
     {
+    }
+
+    private function ignoreWindowsUser( $username )
+    {
+        if( $username == 'INTERACTIVE' ) return true;
+        if( $username == 'Authenticated Users' ) return true;
+        return false;
+    }
+    public function Primavera_main(EtvaServer $etva_server, $r_method, $params,$mode, $service_id)
+    {
+
+        $method = str_replace(array("_cbx","_tree","_grid"),"",$r_method);
 
         // prepare soap info....
         $initial_params = array(
@@ -178,7 +192,7 @@ class primaveraActions extends sfActions
 
             if($mode) $method = $mode;
 
-            switch($method){
+            switch($r_method){
                     case 'primavera_info':
                                 $data = array( 'id'=>$service_id );
                                 $disk_data = (array)$response_decoded['_disk_'];
@@ -237,13 +251,19 @@ class primaveraActions extends sfActions
                                 $data['empresas'] = $empresas;
                                 $return = array( 'success'=>true, 'data'=>$data );
                                 break;
-                    case 'primavera_listusers':
+                    case 'windows_listusers':
                                 $users_data = (array)$response_decoded;
-                                $return = array( 'success'=>true, 'data'=>$users_data );
-                                break;
-                    case 'primavera_viewuser':
-                                $user_data = (array)$response_decoded;
-                                $return = array( 'success'=>true, 'data'=>$user_data );
+                                $husers = array();
+                                foreach($users_data as $eObj){
+                                    $e = (array)$eObj;
+                                    $uname = $e['username'];
+                                    if( !$this->ignoreWindowsUser($uname) ){
+                                        if( !$husers["$uname"] ) $husers["$uname"] = array( 'username'=>"$uname", 'groups'=>array() );
+                                        array_push($husers["$uname"]['groups'], $e['group']);
+                                    }
+                                }
+                                $wusers = array_values($husers);
+                                $return = array( 'success'=>true, 'data'=>$wusers );
                                 break;
                     case 'primavera_listbackupplans':
                                 $bp_data = (array)$response_decoded;
@@ -295,6 +315,7 @@ class primaveraActions extends sfActions
                                 $data['databases'] = $databases;
                                 $return = array( 'success'=>true, 'data'=>$data );
                                 break;*/
+                    case 'windows_createuser':
                     case 'primavera_backup':
                     case 'primavera_fullbackup':
                     case 'primavera_insertbackupplan':
@@ -306,14 +327,38 @@ class primaveraActions extends sfActions
                     case 'primavera_insertuser':
                     case 'primavera_updateuser':
                     case 'primavera_deleteuser':
+                    case 'primavera_updateuser_aplicacoes':
+                    case 'primavera_updateuser_permissoes':
                     case 'change_ip':
                                 $data = array();
-                                $return = array( 'success'=>true, 'data'=>$data, 'response'=>$response_decoded['_okmsg_'] );
+                                $okmsg_i18n = $this->getContext()->getI18N()->__($response_decoded['_okmsg_'],array());
+                                $return = array( 'success'=>true, 'data'=>$data, 'response'=>$okmsg_i18n );
+                                break;
+                    case 'primavera_listempresas_cbx':
+                                $empresas_data = (array)$response_decoded;
+                                $return_empresas = array(array( 'name'=>$this->getContext()->getI18N()->__('All'),'cod'=>'***'));
+                                foreach($empresas_data as $eObj){
+                                    $empresa = (array)$eObj;
+                                    array_push($return_empresas, array('name'=>$this->getContext()->getI18N()->__($empresa['name']),'cod'=>$empresa['name']));
+                                }
+                                $return = array( 'success'=>true, 'data'=>$return_empresas );
+                                break;
+                    case 'primavera_listperfis':
+                    case 'primavera_listusers':
+                    case 'primavera_listempresas':
+                    case 'primavera_list_user_aplicacoes_join':
+                    case 'primavera_list_user_permissoes_join':
+                    case 'primavera_listaplicacoes':
+                    case 'primavera_viewuser':
+                                $return_data = (array)$response_decoded;
+                                $return = array( 'success'=>true, 'data'=>$return_data );
                                 break;
                     default:
+                                $error_i18n = $this->getContext()->getI18N()->__('No action \'%method%\' defined yet.',array('%method%'=>$method));
+                                $info_i18n = $this->getContext()->getI18N()->__('No action \'%method%\' implemented yet',array('%method%'=>$method));
                                 $return = array('success' => false,
-                                                'error'=>'No action \''.$method.'\' defined yet',
-                                                'info'=>'No action \''.$method.'\' implemented yet');
+                                                'error'=>$error_i18n,
+                                                'info'=>$info_i18n);
             }
             return $return;
 
@@ -321,9 +366,10 @@ class primaveraActions extends sfActions
 
             $error_details = $response['info'];
             $error_details = nl2br($error_details);
+            $error_details_i18n = $this->getContext()->getI18N()->__($error_details);
             $error = $response['error'];
 
-            $result = array('success'=>false,'error'=>$error,'info'=>$error_details,'faultcode'=>$response['faultcode']);
+            $result = array('success'=>false,'error'=>$error,'info'=>$error_details_i18n,'faultcode'=>$response['faultcode']);
             return $result;
         }
     }
