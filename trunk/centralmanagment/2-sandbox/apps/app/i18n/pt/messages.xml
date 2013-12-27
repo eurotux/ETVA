@@ -602,12 +602,20 @@
        <target>Política de admissão falha ao tentar iniciar o servidor %name%. %info%</target>
       </trans-unit>
       <trans-unit id="err_cluster_admission_fail_n_hosts_tolerate">
-       <source>Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate.</source>
-       <target>Não foi cumprida a política para tolerância de (%n_hosts_tolerate_value%) host(s) a falha.</target>
+       <source>Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate. The calc of free memory from running servers say that has %free_mem% to garantee %total_mem%.</source>
+       <target>Não foi cumprida a política para tolerância de (%n_hosts_tolerate_value%) host(s) a falha. O cálculo de memória livre apartir dos servidores a correr mostra tem %free_mem% para garantir %total_mem%.</target>
       </trans-unit>
       <trans-unit id="err_cluster_admission_fail_per_resources">
-       <source>Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover.</source>
-       <target>Não foi cumprida a política para (%per_resources_value%) percentagem de recursos reservada a ''failover''.</target>
+       <source>Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover. The calc of free memory from running servers say that has %free_mem% to garantee %total_mem%.</source>
+       <target>Não foi cumprida a política para (%per_resources_value%) percentagem de recursos reservada a ''failover''. O cálculo de memória livre apartir dos servidores a correr mostra tem %free_mem% para garantir %total_mem%.</target>
+      </trans-unit>
+      <trans-unit id="err_cluster_admission_fail_n_hosts_tolerate">
+       <source>Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate. The node info says that has %free_mem% free memory to garantee %total_mem%.</source>
+       <target>Não foi cumprida a política para tolerância de (%n_hosts_tolerate_value%) host(s) a falha. A informação do nó mostra que tem %free_mem% de memória livre para garantir %total_mem%.</target>
+      </trans-unit>
+      <trans-unit id="err_cluster_admission_fail_per_resources">
+       <source>Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover. The node info says that has %free_mem% free memory to garantee %total_mem%.</source>
+       <target>Não foi cumprida a política para (%per_resources_value%) percentagem de recursos reservada a ''failover''. A informação do nó mostra que tem %free_mem% de memória livre para garantir %total_mem%.</target>
       </trans-unit>
       <trans-unit id="err_cluster_admission_fail_max_cpu">
        <source>Number max. of cpus (%max_cpu_Nodes%) exceeded.</source>
@@ -1421,9 +1429,13 @@
         <source>No physical volumes available</source>
         <target>Não foram encontrados physical volumes disponiveis</target>
       </trans-unit>
+      <trans-unit id="pv_shared_inconsistent">
+        <source>Information of the shared physical volumes is reported as inconsistent. %info%</source>
+        <target>Informação dos physical volumes partilhados é inconsistente. %info%</target>
+      </trans-unit>
       <trans-unit id="pv_inconsistent">
-        <source>Shared physical volumes info reported inconsistent. %info%</source>
-        <target>Informação dos physical volumes partilhados inconsistente. %info%</target>
+        <source>Information of the physical volumes is reported as inconsistent. %info%</source>
+        <target>Informação dos physical volumes é inconsistente. %info%</target>
       </trans-unit>
       <trans-unit id="pv_init">
         <source>Initialize physical volume</source>
@@ -1472,10 +1484,6 @@
       <trans-unit id="pv_resize">
         <source>Resize physical volume {0}</source>
         <target>Redimensionar physical volume {0}</target>
-      </trans-unit>
-      <trans-unit id="pv_err_inconsistent">
-        <source>Shared physical volumes info reported inconsistent. %info%</source>
-        <target>Inconsistência encontrada nos physical volumes partilhados. %info%</target>
       </trans-unit>
       <trans-unit id="pv_register_err">
         <source>Physical device %name% could not be registered. %info%</source>
@@ -1569,9 +1577,13 @@
 
       <!-- VOLUME GROUP RELATED -->
       <!--                      -->
+      <trans-unit id="vg_shared_inconsistent">
+        <source>Information of the shared volume groups is reported as inconsistent. %info%</source>
+        <target>Informação dos volume groups partilhados é inconsistente. %info%</target>
+      </trans-unit>
       <trans-unit id="vg_inconsistent">
-        <source>Volume groups info reported inconsistent. %info%</source>
-        <target>Informação dos volume groups inconsistente. %info%</target>
+        <source>Information of the volume groups is reported as inconsistent. %info%</source>
+        <target>Informação dos volume groups é inconsistente. %info%</target>
       </trans-unit>
       <trans-unit id="vg_notavailable">
         <source>No volume groups available</source>
@@ -1765,7 +1777,7 @@
         <target>Tem a certeza que pretende efectuar a operação?</target>
       </trans-unit>
       <trans-unit id="lv_decreasing">
-        <source>When DECREASING size you must BE CAREFULL because you may LOST ALL DATA!</source>
+        <source>When DECREASING size you must BE CAREFULL because you may LOOSE ALL DATA!</source>
         <target>Atenção ao diminuir o tamanho porque pode PERDER DADOS!</target>
       </trans-unit>
       <trans-unit id="curr_lv_size">
@@ -1848,9 +1860,13 @@
         <source>Logical volumes info could not be updated. %info%</source>
         <target>Não foi possível actualizar informação dos logical volumes. %info%</target>
       </trans-unit>
+      <trans-unit id="lv_shared_inconsistent">
+        <source>Information of the shared logical volumes is reported as inconsistent. %info%</source>
+        <target>Informação dos logical volumes partilhados é inconsistente. %info%</target>
+      </trans-unit>
       <trans-unit id="lv_inconsistent">
-        <source>Logical volumes info reported inconsistent. %info%</source>
-        <target>Informação dos logical volumes inconsistente. %info%</target>
+        <source>Information of the logical volumes is reported as inconsistent. %info%</source>
+        <target>Informação dos logical volumes é inconsistente. %info%</target>
       </trans-unit>
       <trans-unit id="lv_notfound">
         <source>Logical volume %name% could not be found</source>
@@ -1971,10 +1987,6 @@
       <trans-unit id="warn_sharedstorage_snapshot">
         <source>Snapshots not supported in shared storage.</source>
         <target>Não é possível fazer snapshots em storage partilhada.</target>
-      </trans-unit>
-      <trans-unit id="lv_err_inconsistent">
-        <source>Shared logical volumes info reported inconsistent. %info%</source>
-        <target>Inconsistência encontrada nos logical volumes partilhados. %info%</target>
       </trans-unit>
       <trans-unit id="lv_ok_soaprefresh">
         <source>Logical volumes info reloaded successfully</source>
@@ -2139,7 +2151,7 @@
       </trans-unit>
       <trans-unit id="ok_node_putmaintenance">
         <source>Node %name% marked in maintenance mode successfully</source>
-        <target>Nó %name% colocado em modo de manutenção com successo</target>
+        <target>Nó %name% colocado em modo de manutenção com sccesso</target>
       </trans-unit>
       <trans-unit id="node_boxtitle_putmaintenance">
         <source>Put node {0} in maintenance</source>
@@ -2237,6 +2249,14 @@
         <source>This will change the node settings.</source>
         <target>Esta opção permite alterar as configurações do nó.</target>
       </trans-unit>
+      <trans-unit id="err_node_check_mdstat">
+        <source>Node %name% receive some errors of RAID system. %info%</source>
+        <target>Nó %name% recebeu a notificação de alguns erros no sistema de RAID. %info%</target>
+      </trans-unit>
+      <trans-unit id="ok_node_check_mdstat">
+        <source>Node %name% RAID system check ok.</source>
+        <target>Check do sistema RAID do nó %name% ok.</target>
+      </trans-unit>
 
       <!-- VLAN STUFF     -->
       <!--                -->
@@ -2295,6 +2315,14 @@
       <trans-unit id="edit_server_name">
         <source>Edit server {0}</source>
         <target>Editar servidor {0}</target>
+      </trans-unit>
+      <trans-unit id="edit_server_changes_tit">
+        <source>Server changes</source>
+        <target>Alterações no servidor</target>
+      </trans-unit>
+      <trans-unit id="edit_server_need_reboot_msg">
+        <source>Some changes will take effect after next restart of virtual server {0}.</source>
+        <target>Algumas alterações serão efectivas após reiniciar o servidor virtual {0}.</target>
       </trans-unit>
       <trans-unit id="load_server_panel">
         <source>Loading server {0} panel...</source>
@@ -2407,7 +2435,7 @@
       </trans-unit>
       <trans-unit id="ok_unassigned">
         <source>Server %name% unassigned from %node% successfully</source>
-        <target>Servidor %name% desassociado do nó %node% com successo</target>
+        <target>Servidor %name% desassociado do nó %node% com sucesso</target>
       </trans-unit>
       <trans-unit id="err_assigned">
         <source>Could not assign server %name% to %node%. %info%</source>
@@ -2415,7 +2443,7 @@
       </trans-unit>
       <trans-unit id="ok_assigned">
         <source>Server %name% assigned to %node% successfully</source>
-        <target>Servidor %name% associado ao nó %node% com successo</target>
+        <target>Servidor %name% associado ao nó %node% com sucesso</target>
       </trans-unit>
 
 
@@ -2554,6 +2582,18 @@
       <trans-unit id="cpus_to_use">
         <source>CPUs to use</source>
         <target>CPUs a usar</target>
+      </trans-unit>
+      <trans-unit id="n_of_cpu_sockets">
+        <source>Number of CPU sockets</source>
+        <target>Número de sockets CPU</target>
+      </trans-unit>
+      <trans-unit id="n_of_cores_per_socket">
+        <source>Number of cores per socket</source>
+        <target>Número de cores por socket</target>
+      </trans-unit>
+      <trans-unit id="n_of_threads_per_core">
+        <source>Number of threads per core</source>
+        <target>Número de threads por core</target>
       </trans-unit>
       <trans-unit id="memory">
         <source>Memory</source>
@@ -2798,6 +2838,13 @@
         <source>Can't change the name when server has snapshots!</source>
         <target>Não é possível alterar o nome quando o servidor tem snapshots!</target>
       </trans-unit>
+
+      <trans-unit id="server_domain_is_not_running">
+        <source>Domain is not running.</source>
+        <target>O servidor não se encontra a correr.</target>
+      </trans-unit>
+
+    
 
       <!-- NETWORK INTERFACES -->
       <!--                    -->
@@ -4087,6 +4134,10 @@
             <source>Device Type</source>
             <target>Tipo</target>
         </trans-unit>
+        <trans-unit id="device_controller_type">
+            <source>Device Controller Type</source>
+            <target>Controladora</target>
+        </trans-unit>
         <trans-unit id="devices">
             <source>Devices</source>
             <target>Dispositivos</target>
@@ -4189,6 +4240,79 @@
         <source>Create</source>
         <target>Criar</target>
       </trans-unit>
+
+        <!-- queue cm -->
+
+      <trans-unit id="running_tasks_tit">
+        <source>Running tasks</source>
+        <target>Tarefas execução</target>
+      </trans-unit>
+
+      <trans-unit id="task_created_ok">
+        <source>Task '%task%' created successfully.</source>
+        <target>Tarefa '%task%' criada com sucesso.</target>
+      </trans-unit>
+
+      <trans-unit id="task_aborted_ok">
+        <source>Task aborted successfully.</source>
+        <target>Tarefa abortada com sucesso.</target>
+      </trans-unit>
+ 
+      <trans-unit id="task_node_check_desc">
+        <source>Check node state</source>
+        <target>Verificação de estado do nó</target>
+      </trans-unit>
+ 
+      <trans-unit id="task_server_start_desc">
+        <source>Start the server</source>
+        <target>Iniciar servidor</target>
+      </trans-unit>
+ 
+      <trans-unit id="task_server_stop_desc">
+        <source>Shutdown the server</source>
+        <target>Parar servidor</target>
+      </trans-unit>
+ 
+      <trans-unit id="task_server_create_desc">
+        <source>Create new server</source>
+        <target>Criar novo servidor</target>
+      </trans-unit>
+ 
+      <trans-unit id="task_server_check_desc">
+        <source>Check server status</source>
+        <target>Verificar estado do servidor</target>
+      </trans-unit>
+ 
+      <trans-unit id="task_logicalvol_create_desc">
+        <source>Create logical volume</source>
+        <target>Criar logical volume</target>
+      </trans-unit>
+ 
+      <trans-unit id="task_logicalvol_clone_desc">
+        <source>Clone logical volume</source>
+        <target>Clonar logical volume</target>
+      </trans-unit>
+ 
+      <trans-unit id="err_create_task">
+        <source>Unable to create new task!</source>
+        <target>Não foi possível criar a nova tarefa!</target>
+      </trans-unit>
+ 
+      <trans-unit id="creating_new_task">
+        <source>Creating new task...</source>
+        <target>A criar nova tarefa...</target>
+      </trans-unit>
+ 
+      <trans-unit id="err_abort_task">
+        <source>Unable to abort task!</source>
+        <target>Não foi possível abortar a tarefa!</target>
+      </trans-unit>
+ 
+      <trans-unit id="aborting_task">
+        <source>Aborting task...</source>
+        <target>A abortar tarefa...</target>
+      </trans-unit>
+ 
     </body>
   </file>
 </xliff>

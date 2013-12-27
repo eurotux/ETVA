@@ -1,7 +1,7 @@
 %{!?rhel:%define rhel   %(cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//')}
 
 Name:           virtagent
-Version:        2.0.0
+Version:        2.1.0
 Release: 5751
 Summary:        Virtualization Agent
 License:        GPL
@@ -25,6 +25,9 @@ Requires:  daemontools
 Requires:  qemu-img >= 0.14
 
 Requires:  samba-client
+%if 0%{?rhel} == 6
+Requires:  cifs-utils
+%endif
 Requires:  nfs-utils
 
 Requires:  perl-Sys-Virt >= 0.2.0
@@ -51,6 +54,7 @@ Requires:  libguestfs-tools
 %if 0%{?rhel} == 6
 Requires: perl-Class-Inspector
 %endif
+Requires:  perl-Time-HiRes
 
 Requires:  logrotate
 Requires:  which

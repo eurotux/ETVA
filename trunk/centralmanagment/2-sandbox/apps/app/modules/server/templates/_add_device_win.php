@@ -97,40 +97,8 @@ Server.Devices.Form = function(obj){
         }
         // listeners
         ,listeners:{
-//            // sets raw value to concatenated last and first names
-//             select:{scope:this,fn:function(combo, record, index) {
-//                var size = byte_to_MBconvert(record.get('size'),2,'floor');
-//                combo.setRawValue(record.get('name') + ' (' + size+' MB)');
-//                //Ext.getCmp('total-vg-size').setValue(size);
-//                this.totalvgsize.setValue(size);
-//                //Ext.getCmp('form-lvsize').setValue(size);
-//                this.lvsize.setValue(size);
-//                
-//            }}
-//            // repair raw value after blur
-//            ,blur:function() {                
-//                var val = this.getRawValue();
-//                this.setRawValue.defer(1, this, [val]);
-//            }
-//
-//            // set tooltip and validate
-//            ,render:function() {
-//                this.el.set(
-//                    //{qtip:'Type at least ' + this.minChars + ' characters to search in volume group'}
-//                    {qtip: <?php echo json_encode(__('Choose volume group')) ?>}
-//                );
-//                //this.validate();
-//            }
-//            // requery if field is cleared by typing
             keypress:{buffer:100, fn:function() {
-//                if(!this.getRawValue()) {
-//                    this.doQuery('', true);
-//                }
-            
-                //TODO carregar o dev type
-//                alert("key pressed");
             }}
-//        
         }
         // label
         ,fieldLabel: <?php echo json_encode(__('Devices')) ?>
@@ -165,21 +133,52 @@ Server.Devices.Form = function(obj){
         'select':function(combo, record, index){
             console.log(combo.getValue());
             devs = Ext.getCmp('devs-combo');
-//            devs.devtype = combo.getValue();
-//            var store = devs.getStore();
-//            store.setBaseParam('devtype', 'pooop');
-//            store.setBaseParam('devtype', combo.getValue());
-//            store.reload();
-            devs.changeDevType(combo.getValue());
+            devtype = combo.getValue();
+            devs.changeDevType(devtype);
+
+            if( devtype == 'usb' ){
+                Ext.getCmp('devs-controller-combo').setDisabled(false);
+            } else {
+                Ext.getCmp('devs-controller-combo').setDisabled(true);
+            }
+            Ext.getCmp('devs-controller-combo').reset();
+            Ext.getCmp('devs-controller-combo').getStore().filter('type',devtype);
+
         }
     });
 
+    this.dvcontroller = new Ext.form.ComboBox({
+        id: 'devs-controller-combo',
+        hiddenName: 'devcontroller',    //This is the name of a hidden HTML input field which is used to
+        //store and submit the separate value of the combo if the descriptive text is not
+        //what is to be submitted
+        fieldLabel: <?php echo json_encode(__('Device Controller Type')) ?>,
+        mode: 'local'
+        ,lastQuery:''
+        //,allowBlank:false
+        ,triggerAction: 'all'
+        ,editable: false
+        ,typeAhead: false
+        ,disabled: true
+//        ,readOnly: true
+        ,store: new Ext.data.ArrayStore({
+            fields: ['type', 'name', 'value']
+            ,data : [
+                ['usb','USB 1.x (Default)',''],
+                ['usb','USB 2.0','usb2']
+            ]
+        })
+        ,displayField:'name',
+        valueField:'value',
+        width: 120
+    });
+    
     // field set
     var allFields = new Ext.form.FieldSet({
         autoHeight:true,
         border:false,
-        labelWidth:60,defaults:{msgTarget: 'side'},
-        items: [this.dvtypes, this.devs]
+        labelWidth:120,defaults:{msgTarget: 'side'},
+        items: [this.dvtypes, this.dvcontroller, this.devs]
     });
 
     // define window and pop-up - render formPanel
@@ -224,6 +223,7 @@ Ext.extend(Server.Devices.Form, Ext.form.FormPanel, {
         if(res){
             // I already have this device
         }else{
+            record.set('controller', this.dvcontroller.getValue());
             store.add([record]);
         }
         
@@ -251,7 +251,8 @@ Ext.extend(Server.Devices.Form, Ext.form.FormPanel, {
                 'description': record.get('description'),
                 'bus'       : record.get('bus'),
                 'slot'      : record.get('slot'),
-                'function'  : record.get('function')
+                'function'  : record.get('function'),
+                'controller'  : this.dvcontroller.getValue()
             };
 
             var conn = new Ext.data.Connection({
@@ -309,44 +310,14 @@ Ext.extend(Server.Devices.Form, Ext.form.FormPanel, {
 Server.Devices.Editor = Ext.extend(Ext.Window,{
     title: <?php echo json_encode(__('Add device')) ?>,
     width: 400,
-    height: 170,
+    height: 190,
 //    closeAction: 'hide',
     layout: 'fit',
     modal:true,
 
-////     id: 'vg-create-win',
-//     width:550,
-//     height:350,
-//     iconCls: 'icon-window',
-//     bodyStyle: 'padding:10px;',
-//     shim:false,
-//     border:true,
-//     constrainHeader:true,
-//     layout: 'fit'
-////     ,items: [centerPanel]
-//     ,tools: [{
-//         id:'help',
-//         qtip: __('Help'),
-//         handler:function(){
-//             View.showHelp({
-//                 anchorid:'help-vol-group-add',
-//                 autoLoad:{ params:'mod=volgroup'},
-//                 title: <?php echo json_encode(__('Physical Volume Help')) ?>
-//             });
-//         }
-//     }]
-
-
     initComponent:function(){
         var form = new Server.Devices.Form({
             server_id: this.server_id 
-//                            domain  :this.domain,
-//                            maxQuota:this.maxQuota,
-//                            mailbox :this.mailbox,
-//                            service_id:this.service_id,
-//                            parent_grid:this.parent_grid,
-//                            changeFreeMb:this.changeFreeMb,
-//                            end:this.end
         });
 
         this.items = [form];
@@ -358,31 +329,5 @@ Server.Devices.Editor = Ext.extend(Ext.Window,{
     }
     
 })
-
-//Server.Devices.Editor = Ext.extend(Ext.Window,{
-////    title: <?php echo json_encode(__('Manage Mailbox')) ?>,
-//    width: 600,
-//    height: 400,
-//    closeAction: 'hide',
-//    layout: 'fit',
-//    initComponent:function(){
-//        alert("EDITOR");
-//        var form = new Server.Devices.Edit.Form({
-//                            domain  :this.domain,
-//                            maxQuota:this.maxQuota,
-//                            mailbox :this.mailbox,
-//                            service_id:this.service_id,
-//                            parent_grid:this.parent_grid,
-//                            changeFreeMb:this.changeFreeMb,
-//                            end:this.end
-//                        });
-//        this.items = [form];
-//        Server.Devices.Editor.superclass.initComponent.call(this);
-//    }
-//    ,end:function(){
-//        this.hide();
-//        this.ownerCt.hide();
-//    }
-//})
 
 </script>

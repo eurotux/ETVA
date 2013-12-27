@@ -1630,8 +1630,21 @@
             'format':lvformat_value,
             'size':size};
 
+        var nodeid = config.nodeId;
+
         if( storage['vm_lv_snapshotusage'] ) params['persnapshotusage'] = storage['vm_lv_snapshotusage'];
 
+        AsynchronousJob.Functions.Create( 'logicalvol', 'create',
+                                            {'name':lvname, 'volumegroup': vgname, 'size':size},
+                                            {'node': nodeid, 'format':lvformat_value},
+                                            function(resp,opt) { // success fh
+                                                var response = Ext.util.JSON.decode(resp.responseText);
+                                                var disks=[{'disk_type':storage['disk_type'], 'from_task_id': response['asynchronousjob']['Id']}];
+                                                data['disks'] = disks;
+                                                data['depends'] = response['asynchronousjob']['Id'];
+                                                vmcreate(data);
+                                            });
+        /*
         var conn = new Ext.data.Connection({
             listeners:{
                 // wait message.....
@@ -1676,6 +1689,7 @@
                     icon: Ext.MessageBox.ERROR});
             }
         });// END Ajax request
+        */
 
     }
     
@@ -1701,6 +1715,32 @@
 
     function vmcreate(send_data)
     {
+        var disks = [];
+        var disks_data_arr = send_data['disks'];
+        for(var i=0; i<disks_data_arr.length; i++){
+            var disk = disks_data_arr[i];
+            disks.push(Ext.encode(disk));
+        }
+
+        var networks = [];
+        var networks_data_arr = send_data['networks'];
+        for(var i=0; i<networks_data_arr.length; i++){
+            var network = networks_data_arr[i];
+            networks.push(Ext.encode(network));
+        }
+        
+        AsynchronousJob.Functions.Create( 'server', 'create',
+                                            { 'name': send_data['name'],
+                                                'vm_type': send_data['vm_type'], 'vm_os': send_data['vm_os'],
+                                                'mem': send_data['mem'], 'vcpu': send_data['vcpu'], 'boot': send_data['boot'] },
+                                            { 'node': config.nodeId, 'location': send_data['location'],
+                                                'description': send_data['description'], 'ip': send_data['ip'],
+                                                'disks': disks, 'networks': networks},
+                                            function(resp,opt) { // success fh
+                                                var response = Ext.util.JSON.decode(resp.responseText);
+                                                console.log(response);
+                                            },null, send_data['depends'] );
+        /*
         var conn = new Ext.data.Connection({
                 listeners:{
                     // wait message.....
@@ -1750,8 +1790,7 @@
 
             }
         }); // END Ajax request
-
-
+        */
     }
 
 

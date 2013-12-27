@@ -1093,6 +1093,8 @@ class nodeActions extends sfActions
                 return $error;
             }
 
+            $node_name = $etva_node->getName();
+
             /*
              * on node soapupdate check if field is state and update keepalive date
              */
@@ -1104,6 +1106,13 @@ class nodeActions extends sfActions
                     //$data['state'] = $etva_node->getState();
                     $data['state'] = EtvaNode_VA::calcState($etva_node);
                 }
+            }
+
+            $check_mdstat = $request->getParameter('checkmdstat');
+            if( $check_mdstat ){
+
+                $node_va = new EtvaNode_VA($etva_node);
+                $node_va->updateLastMessage($check_mdstat);
             }
             
             $etva_node->fromArray($data, BasePeer::TYPE_FIELDNAME);

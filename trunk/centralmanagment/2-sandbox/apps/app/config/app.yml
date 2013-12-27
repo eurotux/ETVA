@@ -87,7 +87,7 @@ all:
     dir: '%SF_DATA_DIR%/rra' 
   sf_guard_plugin:
     import_encrypted_passwords: true
-  dbrequired: 2.0
+  dbrequired: 2.1
   cron:
     alert_dir: '/var/run/etva_etvm'
     log_dir: '/var/log/etva_etvm'

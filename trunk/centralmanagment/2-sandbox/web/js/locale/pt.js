@@ -201,5 +201,21 @@ var i18n = {
     'Domain NetBIOS Name'       : 'Nome do domínio NetBIOS',
     'AD Server Name'            : 'Nome do servidor AD',
     'Domain Administrator Username' : 'Utilizador administrador de domínio',
-    'Domain Administrator Password' : 'Password administrador de domínio'
+    'Domain Administrator Password' : 'Password administrador de domínio',
+    'Type'                      : 'Tipo',
+    'Created'                   : 'Criado',
+    'Updated'                   : 'Actualizado',
+    'Task'                      : 'Tarefa',
+    'Status'                    : 'Estado',
+    'Message'                   : 'Mensagem',
+    'success'                   : 'successo',
+    'queued'                    : 'em queue',
+    'leased'                    : 'a processar',
+    'pending'                   : 'pendente',
+    'waiting'                   : 'em espera',
+    'aborted'                   : 'abortado',
+    'invalid'                   : 'inválido',
+    'error'                     : 'erro',
+    'finished'                  : 'concluído',
+    'Abort'                     : 'Abortar'
 };

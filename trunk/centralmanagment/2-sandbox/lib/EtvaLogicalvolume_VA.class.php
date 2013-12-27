@@ -470,7 +470,7 @@ class EtvaLogicalvolume_VA
                 if(!empty($bulk_update)){
                     $errors = $this->get_missing_lv_devices();
                     $msg_i18n = $errors ? $errors['message'] :
-                                    sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>' processResponse'));
+                                    sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_SHARED_INCONSISTENT_,array('%info%'=>' processResponse'));
                     $response = array( 'success'=>false, 'agent'=>$etva_node->getName(), 'info'=>$msg_i18n, 'msg_i18n'=>$msg_i18n );
                     $ok = 0;
                 }
@@ -594,7 +594,7 @@ class EtvaLogicalvolume_VA
                 if(!empty($bulk_update)){
                     $errors = $this->get_missing_lv_devices();
                     $msg_i18n = $errors ? $errors['message'] :
-                                    sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>'processResizeResponse'));
+                                    sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_SHARED_INCONSISTENT_,array('%info%'=>'processResizeResponse'));
                     $response = array( 'success'=>false, 'agent'=>$etva_node->getName(), 'info'=>$msg_i18n, 'msg_i18n'=>$msg_i18n );
                     $ok = 0;
                 }
@@ -1229,7 +1229,7 @@ class EtvaLogicalvolume_VA
             }
 
             if( $inconsistent ){
-                $message = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>sprintf('device "%s" with uuid "%s"',$lv->getLvdevice(),$lv->getUuid())));
+                $message = sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_SHARED_INCONSISTENT_,array('%info%'=>sprintf('device "%s" with uuid "%s"',$lv->getLvdevice(),$lv->getUuid())));
                 sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(),'event.log',array('message' =>$message,'priority'=>EtvaEventLogger::ERR)));
                 $error['node'] = array( 'name'=>$etva_node->getName(), 'id'=>$etva_node->getId(), 'uuid'=>$etva_node->getUuid() );
                 $error['device'] = $lv->getLvdevice();
@@ -1298,7 +1298,7 @@ class EtvaLogicalvolume_VA
             if(!empty($bulk_update)){
                 $errors = $this->get_missing_lv_devices();
                 $msg_i18n = $errors ? $errors['message'] :
-                                sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>' processResponse'));
+                                sfContext::getInstance()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_SHARED_INCONSISTENT_,array('%info%'=>' processResponse'));
                 $response = array( 'success'=>false, 'agent'=>$etva_node->getName(), 'info'=>$msg_i18n, 'msg_i18n'=>$msg_i18n );
                 $ok = 0;
             }

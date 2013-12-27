@@ -73,6 +73,8 @@ use Fcntl ':flock';
 use Time::localtime;
 use File::stat;
 
+use Time::HiRes qw(gettimeofday);
+
 use constant {
     NODE_ACTIVE => 1,
     NODE_INACTIVE => 0,
@@ -88,8 +90,15 @@ my $PARENT = 1;
 my $VM_DIR = "./vmdir";
 my $CONF;
 my $TMP_DIR = "/var/tmp";
+
 my $VIRTIO_CHANNELS_SOCKETS_DIR = "/var/tmp/virtagent-virtio/virtio-sockets-dir";
 my $VIRTIO_CHANNELS_STATE_DIR = "/var/tmp/virtagent-virtio/virtio-state-dir";
+
+# guest management sockets dir
+my $GUEST_MANAGEMENT_SOCKETS_DIR = "/var/tmp/virtagent-guestmngt-sockets-dir";
+
+# guest console sockets dir
+my $GUEST_CONSOLE_SOCKETS_DIR = "/var/tmp/virtagent-console-sockets-dir";
 
 sub AUTOLOAD {
     my $method = $AUTOLOAD;
@@ -636,6 +645,10 @@ sub vmLoad {
         $A{'cpu'}{'topology'} = { 'sockets'=>$p{'sockets'}, 'cores'=>$p{'cores'}, 'threads'=>$p{'threads'} };
     }
 
+    if( my $controllers = $p{'controllers'} ){
+        $A{'Controllers'} = [ @$controllers ];
+    }
+
     # for kvm add channel and controller 
     if( !$p{'nochannel'} && ($self->get_hypervisor_type() eq 'kvm') ){
         my $controller = $A{'Controllers'} || [];
@@ -644,7 +657,25 @@ sub vmLoad {
         my $channelpath = "${VIRTIO_CHANNELS_SOCKETS_DIR}/$name";
         my $channels = $A{'Channels'} || [];
         $A{'Channels'} = [ @$channels, { 'type'=>'unix', 'target'=>{ 'type'=>'virtio', 'name'=>'com.redhat.rhevm.vdsm' }, 'source'=>{ 'mode'=>'bind', 'path'=>$channelpath } } ];
-        
+    }
+
+    # add serial ports
+    # GUEST_MANAGEMENT_SOCKETS_DIR
+    if( !$p{'noserial'} ){
+        my $serials = $A{'Serials'} || [];
+        my $i = scalar(@$serials);
+
+        if( ($p{'name'} =~ m/etfw/i) || ($p{'description'} =~ m/etfw/i) ){      # for ETFW virtual machines
+            $i++;
+
+            # add console serial port
+            my $console_serial_socketpath = "${GUEST_CONSOLE_SOCKETS_DIR}/$name";
+            push(@$serials, { 'type'=>'unix', 'source'=>{ 'mode'=>'bind', 'path'=>$console_serial_socketpath }, 'target'=>{ 'port'=>$i } });
+        }
+
+        $i++;
+        my $serialsocketpath = "${GUEST_MANAGEMENT_SOCKETS_DIR}/$name";
+        $A{'Serials'} = [ @$serials, { 'type'=>'unix', 'source'=>{ 'mode'=>'bind', 'path'=>$serialsocketpath }, 'target'=>{ 'port'=>$i } } ];
     }
 
     my $VM = VirtMachine->new( %A );
@@ -758,6 +789,7 @@ sub vmLoad {
     $self->{'_lastuuid'} = $uuid;
     $self->{'_lastdomain'} = $self->{'_lastname'} = $name;
 
+    #plogNow("[DEBUG] VM=",Dumper($VM));
     return $VM;
 }
 
@@ -993,8 +1025,6 @@ sub prep_network_params {
 
 sub prep_hostdev_obj{
     my %p = @_;
-    plog('PREP_HOSTDEV_OBJ');
-    plog($p{'type'});
 
     if($p{'type'} eq 'usb'){
         unless($p{'vendor'} =~ /0x/){
@@ -1036,6 +1066,41 @@ sub prep_hostdevs_params {
         my $devs = $p{'hostdevs'};
         if( !ref($devs) ){
             $p{'hostdevs'} = &prep_comma_sep_fields($devs, \&prep_hostdev_obj);
+        }
+    }
+
+    return wantarray() ? %p : \%p;
+}
+
+sub prep_controllers_params {
+    my $self = shift;
+    my (%p) = @_;
+
+    if( defined $p{'controllers'} ){
+        my $controller = $p{'controllers'};
+        if( !ref($controller) ){
+            #plogNow("[DEBUG] prep_controllers_params controller=",$controller);
+            my @aux = &prep_comma_sep_fields($controller);
+
+            my %indexByType = ();
+            my $controllers = [];
+            foreach my $c (@aux){
+                my $t = $c->{'type'};
+                if( $t eq 'usb2' ){   # add usb 2.0
+                    $t = 'usb';
+                    my $i = $indexByType{"$t"}++;
+                    push( @$controllers,
+                                        { 'type'=>"$t", 'index'=>"$i", 'model'=>'ich9-ehci1' },
+                                        { 'type'=>"$t", 'index'=>"$i", 'model'=>'ich9-uhci1' },
+                                        { 'type'=>"$t", 'index'=>"$i", 'model'=>'ich9-uhci2' },
+                                        { 'type'=>"$t", 'index'=>"$i", 'model'=>'ich9-uhci3' } );
+                } else {
+                    my $i = $indexByType{"$t"}++;
+                    push( @$controllers, { %$c, 'index'=>"$i" } );
+                }
+            }
+            #plogNow("[DEBUG] prep_controllers_params controllers=",Dumper($controllers));
+            $p{'controllers'} = $controllers;
         }
     }
 
@@ -1101,6 +1166,8 @@ sub prep_devices_params {
     %p = $self->prep_filesystem_params(%p);
     # prepare hostdevs
     %p = $self->prep_hostdevs_params(%p);
+    # prepare controllers
+    %p = $self->prep_controllers_params(%p);
 
     # other stuff
 
@@ -1546,9 +1613,9 @@ sub vmReload {
                     my $already_attached = 0;
                     my ($oi,$oHD) = $rVM->get_hostdev_i( 'type'=>$HD->{'type'}, %$HD );
                     if( $oHD ){
-                        plog "vmReload hostdev exists type=",$HD->{'type'} if( &debug_level > 3 );
+                        plogNow "[DEBUG] vmReload hostdev exists type=",$HD->{'type'} if( &debug_level > 3 );
                         # dont touch
-                        $oHD->set_dontdetach(1);
+                        $oHD->{'dontdetach'} = 1;
                     } else {
                         my $Er = $self->attachHostdev( 'uuid'=>$uuid, name => $name,
                                                         devices => { hostdev => {%$HD} } );
@@ -1933,7 +2000,7 @@ sub mount_isosdir {
                 $IP_CENTRAL_MANAGEMENT ||= ETVA::Utils::get_cmip();
                 if( $IP_CENTRAL_MANAGEMENT ne '127.0.0.1' ){    # not localhost
                     open(FT,">>/etc/fstab");
-                    print FT "$IP_CENTRAL_MANAGEMENT:$CONF->{'isosdir'} $CONF->{'isosdir'} nfs     soft,timeo=600,retrans=2,nosharecache        0 0","\n";
+                    print FT "$IP_CENTRAL_MANAGEMENT:$CONF->{'isosdir'} $CONF->{'isosdir'} nfs     soft,timeo=600,retrans=2,nosharecache,_netdev        0 0","\n";
                     close(FT);
                     $do_mount = 1;
                 }
@@ -1954,6 +2021,10 @@ sub loadconf {
     $TMP_DIR = $CONF->{'tmpdir'} if( $CONF->{'tmpdir'} );
     $VIRTIO_CHANNELS_SOCKETS_DIR = $ENV{'ga_socket_dir'} || $CONF->{'ga_socket_dir'} || "$TMP_DIR/virtagent-virtio/virtio-sockets-dir";
     $VIRTIO_CHANNELS_STATE_DIR = $ENV{'ga_state_dir'} || $CONF->{'ga_state_dir'} || "$TMP_DIR/virtagent-virtio/virtio-state-dir";
+
+    $GUEST_MANAGEMENT_SOCKETS_DIR = $ENV{'gm_socket_dir'} || $CONF->{'gm_socket_dir'} || "$TMP_DIR/virtagent-guestmngt-sockets-dir";
+    $GUEST_CONSOLE_SOCKETS_DIR = $ENV{'guest_console_socket_dir'} || $CONF->{'guest_console_socket_dir'} || "$TMP_DIR/virtagent-console-sockets-dir";
+
     if( !$ENV{'ga_socket_dir'} ){
         $ENV{'ga_socket_dir'} = $VIRTIO_CHANNELS_SOCKETS_DIR;
     }
@@ -1965,6 +2036,18 @@ sub loadconf {
     }
     if( ! -d "$VIRTIO_CHANNELS_STATE_DIR" ){
         mkpath("$VIRTIO_CHANNELS_STATE_DIR");
+    }
+    if( !$ENV{'gm_socket_dir'} ){
+        $ENV{'gm_socket_dir'} = $GUEST_MANAGEMENT_SOCKETS_DIR;
+    }
+    if( ! -d "$GUEST_MANAGEMENT_SOCKETS_DIR" ){
+        mkpath("$GUEST_MANAGEMENT_SOCKETS_DIR");
+    }
+    if( !$ENV{'guest_console_socket_dir'} ){
+        $ENV{'guest_console_socket_dir'} = $GUEST_CONSOLE_SOCKETS_DIR;
+    }
+    if( ! -d "$GUEST_CONSOLE_SOCKETS_DIR" ){
+        mkpath("$GUEST_CONSOLE_SOCKETS_DIR");
     }
     &set_debug_level( $CONF->{'debug'} || 0 );
 
@@ -4112,6 +4195,16 @@ sub create_storage_pool {
         return retErr("_ERR_CREATE_STORAGE_POOL_","Error creating storage pool: $@");
     }
 
+    # CMAR: force to be always autostart
+    my $autostart = $p{'autostart'};
+    $autostart = 1 if( not defined $autostart );
+    if( $autostart ){
+        eval { $SP->set_autostart($autostart); };
+        if( $@ ){
+            plogNow("_ERR_CREATE_STORAGE_POOL_"," Error make storage pool autostart: $@");
+        }
+    }
+
     my %P = $self->storage_pool_to_hash( $SP );
     return retOk("_CREATE_STORAGE_POOL_OK_","Storage Pool created successful.","_RET_OBJ_",\%P);
 }
@@ -4878,71 +4971,108 @@ sub vm_ovf_export {
 #    print $sock 'Content-disposition: attachment; filename="',$fn_ova,'"',"\n";
 #    print $sock 'Content-Type: application/x-tar',"\n\n";
 
-    plog( "fn_ova=$fn_ova fn_ovf=$fn_ovf" );
+    plogNow( "vm_ovf_export fn_ova=$fn_ova fn_ovf=$fn_ovf" );
 
     my ($bkp_randtmpdir, $bkp_randtmpdir_ori);
 
-    if( $p{'location'} || $p{'snapshot'} || $p{'_do_not_generate_tar_'} ){
+    if( $p{'location'} || $p{'snapshot'} || $p{'do_not_generate_tar'} ){
         # create tmp dir
         $bkp_randtmpdir = $bkp_randtmpdir_ori = ETVA::Utils::rand_tmpdir("${TMP_DIR}/.virtd-export-backup-${name}");
     }
 
     my $tar = new ETVA::ArchiveTar( 'handle'=>$sock );
 
+    my $E;  # error object
+
     if( $p{'location'} ){
-        my $E = $bkp_randtmpdir = &_pre_copy_backup_to_location( %p, 'backup_dir'=>$bkp_randtmpdir );
-        if( isError($E) ){
-            return wantarray() ? %$E: $E;
+        $E = my $bkp_randtmpdir_aux = &_pre_copy_backup_to_location( %p, 'backup_dir'=>$bkp_randtmpdir );
+        if( !isError($E) ){
+            $bkp_randtmpdir = $bkp_randtmpdir_aux;
+            my $tar_randtmpfile = ETVA::Utils::rand_tmpfile("${bkp_randtmpdir}/ovf-export-${name}") . ".tar";
+            $tar = new ETVA::ArchiveTar( 'file'=>$tar_randtmpfile );
         }
-        my $tar_randtmpfile = ETVA::Utils::rand_tmpfile("${bkp_randtmpdir}/ovf-export-${name}") . "tar";
-        $tar = new ETVA::ArchiveTar( 'file'=>$tar_randtmpfile );
     }
 
-    $tar->add_file( 'name'=>"$fn_ovf", 'path'=>'', 'data'=>$F{'xml'}, type=>ETVA::ArchiveTar::FILE, 'mode'=>33204, 'mtime'=>now()  );
+    if( !isError($E) ){
 
-    for my $D (@{$F{'Disks'}}){ 
-        next if( $D->get_device() eq 'cdrom' ); # ignore CDROM
-
-        my $oripath = $D->get_path();
-        if( -l $oripath ){
-            $oripath = abs_path($oripath);
+        # clean old backups
+        if( $p{'clean_old_backups'} && $p{'location'} ){
+            # do the clean up
+            &_clean_old_backups('vm_name'=>$name, 'n_days'=>$p{'n_days'}, 'backup_dir'=>$bkp_randtmpdir);
         }
-        my $fname = $D->get_filename();
 
-        my $bkp_path = $oripath;
-        if( my $snapshot = $p{'snapshot'} ){    # if has snapshot do export from snapshot
-            $bkp_path = "${bkp_randtmpdir}/${fname}";
-            plog( "vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... " );
-            my $E = $self->backupsnapshot('olv'=>$oripath, 'slv'=>$snapshot, 'backup'=>$bkp_path, 'use_qemu'=>$p{'use_qemu'} );
-            if( isError($E) ){
-                plog( "vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... ERROR!" );
-                return wantarray() ? %$E: $E;
+        # generate backup fullpath based on date now string
+        my $dtnow_str = &nowStr(0,'%Y%m%d');
+        my $backup_fullpath = ETVA::Utils::rand_tmpdir("${bkp_randtmpdir}/vm-backup-${name}/${dtnow_str}");
+
+        if( $backup_fullpath ){
+            $tar->add_file( 'name'=>"$fn_ovf", 'path'=>'', 'data'=>$F{'xml'}, type=>ETVA::ArchiveTar::FILE, 'mode'=>33204, 'mtime'=>now()  );
+            for my $D (@{$F{'Disks'}}){ 
+                next if( $D->get_device() eq 'cdrom' ); # ignore CDROM
+
+                my $oripath = $D->get_path();
+                if( -l $oripath ){
+                    $oripath = abs_path($oripath);
+                }
+                my $fname = $D->get_filename();
+
+                my $bkp_path = $oripath;
+                if( my $snapshot = $p{'snapshot'} ){    # if has snapshot do export from snapshot
+                    $bkp_path = "${backup_fullpath}/${fname}";
+                    plogNow( "[INFO] vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... " );
+                    $E = $self->backupsnapshot('olv'=>$oripath, 'slv'=>$snapshot, 'backup'=>$bkp_path, 'use_qemu'=>$p{'use_qemu'} );
+                    if( isError($E) ){
+                        plogNow( "[ERROR] vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... ERROR!" );
+                        last;
+                        #return wantarray() ? %$E: $E;
+                    }
+                    plogNow( "[ERROR] vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... done" );
+                } elsif( $p{'location'} ){
+                    $bkp_path = "${backup_fullpath}/${fname}";
+                    plogNow( "[INFO] vm_ovf_export backupdisk copy oripath=$oripath to bkp_path=$bkp_path ... " );
+                    $E = $self->backupdisk('path'=>$oripath, 'backup'=>$bkp_path );
+                    if( isError($E) ){
+                        plogNow( "[ERROR] vm_ovf_export backupdisk copy oripath=$oripath to bkp_path=$bkp_path ... ERROR!" );
+                        last;
+                        #return wantarray() ? %$E: $E;
+                    }
+                    plogNow( "[INFO] vm_ovf_export backupdisk copy oripath=$oripath to bkp_path=$bkp_path ... done" );
+                }
+                plogNow("[INFO] file name=$fname oripath=$D->{'path'}($oripath) bkp_path=$bkp_path");
+                $tar->add_file( 'name'=>"$fname", 'path'=>"$bkp_path", type=>ETVA::ArchiveTar::FILE, 'mode'=>33204, 'mtime'=>now() );
             }
-            plog( "vm_ovf_export copy oripath=$oripath to bkp_path=$bkp_path ... done" );
+        } else {
+            $E = retErr("_ERR_VM_OVF_EXPORT_","Error create backup directory.");
         }
-        plog ("file name=$fname oripath=$D->{'path'}($oripath) bkp_path=$bkp_path");
-        $tar->add_file( 'name'=>"$fname", 'path'=>"$bkp_path", type=>ETVA::ArchiveTar::FILE, 'mode'=>33204, 'mtime'=>now() );
-    }
     
-    if( !$p{'_do_not_generate_tar_'} ){
-        $tar->write();
-    } else {
-        # write .ovf to tmpdir
-        open(FOVF,">${bkp_randtmpdir}/$fn_ovf");
-        print FOVF $F{'xml'};
-        close(FOVF);
+        if( !isError($E) ){
+            if( !$p{'do_not_generate_tar'} ){
+                $tar->write();
+            } else {
+                # write .ovf to tmpdir
+                open(FOVF,">${backup_fullpath}/$fn_ovf");
+                print FOVF $F{'xml'};
+                close(FOVF);
+            }
+        }
+
+        if( $p{'location'} ){
+            # TODO move to location $bkp_randtmpdir
+            &_pos_copy_backup_to_location( %p, 'backup_dir'=>$bkp_randtmpdir );
+        }
     }
 
     if( $p{'location'} ){
-        # TODO move to location $bkp_randtmpdir
-        &_pos_copy_backup_to_location( %p, 'backup_dir'=>$bkp_randtmpdir );
         rmdir $bkp_randtmpdir_ori if( -d "$bkp_randtmpdir_ori" );   # if exists remove it
     } else {
         rmtree $bkp_randtmpdir if( -d "$bkp_randtmpdir" ); # remove dir recursively
     }
 
     # no return... must write to socket...
-    return;
+    if( isError($E) ){
+        return wantarray() ? %$E: $E;
+    }
+    return retOk("_VM_OVF_EXPORT_","VM '$name' export ovf with success.");
 }
 
 # prepare location to copy backup
@@ -4953,9 +5083,11 @@ sub _pre_copy_backup_to_location {
         $backupdir = $p{'backup_dir'};
     }
 
+    plogNow("_pre_copy_backup_to_location location=$location backupdir=$backupdir");
+
     if( $location =~ m/ftp:\/\// ){
         # TODO for FTP and/or HTTP
-        return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: invalid location");
+        return retErr("_ERR_COPY_BACKUP_TO_LOCATION_","Error copy backup to location: invalid location");
     } elsif( -d "$location" ){
         return $location;
     } elsif( ($location =~ m/smb:\/\//) ||
@@ -4974,28 +5106,28 @@ sub _pre_copy_backup_to_location {
             my $nl = substr($location,$ofs);
             my ($e,$m) = cmd_exec("mount",$nl,$backupdir,@opts);
             unless( $e == 0 ){
-                return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: $m");
+                return retErr("_ERR_COPY_BACKUP_TO_LOCATION_","Error copy backup to location: $m");
             }
         } elsif( $location =~ m/nfs:\/\// ){
             my $ofs = ($location =~ m/nfs:\/\//)? 6: 4;
             my $nl = substr($location,$ofs);
             my ($e,$m) = cmd_exec("mount",$nl,$backupdir);
             unless( $e == 0 ){
-                return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: $m");
+                return retErr("_ERR_COPY_BACKUP_TO_LOCATION_","Error copy backup to location: $m");
             }
         } elsif( -b "$location" ){
             my ($e,$m) = cmd_exec("mount",$location,$backupdir);
             unless( $e == 0 ){
-                return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: $m");
+                return retErr("_ERR_COPY_BACKUP_TO_LOCATION_","Error copy backup to location: $m");
             }
         } elsif( -e "$location" ){
             my ($e,$m) = cmd_exec("mount","-o","loop",$location,$backupdir);
             unless( $e == 0 ){
-                return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: $m");
+                return retErr("_ERR_COPY_BACKUP_TO_LOCATION_","Error copy backup to location: $m");
             }
         }
     } else {
-        return retErr("_ERR_COPY_BACKUP_SNAPSHOT_TO_LOCATION_","Error copy backup snapshot to location: invalid location");
+        return retErr("_ERR_COPY_BACKUP_TO_LOCATION_","Error copy backup to location: invalid location");
     }
     return $backupdir;
 }
@@ -5014,6 +5146,7 @@ sub _pos_copy_backup_to_location {
                 ($location =~ m/nfs:\/\//) ||
                 (-b "$location") ||
                 (-e "$location" ) ){
+        plogNow("_pos_copy_backup_to_location umount $backupdir") if( 1 || &debug_level > 3 );
         cmd_exec("umount",$backupdir);
         rmdir($backupdir);
     }
@@ -5102,11 +5235,22 @@ sub get_backupconf {
     return;
 }
 
+my $CMD_SOSREPORT;
+sub cmd_sosreport {
+    if( ! defined($CMD_SOSREPORT) ){
+        $CMD_SOSREPORT = "/usr/sbin/sosreport --batch --name=eurotux";
+        if( `/usr/sbin/sosreport --help | grep no-progressbar` ){
+            $CMD_SOSREPORT = "/usr/sbin/sosreport --batch --name=eurotux --no-progressbar";
+        }
+    }
+    return $CMD_SOSREPORT;
+}
 
 sub get_sosreport {
     my $sosfiles = '/tmp/sosreport*';
 
-    my $res = `/usr/sbin/sosreport --batch --name=eurotux --no-progressbar;`;
+    my $cmd = &cmd_sosreport;
+    my $res = `$cmd`;
     if($?){
         print STDERR "[ERROR] sosreport problem $res \n";
         return 0;       
@@ -5388,7 +5532,28 @@ sub vm_list_snapshots {
     return $self->list_snapshots(%p);
 }
 
-sub vm_backup_snapshot {
+=item vm_backup
+
+    backup VM
+
+    args:
+        
+        name - va name
+
+        location - location where backup will be saved
+
+        snapshot - if backup is based on snapshot
+
+        shutdown - shutdown the VM before do the backup and start up again after
+
+=cut
+
+# vm_backup_snapshot alias of vm_backup
+*vm_backup_snapshot = \&vm_backup;
+# vm_backup_offsite( alias of vm_backup
+*vm_backup_offsite = \&vm_backup;
+
+sub vm_backup {
     my $self = shift;
     my %p = @_;
 
@@ -5397,13 +5562,127 @@ sub vm_backup_snapshot {
         return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
     }
 
-    my $Snapshot = $self->get_snapshot(%p);
-    if( isError($Snapshot) ){
-        return wantarray() ? %$Snapshot: $Snapshot;
+    my $name = $VM->get_name();
+
+    if( !$p{'force'} && !defined($p{'snapshot'}) && !$p{'shutdown'} ){
+        return retErr("_ERR_VM_BACKUP_","Couldn't backup VM with server running and without snapshots.");
     }
 
-    return $self->vm_ovf_export(%p, 'snapshot'=>$Snapshot->{'name'} );
+    if( defined($p{'snapshot'}) ){
+        my $Snapshot = $self->get_snapshot(%p);
+        if( isError($Snapshot) ){
+            return wantarray() ? %$Snapshot: $Snapshot;
+        }
+        $p{'snapshot'} = $Snapshot->{'name'};
+    }
+
+    if( $p{'location'} ){   # do backup for location
+        plogNow("[INFO] vm_backup: Backup of server '$name' to location '$p{'location'}' and do_not_generate_tar=$p{'do_not_generate_tar'}.");
+    }
+
+    my $running;
+    if( $p{'shutdown'} ){   # shutdown VM after doing the backup
+        $running = $self->vmIsRunning('uuid'=>$VM->get_uuid() ) ? 1 : 0;
+        if( $running ){
+            plogNow("[INFO] vm_backup: server '$name' is running...");
+            my $E = $self->stopDomain( 'uuid'=>$VM->get_uuid() );
+            plogNow("[INFO] vm_backup: server '$name' shutting down...");
+
+            if( &waitCond( sub { return  $self->vmIsRunning('uuid'=>$VM->get_uuid()); }, 1*60) ){
+
+                plogNow("[WARN] vm_backup: server '$name' is stil running and will be shutting down...");
+                $E = $self->stopDomain( 'uuid'=>$VM->get_uuid(), 'force'=>1 );
+
+                if( &waitCond( sub { return  $self->vmIsRunning('uuid'=>$VM->get_uuid()); }, 2*60) ){
+                    #plogNow("vm_backup: server '$name' is stil running and will be force shutting down...");
+                    #$E = $self->stopDomain( 'uuid'=>$VM->get_uuid(), 'force'=>1, 'destroy'=>1 );
+                    plogNow("[ERROR] vm_backup: server '$name' is still running and couldn't make backup...");
+                    return retErr('_ERR_VM_BACKUP_STILL_RUNNING_',"The server '$name' is still running and couldn't make backup.");
+                }
+            }
+        }
+    }
+
+    # do the VM OVF export
+    my $E = $self->vm_ovf_export(%p);
     
+    if( $p{'shutdown'} && $running ){   # start VM after backup
+        my $SE = $self->startDomain( 'uuid'=>$VM->get_uuid() );
+        if( isError($SE) ){
+            return wantarray() ? %$SE: $SE;
+        }
+    }
+
+    if( isError($E) ){
+        return wantarray() ? %$E: $E;
+    }
+    return retOk("_OK_VM_BACKUP_","Backup of VM '$name' done with success.");
+}
+
+sub _clean_old_backups {
+    my ($vm_name,$backupdir,$n_days) = my %p = @_;
+    if( $p{'backup_dir'} || $p{'vm_name'} || $p{'n_days'} ){
+        $backupdir = $p{'backup_dir'};
+        $vm_name = $p{'vm_name'};
+        $n_days = $p{'n_days'};
+    }
+
+    # get VM backup fullpath
+    my $backup_fullpath = "${backupdir}/vm-backup-${vm_name}/";
+
+    # number of days of retention
+    $n_days ||= $CONF->{'VM_BACKUPS_N_DAYS'} || 2;
+    my $p_n_days = "+${n_days}";
+
+    plogNow("[INFO] Clean backups of server '$vm_name' with more then '$n_days' days on '$backupdir'.");
+
+    # remove old backups
+    my ($ef,$mf) = &cmd_exec("find ${backup_fullpath} -maxdepth 2 -mindepth 1 -type f -mtime ${p_n_days} -print0 -delete");
+    plogNow("[INFO] _clean_old_backups: remove the following files: $mf");
+
+    # clean empty directories
+    my ($ed,$md) &cmd_exec("find ${backup_fullpath} -maxdepth 2 -mindepth 1 -type d -empty -print0 -delete");
+    plogNow("[INFO] _clean_old_backups: remove the following empty directories: $md");
+}
+
+sub vm_clean_old_backups {
+    my $self = shift;
+    my %p = @_;
+
+    my $VM = $self->getVM(%p);
+    if( !$VM ){
+        return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
+    }
+
+    # get VM name
+    my $name = $VM->get_name();
+
+    # create tmp dir
+    my $bkp_randtmpdir = ETVA::Utils::rand_tmpdir("${TMP_DIR}/.virtd-export-backup-${name}");
+
+    if( !$p{'location'} ){
+        return retErr('_ERR_VM_CLEAN_OLD_BACKUPS_',"No location specified.");
+    }
+
+    plogNow("[INFO] vm_clean_old_backups: Clean old backups of server '$name' on location '$p{'location'}'.");
+
+    my $E = &_pre_copy_backup_to_location( 'location'=>$p{'location'}, 'backup_dir'=>$bkp_randtmpdir );
+
+    if( !isError($E) ){
+
+        # do the clean up
+        &_clean_old_backups('vm_name'=>$name, 'n_days'=>$p{'n_days'}, 'backup_dir'=>$bkp_randtmpdir);
+
+        # umount location
+        &_pos_copy_backup_to_location( 'location'=>$p{'location'}, 'backup_dir'=>$bkp_randtmpdir );
+    }
+
+    rmdir $bkp_randtmpdir if( -d "$bkp_randtmpdir" );   # if exists remove it
+
+    if( isError($E) ){
+        return wantarray() ? %$E: $E;
+    }
+    return retOk("_OK_VM_CLEAN_OLD_BACKUPS_","Old backup cleanned with success.");
 }
 
 ###### GUEST AGENT METHODS ######
@@ -5611,6 +5890,76 @@ sub systemCheck {
     return retOk("_OK_SYSTEMCHECK_","System check ok.");
 }
 
+# testing if fork func
+sub isForkable {
+    my $self = shift;
+    my ($method) = @_;
+
+    my $v = 0;
+
+    # TODO maybe use other tests...
+    $v = 1 if( $method =~ m/_may_fork$/ );
+
+    $v = 1 if( $method =~ m/^vm_ovf_export/ );
+    $v = 1 if( $method =~ m/^vm_backup_snapshot/ );
+    $v = 1 if( $method =~ m/^vm_backup_offsite/ );
+    $v = 1 if( $method =~ m/^vm_backup/ );
+
+    $v = 1 if( $method eq 'forward_to_mngtagent' );
+
+    plogNow("VirtAgentInterace isForkable method=$method flag=$v") if( 1 || &debug_level > 3 );
+
+    return $v;
+}
+
+# treat Management Agent calls
+
+sub forward_to_mngtagent {
+    my $self = shift;
+    my (%p) = @_;
+
+    plogNow("forward_to_mngtagent receive call server_name=$p{'server_name'} method=$p{'method'}");
+        
+    my $client;
+    eval {
+        # TODO improve this configuration
+        $client = new ETVA::Client::SOAP( address => '127.0.0.1',
+                                            port   => $CONF->{'LocalPort'}+2009,
+                                            proto=>'tcp',
+                                            blocking=>0 );
+    };
+    if( $@ ){
+        return retErr("_ERR_FORWARD_TO_MNGTAGENT_","Couldn't create guest agent client connection: $@");
+    }
+    
+    my $t0 = Time::HiRes::gettimeofday();
+
+    my $res;
+    eval {
+        $res = $client->call($CONF->{'cm_namespace'}, $p{'method'}, %p );
+    };
+    if( $@ ){
+        return retErr("_ERR_FORWARD_TO_MNGTAGENT_","Couldn't connect to guest agent: $@");
+    }
+
+    my $t1 = Time::HiRes::gettimeofday();
+    my $secs = $t1 - $t0;
+
+    plogNow(__PACKAGE__," FORWARD_TO_MNGTAGENT method=$p{'method'} server_name=$p{'server_name'} in $secs secs");
+
+    # treat return response
+    if( defined $res->{faultcode} ){
+        return retErr($res->{faultstring},$res->{detail},$res->{faultcode});
+    } else {
+        my $result = $res->{'result'};
+        if( ref($result) eq 'ARRAY' ){
+            return wantarray() ? @$result: $result;
+        } elsif( ref($result) eq 'HASH' ){
+            return wantarray() ? %$result: $result;
+        }
+        return $result;
+    }
+}
 1;
 
 =back

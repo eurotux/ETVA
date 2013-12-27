@@ -1,5 +1,5 @@
 Name: etva-fsagent
-Version: 1.2.2
+Version: 2.1.0
 Release: beta
 Summary: File Server Agent
 License: GPL
@@ -17,6 +17,10 @@ Requires: daemontools
 Requires: samba >= 3.6.9
 Requires: logrotate
 Requires: krb5-workstation
+
+%if 0%{?rhel} == 6
+Requires: perl-Class-Inspector
+%endif
 
 %description
 ETVOIP Agent

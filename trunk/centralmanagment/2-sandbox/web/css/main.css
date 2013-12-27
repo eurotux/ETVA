@@ -1386,3 +1386,11 @@ li.x-menu-list-item div {
     color: #999;
 }
 
+.notes-msg-box {
+}
+.notes-msg-line {
+    background-position: 0 center;
+    background-repeat: no-repeat;
+    padding-left: 18px;
+    height: 16px;
+}

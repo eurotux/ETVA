@@ -23,13 +23,14 @@ applyschema(){
         echo "[INFO] Applying schema";
         echo "[INFO] cd $DIRECTORY; find * | grep -v '/\.' | cpio -dump ../../../config/.; cd ../../../;"
         `cd $DIRECTORY; find * | grep -v '/\.' | cpio -dump ../../../config/.; cd ../../../;`;
-#        `cd data/schemas/1.0; find * | grep -v '/\.' | cpio -dump ../../../config/.; cd ../../../;`;
-    else
-        #rollback
-        echo '[ERROR] Configuration copy failed. Please check dbrequired entry on app.yml!';
-        exit 2;
+# CMAR - 17/09/2013 - don't need to have schema on data/schemas/, use schemas on config/ dir
+#    else
+#        #rollback
+#        echo '[ERROR] Configuration copy failed. Please check dbrequired entry on app.yml!';
+#        exit 2;
     fi
     
+    echo "[INFO] build database";
     # apply required schema
     symfony propel:build-all --no-confirmation   
     if [ $? -ne 0 ]; then
@@ -37,6 +38,7 @@ applyschema(){
         return 1;
     fi
    
+    echo "[INFO] restore database";
     # restore database
     symfony propel:data-load $BACKUPFILEMODIFIED
     if [ $? -ne 0 ]; then
@@ -44,6 +46,7 @@ applyschema(){
         return 1;
     fi
 
+    echo "[INFO] change dbversion";
     perl -pi -e "s/dbversion=.*/dbversion=$REQUIRED/" $CONFIGFILE;
     perl -pi -e "s#mastersite=.*#mastersite=http://etva-reg.eurotux.com/services#" $CONFIGFILE;
     return 0;
@@ -78,9 +81,11 @@ else
 fi
 
 
+echo "[INFO] clean event logs";
 # run flushlog to clean some event logs
 symfony event:flushlog
 
+echo "[INFO] backup database";
 # backup database data
 symfony propel:data-dump $BACKUPFILE
 BKPRES=$?
@@ -101,14 +106,18 @@ else
 fi
 
 
+echo "[INFO] update db";
 # run updatedb command
 symfony etva:updatedb $BACKUPFILEMODIFIED
 if [ $? -eq 0 ]; then
-    echo "applyschema";
+    echo "[INFO] applyschema";
     applyschema;
     if [ $? -ne 0 ]; then
+        echo "[ERROR] rollback";
         rollback;    
     fi
+else
+    echo "[ERROR] update db";
 fi
 
 # restart apache server

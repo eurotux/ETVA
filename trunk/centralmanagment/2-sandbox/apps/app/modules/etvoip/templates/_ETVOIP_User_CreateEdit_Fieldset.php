@@ -266,6 +266,17 @@ ETVOIP.User.CreateEdit.Fieldset = function(config){
                                     if( this.user_service_list ){
                                         this.user_service_list.setValue( '' );
                                     }
+                                    if( action=='edit' ){
+                                        this.extension_edit.setDisabled(false);
+                                        this.extension_edit.setVisible(true);
+                                        this.extension_new.setDisabled(true);
+                                        this.extension_new.setVisible(false);
+                                    } else {
+                                        this.extension_edit.setDisabled(true);
+                                        this.extension_edit.setVisible(false);
+                                        this.extension_new.setDisabled(false);
+                                        this.extension_new.setVisible(true);
+                                    }
                                 },
                                 afterrender: function(c){
                                     if( this.find('name','extension')[0].getValue() ){

@@ -2,11 +2,13 @@
 
 use strict;
 
-use ETVA::Agent::SOAPFork;
-use ETVA::Client::SOAP::HTTP;
 use ETVOIP;
+
 use ETVA::Utils;
 use Data::Dumper;
+
+use ETVA::GuestAgent::Management;
+
 
 my %CONF = ( "CFG_FILE"=>"/etc/sysconfig/etva-etvoip/etvoipd.conf" );
 
@@ -27,19 +29,18 @@ sub launch_agent {
     # register func handlers
     $CONF{'_register_handler'} = \&register_handler;
 
-    require ETVOIPDispatcher;
-
     my $dispatcher = $CONF{'_dispatcher'} = "ETVOIPDispatcher";
 
-    my $Agent = ETVA::Agent::SOAPFork->new( %CONF );
+    my $agent = ETVA::GuestAgent::Management->new( %CONF );
 
-    $Agent->mainLoop();
+    $agent->mainLoop();
 }
+
 sub register_handler {
-    my ($agent) = @_;
+    my $self = shift;
 
     # initialized on CentralManagement 
-    if( $agent->{'cm_uri'} ){
+    if( $self->{'cm_uri'} ){
 
         # get ETVOIP active modules
         my %Mod = ETVOIP->get_activemodules();
@@ -65,53 +66,50 @@ sub register_handler {
             }
         }
         my $now = nowStr();
-        plog("$now - init Agent with macaddr=",$agent->{'macaddr'});
-        plog(" services = ",Dumper(\@services));
+        plogNow("init Agent with macaddr=",$self->{'macaddr'});
+        plogNow(" services = ",Dumper(\@services));
 
-        my $R = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
-                        -> call( $agent->{'cm_namespace'},
+        my $R = $self->call( $self->{'cm_namespace'},
                                  "initAgentServices",
                                     name=>'ETVOIP',
-                                    ip=>$agent->{'LocalIP'},
-                                    port=>$agent->{'LocalPort'},
-                                    macaddr=>$agent->{'macaddr'},
+                                    ip=>$self->{'LocalIP'},
+                                    port=>$self->{'LocalPort'},
+                                    macaddr=>$self->{'macaddr'},
                                     services=>\@services
                                 );
         if( !$R || $R->{'_error_'} ){
-                plog("Cant connect to CentralManagement.\nInitialization Agent 'etvoip' aborted!");
+                plogNow("Cant connect to CentralManagement.\nInitialization Agent 'etvoip' aborted!");
         } else {
-            plog($R->{'return'}{'success'});
+            plogNow($R->{'return'}{'success'});
             if( ref($R->{'return'}) && $R->{'return'}{'success'} && ( $R->{'return'}{'success'} ne 'false' )){
-                plog("$now - ETVOIP Agent register with success on CentralManagement");
+                plogNow("$now - ETVOIP Agent register with success on CentralManagement");
 
 
                 # Reset
                 if( $R->{'return'}{'reset'} ){
                     my $response = ETVOIP->set_backupconf( '_url'=>"$R->{'return'}{'backup_url'}" );
 
-                    plog("RESPONSE ",isOk($response),Dumper($response));
+                    plogNow("RESPONSE ",isOk($response),Dumper($response));
 
                     # send reset/restore ok
                     if(!isError($response)){
-                        plog("RESPONSE OKKKK",Dumper($response));
+                        plogNow("RESPONSE OKKKK",Dumper($response));
                         my $reset_ok = $response;
-                        my $RR = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
-                            -> call( $agent->{'cm_namespace'},
+                        my $RR = $self->call( $self->{'cm_namespace'},
                                         'restoreManagAgent',
-                                        macaddr=>$agent->{'macaddr'},
+                                        macaddr=>$self->{'macaddr'},
                                         ok=>{ 'oktype'=>$reset_ok->{'_oktype_'}, 'okmsg'=>$reset_ok->{'_okmsg_'} }
                                     );
                     }
                     
                 }
-
-                
-
+                return 1;
             }else{
-                plog("$now - ETVOIP Agent NOT registered with success on CentralManagement");
+                plogNow("$now - ETVOIP Agent NOT registered with success on CentralManagement");
             }
         }      
     }
+    return 0;
 }
 main();
 1;

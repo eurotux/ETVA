@@ -67,19 +67,25 @@ sub findnetdev {
 
     %NetDevices = ();
 
-    # network physical devices
-    my $dir_devices = "/sys/devices";
+    # network devices directory
+    my $dir_net_devices = "/sys/class/net";
 
-    my @find_lines = `/usr/bin/find $dir_devices -name 'net:*'`;
+    # get physical devices
+    opendir(DIRNET,"$dir_net_devices");
+    my @find_lines = grep { -e "$dir_net_devices/$_/device" } readdir(DIRNET);
+    close(DIRNET);
+
+    # process network devices info
     foreach(@find_lines){
         chomp;
-        my $netdev_dir = $_;
+        my $netdev_dir = "$dir_net_devices/$_";
         my $netdev_address_file = "$netdev_dir/address";
         open(N,$netdev_address_file);
         my $netdev_address = <N>;
         chomp($netdev_address);
         close(N);
-        my ($netdev_name) = ($_ =~ m/net:(\w+\d+)/);
+
+        my $netdev_name = $_;
         $NetDevices{$netdev_name} = {
                                         "address" => $netdev_address,
                                         "devdir" => $netdev_dir,

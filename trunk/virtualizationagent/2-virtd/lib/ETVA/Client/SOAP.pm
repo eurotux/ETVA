@@ -46,6 +46,10 @@ use ETVA::Utils;
 
 use SOAP::Lite;
 
+use ETVA::SOAP;
+
+use POSIX;
+
 my $debug = 0;
 
 =item new
@@ -163,6 +167,41 @@ sub call {
 
 sub set_debug {
     $debug = 1;
+}
+
+# nonblock($socket) puts socket into nonblocking mode
+# Perl Cookbook
+sub nonblock {
+     my $socket = shift;
+     my $flags;
+
+     $flags = fcntl($socket, F_GETFL, 0)
+        or die "Can't get flags for socket: $!\n";
+     fcntl($socket, F_SETFL, $flags | O_NONBLOCK)
+        or die "Can't make socket nonblocking: $!\n";
+}
+
+sub receive {
+    my $self = shift;
+
+    my $fh = $self->{'_sock'};  # file handle
+
+    &nonblock($fh);
+
+    my $ready = 0;              # all data received
+    my $data = "";              #  data
+    my $rd = "";                # read result
+    my $part;                   # partial read
+
+    while (!$ready && ($rd = read($fh,$part,4096)) >= 0) {  # read data from socket
+        if (defined $rd) {      # undef means failure
+            if( $rd > 0 ){
+                $data .= $part;  # join parts
+                $ready = &isSOAPValid($data);
+            }
+        }
+    }
+    return $data;
 }
 
 1;

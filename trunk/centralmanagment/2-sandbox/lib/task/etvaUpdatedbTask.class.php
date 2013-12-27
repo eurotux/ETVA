@@ -38,6 +38,8 @@ EOF;
 
   protected function execute($arguments = array(), $options = array())
   {
+    $this->log("[INFO] loadModelConf");
+
     // Instance variables
     $this->loadModelConf();
 
@@ -70,7 +72,8 @@ EOF;
                 $this->upgradeToV13($dbfile);
                 break;
             case 20:    // version 2.0
-                $this->upgradeToV20($dbfile);
+            case 21:    // version 2.1
+                $this->upgradeToV20($dbfile,$i);
                 break;
         }   
     }
@@ -132,8 +135,8 @@ EOF;
     $this->log("[INFO] ... nothing to do...");
   }
 
-  private function upgradeToV20($dbdata){
-    $this->log("[INFO] Upgrading database to version 2.0!");
+  private function upgradeToV20($dbdata,$v){
+    $this->log("[INFO] Upgrading database to version $v!");
 
     // Insert your code here
   }

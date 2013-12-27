@@ -33,4 +33,4 @@ edit c:\Users\Administrator\winagentd\primaveraagentd.ini to change :value of cm
 run install-as-service/add-primavera-agent-to-registry.bat
 
 
-
+IMPORTANTE: Nao esquecer de configurar as permissoes nos perfis associados aos módulos e empresas

@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.8.8)  17 SEP 2013 10:15
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.11.4)  20 DEC 2013 17:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **manual-etvm-cm
 (./manual-etvm-cm.tex
 LaTeX2e <2011/06/27>
-Babel <3.9f> and hyphenation patterns for 2 languages loaded.
+Babel <3.9f> and hyphenation patterns for 74 languages loaded.
 (/usr/share/texlive/texmf-dist/tex/latex/koma-script/scrreprt.cls
 Document Class: scrreprt 2012/07/29 v3.11b KOMA-Script document class (report)
 (/usr/share/texlive/texmf-dist/tex/latex/koma-script/scrkbase.sty
@@ -139,8 +139,6 @@ File: babel.def 2013/05/16 v3.9f Babel common definitions
 \babel@savecnt=\count91
 \U@D=\dimen110
 )
-\l@british = a dialect from \language\l@english 
-\l@UKenglish = a dialect from \language\l@english 
 \l@canadian = a dialect from \language\l@american 
 \l@australian = a dialect from \language\l@british 
 \l@newzealand = a dialect from \language\l@british 
@@ -820,12 +818,12 @@ LaTeX Info: Redefining \nameref on input line 28.
 LaTeX Info: Redefining \Ref on input line 28.
 
 Using optional text marked with etvm. 
-<include/img/logo.png, id=229, 311.9655pt x 246.6816pt>
+<include/img/logo.png, id=237, 333.245pt x 98.3675pt>
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 31.
-(pdftex.def)             Requested size: 142.26378pt x 112.49625pt.
+(pdftex.def)             Requested size: 142.26378pt x 41.99399pt.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 23.63593pt on input line 31.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
@@ -837,7 +835,7 @@ LaTeX Font Info:    Font shape `T1/txss/m/sl' will be
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 13.67995pt on input line 31.
 
-<include/img/logo_PME_excelencia_12.png, id=230, 136.3494pt x 172.4844pt>
+<include/img/logo_PME_excelencia_12.png, id=239, 136.3494pt x 172.4844pt>
 File: include/img/logo_PME_excelencia_12.png Graphic file (type png)
 
 <use include/img/logo_PME_excelencia_12.png>
@@ -846,8 +844,8 @@ ine 31.
 (pdftex.def)             Requested size: 56.9055pt x 71.985pt.
  [1
 
-{/usr/share/texlive/texmf-dist/fonts/map/pdftex/updmap/pdftex.map} <./include/i
-mg/logo.png> <./include/img/logo_PME_excelencia_12.png>]
+{/usr/share/texlive/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./include/im
+g/logo.png> <./include/img/logo_PME_excelencia_12.png>]
 LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
 (Font)              scaled to size 11.39996pt on input line 32.
 LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
@@ -865,7 +863,7 @@ File: t1txtt.fd 2000/12/15 v3.1
 
 ] [3]
 LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
-(Font)              scaled to size 23.63593pt on input line 91.
+(Font)              scaled to size 23.63593pt on input line 93.
 
 (./manual-etvm-cm.toc
 LaTeX Font Info:    Try loading font information for OT1+txr on input line 4.
@@ -897,7 +895,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 37.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 
 Package Fancyhdr Warning: \headheight is too small (18.125pt): 
@@ -913,21 +911,21 @@ Package Fancyhdr Warning: \headheight is too small (18.125pt):
 
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 93.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+Package pdftex.def Info: include/img/logo.png used on input line 95.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [5] (./manual-etvm-cm.lof
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 39.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [6
 
 ]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 82.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [7])
 \tf@lof=\write6
 \openout6 = `manual-etvm-cm.lof'.
@@ -937,7 +935,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [8]
 Chapter 1.
 
@@ -954,7 +952,7 @@ LaTeX Font Warning: Font shape `OMS/txss/m/n' undefined
 (Font)              using `OMS/txsy/m/n' instead
 (Font)              for symbol `textbullet' on input line 8.
 
-<screenshots/etva_blocos.png, id=560, 1259.76529pt x 661.76646pt>
+<screenshots/etva_blocos.png, id=572, 1259.76529pt x 661.76646pt>
 File: screenshots/etva_blocos.png Graphic file (type png)
 
 <use screenshots/etva_blocos.png>
@@ -969,11 +967,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 24.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [9
 
  <./screenshots/etva_blocos.png>]
-<screenshots/etva_enterprise.png, id=571, 597.23125pt x 465.74pt>
+<screenshots/etva_enterprise.png, id=583, 597.23125pt x 465.74pt>
 File: screenshots/etva_enterprise.png Graphic file (type png)
 
 <use screenshots/etva_enterprise.png>
@@ -983,10 +981,10 @@ Package pdftex.def Info: screenshots/etva_enterprise.png used on input line 29.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 38.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [10 <./screenshots/etva_enterprise.png>]
 Chapter 2.
-<screenshots/install/nuxis/bootmenu.png, id=577, 641.39626pt x 480.79625pt>
+<screenshots/install/nuxis/bootmenu.png, id=589, 641.39626pt x 480.79625pt>
 File: screenshots/install/nuxis/bootmenu.png Graphic file (type png)
 
 <use screenshots/install/nuxis/bootmenu.png>
@@ -994,7 +992,7 @@ Package pdftex.def Info: screenshots/install/nuxis/bootmenu.png used on input l
 ine 48.
 (pdftex.def)             Requested size: 256.55396pt x 192.31508pt.
 
-<screenshots/install/nuxis/boot_installer.png, id=578, 721.69624pt x 399.4925pt
+<screenshots/install/nuxis/boot_installer.png, id=590, 721.69624pt x 399.4925pt
 >
 File: screenshots/install/nuxis/boot_installer.png Graphic file (type png)
  <use screenshots/install/nuxis/boot_installer.png>
@@ -1002,7 +1000,7 @@ Package pdftex.def Info: screenshots/install/nuxis/boot_installer.png used on i
 nput line 58.
 (pdftex.def)             Requested size: 216.51054pt x 119.84866pt.
 
-<screenshots/install/nuxis/load_installer_01.png, id=579, 721.69624pt x 400.496
+<screenshots/install/nuxis/load_installer_01.png, id=591, 721.69624pt x 400.496
 25pt>
 File: screenshots/install/nuxis/load_installer_01.png Graphic file (type png)
  <use screenshots/install/nuxis/load_installer_01.png>
@@ -1010,21 +1008,21 @@ Package pdftex.def Info: screenshots/install/nuxis/load_installer_01.png used o
 n input line 59.
 (pdftex.def)             Requested size: 216.51054pt x 120.1498pt.
 
-<screenshots/install/nuxis/wizard_install_01.png, id=580, 1027.84pt x 770.88pt>
+<screenshots/install/nuxis/wizard_install_01.png, id=592, 1027.84pt x 770.88pt>
 File: screenshots/install/nuxis/wizard_install_01.png Graphic file (type png)
 <use screenshots/install/nuxis/wizard_install_01.png>
 Package pdftex.def Info: screenshots/install/nuxis/wizard_install_01.png used o
 n input line 61.
 (pdftex.def)             Requested size: 308.35437pt x 231.26578pt.
 
-<screenshots/install/nuxis/wizard_install_02.png, id=581, 1027.84pt x 770.88pt>
+<screenshots/install/nuxis/wizard_install_02.png, id=593, 1027.84pt x 770.88pt>
 File: screenshots/install/nuxis/wizard_install_02.png Graphic file (type png)
 <use screenshots/install/nuxis/wizard_install_02.png>
 Package pdftex.def Info: screenshots/install/nuxis/wizard_install_02.png used o
 n input line 68.
 (pdftex.def)             Requested size: 205.56436pt x 154.17326pt.
 
-<screenshots/install/nuxis/wizard_install_03.png, id=582, 1027.84pt x 771.88374
+<screenshots/install/nuxis/wizard_install_03.png, id=594, 1027.84pt x 771.88374
 pt>
 File: screenshots/install/nuxis/wizard_install_03.png Graphic file (type png)
  <use screenshots/install/nuxis/wizard_install_03.png>
@@ -1032,14 +1030,14 @@ Package pdftex.def Info: screenshots/install/nuxis/wizard_install_03.png used o
 n input line 69.
 (pdftex.def)             Requested size: 205.56436pt x 154.37401pt.
 
-<screenshots/install/nuxis/wizard_install_04.png, id=583, 1027.84pt x 770.88pt>
+<screenshots/install/nuxis/wizard_install_04.png, id=595, 1027.84pt x 770.88pt>
 File: screenshots/install/nuxis/wizard_install_04.png Graphic file (type png)
 <use screenshots/install/nuxis/wizard_install_04.png>
 Package pdftex.def Info: screenshots/install/nuxis/wizard_install_04.png used o
 n input line 70.
 (pdftex.def)             Requested size: 205.56436pt x 154.17326pt.
 
-<screenshots/install/nuxis/wizard_install_05.png, id=584, 1027.84pt x 771.88374
+<screenshots/install/nuxis/wizard_install_05.png, id=596, 1027.84pt x 771.88374
 pt>
 File: screenshots/install/nuxis/wizard_install_05.png Graphic file (type png)
  <use screenshots/install/nuxis/wizard_install_05.png>
@@ -1047,14 +1045,14 @@ Package pdftex.def Info: screenshots/install/nuxis/wizard_install_05.png used o
 n input line 71.
 (pdftex.def)             Requested size: 205.56436pt x 154.37401pt.
 
-<screenshots/install/nuxis/wizard_install_06.png, id=585, 1027.84pt x 770.88pt>
+<screenshots/install/nuxis/wizard_install_06.png, id=597, 1027.84pt x 770.88pt>
 File: screenshots/install/nuxis/wizard_install_06.png Graphic file (type png)
 <use screenshots/install/nuxis/wizard_install_06.png>
 Package pdftex.def Info: screenshots/install/nuxis/wizard_install_06.png used o
 n input line 72.
 (pdftex.def)             Requested size: 205.56436pt x 154.17326pt.
 
-<screenshots/install/nuxis/wizard_install_07.png, id=586, 1027.84pt x 770.88pt>
+<screenshots/install/nuxis/wizard_install_07.png, id=598, 1027.84pt x 770.88pt>
 File: screenshots/install/nuxis/wizard_install_07.png Graphic file (type png)
 <use screenshots/install/nuxis/wizard_install_07.png>
 Package pdftex.def Info: screenshots/install/nuxis/wizard_install_07.png used o
@@ -1064,11 +1062,11 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 77.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [11
 
  <./screenshots/install/nuxis/bootmenu.png>]
-<screenshots/install/nuxis/packages_selection_01.png, id=593, 1027.84pt x 770.8
+<screenshots/install/nuxis/packages_selection_01.png, id=605, 1027.84pt x 770.8
 8pt>
 File: screenshots/install/nuxis/packages_selection_01.png Graphic file (type pn
 g)
@@ -1077,7 +1075,7 @@ Package pdftex.def Info: screenshots/install/nuxis/packages_selection_01.png us
 ed on input line 80.
 (pdftex.def)             Requested size: 205.56436pt x 154.17326pt.
 
-<screenshots/install/nuxis/packages_selection_02.png, id=594, 1027.84pt x 770.8
+<screenshots/install/nuxis/packages_selection_02.png, id=606, 1027.84pt x 770.8
 8pt>
 File: screenshots/install/nuxis/packages_selection_02.png Graphic file (type pn
 g)
@@ -1089,19 +1087,19 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 85.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [12 <./screenshots/install/nuxis/boot_installer.png> <./screenshots/install/nu
 xis/load_installer_01.png> <./screenshots/install/nuxis/wizard_install_01.png>]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 86.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [13 <./screenshots/install/nuxis/wizard_install_02.png> <./screenshots/install
 /nuxis/wizard_install_03.png> <./screenshots/install/nuxis/wizard_install_04.pn
 g> <./screenshots/install/nuxis/wizard_install_05.png> <./screenshots/install/n
 uxis/wizard_install_06.png> <./screenshots/install/nuxis/wizard_install_07.png>
 ]
-<screenshots/install/nuxis/start_install.png, id=615, 1027.84pt x 771.88374pt>
+<screenshots/install/nuxis/start_install.png, id=627, 1027.84pt x 771.88374pt>
 File: screenshots/install/nuxis/start_install.png Graphic file (type png)
 
 <use screenshots/install/nuxis/start_install.png>
@@ -1109,7 +1107,7 @@ Package pdftex.def Info: screenshots/install/nuxis/start_install.png used on in
 put line 92.
 (pdftex.def)             Requested size: 205.56436pt x 154.37401pt.
 
-<screenshots/install/nuxis/install_progress_02.png, id=616, 1027.84pt x 770.88p
+<screenshots/install/nuxis/install_progress_02.png, id=628, 1027.84pt x 770.88p
 t>
 File: screenshots/install/nuxis/install_progress_02.png Graphic file (type png)
 
@@ -1118,7 +1116,7 @@ Package pdftex.def Info: screenshots/install/nuxis/install_progress_02.png used
  on input line 93.
 (pdftex.def)             Requested size: 205.56436pt x 154.17326pt.
 
-<screenshots/install/nuxis/install_reboot.png, id=617, 720.6925pt x 401.5pt>
+<screenshots/install/nuxis/install_reboot.png, id=629, 720.6925pt x 401.5pt>
 File: screenshots/install/nuxis/install_reboot.png Graphic file (type png)
 
 <use screenshots/install/nuxis/install_reboot.png>
@@ -1126,7 +1124,7 @@ Package pdftex.def Info: screenshots/install/nuxis/install_reboot.png used on i
 nput line 94.
 (pdftex.def)             Requested size: 288.2719pt x 160.59715pt.
 
-<screenshots/install/nuxis/pos_install_bootmenu.png, id=618, 639.38875pt x 480.
+<screenshots/install/nuxis/pos_install_bootmenu.png, id=630, 639.38875pt x 480.
 79625pt>
 File: screenshots/install/nuxis/pos_install_bootmenu.png Graphic file (type png
 )
@@ -1138,12 +1136,12 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 108.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [14 <./screenshots/install/nuxis/packages_selection_01.png> <./screenshots/ins
 tall/nuxis/packages_selection_02.png> <./screenshots/install/nuxis/start_instal
 l.png> <./screenshots/install/nuxis/install_progress_02.png> <./screenshots/ins
 tall/nuxis/install_reboot.png>]
-<screenshots/install/nuxis/login.png, id=629, 722.7pt x 401.5pt>
+<screenshots/install/nuxis/login.png, id=641, 722.7pt x 401.5pt>
 File: screenshots/install/nuxis/login.png Graphic file (type png)
 
 <use screenshots/install/nuxis/login.png>
@@ -1151,7 +1149,7 @@ Package pdftex.def Info: screenshots/install/nuxis/login.png used on input line
  112.
 (pdftex.def)             Requested size: 216.81166pt x 120.45091pt.
 
-<screenshots/install/nuxis/configure_network.png, id=630, 722.7pt x 401.5pt>
+<screenshots/install/nuxis/configure_network.png, id=642, 722.7pt x 401.5pt>
 File: screenshots/install/nuxis/configure_network.png Graphic file (type png)
 
 <use screenshots/install/nuxis/configure_network.png>
@@ -1159,7 +1157,7 @@ Package pdftex.def Info: screenshots/install/nuxis/configure_network.png used o
 n input line 113.
 (pdftex.def)             Requested size: 216.81166pt x 120.45091pt.
 
-<screenshots/install/nuxis/nuxis_enterprise_pos_install_21.png, id=631, 756.576
+<screenshots/install/nuxis/nuxis_enterprise_pos_install_21.png, id=643, 756.576
 57pt x 511.9125pt>
 File: screenshots/install/nuxis/nuxis_enterprise_pos_install_21.png Graphic fil
 e (type png)
@@ -1172,10 +1170,10 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 128.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [15 <./screenshots/install/nuxis/pos_install_bootmenu.png> <./screenshots/inst
 all/nuxis/login.png> <./screenshots/install/nuxis/configure_network.png>]
-<screenshots/install/nuxis/nuxis_enterprise_wiz_install_22.png, id=640, 756.576
+<screenshots/install/nuxis/nuxis_enterprise_wiz_install_22.png, id=652, 756.576
 57pt x 510.40688pt>
 File: screenshots/install/nuxis/nuxis_enterprise_wiz_install_22.png Graphic fil
 e (type png)
@@ -1185,7 +1183,7 @@ Package pdftex.def Info: screenshots/install/nuxis/nuxis_enterprise_wiz_install
 _22.png used on input line 133.
 (pdftex.def)             Requested size: 302.62526pt x 204.15913pt.
 
-<screenshots/install/nuxis/nuxis_enterprise_wiz_install_28.png, id=642, 755.823
+<screenshots/install/nuxis/nuxis_enterprise_wiz_install_28.png, id=654, 755.823
 75pt x 511.15968pt>
 File: screenshots/install/nuxis/nuxis_enterprise_wiz_install_28.png Graphic fil
 e (type png)
@@ -1198,13 +1196,13 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 148.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [16 <./screenshots/install/nuxis/nuxis_enterprise_pos_install_21.png> <./scree
 nshots/install/nuxis/nuxis_enterprise_wiz_install_22.png>])
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 95.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+Package pdftex.def Info: include/img/logo.png used on input line 97.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [17 <./screenshots/install/nuxis/nuxis_enterprise_wiz_install_28.png>] (./chap
 -cm.tex
 Chapter 3.
@@ -1212,25 +1210,20 @@ LaTeX Font Info:    Font shape `T1/txss/bx/it' in size <12> not available
 (Font)              Font shape `T1/txss/bx/sl' tried instead on input line 8.
 LaTeX Font Info:    Font shape `T1/txss/bx/sl' will be
 (Font)              scaled to size 11.39996pt on input line 8.
-<screenshots/principal_nuxis.png, id=658, 1028.34187pt x 488.57532pt>
+<screenshots/principal_nuxis.png, id=670, 790.45313pt x 511.15968pt>
 File: screenshots/principal_nuxis.png Graphic file (type png)
 
 <use screenshots/principal_nuxis.png>
 Package pdftex.def Info: screenshots/principal_nuxis.png used on input line 21.
 
-(pdftex.def)             Requested size: 462.74957pt x 219.85686pt.
-
-Overfull \hbox (2.02834pt too wide) in paragraph at lines 21--21
- [] 
- []
-
+(pdftex.def)             Requested size: 355.7006pt x 230.01971pt.
 File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png>
+ <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 33.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [18
 
- <./screenshots/principal_nuxis.png (PNG copy)>]
+ <./screenshots/principal_nuxis.png>]
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 7.59998pt on input line 37.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
@@ -1238,7 +1231,7 @@ LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 6.64998pt on input line 39.
 
-<screenshots/login_nuxis.png, id=666, 268.75406pt x 155.83218pt>
+<screenshots/login_nuxis.png, id=679, 268.75406pt x 155.83218pt>
 File: screenshots/login_nuxis.png Graphic file (type png)
 
 <use screenshots/login_nuxis.png>
@@ -1254,16 +1247,16 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 63--66
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 81.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [19 <./screenshots/login_nuxis.png (PNG copy)>]
-<screenshots/main_nodes.png, id=682, 1017.8025pt x 505.89pt>
+<screenshots/main_nodes.png, id=695, 1017.8025pt x 409.53pt>
 File: screenshots/main_nodes.png Graphic file (type png)
 
 <use screenshots/main_nodes.png>
 Package pdftex.def Info: screenshots/main_nodes.png used on input line 94.
-(pdftex.def)             Requested size: 458.0069pt x 227.64839pt.
+(pdftex.def)             Requested size: 458.0069pt x 184.28679pt.
 
-<screenshots/main_networks.png, id=683, 1017.8025pt x 505.89pt>
+<screenshots/main_networks.png, id=696, 1017.8025pt x 505.89pt>
 File: screenshots/main_networks.png Graphic file (type png)
 
 <use screenshots/main_networks.png>
@@ -1272,8 +1265,8 @@ Package pdftex.def Info: screenshots/main_networks.png used on input line 113.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 118.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
- [20 <./screenshots/main_nodes.png (PNG copy)>]
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
+ [20 <./screenshots/main_nodes.png>]
 LaTeX Font Info:    Font shape `T1/txss/m/it' in size <10> not available
 (Font)              Font shape `T1/txss/m/sl' tried instead on input line 126.
 LaTeX Font Info:    Font shape `T1/txss/m/sl' will be
@@ -1283,7 +1276,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 131--134
 []$ 
  []
 
-<screenshots/network_create.png, id=693, 299.1175pt x 179.67125pt>
+<screenshots/network_create.png, id=707, 299.1175pt x 179.67125pt>
 File: screenshots/network_create.png Graphic file (type png)
 
 <use screenshots/network_create.png>
@@ -1293,9 +1286,9 @@ Package pdftex.def Info: screenshots/network_create.png used on input line 139.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 144.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [21 <./screenshots/main_networks.png (PNG copy)>]
-<screenshots/networks_macpool.png, id=701, 501.875pt x 432.61626pt>
+<screenshots/networks_macpool.png, id=715, 501.875pt x 432.61626pt>
 File: screenshots/networks_macpool.png Graphic file (type png)
 
 <use screenshots/networks_macpool.png>
@@ -1303,7 +1296,7 @@ Package pdftex.def Info: screenshots/networks_macpool.png used on input line 15
 5.
 (pdftex.def)             Requested size: 250.93687pt x 216.3076pt.
 
-<screenshots/nics.png, id=702, 701.62125pt x 302.12875pt>
+<screenshots/nics.png, id=716, 701.62125pt x 302.12875pt>
 File: screenshots/nics.png Graphic file (type png)
 
 <use screenshots/nics.png>
@@ -1312,10 +1305,10 @@ Package pdftex.def Info: screenshots/nics.png used on input line 167.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 172.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [22 <./screenshots/network_create.png (PNG copy)> <./screenshots/networks_macp
 ool.png (PNG copy)>]
-<screenshots/cluster_edit.png, id=712, 361.35pt x 271.0125pt>
+<screenshots/cluster_edit.png, id=726, 361.35pt x 271.0125pt>
 File: screenshots/cluster_edit.png Graphic file (type png)
 
 <use screenshots/cluster_edit.png>
@@ -1324,13 +1317,13 @@ Package pdftex.def Info: screenshots/cluster_edit.png used on input line 195.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 200.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [23 <./screenshots/nics.png (PNG copy)>]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 228.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
- [24 <./screenshots/cluster_edit.png>] <screenshots/node_edit.png, id=733, 368.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
+ [24 <./screenshots/cluster_edit.png>] <screenshots/node_edit.png, id=747, 368.
 1253pt x 307.90031pt>
 File: screenshots/node_edit.png Graphic file (type png)
 
@@ -1338,7 +1331,7 @@ File: screenshots/node_edit.png Graphic file (type png)
 Package pdftex.def Info: screenshots/node_edit.png used on input line 240.
 (pdftex.def)             Requested size: 184.0622pt x 153.94977pt.
 
-<screenshots/node_conn.png, id=734, 399.4925pt x 378.41376pt>
+<screenshots/node_conn.png, id=748, 399.4925pt x 378.41376pt>
 File: screenshots/node_conn.png Graphic file (type png)
 
 <use screenshots/node_conn.png>
@@ -1347,9 +1340,9 @@ Package pdftex.def Info: screenshots/node_conn.png used on input line 252.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 257.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [25 <./screenshots/node_edit.png (PNG copy)>]
-<screenshots/node_maintenance.png, id=743, 420.82219pt x 80.55093pt>
+<screenshots/node_maintenance.png, id=757, 420.82219pt x 80.55093pt>
 File: screenshots/node_maintenance.png Graphic file (type png)
 
 <use screenshots/node_maintenance.png>
@@ -1359,16 +1352,16 @@ Package pdftex.def Info: screenshots/node_maintenance.png used on input line 27
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 282.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [26 <./screenshots/node_conn.png (PNG copy)> <./screenshots/node_maintenance.p
-ng (PNG copy)>] <screenshots/node_info.png, id=750, 826.58812pt x 231.11343pt>
+ng (PNG copy)>] <screenshots/node_info.png, id=764, 826.58812pt x 231.11343pt>
 File: screenshots/node_info.png Graphic file (type png)
 
 <use screenshots/node_info.png>
 Package pdftex.def Info: screenshots/node_info.png used on input line 285.
 (pdftex.def)             Requested size: 371.96121pt x 104.00008pt.
 
-<screenshots/node_servers.png, id=751, 689.57625pt x 322.95656pt>
+<screenshots/node_servers.png, id=765, 689.57625pt x 322.95656pt>
 File: screenshots/node_servers.png Graphic file (type png)
 
 <use screenshots/node_servers.png>
@@ -1377,13 +1370,13 @@ Package pdftex.def Info: screenshots/node_servers.png used on input line 306.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 311.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [27 <./screenshots/node_info.png (PNG copy)>]
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 317--320
 []$ 
  []
 
-<screenshots/server_createwiz.png, id=757, 801.99625pt x 451.6875pt>
+<screenshots/server_createwiz.png, id=771, 801.99625pt x 451.6875pt>
 File: screenshots/server_createwiz.png Graphic file (type png)
 
 <use screenshots/server_createwiz.png>
@@ -1393,10 +1386,10 @@ Package pdftex.def Info: screenshots/server_createwiz.png used on input line 32
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 333.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [28 <./screenshots/node_servers.png (PNG copy)> <./screenshots/server_createwi
 z.png (PNG copy)>]
-<screenshots/server_createwiz_name.png, id=763, 801.99625pt x 450.68375pt>
+<screenshots/server_createwiz_name.png, id=777, 801.99625pt x 450.68375pt>
 File: screenshots/server_createwiz_name.png Graphic file (type png)
 
 <use screenshots/server_createwiz_name.png>
@@ -1404,7 +1397,7 @@ Package pdftex.def Info: screenshots/server_createwiz_name.png used on input li
 ne 353.
 (pdftex.def)             Requested size: 400.99713pt x 225.34131pt.
 
-<screenshots/server_createwiz_memory.png, id=764, 801.99625pt x 451.6875pt>
+<screenshots/server_createwiz_memory.png, id=778, 801.99625pt x 451.6875pt>
 File: screenshots/server_createwiz_memory.png Graphic file (type png)
 
 <use screenshots/server_createwiz_memory.png>
@@ -1414,10 +1407,10 @@ line 362.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 367.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [29 <./screenshots/server_createwiz_name.png (PNG copy)>]
-<screenshots/server_createwiz_processor.png, id=770, 801.99625pt x 451.6875pt>
+<screenshots/server_createwiz_processor.png, id=784, 801.99625pt x 451.6875pt>
 File: screenshots/server_createwiz_processor.png Graphic file (type png)
 
 <use screenshots/server_createwiz_processor.png>
@@ -1427,11 +1420,11 @@ ut line 371.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 381.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [30 <./screenshots/server_createwiz_memory.png (PNG copy)> <./screenshots/serve
 r_createwiz_processor.png (PNG copy)>]
-<screenshots/server_createwiz_storage.png, id=776, 801.99625pt x 452.69125pt>
+<screenshots/server_createwiz_storage.png, id=791, 801.99625pt x 452.69125pt>
 File: screenshots/server_createwiz_storage.png Graphic file (type png)
 
 <use screenshots/server_createwiz_storage.png>
@@ -1443,7 +1436,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 393--396
 []$ 
  []
 
-<screenshots/server_createwiz_hostnet.png, id=777, 800.9925pt x 451.6875pt>
+<screenshots/server_createwiz_hostnet.png, id=792, 800.9925pt x 451.6875pt>
 File: screenshots/server_createwiz_hostnet.png Graphic file (type png)
 
 <use screenshots/server_createwiz_hostnet.png>
@@ -1453,10 +1446,10 @@ Package pdftex.def Info: screenshots/server_createwiz_hostnet.png used on input
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 407.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [31 <./screenshots/server_createwiz_storage.png (PNG copy)>]
-<screenshots/server_createwiz_startup.png, id=786, 800.9925pt x 452.69125pt>
+<screenshots/server_createwiz_startup.png, id=800, 800.9925pt x 452.69125pt>
 File: screenshots/server_createwiz_startup.png Graphic file (type png)
 
 <use screenshots/server_createwiz_startup.png>
@@ -1466,10 +1459,10 @@ Package pdftex.def Info: screenshots/server_createwiz_startup.png used on input
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 429.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [32 <./screenshots/server_createwiz_hostnet.png (PNG copy)>]
-<screenshots/server_createwiz_finish.png, id=792, 801.99625pt x 452.69125pt>
+<screenshots/server_createwiz_finish.png, id=806, 801.99625pt x 452.69125pt>
 File: screenshots/server_createwiz_finish.png Graphic file (type png)
 
 <use screenshots/server_createwiz_finish.png>
@@ -1479,7 +1472,7 @@ line 434.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 446.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [33 <./screenshots/server_createwiz_startup.png (PNG copy)> <./screenshots/serv
 er_createwiz_finish.png (PNG copy)>]
@@ -1487,7 +1480,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 447--450
 []$ 
  []
 
-<screenshots/server_edit_general.png, id=799, 604.50844pt x 339.51843pt>
+<screenshots/server_edit_general.png, id=813, 604.50844pt x 339.51843pt>
 File: screenshots/server_edit_general.png Graphic file (type png)
 
 <use screenshots/server_edit_general.png>
@@ -1495,7 +1488,7 @@ Package pdftex.def Info: screenshots/server_edit_general.png used on input line
  459.
 (pdftex.def)             Requested size: 302.25348pt x 169.75879pt.
 
-<screenshots/server_edit_interfaces.png, id=801, 603.75563pt x 340.27126pt>
+<screenshots/server_edit_interfaces.png, id=815, 603.75563pt x 340.27126pt>
 File: screenshots/server_edit_interfaces.png Graphic file (type png)
 
 <use screenshots/server_edit_interfaces.png>
@@ -1505,14 +1498,14 @@ ine 468.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 473.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [34 <./screenshots/server_edit_general.png (PNG copy)>]
 Overfull \hbox (53.97282pt too wide) in paragraph at lines 477--480
 []$ 
  []
 
-<screenshots/server_edit_disks.png, id=808, 600.74437pt x 341.02406pt>
+<screenshots/server_edit_disks.png, id=822, 600.74437pt x 341.02406pt>
 File: screenshots/server_edit_disks.png Graphic file (type png)
 
 <use screenshots/server_edit_disks.png>
@@ -1524,7 +1517,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 491--494
 []$ 
  []
 
-<screenshots/server_edit_devices.png, id=809, 603.75563pt x 340.27126pt>
+<screenshots/server_edit_devices.png, id=823, 603.75563pt x 340.27126pt>
 File: screenshots/server_edit_devices.png Graphic file (type png)
 
 <use screenshots/server_edit_devices.png>
@@ -1534,10 +1527,10 @@ Package pdftex.def Info: screenshots/server_edit_devices.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 503.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [35 <./screenshots/server_edit_interfaces.png (PNG copy)> <./screenshots/serve
 r_edit_disks.png (PNG copy)>]
-<screenshots/server_edit_otheroptions.png, id=815, 603.75563pt x 341.02406pt>
+<screenshots/server_edit_otheroptions.png, id=829, 603.75563pt x 341.02406pt>
 File: screenshots/server_edit_otheroptions.png Graphic file (type png)
 
 <use screenshots/server_edit_otheroptions.png>
@@ -1549,7 +1542,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 519--523
 []$ 
  []
 
-<screenshots/server_edit_ha.png, id=816, 603.75563pt x 342.5297pt>
+<screenshots/server_edit_ha.png, id=830, 603.75563pt x 342.5297pt>
 File: screenshots/server_edit_ha.png Graphic file (type png)
 
 <use screenshots/server_edit_ha.png>
@@ -1559,10 +1552,10 @@ Package pdftex.def Info: screenshots/server_edit_ha.png used on input line 527.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 532.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [36 <./screenshots/server_edit_devices.png (PNG copy)> <./screenshots/server_e
 dit_otheroptions.png (PNG copy)>]
-<screenshots/server_remove.png, id=822, 301.125pt x 151.56625pt>
+<screenshots/server_remove.png, id=836, 301.125pt x 151.56625pt>
 File: screenshots/server_remove.png Graphic file (type png)
 
 <use screenshots/server_remove.png>
@@ -1586,7 +1579,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 564--566
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 569.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [37 <./screenshots/server_edit_ha.png (PNG copy)> <./screenshots/server_remove
 .png (PNG copy)>]
 Overfull \hbox (853.85097pt too wide) in paragraph at lines 571--571
@@ -1607,14 +1600,14 @@ Overfull \hbox (110.45241pt too wide) in paragraph at lines 580--580
 s -file server-certificate[] 
  []
 
-<screenshots/server_start.png, id=835, 688.07062pt x 320.69812pt>
+<screenshots/server_start.png, id=849, 688.07062pt x 320.69812pt>
 File: screenshots/server_start.png Graphic file (type png)
 
 <use screenshots/server_start.png>
 Package pdftex.def Info: screenshots/server_start.png used on input line 600.
 (pdftex.def)             Requested size: 309.62892pt x 144.3128pt.
 
-<screenshots/server_migrate.png, id=836, 295.85532pt x 112.92188pt>
+<screenshots/server_migrate.png, id=850, 295.85532pt x 112.92188pt>
 File: screenshots/server_migrate.png Graphic file (type png)
 
 <use screenshots/server_migrate.png>
@@ -1624,13 +1617,13 @@ Package pdftex.def Info: screenshots/server_migrate.png used on input line 615.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 619.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [38 <./screenshots/server_start.png (PNG copy)>]
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 622--625
 []$ 
  []
 
-<screenshots/server_snapshots.png, id=847, 325.215pt x 240.14719pt>
+<screenshots/server_snapshots.png, id=861, 325.215pt x 240.14719pt>
 File: screenshots/server_snapshots.png Graphic file (type png)
 
 <use screenshots/server_snapshots.png>
@@ -1640,21 +1633,21 @@ Package pdftex.def Info: screenshots/server_snapshots.png used on input line 63
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 650.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [39 <./screenshots/server_migrate.png (PNG copy)> <./screenshots/server_snapsh
 ots.png (PNG copy)>]
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 655--658
 []$ 
  []
 
-<screenshots/node_storage.png, id=857, 1016.79875pt x 505.89pt>
+<screenshots/node_storage.png, id=871, 1016.79875pt x 505.89pt>
 File: screenshots/node_storage.png Graphic file (type png)
 
 <use screenshots/node_storage.png>
 Package pdftex.def Info: screenshots/node_storage.png used on input line 663.
 (pdftex.def)             Requested size: 457.55522pt x 227.64839pt.
 
-<screenshots/node_storage_device_ctx.png, id=858, 429.85594pt x 199.49532pt>
+<screenshots/node_storage_device_ctx.png, id=872, 429.85594pt x 199.49532pt>
 File: screenshots/node_storage_device_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_device_ctx.png>
@@ -1664,14 +1657,14 @@ line 682.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 687.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [40 <./screenshots/node_storage.png (PNG copy)>]
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 691--694
 []$ 
  []
 
-<screenshots/node_storage_device_search.png, id=866, 439.6425pt x 323.2075pt>
+<screenshots/node_storage_device_search.png, id=880, 439.6425pt x 323.2075pt>
 File: screenshots/node_storage_device_search.png Graphic file (type png)
 
 <use screenshots/node_storage_device_search.png>
@@ -1679,7 +1672,7 @@ Package pdftex.def Info: screenshots/node_storage_device_search.png used on inp
 ut line 698.
 (pdftex.def)             Requested size: 197.8373pt x 145.44203pt.
 
-<screenshots/node_storage_iscsi_grid.png, id=867, 438.63875pt x 326.21875pt>
+<screenshots/node_storage_iscsi_grid.png, id=881, 438.63875pt x 326.21875pt>
 File: screenshots/node_storage_iscsi_grid.png Graphic file (type png)
 
 <use screenshots/node_storage_iscsi_grid.png>
@@ -1689,11 +1682,11 @@ line 710.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 715.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [41 <./screenshots/node_storage_device_ctx.png (PNG copy)> <./screenshots/node_
 storage_device_search.png>]
-<screenshots/node_storage_iscsi_new.png, id=875, 433.62pt x 323.2075pt>
+<screenshots/node_storage_iscsi_new.png, id=889, 433.62pt x 323.2075pt>
 File: screenshots/node_storage_iscsi_new.png Graphic file (type png)
 
 <use screenshots/node_storage_iscsi_new.png>
@@ -1703,11 +1696,11 @@ ine 720.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 737.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [42 <./screenshots/node_storage_iscsi_grid.png> <./screenshots/node_storage_isc
 si_new.png>]
-<screenshots/node_storage_vg_ctx.png, id=883, 429.85594pt x 226.59656pt>
+<screenshots/node_storage_vg_ctx.png, id=898, 429.85594pt x 226.59656pt>
 File: screenshots/node_storage_vg_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_vg_ctx.png>
@@ -1715,7 +1708,7 @@ Package pdftex.def Info: screenshots/node_storage_vg_ctx.png used on input line
  744.
 (pdftex.def)             Requested size: 193.43338pt x 101.9675pt.
 
-<screenshots/storage_vg_create.png, id=884, 552.0625pt x 350.30875pt>
+<screenshots/storage_vg_create.png, id=899, 552.0625pt x 350.30875pt>
 File: screenshots/storage_vg_create.png Graphic file (type png)
 
 <use screenshots/storage_vg_create.png>
@@ -1730,10 +1723,10 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 768--771
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 771.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [43 <./screenshots/node_storage_vg_ctx.png (PNG copy)> <./screenshots/storage_
 vg_create.png (PNG copy)>]
-<screenshots/storage_vg_extend.png, id=892, 1016.79875pt x 505.89pt>
+<screenshots/storage_vg_extend.png, id=906, 1016.79875pt x 505.89pt>
 File: screenshots/storage_vg_extend.png Graphic file (type png)
 
 <use screenshots/storage_vg_extend.png>
@@ -1741,7 +1734,7 @@ Package pdftex.def Info: screenshots/storage_vg_extend.png used on input line 7
 75.
 (pdftex.def)             Requested size: 457.55522pt x 227.64839pt.
 
-<screenshots/node_storage_vg_search.png, id=894, 328.97906pt x 320.69812pt>
+<screenshots/node_storage_vg_search.png, id=908, 328.97906pt x 320.69812pt>
 File: screenshots/node_storage_vg_search.png Graphic file (type png)
 
 <use screenshots/node_storage_vg_search.png>
@@ -1751,11 +1744,11 @@ ine 785.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 800.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [44 <./screenshots/storage_vg_extend.png (PNG copy)> <./screenshots/node_storag
 e_vg_search.png (PNG copy)>]
-<screenshots/node_storage_lv_ctx.png, id=900, 404.26031pt x 382.42876pt>
+<screenshots/node_storage_lv_ctx.png, id=914, 404.26031pt x 382.42876pt>
 File: screenshots/node_storage_lv_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_lv_ctx.png>
@@ -1763,7 +1756,7 @@ Package pdftex.def Info: screenshots/node_storage_lv_ctx.png used on input line
  810.
 (pdftex.def)             Requested size: 181.91545pt x 172.09134pt.
 
-<screenshots/storage_lv_create.png, id=901, 325.215pt x 181.42781pt>
+<screenshots/storage_lv_create.png, id=915, 325.215pt x 181.42781pt>
 File: screenshots/storage_lv_create.png Graphic file (type png)
 
 <use screenshots/storage_lv_create.png>
@@ -1773,13 +1766,13 @@ Package pdftex.def Info: screenshots/storage_lv_create.png used on input line 8
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 828.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [45 <./screenshots/node_storage_lv_ctx.png (PNG copy)>]
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 832--835
 []$ 
  []
 
-<screenshots/storage_lv_resize.png, id=907, 360.34625pt x 199.74625pt>
+<screenshots/storage_lv_resize.png, id=921, 360.34625pt x 199.74625pt>
 File: screenshots/storage_lv_resize.png Graphic file (type png)
 
 <use screenshots/storage_lv_resize.png>
@@ -1787,7 +1780,7 @@ Package pdftex.def Info: screenshots/storage_lv_resize.png used on input line 8
 40.
 (pdftex.def)             Requested size: 180.17268pt x 99.87288pt.
 
-<screenshots/node_storage_lv_search.png, id=908, 335.00156pt x 173.14688pt>
+<screenshots/node_storage_lv_search.png, id=922, 335.00156pt x 173.14688pt>
 File: screenshots/node_storage_lv_search.png Graphic file (type png)
 
 <use screenshots/node_storage_lv_search.png>
@@ -1797,11 +1790,11 @@ ine 853.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 858.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [46 <./screenshots/storage_lv_create.png (PNG copy)> <./screenshots/storage_lv_
 resize.png (PNG copy)>]
-<screenshots/node_load.png, id=915, 774.895pt x 378.41376pt>
+<screenshots/node_load.png, id=929, 774.895pt x 378.41376pt>
 File: screenshots/node_load.png Graphic file (type png)
 
 <use screenshots/node_load.png>
@@ -1815,10 +1808,10 @@ Overfull \hbox (4.21935pt too wide) in paragraph at lines 871--874
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 880.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [47 <./screenshots/node_storage_lv_search.png (PNG copy)> <./screenshots/node_
 load.png (PNG copy)>]
-<screenshots/server_stats_nodeLoadRange.png, id=922, 650.43pt x 354.32375pt>
+<screenshots/server_stats_nodeLoadRange.png, id=936, 650.43pt x 354.32375pt>
 File: screenshots/server_stats_nodeLoadRange.png Graphic file (type png)
 
 <use screenshots/server_stats_nodeLoadRange.png>
@@ -1830,7 +1823,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 904--907
 []$ 
  []
 
-<screenshots/shutdownnode.png, id=923, 352.31625pt x 235.63031pt>
+<screenshots/shutdownnode.png, id=937, 352.31625pt x 235.63031pt>
 File: screenshots/shutdownnode.png Graphic file (type png)
 
 <use screenshots/shutdownnode.png>
@@ -1839,15 +1832,15 @@ Package pdftex.def Info: screenshots/shutdownnode.png used on input line 912.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 917.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [48 <./screenshots/server_stats_nodeLoadRange.png (PNG copy)>]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 920.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [49 <./screenshots/shutdownnode.png (PNG copy)>]
-<screenshots/server_info.png, id=942, 687.31781pt x 318.43968pt>
+<screenshots/server_info.png, id=956, 687.31781pt x 318.43968pt>
 File: screenshots/server_info.png Graphic file (type png)
 
 <use screenshots/server_info.png>
@@ -1856,23 +1849,23 @@ Package pdftex.def Info: screenshots/server_info.png used on input line 947.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 957.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [50 <./screenshots/server_info.png (PNG copy)>]
-<screenshots/vm_cpuload.png, id=952, 773.89125pt x 443.6575pt>
+<screenshots/vm_cpuload.png, id=966, 773.89125pt x 443.6575pt>
 File: screenshots/vm_cpuload.png Graphic file (type png)
 
 <use screenshots/vm_cpuload.png>
 Package pdftex.def Info: screenshots/vm_cpuload.png used on input line 965.
 (pdftex.def)             Requested size: 348.24785pt x 199.64401pt.
 
-<screenshots/vm_interfaces.png, id=953, 771.88374pt x 440.64626pt>
+<screenshots/vm_interfaces.png, id=967, 771.88374pt x 440.64626pt>
 File: screenshots/vm_interfaces.png Graphic file (type png)
 
 <use screenshots/vm_interfaces.png>
 Package pdftex.def Info: screenshots/vm_interfaces.png used on input line 973.
 (pdftex.def)             Requested size: 347.34447pt x 198.28897pt.
 
-<screenshots/vm_mem.png, id=954, 774.895pt x 443.6575pt>
+<screenshots/vm_mem.png, id=968, 774.895pt x 443.6575pt>
 File: screenshots/vm_mem.png Graphic file (type png)
 
 <use screenshots/vm_mem.png>
@@ -1881,10 +1874,10 @@ Package pdftex.def Info: screenshots/vm_mem.png used on input line 981.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 986.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [51 <./screenshots/vm_cpuload.png (PNG copy)> <./screenshots/vm_interfaces.png
  (PNG copy)>]
-<screenshots/vm_disk_io.png, id=960, 773.89125pt x 442.65375pt>
+<screenshots/vm_disk_io.png, id=974, 773.89125pt x 442.65375pt>
 File: screenshots/vm_disk_io.png Graphic file (type png)
 
 <use screenshots/vm_disk_io.png>
@@ -1893,10 +1886,10 @@ Package pdftex.def Info: screenshots/vm_disk_io.png used on input line 989.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1002.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [52 <./screenshots/vm_mem.png (PNG copy)> <./screenshots/vm_disk_io.png (PNG c
 opy)>]
-<screenshots/virtio/virtio_4.png, id=970, 801.99625pt x 452.69125pt>
+<screenshots/virtio/virtio_4.png, id=984, 801.99625pt x 452.69125pt>
 File: screenshots/virtio/virtio_4.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_4.png>
@@ -1906,9 +1899,9 @@ Package pdftex.def Info: screenshots/virtio/virtio_4.png used on input line 102
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1026.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [53]
-<screenshots/virtio/virtio_7.png, id=977, 799.98875pt x 451.6875pt>
+<screenshots/virtio/virtio_7.png, id=991, 799.98875pt x 451.6875pt>
 File: screenshots/virtio/virtio_7.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_7.png>
@@ -1916,7 +1909,7 @@ Package pdftex.def Info: screenshots/virtio/virtio_7.png used on input line 102
 9.
 (pdftex.def)             Requested size: 399.9934pt x 225.84319pt.
 
-<screenshots/virtio/virtio_5.png, id=979, 688.82344pt x 320.69812pt>
+<screenshots/virtio/virtio_5.png, id=993, 688.82344pt x 320.69812pt>
 File: screenshots/virtio/virtio_5.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_5.png>
@@ -1926,10 +1919,10 @@ Package pdftex.def Info: screenshots/virtio/virtio_5.png used on input line 103
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1044.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [54 <./screenshots/virtio/virtio_4.png (PNG copy)> <./screenshots/virtio/virti
-o_7.png (PNG copy)>] <screenshots/virtio/virtio_10.png, id=986, 508.90125pt x 4
-54.69875pt>
+o_7.png (PNG copy)>] <screenshots/virtio/virtio_10.png, id=1000, 508.90125pt x 
+454.69875pt>
 File: screenshots/virtio/virtio_10.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_10.png>
@@ -1937,7 +1930,7 @@ Package pdftex.def Info: screenshots/virtio/virtio_10.png used on input line 10
 51.
 (pdftex.def)             Requested size: 254.45pt x 227.34882pt.
 
-<screenshots/virtio/virtio_16.png, id=988, 801.99625pt x 450.68375pt>
+<screenshots/virtio/virtio_16.png, id=1002, 801.99625pt x 450.68375pt>
 File: screenshots/virtio/virtio_16.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_16.png>
@@ -1947,10 +1940,10 @@ Package pdftex.def Info: screenshots/virtio/virtio_16.png used on input line 10
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1066.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [55 <./screenshots/virtio/virtio_5.png (PNG copy)> <./screenshots/virtio/virti
 o_10.png>]
-<screenshots/ovf_import.png, id=995, 803.0pt x 401.5pt>
+<screenshots/ovf_import.png, id=1010, 803.0pt x 401.5pt>
 File: screenshots/ovf_import.png Graphic file (type png)
 
 <use screenshots/ovf_import.png>
@@ -1959,13 +1952,13 @@ Package pdftex.def Info: screenshots/ovf_import.png used on input line 1083.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1088.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [56 <./screenshots/virtio/virtio_16.png (PNG copy)>]
 Overfull \hbox (53.97282pt too wide) in paragraph at lines 1094--1097
 []$ 
  []
 
-<screenshots/ovf_import_file.png, id=1003, 801.99625pt x 401.5pt>
+<screenshots/ovf_import_file.png, id=1017, 801.99625pt x 401.5pt>
 File: screenshots/ovf_import_file.png Graphic file (type png)
 
 <use screenshots/ovf_import_file.png>
@@ -1973,7 +1966,7 @@ Package pdftex.def Info: screenshots/ovf_import_file.png used on input line 110
 1.
 (pdftex.def)             Requested size: 400.99713pt x 200.7495pt.
 
-<screenshots/ovf_import_resume.png, id=1004, 801.99625pt x 401.5pt>
+<screenshots/ovf_import_resume.png, id=1018, 801.99625pt x 401.5pt>
 File: screenshots/ovf_import_resume.png Graphic file (type png)
 
 <use screenshots/ovf_import_resume.png>
@@ -1983,9 +1976,9 @@ Package pdftex.def Info: screenshots/ovf_import_resume.png used on input line 1
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1115.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [57 <./screenshots/ovf_import.png (PNG copy)> <./screenshots/ovf_import_file.p
-ng (PNG copy)>] <screenshots/ovf_import_eula.png, id=1010, 902.37125pt x 437.63
+ng (PNG copy)>] <screenshots/ovf_import_eula.png, id=1024, 902.37125pt x 437.63
 5pt>
 File: screenshots/ovf_import_eula.png Graphic file (type png)
 
@@ -1996,9 +1989,9 @@ Package pdftex.def Info: screenshots/ovf_import_eula.png used on input line 111
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1131.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [58 <./screenshots/ovf_import_resume.png (PNG copy)> <./screenshots/ovf_import
-_eula.png (PNG copy)>] <screenshots/ovf_import_name.png, id=1016, 903.375pt x 4
+_eula.png (PNG copy)>] <screenshots/ovf_import_name.png, id=1030, 903.375pt x 4
 39.6425pt>
 File: screenshots/ovf_import_name.png Graphic file (type png)
 
@@ -2007,7 +2000,7 @@ Package pdftex.def Info: screenshots/ovf_import_name.png used on input line 114
 6.
 (pdftex.def)             Requested size: 451.6864pt x 219.82071pt.
 
-<screenshots/ovf_import_storage.png, id=1017, 801.99625pt x 399.4925pt>
+<screenshots/ovf_import_storage.png, id=1031, 801.99625pt x 399.4925pt>
 File: screenshots/ovf_import_storage.png Graphic file (type png)
 
 <use screenshots/ovf_import_storage.png>
@@ -2017,9 +2010,9 @@ Package pdftex.def Info: screenshots/ovf_import_storage.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1169.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [59 <./screenshots/ovf_import_name.png (PNG copy)>]
-<screenshots/ovf_import_networks.png, id=1023, 801.99625pt x 400.49625pt>
+<screenshots/ovf_import_networks.png, id=1037, 801.99625pt x 400.49625pt>
 File: screenshots/ovf_import_networks.png Graphic file (type png)
 
 <use screenshots/ovf_import_networks.png>
@@ -2027,7 +2020,7 @@ Package pdftex.def Info: screenshots/ovf_import_networks.png used on input line
  1174.
 (pdftex.def)             Requested size: 400.99713pt x 200.24763pt.
 
-<screenshots/ovf_import_finish.png, id=1024, 797.98125pt x 398.48875pt>
+<screenshots/ovf_import_finish.png, id=1038, 797.98125pt x 398.48875pt>
 File: screenshots/ovf_import_finish.png Graphic file (type png)
 
 <use screenshots/ovf_import_finish.png>
@@ -2037,21 +2030,21 @@ Package pdftex.def Info: screenshots/ovf_import_finish.png used on input line 1
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1188.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [60 <./screenshots/ovf_import_storage.png (PNG copy)> <./screenshots/ovf_impor
 t_networks.png (PNG copy)>]
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 1196--1199
 []$ 
  []
 
-<screenshots/ovf_export.png, id=1030, 402.50375pt x 201.75375pt>
+<screenshots/ovf_export.png, id=1044, 402.50375pt x 201.75375pt>
 File: screenshots/ovf_export.png Graphic file (type png)
 
 <use screenshots/ovf_export.png>
 Package pdftex.def Info: screenshots/ovf_export.png used on input line 1203.
 (pdftex.def)             Requested size: 201.25137pt x 100.87662pt.
 
-<screenshots/iso_manager.png, id=1031, 1016.79875pt x 506.89375pt>
+<screenshots/iso_manager.png, id=1045, 1016.79875pt x 506.89375pt>
 File: screenshots/iso_manager.png Graphic file (type png)
 
 <use screenshots/iso_manager.png>
@@ -2065,14 +2058,14 @@ Overfull \hbox (47.6769pt too wide) in paragraph at lines 1217--1220
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1222.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [61 <./screenshots/ovf_import_finish.png (PNG copy)> <./screenshots/ovf_export
 .png (PNG copy)>]
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 1233--1236
 []$ 
  []
 
-<screenshots/events_log.png, id=1038, 989.6975pt x 339.2675pt>
+<screenshots/events_log.png, id=1052, 989.6975pt x 339.2675pt>
 File: screenshots/events_log.png Graphic file (type png)
 
 <use screenshots/events_log.png>
@@ -2081,14 +2074,14 @@ Package pdftex.def Info: screenshots/events_log.png used on input line 1249.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1253.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [62 <./screenshots/iso_manager.png (PNG copy)>]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1283.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [63 <./screenshots/events_log.png (PNG copy)>]
-<screenshots/first_time_wizard.png, id=1050, 612.2875pt x 521.95pt>
+<screenshots/first_time_wizard.png, id=1064, 612.2875pt x 521.95pt>
 File: screenshots/first_time_wizard.png Graphic file (type png)
 
 <use screenshots/first_time_wizard.png>
@@ -2100,7 +2093,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1295--1298
 []$ 
  []
 
-<screenshots/cluster-context.png, id=1052, 493.845pt x 216.81pt>
+<screenshots/cluster-context.png, id=1066, 493.845pt x 216.81pt>
 File: screenshots/cluster-context.png Graphic file (type png)
 
 <use screenshots/cluster-context.png>
@@ -2110,9 +2103,9 @@ Package pdftex.def Info: screenshots/cluster-context.png used on input line 136
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1364.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [64 <./screenshots/first_time_wizard.png (PNG copy)>]
-<screenshots/cluster_config.png, id=1061, 613.29124pt x 523.9575pt>
+<screenshots/cluster_config.png, id=1075, 613.29124pt x 523.9575pt>
 File: screenshots/cluster_config.png Graphic file (type png)
 
 <use screenshots/cluster_config.png>
@@ -2122,9 +2115,9 @@ Package pdftex.def Info: screenshots/cluster_config.png used on input line 1364
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1364.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [65 <./screenshots/cluster-context.png (PNG copy)>]
-<screenshots/cluster-move.png, id=1071, 525.965pt x 302.12875pt>
+<screenshots/cluster-move.png, id=1085, 525.965pt x 302.12875pt>
 File: screenshots/cluster-move.png Graphic file (type png)
 
 <use screenshots/cluster-move.png>
@@ -2133,16 +2126,16 @@ Package pdftex.def Info: screenshots/cluster-move.png used on input line 1364.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1364.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [66 <./screenshots/cluster_config.png (PNG copy)>]
-<screenshots/cluster-auth.png, id=1079, 534.99875pt x 376.40625pt>
+<screenshots/cluster-auth.png, id=1093, 534.99875pt x 376.40625pt>
 File: screenshots/cluster-auth.png Graphic file (type png)
 
 <use screenshots/cluster-auth.png>
 Package pdftex.def Info: screenshots/cluster-auth.png used on input line 1364.
 (pdftex.def)             Requested size: 321.00172pt x 225.84547pt.
 
-<screenshots/cluster-auth1.png, id=1080, 303.1325pt x 105.39375pt>
+<screenshots/cluster-auth1.png, id=1094, 303.1325pt x 105.39375pt>
 File: screenshots/cluster-auth1.png Graphic file (type png)
 
 <use screenshots/cluster-auth1.png>
@@ -2152,10 +2145,10 @@ Package pdftex.def Info: screenshots/cluster-auth1.png used on input line 1364.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1364.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [67 <./screenshots/cluster-move.png (PNG copy)> <./screenshots/cluster-auth.pn
 g (PNG copy)>]
-<screenshots/preferences_general.png, id=1088, 803.0pt x 308.15125pt>
+<screenshots/preferences_general.png, id=1102, 803.0pt x 308.15125pt>
 File: screenshots/preferences_general.png Graphic file (type png)
 
 <use screenshots/preferences_general.png>
@@ -2163,7 +2156,7 @@ Package pdftex.def Info: screenshots/preferences_general.png used on input line
  1372.
 (pdftex.def)             Requested size: 401.49902pt x 154.07524pt.
 
-<screenshots/preferences_conn.png, id=1089, 803.0pt x 377.41pt>
+<screenshots/preferences_conn.png, id=1103, 803.0pt x 377.41pt>
 File: screenshots/preferences_conn.png Graphic file (type png)
 
 <use screenshots/preferences_conn.png>
@@ -2173,10 +2166,10 @@ Package pdftex.def Info: screenshots/preferences_conn.png used on input line 13
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1387.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [68 <./screenshots/cluster-auth1.png> <./screenshots/preferences_general.png (
 PNG copy)>]
-<screenshots/users/admin_users.png, id=1096, 679.78969pt x 380.92313pt>
+<screenshots/users/admin_users.png, id=1111, 679.78969pt x 380.92313pt>
 File: screenshots/users/admin_users.png Graphic file (type png)
 
 <use screenshots/users/admin_users.png>
@@ -2186,10 +2179,10 @@ Package pdftex.def Info: screenshots/users/admin_users.png used on input line 1
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1408.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [69 <./screenshots/preferences_conn.png (PNG copy)> <./screenshots/users/admin
 _users.png (PNG copy)>]
-<screenshots/users/create_user_wiz_01.png, id=1103, 463.7325pt x 395.22656pt>
+<screenshots/users/create_user_wiz_01.png, id=1117, 463.7325pt x 395.22656pt>
 File: screenshots/users/create_user_wiz_01.png Graphic file (type png)
 
 <use screenshots/users/create_user_wiz_01.png>
@@ -2197,7 +2190,7 @@ Package pdftex.def Info: screenshots/users/create_user_wiz_01.png used on input
  line 1441.
 (pdftex.def)             Requested size: 185.4897pt x 158.08781pt.
 
-<screenshots/users/create_user_wiz_02.png, id=1104, 463.7325pt x 395.22656pt>
+<screenshots/users/create_user_wiz_02.png, id=1118, 463.7325pt x 395.22656pt>
 File: screenshots/users/create_user_wiz_02.png Graphic file (type png)
 
 <use screenshots/users/create_user_wiz_02.png>
@@ -2205,7 +2198,7 @@ Package pdftex.def Info: screenshots/users/create_user_wiz_02.png used on input
  line 1441.
 (pdftex.def)             Requested size: 185.4897pt x 158.08781pt.
 
-<screenshots/users/create_user_wiz_03.png, id=1105, 463.7325pt x 395.97937pt>
+<screenshots/users/create_user_wiz_03.png, id=1119, 463.7325pt x 395.97937pt>
 File: screenshots/users/create_user_wiz_03.png Graphic file (type png)
 
 <use screenshots/users/create_user_wiz_03.png>
@@ -2215,11 +2208,11 @@ Package pdftex.def Info: screenshots/users/create_user_wiz_03.png used on input
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1441.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [70 <./screenshots/users/create_user_wiz_01.png (PNG copy)> <./screenshots/user
 s/create_user_wiz_02.png (PNG copy)>]
-<screenshots/users/create_user_wiz_04.png, id=1111, 463.7325pt x 395.22656pt>
+<screenshots/users/create_user_wiz_04.png, id=1125, 463.7325pt x 395.22656pt>
 File: screenshots/users/create_user_wiz_04.png Graphic file (type png)
 
 <use screenshots/users/create_user_wiz_04.png>
@@ -2227,7 +2220,7 @@ Package pdftex.def Info: screenshots/users/create_user_wiz_04.png used on input
  line 1441.
 (pdftex.def)             Requested size: 185.4897pt x 158.08781pt.
 
-<screenshots/users/admin_users_groups.png, id=1112, 682.80093pt x 383.18156pt>
+<screenshots/users/admin_users_groups.png, id=1126, 682.80093pt x 383.18156pt>
 File: screenshots/users/admin_users_groups.png Graphic file (type png)
 
 <use screenshots/users/admin_users_groups.png>
@@ -2237,11 +2230,11 @@ Package pdftex.def Info: screenshots/users/admin_users_groups.png used on input
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1514.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [71 <./screenshots/users/create_user_wiz_03.png (PNG copy)> <./screenshots/user
 s/create_user_wiz_04.png (PNG copy)>]
-<screenshots/permissions/context_dc.png, id=1121, 566.115pt x 403.5075pt>
+<screenshots/permissions/context_dc.png, id=1135, 566.115pt x 403.5075pt>
 File: screenshots/permissions/context_dc.png Graphic file (type png)
 
 <use screenshots/permissions/context_dc.png>
@@ -2249,7 +2242,7 @@ Package pdftex.def Info: screenshots/permissions/context_dc.png used on input l
 ine 1520.
 (pdftex.def)             Requested size: 283.05681pt x 201.75325pt.
 
-<screenshots/permissions/context_server.png, id=1122, 532.99126pt x 404.51125pt
+<screenshots/permissions/context_server.png, id=1136, 532.99126pt x 404.51125pt
 >
 File: screenshots/permissions/context_server.png Graphic file (type png)
  <use screenshots/permissions/context_server.png>
@@ -2259,11 +2252,11 @@ ut line 1528.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1533.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 [72 <./screenshots/users/admin_users_groups.png (PNG copy)> <./screenshots/perm
 issions/context_dc.png (PNG copy)>]
-<screenshots/permissions/server_window.png, id=1128, 501.875pt x 381.425pt>
+<screenshots/permissions/server_window.png, id=1142, 501.875pt x 381.425pt>
 File: screenshots/permissions/server_window.png Graphic file (type png)
 
 <use screenshots/permissions/server_window.png>
@@ -2278,7 +2271,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1543--1546
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1557.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [73 <./screenshots/permissions/context_server.png (PNG copy)> <./screenshots/p
 ermissions/server_window.png (PNG copy)>]
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 1557--1557
@@ -2288,58 +2281,63 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1557--1557
 )
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 100.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+Package pdftex.def Info: include/img/logo.png used on input line 102.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [74] (./appendix.tex
 Chapter 4.
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 30.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [75
 
 ]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 60.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [76]
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 93.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [77]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 125.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [78]
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 159.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
  [79]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 192.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
- [80])
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
+ [80]
+File: include/img/logo.png Graphic file (type png)
 
+<use include/img/logo.png>
+Package pdftex.def Info: include/img/logo.png used on input line 224.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
+ [81]) 
 AED: lastpage setting LastPage
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 105.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
- [81]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 105.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 105.
+Package pdftex.def Info: include/img/logo.png used on input line 107.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
+ [82]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 107.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 107.
  (./manual-etvm-cm.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 105.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 105.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 107.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 107.
 Package rerunfilecheck Info: File `manual-etvm-cm.out' has not changed.
-(rerunfilecheck)             Checksum: 1B7172C35175F6F358BFED5031EACEC6;4299.
+(rerunfilecheck)             Checksum: 0858A77D5045FF8D9D2DE610FFE576D4;4447.
 
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
@@ -2347,15 +2345,15 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 LaTeX Warning: There were multiply-defined labels.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 105.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 107.
  ) 
 Here is how much of TeX's memory you used:
- 10763 strings out of 495035
- 167909 string characters out of 6181703
- 266944 words of memory out of 5000000
- 13359 multiletter control sequences out of 15000+600000
+ 10766 strings out of 493356
+ 167964 string characters out of 6141781
+ 270941 words of memory out of 5000000
+ 13591 multiletter control sequences out of 15000+600000
  73375 words of font info for 124 fonts, out of 8000000 for 9000
- 14 hyphenation exceptions out of 8191
+ 953 hyphenation exceptions out of 8191
  54i,16n,55p,615b,572s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/txfonts/t1xtt.pfb></usr/share/texlive/texmf-dis
@@ -2364,10 +2362,10 @@ t/fonts/type1/public/txfonts/txsy.pfb></usr/share/texlive/texmf-dist/fonts/type
 ic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pf
 b></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on manual-etvm-cm.pdf (81 pages, 3329984 bytes).
+Output written on manual-etvm-cm.pdf (82 pages, 3280774 bytes).
 PDF statistics:
- 1420 PDF objects out of 1440 (max. 8388607)
- 1182 compressed objects within 12 object streams
- 256 named destinations out of 1000 (max. 500000)
- 999 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1492 PDF objects out of 1728 (max. 8388607)
+ 1249 compressed objects within 13 object streams
+ 259 named destinations out of 1000 (max. 500000)
+ 1015 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -130,7 +130,7 @@ class SOAP_Transport_TCP extends SOAP_Transport
                 return $this->incoming_payload;
             }
 
-            return $this->_raiseSoapFault('Error reveiving data from ' . $this->url,'','socket_read');
+            return $this->_raiseSoapFault('Error receiving data from ' . $this->url,'','socket_read');
         }
 
         return $this->_raiseSoapFault('Invalid url scheme ' . $this->url);

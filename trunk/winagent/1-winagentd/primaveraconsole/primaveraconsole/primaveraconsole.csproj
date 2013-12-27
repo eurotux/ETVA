@@ -46,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <Externalconsole>true</Externalconsole>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>CA01271144B539D4C2982180F4C141407C655D97</ManifestCertificateThumbprint>
@@ -60,21 +61,25 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Interop.AdmBE800">
-      <HintPath>.\Interop.AdmBE800.dll</HintPath>
+    <Reference Include="Interop.AdmBE800, Version=8.1005.0.0, Culture=neutral, PublicKeyToken=e076e239d0e78a42, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\..\Common Files\Interop.AdmBE800.dll</HintPath>
     </Reference>
-    <Reference Include="Interop.AdmBS800">
-      <HintPath>.\Interop.AdmBS800.dll</HintPath>
+    <Reference Include="Interop.AdmBS800, Version=8.1005.0.0, Culture=neutral, PublicKeyToken=e076e239d0e78a42, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\..\Common Files\Interop.AdmBS800.dll</HintPath>
     </Reference>
-    <Reference Include="Interop.ErpBS800">
-      <HintPath>.\Interop.ErpBS800.dll</HintPath>
+    <Reference Include="Interop.ErpBS800, Version=8.1004.0.0, Culture=neutral, PublicKeyToken=e076e239d0e78a42, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\..\Common Files\Interop.ErpBS800.dll</HintPath>
     </Reference>
-    <Reference Include="Interop.StdBE800">
-      <HintPath>.\Interop.StdBE800.dll</HintPath>
+    <Reference Include="Interop.StdBE800, Version=8.1005.0.0, Culture=neutral, PublicKeyToken=e076e239d0e78a42, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\..\..\Common Files\Interop.StdBE800.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System">
@@ -100,45 +105,9 @@
     <Compile Include="WindowsUsers.cs" />
   </ItemGroup>
   <ItemGroup>
-    <COMReference Include="ADODB">
-      <Guid>{2A75196C-D9EB-4129-B803-931327F72D5C}</Guid>
-      <VersionMajor>2</VersionMajor>
-      <VersionMinor>8</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
     <COMReference Include="MSXML2">
       <Guid>{F5078F18-C551-11D3-89B9-0000F81FE221}</Guid>
       <VersionMajor>6</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-    <COMReference Include="StdBE800">
-      <Guid>{54E47925-8616-466D-873E-777C58539F0B}</Guid>
-      <VersionMajor>2</VersionMajor>
-      <VersionMinor>5</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-    <COMReference Include="StdBESql800">
-      <Guid>{3B983077-6658-4F6D-810F-6ADD00B81422}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>3</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-    <COMReference Include="StdClasses800">
-      <Guid>{2C67BA9A-1132-4570-9C7D-D2D980E520AE}</Guid>
-      <VersionMajor>2</VersionMajor>
       <VersionMinor>0</VersionMinor>
       <Lcid>0</Lcid>
       <WrapperTool>tlbimp</WrapperTool>
@@ -188,6 +157,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -7,8 +7,13 @@ use Cmdline::Shell;
 use Data::Dumper;
 use JSON;
 
-my $uri = "http://10.10.20.116:8004/soapcliapi.php";
+my $uri = $ENV{'cm_uri'} || "http://localhost/soapcliapi.php";
 my $ns = "urn:soapCliController";
+
+if( $ENV{'cm_host'} ) {
+    my $host = $ENV{'cm_host'};
+    $uri = "http://${host}/soapcliapi.php";
+}
 
 sub main {
     my $shell = Cmdline::Shell->new();

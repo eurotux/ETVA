@@ -44,7 +44,8 @@ BEGIN {
 
 $/ = "\r\n";	# for WIN32 set end of line with \r\n
 
-my %CONF = ( 'username'=>"adm", 'password'=>"123", 'sa_username'=>"sa", 'sa_password'=>"sa123", 'instance'=>".\\\\PRIMAVERA", 'primaveraInstance'=>"DEFAULT", 'tipoPlataforma'=>'Executive', 'INSTALLDIR'=>"C:\\Program Files\\primaveraagentd", 'BACKUPSDIR'=>"C:\\Program Files\\Microsoft SQL Server\\MSSQL10.PRIMAVERA\\MSSQL\\Backup");
+#my %CONF = ( 'username'=>"adm", 'password'=>"123", 'sa_username'=>"sa", 'sa_password'=>"sa123", 'instance'=>".\\\\PRIMAVERA", 'primaveraInstance'=>"DEFAULT", 'tipoPlataforma'=>'Executive', 'INSTALLDIR'=>"C:\\Program Files\\primaveraagentd", 'BACKUPSDIR'=>"C:\\Program Files\\Microsoft SQL Server\\MSSQL10.PRIMAVERA\\MSSQL\\Backup");
+my %CONF = ( 'username'=>"adm", 'password'=>"123", 'sa_username'=>"sa", 'sa_password'=>"sa123", 'instance'=>".\\\\PRIMAVERA", 'primaveraInstance'=>"DEFAULT", 'tipoPlataforma'=>'Executive', 'INSTALLDIR'=>"C:\\Program Files\\primaveraagentd");
 
 my $TMPDIR = 'c:\Temp';
 
@@ -67,9 +68,11 @@ sub init_conf {
         mkdir $TMPDIR;
     }
 
-    my %BC = $self->primavera_backupconf(%p);
-    if( $BC{'DirectoriaBackup'} ){
-        $CONF{'BACKUPSDIR'} = $BC{'DirectoriaBackup'};
+    if( !$CONF{'BACKUPSDIR'} ){
+        my %BC = $self->primavera_backupconf(%p);
+        if( $BC{'DirectoriaBackup'} ){
+            $CONF{'BACKUPSDIR'} = $BC{'DirectoriaBackup'};
+        }
     }
 
     return wantarray() ? %CONF : \%CONF;
@@ -127,7 +130,9 @@ sub primavera_about {
     my $i = $p{'instance'} || $CONF{'primaveraInstance'};
     my $t = $p{'type'} || $CONF{'tipoPlataforma'};
 
-    open(P,"primaveraconsole /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" |");
+    my $backupsdir = $p{'backupsdir'} || $CONF{'BACKUPSDIR'};
+
+    open(P,"primaveraconsole /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" /backupsdir=\"$backupsdir\" |");
     while(<P>){
         chomp;
 	decode_entities($_);
@@ -159,12 +164,14 @@ sub primavera_backup {
     my $i = $p{'instance'} || $CONF{'primaveraInstance'};
     my $t = $p{'type'} || $CONF{'tipoPlataforma'};
 
+    my $backupsdir = $p{'backupsdir'} || $CONF{'BACKUPSDIR'};
+
     my $d = $p{'database'}; # just for testing
 
     if( !$d ){
         return retErr("_ERR_BACKUP_","Error backup: no database to make backup.");
     }
-    my ($e,$m) = cmd_exec("primaveraconsole pricopiaseg /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" /database=\"$d\"");
+    my ($e,$m) = cmd_exec("primaveraconsole pricopiaseg /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" /database=\"$d\" /backupsdir=\"$backupsdir\"");
 
     unless( $e == 0 ){
         return retErr("_ERR_BACKUP_","Error backup: $m");
@@ -257,8 +264,10 @@ sub primavera_listbackups {
     my $i = $p{'instance'} || $CONF{'primaveraInstance'};
     my $t = $p{'type'} || $CONF{'tipoPlataforma'};
 
+    my $backupsdir = $p{'backupsdir'} || $CONF{'BACKUPSDIR'};
+
     my @l = ();
-    open(P,"primaveraconsole prilistabkps /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" |");
+    open(P,"primaveraconsole prilistabkps /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" /backupsdir=\"$backupsdir\" |");
     while(<P>){
         chomp;
 	decode_entities($_);
@@ -286,10 +295,13 @@ sub primavera_lastbackups {
     my @ld = $self->primavera_listdatabases(%p);
     my @lb = $self->primavera_listbackups(%p);
     for my $D (@ld){
-        if( $D->{'name'} =~ m/PRI/ ){
-	    my $nb = $D->{'name'};
+        if( $D->{'name'} =~ m/PRI(\w+)/ ){
+            my $ne = $1;                # nome empresa
+	    my $nb = $D->{'name'};      # nome base de dados
             my ($B) = grep { ($_->{'name'} =~ m/^${nb}_/) ||
-                                    ($_->{'name'} =~ m/^${nb}.BAK/) } @lb;
+                                    ($_->{'name'} =~ m/^${nb}.BAK/) ||
+                                    ($_->{'name'} =~ m/^${ne}_/) ||
+                                    ($_->{'name'} =~ m/^${ne}.BAK/) } @lb;
 	    if( $B ){
 	        push(@l, $B );
 	    }
@@ -382,6 +394,8 @@ sub primavera_insertbackupplan {
     my $i = $p{'instance'} || $CONF{'primaveraInstance'};
     my $t = $p{'type'} || $CONF{'tipoPlataforma'};
 
+    my $backupsdir = $p{'backupsdir'} || $CONF{'BACKUPSDIR'};
+
     my $name = $p{'name'};
 
     if( !$name ){
@@ -406,7 +420,7 @@ sub primavera_insertbackupplan {
     my $overwrite = ( $p{'overwrite'} && ($p{'overwrite'} ne 'false') ) ? "true" : "false";
     my $periodo = $p{'periodo'} || "diario";
 
-    my ($e,$m) = cmd_exec("primaveraconsole priinsereplanocopiaseguranca /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" /name=\"$name\" /verify=\"$verify\" /incremental=\"$incremental\" /overwrite=\"$overwrite\" /companiesByComma=\"$companiesByComma\" /periodo=\"$periodo\"");
+    my ($e,$m) = cmd_exec("primaveraconsole priinsereplanocopiaseguranca /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" /name=\"$name\" /verify=\"$verify\" /incremental=\"$incremental\" /overwrite=\"$overwrite\" /companiesByComma=\"$companiesByComma\" /periodo=\"$periodo\" /backupsdir=\"$backupsdir\"");
 
     unless( $e == 0 ){
         return retErr("_ERR_PRI_INSERTBACKUPPLAN_","Error insert backup plan: $m");
@@ -646,8 +660,8 @@ sub primavera_list_user_aplicacoes_join {
     if( my @user_aplicacoes = $self->primavera_list_user_aplicacoes(@_) ){
         my %h_user_aplicacoes = map { $_->{'apl'} => 1 } @user_aplicacoes;
         foreach my $A (@all_aplicacoes){
-	    my $apl = $A->{'apl'};
-	    $A->{'checked'} = $h_user_aplicacoes{"$apl"} ? 1 : 0;
+            my $apl = $A->{'apl'};
+            $A->{'checked'} = $h_user_aplicacoes{"$apl"} ? 'true' : 'false';
         }
     }
     return wantarray() ? @all_aplicacoes : \@all_aplicacoes;
@@ -1039,9 +1053,12 @@ sub primavera_backupinfo {
         my ($D) = grep { $_->{'name'} eq "PRI$n" } @ld;
         if( $D ){
             my $nb = $D->{'name'};
-            my @bkps = grep { $_->{'name'} =~ m/_${nb}_/ } @lb;
+            my @bkps = grep { ($_->{'name'} =~ m/^${nb}_/) ||
+                                    ($_->{'name'} =~ m/^${nb}.BAK/) ||
+                                    ($_->{'name'} =~ m/^${n}_/) ||
+                                    ($_->{'name'} =~ m/^${n}.BAK/) } @lb;
             push(@l, { %$E, 'DATABASE'=>{%$D}, 'BACKUPS'=>[@bkps] });
-	    }
+        }
     }
 
     return wantarray() ? @l : \@l;
@@ -1064,7 +1081,9 @@ sub primavera_backupconf {
     my $i = $p{'instance'} || $CONF{'primaveraInstance'};
     my $t = $p{'type'} || $CONF{'tipoPlataforma'};
 
-    open(P,"primaveraconsole priconfigbackups /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" |");
+    my $backupsdir = $p{'backupsdir'} || $CONF{'BACKUPSDIR'};
+
+    open(P,"primaveraconsole priconfigbackups /adminuser=\"$u\" /adminpassword=\"$p\" /instance=\"$i\" /type=\"$t\" /backupsdir=\"$backupsdir\" |");
     while(<P>){
         chomp;
 	decode_entities($_);
@@ -1399,6 +1418,11 @@ sub windows_createuser {
     }
 
     return retOk("_WINDOWS_CREATEUSER_OK_","User created.");
+}
+
+
+sub getstate {
+    return retOk("_OK_STATE_","ok");
 }
 
 1;

@@ -3,3 +3,4 @@ BOOTPROTO=none
 ONBOOT=yes
 TYPE=Ethernet
 USERCTL=no
+NM_CONTROLLED="no"

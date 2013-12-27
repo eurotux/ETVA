@@ -328,7 +328,12 @@ Cluster.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                         Ext.getCmp('cluster-nodeha-fieldset').collapse();
                     } else  {
                         Ext.getCmp('cluster-nodeha-fieldset').expand();
-                        //cb.store.reload();
+                        cb.store.reload();
+
+                        if( data['admissionGate_type'] == 1 )
+                            Ext.getCmp('spinner-admissiongate-value-n-host-failures-tolerates').setValue(data['admissionGate_value']);
+                        else if( data['admissionGate_type'] == 2 )
+                            Ext.getCmp('spinner-admissiongate-value-per-resources').setValue(data['admissionGate_value']);
                     }
                 } else {
                     var title = <?php echo json_encode(__('Node High availability')) ?>;

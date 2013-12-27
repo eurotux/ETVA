@@ -2,7 +2,7 @@
 %define nagios_plugins /usr/lib64/nagios/plugins  
 
 Name: etva-centralmanagement
-Version: 2.0.0
+Version: 2.1.0
 Release: 2536
 Summary: ETVA Central Management
 License: GPL
@@ -124,6 +124,8 @@ rm -rf $RPM_BUILD_ROOT;
 
 %{__cp} -rf * $RPM_BUILD_ROOT/srv/etva-centralmanagement/;
 
+install -D -p -m 0755 etva-queue-cm $RPM_BUILD_ROOT%{_sysconfdir}/init.d/etva-queue-cm
+
 %{__rm} -f $RPM_BUILD_ROOT/srv/etva-centralmanagement/*.spec
 
 find $RPM_BUILD_ROOT -name "\.svn" -depth -type d -exec rm -rf {} 2>/dev/null \;
@@ -175,6 +177,13 @@ fi
 
 #clear project cache
 symfony cc;
+
+# add Queue CM service
+if [ ! -f "/var/lock/subsys/etva-queue-cm" ]; then
+    /sbin/chkconfig --add etva-queue-cm
+    /sbin/chkconfig etva-queue-cm on
+    /sbin/service etva-queue-cm start
+fi
 
 if [ "$1" == "1" ]; then
 	#echo "depois de instalar pela 1a vez (-i)..."
@@ -248,6 +257,9 @@ if [ "$1" == "1" ]; then
     fi
 fi
 
+# modify the etva-model.conf
+echo -n " " >> /etc/sysconfig/etva-model.conf
+
 %post ent
 cd /srv/etva-centralmanagement
 
@@ -287,8 +299,10 @@ if [ "$1" == "1" ]; then
     fi
 fi
 
+# modify the etva-model.conf
+echo -n " " >> /etc/sysconfig/etva-model.conf
+
 %post https
-cd /srv/etva-centralmanagement
 if [ "$1" == "1" ]; then
 
     echo "[ req ]
@@ -315,6 +329,8 @@ authorityKeyIdentifier=keyid,issuer
     %{__rm} -f /var/tmp/sslserver.conf;
 
     %{__mv} /etc/httpd/conf.d/https_etvacm.conf.disabled /etc/httpd/conf.d/https_etvacm.conf;
+
+    cd /srv/etva-centralmanagement
 
     %{__mv} apps/app/config/security.yml apps/app/config/security.yml.http;
     %{__mv} apps/app/config/security.yml.https apps/app/config/security.yml;
@@ -356,6 +372,7 @@ fi
 %config(noreplace) %{_sysconfdir}/php.d/php_etva.ini
 %{_sysconfdir}/cron.d/etva
 %{_sysconfdir}/avahi/services/etva.service
+%{_sysconfdir}/init.d/etva-queue-cm
 
 %config(noreplace) /srv/etva-centralmanagement/config/databases.yml
 %config(noreplace) /srv/etva-centralmanagement/apps/app/config/config.yml

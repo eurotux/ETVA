@@ -1747,6 +1747,10 @@ sub genXMLDomain {
     my @channels_params = $self->get_channels_xml(%params);
     push(@devices_params, @channels_params ) if ( @channels_params );
 
+    #   <serial>
+    my @serials_params = $self->get_serials_xml(%params);
+    push(@devices_params, @serials_params ) if ( @serials_params );
+
     #   <interface>
     my @interfacedevices_params = $self->get_interfacedevices_xml(%params);
     push(@devices_params, @interfacedevices_params ) if( @interfacedevices_params );
@@ -1802,6 +1806,10 @@ sub genXMLDevices {
     #   <channel>
     my @channels_params = $self->get_channels_xml(%params);
     push(@devices_params, @channels_params ) if ( @channels_params );
+
+    #   <serial>
+    my @serials_params = $self->get_serials_xml(%params);
+    push(@devices_params, @serials_params ) if ( @serials_params );
 
     # <interface>
     my @interfacedevices_params = $self->get_interfacedevices_xml(%params);
@@ -2310,6 +2318,40 @@ sub get_channel_xml {
     return wantarray() ? @devices_params : \@devices_params;
 }
 
+sub get_serial_xml {
+    my $self = shift;
+    my ($D) = my %p = @_; 
+
+    $D = \%p if( !ref($D) );
+
+    my $X = XML::Generator->new(':pretty');
+
+    my @devices_params = ();
+
+    my @serial_params = ();
+    my @target_params = ();
+    my @source_params = ();
+
+    #   <serial>
+    my $serial_attrs = getAttrs($D);
+    push(@serial_params,$serial_attrs) if( $serial_attrs );
+
+    #       <target>
+    my $target_attrs = getAttrs($D->{'target'});
+    push(@target_params, $target_attrs) if( $target_attrs );    
+
+    #       <source>
+    my $source_attrs = getAttrs($D->{'source'});
+    push(@source_params, $source_attrs) if( $source_attrs );    
+   
+    push(@serial_params, $X->source( @source_params )) if( @source_params );
+    push(@serial_params, $X->target( @target_params )) if( @target_params );
+
+    push(@devices_params,$X->serial(@serial_params)) if( @serial_params );
+
+    return wantarray() ? @devices_params : \@devices_params;
+}
+
 sub get_hostdevdevices_xml {
     my $self = shift;
     my %params = @_; 
@@ -2361,6 +2403,25 @@ sub get_channels_xml {
     } elsif( ref($ldf) eq 'ARRAY'){
         for my $D (@$ldf){
             push(@devices_params,$self->get_channel_xml($D));
+        }
+    }
+
+    return wantarray() ? @devices_params : \@devices_params;
+}
+
+sub get_serials_xml {
+    my $self = shift;
+    my %params = @_; 
+
+    my $X = XML::Generator->new(':pretty');
+
+    my @devices_params = ();
+    my $ldf = $params{'devices'}{'serial'};
+    if(ref($ldf) eq 'HASH'){
+        push(@devices_params,$self->get_serial_xml($ldf));
+    } elsif( ref($ldf) eq 'ARRAY'){
+        for my $D (@$ldf){
+            push(@devices_params,$self->get_serial_xml($D));
         }
     }
 

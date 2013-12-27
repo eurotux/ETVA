@@ -2,6 +2,34 @@
 # -e: Exit immediately if a command exits with a non-zero status.
 # -u: Treat unset variables as an error when substituting.
 
+perl -pi -e "s/etva-build/$JOB_NAME/" etc/mock/etva-* etc/revisor/conf.d/revisor-*
+perl -pi -e "s/etva6-build/$JOB_NAME/" etc/mock/etva-* etc/revisor/conf.d/revisor-*
+
+# use devel repository in devel builds. See #419
+if [ "$JOB_NAME" == "etva-build" ]; then
+	echo "
+[etva-devel]
+name=ETVA Repository - devel
+baseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/
+enabled=1
+gpgcheck=0
+gpgkey=
+" >> etc/revisor/conf.d/revisor-el5-x86_64-updates.conf
+	cat etc/mock/etva-5-x86_64.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\n\n\[groups\]#' > etc/mock/etva-5-x86_64.cfg.new && mv etc/mock/etva-5-x86_64.cfg.new etc/mock/etva-5-x86_64.cfg
+	cat etc/mock/etva-5-x86_64.first.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\n\n\[groups\]#' > etc/mock/etva-5-x86_64.first.cfg.new && mv etc/mock/etva-5-x86_64.first.cfg.new etc/mock/etva-5-x86_64.first.cfg
+elif [ "$JOB_NAME" == "etva6-build" ]; then
+	echo "
+[etva-devel]
+name=ETVA Repository - devel
+baseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/
+enabled=1
+gpgcheck=0
+gpgkey=
+" >> etc/revisor/conf.d/revisor-el6-x86_64-updates.conf
+	cat etc/mock/etva-6-x86_64.cfg | sed -e 's#\[local\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/\n\n\[local\]#' > etc/mock/etva-6-x86_64.cfg.new && mv etc/mock/etva-6-x86_64.cfg.new etc/mock/etva-6-x86_64.cfg
+	cat etc/mock/etva-6-x86_64.first.cfg | sed -e 's#\[local\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/\n\n\[local\]#' > etc/mock/etva-6-x86_64.first.cfg.new && mv etc/mock/etva-6-x86_64.first.cfg.new etc/mock/etva-6-x86_64.first.cfg
+fi
+
 CENTOSVER=`cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//'`
 if [ "$CENTOSVER" == "6" ]; then
 	exit 0
@@ -32,31 +60,6 @@ if [ "$?" != "0" ]; then
 	sudo yum -y install createrepo
 fi
 
-# use devel repository in devel builds. See #419
-if [ "$JOB_NAME" == "etva-build" ]; then
-	echo "
-[etva-devel]
-name=ETVA Repository - devel
-baseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/
-enabled=1
-gpgcheck=0
-gpgkey=
-" >> etc/revisor/conf.d/revisor-el5-x86_64-updates.conf
-	cat etc/mock/etva-5-x86_64.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\n\n\[groups\]#' > etc/mock/etva-5-x86_64.cfg.new && mv etc/mock/etva-5-x86_64.cfg.new etc/mock/etva-5-x86_64.cfg
-	cat etc/mock/etva-5-x86_64.first.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\n\n\[groups\]#' > etc/mock/etva-5-x86_64.first.cfg.new && mv etc/mock/etva-5-x86_64.first.cfg.new etc/mock/etva-5-x86_64.first.cfg
-elif [ "$JOB_NAME" == "etva6-build" ]; then
-	echo "
-[etva-devel]
-name=ETVA Repository - devel
-baseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/
-enabled=1
-gpgcheck=0
-gpgkey=
-" >> etc/revisor/conf.d/revisor-el6-x86_64-updates.conf
-	cat etc/mock/etva-6-x86_64.cfg | sed -e 's#\[local\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/\n\n\[local\]#' > etc/mock/etva-6-x86_64.cfg.new && mv etc/mock/etva-6-x86_64.cfg.new etc/mock/etva-6-x86_64.cfg
-	cat etc/mock/etva-6-x86_64.first.cfg | sed -e 's#\[local\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/\n\n\[local\]#' > etc/mock/etva-6-x86_64.first.cfg.new && mv etc/mock/etva-6-x86_64.first.cfg.new etc/mock/etva-6-x86_64.first.cfg
-fi
-
 if [ "$CENTOSVER" == "5" ]; then
 	rpm -q squashfs-tools > /dev/null 2>&1
 	if [ "$?" != "0" ]; then
@@ -77,8 +80,5 @@ if [ "$CENTOSVER" == "5" ]; then
 	sudo cp etc/revisor/conf.d/* /etc/revisor/conf.d/
 	sudo su - -c "/usr/bin/system-config-securitylevel-tui -q --disabled --selinux='disabled'"
 fi
-
-perl -pi -e "s/etva-build/$JOB_NAME/" etc/mock/etva-* etc/revisor/conf.d/revisor-*
-perl -pi -e "s/etva6-build/$JOB_NAME/" etc/mock/etva-* etc/revisor/conf.d/revisor-*
 
 sudo /sbin/service iptables stop > /dev/null 2>&1

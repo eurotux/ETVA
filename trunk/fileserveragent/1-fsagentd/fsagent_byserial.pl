@@ -41,26 +41,20 @@ fsagentd - File Server daemon
 
 use strict;
 
-#use ETVA::Agent::SOAPFork;
-#use ETVA::Client::SOAP::HTTP;
-use ETVA::SOAP;
 use ETVA::Utils;
+
+use ETVA::GuestManagementAgentSerialPort;
 
 use Samba;
 
-use Event::Lib;
-
-#use IO::Socket;
-#use IO::Handle;
 use POSIX;
-
-#use Device::SerialPort;
 
 use Data::Dumper;
 
 my %CONF = ( "CFG_FILE"=>"/etc/sysconfig/etva-fsagent/fsagentd.conf" );
 
 # choosed serial port
+#my $serial_port = "/dev/ttyS1";
 my $serial_port = "/dev/ttyS0";
 
 =item launch_agent
@@ -75,115 +69,39 @@ sub launch_agent {
     # get network interface to initialize agent with macaddress
     $CONF{'macaddr'} = ETVA::Utils::getmacaddr();
 
-    open(COM,"+<","$serial_port");
-
     # dispatcher
     my $dispatcher = $CONF{'_dispatcher'} = "Samba";
 
-    # register func handlers
-    &register_handler( *COM, \%CONF );
+    # agent
+    my $agent = ETVA::GuestManagementAgentSerialPort->new( %CONF,
+                                                    'serial_port'=>$serial_port,
+                                                    '_register_handler'=>\&register_handler
+                                                 );
 
-    # loop
-    &mainLoop( *COM, \%CONF );
-    #my $Agent = ETVA::Agent::SOAPFork->new( %CONF );
-
-    #$Agent->mainLoop();
-
-    close(COM);
-}
-
-=item call
-
-    my $SOAP_Response = $Client->call( $uri, $method, @params );
-
-=cut
-
-# call
-#  soap call
-#  args: uri, method, parameters
-sub call {
-    my $fh = shift;
-    my ($uri,$method,@params) = @_;
-
-    # default uri
-    $uri = "urn:#$method" if( !$uri );
-
-    my $request = &soap_request($uri,$method,@params);
-
-    plog "ETVA::Client::SOAP call request = $request" if(1 || &debug_level > 3);
-
-    my $response = &send_receive($fh, $request);
-
-    plog "ETVA::Client::SOAP call response = $response" if(1 || &debug_level > 3);
-
-    return &soap_response($response);
-}
-
-=item send_receive
-
-send request and receive response
-
-    my $response = $Client->send_receive( $request );
-
-=cut
-
-sub send_receive {
-    my $fh = shift;
-    &send( $fh, @_ );
-
-    return &receive($fh);
-}
-
-# nonblock($socket) puts socket into nonblocking mode
-# Perl Cookbook
-sub nonblock {
-     my $socket = shift;
-     my $flags;
-
-     $flags = fcntl($socket, F_GETFL, 0)
-        or die "Can't get flags for socket: $!\n";
-     fcntl($socket, F_SETFL, $flags | O_NONBLOCK)
-        or die "Can't make socket nonblocking: $!\n";
-}
-sub receive {
-    my $fh = shift;
-    my $data = '';
-    while(<$fh>){
-        $data .= $_;
-        last if( $data =~ m/<\/\S+Envelope>/i );
-    }
-    return $data;
-}
-sub send {
-    my $fh = shift;
-    my @data = @_;
-
-    print $fh @data;
+    $agent->mainLoop();
 }
 
 sub register_handler {
-    my $fh = shift;
-    my ($agent) = @_;
+    my $self = shift;
 
-    my $dispatcher = $agent->{'_dispatcher'};
+    my $dispatcher = $self->{'_dispatcher'};
 
     # initialized on CentralManagement 
-    if( $agent->{'cm_uri'} ){
+    if( $self->{'cm_uri'} ){
 
         my $now = nowStr();
-        plogNow("init Agent with macaddr=",$agent->{'macaddr'});
+        plogNow("init Agent with macaddr=",$self->{'macaddr'});
 
-        my $R = &call( $fh, $agent->{'cm_namespace'},
+        my $R = $self->call( $self->{'cm_namespace'},
                                  "initAgentServices",
                                     name=>'ETFS',
-                                    ip=>$agent->{'LocalIP'},
-                                    port=>$agent->{'LocalPort'},
-                                    macaddr=>$agent->{'macaddr'},
+                                    ip=>$self->{'LocalIP'},
+                                    port=>$self->{'LocalPort'},
+                                    macaddr=>$self->{'macaddr'},
                                     services=>[{'name'=>'main'}]
                                 );
         if( !$R || $R->{'_error_'} ){
             plogNow("Cant connect to CentralManagement.\nInitialization Agent 'etfs' aborted!");
-            die("Cant connect to CentralManagement.\nInitialization Agent 'etfs' aborted!");
         } else {
             if( ref($R->{'return'}) && $R->{'return'}{'success'} && ( $R->{'return'}{'success'} ne 'false' )){
                 plogNow("ETFS Agent register with success on CentralManagement");
@@ -196,38 +114,20 @@ sub register_handler {
                     # send reset/restore ok
                     if(!isError($response)){
                         my $reset_ok = $response;
-                        my $RR = &call( $fh, $agent->{'cm_namespace'},
+                        my $RR = $self->call( $self->{'cm_namespace'},
                                         'restoreManagAgent',
-                                        macaddr=>$agent->{'macaddr'},
+                                        macaddr=>$self->{'macaddr'},
                                         ok=>{ 'oktype'=>$reset_ok->{'_oktype_'}, 'okmsg'=>$reset_ok->{'_okmsg_'} }
                                     );
                     }
                 }
+                return 1;
             }else{
                 plogNow("ETFS Agent NOT registered with success on CentralManagement");
-                die("ETFS Agent NOT registered with success on CentralManagement");
             }
         }      
     }
-}
-
-sub handle_request {
-    my $e = shift;
-    my $h = $e->fh;
-
-    plog "handle_guestmessage";
-    my $message=&receive($h);
-    plog "receive message = $message";
-}
-
-sub mainLoop {
-    my $fh = shift;
-    my ($agent) = @_;
-    
-    my $eguest = event_new($fh, EV_READ|EV_PERSIST, \&handle_request, $agent);
-    $eguest->add;
-
-    event_mainloop;
+    return 0;
 }
 
 =item main

@@ -1,3 +1,6 @@
+<?php
+include_partial('asynchronousJob/functions');
+?>
 <script>
 
 /*
@@ -353,12 +356,19 @@ Ext.extend(lvwin.cloneForm.Main, Ext.form.FormPanel, {
         // if necessary fields valid...
         if(this.getForm().isValid()){            
             var lvname = this.lvname.getValue();                        
+            var vg = this.vg.getValue();
             var srcname = this.lvsrcname.getValue();
+            var olv = this.lvsrcname.getValue();
             var olvuuid = this.original_lvuuid.getValue();
             var ovg = this.original_vg.getValue();
 
+            var level = this.level;
+            var nodeid = this.node_id;
+            var clusterid = this.node_id;
 
-            // clone parameters array to pass to soap request....
+            var size = this.lvsize.getValue();
+
+            /*// clone parameters array to pass to soap request....
             var params = {'lv':lvname,'vg':this.vg.getValue(),'size':this.lvsize.getValue()+'M','olv': srcname,'olvuuid': olvuuid,'ovg':ovg};
     
                           
@@ -372,7 +382,23 @@ Ext.extend(lvwin.cloneForm.Main, Ext.form.FormPanel, {
                 params['nid'] = this.node_id;
             }
             console.log(params);
-            this.sendCreate_n_Clone(params);
+            this.sendCreate_n_Clone(params);*/
+
+            var scope_form = this;
+            AsynchronousJob.Functions.Create( 'logicalvol', 'create',
+                                                {'name':lvname, 'volumegroup': vg, 'size':size+'M'},
+                                                {'level': level, 'cluster': clusterid, 'node': nodeid},
+                                                function(resp,opt) { // success fh
+                                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                                    AsynchronousJob.Functions.Create( 'logicalvol', 'clone',
+                                                                    {'original': olv, 'logicalvolume': lvname },
+                                                                    {'level': level, 'cluster': clusterid, 'node': nodeid, 'volumegroup': vg, 'original-volumegroup': ovg },
+                                                                    function(resp,opt){
+                                                                        scope_form.fireEvent('updated');
+                                                                    }, 
+                                                                    null, response['asynchronousjob']['Id'] );
+                                                });
+
 
         }//end isValid
 

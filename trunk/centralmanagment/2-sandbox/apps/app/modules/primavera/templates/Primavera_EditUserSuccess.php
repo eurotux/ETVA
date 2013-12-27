@@ -230,6 +230,7 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                                                                     listeners: {
                                                                         load: function(store,records,options){
                                                                             Ext.getCmp('primavera-edituser-permissions-profiles').body.unmask();
+                                                                            Ext.getCmp('primavera-edituser-permissions-permissions').getStore().reload();
                                                                         }
                                                                     }
                                                                 }),
@@ -243,9 +244,10 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                                                                 title            : <?php echo json_encode(__('Profiles available')) ?>
                                                                 ,listeners : {
                                                                    render : function(grid){      
-                                                                       grid.body.mask('Loading...');
+                                                                       /*grid.body.mask('Loading...');
                                                                        var store = grid.getStore();
-                                                                       store.load.defer(100, store);
+                                                                       store.load.defer(100, store);*/
+                                                                       grid.getStore().load();
                                                                    },
                                                                    rowcontextmenu: function(grid,rowIndex,e){
                                                                         var selModel = grid.getSelectionModel();
@@ -319,6 +321,16 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                                                                    },
                                                                    delay: 200
                                                                 }
+                                                                ,tbar:  new Ext.Toolbar({items: [{
+                                                                            xtype: 'button',
+                                                                            tooltip: __('Refresh'),
+                                                                            iconCls: 'x-tbar-loading',
+                                                                            scope: this,
+                                                                            handler: function(){
+                                                                                Ext.getCmp('primavera-edituser-permissions-profiles').getStore().reload();
+                                                                            }
+                                                                        }]
+                                                                    })
                                                                 })
                                                         ]
                                                     },{
@@ -347,6 +359,7 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                                                                         ,listeners: {
                                                                             load: function(store,records,options){
                                                                                 Ext.getCmp('primavera-edituser-permissions-permissions').body.unmask();
+                                                                                Ext.getCmp('primavera-edituser-permissions-applications').getStore().reload();
                                                                             }
                                                                         }
                                                                     }),
@@ -366,9 +379,9 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                                                                     title            : <?php echo json_encode(__('Companies/Profiles that user has access')) ?>
                                                                     ,listeners : {
                                                                        render : function(grid){      
-                                                                           grid.body.mask('Loading...');
+                                                                           /*grid.body.mask('Loading...');
                                                                            var store = grid.getStore();
-                                                                           store.load.defer(100, store);
+                                                                           store.load.defer(100, store);*/
 
                                                                             // This will make sure we only drop to the view scroller element
                                                                             var selectedGridDropTargetEl = grid.getView().scroller.dom;
@@ -414,6 +427,16 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                                                                        },
                                                                        delay: 200
                                                                     }
+                                                                    ,tbar:  new Ext.Toolbar({items: [{
+                                                                            xtype: 'button',
+                                                                            tooltip: __('Refresh'),
+                                                                            iconCls: 'x-tbar-loading',
+                                                                            scope: this,
+                                                                            handler: function(){
+                                                                                Ext.getCmp('primavera-edituser-permissions-permissions').getStore().reload();
+                                                                            }
+                                                                        }]
+                                                                    })
                                                                 })
                                                         ]
                                                     }
@@ -460,14 +483,24 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                                                     border           : false,
                                                     stripeRows       : true,
                                                     title            : <?php echo json_encode(__('Applications/Modules that user has access')) ?>
-                                                    ,listeners : {
+                                                    /*,listeners : {
                                                         render : function(grid){      
                                                             grid.body.mask('Loading...');
                                                             var store = grid.getStore();
                                                             store.load.defer(100, store);
                                                         },
                                                         delay: 200
-                                                    }
+                                                    }*/
+                                                    ,tbar:  new Ext.Toolbar({items: [{
+                                                            xtype: 'button',
+                                                            tooltip: __('Refresh'),
+                                                            iconCls: 'x-tbar-loading',
+                                                            scope: this,
+                                                            handler: function(){
+                                                                Ext.getCmp('primavera-edituser-permissions-applications').getStore().reload();
+                                                            }
+                                                        }]
+                                                    })
                                                 })
                                         ]
                                     }
@@ -475,6 +508,11 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                             }
                         ],
                         listeners: {
+                            /*'afterrender': function(p){
+                                Ext.getCmp('primavera-edituser-permissions-profiles').getStore().reload();
+                                Ext.getCmp('primavera-edituser-permissions-permissions').getStore().reload();
+                                Ext.getCmp('primavera-edituser-permissions-applications').getStore().reload();
+                            },*/
                             'activate': function(p){
                                 /*p.items.get(0).items.get(0).items.get(0).items.get(0).items.get(0).getStore().load();
                                 p.items.get(0).items.get(0).items.get(0).items.get(1).items.get(0).getStore().load();
@@ -526,6 +564,42 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
             send_data['perfil'] = form_values['perfil'];
             send_data['idioma'] = form_values['idioma'];
  
+            // send permissions information
+            if( Ext.getCmp('primavera-edituser-permissions-permissions').rendered ){
+                var permissions_companiesprofiles_store = Ext.getCmp('primavera-edituser-permissions-permissions').getStore();
+
+                var permissions = [];
+                permissions_companiesprofiles_store.each(function(item){
+                        var data = item.data;
+                        if( data.Perfil && data.Empresa ){
+                            var a_permission = [data.Perfil,data.Empresa];
+                            var s_permission = a_permission.join(',');
+                            permissions.push(s_permission);
+                        }
+                    });
+
+                var s_permissions = permissions.join(';');
+                send_data['u_permissoes'] = s_permissions;
+            }
+
+            // send applications information
+            if( Ext.getCmp('primavera-edituser-permissions-applications').rendered ){
+                var permissions_applications_sm = Ext.getCmp('primavera-edituser-permissions-applications').getSelectionModel();
+                var permissions_applications_selected = permissions_applications_sm.getSelections();
+
+                var applications = [];
+                Ext.each(permissions_applications_selected, function(item, index){
+                        var data = item.data;
+                        if( data['apl'] ){
+                            applications.push(data['apl']);
+                        }
+                    });
+
+                var s_applications = applications.join(',');
+
+                send_data['u_aplicacoes'] = s_applications;
+            }
+
             // process update user
             var conn = new Ext.data.Connection({
                 listeners:{
@@ -552,7 +626,7 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                 method = 'primavera_insertuser';
             }
             conn.request({
-                url: <?php echo json_encode(url_for('primavera/json')) ?>,
+                url: <?php echo json_encode(url_for('primavera/jsonSaveUser')) ?>,
                 params: {
                     id: this.service_id,
                     method: method,
@@ -564,7 +638,7 @@ Primavera.EditUser.Form = new Ext.extend( Ext.form.FormPanel, {
                     var response = Ext.util.JSON.decode(resp.responseText);                
 
                     Ext.ux.Logger.info(response['agent'],response['response']);
-                    this.onSavePermissions(send_data);
+                    //this.onSavePermissions(send_data);
 
                     (this.ownerCt).fireEvent('onSave');
                 },

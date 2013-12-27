@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# etva-queue-cm		Script to start and stop ETVA Queue Manager.
+#
+# Author:       Carlos Rodrigues <cmar@eurotux.com>
+#
+# chkconfig: 2345 99 01
+# description: Starts and stops ETVA Queue Manager.
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+SERVICE=etva-queue-cm
+PROCESS=etva-queue-cm
+
+RETVAL=0
+
+start() {
+    echo -n $"Starting $SERVICE"
+    echo
+
+    cd /srv/etva-centralmanagement
+    symfony etva:queue-cm start >/dev/null 2>&1
+
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/$SERVICE
+}
+
+stop() {
+    echo -n $"Stopping $SERVICE"
+    echo
+
+    cd /srv/etva-centralmanagement
+    symfony etva:queue-cm stop >/dev/null 2>&1
+    RETVAL=$?
+    echo
+    if [ $RETVAL -eq 0 ]; then
+        rm -f /var/lock/subsys/$SERVICE
+        rm -f /var/run/$SERVICE.pid
+    fi
+}
+
+restart() {
+    stop
+    sleep 2
+    start
+}
+
+reload() {
+    echo -n $"Reloading $SERVICE"
+    RETVAL=1
+    echo
+    return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+    start|stop|restart|reload)
+        $1
+        ;;
+    status)
+        status $PROCESS
+        RETVAL=$?
+        ;;
+    force-reload)
+        reload
+	;;
+    condrestart|try-restart)
+        [ -f /var/lock/subsys/$SERVICE ] && restart || :
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|reload}"
+	exit 1
+        ;;
+esac
+exit $RETVAL
+

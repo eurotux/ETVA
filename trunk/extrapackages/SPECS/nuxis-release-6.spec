@@ -12,6 +12,7 @@ Group:          System Environment/Base
 License:        GPLv2
 Obsoletes:      rawhide-release redhat-release-as redhat-release-es redhat-release-ws redhat-release-de comps rpmdb-redhat fedora-release redhat-release centos-release
 Provides:	redhat-release etva-release nuxis-release centos-release
+Requires: epel-release
 Source0:        centos-release-6-0.tar.gz
 Source1: nuxis.repo
 

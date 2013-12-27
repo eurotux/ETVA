@@ -32,7 +32,8 @@ class EtvaVolumegroupPeer extends BaseEtvaVolumegroupPeer
 
   const _SPECIAL_NODEL_ = 'Special volume group %name% cannot be removed';
 
-  const _ERR_INCONSISTENT_ = 'Shared volume groups info reported inconsistent. %info%';
+  const _ERR_INCONSISTENT_ = 'Information of the shared volume groups is reported as inconsistent. %info%';
+  const _ERR_SHARED_INCONSISTENT_ = 'Information of the shared volume groups is reported as inconsistent. %info%';
 
   const _ERR_INIT_OTHER_CLUSTER_ = 'Node has some volume group that exists on cluster %name%.';
 

@@ -1720,7 +1720,7 @@ class serverActions extends sfActions
             //notify event log
             $msg_i18n = Etva::makeNotifyLogMessage(sfConfig::get('config_acronym'),
                                                                     EtvaNodePeer::_ERR_NOTFOUND_ID_, array('id'=>$nid),
-                                                                    EtvaServerPeer::_ERR_START_, array('name'=>$server));
+                                                                    EtvaServerPeer::_ERR_STOP_, array('name'=>$server));
             $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
 
             // if is a CLI soap request return json encoded data
@@ -1737,7 +1737,7 @@ class serverActions extends sfActions
             //notify event log
             $msg_i18n = Etva::makeNotifyLogMessage($etva_node->getName(),
                                                                     EtvaServerPeer::_ERR_NOTFOUND_,array('name'=>$server),
-                                                                    EtvaServerPeer::_ERR_START_,array('name'=>$server));
+                                                                    EtvaServerPeer::_ERR_STOP_,array('name'=>$server));
 
             $error = array('agent'=>$etva_node->getName(),'success'=>false,'error'=>$msg_i18n);
 
@@ -3280,7 +3280,7 @@ class serverActions extends sfActions
             $etva_server = EtvaServerPeer::retrieveByPK($sid);
         }
 
-        if(!$etva_server){
+        /*if(!$etva_server){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaServerPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$sid));            
             return $this->renderText($msg_i18n);
         }
@@ -3317,24 +3317,45 @@ class serverActions extends sfActions
         
         $port = $etva_node->getPort();
         if($port) $url.=":".$port;        
-        $url.="/vm_backup_snapshot_may_fork";
+        $url.="/vm_backup_snapshot_may_fork";*/
         
         /*
          * get response stream data
          */
-        $ovf_curl = new ovfcURL($url);
+        /*$ovf_curl = new ovfcURL($url);
         $ovf_curl->post($request_body);
         $ovf_curl->setFilename($filename);
         $ovf_curl->exec();
 
-        if($ovf_curl->getStatus()==500) return $this->renderText('Error 500');
+        if($ovf_curl->getStatus()==500) return $this->renderText('Error 500');*/
 
+        $options_task_server_backup = array( // options
+                                            'filepath'=>'STDOUT'
+                                        );
+
+        $snapshot = $request->getParameter('snapshot');
+        if( $snapshot ){
+            $options_task_server_backup['snapshot'] = $snapshot;
+        }
+        $newsnapshot = $request->getParameter('newsnapshot');
+        if( $newsnapshot ){
+            $options_task_server_backup['newsnapshot'] = $newsnapshot;
+        }
+        $delete = $request->getParameter('delete');
         if( $delete && ($delete!='false') ){ // delete after
-            if( $newsnapshot ){
-                $server_va->remove_snapshot($etva_node,$newsnapshot);
-            } else if( $snapshot ){
-                $server_va->remove_snapshot($etva_node,$snapshot);
-            }
+            $options_task_server_backup['deletesnapshot'] = true;
+        }
+
+        $task_server_backup = new serverBackupTask($this->dispatcher, new sfFormatter());
+        $res_task = $task_server_backup->run(
+                                    array( // arguments
+                                        'serverid'=>$sid
+                                    ),
+                                    $options_task_server_backup
+                                );
+        if( $res_task < 0 ){
+            // TODO treat error
+            return $this->renderText('Error 500');
         }
 
         return sfView::NONE;

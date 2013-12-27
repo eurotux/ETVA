@@ -6,7 +6,7 @@ ETMS.User.CreateEdit.onSave = function(alldata){
     var service_id = alldata['service_id'];
     var url = <?php echo json_encode(url_for('etms/json'))?>;
     var send_data = new Object();
-    send_data['user_name']      = alldata['user_name'];
+    send_data['user_name']      = (typeof alldata['user_name'] === 'string') ?  alldata['user_name'] :  alldata['user_name'][0];
     send_data['domain']         = alldata['domain'];
     send_data['real_name']      = alldata['real_name'];
     send_data['isActive']       = alldata['isActive'];
@@ -401,10 +401,14 @@ ETMS.User.CreateEdit.Fieldset = function(config){
                                     this.txtuser_name.setDisabled(true);
                                 },
                                 beforeexpand:function(panel,anim){
+                                    var action = 'add';
                                     Ext.each(this.items.items,function(ct){ // hide all items
-                                        if( ct.xtype )
+                                        if( ct.xtype ){
                                             ct.setDisabled(false);
-                                        else Ext.each(ct.items.items, function(sct){ sct.setDisabled(false); });
+                                            if( (ct.name=='etms-action') && (ct.inputValue=='edit') && ct.checked ){
+                                                action = 'edit';
+                                            }
+                                        } else Ext.each(ct.items.items, function(sct){ sct.setDisabled(false); });
 
                                     });
                                     this.txtuser_name.setDisabled(false);
@@ -413,6 +417,26 @@ ETMS.User.CreateEdit.Fieldset = function(config){
                                     // clean this user_service_list
                                     if( this.user_service_list ){
                                         this.user_service_list.setValue( '' );
+                                    }
+
+                                    if( action=='edit' ){
+                                        this.account_edit.setDisabled(false);
+                                        this.account_edit.setVisible(true);
+
+                                        this.account_new.setDisabled(true);
+                                        this.txtuser_name.setDisabled(true);
+                                        this.txtdomain.setDisabled(true);
+                                        this.account_new.setVisible(false);
+                                        this.txtuser_name.setVisible(false);
+                                    } else {
+                                        this.account_edit.setDisabled(true);
+                                        this.account_edit.setVisible(false);
+
+                                        this.account_new.setDisabled(false);
+                                        this.txtuser_name.setDisabled(false);
+                                        this.txtdomain.setDisabled(false);
+                                        this.account_new.setVisible(true);
+                                        this.txtuser_name.setVisible(true);
                                     }
                                 },
                                 afterrender: function(c){

@@ -167,6 +167,8 @@ sub isForkable {
     my $self = shift;
     my ($method) = @_;
 
+    plogNow("ETVA::Agent::SOAPFork isForkable method=$method") if( &debug_level > 3 );
+
     # TODO maybe use other tests...
     return ( $method =~ m/_may_fork$/ ) ? 1 : 0;
 }
@@ -202,6 +204,10 @@ sub processdata {
         $runproc = fork();
         if( defined($runproc) && ( $runproc == 0 ) ){
             $self->set_imchild();   # mark as child
+
+            # rename process
+            $0 .= " ($method)";
+
         } else {
             $self->set_imparent();  # mark as parent
             plogNow "fork... pid=$runproc \n" if(&debug_level > 5);

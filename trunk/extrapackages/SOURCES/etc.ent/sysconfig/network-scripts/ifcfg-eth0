@@ -4,3 +4,4 @@ USERCTL=no
 ONBOOT=yes
 MASTER=bond0
 SLAVE=yes
+NM_CONTROLLED="no"

@@ -76,7 +76,7 @@ lvwin.resizeForm.Main = function(node_id, level) {
                         {
                             tag:'div'
                             ,style:'margin-left:35px'
-                            ,html: <?php echo json_encode(__('When DECREASING size you must BE CAREFULL because you may LOST ALL DATA!')) ?>
+                            ,html: <?php echo json_encode(__('When DECREASING size you must BE CAREFULL because you may LOOSE ALL DATA!')) ?>
                     }]
                 }
               }
@@ -135,7 +135,7 @@ Ext.extend(lvwin.resizeForm.Main, Ext.form.FormPanel, {
                     title: <?php echo json_encode(__('Resize logical volume')) ?>,
                     msg: String.format('{0}<br>{1}<br>{2}'
                             ,<?php echo json_encode(__('You are about to decrease size.')) ?>
-                            ,<?php echo json_encode(__('When DECREASING size you must BE CAREFULL because you may LOST ALL DATA!')) ?>
+                            ,<?php echo json_encode(__('When DECREASING size you must BE CAREFULL because you may LOOSE ALL DATA!')) ?>
                             ,<?php echo json_encode(__('Are you sure you want to do this?')) ?>),
                     buttons: Ext.MessageBox.YESNOCANCEL,
                     fn: function(btn){

@@ -618,6 +618,9 @@ class EtvaPhysicalvolume_VA
 
             if( $inconsistent ){
                 $message = sfContext::getInstance()->getI18N()->__(EtvaPhysicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>sprintf('device "%s" with uuid "%s"',$pv->getDevice(),$pv->getUuid())));
+                if( $error['not_found_shared_lvm'] || $error['diff_storage_type'] ){
+                    $message = sfContext::getInstance()->getI18N()->__(EtvaPhysicalvolumePeer::_ERR_SHARED_INCONSISTENT_,array('%info%'=>sprintf('device "%s" with uuid "%s"',$pv->getDevice(),$pv->getUuid())));
+                }
                 sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(),'event.log',array('message' =>$message,'priority'=>EtvaEventLogger::ERR)));
                 $error['node'] = array( 'name'=>$etva_node->getName(), 'id'=>$etva_node->getId(), 'uuid'=>$etva_node->getUuid() );
                 $error['device'] = $pv->getDevice();
@@ -677,7 +680,7 @@ class EtvaPhysicalvolume_VA
             }
 
             if( $inconsistent ){
-                $message = sfContext::getInstance()->getI18N()->__(EtvaPhysicalvolumePeer::_ERR_INCONSISTENT_,array('%info%'=>sprintf('device "%s" with uuid "%s"',$pv->getDevice(),$pv->getUuid())));
+                $message = sfContext::getInstance()->getI18N()->__(EtvaPhysicalvolumePeer::_ERR_SHARED_INCONSISTENT_,array('%info%'=>sprintf('device "%s" with uuid "%s"',$pv->getDevice(),$pv->getUuid())));
                 sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($etva_node->getName(),'event.log',array('message' =>$message,'priority'=>EtvaEventLogger::ERR)));
                 $error['node'] = array( 'name'=>$etva_node->getName(), 'id'=>$etva_node->getId(), 'uuid'=>$etva_node->getUuid() );
                 $error['device'] = $pv->getDevice();

@@ -31,11 +31,11 @@ BEGIN {
     # this is the worst damned warning ever, so SHUT UP ALREADY!
     $SIG{__WARN__} = sub { warn @_ unless $_[0] =~ /Use of uninitialized value/ };
 
-    require Client::SOAP::HTTP;
+    require ETVA::Client::SOAP::HTTP;
 
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS  $CRLF);
     $VERSION = '0.0.1';
-    @ISA = qw( Client::SOAP::HTTP );
+    @ISA = qw( ETVA::Client::SOAP::HTTP );
     @EXPORT = qw( );
 }
 

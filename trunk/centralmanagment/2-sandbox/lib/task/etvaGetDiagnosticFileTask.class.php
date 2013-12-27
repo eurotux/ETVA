@@ -12,7 +12,7 @@ class etvaGetDiagnosticFileTask extends sfBaseTask
     // ));
     $this->addOptions(array(
       new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name'),
-      new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
+      new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'prod'),
       new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'propel'),
       //new sfCommandOption('cluster_id', null, sfCommandOption::PARAMETER_OPTIONAL, 'The cluster id, to associate networks'),
       // add your own options here

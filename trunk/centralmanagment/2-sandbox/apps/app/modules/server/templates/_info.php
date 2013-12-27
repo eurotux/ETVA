@@ -255,62 +255,8 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                             var node_id = this.form.findField('node_id').getValue();
                             var forcestop = ( item.menu.stop_force.checked ) ? 1 : 0;
 
-                            Ext.Msg.show({
-                                title: item.text,
-                                scope:this,
-                                buttons: Ext.MessageBox.YESNOCANCEL,
-                                msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,server_vm_state)+'<br>'
-                                     +String.format(<?php echo json_encode(__('Stop server {0} ?')) ?>,server_name),
-                                icon: Ext.MessageBox.QUESTION,
-                                fn: function(btn){
-
-                                    if (btn == 'yes'){
-                                        var params = {'name':server_name};
-                                        var conn = new Ext.data.Connection({
-                                            listeners:{
-                                                // wait message.....
-                                                beforerequest:function(){
-                                                    Ext.MessageBox.show({
-                                                        title: <?php echo json_encode(__('Please wait...')) ?>,
-                                                        msg: <?php echo json_encode(__('Stoping virtual server...')) ?>,
-                                                        width:300,
-                                                        wait:true,
-                                                        modal: false
-                                                    });
-                                                },// on request complete hide message
-                                                requestcomplete:function(){Ext.MessageBox.hide();}
-                                                ,requestexception:function(c,r,o){
-                                                    Ext.MessageBox.hide();
-                                                    Ext.Ajax.fireEvent('requestexception',c,r,o);}
-                                            }
-                                        });// end conn
-                                        conn.request({
-                                            url: <?php echo json_encode(url_for('server/jsonStop'))?>,
-                                            params: {'nid':node_id,'server': server_name, 'force': forcestop, 'destroy': forcestop },
-                                            scope:this,
-                                            success: function(resp,opt) {
-                                                var response = Ext.util.JSON.decode(resp.responseText);
-                                                Ext.ux.Logger.info(response['agent'],response['response']);
-                                                var parentCmp = Ext.getCmp((item.scope).id);
-                                                parentCmp.fireEvent('refresh',parentCmp);
-
-                                            },
-                                            failure: function(resp,opt) {
-                                                var response = Ext.util.JSON.decode(resp.responseText);
-
-                                                Ext.ux.Logger.error(response['agent'], response['error']);
-
-                                                Ext.Msg.show({
-                                                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
-                                                    width:300,
-                                                    buttons: Ext.MessageBox.OK,
-                                                    msg: String.format(<?php echo json_encode(__('Unable to stop virtual server {0}!')) ?>,server_name)+'<br>'+response['info'],
-                                                    icon: Ext.MessageBox.ERROR});
-                                            }
-                                        });// END Ajax request
-                                    }//END button==yes
-                                }// END fn
-                            }); //END Msg.show
+                            var obj = { 'id': server_id, 'name': server_name, 'vm_state':server_vm_state, 'node_id':node_id, 'forcestop': forcestop };
+                            this.stopServer(obj,item);
 
                         }//END handler Stop
                         ,menu: [
@@ -320,12 +266,34 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                                     ,checked: true
                                     ,group: 'stop_type'
                                     ,scope:this
+                                    ,handler: function(item) {
+
+                                        var server_id = this.form.findField('id').getValue();
+                                        var server_name = this.form.findField('name').getValue();
+                                        var server_vm_state = this.form.findField('vm_state').getValue();
+                                        var node_id = this.form.findField('node_id').getValue();
+
+                                        var obj = { 'id': server_id, 'name': server_name, 'vm_state':server_vm_state, 'node_id':node_id, 'forcestop': 0 };
+                                        this.stopServer(obj,item);
+
+                                    }//END handler Stop
                                 },
                                 {
                                     text: <?php echo json_encode(__('Force stop')) ?>
                                     ,name:'forcestop',xtype:'menucheckitem',ref:'stop_force'
                                     ,group: 'stop_type'
                                     ,scope:this
+                                    ,handler: function(item) {
+
+                                        var server_id = this.form.findField('id').getValue();
+                                        var server_name = this.form.findField('name').getValue();
+                                        var server_vm_state = this.form.findField('vm_state').getValue();
+                                        var node_id = this.form.findField('node_id').getValue();
+
+                                        var obj = { 'id': server_id, 'name': server_name, 'vm_state':server_vm_state, 'node_id':node_id, 'forcestop': 1 };
+                                        this.stopServer(obj,item);
+
+                                    }//END handler Stop
                                 }
                         ]
                     },
@@ -969,6 +937,40 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
             fn: function(btn){
                 if (btn == 'yes'){
 
+                    var scope_form = this;
+                    AsynchronousJob.Functions.Create( 'server', 'start',
+                                                        { 'server': server_name },
+                                                        { 'node': node_id },
+                                                        function(resp,opt) { // success fh
+                                                            var response = Ext.util.JSON.decode(resp.responseText);
+                                                            AsynchronousJob.Functions.Create( 'server', 'check',
+                                                                                                { 'server': server_name },
+                                                                                                { 'node': node_id, 'check': 'running' },
+                                                                                                function(resp2,opt2){
+                                                                                                    var res2 = Ext.util.JSON.decode(resp2.responseText);
+                                                                                                    if( start_openconsole ){
+                                                                                                        AsynchronousJob.Functions.CheckStatus(res2['asynchronousjob']['Id'],
+                                                                                                                            function(taskObj){
+                                                                                                                                if( taskObj['asynchronousjob']['Status'] == 'finished' ){
+                                                                                                                                    var taskRes = taskObj['asynchronousjob']['Result'];
+                                                                                                                                    if( taskRes ){
+                                                                                                                                        taskResObj = Ext.util.JSON.decode(taskRes);
+                                                                                                                                        if( taskResObj['success'] )
+                                                                                                                                        {
+                                                                                                                                            scope_form.openConsole( {'id':server_id, 'vm_state':'running', 'sleep':'10'} );
+                                                                                                                                        }
+                                                                                                                                    }
+                                                                                                                                    return true;
+                                                                                                                                }
+                                                                                                                                return false;
+                                                                                                                            });
+                                                                                                    }
+                                                                                                },
+                                                                                                null, response['asynchronousjob']['Id']);
+                                                            var parentCmp = Ext.getCmp((item.scope).id);
+                                                            parentCmp.fireEvent('refresh',parentCmp);
+                                                        });
+                    /*
                     var conn = new Ext.data.Connection({
                         listeners:{
                             // wait message.....
@@ -1011,6 +1013,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                                     icon: Ext.MessageBox.ERROR});
                         }
                     });// END Ajax request
+                    */
                 }//END button==yes
             }// END fn
         }); //END Msg.show
@@ -1085,6 +1088,85 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
         win.show();
         win.hide();
+    }
+    ,stopServer: function(obj,item){
+
+        var server_id = obj['id'];
+        var server_name = obj['name'];
+        var server_vm_state = obj['vm_state'];
+        var node_id = obj['node_id'];
+        var forcestop = obj['forcestop'] ? 1 : 0;
+
+        Ext.Msg.show({
+            title: item.text,
+            scope:this,
+            buttons: Ext.MessageBox.YESNOCANCEL,
+            msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,server_vm_state)+'<br>'
+                 +String.format(<?php echo json_encode(__('Stop server {0} ?')) ?>,server_name),
+            icon: Ext.MessageBox.QUESTION,
+            fn: function(btn){
+
+                if (btn == 'yes'){
+
+                    //params: {'nid':node_id,'server': server_name, 'force': forcestop, 'destroy': forcestop },
+                    AsynchronousJob.Functions.Create( 'server', 'stop',
+                                                        { 'server': server_name },
+                                                        { 'node': node_id, 'force': forcestop, 'destroy':forcestop },
+                                                        function(resp,opt) { // success fh
+                                                            var response = Ext.util.JSON.decode(resp.responseText);
+                                                            AsynchronousJob.Functions.Create( 'server', 'check',
+                                                                                                { 'server': server_name },
+                                                                                                { 'node': node_id, 'check': 'stop' },                                                                                                                    null,null, response['asynchronousjob']['Id']);
+                                                            var parentCmp = Ext.getCmp((item.scope).id);
+                                                            parentCmp.fireEvent('refresh',parentCmp);
+                                                        });
+                    /*var params = {'name':server_name};
+                    var conn = new Ext.data.Connection({
+                        listeners:{
+                            // wait message.....
+                            beforerequest:function(){
+                                Ext.MessageBox.show({
+                                    title: <?php echo json_encode(__('Please wait...')) ?>,
+                                    msg: <?php echo json_encode(__('Stoping virtual server...')) ?>,
+                                    width:300,
+                                    wait:true,
+                                    modal: false
+                                });
+                            },// on request complete hide message
+                            requestcomplete:function(){Ext.MessageBox.hide();}
+                            ,requestexception:function(c,r,o){
+                                Ext.MessageBox.hide();
+                                Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                        }
+                    });// end conn
+                    conn.request({
+                        url: <?php echo json_encode(url_for('server/jsonStop'))?>,
+                        params: {'nid':node_id,'server': server_name, 'force': forcestop, 'destroy': forcestop },
+                        scope:this,
+                        success: function(resp,opt) {
+                            var response = Ext.util.JSON.decode(resp.responseText);
+                            Ext.ux.Logger.info(response['agent'],response['response']);
+                            var parentCmp = Ext.getCmp((item.scope).id);
+                            parentCmp.fireEvent('refresh',parentCmp);
+
+                        },
+                        failure: function(resp,opt) {
+                            var response = Ext.util.JSON.decode(resp.responseText);
+
+                            Ext.ux.Logger.error(response['agent'], response['error']);
+
+                            Ext.Msg.show({
+                                title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                width:300,
+                                buttons: Ext.MessageBox.OK,
+                                msg: String.format(<?php echo json_encode(__('Unable to stop virtual server {0}!')) ?>,server_name)+'<br>'+response['info'],
+                                icon: Ext.MessageBox.ERROR});
+                        }
+                    });// END Ajax request
+                    */
+                }//END button==yes
+            }// END fn
+        }); //END Msg.show
     }
 });
 

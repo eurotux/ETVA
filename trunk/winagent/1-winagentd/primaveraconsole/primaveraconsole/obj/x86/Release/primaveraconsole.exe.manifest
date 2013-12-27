@@ -3,7 +3,7 @@
   <asmv1:assemblyIdentity name="primaveraconsole.exe" version="1.0.0.1" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="x86" type="win32" />
   <application />
   <entryPoint>
-    <assemblyIdentity name="primaveraconsole" version="1.0.5001.13171" language="neutral" processorArchitecture="x86" />
+    <assemblyIdentity name="primaveraconsole" version="1.0.5037.26230" language="neutral" processorArchitecture="x86" />
     <commandLine file="primaveraconsole.exe" parameters="" />
   </entryPoint>
   <trustInfo>
@@ -102,14 +102,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="primaveraconsole.exe" size="52224">
-      <assemblyIdentity name="primaveraconsole" version="1.0.5001.13171" language="neutral" processorArchitecture="x86" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="primaveraconsole.exe" size="52736">
+      <assemblyIdentity name="primaveraconsole" version="1.0.5037.26230" language="neutral" processorArchitecture="x86" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>IfVFO6jFMWVCrNj3l8hqCc5pM4Q=</dsig:DigestValue>
+        <dsig:DigestValue>HPUdzdxFlwqE/pRHkdeWIeckG4I=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

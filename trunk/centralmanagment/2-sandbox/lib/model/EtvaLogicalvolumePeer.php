@@ -39,7 +39,8 @@ class EtvaLogicalvolumePeer extends BaseEtvaLogicalvolumePeer
 
   const _ERR_INVALIDSIZE_ = 'Invalid logical volume size';
 
-  const _ERR_INCONSISTENT_ = 'Shared logical volumes info reported inconsistent. %info%';
+  const _ERR_INCONSISTENT_ = 'Information of the logical volumes is reported as inconsistent. %info%';
+  const _ERR_SHARED_INCONSISTENT_ = 'Information of the shared logical volumes is reported as inconsistent. %info%';
 
   const _SNAPSHOT_LV_   = 'Volume %name% is a snapshot.';
     

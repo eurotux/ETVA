@@ -38,13 +38,21 @@ class EtvaNode extends BaseEtvaNode
      */
     public function clearErrorMessage($action)
     {
+        if($this->isLastErrorMessage($action)){
+            $this->setLastMessage('');
+            $this->save();
+        }
+    }
+
+    public function isLastErrorMessage($action)
+    {
         $last_message = $this->getLastMessage();
         $last_message_decoded = json_decode($last_message,true);
         
         if(isset($last_message_decoded['action']) && ($last_message_decoded['action']==$action)){
-            $this->setLastMessage('');
-            $this->save();
+            return true;
         }
+        return false;
     }
 
 
@@ -235,6 +243,15 @@ class EtvaNode extends BaseEtvaNode
 
         return EtvaLogicalvolumePeer::doSelectOne($criteria);
     }
+    public function retrieveLogicalvolumeByLvDevice($lv){
+
+        $criteria = new Criteria();
+        $criteria->add(EtvaNodeLogicalvolumePeer::NODE_ID, $this->getId());
+        $criteria->addJoin(EtvaNodeLogicalvolumePeer::LOGICALVOLUME_ID, EtvaLogicalvolumePeer::ID);
+        $criteria->add(EtvaLogicalvolumePeer::LVDEVICE, $lv);
+
+        return EtvaLogicalvolumePeer::doSelectOne($criteria);
+    }
     public function retrieveLogicalvolumeByVgLv($vg,$lv){
 
         $criteria = new Criteria();
@@ -262,6 +279,22 @@ class EtvaNode extends BaseEtvaNode
             return $this->retrieveLogicalvolumeByVgLv($vg,$lv);
         else
             return $this->retrieveLogicalvolumeByLv($lv);
+    }
+    public function retrieveLogicalvolumeByAny($lv, $vg = null, $uuid = null)
+    {
+        $etva_lv = $this->retrieveLogicalvolumeByUuid($lv);
+        if( !$etva_lv )
+        {
+            if( $uuid ){
+                $etva_lv = $this->retrieveLogicalvolumeByUuid($uuid);               // by uuid
+            } else if( $vg ) {
+                $etva_lv = $this->retrieveLogicalvolumeByVgLv($vg,$lv);             // by vg and lv
+            } else {
+                $etva_lv = $this->retrieveLogicalvolumeByLvDevice($lv);             // by device 
+                if( !$etva_lv ) $etva_lv = $this->retrieveLogicalvolumeByLv($lv);   // by name
+            }
+        }
+        return $etva_lv;
     }
 
     public function retrieveServerByName($server){

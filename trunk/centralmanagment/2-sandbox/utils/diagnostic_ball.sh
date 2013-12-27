@@ -5,10 +5,10 @@
 
 BACKUPFILE='/tmp/backup_'$(date +%Y_%m_%d)'.yml';
 SERVERDIR='/srv/etva-centralmanagement';
-ALRTLOGS='/var/log/etva_etvm/*.log';
+ALRTLOGS='/var/log/etva_etvm/';
 ALRTALRT='/var/run/etva_etvm';
 INSTALLLOG='/var/log/post_install.log /root/install.log /var/log/messages*'
-CMLOGDIR=$SERVERDIR'/log/*.log';
+CMLOGDIR=$SERVERDIR'/log/';
 APPCONFIG=$SERVERDIR'/apps/app/config';
 PROJECTCONFIG=$SERVERDIR'/config';
 MODELCONFIG='/etc/sysconfig/etva-model.conf';

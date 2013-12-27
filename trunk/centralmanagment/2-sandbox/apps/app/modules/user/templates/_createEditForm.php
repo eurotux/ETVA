@@ -71,7 +71,7 @@ User.List.CreateEditForm = function(config) {
     });
     this.lastname = new Ext.form.TextField({
         fieldLabel: <?php echo json_encode(__('Last name')) ?>,
-        allowBlank: false,
+        //allowBlank: false,
         name: 'lastName',
         maxLength: 50	    
     });

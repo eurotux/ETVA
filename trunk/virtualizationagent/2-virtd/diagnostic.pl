@@ -127,7 +127,7 @@ sub agentOffReport{
     my $tar = new ETVA::ArchiveTar( 'handle'=> $FILE );
     $tar->add_file( 'name'=>"$c_path", 'path'=>"$c_path" );
 
-    my $agent_logs = $ENV{'agent_log_dir'} || "/var/log/etva-vdaemon/*.log";
+    my $agent_logs = $ENV{'agent_log_dir'} || "/var/log/etva-vdaemon/*.log*";
     my @log_files = glob $agent_logs;
 
     # add agent logs

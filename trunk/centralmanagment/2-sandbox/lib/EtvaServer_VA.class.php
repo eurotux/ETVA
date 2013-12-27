@@ -371,7 +371,8 @@ class EtvaServer_VA
 
             $result = $response;
             $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
-                                                        EtvaServerPeer::_ERR_EDIT_,array('name'=>$server_name,'info'=>$response['info']));
+                                                        $response['info'],array(),
+                                                        EtvaServerPeer::_ERR_EDIT_,array('name'=>$server_name));
             $result['error'] = $msg_i18n;
             return $result;
         }
@@ -1252,7 +1253,7 @@ class EtvaServer_VA
         $response = $etva_node->soapSend($method,$params);
         return $this->processStartStop($etva_node,$response,$method);
     }
-    public function send_start(EtvaNode $etva_node, $extra=null){
+    public function send_start(EtvaNode $etva_node, $extra=null, $ignoreAdmissionGate=false){
         $etva_server = $this->etva_server;
         $method = self::SERVER_START;
 
@@ -1273,7 +1274,7 @@ class EtvaServer_VA
         }
 
         $etva_cluster = $etva_node->getEtvaCluster();
-        if( $etva_cluster->getHasNodeHA() ){
+        if( !$ignoreAdmissionGate && $etva_cluster->getHasNodeHA() ){
             $admissiongate_response = $etva_cluster->getAdmissionGate( $etva_server );
             if( !$admissiongate_response['success'] ){
 
@@ -1325,7 +1326,8 @@ class EtvaServer_VA
         if(!$response['success']){
             $result = $response;
             $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
-                                                        $msg_err_type, array('name'=>$etva_server->getName(),'info'=>$response['error']));
+                                                        $response['info'],array(),
+                                                        $msg_err_type, array('name'=>$etva_server->getName()));
             $result['error'] = $msg_i18n;
             return $result;
         }

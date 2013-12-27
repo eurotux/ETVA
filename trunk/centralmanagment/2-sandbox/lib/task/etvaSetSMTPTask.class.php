@@ -12,7 +12,7 @@ class etvaSetSMTPTask extends sfBaseTask
     // ));
     $this->addOptions(array(
       new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name'),
-      new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
+      new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'prod'),
       new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'propel'),
       new sfCommandOption('server', null, sfCommandOption::PARAMETER_OPTIONAL, 'The server address.', 'zeus.eurotux.com'),
       new sfCommandOption('port', null, sfCommandOption::PARAMETER_OPTIONAL, 'The server\'s listening port', '25'),

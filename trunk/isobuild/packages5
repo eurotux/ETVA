@@ -7,11 +7,11 @@ etva-xen-win*.src.rpm
 nuxis-release-5*.src.rpm
 anaconda-*.src.rpm
 libxml2-*.src.rpm
-perl-Sys-Virt-*.src.rpm
 virtagent-*.src.rpm
 lcdagent-*.src.rpm
 etva-etfw-*.src.rpm
 etva-etvoip-*.src.rpm
+etva-fsagent-*.src.rpm
 etva-etms-*.src.rpm
 etva-etasp-*.src.rpm
 timeout*.src.rpm

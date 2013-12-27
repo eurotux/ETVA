@@ -58,11 +58,9 @@ EOF;
 
     $this->log('[INFO]Checking node(s) virtual machines state...'."\n");
 
-    // reset VM state
-    EtvaServerQuery::create()
-                        ->filterByVmState(EtvaServer::STATE_MIGRATING,Criteria::NOT_EQUAL)
-                        ->update(array('VmState'=>EtvaServer::STATE_STOP));
 
+    // get nodes active
+    $updated_vm_state = array();
     $nodes = EtvaNodeQuery::create()
                     ->filterByState(EtvaNode::NODE_ACTIVE)
                     ->find();
@@ -80,19 +78,24 @@ EOF;
                 $server_data = (array) $server;
                 $etva_server = $node->retrieveServerByName($server_data['name']);
                 if($etva_server){
+                    $server_id = $etva_server->getId(); // get server id
                     if ($etva_server->getVmState() !== EtvaServer::STATE_MIGRATING) {   // only if not in migrating mode
                         $etva_server->setVmState($server_data['state']);
                         $etva_server->save();
                     }
+                    $updated_vm_state[$server_id] = $etva_server->getVmState();     // mark as updated
                 }
-
             }
-
         }else{
             $affected++;
             $errors[] = $response['error'];
         }
     }
+
+    // change state as STOP for servers that are not in array
+    EtvaServerQuery::create()
+                        ->filterById(array_keys($updated_vm_state),Criteria::NOT_IN)
+                        ->update(array('VmState'=>EtvaServer::STATE_STOP));
 
     if($nodes)
     {

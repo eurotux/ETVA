@@ -41,9 +41,9 @@ fsagentd - File Server daemon
 
 use strict;
 
-use ETVA::Agent::SOAPFork;
-use ETVA::Client::SOAP::HTTP;
 use ETVA::Utils;
+
+use ETVA::GuestAgent::Management;
 
 use Samba;
 
@@ -69,37 +69,37 @@ sub launch_agent {
 
     my $dispatcher = $CONF{'_dispatcher'} = "Samba";
 
-    my $Agent = ETVA::Agent::SOAPFork->new( %CONF );
+    my $agent = ETVA::GuestAgent::Management->new( %CONF );
 
-    $Agent->mainLoop();
+    $agent->mainLoop();
 }
-sub register_handler {
-    my ($agent) = @_;
 
-    my $dispatcher = $agent->{'_dispatcher'};
+sub register_handler {
+    my $self = shift;
+
+    my $dispatcher = $self->{'_dispatcher'};
 
     # initialized on CentralManagement 
-    if( $agent->{'cm_uri'} ){
+    if( $self->{'cm_uri'} ){
 
         my $now = nowStr();
-        plogNow("init Agent with macaddr=",$agent->{'macaddr'});
+        plogNow("init Agent with macaddr=",$self->{'macaddr'}) if( &debug_level > 3 );
 
-        my $R = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
-                        -> call( $agent->{'cm_namespace'},
+        my $R = $self->call( $self->{'cm_namespace'},
                                  "initAgentServices",
                                     name=>'ETFS',
-                                    ip=>$agent->{'LocalIP'},
-                                    port=>$agent->{'LocalPort'},
-                                    macaddr=>$agent->{'macaddr'},
+                                    ip=>$self->{'LocalIP'},
+                                    port=>$self->{'LocalPort'},
+                                    macaddr=>$self->{'macaddr'},
                                     services=>[{'name'=>'main'}]
                                 );
         if( !$R || $R->{'_error_'} ){
-                plogNow("Cant connect to CentralManagement.\nInitialization Agent 'etfs' aborted!");
+            plogNow("Cant connect to CentralManagement.\nInitialization Agent 'etfs' aborted!");
         } else {
             if( ref($R->{'return'}) && $R->{'return'}{'success'} && ( $R->{'return'}{'success'} ne 'false' )){
                 plogNow("ETFS Agent register with success on CentralManagement");
 
-                plogNow Dumper($R);
+                plogNow Dumper($R) if( &debug_level > 9 );
                 # Reset
                 if( $R->{'return'}{'reset'} ){
                     my $response = $dispatcher->set_backupconf( '_url'=>"$R->{'return'}{'backup_url'}" );
@@ -107,19 +107,20 @@ sub register_handler {
                     # send reset/restore ok
                     if(!isError($response)){
                         my $reset_ok = $response;
-                        my $RR = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
-                            -> call( $agent->{'cm_namespace'},
+                        my $RR = $self->call( $self->{'cm_namespace'},
                                         'restoreManagAgent',
-                                        macaddr=>$agent->{'macaddr'},
+                                        macaddr=>$self->{'macaddr'},
                                         ok=>{ 'oktype'=>$reset_ok->{'_oktype_'}, 'okmsg'=>$reset_ok->{'_okmsg_'} }
                                     );
                     }
                 }
+                return 1;
             }else{
                 plogNow("ETFS Agent NOT registered with success on CentralManagement");
             }
         }      
     }
+    return 0;
 }
 
 =item main

@@ -5,11 +5,12 @@
 
 use strict;
 
-use ETVA::Agent::SOAPFork;
-use ETVA::Client::SOAP::HTTP;
+
 use ETFW;
 use ETFW::Network;
 use ETVA::Utils;
+
+use ETVA::GuestAgent::Management;
 
 use Data::Dumper;
 use Socket;
@@ -38,15 +39,15 @@ sub launch_agent {
 
     my $dispatcher = $CONF{'_dispatcher'} = "ETFWDispatcher";
 
-    my $Agent = ETVA::Agent::SOAPFork->new( %CONF );
+    my $agent = ETVA::GuestAgent::Management->new( %CONF, 'exclude_serial_ports'=>[ '/dev/ttyS0' ] );
 
-    $Agent->mainLoop();
+    $agent->mainLoop();
 }
 sub register_handler {
-    my ($agent) = @_;
+    my $self = shift;
 
     # initialized on CentralManagement 
-    if( $agent->{'cm_uri'} ){
+    if( $self->{'cm_uri'} ){
 
         # get ETFW active modules
         my %Mod = ETFW->get_activemodules();
@@ -71,16 +72,15 @@ sub register_handler {
             }
         }
         my $now = now();
-        plog("$now - init Agent with macaddr=",$agent->{'macaddr'});
+        plog("$now - init Agent with macaddr=",$self->{'macaddr'});
         plog(" services = ",Dumper(\@services));
 
-        my $R = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
-                    -> call( $agent->{'cm_namespace'},
+        my $R = $self->call( $self->{'cm_namespace'},
                              "initAgentServices",
                                 name=>'ETFW',
-                                ip=>$agent->{'LocalIP'},
-                                port=>$agent->{'LocalPort'},
-                                macaddr=>$agent->{'macaddr'},
+                                ip=>$self->{'LocalIP'},
+                                port=>$self->{'LocalPort'},
+                                macaddr=>$self->{'macaddr'},
                                 services=>\@services
                             );
         if( !$R || $R->{'_error_'} ){
@@ -107,16 +107,17 @@ sub register_handler {
 
                 if( !$resetError && $R->{'return'}{'reset'} ){
                     my $reset_ok = retOk("_OK_","ok");
-                    my $RR = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
-                            -> call( $agent->{'cm_namespace'},
+                    my $RR = $self->call( $self->{'cm_namespace'},
                                         'restoreManagAgent',
-                                        macaddr=>$agent->{'macaddr'},
+                                        macaddr=>$self->{'macaddr'},
                                         ok=>{ 'oktype'=>$reset_ok->{'_oktype_'}, 'okmsg'=>$reset_ok->{'_okmsg_'} }
                                     );
                 }
+                return 1;
             }
         }
     }
+    return 0;
 }
 main();
 1;

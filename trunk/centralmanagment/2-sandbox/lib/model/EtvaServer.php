@@ -180,6 +180,29 @@ class EtvaServer extends BaseEtvaServer
   }
 
   /*
+   * format controllers data to be sent to Virtualization Agent
+   */
+  public function controllers_VA()
+  {
+    $devices_str = $this->getDevices();
+    $devices_arr = json_decode($devices_str);
+
+    $controllers_uniq = array();
+    $controllers_to_send = array();
+    foreach($devices_arr as $key=>$d)
+    {
+        if(!empty($d->controller)){
+            $type = $d->controller;
+            if( !$controllers_uniq["$type"] ){
+                $controllers_to_send[] = "type=$type";
+                $controllers_uniq["$type"]++;
+            }
+        }
+    }
+    //error_log("controllers_VA controllers=".implode(';', $controllers_to_send) );
+    return implode(';', $controllers_to_send);
+  }
+  /*
    * format disk data to be sent to Virtualization Agent
    */
   public function disks_VA()
@@ -225,12 +248,7 @@ class EtvaServer extends BaseEtvaServer
       $networks = $this->networks_VA();
       $disks = $this->disks_VA();
       $devices = $this->getDevices_VA();
-
-
-
-    //  $etva_lv = $this->getEtvaLogicalvolume();
-     // $server_path = $etva_lv->getLvdevice();
-
+      $controllers = $this->controllers_VA();
 
       $features = (array)json_decode($this->getFeatures());
 
@@ -257,12 +275,10 @@ class EtvaServer extends BaseEtvaServer
                          'hostdevs'=>$devices,
                          'priority_ha'=>$this->getPriorityHa(),
                          'hasHA'=>$this->getHasHa(),
-                         'features'=>$features
+                         'features'=>$features,
+                         'controllers'=>$controllers
       );
       //if( $devices ) $server_VA['no_tablet'] = true;
-
-
-
 
       return $server_VA;
 
@@ -499,13 +515,46 @@ class EtvaServer extends BaseEtvaServer
       $this->rcv_timeout = $val;
   }
 
+  public function isRetryResponse($response)
+  {
+    #error_log("isRetryResponse ".print_r($response,true));
+    if( $response['faultactor'] == 'socket_read' ) return true;
+    if( $response['error'] == 'ERR_INVALID_SERVER_MESSAGE' ) return true;
+    if( $response['error'] == 'ERR_MESSAGE_SERVER_IGNORED' ) return true;
+    if( $response['error'] == 'ERR_REQUEST_TIMEOUT' ) return true;
+    if( $response['error'] == '_ERR_FORWARD_TO_MNGTAGENT_' ) return true;
+    return false;
+  }
 
   /*
    * send soap request to management agent
    */
   public function soapSend($method,$params=null)
   {
-      
+        if(!$params) $params = array("nil"=>"true");
+
+        $node = $this->getEtvaNode();
+        // try to send from node
+        if( $node && ( $node->getState() == EtvaNode::NODE_ACTIVE ) ){
+            /*
+             * send soap request to management agent via node agent
+             */
+            $params['server_name'] = $this->getName();
+            $params['server_uuid'] = $this->getUuid();
+            $params['method']      = $method;
+            $params['force_call']  = ($this->getState() ? 0 : 1);
+            $response = $node->soapSend('forward_to_mngtagent', $params);
+            // only if response is ok
+            // TODO check if fail connect via node agent
+            if( $response ){
+                if( $response['success'] || !$this->isRetryResponse($response) ){
+                    return $response;
+                }
+            }
+        }
+
+        // else send directly from HTTP
+        
         $dispatcher = sfContext::getInstance()->getEventDispatcher();
 
         $addr = $this->getIP();
@@ -513,8 +562,6 @@ class EtvaServer extends BaseEtvaServer
         $proto = "tcp";
         $host = "" . $proto . "://" . $addr . ":" . $port;
         $agent = $this->getName();
-
-        if(!$params) $params = array("nil"=>"true");
 
         $request_array = array('request'=>array(
                             'agent'=>$agent,
@@ -695,6 +742,7 @@ class EtvaServer extends BaseEtvaServer
                             ->orderBy('per_cpu','asc')
                             ->filterByClusterId($this->getClusterId())
                             ->filterByState(EtvaNode::NODE_ACTIVE)
+                            ->filterByInitialize(EtvaNode::INITIALIZE_OK)
                             ->find();
             if( count($nodes) == 1 ||  ((count($nodes)>1) && $this->isAllSharedLogicalvolumes()) ){
                 # TODO calc assign gate
@@ -718,6 +766,7 @@ class EtvaServer extends BaseEtvaServer
                                             ->orderBy('per_cpu','asc')
                                             ->filterByClusterId($this->getClusterId())
                                             ->filterByState(EtvaNode::NODE_ACTIVE)
+                                            ->filterByInitialize(EtvaNode::INITIALIZE_OK)
                                             ->useEtvaNodeLogicalvolumeQuery('NodeLogicalvolume','INNER JOIN')
                                                 ->useEtvaLogicalvolumeQuery('Logicalvolume','INNER JOIN')
                                                     ->useEtvaServerLogicalQuery('ServerLogical','INNER JOIN')

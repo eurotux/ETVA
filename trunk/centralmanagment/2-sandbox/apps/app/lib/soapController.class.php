@@ -67,7 +67,8 @@ class soapController extends sfController {
          */
         $this->__dispatch_map['updateVirtAgent'] = array(
                                                         'in'    => array('uuid'=>'string',
-                                                                        'data'=>'{urn:soapController}VirtAgentUpdateParams'),
+                                                                        'data'=>'{urn:soapController}VirtAgentUpdateParams',
+                                                                        'checkmdstat'=>'{urn:soapController}ArrayOfStrings'),
                                                         'out'   => array('return'=>"{urn:soapController}ArraySuccess")
         );
 
@@ -337,18 +338,24 @@ class soapController extends sfController {
 
     }
 
-    function updateVirtAgent($node_uuid, $node_data)
+    function updateVirtAgent($node_uuid, $node_data, $node_checkmdstat)
     {
 
         $node_array = array(
                 'ip'=>$node_data->ip,
                 'state'=>$node_data->state);
 
-
-        $request_array = array('request'=>array_merge($node_array,array('uuid' => $node_uuid, 'method'=>'updateVirtAgent')));        
-
         $this->request->setParameter('uuid', $node_uuid);
         $this->request->setParameter('data',$node_array);
+        $this->request->setParameter('checkmdstat',(array)$node_checkmdstat);
+
+        $data = $this->request->getParameterHolder();
+        $all_data = $data->getAll();
+        $all_data['module'] = 'node';
+        $all_data['action'] = 'soapUpdate';
+        $all_data['method'] = 'updateVirtAgent';
+
+        $request_array = array('request'=>$all_data);
 
         $action = $this->getAction('node','soapUpdate');
         $result = $action->executeSoapUpdate($this->request);

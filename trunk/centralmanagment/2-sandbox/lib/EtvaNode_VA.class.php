@@ -27,6 +27,8 @@ class EtvaNode_VA
 
     const GET_SYS_INFO = 'getsysinfo';
 
+    const CHECK_MDSTAT = 'check_mdstat';
+
     public function EtvaNode_VA(EtvaNode $etva_node = null)
     {
 
@@ -580,6 +582,8 @@ class EtvaNode_VA
 
         }
 
+        $this->clearLastMessage();
+
         $result = $this->processNodeForm($data, $form);
 
         if(!$result['success']) return $result;
@@ -1020,7 +1024,7 @@ class EtvaNode_VA
         return $res_state;
     }
 
-    public function migrateAllServers(EtvaNode $etva_sparenode = null, $off = false){
+    public function migrateAllServers(EtvaNode $etva_sparenode = null, $off = false, $ignoreAdmissionGate = false){
         // migrate all servers
 
         // order by priority HA
@@ -1047,7 +1051,7 @@ class EtvaNode_VA
                     // start it server is running or has autostart  or has HA or has priority HA
                     if( $off && (($etva_server->getVmState() == 'running') || $etva_server->getAutostart()) ){
                         // send start server
-                        $start_res = $server_va->send_start($this->etva_node);
+                        $start_res = $server_va->send_start($etva_tonode,null,$ignoreAdmissionGate);
                     }
                 }
                 if( $response['success'] ){
@@ -1159,5 +1163,47 @@ class EtvaNode_VA
         $method = self::GET_SYS_INFO;
         $response = $this->etva_node->soapSend($method);
         return $response;
+    }
+
+    private function clearLastMessage($response=null)
+    {
+        // if node is mark with error of check mdstat
+        if( $this->etva_node->isLastErrorMessage(self::CHECK_MDSTAT) ){
+
+            $message='';    // empty message
+
+            if( $response ){
+                $message = Etva::getLogMessage(array('name'=>$node_name,'info'=>$response['message']), EtvaNodePeer::_OK_CHECK_MDSTAT_ );
+                sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($node_name, 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::INFO)));
+
+                error_log($message);
+            }
+
+            $apli = new Appliance();
+            $apli->updateStatusMessage($message);
+
+            $this->etva_node->clearErrorMessage(self::CHECK_MDSTAT);
+        }
+    }
+    public function updateLastMessage($response)
+    {
+        $node_name = $this->etva_node->getName();
+
+        if( !$response['success'] ){
+            $message = Etva::getLogMessage(array('name'=>$node_name,'info'=>$response['message']), EtvaNodePeer::_ERR_CHECK_MDSTAT_ );
+            sfContext::getInstance()->getEventDispatcher()->notify(new sfEvent($node_name, 'event.log',array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+            $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaNodePeer::_ERR_CHECK_MDSTAT_,array('%name%'=>$node_name,'%info%'=>$response['message']));
+
+            error_log($message);
+
+            // send status to mastersite
+            $apli = new Appliance();
+            $apli->updateStatusMessage($message);
+
+            // mark node with fail
+            $this->etva_node->setErrorMessage(self::CHECK_MDSTAT,$msg_i18n);
+        } else {
+            $this->clearLastMessage($response);
+        }
     }
 }

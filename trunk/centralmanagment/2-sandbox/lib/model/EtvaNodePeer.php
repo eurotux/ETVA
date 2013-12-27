@@ -50,6 +50,9 @@ class EtvaNodePeer extends BaseEtvaNodePeer
     const _ERR_SYSTEMCHECK_   = 'Node %name% could not execute system check. %info%';
     const _OK_SYSTEMCHECK_   = 'Node %name% execute system check successfully.';
 
+    const _ERR_CHECK_MDSTAT_ = 'Node %name% receive some errors of RAID system. %info%';
+    const _OK_CHECK_MDSTAT_ = 'Node %name% RAID system check ok.';
+
     static function getWithServers()
     {
         /*$criteria = new Criteria();
@@ -97,7 +100,8 @@ class EtvaNodePeer extends BaseEtvaNodePeer
   /**
     * Used for compatibility of the previous version, where requests only contains the "nid". Needed since the implementation of clusters.
     */
-  public static function getOrElectNode(sfWebRequest $request){
+  public static function getOrElectNode(sfWebRequest $request)
+  {
 
      // get parameters
      $nid = $request->getParameter('nid');
@@ -106,6 +110,20 @@ class EtvaNodePeer extends BaseEtvaNodePeer
      $vg = $request->getParameter('vg');
      $dev = $request->getParameter('dev');
      $lv = $request->getParameter('lv');
+
+     return self::getOrElectNodeFromArray( array( 'node'=>$nid, 'cluster'=>$cid, 'level'=>$level,
+                                        'volumegroup'=>$vg, 'device'=>$dev, 'logicalvolume'=>$logicalvolume ) );
+  }
+  public static function getOrElectNodeFromArray($arguments)
+  {
+
+     // get parameters
+     $nid = (isset($arguments['node'])) ? $arguments['node'] : null;
+     $cid = (isset($arguments['cluster'])) ? $arguments['cluster'] : null;
+     $level = (isset($arguments['level'])) ? $arguments['level'] : null;
+     $vg = (isset($arguments['volumegroup'])) ? $arguments['volumegroup'] : null;
+     $dev = (isset($arguments['device'])) ? $arguments['device'] : null;
+     $lv = (isset($arguments['logicalvolume'])) ? $arguments['logicalvolume'] : null;
 
      // check level - back compatibility
      if(!$level)
@@ -120,12 +138,12 @@ class EtvaNodePeer extends BaseEtvaNodePeer
         if($lv){
             $c = new Criteria();
             $c->add(EtvaLogicalvolumePeer::STORAGE_TYPE, EtvaLogicalvolume::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
-            $etva_lv = EtvaLogicalvolumePeer::retrieveByLv($vg, $c);
+            $etva_lv = EtvaLogicalvolumePeer::retrieveByLv($lv, $c);
             return ($etva_lv) ? EtvaNodePeer::ElectNode($etva_node): $etva_node;
         }elseif($dev){
             $c = new Criteria();
             $c->add(EtvaPhysicalvolumePeer::STORAGE_TYPE, EtvaPhysicalvolume::STORAGE_TYPE_LOCAL_MAP, Criteria::ALT_NOT_EQUAL);
-            $etva_pv = EtvaPhysicalvolumePeer::retrieveByDevice($vg, $c);
+            $etva_pv = EtvaPhysicalvolumePeer::retrieveByDevice($dev, $c);
             return ($etva_pv) ? EtvaNodePeer::ElectNode($etva_node): $etva_node;            
         }elseif($vg){
              $c = new Criteria();

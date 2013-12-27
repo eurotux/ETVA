@@ -28,6 +28,7 @@ class Appliance
     const DB_BACKUP = 'db_backup';
     const ARCHIVE_BACKUP = 'archive_backup';
     const LOGIN_BACKUP = 'login_backup';
+    const UPDATESTATUS = 'updatestatus';
 
     const RESTORE_STAGE = 'restore';
     const GET_RESTORE = 'get_restore';
@@ -1064,6 +1065,32 @@ class Appliance
 
     }
 
+    public function updateStatusMessage($message)
+    {
+        $url = $this->site_url."/updatestatus"; // mastersite url to upload file
+        $serial_number = $this->serial_number;
+
+        $send_fields = array('serial_number'=>$serial_number,'message'=>$message);
+        
+        $curl_req = new cURL($url);
+        $curl_req->post($send_fields);
+        //$curl_req->progress($serial_number);
+        $result = $this->process_curl_auth($curl_req); // check auth....        
+
+        if(!$result['success']){
+            $result['action'] = self::UPDATESTATUS;
+            return $result;
+        }
+        
+
+        // ok...
+        $response = $curl_req->get_response();
+        $decoded = json_decode($response,true);        
+        $decoded['serial_number'] = $serial_number;
+        $decoded['success'] = true;
+        return $decoded;
+
+    }
 }
 
 ?>

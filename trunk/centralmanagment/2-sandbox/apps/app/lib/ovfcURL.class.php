@@ -24,6 +24,12 @@ class ovfcURL
         $this->filename = $filename;
     }
     
+    public function setOutputFile($filepath)
+    {
+        $fp = fopen($filepath, 'w');
+        curl_setopt($this->curl, CURLOPT_FILE, $fp);
+    }
+
     //set post fields
     public function post($fields)
     {

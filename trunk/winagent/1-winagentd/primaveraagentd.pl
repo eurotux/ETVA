@@ -9,8 +9,11 @@ use utf8;
 use POSIX;
 
 #use ETVA::Agent::SOAP;
-use ETVA::Agent::SOAPFork;
-use ETVA::Client::SOAP::HTTP;
+#use ETVA::Agent::SOAPFork;
+#use ETVA::Client::SOAP::HTTP;
+
+use ETVA::GuestAgent::Management;
+
 use ETVA::Utils;
 
 use Data::Dumper;
@@ -24,24 +27,14 @@ sub main {
     require PrimaveraDispatcher;
 
     &loadconf();
+
     PrimaveraDispatcher->init_conf( %CONF );
 
     my %C = ();
     $C{'_chldhandler_'} = \&chld_handler;
 
-    my $class = $AgentClass || 'ETVA::Agent::SOAPFork';
-
-    # initialization agent
-    my $agent = $class->new( 'LocalPort'=>'7000', '_dispatcher'=>'PrimaveraDispatcher', debug=>1, %CONF, '_register_handler'=>\&register_handler, %C );
-
-    # allways fork
-    *ETVA::Agent::SOAPFork::isForkable = sub { shift; return ( shift =~ /change_ip/ ) ? 0 : 1; };
-
-    if( $agent ){
-        # start loop
+    my $agent = new ETVA::GuestAgent::Management( 'LocalPort'=>'7000', '_dispatcher'=>'PrimaveraDispatcher', debug=>1, %CONF, '_register_handler'=>\&register_handler, %C );
     return $agent->mainLoop(); 
-    }
-    return;
 }
 
 sub chld_handler {
@@ -72,24 +65,23 @@ sub chld_dies_handler {
 }
 
 sub register_handler {
-    my $agent = shift;
-    if( $agent->{'cm_uri'} ){
+    my $self = shift;
+    if( $self->{'cm_uri'} ){
         my $now = &now();
-        my $R = new ETVA::Client::SOAP::HTTP( uri => $agent->{'cm_uri'} )
-                    -> call( $agent->{'cm_namespace'},
+        my $R = $self->call( $self->{'cm_namespace'},
                              "initAgentServices",
-                                name=>$agent->{'Type'} || 'WINAGENT',
-                                ip=>$agent->{'LocalIP'},
-                                port=>$agent->{'LocalPort'},
-                                macaddr=>$agent->{'macaddr'},
+                                name=>$self->{'Type'} || 'WINAGENT',
+                                ip=>$self->{'LocalIP'},
+                                port=>$self->{'LocalPort'},
+                                macaddr=>$self->{'macaddr'},
                                 services=>[{'name'=>'main'}]
                             );
-        ETVA::Utils::plog( "macaddr = $agent->{'macaddr'} ip=$agent->{'LocalIP'}");
+        ETVA::Utils::plogNow(__PACKAGE__," macaddr = $self->{'macaddr'} ip=$self->{'LocalIP'}");
         if( !$R || $R->{'_error_'} ){
-            ETVA::Utils::plog("Cant connect to CentralManagement.\nInitialization Agent aborted!");
+            ETVA::Utils::plogNow(__PACKAGE__," Cant connect to CentralManagement.\nInitialization Agent aborted!");
         } else {
             if( ref($R->{'return'}) && $R->{'return'}{'success'} ne 'false' ){
-                ETVA::Utils::plog("$now - Agent register with success on CentralManagement");
+                ETVA::Utils::plogNow(__PACKAGE__," - Agent register with success on CentralManagement");
             }
         }
     }
@@ -106,6 +98,7 @@ sub loadconf {
 
     if( !$CONF{'macaddr'} || !$CONF{'LocalIP'} ||
             ( $CONF{'LocalIP'} eq '127.0.0.1' ) ||
+            ( $CONF{'macaddr'} ne "$I->{'macaddr'}" ) ||
             ( $CONF{'LocalIP'} ne "$I->{'ipaddr'}" ) ){
 
         plog( "IP address changed '$I->{'ipaddr'}'" ) if( $CONF{'LocalIP'} ne "$I->{'ipaddr'}" );

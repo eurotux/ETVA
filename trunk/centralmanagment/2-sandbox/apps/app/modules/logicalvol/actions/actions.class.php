@@ -29,105 +29,38 @@ class logicalvolActions extends sfActions
     public function executeJsonClone(sfWebRequest $request)
     {
 
+        chdir(sfConfig::get('sf_root_dir')); // Trick plugin into thinking you are in a project directory
+
         // Lvs info
-        $lv = $request->getParameter('lv');
+        $lv = $request->getParameter('lvuuid');
+        if( !$lv ) $lv = $request->getParameter('lv');
         $vg = $request->getParameter('vg');
-        $lvuuid = $request->getParameter('lvuuid');
-        $original_lv_uuid = $request->getParameter('olvuuid');
-        $original_lv = $request->getParameter('olv');
+
+        $original_lv = $request->getParameter('olvuuid');
+        if( !$original_lv ) $original_lv = $request->getParameter('olv');
         $original_vg = $request->getParameter('ovg');
 
-        /*
-         * check if lv is a file disk instead
-         * if is a file disk check if special volume group exists. if not create
-         */
-        $is_DiskFile = ($vg == sfConfig::get('app_volgroup_disk_flag')) ? 1:0;
+        $task_logicalvol_clone = new logicalvolCloneTask($this->dispatcher, new sfFormatter());
+        $response = $task_logicalvol_clone->run(
+                                    array( // arguments
+                                        'original'=>$original_lv,
+                                        'logicalvolume'=>$lv
+                                    ),
+                                    array( // options
+                                        'level'=>$request->getParameter('level'),
+                                        'cluster'=>$request->getParameter('cid'),
+                                        'node'=>$request->getParameter('nid'),
+                                        'volumegroup'=>$vg,
+                                        'original-volumegroup'=>$original_vg
+                                    )
+            );
 
-        // get node            
-        $etva_node = EtvaNodePeer::getOrElectNode($request);
-        if(!$etva_node){
-            error_log("LVCLONE[ERROR] null etva_node");
-            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
-
-            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
-            
-            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
-            $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$node_log), EtvaLogicalvolumePeer::_ERR_CREATE_);
-            //notify system log
-            $this->dispatcher->notify(
-                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-
-            // if is a CLI soap request return json encoded data
-            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
-
-            // if is browser request return text renderer
-            $error = $this->setJsonError($error);
-            return $this->renderText($error);
-
-        }
-        error_log("LVCLONE[INFO] Elected node ".$etva_node->getName());
-
-        // check if a logical volume exists
-        if(!$etva_lv = $etva_node->retrieveLogicalvolume($lvuuid,$vg,$lv)){  //lv is the logical volume name
-
-            error_log("LVCREATE[ERROR] Logical volume not created before.");
-
-            $msg = Etva::getLogMessage(array('name'=>$lv), EtvaLogicalvolumePeer::_ERR_NOTFOUND_);
-            $msg_i18n = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_NOTFOUND_,array('%name%'=>$lv));
-
-            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
-
-            //notify system log            
-            $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_REMOVE_);
-            $this->dispatcher->notify(
-                new sfEvent($etva_node->getName(), 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-
-
-            // if is a CLI soap request return json encoded data
-            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
-
-            // if is browser request return text renderer
-            $error = $this->setJsonError($error);
-            return $this->renderText($error);
-        }
-        error_log("LVCLONE[INFO] Found new logical volume ".$etva_lv->getLv());
-
-        // if cannot find logical volume
-        $etva_src_lv = $etva_node->retrieveLogicalvolume($original_lv_uuid,$original_vg,$original_lv);
-        if(!$etva_src_lv){
-            $msg = Etva::getLogMessage(array('name'=>$original_lv), EtvaLogicalvolumePeer::_ERR_NOTFOUND_);
-            $msg_i18n = $this->getContext()->getI18N()->__(EtvaLogicalvolumePeer::_ERR_NOTFOUND_,array('%name%'=>$original_lv));
-
-            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
-
-            //notify system log            
-            $message = Etva::getLogMessage(array('name'=>$original_lv,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_REMOVE_);
-            $this->dispatcher->notify(
-                new sfEvent($etva_node->getName(), 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-
-
-            // if is a CLI soap request return json encoded data
-            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
-
-            // if is browser request return text renderer
-            $error = $this->setJsonError($error);
-            return $this->renderText($error);
-        }
-        error_log("LVCLONE[INFO] Found source logical volume ".$etva_src_lv->getLv());
-
-
-        // prepare soap info....
-        $lv_va = new EtvaLogicalvolume_VA($etva_lv);
-
-        error_log("LVCLONE[INFO] Before send_clone method");
-        $response = $lv_va->send_clone($etva_node,$etva_src_lv);
-        error_log("LVCLONE[INFO] After send_clone method");
-        error_log("LVCLONE[INFO] Agent response:  ".print_r($response, true));
         if($response['success'])
         {
+            /*$this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $response['response'],'priority'=>EtvaEventLogger::INFO)));*/
+
             $return = json_encode($response);
 
             // if the request is made throught soap request...
@@ -135,7 +68,11 @@ class logicalvolActions extends sfActions
             // if is browser request return text renderer
             $this->getResponse()->setHttpHeader('Content-type', 'application/json');
             return  $this->renderText($return);
-        }else{
+        } else {
+
+            $this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $response['error'],'priority'=>EtvaEventLogger::ERR)));
 
             if(sfConfig::get('sf_environment') == 'soap') return json_encode($response);
 
@@ -158,7 +95,6 @@ class logicalvolActions extends sfActions
    */
     public function executeJsonCreate(sfWebRequest $request)
     {
-    
         // get parameters
         $nid = $request->getParameter('nid');
         $lv = $request->getParameter('lv');
@@ -167,105 +103,30 @@ class logicalvolActions extends sfActions
         $format = $request->getParameter('format');
         $persnapshotusage = $request->getParameter('persnapshotusage');
 
-        $etva_node = EtvaNodePeer::getOrElectNode($request);
+        chdir(sfConfig::get('sf_root_dir')); // Trick plugin into thinking you are in a project directory
 
-        /*
-         * check if lv is a file disk instead
-         * if is a file disk check if special volume group exists. if not create
-         */
-        $is_DiskFile = ($vg == sfConfig::get('app_volgroup_disk_flag')) ? 1:0;
-
-        // get node            
-        if(!$etva_node){
-            error_log("LVCREATE[ERROR] null etva_node");
-            $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));
-
-            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
-            
-            $node_log = Etva::getLogMessage(array('id'=>$nid), EtvaNodePeer::_ERR_NOTFOUND_ID_);
-            $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$node_log), EtvaLogicalvolumePeer::_ERR_CREATE_);
-            //notify system log
-            $this->dispatcher->notify(
-                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-
-            // if is a CLI soap request return json encoded data
-            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
-
-            // if is browser request return text renderer
-            $error = $this->setJsonError($error);
-            return $this->renderText($error);
-
-        }
-
-        // get logical volume 
-        if($etva_lv = $etva_node->retrieveLogicalvolumeByLv($lv)){  //lv is the logical volume name
-            error_log("LVCREATE[ERROR] Logical volume already exists");
-            $msg_type = $is_DiskFile ? EtvaLogicalvolumePeer::_ERR_DISK_EXIST_ : EtvaLogicalvolumePeer::_ERR_LV_EXIST_;
-            $msg = Etva::getLogMessage(array('name'=>$lv), $msg_type);
-            $msg_i18n = $this->getContext()->getI18N()->__($msg_type,array('%name%'=>$lv));
-
-
-            $error = array('success'=>false,
-                       'agent'=>$etva_node->getName(),
-                       'error'=>$msg_i18n,
-                       'info'=>$msg_i18n);
-
-            //notify system log
-            $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_CREATE_);                
-            $this->dispatcher->notify(
-                new sfEvent($error['agent'], 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-            
-
-            // if is a CLI soap request return json encoded data
-            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
-
-            // if is browser request return text renderer
-            $error = $this->setJsonError($error);
-            return $this->renderText($error);            
-
-        }
-            
-        error_log("LVCREATE[INFO] Logical volume does not exist: ".$lv);
-
-        if(!$etva_vg = $etva_node->retrieveVolumegroupByVg($vg)){
-            error_log("LVCREATE[ERROR] Volume Group does not exist: ".$vg);
-            $msg = Etva::getLogMessage(array('name'=>$vg), EtvaVolumegroupPeer::_ERR_NOTFOUND_);
-            $msg_i18n = $this->getContext()->getI18N()->__(EtvaVolumegroupPeer::_ERR_NOTFOUND_,array('%name%'=>$vg));
-
-            $error = array('success'=>false,'agent'=>$etva_node->getName(),'error'=>$msg_i18n, 'info'=>$msg_i18n);
-
-            //notify system log
-            $message = Etva::getLogMessage(array('name'=>$lv,'info'=>$msg), EtvaLogicalvolumePeer::_ERR_CREATE_);
-            $this->dispatcher->notify(
-                new sfEvent($error['agent'], 'event.log',
-                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
-
-            // if is a CLI soap request return json encoded data
-            if(sfConfig::get('sf_environment') == 'soap') return json_encode($error);
-
-            // if is browser request return text renderer
-            $error = $this->setJsonError($error);
-            return $this->renderText($error);
-        }
-
-        error_log("LVCREATE[INFO] Volume Group exists: ".$vg);
-
-        // prepare soap info....
-        $etva_lv = new EtvaLogicalvolume();
-        $etva_lv->setEtvaVolumegroup($etva_vg);
-        $etva_lv->setLv($lv);
-        $lv_va = new EtvaLogicalvolume_VA($etva_lv);
-
-//        error_log("$etva_node");
-//        error_log(print_r($etva_node,true));
-        error_log("LVCREATE[INFO] Size: ".$size);
-
-        $response = $lv_va->send_create($etva_node,$size,$format,$persnapshotusage);
+        $task_logicalvol_create = new logicalvolCreateTask($this->dispatcher, new sfFormatter());
+        $response = $task_logicalvol_create->run(
+                                    array( // arguments
+                                        'name'=>$lv,
+                                        'volumegroup'=>$vg,
+                                        'size'=>$size
+                                    ),
+                                    array( // options
+                                        'level'=>$request->getParameter('level'),
+                                        'cluster'=>$request->getParameter('cid'),
+                                        'node'=>$request->getParameter('nid'),
+                                        'format'=>$format,
+                                        'persnapshotusage'=>$persnapshotusage
+                                    )
+            );
 
         if($response['success'])
         {
+            /*$this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $response['response'],'priority'=>EtvaEventLogger::INFO)));*/
+
             $return = json_encode($response);
 
             // if the request is made throught soap request...
@@ -273,16 +134,17 @@ class logicalvolActions extends sfActions
             // if is browser request return text renderer
             $this->getResponse()->setHttpHeader('Content-type', 'application/json');
             return  $this->renderText($return);
+        } else {
 
-
-        }else{
+            $this->dispatcher->notify(
+                new sfEvent($response['agent'], 'event.log',
+                    array('message' => $response['error'],'priority'=>EtvaEventLogger::ERR)));
 
             if(sfConfig::get('sf_environment') == 'soap') return json_encode($response);
 
             $return = $this->setJsonError($response);
             return  $this->renderText($return);
         }
-
     }   
 
 

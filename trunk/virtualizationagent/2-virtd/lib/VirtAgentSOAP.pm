@@ -136,6 +136,18 @@ sub opPeriodic5Secs {
     }
 }
 
+# testing if fork func
+sub isForkable {
+    my $self = shift;
+    my ($method) = @_;
+
+    plogNow("VirtAgentSOAP isForkable method=$method") if( &debug_level > 3 );
+
+    if( my $f = VirtAgentInterface->isForkable(@_) ){
+        return $f;
+    }
+    return $self->SUPER::isForkable(@_);
+}
 sub terminate_agent {
     my $self = shift;
     plog("VirtAgentSOAP terminate_agent") if( &debug_level() > 7 );

@@ -41,6 +41,7 @@ BEGIN {
                     list_processes find_procname
                     debug_level debug_inc debug_dec set_debug_level
                     get_os_release
+                    waitCond
                      );
 }
 
@@ -803,7 +804,11 @@ sub rand_tmpdir {
     my ($pr) = @_;
     my $randtok = substr(md5_hex( rand(time()) ),0,5);
     my $dir = $pr ? "$pr.$randtok" : $randtok ;
-    mkdir $dir;
+    eval { mkpath($dir); };  # make full path
+    if( $@ ){
+        plogNow("rand_tmpdir error create path '$dir': $!");
+        return;
+    }
     return $dir;
 }
 
@@ -890,7 +895,7 @@ sub decode_content {
     return $cnt;
 }
 
-my %ValidSoapTypes = ( 'string'=> 'string', 'float'=>'float', 'integer'=>'int', 'int'=>'int', 'Boolean'=>'boolean' );
+my %ValidSoapTypes = ( 'string'=> 'string', 'float'=>'float', 'integer'=>'int', 'int'=>'int', 'boolean'=>'boolean' );
 sub parseSoapType {
     my ($value) = @_;
     my $type;
@@ -901,6 +906,12 @@ sub parseSoapType {
             $type = $ValidSoapTypes{"$lc_t"};
             $value = $v;
         }
+    } elsif( lc($value) eq 'true' ){
+        $type = 'boolean';
+    } elsif( lc($value) eq 'false' ){
+        $type = 'boolean';
+    } elsif( $value =~ m/^\d+$/ ){
+        $type = 'int';
     } elsif( $value =~ m/^\w+$/ ){
         $type = 'string';
     }
@@ -916,23 +927,30 @@ sub make_soap_args {
     while(@args){
         my $k = shift(@args);
         my $v = shift(@args);
-        if( ref($v) eq 'HASH' ){
-            push(@rargs, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) )) );
-        } elsif( ref($v) eq 'ARRAY' ){
-            my $c = scalar(@$v);
-            my %attr = ( "$soapenc:arrayType"=>"xsd:anyType[$c]", "xsi:type"=>"$soapenc:Array" );
-#            $attr{"xsi:nil"} = "true" if( !$c );
-            push(@rargs, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
+        if( $k eq 'header' ){
+            push(@rargs, make_soap($serializer,$v, 1) );
         } else {
-            my ($value,$type) = &parseSoapType($v);
-	    push(@rargs, SOAP::Data->name( $k => $value )->type($type)); 
+            if( ref($v) eq 'HASH' ){
+                push(@rargs, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) )) );
+            } elsif( ref($v) eq 'ARRAY' ){
+                my $c = scalar(@$v);
+                my %attr = ( "$soapenc:arrayType"=>"xsd:anyType[$c]", "xsi:type"=>"$soapenc:Array" );
+#                $attr{"xsi:nil"} = "true" if( !$c );
+                push(@rargs, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
+            } else {
+                my ($value,$type) = &parseSoapType($v);
+                push(@rargs, SOAP::Data->name( $k => $value )->type($type)); 
+            }
         }
     }
 
     return @rargs;
 }
 sub make_soap {
-    my ($serializer,$st) = @_;
+    my ($serializer,$st,$header) = @_;
+
+    my $class = 'SOAP::Data';
+    $class = 'SOAP::Header' if( $header );
 
     my $soapenc = $serializer->find_prefix($SOAP::Constants::NS_ENC);
 
@@ -942,15 +960,15 @@ sub make_soap {
         for my $k ( keys %$st ){
             my $v = $st->{"$k"};
             if( ref($v) eq 'HASH' ){
-                push(@sres, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) )) );
+                push(@sres, $class->name( $k => \$class->value( make_soap($serializer,$v) )) );
             } elsif( ref($v) eq 'ARRAY' ){
                 my $c = scalar(@$v);
                 my %attr = ( "$soapenc:arrayType"=>"xsd:anyType[$c]", "xsi:type"=>"$soapenc:Array" );
 #                $attr{"xsi:nil"} = "true" if( !$c );
-                push(@sres, SOAP::Data->name( $k => \SOAP::Data->value( make_soap($serializer,$v) ))->attr( \%attr ) );
+                push(@sres, $class->name( $k => \$class->value( make_soap($serializer,$v) ))->attr( \%attr ) );
             } else {
-		my ($value,$type) = &parseSoapType($v);
-		push(@sres, SOAP::Data->name( $k => $value )->type($type)); 
+                my ($value,$type) = &parseSoapType($v);
+                push(@sres, $class->name( $k => $value )->type($type)); 
             }
         }
         push(@res, @sres);
@@ -959,17 +977,17 @@ sub make_soap {
             my @sres = ();
             for my $e (@$st){
                 if( ref($e) eq 'HASH' ){
-                    push(@sres, SOAP::Data->name('item' => \SOAP::Data->value( make_soap($serializer,$e) ) ));
+                    push(@sres, $class->name('item' => \$class->value( make_soap($serializer,$e) ) ));
                 } elsif( ref($e) eq 'ARRAY' ){
                     my $c = scalar(@$e);
                     my %attr = ( "$soapenc:arrayType"=>"xsd:anyType[$c]", "xsi:type"=>"$soapenc:Array" );
 #                    $attr{"xsi:nil"} = "true" if( !$c );
-                    push(@sres, SOAP::Data->name('item' => \SOAP::Data->value( make_soap($serializer,$e) ) )->attr( \%attr ));
+                    push(@sres, $class->name('item' => \$class->value( make_soap($serializer,$e) ) )->attr( \%attr ));
                 } else {
-                    push(@sres, SOAP::Data->name('item' => $e ));
+                    push(@sres, $class->name('item' => $e ));
                 }
             }
-            push(@res, SOAP::Data->name("arrayOfItems" => @sres ) );
+            push(@res, $class->name("arrayOfItems" => @sres ) );
         }
     } else {
         push(@res,$st);
@@ -1357,6 +1375,19 @@ sub configure_ntp {
         # restart for activate configuration
         &cmd_exec("service ntpd restart");
     }
+}
+
+sub waitCond {
+    my ($handle,$ttl,$sleep_time) = @_;
+    $sleep_time ||= 5;
+    my $st_time = &now();
+    while( &$handle ){
+        if( &now() > ($st_time+$ttl) ){
+            last;
+        }
+        sleep($sleep_time);
+    }
+    return &$handle;
 }
 
 

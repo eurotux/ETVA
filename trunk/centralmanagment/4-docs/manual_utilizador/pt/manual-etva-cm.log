@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.8.8)  17 SEP 2013 10:17
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.11.4)  20 DEC 2013 17:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **manual-etva-cm
 (./manual-etva-cm.tex
 LaTeX2e <2011/06/27>
-Babel <3.9f> and hyphenation patterns for 2 languages loaded.
+Babel <3.9f> and hyphenation patterns for 74 languages loaded.
 (/usr/share/texlive/texmf-dist/tex/latex/koma-script/scrreprt.cls
 Document Class: scrreprt 2012/07/29 v3.11b KOMA-Script document class (report)
 (/usr/share/texlive/texmf-dist/tex/latex/koma-script/scrkbase.sty
@@ -139,16 +139,9 @@ File: babel.def 2013/05/16 v3.9f Babel common definitions
 \babel@savecnt=\count91
 \U@D=\dimen110
 )
-
-Package babel Warning: No hyphenation patterns were preloaded for
-(babel)                the language `Portuguese' into the format.
-(babel)                Please, configure your TeX system to add them and
-(babel)                rebuild the format. Now I will use the patterns
-(babel)                preloaded for english instead on input line 55.
-
-\l@portuges = a dialect from \language0
 Package babel Info: Making " an active character on input line 145.
-)) (/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty
+))
+(/usr/share/texlive/texmf-dist/tex/latex/base/inputenc.sty
 Package: inputenc 2008/03/30 v1.1d Input encoding file
 \inpenc@prehook=\toks16
 \inpenc@posthook=\toks17
@@ -835,12 +828,12 @@ LaTeX Info: Redefining \nameref on input line 25.
 LaTeX Info: Redefining \Ref on input line 25.
 
 Using optional text marked with etva. 
-<include/img/logo.png, id=454, 311.9655pt x 246.6816pt>
+<include/img/logo.png, id=462, 333.245pt x 98.3675pt>
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 28.
-(pdftex.def)             Requested size: 142.26378pt x 112.49625pt.
+(pdftex.def)             Requested size: 142.26378pt x 41.99399pt.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 23.63593pt on input line 28.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
@@ -852,7 +845,7 @@ LaTeX Font Info:    Font shape `T1/txss/m/sl' will be
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
 (Font)              scaled to size 13.67995pt on input line 28.
 
-<include/img/logo_PME_excelencia_12.png, id=455, 136.3494pt x 172.4844pt>
+<include/img/logo_PME_excelencia_12.png, id=464, 136.3494pt x 172.4844pt>
 File: include/img/logo_PME_excelencia_12.png Graphic file (type png)
 
 <use include/img/logo_PME_excelencia_12.png>
@@ -865,8 +858,8 @@ Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 28.
  [1
 
-{/usr/share/texlive/texmf-dist/fonts/map/pdftex/updmap/pdftex.map} <./include/i
-mg/logo.png> <./include/img/logo_PME_excelencia_12.png>]
+{/usr/share/texlive/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./include/im
+g/logo.png> <./include/img/logo_PME_excelencia_12.png>]
 LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
 (Font)              scaled to size 11.39996pt on input line 29.
 LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
@@ -881,20 +874,20 @@ LaTeX Font Info:    Try loading font information for T1+txtt on input line 30.
 File: t1txtt.fd 2000/12/15 v3.1
 )
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 62.
+(babel)             in language  on input line 64.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 62.
+(babel)             in language  on input line 64.
  [2
 
 
 ]
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 68.
+(babel)             in language  on input line 70.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 68.
+(babel)             in language  on input line 70.
  [3]
 LaTeX Font Info:    Font shape `T1/txss/bx/n' will be
-(Font)              scaled to size 23.63593pt on input line 70.
+(Font)              scaled to size 23.63593pt on input line 72.
 
 (./manual-etva-cm.toc
 LaTeX Font Info:    Try loading font information for OT1+txr on input line 4.
@@ -926,7 +919,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 36.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 
 
 Package Fancyhdr Warning: \headheight is too small (18.125pt): 
@@ -1008,7 +1001,7 @@ Overfull \hbox (1.34512pt too wide) detected at line 76
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 77.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 77.
 Package babel Info: Redefining portuges shorthand "|
@@ -1193,24 +1186,34 @@ Overfull \hbox (1.34512pt too wide) detected at line 113
  [][][]\T1/txss/m/n/12 146[][]
  []
 
+
+Overfull \hbox (1.34512pt too wide) detected at line 114
+ [][][]\T1/txss/m/n/12 147[][]
+ []
+
+
+Overfull \hbox (1.34512pt too wide) detected at line 115
+ [][][]\T1/txss/m/n/12 148[][]
+ []
+
 )
 \tf@toc=\write5
 \openout5 = `manual-etva-cm.toc'.
 
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 72.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+Package pdftex.def Info: include/img/logo.png used on input line 74.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 72.
+(babel)             in language  on input line 74.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 72.
+(babel)             in language  on input line 74.
  [6] (./manual-etva-cm.lof
 File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 39.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 39.
 Package babel Info: Redefining portuges shorthand "|
@@ -1221,7 +1224,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 82.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 82.
 Package babel Info: Redefining portuges shorthand "|
@@ -1231,7 +1234,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 125.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 125.
 Package babel Info: Redefining portuges shorthand "|
@@ -1399,7 +1402,7 @@ Overfull \hbox (1.34512pt too wide) detected at line 165
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 166.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 166.
 Package babel Info: Redefining portuges shorthand "|
@@ -1562,7 +1565,7 @@ Overfull \hbox (1.34512pt too wide) detected at line 193
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1.
 Package babel Info: Redefining portuges shorthand "|
@@ -1585,7 +1588,7 @@ LaTeX Font Warning: Font shape `OMS/txss/m/n' undefined
 (Font)              using `OMS/txsy/m/n' instead
 (Font)              for symbol `textbullet' on input line 8.
 
-<screenshots/etva_blocos.png, id=1030, 1259.76529pt x 661.76646pt>
+<screenshots/etva_blocos.png, id=1042, 1259.76529pt x 661.76646pt>
 File: screenshots/etva_blocos.png Graphic file (type png)
 
 <use screenshots/etva_blocos.png>
@@ -1600,7 +1603,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 24.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 24.
 Package babel Info: Redefining portuges shorthand "|
@@ -1608,7 +1611,7 @@ Package babel Info: Redefining portuges shorthand "|
  [12
 
  <./screenshots/etva_blocos.png>]
-<screenshots/etva_standard.png, id=1040, 548.40176pt x 735.45354pt>
+<screenshots/etva_standard.png, id=1053, 548.40176pt x 735.45354pt>
 File: screenshots/etva_standard.png Graphic file (type png)
 
 <use screenshots/etva_standard.png>
@@ -1617,7 +1620,7 @@ Package pdftex.def Info: screenshots/etva_standard.png used on input line 28.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 37.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 37.
 Package babel Info: Redefining portuges shorthand "|
@@ -1628,7 +1631,7 @@ Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 37.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 39.
-<screenshots/install/unitbox/bootmenu.png, id=1048, 642.4pt x 481.8pt>
+<screenshots/install/unitbox/bootmenu.png, id=1060, 642.4pt x 481.8pt>
 File: screenshots/install/unitbox/bootmenu.png Graphic file (type png)
 
 <use screenshots/install/unitbox/bootmenu.png>
@@ -1636,7 +1639,7 @@ Package pdftex.def Info: screenshots/install/unitbox/bootmenu.png used on input
  line 46.
 (pdftex.def)             Requested size: 256.95544pt x 192.71658pt.
 
-<screenshots/install/unitbox/load_installer_01.png, id=1049, 721.69624pt x 400.
+<screenshots/install/unitbox/load_installer_01.png, id=1061, 721.69624pt x 400.
 49625pt>
 File: screenshots/install/unitbox/load_installer_01.png Graphic file (type png)
 
@@ -1645,7 +1648,7 @@ Package pdftex.def Info: screenshots/install/unitbox/load_installer_01.png used
  on input line 56.
 (pdftex.def)             Requested size: 216.51054pt x 120.1498pt.
 
-<screenshots/install/unitbox/load_installer_02.png, id=1050, 720.6925pt x 400.4
+<screenshots/install/unitbox/load_installer_02.png, id=1062, 720.6925pt x 400.4
 9625pt>
 File: screenshots/install/unitbox/load_installer_02.png Graphic file (type png)
 
@@ -1654,7 +1657,7 @@ Package pdftex.def Info: screenshots/install/unitbox/load_installer_02.png used
  on input line 57.
 (pdftex.def)             Requested size: 216.20941pt x 120.1498pt.
 
-<screenshots/install/unitbox/format_disks_01.png, id=1051, 1027.84pt x 770.88pt
+<screenshots/install/unitbox/format_disks_01.png, id=1063, 1027.84pt x 770.88pt
 >
 File: screenshots/install/unitbox/format_disks_01.png Graphic file (type png)
  <use screenshots/install/unitbox/format_disks_01.png>
@@ -1662,7 +1665,7 @@ Package pdftex.def Info: screenshots/install/unitbox/format_disks_01.png used o
 n input line 58.
 (pdftex.def)             Requested size: 205.56436pt x 154.17326pt.
 
-<screenshots/install/unitbox/format_disks_02.png, id=1052, 1027.84pt x 771.8837
+<screenshots/install/unitbox/format_disks_02.png, id=1064, 1027.84pt x 771.8837
 4pt>
 File: screenshots/install/unitbox/format_disks_02.png Graphic file (type png)
  <use screenshots/install/unitbox/format_disks_02.png>
@@ -1670,7 +1673,7 @@ Package pdftex.def Info: screenshots/install/unitbox/format_disks_02.png used o
 n input line 59.
 (pdftex.def)             Requested size: 205.56436pt x 154.37401pt.
 
-<screenshots/install/unitbox/check_dependencies.png, id=1053, 1027.84pt x 771.8
+<screenshots/install/unitbox/check_dependencies.png, id=1065, 1027.84pt x 771.8
 8374pt>
 File: screenshots/install/unitbox/check_dependencies.png Graphic file (type png
 )
@@ -1679,7 +1682,7 @@ Package pdftex.def Info: screenshots/install/unitbox/check_dependencies.png use
 d on input line 60.
 (pdftex.def)             Requested size: 205.56436pt x 154.37401pt.
 
-<screenshots/install/unitbox/start_install.png, id=1054, 1027.84pt x 771.88374p
+<screenshots/install/unitbox/start_install.png, id=1066, 1027.84pt x 771.88374p
 t>
 File: screenshots/install/unitbox/start_install.png Graphic file (type png)
  <use screenshots/install/unitbox/start_install.png>
@@ -1687,7 +1690,7 @@ Package pdftex.def Info: screenshots/install/unitbox/start_install.png used on
 input line 61.
 (pdftex.def)             Requested size: 205.56436pt x 154.37401pt.
 
-<screenshots/install/unitbox/progress_install_01.png, id=1055, 1027.84pt x 771.
+<screenshots/install/unitbox/progress_install_01.png, id=1067, 1027.84pt x 771.
 88374pt>
 File: screenshots/install/unitbox/progress_install_01.png Graphic file (type pn
 g)
@@ -1696,7 +1699,7 @@ Package pdftex.def Info: screenshots/install/unitbox/progress_install_01.png us
 ed on input line 62.
 (pdftex.def)             Requested size: 205.56436pt x 154.37401pt.
 
-<screenshots/install/unitbox/progress_install_02.png, id=1056, 1027.84pt x 770.
+<screenshots/install/unitbox/progress_install_02.png, id=1068, 1027.84pt x 770.
 88pt>
 File: screenshots/install/unitbox/progress_install_02.png Graphic file (type pn
 g)
@@ -1708,7 +1711,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 68.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 68.
 Package babel Info: Redefining portuges shorthand "|
@@ -1720,7 +1723,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 70.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 70.
 Package babel Info: Redefining portuges shorthand "|
@@ -1731,7 +1734,7 @@ ll/unitbox/load_installer_02.png> <./screenshots/install/unitbox/format_disks_0
 ll/unitbox/check_dependencies.png> <./screenshots/install/unitbox/start_install
 .png> <./screenshots/install/unitbox/progress_install_01.png> <./screenshots/in
 stall/unitbox/progress_install_02.png>]
-<screenshots/install/unitbox/pos_install_bootmenu.png, id=1076, 642.4pt x 482.8
+<screenshots/install/unitbox/pos_install_bootmenu.png, id=1088, 642.4pt x 482.8
 0376pt>
 File: screenshots/install/unitbox/pos_install_bootmenu.png Graphic file (type p
 ng)
@@ -1740,7 +1743,7 @@ Package pdftex.def Info: screenshots/install/unitbox/pos_install_bootmenu.png u
 sed on input line 73.
 (pdftex.def)             Requested size: 256.95544pt x 193.11807pt.
 
-<screenshots/appliance_back_g3.jpg, id=1078, 1300.86pt x 439.6425pt>
+<screenshots/appliance_back_g3.jpg, id=1090, 1300.86pt x 439.6425pt>
 File: screenshots/appliance_back_g3.jpg Graphic file (type jpg)
 
 <use screenshots/appliance_back_g3.jpg>
@@ -1750,12 +1753,12 @@ Package pdftex.def Info: screenshots/appliance_back_g3.jpg used on input line 8
 )
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 74.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+Package pdftex.def Info: include/img/logo.png used on input line 76.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 74.
+(babel)             in language  on input line 76.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 74.
+(babel)             in language  on input line 76.
  [16 <./screenshots/install/unitbox/pos_install_bootmenu.png> <./screenshots/ap
 pliance_back_g3.jpg>] (./chap-cm.tex
 Cap\'{\i }tulo 3.
@@ -1767,19 +1770,19 @@ LaTeX Font Info:    Font shape `T1/txss/bx/sl' will be
 (Font)              scaled to size 11.39996pt on input line 8.
 
 Overfull \hbox (5.85373pt too wide) in paragraph at lines 10--11
-[]\T1/txss/m/n/12 Área de breve no-ti-fi-cação ac-erca dos even-
+[]\T1/txss/m/n/12 Área de breve no-ti-fi-ca-ção acerca dos even-
  []
 
-<screenshots/principal.png, id=1087, 835.62187pt x 456.20438pt>
+<screenshots/principal.png, id=1099, 787.44188pt x 514.17094pt>
 File: screenshots/principal.png Graphic file (type png)
 
 <use screenshots/principal.png>
 Package pdftex.def Info: screenshots/principal.png used on input line 30.
-(pdftex.def)             Requested size: 417.8099pt x 228.10162pt.
+(pdftex.def)             Requested size: 393.71997pt x 257.08484pt.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 31.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 31.
 Package babel Info: Redefining portuges shorthand "|
@@ -1791,12 +1794,12 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 33.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 33.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 33.
- [18 <./screenshots/principal.png (PNG copy)>]
+ [18 <./screenshots/principal.png>]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 35.
 LaTeX Font Info:    Font shape `T1/txss/m/n' will be
@@ -1812,7 +1815,7 @@ LaTeX Font Info:    Font shape `T1/txss/bx/it' in size <10> not available
 LaTeX Font Info:    Font shape `T1/txss/bx/sl' will be
 (Font)              scaled to size 9.49997pt on input line 37.
 
-<screenshots/login_unitbox.png, id=1101, 306.39468pt x 184.43906pt>
+<screenshots/login_unitbox.png, id=1114, 306.39468pt x 184.43906pt>
 File: screenshots/login_unitbox.png Graphic file (type png)
 
 <use screenshots/login_unitbox.png>
@@ -1828,7 +1831,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 62--65
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 79.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 79.
 Package babel Info: Redefining portuges shorthand "|
@@ -1839,12 +1842,12 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 85.
 
-<screenshots/main_nodes.png, id=1115, 1028.34187pt x 443.40656pt>
+<screenshots/main_nodes.png, id=1128, 1028.34187pt x 371.13657pt>
 File: screenshots/main_nodes.png Graphic file (type png)
 
 <use screenshots/main_nodes.png>
 Package pdftex.def Info: screenshots/main_nodes.png used on input line 91.
-(pdftex.def)             Requested size: 462.74957pt x 199.5311pt.
+(pdftex.def)             Requested size: 462.74957pt x 167.0099pt.
 
 Overfull \hbox (2.02834pt too wide) in paragraph at lines 91--94
  [] 
@@ -1852,7 +1855,7 @@ Overfull \hbox (2.02834pt too wide) in paragraph at lines 91--94
 
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 97.
-<screenshots/main_networks.png, id=1116, 850.67813pt x 350.05782pt>
+<screenshots/main_networks.png, id=1129, 850.67813pt x 350.05782pt>
 File: screenshots/main_networks.png Graphic file (type png)
 
 <use screenshots/main_networks.png>
@@ -1861,7 +1864,7 @@ Package pdftex.def Info: screenshots/main_networks.png used on input line 110.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 115.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 115.
 Package babel Info: Redefining portuges shorthand "|
@@ -1878,7 +1881,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 127--130
 []$ 
  []
 
-<screenshots/network_create.png, id=1126, 299.1175pt x 181.67876pt>
+<screenshots/network_create.png, id=1139, 299.1175pt x 181.67876pt>
 File: screenshots/network_create.png Graphic file (type png)
 
 <use screenshots/network_create.png>
@@ -1890,14 +1893,14 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 149.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 149.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 149.
  [21 <./screenshots/main_networks.png (PNG copy)> <./screenshots/network_create
 .png>]
-<screenshots/networks_macpool.png, id=1134, 500.87125pt x 430.60875pt>
+<screenshots/networks_macpool.png, id=1147, 500.87125pt x 430.60875pt>
 File: screenshots/networks_macpool.png Graphic file (type png)
 
 <use screenshots/networks_macpool.png>
@@ -1907,7 +1910,7 @@ Package pdftex.def Info: screenshots/networks_macpool.png used on input line 15
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 159.
 
-<screenshots/nics.png, id=1135, 704.6325pt x 303.1325pt>
+<screenshots/nics.png, id=1148, 704.6325pt x 303.1325pt>
 File: screenshots/nics.png Graphic file (type png)
 
 <use screenshots/nics.png>
@@ -1916,7 +1919,7 @@ Package pdftex.def Info: screenshots/nics.png used on input line 164.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 169.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 169.
 Package babel Info: Redefining portuges shorthand "|
@@ -1925,7 +1928,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 172.
 
-<screenshots/cluster_edit.png, id=1145, 360.59718pt x 271.76532pt>
+<screenshots/cluster_edit.png, id=1158, 360.59718pt x 271.76532pt>
 File: screenshots/cluster_edit.png Graphic file (type png)
 
 <use screenshots/cluster_edit.png>
@@ -1934,7 +1937,7 @@ Package pdftex.def Info: screenshots/cluster_edit.png used on input line 192.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 197.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 197.
 Package babel Info: Redefining portuges shorthand "|
@@ -1945,20 +1948,20 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 224.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 224.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 224.
  [24 <./screenshots/cluster_edit.png>]
-<screenshots/node_edit.png, id=1167, 365.11406pt x 305.64188pt>
+<screenshots/node_edit.png, id=1180, 365.11406pt x 305.64188pt>
 File: screenshots/node_edit.png Graphic file (type png)
 
 <use screenshots/node_edit.png>
 Package pdftex.def Info: screenshots/node_edit.png used on input line 237.
 (pdftex.def)             Requested size: 182.55658pt x 152.82056pt.
 
-<screenshots/node_conn.png, id=1168, 404.51125pt x 376.40625pt>
+<screenshots/node_conn.png, id=1181, 404.51125pt x 376.40625pt>
 File: screenshots/node_conn.png Graphic file (type png)
 
 <use screenshots/node_conn.png>
@@ -1967,38 +1970,32 @@ Package pdftex.def Info: screenshots/node_conn.png used on input line 249.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 254.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 254.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 254.
  [25 <./screenshots/node_edit.png (PNG copy)>]
-<screenshots/node_maintenance.png, id=1177, 420.82219pt x 79.79813pt>
+<screenshots/node_maintenance.png, id=1190, 420.82219pt x 79.79813pt>
 File: screenshots/node_maintenance.png Graphic file (type png)
 
 <use screenshots/node_maintenance.png>
 Package pdftex.def Info: screenshots/node_maintenance.png used on input line 26
 7.
 (pdftex.def)             Requested size: 189.36823pt x 35.90881pt.
-
-Overfull \hbox (7.66234pt too wide) in paragraph at lines 264--271
-[]\T1/txss/m/n/12 Na opção \T1/txss/m/sl/12 Manutenção \T1/txss/m/n/12 temos a 
-pos-si-bil-i-dade de colo-car a máquina em es-tado de manutenção
- []
-
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 277.
 File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png>
+ <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 280.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 280.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 280.
  [26 <./screenshots/node_conn.png> <./screenshots/node_maintenance.png (PNG cop
 y)>]
-<screenshots/node_info.png, id=1184, 883.04906pt x 326.72063pt>
+<screenshots/node_info.png, id=1197, 883.04906pt x 326.72063pt>
 File: screenshots/node_info.png Graphic file (type png)
 
 <use screenshots/node_info.png>
@@ -2007,7 +2004,7 @@ Package pdftex.def Info: screenshots/node_info.png used on input line 283.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 289.
 
-<screenshots/node_servers.png, id=1185, 727.96968pt x 320.69812pt>
+<screenshots/node_servers.png, id=1198, 727.96968pt x 320.69812pt>
 File: screenshots/node_servers.png Graphic file (type png)
 
 <use screenshots/node_servers.png>
@@ -2016,7 +2013,7 @@ Package pdftex.def Info: screenshots/node_servers.png used on input line 303.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 308.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 308.
 Package babel Info: Redefining portuges shorthand "|
@@ -2029,7 +2026,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 314--317
 []$ 
  []
 
-<screenshots/server_createwiz.png, id=1191, 805.0075pt x 454.69875pt>
+<screenshots/server_createwiz.png, id=1204, 805.0075pt x 454.69875pt>
 File: screenshots/server_createwiz.png Graphic file (type png)
 
 <use screenshots/server_createwiz.png>
@@ -2039,13 +2036,13 @@ Package pdftex.def Info: screenshots/server_createwiz.png used on input line 32
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 329.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 329.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 329.
  [28 <./screenshots/node_servers.png (PNG copy)> <./screenshots/server_createwi
-z.png (PNG copy)>] <screenshots/server_createwiz_name.png, id=1197, 805.0075pt 
+z.png (PNG copy)>] <screenshots/server_createwiz_name.png, id=1210, 805.0075pt 
 x 453.695pt>
 File: screenshots/server_createwiz_name.png Graphic file (type png)
 
@@ -2054,7 +2051,7 @@ Package pdftex.def Info: screenshots/server_createwiz_name.png used on input li
 ne 350.
 (pdftex.def)             Requested size: 402.50278pt x 226.84694pt.
 
-<screenshots/server_createwiz_memory.png, id=1198, 807.015pt x 455.7025pt>
+<screenshots/server_createwiz_memory.png, id=1211, 807.015pt x 455.7025pt>
 File: screenshots/server_createwiz_memory.png Graphic file (type png)
 
 <use screenshots/server_createwiz_memory.png>
@@ -2064,14 +2061,14 @@ line 359.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 364.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 364.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 364.
 
 [29 <./screenshots/server_createwiz_name.png (PNG copy)>]
-<screenshots/server_createwiz_processor.png, id=1204, 805.0075pt x 453.695pt>
+<screenshots/server_createwiz_processor.png, id=1217, 805.0075pt x 453.695pt>
 File: screenshots/server_createwiz_processor.png Graphic file (type png)
 
 <use screenshots/server_createwiz_processor.png>
@@ -2081,7 +2078,7 @@ ut line 368.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 378.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 378.
 Package babel Info: Redefining portuges shorthand "|
@@ -2089,7 +2086,7 @@ Package babel Info: Redefining portuges shorthand "|
 
 [30 <./screenshots/server_createwiz_memory.png (PNG copy)> <./screenshots/serve
 r_createwiz_processor.png (PNG copy)>]
-<screenshots/server_createwiz_storage.png, id=1212, 804.00375pt x 454.69875pt>
+<screenshots/server_createwiz_storage.png, id=1225, 804.00375pt x 454.69875pt>
 File: screenshots/server_createwiz_storage.png Graphic file (type png)
 
 <use screenshots/server_createwiz_storage.png>
@@ -2101,7 +2098,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 390--393
 []$ 
  []
 
-<screenshots/server_createwiz_hostnet.png, id=1213, 805.0075pt x 453.695pt>
+<screenshots/server_createwiz_hostnet.png, id=1226, 805.0075pt x 453.695pt>
 File: screenshots/server_createwiz_hostnet.png Graphic file (type png)
 
 <use screenshots/server_createwiz_hostnet.png>
@@ -2111,14 +2108,14 @@ Package pdftex.def Info: screenshots/server_createwiz_hostnet.png used on input
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 404.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 404.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 404.
 
 [31 <./screenshots/server_createwiz_storage.png (PNG copy)>]
-<screenshots/server_createwiz_startup.png, id=1222, 805.0075pt x 455.7025pt>
+<screenshots/server_createwiz_startup.png, id=1235, 805.0075pt x 455.7025pt>
 File: screenshots/server_createwiz_startup.png Graphic file (type png)
 
 <use screenshots/server_createwiz_startup.png>
@@ -2128,14 +2125,14 @@ Package pdftex.def Info: screenshots/server_createwiz_startup.png used on input
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 427.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 427.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 427.
 
 [32 <./screenshots/server_createwiz_hostnet.png (PNG copy)>]
-<screenshots/server_createwiz_finish.png, id=1228, 720.6925pt x 449.68pt>
+<screenshots/server_createwiz_finish.png, id=1241, 720.6925pt x 449.68pt>
 File: screenshots/server_createwiz_finish.png Graphic file (type png)
 
 <use screenshots/server_createwiz_finish.png>
@@ -2147,7 +2144,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 443.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 443.
 Package babel Info: Redefining portuges shorthand "|
@@ -2159,13 +2156,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 444--447
 []$ 
  []
 
-
-Overfull \hbox (33.19124pt too wide) in paragraph at lines 444--447
-\T1/txss/m/n/12 de vir-tu-al-iza-ção us-ado, al-gu-mas opções encontram-se desa
-bil-i-tadas, sendo necessário
- []
-
-<screenshots/server_edit_general.png, id=1235, 603.0028pt x 341.02406pt>
+<screenshots/server_edit_general.png, id=1248, 603.0028pt x 341.02406pt>
 File: screenshots/server_edit_general.png Graphic file (type png)
 
 <use screenshots/server_edit_general.png>
@@ -2173,7 +2164,7 @@ Package pdftex.def Info: screenshots/server_edit_general.png used on input line
  455.
 (pdftex.def)             Requested size: 301.50066pt x 170.51161pt.
 
-<screenshots/server_edit_interfaces.png, id=1237, 603.75563pt x 341.02406pt>
+<screenshots/server_edit_interfaces.png, id=1250, 603.75563pt x 341.02406pt>
 File: screenshots/server_edit_interfaces.png Graphic file (type png)
 
 <use screenshots/server_edit_interfaces.png>
@@ -2183,7 +2174,7 @@ ine 464.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 469.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 469.
 Package babel Info: Redefining portuges shorthand "|
@@ -2194,7 +2185,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 473--476
 []$ 
  []
 
-<screenshots/server_edit_disks.png, id=1244, 603.0028pt x 338.01282pt>
+<screenshots/server_edit_disks.png, id=1257, 603.0028pt x 338.01282pt>
 File: screenshots/server_edit_disks.png Graphic file (type png)
 
 <use screenshots/server_edit_disks.png>
@@ -2206,13 +2197,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 488--491
 []$ 
  []
 
-
-Overfull \hbox (47.2464pt too wide) in paragraph at lines 488--491
-\T1/txss/m/n/12 Caso a máquina vir-tual tenha dis-pos-i-tivos as-so-ci-a-dos nã
-o poderá ser movida/migrada
- []
-
-<screenshots/server_edit_devices.png, id=1245, 603.75563pt x 340.27126pt>
+<screenshots/server_edit_devices.png, id=1258, 603.75563pt x 340.27126pt>
 File: screenshots/server_edit_devices.png Graphic file (type png)
 
 <use screenshots/server_edit_devices.png>
@@ -2222,14 +2207,14 @@ Package pdftex.def Info: screenshots/server_edit_devices.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 500.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 500.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 500.
  [35 <./screenshots/server_edit_interfaces.png (PNG copy)> <./screenshots/serve
 r_edit_disks.png (PNG copy)>]
-<screenshots/server_edit_otheroptions.png, id=1251, 602.25pt x 340.27126pt>
+<screenshots/server_edit_otheroptions.png, id=1264, 602.25pt x 340.27126pt>
 File: screenshots/server_edit_otheroptions.png Graphic file (type png)
 
 <use screenshots/server_edit_otheroptions.png>
@@ -2241,7 +2226,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 514--519
 []$ 
  []
 
-<screenshots/server_edit_ha.png, id=1252, 603.0028pt x 342.5297pt>
+<screenshots/server_edit_ha.png, id=1265, 603.0028pt x 342.5297pt>
 File: screenshots/server_edit_ha.png Graphic file (type png)
 
 <use screenshots/server_edit_ha.png>
@@ -2251,7 +2236,7 @@ Package pdftex.def Info: screenshots/server_edit_ha.png used on input line 523.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 528.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 528.
 Package babel Info: Redefining portuges shorthand "|
@@ -2261,7 +2246,7 @@ dit_otheroptions.png (PNG copy)>]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 532.
 
-<screenshots/server_remove.png, id=1258, 282.05376pt x 150.5625pt>
+<screenshots/server_remove.png, id=1271, 282.05376pt x 150.5625pt>
 File: screenshots/server_remove.png Graphic file (type png)
 
 <use screenshots/server_remove.png>
@@ -2282,7 +2267,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 559--562
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 562.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 562.
 Package babel Info: Redefining portuges shorthand "|
@@ -2316,7 +2301,7 @@ Overfull \hbox (15.95259pt too wide) in paragraph at lines 574--574
 
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 580.
-<screenshots/server_start.png, id=1271, 731.73375pt x 330.48468pt>
+<screenshots/server_start.png, id=1284, 731.73375pt x 330.48468pt>
 File: screenshots/server_start.png Graphic file (type png)
 
 <use screenshots/server_start.png>
@@ -2325,7 +2310,7 @@ Package pdftex.def Info: screenshots/server_start.png used on input line 594.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 602.
 
-<screenshots/server_migrate.png, id=1272, 294.34969pt x 112.92188pt>
+<screenshots/server_migrate.png, id=1285, 294.34969pt x 112.92188pt>
 File: screenshots/server_migrate.png Graphic file (type png)
 
 <use screenshots/server_migrate.png>
@@ -2335,7 +2320,7 @@ Package pdftex.def Info: screenshots/server_migrate.png used on input line 609.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 613.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 613.
 Package babel Info: Redefining portuges shorthand "|
@@ -2347,7 +2332,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 616--619
 
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 621.
-<screenshots/server_snapshots.png, id=1284, 325.215pt x 241.65282pt>
+<screenshots/server_snapshots.png, id=1297, 325.215pt x 241.65282pt>
 File: screenshots/server_snapshots.png Graphic file (type png)
 
 <use screenshots/server_snapshots.png>
@@ -2359,7 +2344,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 643.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 643.
 Package babel Info: Redefining portuges shorthand "|
@@ -2370,7 +2355,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 649--652
 []$ 
  []
 
-<screenshots/node_storage.png, id=1293, 796.47563pt x 387.69844pt>
+<screenshots/node_storage.png, id=1306, 796.47563pt x 387.69844pt>
 File: screenshots/node_storage.png Graphic file (type png)
 
 <use screenshots/node_storage.png>
@@ -2379,7 +2364,7 @@ Package pdftex.def Info: screenshots/node_storage.png used on input line 657.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 665.
 
-<screenshots/node_storage_device_ctx.png, id=1294, 442.65375pt x 204.01219pt>
+<screenshots/node_storage_device_ctx.png, id=1307, 442.65375pt x 204.01219pt>
 File: screenshots/node_storage_device_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_device_ctx.png>
@@ -2389,7 +2374,7 @@ line 676.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 681.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 681.
 Package babel Info: Redefining portuges shorthand "|
@@ -2401,7 +2386,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 686--689
  []
 
 
-<screenshots/node_storage_device_search.png, id=1303, 436.63126pt x 328.22626pt
+<screenshots/node_storage_device_search.png, id=1316, 436.63126pt x 328.22626pt
 >
 File: screenshots/node_storage_device_search.png Graphic file (type png)
  <use screenshots/node_storage_device_search.png>
@@ -2409,7 +2394,7 @@ Package pdftex.def Info: screenshots/node_storage_device_search.png used on inp
 ut line 709.
 (pdftex.def)             Requested size: 196.48224pt x 147.70044pt.
 
-<screenshots/node_storage_iscsi_grid.png, id=1304, 434.62375pt x 324.21124pt>
+<screenshots/node_storage_iscsi_grid.png, id=1317, 434.62375pt x 324.21124pt>
 File: screenshots/node_storage_iscsi_grid.png Graphic file (type png)
 
 <use screenshots/node_storage_iscsi_grid.png>
@@ -2419,7 +2404,7 @@ line 722.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 727.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 727.
 Package babel Info: Redefining portuges shorthand "|
@@ -2427,7 +2412,7 @@ Package babel Info: Redefining portuges shorthand "|
 
 [41 <./screenshots/node_storage_device_ctx.png (PNG copy)> <./screenshots/node_
 storage_device_search.png>]
-<screenshots/node_storage_iscsi_new.png, id=1312, 435.6275pt x 324.21124pt>
+<screenshots/node_storage_iscsi_new.png, id=1325, 435.6275pt x 324.21124pt>
 File: screenshots/node_storage_iscsi_new.png Graphic file (type png)
 
 <use screenshots/node_storage_iscsi_new.png>
@@ -2439,7 +2424,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 748.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 748.
 Package babel Info: Redefining portuges shorthand "|
@@ -2447,7 +2432,7 @@ Package babel Info: Redefining portuges shorthand "|
 
 [42 <./screenshots/node_storage_iscsi_grid.png (PNG copy)> <./screenshots/node_
 storage_iscsi_new.png (PNG copy)>]
-<screenshots/node_storage_vg_ctx.png, id=1318, 440.39531pt x 226.59656pt>
+<screenshots/node_storage_vg_ctx.png, id=1331, 440.39531pt x 226.59656pt>
 File: screenshots/node_storage_vg_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_vg_ctx.png>
@@ -2455,7 +2440,7 @@ Package pdftex.def Info: screenshots/node_storage_vg_ctx.png used on input line
  756.
 (pdftex.def)             Requested size: 198.17606pt x 101.9675pt.
 
-<screenshots/storage_vg_create.png, id=1319, 593.21625pt x 352.31625pt>
+<screenshots/storage_vg_create.png, id=1332, 593.21625pt x 352.31625pt>
 File: screenshots/storage_vg_create.png Graphic file (type png)
 
 <use screenshots/storage_vg_create.png>
@@ -2465,7 +2450,7 @@ Package pdftex.def Info: screenshots/storage_vg_create.png used on input line 7
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 778.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 778.
 Package babel Info: Redefining portuges shorthand "|
@@ -2476,7 +2461,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 779--782
 []$ 
  []
 
-<screenshots/storage_vg_extend.png, id=1326, 786.94pt x 366.36874pt>
+<screenshots/storage_vg_extend.png, id=1339, 786.94pt x 366.36874pt>
 File: screenshots/storage_vg_extend.png Graphic file (type png)
 
 <use screenshots/storage_vg_extend.png>
@@ -2484,7 +2469,7 @@ Package pdftex.def Info: screenshots/storage_vg_extend.png used on input line 7
 86.
 (pdftex.def)             Requested size: 354.11972pt x 164.86441pt.
 
-<screenshots/node_storage_vg_search.png, id=1328, 329.73187pt x 321.45094pt>
+<screenshots/node_storage_vg_search.png, id=1341, 329.73187pt x 321.45094pt>
 File: screenshots/node_storage_vg_search.png Graphic file (type png)
 
 <use screenshots/node_storage_vg_search.png>
@@ -2496,7 +2481,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 811.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 811.
 Package babel Info: Redefining portuges shorthand "|
@@ -2504,7 +2489,7 @@ Package babel Info: Redefining portuges shorthand "|
 
 [44 <./screenshots/storage_vg_extend.png (PNG copy)> <./screenshots/node_storag
 e_vg_search.png (PNG copy)>]
-<screenshots/node_storage_lv_ctx.png, id=1334, 384.6872pt x 359.09157pt>
+<screenshots/node_storage_lv_ctx.png, id=1347, 384.6872pt x 359.09157pt>
 File: screenshots/node_storage_lv_ctx.png Graphic file (type png)
 
 <use screenshots/node_storage_lv_ctx.png>
@@ -2512,7 +2497,7 @@ Package pdftex.def Info: screenshots/node_storage_lv_ctx.png used on input line
  821.
 (pdftex.def)             Requested size: 173.10764pt x 161.5897pt.
 
-<screenshots/storage_lv_create.png, id=1335, 325.96782pt x 182.93344pt>
+<screenshots/storage_lv_create.png, id=1348, 325.96782pt x 182.93344pt>
 File: screenshots/storage_lv_create.png Graphic file (type png)
 
 <use screenshots/storage_lv_create.png>
@@ -2522,7 +2507,7 @@ Package pdftex.def Info: screenshots/storage_lv_create.png used on input line 8
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 840.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 840.
 Package babel Info: Redefining portuges shorthand "|
@@ -2533,7 +2518,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 843--846
 []$ 
  []
 
-<screenshots/storage_lv_resize.png, id=1341, 359.3425pt x 198.7425pt>
+<screenshots/storage_lv_resize.png, id=1354, 359.3425pt x 198.7425pt>
 File: screenshots/storage_lv_resize.png Graphic file (type png)
 
 <use screenshots/storage_lv_resize.png>
@@ -2541,7 +2526,7 @@ Package pdftex.def Info: screenshots/storage_lv_resize.png used on input line 8
 51.
 (pdftex.def)             Requested size: 179.6708pt x 99.371pt.
 
-<screenshots/node_storage_lv_search.png, id=1342, 325.96782pt x 177.66376pt>
+<screenshots/node_storage_lv_search.png, id=1355, 325.96782pt x 177.66376pt>
 File: screenshots/node_storage_lv_search.png Graphic file (type png)
 
 <use screenshots/node_storage_lv_search.png>
@@ -2553,7 +2538,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 879.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 879.
 Package babel Info: Redefining portuges shorthand "|
@@ -2565,7 +2550,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 884--887
 []$ 
  []
 
-<screenshots/shutdownnode.png, id=1348, 347.79938pt x 239.39438pt>
+<screenshots/shutdownnode.png, id=1361, 347.79938pt x 239.39438pt>
 File: screenshots/shutdownnode.png Graphic file (type png)
 
 <use screenshots/shutdownnode.png>
@@ -2574,7 +2559,7 @@ Package pdftex.def Info: screenshots/shutdownnode.png used on input line 892.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 899.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 899.
 Package babel Info: Redefining portuges shorthand "|
@@ -2585,7 +2570,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 911.
 
-<screenshots/server_info.png, id=1361, 727.96968pt x 322.95656pt>
+<screenshots/server_info.png, id=1374, 727.96968pt x 322.95656pt>
 File: screenshots/server_info.png Graphic file (type png)
 
 <use screenshots/server_info.png>
@@ -2596,13 +2581,13 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 936.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 936.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 936.
  [48 <./screenshots/server_info.png (PNG copy)>]
-<screenshots/server_stats_memUsage.png, id=1367, 675.27281pt x 323.70938pt>
+<screenshots/server_stats_memUsage.png, id=1380, 675.27281pt x 323.70938pt>
 File: screenshots/server_stats_memUsage.png Graphic file (type png)
 
 <use screenshots/server_stats_memUsage.png>
@@ -2610,7 +2595,7 @@ Package pdftex.def Info: screenshots/server_stats_memUsage.png used on input li
 ne 944.
 (pdftex.def)             Requested size: 303.86995pt x 145.66786pt.
 
-<screenshots/server_stats_nodeLoad.png, id=1368, 787.94376pt x 434.62375pt>
+<screenshots/server_stats_nodeLoad.png, id=1381, 787.94376pt x 434.62375pt>
 File: screenshots/server_stats_nodeLoad.png Graphic file (type png)
 
 <use screenshots/server_stats_nodeLoad.png>
@@ -2620,14 +2605,14 @@ ne 952.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 964.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 964.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 964.
  [49 <./screenshots/server_stats_memUsage.png (PNG copy)> <./screenshots/server
 _stats_nodeLoad.png (PNG copy)>]
-<screenshots/server_stats_nodeLoadRange.png, id=1377, 650.43pt x 355.3275pt>
+<screenshots/server_stats_nodeLoadRange.png, id=1391, 650.43pt x 355.3275pt>
 File: screenshots/server_stats_nodeLoadRange.png Graphic file (type png)
 
 <use screenshots/server_stats_nodeLoadRange.png>
@@ -2641,14 +2626,14 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 989.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 989.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 989.
 
 [50 <./screenshots/server_stats_nodeLoadRange.png>]
-<screenshots/virtio/virtio_4.png, id=1387, 801.99625pt x 447.6725pt>
+<screenshots/virtio/virtio_4.png, id=1400, 801.99625pt x 447.6725pt>
 File: screenshots/virtio/virtio_4.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_4.png>
@@ -2656,7 +2641,7 @@ Package pdftex.def Info: screenshots/virtio/virtio_4.png used on input line 100
 1.
 (pdftex.def)             Requested size: 400.99713pt x 223.8357pt.
 
-<screenshots/virtio/virtio_7.png, id=1388, 801.99625pt x 449.68pt>
+<screenshots/virtio/virtio_7.png, id=1401, 801.99625pt x 449.68pt>
 File: screenshots/virtio/virtio_7.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_7.png>
@@ -2666,13 +2651,13 @@ Package pdftex.def Info: screenshots/virtio/virtio_7.png used on input line 100
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1014.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1014.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1014.
  [51 <./screenshots/virtio/virtio_4.png>]
-<screenshots/virtio/virtio_5.png, id=1396, 725.71124pt x 322.20375pt>
+<screenshots/virtio/virtio_5.png, id=1409, 725.71124pt x 322.20375pt>
 File: screenshots/virtio/virtio_5.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_5.png>
@@ -2680,7 +2665,7 @@ Package pdftex.def Info: screenshots/virtio/virtio_5.png used on input line 101
 9.
 (pdftex.def)             Requested size: 362.85474pt x 161.10147pt.
 
-<screenshots/virtio/virtio_10.png, id=1398, 508.90125pt x 454.69875pt>
+<screenshots/virtio/virtio_10.png, id=1411, 508.90125pt x 454.69875pt>
 File: screenshots/virtio/virtio_10.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_10.png>
@@ -2690,14 +2675,14 @@ Package pdftex.def Info: screenshots/virtio/virtio_10.png used on input line 10
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1036.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1036.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1036.
  [52 <./screenshots/virtio/virtio_7.png> <./screenshots/virtio/virtio_5.png (PN
 G copy)>]
-<screenshots/virtio/virtio_16.png, id=1405, 803.0pt x 449.68pt>
+<screenshots/virtio/virtio_16.png, id=1418, 803.0pt x 449.68pt>
 File: screenshots/virtio/virtio_16.png Graphic file (type png)
 
 <use screenshots/virtio/virtio_16.png>
@@ -2709,7 +2694,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1051.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1051.
 Package babel Info: Redefining portuges shorthand "|
@@ -2718,7 +2703,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1058.
 
-<screenshots/ovf_import.png, id=1411, 803.0pt x 403.5075pt>
+<screenshots/ovf_import.png, id=1424, 803.0pt x 403.5075pt>
 File: screenshots/ovf_import.png Graphic file (type png)
 
 <use screenshots/ovf_import.png>
@@ -2729,7 +2714,7 @@ Overfull \hbox (53.97282pt too wide) in paragraph at lines 1075--1078
 []$ 
  []
 
-<screenshots/ovf_import_file.png, id=1413, 800.9925pt x 401.5pt>
+<screenshots/ovf_import_file.png, id=1426, 800.9925pt x 401.5pt>
 File: screenshots/ovf_import_file.png Graphic file (type png)
 
 <use screenshots/ovf_import_file.png>
@@ -2739,13 +2724,13 @@ Package pdftex.def Info: screenshots/ovf_import_file.png used on input line 108
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1087.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1087.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1087.
  [54 <./screenshots/ovf_import.png>]
-<screenshots/ovf_import_resume.png, id=1419, 903.375pt x 437.635pt>
+<screenshots/ovf_import_resume.png, id=1432, 903.375pt x 437.635pt>
 File: screenshots/ovf_import_resume.png Graphic file (type png)
 
 <use screenshots/ovf_import_resume.png>
@@ -2753,7 +2738,7 @@ Package pdftex.def Info: screenshots/ovf_import_resume.png used on input line 1
 091.
 (pdftex.def)             Requested size: 451.6864pt x 218.81696pt.
 
-<screenshots/ovf_import_eula.png, id=1420, 902.37125pt x 437.635pt>
+<screenshots/ovf_import_eula.png, id=1433, 902.37125pt x 437.635pt>
 File: screenshots/ovf_import_eula.png Graphic file (type png)
 
 <use screenshots/ovf_import_eula.png>
@@ -2763,14 +2748,14 @@ Package pdftex.def Info: screenshots/ovf_import_eula.png used on input line 110
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1105.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1105.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1105.
  [55 <./screenshots/ovf_import_file.png> <./screenshots/ovf_import_resume.png>]
 
-<screenshots/ovf_import_name.png, id=1427, 903.375pt x 439.6425pt>
+<screenshots/ovf_import_name.png, id=1440, 903.375pt x 439.6425pt>
 File: screenshots/ovf_import_name.png Graphic file (type png)
 
 <use screenshots/ovf_import_name.png>
@@ -2780,13 +2765,13 @@ Package pdftex.def Info: screenshots/ovf_import_name.png used on input line 112
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1132.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1132.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1132.
  [56 <./screenshots/ovf_import_eula.png>]
-<screenshots/ovf_import_storage.png, id=1433, 801.99625pt x 399.4925pt>
+<screenshots/ovf_import_storage.png, id=1446, 801.99625pt x 399.4925pt>
 File: screenshots/ovf_import_storage.png Graphic file (type png)
 
 <use screenshots/ovf_import_storage.png>
@@ -2796,13 +2781,13 @@ Package pdftex.def Info: screenshots/ovf_import_storage.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1151.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1151.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1151.
  [57 <./screenshots/ovf_import_name.png>]
-<screenshots/ovf_import_networks.png, id=1439, 801.99625pt x 400.49625pt>
+<screenshots/ovf_import_networks.png, id=1452, 801.99625pt x 400.49625pt>
 File: screenshots/ovf_import_networks.png Graphic file (type png)
 
 <use screenshots/ovf_import_networks.png>
@@ -2810,23 +2795,17 @@ Package pdftex.def Info: screenshots/ovf_import_networks.png used on input line
  1156.
 (pdftex.def)             Requested size: 400.99713pt x 200.24763pt.
 
-<screenshots/ovf_import_finish.png, id=1440, 797.98125pt x 398.48875pt>
+<screenshots/ovf_import_finish.png, id=1453, 797.98125pt x 398.48875pt>
 File: screenshots/ovf_import_finish.png Graphic file (type png)
 
 <use screenshots/ovf_import_finish.png>
 Package pdftex.def Info: screenshots/ovf_import_finish.png used on input line 1
 165.
 (pdftex.def)             Requested size: 398.98964pt x 199.24388pt.
-
-Overfull \hbox (7.8988pt too wide) in paragraph at lines 1162--1169
-\T1/txss/m/n/12 dor de vir-tu-al-iza-ção. Pos-te-ri-or-mente no painel \T1/txss
-/m/sl/12 Servi-dores \T1/txss/m/n/12 poderá ser ini-ci-ada a máquina
- []
-
 File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png>
+ <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1170.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1170.
 Package babel Info: Redefining portuges shorthand "|
@@ -2840,7 +2819,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1178--1181
 []$ 
  []
 
-<screenshots/ovf_export.png, id=1446, 400.49625pt x 197.73875pt>
+<screenshots/ovf_export.png, id=1459, 400.49625pt x 197.73875pt>
 File: screenshots/ovf_export.png Graphic file (type png)
 
 <use screenshots/ovf_export.png>
@@ -2849,7 +2828,7 @@ Package pdftex.def Info: screenshots/ovf_export.png used on input line 1185.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1192.
 
-<screenshots/iso_manager.png, id=1447, 734.745pt x 292.09125pt>
+<screenshots/iso_manager.png, id=1460, 734.745pt x 292.09125pt>
 File: screenshots/iso_manager.png Graphic file (type png)
 
 <use screenshots/iso_manager.png>
@@ -2858,7 +2837,7 @@ Package pdftex.def Info: screenshots/iso_manager.png used on input line 1199.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1204.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1204.
 Package babel Info: Redefining portuges shorthand "|
@@ -2872,7 +2851,7 @@ Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1221.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1225.
-<screenshots/events_log.png, id=1453, 943.525pt x 372.39125pt>
+<screenshots/events_log.png, id=1466, 943.525pt x 372.39125pt>
 File: screenshots/events_log.png Graphic file (type png)
 
 <use screenshots/events_log.png>
@@ -2886,7 +2865,7 @@ Overfull \hbox (11.0401pt too wide) in paragraph at lines 1232--1235
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1237.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1237.
 Package babel Info: Redefining portuges shorthand "|
@@ -2900,13 +2879,13 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1265.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1265.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1265.
  [61 <./screenshots/events_log.png>]
-<screenshots/first_time_wizard.png, id=1466, 613.29124pt x 523.9575pt>
+<screenshots/first_time_wizard.png, id=1479, 613.29124pt x 523.9575pt>
 File: screenshots/first_time_wizard.png Graphic file (type png)
 
 <use screenshots/first_time_wizard.png>
@@ -2920,7 +2899,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1277--1280
 
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1350.
-<screenshots/preferences_general.png, id=1467, 801.99625pt x 500.87125pt>
+<screenshots/preferences_general.png, id=1480, 801.99625pt x 500.87125pt>
 File: screenshots/preferences_general.png Graphic file (type png)
 
 <use screenshots/preferences_general.png>
@@ -2930,13 +2909,13 @@ Package pdftex.def Info: screenshots/preferences_general.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1361.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1361.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1361.
  [62 <./screenshots/first_time_wizard.png (PNG copy)>]
-<screenshots/preferences_conn.png, id=1473, 803.0pt x 499.8675pt>
+<screenshots/preferences_conn.png, id=1486, 803.0pt x 499.8675pt>
 File: screenshots/preferences_conn.png Graphic file (type png)
 
 <use screenshots/preferences_conn.png>
@@ -2946,7 +2925,7 @@ Package pdftex.def Info: screenshots/preferences_conn.png used on input line 13
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1371.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1371.
 Package babel Info: Redefining portuges shorthand "|
@@ -2955,12 +2934,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1372.
 
-Overfull \hbox (3.68027pt too wide) in paragraph at lines 1381--1382
-\T1/txss/m/n/12 para acesso à in-ter-face de gestão, e atribuí-das per-mis-sões
- para acesso ao nível de máquinas
- []
-
-<screenshots/users/admin_users.png, id=1480, 683.55376pt x 385.44pt>
+<screenshots/users/admin_users.png, id=1493, 683.55376pt x 385.44pt>
 File: screenshots/users/admin_users.png Graphic file (type png)
 
 <use screenshots/users/admin_users.png>
@@ -2970,13 +2944,13 @@ Package pdftex.def Info: screenshots/users/admin_users.png used on input line 1
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1390.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1390.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1390.
  [64 <./screenshots/preferences_conn.png>]
-<screenshots/users/etva/create_user_wiz_01.png, id=1486, 462.97969pt x 397.485p
+<screenshots/users/etva/create_user_wiz_01.png, id=1500, 462.97969pt x 397.485p
 t>
 File: screenshots/users/etva/create_user_wiz_01.png Graphic file (type png)
  <use screenshots/users/etva/create_user_wiz_01.png>
@@ -2984,7 +2958,7 @@ Package pdftex.def Info: screenshots/users/etva/create_user_wiz_01.png used on
 input line 1487.
 (pdftex.def)             Requested size: 185.18858pt x 158.99118pt.
 
-<screenshots/users/etva/create_user_wiz_02.png, id=1487, 463.7325pt x 395.97937
+<screenshots/users/etva/create_user_wiz_02.png, id=1501, 463.7325pt x 395.97937
 pt>
 File: screenshots/users/etva/create_user_wiz_02.png Graphic file (type png)
  <use screenshots/users/etva/create_user_wiz_02.png>
@@ -2995,14 +2969,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1487.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1487.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1487.
  [65 <./screenshots/users/admin_users.png (PNG copy)> <./screenshots/users/etva
 /create_user_wiz_01.png (PNG copy)>]
-<screenshots/users/etva/create_user_wiz_03.png, id=1494, 463.7325pt x 395.97937
+<screenshots/users/etva/create_user_wiz_03.png, id=1507, 463.7325pt x 395.97937
 pt>
 File: screenshots/users/etva/create_user_wiz_03.png Graphic file (type png)
  <use screenshots/users/etva/create_user_wiz_03.png>
@@ -3010,7 +2984,7 @@ Package pdftex.def Info: screenshots/users/etva/create_user_wiz_03.png used on
 input line 1487.
 (pdftex.def)             Requested size: 185.4897pt x 158.38895pt.
 
-<screenshots/users/etva/create_user_wiz_04.png, id=1495, 463.7325pt x 395.97937
+<screenshots/users/etva/create_user_wiz_04.png, id=1508, 463.7325pt x 395.97937
 pt>
 File: screenshots/users/etva/create_user_wiz_04.png Graphic file (type png)
  <use screenshots/users/etva/create_user_wiz_04.png>
@@ -3021,14 +2995,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1487.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1487.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1487.
  [66 <./screenshots/users/etva/create_user_wiz_02.png (PNG copy)> <./screenshot
 s/users/etva/create_user_wiz_03.png (PNG copy)>]
-<screenshots/users/etva/create_user_wiz_05.png, id=1501, 463.7325pt x 395.97937
+<screenshots/users/etva/create_user_wiz_05.png, id=1514, 463.7325pt x 395.97937
 pt>
 File: screenshots/users/etva/create_user_wiz_05.png Graphic file (type png)
  <use screenshots/users/etva/create_user_wiz_05.png>
@@ -3036,7 +3010,7 @@ Package pdftex.def Info: screenshots/users/etva/create_user_wiz_05.png used on
 input line 1487.
 (pdftex.def)             Requested size: 185.4897pt x 158.38895pt.
 
-<screenshots/users/etva/create_user_wiz_06.png, id=1502, 461.47406pt x 395.2265
+<screenshots/users/etva/create_user_wiz_06.png, id=1515, 461.47406pt x 395.2265
 6pt>
 File: screenshots/users/etva/create_user_wiz_06.png Graphic file (type png)
  <use screenshots/users/etva/create_user_wiz_06.png>
@@ -3044,7 +3018,7 @@ Package pdftex.def Info: screenshots/users/etva/create_user_wiz_06.png used on
 input line 1487.
 (pdftex.def)             Requested size: 184.58635pt x 158.08781pt.
 
-<screenshots/users/etva/create_user_wiz_07.png, id=1503, 463.7325pt x 395.97937
+<screenshots/users/etva/create_user_wiz_07.png, id=1516, 463.7325pt x 395.97937
 pt>
 File: screenshots/users/etva/create_user_wiz_07.png Graphic file (type png)
  <use screenshots/users/etva/create_user_wiz_07.png>
@@ -3055,7 +3029,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1487.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1487.
 Package babel Info: Redefining portuges shorthand "|
@@ -3063,7 +3037,7 @@ Package babel Info: Redefining portuges shorthand "|
  [67 <./screenshots/users/etva/create_user_wiz_04.png (PNG copy)> <./screenshot
 s/users/etva/create_user_wiz_05.png (PNG copy)> <./screenshots/users/etva/creat
 e_user_wiz_06.png (PNG copy)>]
-<screenshots/users/admin_users_groups.png, id=1510, 690.32906pt x 384.6872pt>
+<screenshots/users/admin_users_groups.png, id=1523, 690.32906pt x 384.6872pt>
 File: screenshots/users/admin_users_groups.png Graphic file (type png)
 
 <use screenshots/users/admin_users_groups.png>
@@ -3071,7 +3045,7 @@ Package pdftex.def Info: screenshots/users/admin_users_groups.png used on input
  line 1493.
 (pdftex.def)             Requested size: 276.12672pt x 153.87215pt.
 
-<screenshots/permissions/context_dc.png, id=1514, 672.5125pt x 398.48875pt>
+<screenshots/permissions/context_dc.png, id=1527, 672.5125pt x 398.48875pt>
 File: screenshots/permissions/context_dc.png Graphic file (type png)
 
 <use screenshots/permissions/context_dc.png>
@@ -3081,7 +3055,7 @@ ine 1503.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1508.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1508.
 Package babel Info: Redefining portuges shorthand "|
@@ -3089,14 +3063,14 @@ Package babel Info: Redefining portuges shorthand "|
 
 [68 <./screenshots/users/etva/create_user_wiz_07.png (PNG copy)> <./screenshots
 /users/admin_users_groups.png (PNG copy)>]
-<screenshots/permissions/context_server.png, id=1520, 640.3925pt x 328.22626pt>
+<screenshots/permissions/context_server.png, id=1533, 640.3925pt x 328.22626pt>
 File: screenshots/permissions/context_server.png Graphic file (type png)
 <use screenshots/permissions/context_server.png>
 Package pdftex.def Info: screenshots/permissions/context_server.png used on inp
 ut line 1511.
 (pdftex.def)             Requested size: 256.15245pt x 131.28816pt.
 
-<screenshots/permissions/server_window.png, id=1521, 507.8975pt x 386.44376pt>
+<screenshots/permissions/server_window.png, id=1534, 507.8975pt x 386.44376pt>
 File: screenshots/permissions/server_window.png Graphic file (type png)
 
 <use screenshots/permissions/server_window.png>
@@ -3111,7 +3085,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 1526--1529
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1529.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1529.
 Package babel Info: Redefining portuges shorthand "|
@@ -3122,7 +3096,7 @@ png>]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1568.
 
-<screenshots/appliancedisplay.jpg, id=1528, 783.92876pt x 410.53375pt>
+<screenshots/appliancedisplay.jpg, id=1541, 783.92876pt x 410.53375pt>
 File: screenshots/appliancedisplay.jpg Graphic file (type jpg)
 
 <use screenshots/appliancedisplay.jpg>
@@ -3132,12 +3106,12 @@ Package pdftex.def Info: screenshots/appliancedisplay.jpg used on input line 15
 )
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 78.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+Package pdftex.def Info: include/img/logo.png used on input line 80.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 78.
+(babel)             in language  on input line 80.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 78.
+(babel)             in language  on input line 80.
  [70 <./screenshots/appliancedisplay.jpg>] (./chap-agents.tex
 Cap\'{\i }tulo 4.
 Package babel Info: Redefining portuges shorthand "|
@@ -3145,7 +3119,7 @@ Package babel Info: Redefining portuges shorthand "|
 (./ETFW.tex
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1.
- <screenshots/etfw/etfwmain.png, id=1534, 790.955pt x 514.92375pt>
+ <screenshots/etfw/etfwmain.png, id=1547, 790.955pt x 514.92375pt>
 File: screenshots/etfw/etfwmain.png Graphic file (type png)
 
 <use screenshots/etfw/etfwmain.png>
@@ -3154,7 +3128,7 @@ Package pdftex.def Info: screenshots/etfw/etfwmain.png used on input line 11.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 16.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 16.
 Package babel Info: Redefining portuges shorthand "|
@@ -3165,7 +3139,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 17.
 
-<screenshots/etfw/etfw_wizard_01.png, id=1540, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_01.png, id=1553, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_01.png>
@@ -3173,7 +3147,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_wizard_01.png used on input line
  23.
 (pdftex.def)             Requested size: 267.00027pt x 190.33304pt.
 
-<screenshots/etfw/etfw_wizard_02.png, id=1541, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_02.png, id=1554, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_02.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_02.png>
@@ -3183,14 +3157,14 @@ Package pdftex.def Info: screenshots/etfw/etfw_wizard_02.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 36.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 36.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 36.
  [72 <./screenshots/etfw/etfwmain.png> <./screenshots/etfw/etfw_wizard_01.png>]
 
-<screenshots/etfw/etfw_wizard_03.png, id=1549, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_03.png, id=1562, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_03.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_03.png>
@@ -3198,7 +3172,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_wizard_03.png used on input line
  39.
 (pdftex.def)             Requested size: 267.00027pt x 190.33304pt.
 
-<screenshots/etfw/etfw_wizard_04.png, id=1550, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_04.png, id=1563, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_04.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_04.png>
@@ -3208,14 +3182,14 @@ Package pdftex.def Info: screenshots/etfw/etfw_wizard_04.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 52.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 52.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 52.
  [73 <./screenshots/etfw/etfw_wizard_02.png> <./screenshots/etfw/etfw_wizard_03
 .png>]
-<screenshots/etfw/etfw_wizard_05.png, id=1559, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_05.png, id=1572, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_05.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_05.png>
@@ -3223,7 +3197,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_wizard_05.png used on input line
  55.
 (pdftex.def)             Requested size: 267.00027pt x 190.33304pt.
 
-<screenshots/etfw/etfw_wizard_06.png, id=1560, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_06.png, id=1573, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_06.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_06.png>
@@ -3233,14 +3207,14 @@ Package pdftex.def Info: screenshots/etfw/etfw_wizard_06.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 68.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 68.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 68.
  [74 <./screenshots/etfw/etfw_wizard_04.png> <./screenshots/etfw/etfw_wizard_05
 .png>]
-<screenshots/etfw/etfw_wizard_07.png, id=1568, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_07.png, id=1581, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_07.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_07.png>
@@ -3248,7 +3222,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_wizard_07.png used on input line
  71.
 (pdftex.def)             Requested size: 267.00027pt x 190.33304pt.
 
-<screenshots/etfw/etfw_wizard_08.png, id=1569, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_08.png, id=1582, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_08.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_08.png>
@@ -3258,14 +3232,14 @@ Package pdftex.def Info: screenshots/etfw/etfw_wizard_08.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 84.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 84.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 84.
  [75 <./screenshots/etfw/etfw_wizard_06.png> <./screenshots/etfw/etfw_wizard_07
 .png>]
-<screenshots/etfw/etfw_wizard_09.png, id=1577, 702.625pt x 500.87125pt>
+<screenshots/etfw/etfw_wizard_09.png, id=1590, 702.625pt x 500.87125pt>
 File: screenshots/etfw/etfw_wizard_09.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_wizard_09.png>
@@ -3283,14 +3257,14 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 102.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 102.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 102.
  [76 <./screenshots/etfw/etfw_wizard_08.png> <./screenshots/etfw/etfw_wizard_09
 .png>]
-<screenshots/etfw/etfw_network_interfaces_01.png, id=1585, 994.71625pt x 567.11
+<screenshots/etfw/etfw_network_interfaces_01.png, id=1598, 994.71625pt x 567.11
 874pt>
 File: screenshots/etfw/etfw_network_interfaces_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_interfaces_01.png>
@@ -3298,7 +3272,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_network_interfaces_01.png used o
 n input line 107.
 (pdftex.def)             Requested size: 377.99611pt x 215.50735pt.
 
-<screenshots/etfw/etfw_network_interfaces_02.png, id=1586, 994.71625pt x 567.11
+<screenshots/etfw/etfw_network_interfaces_02.png, id=1599, 994.71625pt x 567.11
 874pt>
 File: screenshots/etfw/etfw_network_interfaces_02.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_interfaces_02.png>
@@ -3309,13 +3283,13 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 120.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 120.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 120.
  [77 <./screenshots/etfw/etfw_network_interfaces_01.png>]
-<screenshots/etfw/etfw_network_interfaces_03.png, id=1593, 777.90625pt x 476.78
+<screenshots/etfw/etfw_network_interfaces_03.png, id=1606, 777.90625pt x 476.78
 125pt>
 File: screenshots/etfw/etfw_network_interfaces_03.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_interfaces_03.png>
@@ -3323,7 +3297,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_network_interfaces_03.png used o
 n input line 125.
 (pdftex.def)             Requested size: 295.60744pt x 181.17874pt.
 
-<screenshots/etfw/etfw_network_interfaces_04.png, id=1594, 777.90625pt x 476.78
+<screenshots/etfw/etfw_network_interfaces_04.png, id=1607, 777.90625pt x 476.78
 125pt>
 File: screenshots/etfw/etfw_network_interfaces_04.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_interfaces_04.png>
@@ -3334,7 +3308,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 138.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 138.
 Package babel Info: Redefining portuges shorthand "|
@@ -3344,7 +3318,7 @@ fw_network_interfaces_03.png>]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 139.
 
-<screenshots/etfw/etfw_network_routing_01.png, id=1602, 994.71625pt x 567.11874
+<screenshots/etfw/etfw_network_routing_01.png, id=1615, 994.71625pt x 567.11874
 pt>
 File: screenshots/etfw/etfw_network_routing_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_routing_01.png>
@@ -3355,14 +3329,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 156.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 156.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 156.
  [79 <./screenshots/etfw/etfw_network_interfaces_04.png> <./screenshots/etfw/et
 fw_network_routing_01.png>]
-<screenshots/etfw/etfw_network_routing_02.png, id=1611, 994.71625pt x 567.11874
+<screenshots/etfw/etfw_network_routing_02.png, id=1625, 994.71625pt x 567.11874
 pt>
 File: screenshots/etfw/etfw_network_routing_02.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_routing_02.png>
@@ -3372,7 +3346,7 @@ nput line 162.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 176.
 
-<screenshots/etfw/etfw_network_hostaddresses_01.png, id=1612, 994.71625pt x 567
+<screenshots/etfw/etfw_network_hostaddresses_01.png, id=1626, 994.71625pt x 567
 .11874pt>
 File: screenshots/etfw/etfw_network_hostaddresses_01.png Graphic file (type png
 )
@@ -3384,7 +3358,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 187.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 187.
 Package babel Info: Redefining portuges shorthand "|
@@ -3393,7 +3367,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 188.
 
-<screenshots/etfw/etfw_network_dnsclient_01.png, id=1620, 994.71625pt x 567.118
+<screenshots/etfw/etfw_network_dnsclient_01.png, id=1633, 994.71625pt x 567.118
 74pt>
 File: screenshots/etfw/etfw_network_dnsclient_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_network_dnsclient_01.png>
@@ -3406,14 +3380,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 206.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 206.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 206.
  [81 <./screenshots/etfw/etfw_network_hostaddresses_01.png> <./screenshots/etfw
 /etfw_network_dnsclient_01.png>]
-<screenshots/etfw/etfw_firewall_01.png, id=1628, 994.71625pt x 567.11874pt>
+<screenshots/etfw/etfw_firewall_01.png, id=1641, 994.71625pt x 567.11874pt>
 File: screenshots/etfw/etfw_firewall_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_firewall_01.png>
@@ -3423,7 +3397,7 @@ ne 229.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 237.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 237.
 Package babel Info: Redefining portuges shorthand "|
@@ -3432,7 +3406,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 237.
 
-<screenshots/etfw/etfw_firewall_02.png, id=1635, 995.72pt x 568.1225pt>
+<screenshots/etfw/etfw_firewall_02.png, id=1648, 995.72pt x 568.1225pt>
 File: screenshots/etfw/etfw_firewall_02.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_firewall_02.png>
@@ -3442,29 +3416,23 @@ ne 249.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 263.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 263.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 263.
  [83 <./screenshots/etfw/etfw_firewall_02.png>]
-<screenshots/etfw/etfw_firewall_03.png, id=1642, 823.075pt x 724.7075pt>
+<screenshots/etfw/etfw_firewall_03.png, id=1655, 823.075pt x 724.7075pt>
 File: screenshots/etfw/etfw_firewall_03.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_firewall_03.png>
 Package pdftex.def Info: screenshots/etfw/etfw_firewall_03.png used on input li
 ne 268.
 (pdftex.def)             Requested size: 312.77174pt x 275.39171pt.
-
-Overfull \hbox (8.10973pt too wide) in paragraph at lines 281--282
-[]\T1/txss/bx/n/12 Fragmentation \T1/txss/m/n/12 - Al-gu-mas vezes um pa-cote s
-ofre frag-men-tação de-v-ido ao seu tamanho,
- []
-
 File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png>
+ <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 284.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 284.
 Package babel Info: Redefining portuges shorthand "|
@@ -3473,35 +3441,27 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 295.
 File: include/img/logo.png Graphic file (type png)
-
-<use include/img/logo.png>
+ <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 311.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 311.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 311.
  [85]
-<screenshots/etfw/etfw_firewall_04.png, id=1655, 994.71625pt x 565.11125pt>
+<screenshots/etfw/etfw_firewall_04.png, id=1668, 994.71625pt x 565.11125pt>
 File: screenshots/etfw/etfw_firewall_04.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_firewall_04.png>
 Package pdftex.def Info: screenshots/etfw/etfw_firewall_04.png used on input li
 ne 317.
 (pdftex.def)             Requested size: 377.99611pt x 214.7445pt.
-
-Overfull \hbox (18.81172pt too wide) in paragraph at lines 328--329
-[]| \T1/txss/bx/n/12 Source NAT \T1/txss/m/n/12 / \T1/txss/bx/n/12 Des-ti-na-ti
-on NAT \T1/txss/m/n/12 - De-pen-dendo da \T1/txss/m/sl/12 chain \T1/txss/m/n/12
- (\T1/txss/m/sl/12 PRE-ROUT-ING\T1/txss/m/n/12 , \T1/txss/m/sl/12 POSTROUT-
- []
-
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 331.
 File: include/img/logo.png Graphic file (type png)
-<use include/img/logo.png>
+ <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 335.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 335.
 Package babel Info: Redefining portuges shorthand "|
@@ -3510,7 +3470,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 335.
 
-<screenshots/etfw/etfw_dhcp_wizard_01.png, id=1662, 994.71625pt x 567.11874pt>
+<screenshots/etfw/etfw_dhcp_wizard_01.png, id=1675, 994.71625pt x 567.11874pt>
 File: screenshots/etfw/etfw_dhcp_wizard_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_dhcp_wizard_01.png>
@@ -3518,7 +3478,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_dhcp_wizard_01.png used on input
  line 341.
 (pdftex.def)             Requested size: 377.99611pt x 215.50735pt.
 
-<screenshots/etfw/etfw_dhcp_subnets_01.png, id=1663, 994.71625pt x 567.11874pt>
+<screenshots/etfw/etfw_dhcp_subnets_01.png, id=1676, 994.71625pt x 567.11874pt>
 File: screenshots/etfw/etfw_dhcp_subnets_01.png Graphic file (type png)
 <use screenshots/etfw/etfw_dhcp_subnets_01.png>
 Package pdftex.def Info: screenshots/etfw/etfw_dhcp_subnets_01.png used on inpu
@@ -3527,21 +3487,21 @@ t line 351.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 356.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 356.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 356.
 
 [87 <./screenshots/etfw/etfw_dhcp_wizard_01.png>]
-<screenshots/etfw/etfw_dhcp_subnets_02.png, id=1670, 922.44624pt x 651.43375pt>
+<screenshots/etfw/etfw_dhcp_subnets_02.png, id=1683, 922.44624pt x 651.43375pt>
 File: screenshots/etfw/etfw_dhcp_subnets_02.png Graphic file (type png)
 <use screenshots/etfw/etfw_dhcp_subnets_02.png>
 Package pdftex.def Info: screenshots/etfw/etfw_dhcp_subnets_02.png used on inpu
 t line 359.
 (pdftex.def)             Requested size: 350.53322pt x 247.5474pt.
 
-<screenshots/etfw/etfw_dhcp_interfaces_01.png, id=1671, 993.7125pt x 565.11125p
+<screenshots/etfw/etfw_dhcp_interfaces_01.png, id=1684, 993.7125pt x 565.11125p
 t>
 File: screenshots/etfw/etfw_dhcp_interfaces_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_dhcp_interfaces_01.png>
@@ -3552,14 +3512,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 374.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 374.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 374.
  [88 <./screenshots/etfw/etfw_dhcp_subnets_01.png> <./screenshots/etfw/etfw_dhc
 p_subnets_02.png>]
-<screenshots/etfw/etfw_dhcp_texteditor_01.png, id=1679, 993.7125pt x 570.13pt>
+<screenshots/etfw/etfw_dhcp_texteditor_01.png, id=1692, 993.7125pt x 570.13pt>
 File: screenshots/etfw/etfw_dhcp_texteditor_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_dhcp_texteditor_01.png>
@@ -3567,7 +3527,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_dhcp_texteditor_01.png used on i
 nput line 380.
 (pdftex.def)             Requested size: 377.61467pt x 216.65166pt.
 
-<screenshots/etfw/etfw_dhcp_leases_01.png, id=1680, 993.7125pt x 565.11125pt>
+<screenshots/etfw/etfw_dhcp_leases_01.png, id=1693, 993.7125pt x 565.11125pt>
 File: screenshots/etfw/etfw_dhcp_leases_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_dhcp_leases_01.png>
@@ -3577,7 +3537,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_dhcp_leases_01.png used on input
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 395.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 395.
 Package babel Info: Redefining portuges shorthand "|
@@ -3588,7 +3548,7 @@ hcp_texteditor_01.png>]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 398.
 
-<screenshots/etfw/etfw_squid_wizard_01.png, id=1688, 994.71625pt x 567.11874pt>
+<screenshots/etfw/etfw_squid_wizard_01.png, id=1701, 994.71625pt x 567.11874pt>
 File: screenshots/etfw/etfw_squid_wizard_01.png Graphic file (type png)
 <use screenshots/etfw/etfw_squid_wizard_01.png>
 Package pdftex.def Info: screenshots/etfw/etfw_squid_wizard_01.png used on inpu
@@ -3597,7 +3557,7 @@ t line 404.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 409.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 409.
 Package babel Info: Redefining portuges shorthand "|
@@ -3607,7 +3567,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 426.
 
-<screenshots/etfw/etfw_squid_portsnetworking_01.png, id=1695, 994.71625pt x 716
+<screenshots/etfw/etfw_squid_portsnetworking_01.png, id=1708, 994.71625pt x 716
 .6775pt>
 File: screenshots/etfw/etfw_squid_portsnetworking_01.png Graphic file (type png
 )
@@ -3619,7 +3579,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 437.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 437.
 Package babel Info: Redefining portuges shorthand "|
@@ -3628,7 +3588,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 448.
 
-<screenshots/etfw/etfw_squid_accesscontrol_01.png, id=1703, 994.71625pt x 564.1
+<screenshots/etfw/etfw_squid_accesscontrol_01.png, id=1716, 994.71625pt x 564.1
 075pt>
 File: screenshots/etfw/etfw_squid_accesscontrol_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_accesscontrol_01.png>
@@ -3639,13 +3599,13 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 459.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 459.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 459.
  [92 <./screenshots/etfw/etfw_squid_portsnetworking_01.png>]
-<screenshots/etfw/etfw_squid_accesscontrol_02.png, id=1710, 994.71625pt x 564.1
+<screenshots/etfw/etfw_squid_accesscontrol_02.png, id=1723, 994.71625pt x 564.1
 075pt>
 File: screenshots/etfw/etfw_squid_accesscontrol_02.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_accesscontrol_02.png>
@@ -3653,7 +3613,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_squid_accesscontrol_02.png used
 on input line 464.
 (pdftex.def)             Requested size: 377.99611pt x 214.36307pt.
 
-<screenshots/etfw/etfw_squid_accesscontrol_03.png, id=1711, 996.72375pt x 564.1
+<screenshots/etfw/etfw_squid_accesscontrol_03.png, id=1724, 996.72375pt x 564.1
 075pt>
 File: screenshots/etfw/etfw_squid_accesscontrol_03.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_accesscontrol_03.png>
@@ -3664,14 +3624,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 479.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 479.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 479.
  [93 <./screenshots/etfw/etfw_squid_accesscontrol_01.png> <./screenshots/etfw/e
 tfw_squid_accesscontrol_02.png>]
-<screenshots/etfw/etfw_squid_accesscontrol_04.png, id=1719, 995.72pt x 565.1112
+<screenshots/etfw/etfw_squid_accesscontrol_04.png, id=1732, 995.72pt x 565.1112
 5pt>
 File: screenshots/etfw/etfw_squid_accesscontrol_04.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_accesscontrol_04.png>
@@ -3682,7 +3642,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 496.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 496.
 Package babel Info: Redefining portuges shorthand "|
@@ -3692,7 +3652,7 @@ tfw_squid_accesscontrol_04.png>]
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 497.
 
-<screenshots/etfw/etfw_squid_authenticationprograms_01.png, id=1727, 993.7125pt
+<screenshots/etfw/etfw_squid_authenticationprograms_01.png, id=1740, 993.7125pt
  x 716.6775pt>
 File: screenshots/etfw/etfw_squid_authenticationprograms_01.png Graphic file (t
 ype png)
@@ -3704,7 +3664,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 520.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 520.
 Package babel Info: Redefining portuges shorthand "|
@@ -3713,7 +3673,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 528.
 
-<screenshots/etfw/etfw_squid_othercaches_01.png, id=1734, 994.71625pt x 565.111
+<screenshots/etfw/etfw_squid_othercaches_01.png, id=1747, 994.71625pt x 565.111
 25pt>
 File: screenshots/etfw/etfw_squid_othercaches_01.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_othercaches_01.png>
@@ -3721,7 +3681,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_squid_othercaches_01.png used on
  input line 534.
 (pdftex.def)             Requested size: 377.99611pt x 214.7445pt.
 
-<screenshots/etfw/etfw_squid_othercaches_02.png, id=1735, 852.18375pt x 615.298
+<screenshots/etfw/etfw_squid_othercaches_02.png, id=1748, 852.18375pt x 615.298
 75pt>
 File: screenshots/etfw/etfw_squid_othercaches_02.png Graphic file (type png)
  <use screenshots/etfw/etfw_squid_othercaches_02.png>
@@ -3732,7 +3692,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 547.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 547.
 Package babel Info: Redefining portuges shorthand "|
@@ -3741,7 +3701,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 566.
 
-<screenshots/etfw/etfw_squid_example_time_01_01.png, id=1742, 993.7125pt x 583.
+<screenshots/etfw/etfw_squid_example_time_01_01.png, id=1756, 993.7125pt x 583.
 17876pt>
 File: screenshots/etfw/etfw_squid_example_time_01_01.png Graphic file (type png
 )
@@ -3753,13 +3713,13 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 575.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 575.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 575.
  [97 <./screenshots/etfw/etfw_squid_othercaches_02.png>]
-<screenshots/etfw/etfw_squid_example_time_01_02.png, id=1751, 994.71625pt x 584
+<screenshots/etfw/etfw_squid_example_time_01_02.png, id=1764, 994.71625pt x 584
 .1825pt>
 File: screenshots/etfw/etfw_squid_example_time_01_02.png Graphic file (type png
 )
@@ -3768,7 +3728,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_squid_example_time_01_02.png use
 d on input line 578.
 (pdftex.def)             Requested size: 377.99611pt x 221.99165pt.
 
-<screenshots/etfw/etfw_squid_example_time_02_01.png, id=1752, 995.72pt x 582.17
+<screenshots/etfw/etfw_squid_example_time_02_01.png, id=1765, 995.72pt x 582.17
 5pt>
 File: screenshots/etfw/etfw_squid_example_time_02_01.png Graphic file (type png
 )
@@ -3780,14 +3740,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 591.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 591.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 591.
  [98 <./screenshots/etfw/etfw_squid_example_time_01_01.png> <./screenshots/etfw
 /etfw_squid_example_time_01_02.png>]
-<screenshots/etfw/etfw_squid_example_time_02_02.png, id=1760, 995.72pt x 583.17
+<screenshots/etfw/etfw_squid_example_time_02_02.png, id=1773, 995.72pt x 583.17
 876pt>
 File: screenshots/etfw/etfw_squid_example_time_02_02.png Graphic file (type png
 )
@@ -3796,7 +3756,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_squid_example_time_02_02.png use
 d on input line 594.
 (pdftex.def)             Requested size: 378.37753pt x 221.61023pt.
 
-<screenshots/etfw/etfw_squid_example_acessoip_01.png, id=1761, 995.72pt x 584.1
+<screenshots/etfw/etfw_squid_example_acessoip_01.png, id=1774, 995.72pt x 584.1
 825pt>
 File: screenshots/etfw/etfw_squid_example_acessoip_01.png Graphic file (type pn
 g)
@@ -3808,14 +3768,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 607.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 607.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 607.
  [99 <./screenshots/etfw/etfw_squid_example_time_02_01.png> <./screenshots/etfw
 /etfw_squid_example_time_02_02.png>]
-<screenshots/etfw/etfw_squid_example_acessoip_02.png, id=1769, 994.71625pt x 58
+<screenshots/etfw/etfw_squid_example_acessoip_02.png, id=1782, 994.71625pt x 58
 3.17876pt>
 File: screenshots/etfw/etfw_squid_example_acessoip_02.png Graphic file (type pn
 g)
@@ -3824,7 +3784,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_squid_example_acessoip_02.png us
 ed on input line 610.
 (pdftex.def)             Requested size: 377.99611pt x 221.61023pt.
 
-<screenshots/etfw/etfw_squid_example_urlregexp_01.png, id=1770, 994.71625pt x 5
+<screenshots/etfw/etfw_squid_example_urlregexp_01.png, id=1783, 994.71625pt x 5
 84.1825pt>
 File: screenshots/etfw/etfw_squid_example_urlregexp_01.png Graphic file (type p
 ng)
@@ -3836,14 +3796,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 623.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 623.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 623.
  [100 <./screenshots/etfw/etfw_squid_example_acessoip_01.png> <./screenshots/et
 fw/etfw_squid_example_acessoip_02.png>]
-<screenshots/etfw/etfw_squid_example_urlregexp_02.png, id=1778, 887.315pt x 550
+<screenshots/etfw/etfw_squid_example_urlregexp_02.png, id=1791, 887.315pt x 550
 .055pt>
 File: screenshots/etfw/etfw_squid_example_urlregexp_02.png Graphic file (type p
 ng)
@@ -3857,14 +3817,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 639.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 639.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 639.
  [101 <./screenshots/etfw/etfw_squid_example_urlregexp_01.png> <./screenshots/e
 tfw/etfw_squid_example_urlregexp_02.png>]
-<screenshots/etfw/etfw_snmp_01.png, id=1786, 792.9625pt x 513.92pt>
+<screenshots/etfw/etfw_snmp_01.png, id=1799, 792.9625pt x 513.92pt>
 File: screenshots/etfw/etfw_snmp_01.png Graphic file (type png)
 
 <use screenshots/etfw/etfw_snmp_01.png>
@@ -3875,12 +3835,7 @@ Package pdftex.def Info: screenshots/etfw/etfw_snmp_01.png used on input line 6
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1.
 
-Overfull \hbox (9.6915pt too wide) in paragraph at lines 3--4
-\T1/txss/m/n/12 Através da in-ter-face do \T1/txss/m/sl/12 Cen-tral Man-age-men
-t \T1/txss/m/n/12 é pos-sível efec-tuar as con-fig-u-rações necessárias
- []
-
-<screenshots/etms/etms_main_info.png, id=1791, 944.52875pt x 327.2225pt>
+<screenshots/etms/etms_main_info.png, id=1804, 944.52875pt x 327.2225pt>
 File: screenshots/etms/etms_main_info.png Graphic file (type png)
 
 <use screenshots/etms/etms_main_info.png>
@@ -3890,7 +3845,7 @@ Package pdftex.def Info: screenshots/etms/etms_main_info.png used on input line
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 17.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 17.
 Package babel Info: Redefining portuges shorthand "|
@@ -3901,7 +3856,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 28.
 
-<screenshots/etms/etms_criar_dominio_1.png, id=1801, 941.5175pt x 324.21124pt>
+<screenshots/etms/etms_criar_dominio_1.png, id=1814, 941.5175pt x 324.21124pt>
 File: screenshots/etms/etms_criar_dominio_1.png Graphic file (type png)
 
 <use screenshots/etms/etms_criar_dominio_1.png>
@@ -3911,7 +3866,7 @@ t line 37.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 42.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 42.
 Package babel Info: Redefining portuges shorthand "|
@@ -3921,7 +3876,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 43.
 
-<screenshots/etms/etms_criar_dominio_2.png, id=1809, 605.26125pt x 323.2075pt>
+<screenshots/etms/etms_criar_dominio_2.png, id=1822, 605.26125pt x 323.2075pt>
 File: screenshots/etms/etms_criar_dominio_2.png Graphic file (type png)
 
 <use screenshots/etms/etms_criar_dominio_2.png>
@@ -3930,14 +3885,14 @@ t line 50.
 (pdftex.def)             Requested size: 211.8446pt x 113.12431pt.
 
 Overfull \hbox (24.5827pt too wide) in paragraph at lines 61--62
-[]\T1/txss/bx/n/12 Quota de Servi-dor \T1/txss/m/n/12 - Valor máx-imo a uti-liz
-ar no ar-mazena-mento de emails(Ex: 1000000000
+[]\T1/txss/bx/n/12 Quota de Ser-vi-dor \T1/txss/m/n/12 - Va-lor má-ximo a uti-l
+i-zar no ar-ma-ze-na-mento de emails(Ex: 1000000000
  []
 
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 63.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 63.
 Package babel Info: Redefining portuges shorthand "|
@@ -3949,7 +3904,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 72.
 
-<screenshots/etms/etms_delete_domain.png, id=1820, 938.50626pt x 325.215pt>
+<screenshots/etms/etms_delete_domain.png, id=1833, 938.50626pt x 325.215pt>
 File: screenshots/etms/etms_delete_domain.png Graphic file (type png)
 
 <use screenshots/etms/etms_delete_domain.png>
@@ -3961,14 +3916,14 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 88.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 88.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 88.
 
 [105 <./screenshots/etms/etms_delete_domain.png (PNG copy)>]
-<screenshots/etms/etms_gerir_mailboxes.png, id=1827, 943.525pt x 327.2225pt>
+<screenshots/etms/etms_gerir_mailboxes.png, id=1840, 943.525pt x 327.2225pt>
 File: screenshots/etms/etms_gerir_mailboxes.png Graphic file (type png)
 
 <use screenshots/etms/etms_gerir_mailboxes.png>
@@ -3978,7 +3933,7 @@ t line 91.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 97.
 
-<screenshots/etms/etms_domain_details.png, id=1829, 943.525pt x 329.23pt>
+<screenshots/etms/etms_domain_details.png, id=1842, 943.525pt x 329.23pt>
 File: screenshots/etms/etms_domain_details.png Graphic file (type png)
 
 <use screenshots/etms/etms_domain_details.png>
@@ -3990,7 +3945,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 112.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 112.
 Package babel Info: Redefining portuges shorthand "|
@@ -3998,7 +3953,7 @@ Package babel Info: Redefining portuges shorthand "|
 
 [106 <./screenshots/etms/etms_gerir_mailboxes.png (PNG copy)> <./screenshots/et
 ms/etms_domain_details.png (PNG copy)>]
-<screenshots/etms/etms_criar_alias_dominio.png, id=1837, 941.5175pt x 326.21875
+<screenshots/etms/etms_criar_alias_dominio.png, id=1850, 941.5175pt x 326.21875
 pt>
 File: screenshots/etms/etms_criar_alias_dominio.png Graphic file (type png)
  <use screenshots/etms/etms_criar_alias_dominio.png>
@@ -4006,7 +3961,7 @@ Package pdftex.def Info: screenshots/etms/etms_criar_alias_dominio.png used on
 input line 115.
 (pdftex.def)             Requested size: 329.53606pt x 114.17827pt.
 
-<screenshots/etms/etms_criar_alias_dominio_success.png, id=1838, 941.5175pt x 3
+<screenshots/etms/etms_criar_alias_dominio_success.png, id=1851, 941.5175pt x 3
 26.21875pt>
 File: screenshots/etms/etms_criar_alias_dominio_success.png Graphic file (type 
 png)
@@ -4022,7 +3977,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 139.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 139.
 Package babel Info: Redefining portuges shorthand "|
@@ -4039,7 +3994,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 153.
 
-<screenshots/etms/etms_criar_mailbox.png, id=1850, 605.26125pt x 389.455pt>
+<screenshots/etms/etms_criar_mailbox.png, id=1863, 605.26125pt x 389.455pt>
 File: screenshots/etms/etms_criar_mailbox.png Graphic file (type png)
 
 <use screenshots/etms/etms_criar_mailbox.png>
@@ -4049,7 +4004,7 @@ line 159.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 164.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 164.
 Package babel Info: Redefining portuges shorthand "|
@@ -4059,7 +4014,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 184.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 184.
 Package babel Info: Redefining portuges shorthand "|
@@ -4070,7 +4025,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 190.
 
-<screenshots/etms/etms_mb_pass_ed.png, id=1873, 606.265pt x 404.51125pt>
+<screenshots/etms/etms_mb_pass_ed.png, id=1886, 606.265pt x 404.51125pt>
 File: screenshots/etms/etms_mb_pass_ed.png Graphic file (type png)
 
 <use screenshots/etms/etms_mb_pass_ed.png>
@@ -4080,7 +4035,7 @@ e 196.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 202.
 
-<screenshots/etms/etms_alias_create.png, id=1876, 607.26875pt x 407.5225pt>
+<screenshots/etms/etms_alias_create.png, id=1889, 607.26875pt x 407.5225pt>
 File: screenshots/etms/etms_alias_create.png Graphic file (type png)
 
 <use screenshots/etms/etms_alias_create.png>
@@ -4090,14 +4045,14 @@ ine 208.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 213.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 213.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 213.
 
 [110 <./screenshots/etms/etms_mb_pass_ed.png (PNG copy)>]
-<screenshots/etms/etms_alias_mailbox_delete.png, id=1884, 604.2575pt x 404.5112
+<screenshots/etms/etms_alias_mailbox_delete.png, id=1897, 604.2575pt x 404.5112
 5pt>
 File: screenshots/etms/etms_alias_mailbox_delete.png Graphic file (type png)
  <use screenshots/etms/etms_alias_mailbox_delete.png>
@@ -4105,7 +4060,7 @@ Package pdftex.def Info: screenshots/etms/etms_alias_mailbox_delete.png used on
  input line 218.
 (pdftex.def)             Requested size: 211.49329pt x 141.58105pt.
 
-<screenshots/etms/etms_alias_mailbox_delete_2.png, id=1885, 604.2575pt x 401.5p
+<screenshots/etms/etms_alias_mailbox_delete_2.png, id=1898, 604.2575pt x 401.5p
 t>
 File: screenshots/etms/etms_alias_mailbox_delete_2.png Graphic file (type png)
  <use screenshots/etms/etms_alias_mailbox_delete_2.png>
@@ -4118,7 +4073,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 235.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 235.
 Package babel Info: Redefining portuges shorthand "|
@@ -4126,7 +4081,7 @@ Package babel Info: Redefining portuges shorthand "|
  [111 <./screenshots/etms/etms_alias_create.png (PNG copy)> <./screenshots/etms
 /etms_alias_mailbox_delete.png (PNG copy)> <./screenshots/etms/etms_alias_mailb
 ox_delete_2.png (PNG copy)>]
-<screenshots/etms/etms_forwarding_mb_del.png, id=1893, 605.26125pt x 403.5075pt
+<screenshots/etms/etms_forwarding_mb_del.png, id=1906, 605.26125pt x 403.5075pt
 >
 File: screenshots/etms/etms_forwarding_mb_del.png Graphic file (type png)
  <use screenshots/etms/etms_forwarding_mb_del.png>
@@ -4136,7 +4091,7 @@ put line 238.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 246.
 
-<screenshots/etms/etms_free_mb.png, id=1896, 586.19pt x 261.97874pt>
+<screenshots/etms/etms_free_mb.png, id=1909, 586.19pt x 261.97874pt>
 File: screenshots/etms/etms_free_mb.png Graphic file (type png)
 
 <use screenshots/etms/etms_free_mb.png>
@@ -4146,7 +4101,7 @@ Package pdftex.def Info: screenshots/etms/etms_free_mb.png used on input line 2
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 257.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 257.
 Package babel Info: Redefining portuges shorthand "|
@@ -4155,7 +4110,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 259.
 
-<screenshots/etms/etms_mb_space.png, id=1903, 943.525pt x 328.22626pt>
+<screenshots/etms/etms_mb_space.png, id=1916, 943.525pt x 328.22626pt>
 File: screenshots/etms/etms_mb_space.png Graphic file (type png)
 
 <use screenshots/etms/etms_mb_space.png>
@@ -4165,7 +4120,7 @@ Package pdftex.def Info: screenshots/etms/etms_mb_space.png used on input line
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 273.
 
-<screenshots/etms/etms_mb_del.png, id=1906, 944.52875pt x 327.2225pt>
+<screenshots/etms/etms_mb_del.png, id=1919, 944.52875pt x 327.2225pt>
 File: screenshots/etms/etms_mb_del.png Graphic file (type png)
 
 <use screenshots/etms/etms_mb_del.png>
@@ -4176,7 +4131,7 @@ Package pdftex.def Info: screenshots/etms/etms_mb_del.png used on input line 27
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 20.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 20.
 Package babel Info: Redefining portuges shorthand "|
@@ -4186,7 +4141,7 @@ _mb_space.png (PNG copy)>]
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 20.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 20.
 Package babel Info: Redefining portuges shorthand "|
@@ -4195,17 +4150,11 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1.
 
-Overfull \hbox (0.22237pt too wide) in paragraph at lines 2--5
-\T1/txss/m/n/12 No sep-a-rador ETVOIP de uma máquina vir-tual é pos-si-bil-i-ta
-da a gestão VOIP de uma solução
- []
-
-
 Overfull \hbox (31.64815pt too wide) in paragraph at lines 14--17
 []$ 
  []
 
-<screenshots/etvoip_pbx.png, id=1917, 792.9625pt x 274.02374pt>
+<screenshots/etvoip_pbx.png, id=1930, 792.9625pt x 274.02374pt>
 File: screenshots/etvoip_pbx.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx.png>
@@ -4218,7 +4167,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 36--39
 []$ 
  []
 
-<screenshots/etvoip_pbx_extensions.png, id=1920, 794.97pt x 274.02374pt>
+<screenshots/etvoip_pbx_extensions.png, id=1933, 794.97pt x 274.02374pt>
 File: screenshots/etvoip_pbx_extensions.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_extensions.png>
@@ -4228,7 +4177,7 @@ ne 43.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 48.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 48.
 Package babel Info: Redefining portuges shorthand "|
@@ -4237,7 +4186,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 50.
 
-<screenshots/etvoip_pbx_extensions_sip.png, id=1929, 696.6025pt x 275.0275pt>
+<screenshots/etvoip_pbx_extensions_sip.png, id=1942, 696.6025pt x 275.0275pt>
 File: screenshots/etvoip_pbx_extensions_sip.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_extensions_sip.png>
@@ -4247,7 +4196,7 @@ t line 57.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 80.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 80.
 Package babel Info: Redefining portuges shorthand "|
@@ -4255,21 +4204,15 @@ Package babel Info: Redefining portuges shorthand "|
 
 [116 <./screenshots/etvoip_pbx_extensions.png (PNG copy)> <./screenshots/etvoip
 _pbx_extensions_sip.png>]
-Overfull \hbox (4.28989pt too wide) in paragraph at lines 95--96
-[]\T1/txss/m/n/12 Tempo de chamada - Número de se-gun-dos a to-car antes de en-
-viar a chamada
- []
-
-
 Overfull \hbox (7.40205pt too wide) in paragraph at lines 96--97
-[]\T1/txss/m/n/12 Chamada em Es-pera - Con-figura o es-tado ini-cial de "chamad
-a em es-pera"para
+[]\T1/txss/m/n/12 Chamada em Es-pera - Con-fi-gura o es-tado ini-cial de "cha-m
+ada em es-pera"para
  []
 
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 106.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 106.
 Package babel Info: Redefining portuges shorthand "|
@@ -4278,7 +4221,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 135.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 135.
 Package babel Info: Redefining portuges shorthand "|
@@ -4289,7 +4232,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 151.
 
-<screenshots/etvoip_pbx_extensions_remove.png, id=1948, 795.97375pt x 272.01625
+<screenshots/etvoip_pbx_extensions_remove.png, id=1961, 795.97375pt x 272.01625
 pt>
 File: screenshots/etvoip_pbx_extensions_remove.png Graphic file (type png)
  <use screenshots/etvoip_pbx_extensions_remove.png>
@@ -4303,7 +4246,7 @@ Overfull \hbox (31.64815pt too wide) in paragraph at lines 169--172
 []$ 
  []
 
-<screenshots/etvoip_pbx_trunks.png, id=1949, 794.97pt x 276.03125pt>
+<screenshots/etvoip_pbx_trunks.png, id=1962, 794.97pt x 276.03125pt>
 File: screenshots/etvoip_pbx_trunks.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_trunks.png>
@@ -4313,7 +4256,7 @@ Package pdftex.def Info: screenshots/etvoip_pbx_trunks.png used on input line 1
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 181.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 181.
 Package babel Info: Redefining portuges shorthand "|
@@ -4322,7 +4265,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 182.
 
-<screenshots/etvoip_pbx_trunks_iax.png, id=1956, 903.375pt x 540.0175pt>
+<screenshots/etvoip_pbx_trunks_iax.png, id=1969, 903.375pt x 540.0175pt>
 File: screenshots/etvoip_pbx_trunks_iax.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_trunks_iax.png>
@@ -4332,71 +4275,70 @@ ne 189.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 208.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 208.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 208.
  [120 <./screenshots/etvoip_pbx_trunks.png (PNG copy)> <./screenshots/etvoip_pb
 x_trunks_iax.png>]
-Overfull \hbox (136.01624pt too wide) in paragraph at lines 217--218
-\T1/txss/m/n/12 ISTE. In-tro-duza a linha de reg-isto aqui (ex-em-plo: user-nam
-e:password@switch.voipprovider.com).Muitos
+Overfull \hbox (144.88539pt too wide) in paragraph at lines 217--218
+\T1/txss/m/n/12 GISTE. In-tro-duza a li-nha de re-gisto aqui (exem-plo: user-na
+me:password@switch.voipprovider.com).Muitos
  []
 
 
 Overfull \hbox (127.59177pt too wide) in paragraph at lines 217--218
-\T1/txss/m/n/12 prove-dores re-querem um número DID, (ex: user-name:password@sw
-itch.voipprovider.com/didnumber)
- []
-
-
-Overfull \hbox (4.87341pt too wide) in paragraph at lines 227--228
-[]\T1/txss/m/n/12 Block For-eign CIDs - Blo-queia CIDs que se-jam prove-nientes
- de chamadas
+\T1/txss/m/n/12 pro-ve-do-res re-que-rem um nú-mero DID, (ex: user-name:passwor
+d@switch.voipprovider.com/didnumber)
  []
 
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 234.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 234.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 234.
  [121]
+Overfull \hbox (3.26598pt too wide) in paragraph at lines 243--244
+[]\T1/txss/m/n/12 - Faz cor-res-pon-dên-cia com di-gi-tos ou le-tras en-tre pa-
+rên-te-sis (neste exem-
+ []
+
+
 Overfull \hbox (17.23322pt too wide) in paragraph at lines 245--246
-[]\T1/txss/m/n/12 | - Re-move um pre-fixo de mar-cação do número (por ex-em-plo
-, 613|NXXXXXX
+[]\T1/txss/m/n/12 | - Re-move um pre-fixo de mar-ca-ção do nú-mero (por exem-pl
+o, 613|NXXXXXX
  []
 
 
 Overfull \hbox (32.6915pt too wide) in paragraph at lines 246--247
-[]\T1/txss/m/n/12 + - Adi-ciona um pre-fixo de mar-cação ao número (por ex-em-p
-lo, 1613+NXXXXXX
+[]\T1/txss/m/n/12 + - Adi-ci-ona um pre-fixo de mar-ca-ção ao nú-mero (por exem
+-plo, 1613+NXXXXXX
  []
 
 
 Overfull \hbox (53.44841pt too wide) in paragraph at lines 246--247
-\T1/txss/m/n/12 tem cor-re-spondên-cia quando al-guém marca "5551234"e passa "1
-6135551234"para
+\T1/txss/m/n/12 tem cor-res-pon-dên-cia quando al-guém marca "5551234"e passa "
+16135551234"para
  []
 
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 256.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 261.
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 261.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+Package pdftex.def Info: include/img/logo.png used on input line 265.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 261.
+(babel)             in language  on input line 265.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 261.
+(babel)             in language  on input line 265.
  [122]
-Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 261.
-
-<screenshots/etvoip_pbx_trunks_remove.png, id=1976, 795.97375pt x 275.0275pt>
+<screenshots/etvoip_pbx_trunks_remove.png, id=1989, 795.97375pt x 275.0275pt>
 File: screenshots/etvoip_pbx_trunks_remove.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_trunks_remove.png>
@@ -4406,7 +4348,7 @@ Package pdftex.def Info: screenshots/etvoip_pbx_trunks_remove.png used on input
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 275.
 
-<screenshots/etvoip_pbx_outbound_routes.png, id=1977, 862.22125pt x 369.38pt>
+<screenshots/etvoip_pbx_outbound_routes.png, id=1990, 862.22125pt x 369.38pt>
 File: screenshots/etvoip_pbx_outbound_routes.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_outbound_routes.png>
@@ -4418,7 +4360,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 296.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 296.
 Package babel Info: Redefining portuges shorthand "|
@@ -4426,16 +4368,21 @@ Package babel Info: Redefining portuges shorthand "|
 
 [123 <./screenshots/etvoip_pbx_trunks_remove.png (PNG copy)> <./screenshots/etv
 oip_pbx_outbound_routes.png (PNG copy)>]
+Overfull \hbox (3.26598pt too wide) in paragraph at lines 306--307
+[]\T1/txss/m/n/12 - Faz cor-res-pon-dên-cia com di-gi-tos ou le-tras en-tre pa-
+rên-te-sis (neste exem-
+ []
+
 File: include/img/logo.png Graphic file (type png)
- <use include/img/logo.png>
+<use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 324.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 324.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 324.
  [124]
-<screenshots/etvoip_pbx_outbound_routes_add.png, id=1989, 1003.75pt x 403.5075p
+<screenshots/etvoip_pbx_outbound_routes_add.png, id=2002, 1003.75pt x 403.5075p
 t>
 File: screenshots/etvoip_pbx_outbound_routes_add.png Graphic file (type png)
  <use screenshots/etvoip_pbx_outbound_routes_add.png>
@@ -4450,13 +4397,13 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 355.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 355.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 355.
  [125 <./screenshots/etvoip_pbx_outbound_routes_add.png>]
-<screenshots/etvoip_pbx_outbound_routes_remove.png, id=1998, 796.9775pt x 276.0
+<screenshots/etvoip_pbx_outbound_routes_remove.png, id=2011, 796.9775pt x 276.0
 3125pt>
 File: screenshots/etvoip_pbx_outbound_routes_remove.png Graphic file (type png)
 
@@ -4467,7 +4414,7 @@ Package pdftex.def Info: screenshots/etvoip_pbx_outbound_routes_remove.png used
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 365.
 
-<screenshots/etvoip_pbx_inbound_routes.png, id=1999, 865.2325pt x 370.38374pt>
+<screenshots/etvoip_pbx_inbound_routes.png, id=2012, 865.2325pt x 370.38374pt>
 File: screenshots/etvoip_pbx_inbound_routes.png Graphic file (type png)
 
 <use screenshots/etvoip_pbx_inbound_routes.png>
@@ -4479,7 +4426,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 390.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 390.
 Package babel Info: Redefining portuges shorthand "|
@@ -4487,19 +4434,13 @@ Package babel Info: Redefining portuges shorthand "|
 
 [126 <./screenshots/etvoip_pbx_outbound_routes_remove.png (PNG copy)> <./screen
 shots/etvoip_pbx_inbound_routes.png (PNG copy)>]
-Overfull \hbox (4.47699pt too wide) in paragraph at lines 393--394
-[]\T1/txss/bx/n/12 Número DID \T1/txss/m/n/12 - De-fine o número DID es-per-ado
- se o trunk aceita DID nas chamadas
- []
-
-
 Overfull \hbox (9.68997pt too wide) in paragraph at lines 397--398
-[]\T1/txss/m/n/12 Destino das chamadas que fazem cor-re-spondên-cia com o númer
-o DID/CID. 
+[]\T1/txss/m/n/12 Destino das cha-ma-das que fa-zem cor-res-pon-dên-cia com o n
+ú-mero DID/CID. 
  []
 
 
-<screenshots/etvoip_pbx_inbound_routes_add.png, id=2007, 702.625pt x 262.9825pt
+<screenshots/etvoip_pbx_inbound_routes_add.png, id=2020, 702.625pt x 262.9825pt
 >
 File: screenshots/etvoip_pbx_inbound_routes_add.png Graphic file (type png)
  <use screenshots/etvoip_pbx_inbound_routes_add.png>
@@ -4508,24 +4449,19 @@ input line 410.
 (pdftex.def)             Requested size: 281.04501pt x 105.19113pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 416.
-
-Overfull \hbox (2.9029pt too wide) in paragraph at lines 418--420
-\T1/txss/m/n/12 Sur-girá en-tão uma janela (ver figura [][]4.76[][]) preenchida
- com as definições da rota. Os parâmet-
- []
-
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 421.
 File: include/img/logo.png Graphic file (type png)
+
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 425.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 425.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 425.
  [127 <./screenshots/etvoip_pbx_inbound_routes_add.png>]
-<screenshots/etvoip_pbx_inbound_routes_remove.png, id=2018, 866.23625pt x 372.3
+<screenshots/etvoip_pbx_inbound_routes_remove.png, id=2031, 866.23625pt x 372.3
 9125pt>
 File: screenshots/etvoip_pbx_inbound_routes_remove.png Graphic file (type png)
  <use screenshots/etvoip_pbx_inbound_routes_remove.png>
@@ -4537,7 +4473,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 22.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 22.
 Package babel Info: Redefining portuges shorthand "|
@@ -4549,7 +4485,7 @@ Package babel Info: Redefining portuges shorthand "|
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 5.
 
-<screenshots/primavera/primaverainstall_01.png, id=2024, 427.5975pt x 288.07625
+<screenshots/primavera/primaverainstall_01.png, id=2037, 427.5975pt x 288.07625
 pt>
 File: screenshots/primavera/primaverainstall_01.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_01.png>
@@ -4557,7 +4493,7 @@ Package pdftex.def Info: screenshots/primavera/primaverainstall_01.png used on
 input line 13.
 (pdftex.def)             Requested size: 162.48874pt x 109.47011pt.
 
-<screenshots/primavera/primaverainstall_02.png, id=2025, 428.60126pt x 288.0762
+<screenshots/primavera/primaverainstall_02.png, id=2038, 428.60126pt x 288.0762
 5pt>
 File: screenshots/primavera/primaverainstall_02.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_02.png>
@@ -4565,7 +4501,7 @@ Package pdftex.def Info: screenshots/primavera/primaverainstall_02.png used on
 input line 21.
 (pdftex.def)             Requested size: 162.87016pt x 109.47011pt.
 
-<screenshots/primavera/primaverainstall_03.png, id=2026, 427.5975pt x 288.07625
+<screenshots/primavera/primaverainstall_03.png, id=2039, 427.5975pt x 288.07625
 pt>
 File: screenshots/primavera/primaverainstall_03.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_03.png>
@@ -4576,14 +4512,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 34.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 34.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 34.
  [129 <./screenshots/primavera/primaverainstall_01.png> <./screenshots/primaver
 a/primaverainstall_02.png>]
-<screenshots/primavera/primaverainstall_04.png, id=2034, 427.5975pt x 288.07625
+<screenshots/primavera/primaverainstall_04.png, id=2047, 427.5975pt x 288.07625
 pt>
 File: screenshots/primavera/primaverainstall_04.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_04.png>
@@ -4591,7 +4527,7 @@ Package pdftex.def Info: screenshots/primavera/primaverainstall_04.png used on
 input line 39.
 (pdftex.def)             Requested size: 162.48874pt x 109.47011pt.
 
-<screenshots/primavera/primaverainstall_05.png, id=2035, 669.50125pt x 331.2375
+<screenshots/primavera/primaverainstall_05.png, id=2048, 669.50125pt x 331.2375
 pt>
 File: screenshots/primavera/primaverainstall_05.png Graphic file (type png)
  <use screenshots/primavera/primaverainstall_05.png>
@@ -4600,8 +4536,9 @@ input line 47.
 (pdftex.def)             Requested size: 254.41312pt x 125.87155pt.
 
 Overfull \hbox (1.66594pt too wide) in paragraph at lines 53--55
-[]\T1/txss/m/n/12 Após in-sta-lação é necessário pro-ceder ao \T1/txss/m/sl/12 
-re-boot \T1/txss/m/n/12 da máquina vir-tual para ini-cializar o agente.
+[]\T1/txss/m/n/12 Após ins-ta-la-ção é ne-ces-sá-rio pro-ce-der ao \T1/txss/m/s
+l/12 re-boot \T1/txss/m/n/12 da má-quina vir-tual para ini-ci-a-li-zar o agente
+.
  []
 
 Package babel Info: Redefining portuges shorthand "|
@@ -4609,14 +4546,14 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 59.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 59.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 59.
  [130 <./screenshots/primavera/primaverainstall_03.png> <./screenshots/primaver
 a/primaverainstall_04.png> <./screenshots/primavera/primaverainstall_05.png>]
-<screenshots/primavera/primavera_main.png, id=2044, 596.98032pt x 279.29344pt>
+<screenshots/primavera/primavera_main.png, id=2057, 596.98032pt x 279.29344pt>
 File: screenshots/primavera/primavera_main.png Graphic file (type png)
 
 <use screenshots/primavera/primavera_main.png>
@@ -4624,7 +4561,7 @@ Package pdftex.def Info: screenshots/primavera/primavera_main.png used on input
  line 62.
 (pdftex.def)             Requested size: 226.85487pt x 106.1326pt.
 
-<screenshots/primavera/primaverainterface_02.png, id=2045, 801.99625pt x 449.68
+<screenshots/primavera/primaverainterface_02.png, id=2058, 801.99625pt x 449.68
 pt>
 File: screenshots/primavera/primaverainterface_02.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_02.png>
@@ -4635,14 +4572,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 82.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 82.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 82.
  [131 <./screenshots/primavera/primavera_main.png (PNG copy)> <./screenshots/pr
 imavera/primaverainterface_02.png>]
-<screenshots/primavera/primaverainterface_03.png, id=2052, 801.99625pt x 449.68
+<screenshots/primavera/primaverainterface_03.png, id=2065, 801.99625pt x 449.68
 pt>
 File: screenshots/primavera/primaverainterface_03.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_03.png>
@@ -4650,7 +4587,7 @@ Package pdftex.def Info: screenshots/primavera/primaverainterface_03.png used o
 n input line 85.
 (pdftex.def)             Requested size: 304.76173pt x 170.88017pt.
 
-<screenshots/primavera/primaverainterface_04.png, id=2053, 804.00375pt x 451.68
+<screenshots/primavera/primaverainterface_04.png, id=2066, 804.00375pt x 451.68
 75pt>
 File: screenshots/primavera/primaverainterface_04.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_04.png>
@@ -4658,7 +4595,7 @@ Package pdftex.def Info: screenshots/primavera/primaverainterface_04.png used o
 n input line 93.
 (pdftex.def)             Requested size: 305.5246pt x 171.64302pt.
 
-<screenshots/primavera/primaverainterface_05.png, id=2054, 791.95876pt x 455.70
+<screenshots/primavera/primaverainterface_05.png, id=2067, 791.95876pt x 455.70
 25pt>
 File: screenshots/primavera/primaverainterface_05.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_05.png>
@@ -4669,14 +4606,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 109.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 109.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 109.
  [132 <./screenshots/primavera/primaverainterface_03.png> <./screenshots/primav
 era/primaverainterface_04.png>]
-<screenshots/primavera/primaverainterface_06.png, id=2062, 785.93625pt x 454.69
+<screenshots/primavera/primaverainterface_06.png, id=2076, 785.93625pt x 454.69
 875pt>
 File: screenshots/primavera/primaverainterface_06.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_06.png>
@@ -4684,7 +4621,7 @@ Package pdftex.def Info: screenshots/primavera/primaverainterface_06.png used o
 n input line 115.
 (pdftex.def)             Requested size: 298.65887pt x 172.78731pt.
 
-<screenshots/primavera/primaverainterface_07.png, id=2063, 785.93625pt x 454.69
+<screenshots/primavera/primaverainterface_07.png, id=2077, 785.93625pt x 454.69
 875pt>
 File: screenshots/primavera/primaverainterface_07.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_07.png>
@@ -4695,14 +4632,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 130.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 130.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 130.
  [133 <./screenshots/primavera/primaverainterface_05.png> <./screenshots/primav
 era/primaverainterface_06.png>]
-<screenshots/primavera/primavera_add_user.png, id=2073, 462.97969pt x 478.78876
+<screenshots/primavera/primavera_add_user.png, id=2086, 462.97969pt x 478.78876
 pt>
 File: screenshots/primavera/primavera_add_user.png Graphic file (type png)
  <use screenshots/primavera/primavera_add_user.png>
@@ -4710,7 +4647,7 @@ Package pdftex.def Info: screenshots/primavera/primavera_add_user.png used on i
 nput line 136.
 (pdftex.def)             Requested size: 175.9341pt x 181.9416pt.
 
-<screenshots/primavera/primavera_edit_user.png, id=2074, 469.755pt x 484.81125p
+<screenshots/primavera/primavera_edit_user.png, id=2087, 469.755pt x 484.81125p
 t>
 File: screenshots/primavera/primavera_edit_user.png Graphic file (type png)
  <use screenshots/primavera/primavera_edit_user.png>
@@ -4721,14 +4658,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 149.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 149.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 149.
  [134 <./screenshots/primavera/primaverainterface_07.png> <./screenshots/primav
 era/primavera_add_user.png (PNG copy)>]
-<screenshots/primavera/primavera_edit_user_permissions.png, id=2081, 462.97969p
+<screenshots/primavera/primavera_edit_user_permissions.png, id=2094, 462.97969p
 t x 475.7775pt>
 File: screenshots/primavera/primavera_edit_user_permissions.png Graphic file (t
 ype png)
@@ -4738,7 +4675,7 @@ Package pdftex.def Info: screenshots/primavera/primavera_edit_user_permissions.
 png used on input line 152.
 (pdftex.def)             Requested size: 175.9341pt x 180.79732pt.
 
-<screenshots/primavera/primaverainterface_10.png, id=2082, 785.93625pt x 454.69
+<screenshots/primavera/primaverainterface_10.png, id=2095, 785.93625pt x 454.69
 875pt>
 File: screenshots/primavera/primaverainterface_10.png Graphic file (type png)
  <use screenshots/primavera/primaverainterface_10.png>
@@ -4749,7 +4686,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 165.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 165.
 Package babel Info: Redefining portuges shorthand "|
@@ -4760,7 +4697,7 @@ x
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1.
 
-<screenshots/etfs/etfs_main.png, id=2088, 979.66pt x 633.36626pt>
+<screenshots/etfs/etfs_main.png, id=2101, 979.66pt x 633.36626pt>
 File: screenshots/etfs/etfs_main.png Graphic file (type png)
 
 <use screenshots/etfs/etfs_main.png>
@@ -4769,14 +4706,14 @@ Package pdftex.def Info: screenshots/etfs/etfs_main.png used on input line 9.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 16.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 16.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 16.
  [136 <./screenshots/primavera/primaverainterface_10.png> <./screenshots/etfs/e
 tfs_main.png>]
-<screenshots/etfs/etfs_edit_global_config_user.png, id=2096, 375.4025pt x 286.0
+<screenshots/etfs/etfs_edit_global_config_user.png, id=2109, 375.4025pt x 286.0
 6876pt>
 File: screenshots/etfs/etfs_edit_global_config_user.png Graphic file (type png)
 
@@ -4785,7 +4722,7 @@ Package pdftex.def Info: screenshots/etfs/etfs_edit_global_config_user.png used
  on input line 19.
 (pdftex.def)             Requested size: 142.65442pt x 108.70724pt.
 
-<screenshots/etfs/etfs_edit_global_config_ad.png, id=2097, 379.4175pt x 288.076
+<screenshots/etfs/etfs_edit_global_config_ad.png, id=2110, 379.4175pt x 288.076
 25pt>
 File: screenshots/etfs/etfs_edit_global_config_ad.png Graphic file (type png)
  <use screenshots/etfs/etfs_edit_global_config_ad.png>
@@ -4793,7 +4730,7 @@ Package pdftex.def Info: screenshots/etfs/etfs_edit_global_config_ad.png used o
 n input line 33.
 (pdftex.def)             Requested size: 144.18015pt x 109.47011pt.
 
-<screenshots/etfs/etfs_join_to_ad.png, id=2099, 369.38pt x 283.0575pt>
+<screenshots/etfs/etfs_join_to_ad.png, id=2112, 369.38pt x 283.0575pt>
 File: screenshots/etfs/etfs_join_to_ad.png Graphic file (type png)
 
 <use screenshots/etfs/etfs_join_to_ad.png>
@@ -4803,14 +4740,14 @@ e 44.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 49.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 49.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 49.
  [137 <./screenshots/etfs/etfs_edit_global_config_user.png> <./screenshots/etfs
 /etfs_edit_global_config_ad.png>]
-<screenshots/etfs/etfs_edit_file_share.png, id=2107, 572.1375pt x 633.36626pt>
+<screenshots/etfs/etfs_edit_file_share.png, id=2120, 572.1375pt x 633.36626pt>
 File: screenshots/etfs/etfs_edit_file_share.png Graphic file (type png)
 
 <use screenshots/etfs/etfs_edit_file_share.png>
@@ -4818,7 +4755,7 @@ Package pdftex.def Info: screenshots/etfs/etfs_edit_file_share.png used on inpu
 t line 54.
 (pdftex.def)             Requested size: 217.4145pt x 240.68167pt.
 
-<screenshots/etfs/etfs_edit_printer_share.png, id=2108, 568.1225pt x 631.35875p
+<screenshots/etfs/etfs_edit_printer_share.png, id=2121, 568.1225pt x 631.35875p
 t>
 File: screenshots/etfs/etfs_edit_printer_share.png Graphic file (type png)
  <use screenshots/etfs/etfs_edit_printer_share.png>
@@ -4829,14 +4766,14 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 67.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 67.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 67.
  [138 <./screenshots/etfs/etfs_join_to_ad.png> <./screenshots/etfs/etfs_edit_fi
 le_share.png>]
-<screenshots/etfs/etfs_edit_user.png, id=2116, 469.755pt x 366.36874pt>
+<screenshots/etfs/etfs_edit_user.png, id=2129, 469.755pt x 366.36874pt>
 File: screenshots/etfs/etfs_edit_user.png Graphic file (type png)
 
 <use screenshots/etfs/etfs_edit_user.png>
@@ -4844,7 +4781,7 @@ Package pdftex.def Info: screenshots/etfs/etfs_edit_user.png used on input line
  70.
 (pdftex.def)             Requested size: 178.50876pt x 139.22156pt.
 
-<screenshots/etfs/etfs_client_status.png, id=2117, 436.63126pt x 377.41pt>
+<screenshots/etfs/etfs_client_status.png, id=2130, 436.63126pt x 377.41pt>
 File: screenshots/etfs/etfs_client_status.png Graphic file (type png)
 
 <use screenshots/etfs/etfs_client_status.png>
@@ -4854,7 +4791,7 @@ line 80.
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 85.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 85.
 Package babel Info: Redefining portuges shorthand "|
@@ -4865,7 +4802,7 @@ edit_user.png>])) (./appendix.tex
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 1.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 1.
 Package babel Info: Redefining portuges shorthand "|
@@ -4881,7 +4818,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 30.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 30.
 Package babel Info: Redefining portuges shorthand "|
@@ -4893,14 +4830,14 @@ Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 33.
 
 Overfull \hbox (133.3147pt too wide) in paragraph at lines 52--53
-[]\T1/txss/m/n/12 bug fix - cor-recção na con-fig-u-ração do parâmetro VLAN Nam
-e-Type (VLAN_NAME_TYPE_PLUS_VID_NO_PAD)
+[]\T1/txss/m/n/12 bug fix - cor-rec-ção na con-fi-gu-ra-ção do pa-râ-me-tro VLA
+N Name-Type (VLAN_NAME_TYPE_PLUS_VID_NO_PAD)
  []
 
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 62.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 62.
 Package babel Info: Redefining portuges shorthand "|
@@ -4911,7 +4848,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 93.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 93.
 Package babel Info: Redefining portuges shorthand "|
@@ -4923,7 +4860,7 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 125.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 125.
 Package babel Info: Redefining portuges shorthand "|
@@ -4934,7 +4871,7 @@ Package babel Info: Redefining portuges shorthand "|
 File: include/img/logo.png Graphic file (type png)
  <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 158.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 158.
 Package babel Info: Redefining portuges shorthand "|
@@ -4946,31 +4883,54 @@ File: include/img/logo.png Graphic file (type png)
 
 <use include/img/logo.png>
 Package pdftex.def Info: include/img/logo.png used on input line 190.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 190.
 Package babel Info: Redefining portuges shorthand "|
 (babel)             in language  on input line 190.
- [146]) 
+ [146]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 202.
+File: include/img/logo.png Graphic file (type png)
+ <use include/img/logo.png>
+Package pdftex.def Info: include/img/logo.png used on input line 221.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 221.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 221.
+ [147]
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 235.
+File: include/img/logo.png Graphic file (type png)
+
+<use include/img/logo.png>
+Package pdftex.def Info: include/img/logo.png used on input line 254.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 254.
+Package babel Info: Redefining portuges shorthand "|
+(babel)             in language  on input line 254.
+ [148]) 
 AED: lastpage setting LastPage
 File: include/img/logo.png Graphic file (type png)
 <use include/img/logo.png>
-Package pdftex.def Info: include/img/logo.png used on input line 83.
-(pdftex.def)             Requested size: 21.58752pt x 17.07182pt.
+Package pdftex.def Info: include/img/logo.png used on input line 85.
+(pdftex.def)             Requested size: 57.83058pt x 17.07182pt.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 83.
+(babel)             in language  on input line 85.
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 83.
- [147]
+(babel)             in language  on input line 85.
+ [149]
 Package babel Info: Redefining portuges shorthand "|
-(babel)             in language  on input line 83.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 83.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 83.
+(babel)             in language  on input line 85.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 85.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 85.
  (./manual-etva-cm.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 83.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 83.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 85.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 85.
 Package rerunfilecheck Info: File `manual-etva-cm.out' has not changed.
-(rerunfilecheck)             Checksum: 5F5E4D79C4A0297534C12896E53E253E;9363.
+(rerunfilecheck)             Checksum: C670E082BC0E2F8539A031D960E25E03;9515.
 
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
@@ -4978,15 +4938,15 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
 LaTeX Warning: There were multiply-defined labels.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 83.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 85.
  ) 
 Here is how much of TeX's memory you used:
- 11625 strings out of 495035
- 194581 string characters out of 6181703
- 274465 words of memory out of 5000000
- 13892 multiletter control sequences out of 15000+600000
+ 11630 strings out of 493356
+ 194652 string characters out of 6141781
+ 278462 words of memory out of 5000000
+ 14125 multiletter control sequences out of 15000+600000
  81212 words of font info for 131 fonts, out of 8000000 for 9000
- 14 hyphenation exceptions out of 8191
+ 953 hyphenation exceptions out of 8191
  54i,16n,55p,926b,557s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/txfonts/t1xtt.pfb></usr/share/texlive/texmf-dis
@@ -4995,10 +4955,10 @@ t/fonts/type1/public/txfonts/txsy.pfb></usr/share/texlive/texmf-dist/fonts/type
 ic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pf
 b></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on manual-etva-cm.pdf (147 pages, 6282346 bytes).
+Output written on manual-etva-cm.pdf (149 pages, 6229343 bytes).
 PDF statistics:
- 2460 PDF objects out of 2487 (max. 8388607)
- 2008 compressed objects within 21 object streams
- 474 named destinations out of 1000 (max. 500000)
- 1877 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 2535 PDF objects out of 2984 (max. 8388607)
+ 2079 compressed objects within 21 object streams
+ 478 named destinations out of 1000 (max. 500000)
+ 1893 words of extra memory for PDF output out of 10000 (max. 10000000)
 

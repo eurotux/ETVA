@@ -210,7 +210,7 @@ sub response_soap_fault {
     $faultstring = '' if( not defined $faultstring );
     $result_desc = '' if( not defined $result_desc );
 
-    plog("SOAP_FAULT: faultcode: $faultcode, faultstring: $faultstring, detail: $result_desc") if( &debug_level );
+    plog("SOAP_FAULT: faultcode: $faultcode, faultstring: $faultstring, detail: $result_desc") if( &debug_level > 3 );
 
     my %a = ( faultcode => encode_content($faultcode,1,1),
                 faultstring => encode_content($faultstring,1,1),
@@ -221,7 +221,7 @@ sub response_soap_fault {
                                 ->serializer()
                                 ->fault($a{"faultcode"},$a{"faultstring"},$a{"detail"} );
 
-    plog("response_soap_fault: $response") if(&debug_level);
+    plog("response_soap_fault: $response") if( &debug_level > 9 );
 
     return $response;
 }

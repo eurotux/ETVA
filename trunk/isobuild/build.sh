@@ -109,6 +109,25 @@ cd trunk/etvoipagent/
 	rpmbuild --nodeps -ts --define "_topdir $DIR/._RPM_" --define "_srcrpmdir $DIR/SRPMS" $_SOURCE.tar.gz > /dev/null
 cd - > /dev/null
 
+# build do fileserveragent
+cd trunk/fileserveragent/
+	if [ -d *-fsagentd ]; then
+		_VERSION=`head *-fsagentd/*.spec|egrep -i "^Version:"|awk {' print $2'}`
+		_SOURCE=`head *-fsagentd/*.spec|egrep -i "^Source:"|awk {' print $2'}|sed -e 's/-%.*//'`
+		_SOURCE=$_SOURCE-${_VERSION}-$VERSION
+		cat *-fsagentd/*.spec | sed -e "s/^Release:.*/Release: $VERSION/g" > _tmp
+		mv _tmp *-fsagentd/*.spec
+		mv *-fsagentd $_SOURCE
+	else
+		_VERSION=`head *$VERSION/*.spec|egrep -i "^Version:"|awk {' print $2'}`
+		_SOURCE=`head *$VERSION/*.spec|egrep -i "^Source:"|awk {' print $2'}|sed -e 's/-%.*//'`
+		_SOURCE=$_SOURCE-$_VERSION-$VERSION
+	fi
+	rm -f $_SOURCE.tar.gz
+	tar zcf $_SOURCE.tar.gz $_SOURCE
+	rpmbuild --nodeps -ts --define "_topdir $DIR/._RPM_" --define "_srcrpmdir $DIR/SRPMS" $_SOURCE.tar.gz > /dev/null
+cd - > /dev/null
+
 # build do etmsagent
 cd trunk/etmsagent/
 	if [ -d *-etmsd ]; then
@@ -220,10 +239,11 @@ cd trunk/centralmanagment/
 cd - > /dev/null
 
 # revert das alteracoes
-rm -f trunk/centralmanagment/etva-centralmanagement*tar.gz trunk/virtualizationagent/virtagent-*.tar.gz trunk/etvoipagent/etva-etvoip-*tar.gz trunk/etmsagent/etva-etms-*tar.gz trunk/etaspagent/etva-etasp-*tar.gz trunk/etfwagent/etva-etfw-*tar.gz && \
+rm -f trunk/centralmanagment/etva-centralmanagement*tar.gz trunk/virtualizationagent/virtagent-*.tar.gz trunk/fileserveragent/etva-fsagent-*tar.gz trunk/etvoipagent/etva-etvoip-*tar.gz trunk/etmsagent/etva-etms-*tar.gz trunk/etaspagent/etva-etasp-*tar.gz trunk/etfwagent/etva-etfw-*tar.gz && \
 mv trunk/centralmanagment/etva-centralmanagement-* trunk/centralmanagment/2-sandbox && \
 mv trunk/virtualizationagent/virtagent-* trunk/virtualizationagent/2-virtd && \
 mv trunk/etvoipagent/etva-etvoip-* trunk/etvoipagent/1-etvoipd && \
+mv trunk/fileserveragent/etva-fsagent-* trunk/fileserveragent/1-fsagentd && \
 mv trunk/etmsagent/etva-etms-* trunk/etmsagent/1-etmsd && \
 mv trunk/etaspagent/etva-etasp-* trunk/etaspagent/1-etaspd && \
 mv trunk/etfwagent/etva-etfw-* trunk/etfwagent/1-etfwd && \

@@ -50,103 +50,33 @@ EOF;
 
     // add your code here
 
-    $sid = $arguments['serverid']; 
+    $options_task_server_backup = array( // options
+                                        'location'=>$arguments['location'],
+                                        'filepath'=>$arguments['filepath']
+                                    );
 
-    $etva_server = EtvaServerPeer::retrieveByPK($sid);          // try by id
-    if( !$etva_server ) $etva_server = EtvaServerPeer::retrieveByUuid($sid);    // try by uuid
-    if( !$etva_server ) $etva_server = EtvaServerPeer::retrieveByName($sid);    // try by name
-
-    if(!$etva_server){
-        $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_ERR_NOTFOUND_ID_,array('%id%'=>$sid));
-        // Error
-        $this->log("[Error] $msg_i18n");
-        return -1;
-    } else {
-        
-        $newsnapshot = $arguments['newsnapshot'];
-        $snapshot = $arguments['snapshot'];
-
-        if(!$etva_server->getHasSnapshots() && !$snapshot && !$newsnapshot && ($etva_server->getVmState() != 'stop') && ($etva_server->getVmState() != 'notrunning') ){
-            // Error is running
-            $this->log("[Error] Can't create backup file of running server without snapshots");
-            return -101;
-        }
-        
-        $etva_node = $etva_server->getEtvaNode();
-
-        if( !$etva_node ){
-            // Error is running
-            $this->log("[Error] The server is not assigned to any node");
-            return -1010;
-        }
-        
-        $server_va = new EtvaServer_VA($etva_server);
-
-        if( !$etva_server->getHasSnapshots() || $newsnapshot ){
-            $response = $server_va->create_snapshot($etva_node,$newsnapshot);
-            if( !$response['success'] ){
-                $msg_i18n = $response['info'];
-                $this->log("[Error] Can't create snapshot: $msg_i18n");
-                // Error
-                return -110;
-            }
-        }
-
-        $url = "http://".$etva_node->getIp();
-        $request_body = "uuid=".$etva_server->getUuid();
-
-        if( $snapshot ){
-            $request_body .= "&snapshot=$snapshot";
-        }
-
-        if( $arguments['location'] ){
-            if( $arguments['do_not_generate_tar'] && ($arguments['do_not_generate_tar']!='false') ){ // do not generate tar 
-                $request_body .= "&_do_not_generate_tar_=1";
-            }
-            $request_body .= "&location=".$arguments['location'];
-        }
-
-        $filename = $etva_server->getName().".tar";
-        
-        $port = $etva_node->getPort();
-        if($port) $url.=":".$port;        
-        $url.="/vm_backup_snapshot_may_fork";
-        
-        /*
-         * get response stream data
-         */
-        $path = $arguments['filepath'];
-        if( $path != 'STDOUT' ) $fp = fopen($path, 'w');
-
-        $ovf_curl = curl_init($url);
-
-        if( $path != 'STDOUT' ) curl_setopt($ovf_curl, CURLOPT_FILE, $fp);
-
-        curl_setopt($ovf_curl, CURLOPT_POST, true);
-        curl_setopt($ovf_curl, CURLOPT_POSTFIELDS, $request_body);
-
-        $data = curl_exec($ovf_curl);
-        if( curl_getinfo($ovf_curl,CURLINFO_HTTP_CODE)==500){
-            // Error;
-            $this->log("[Error] Can't download backup, we get STATUS 500: $data");
-            return -111;
-        }
-
-        curl_close($ovf_curl);
-
-        if( $path != 'STDOUT' ) fclose($fp);
-
-        if( $arguments['delete'] && ($arguments['delete']!='false') ){ // delete after
-            if( $newsnapshot ){
-                $server_va->remove_snapshot($etva_node,$newsnapshot);
-            } else if( $snapshot ){
-                $server_va->remove_snapshot($etva_node,$snapshot);
-            }
-        }
-
-        return 0;
-
+    if( $arguments['snapshot'] ){
+        $options_task_server_backup['snapshot'] = $arguments['snapshot'];
+    }
+    if( $arguments['newsnapshot'] ){
+        $options_task_server_backup['newsnapshot'] = $arguments['newsnapshot'];
+    }
+    if( $arguments['delete'] ){
+        $options_task_server_backup['deletesnapshot'] = $arguments['delete'];
     }
 
+    if( $arguments['location'] ){
+        if( $arguments['do_not_generate_tar'] && ($arguments['do_not_generate_tar']!='false') ){
+            $options_task_server_backup['do_not_generate_tar'] = true;
+        }
+    }
+
+    $task_server_backup = new serverBackupTask($this->dispatcher, new sfFormatter());
+    return $task_server_backup->run(
+                                array( // arguments
+                                    'serverid'=>$arguments['serverid']
+                                ),
+                                $options_task_server_backup
+                            );
   }
 }

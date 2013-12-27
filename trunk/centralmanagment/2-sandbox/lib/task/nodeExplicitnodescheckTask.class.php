@@ -197,7 +197,7 @@ class processCheckPoweroff extends processCheck {
 
                     // migrate all servers
                     $node_va = new EtvaNode_VA($this->node);
-                    $node_va->migrateAllServers($sparenode,true);
+                    $node_va->migrateAllServers($sparenode,true,true);
 
                     $msg = sprintf('Node %s process poweroff with success. Next will migrate the VMs to Spare Node...',$this->node->getName());
                     $this->task->log('[INFO] ' . $msg);
@@ -211,7 +211,7 @@ class processCheckPoweroff extends processCheck {
         } else {            // for others policies
             // migrate all servers
             $node_va = new EtvaNode_VA($this->node);
-            $node_va->migrateAllServers($sparenode,true);
+            $node_va->migrateAllServers($sparenode,true,true);
 
             $msg = sprintf('Node %s process poweroff with success. Next will migrate the VMs...',$this->node->getName());
             $this->task->log('[INFO] ' . $msg);
@@ -310,7 +310,7 @@ class nodeExplicitnodescheckTask extends etvaBaseTask
 
         $this->addOptions(array(
           new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name'),
-          new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
+          new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'prod'),
           new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'propel'),
           // add your own options here
         ));

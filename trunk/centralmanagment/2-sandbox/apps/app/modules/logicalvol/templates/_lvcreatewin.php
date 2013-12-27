@@ -1,3 +1,6 @@
+<?php
+include_partial('asynchronousJob/functions');
+?>
 <script>
 
 /*
@@ -244,38 +247,34 @@ Ext.extend(lvwin.createForm.Main, Ext.form.FormPanel, {
         // if necessary fields valid...
         if(this.getForm().isValid()){            
             var lvname = this.lvname.getValue();                        
+            var size = this.lvsize.getValue();
+            var vg = this.vg.getValue();
 
             // create parameters array to pass to soap request....
             var params;
+            var options;
     
             if(this.level == 'cluster'){
-                params = {
-                          'cid':this.node_id,
-                          'level':this.level,
-                          'lv':lvname,
-                          'vg':this.vg.getValue(),
-                          'size':this.lvsize.getValue()+'M',
-                          'persnapshotusage':this.lvsnapshotusage.getValue(),
-                          'format':this.lvformat.getValue()};
+                options = { 'cluster':this.node_id, 'level':this.level };
             }else if(this.level == 'node'){
-                params = {
-                          'nid':this.node_id,
-                          'level':this.level,
-                          'lv':lvname,
-                          'vg':this.vg.getValue(),
-                          'size':this.lvsize.getValue()+'M',
-                          'persnapshotusage':this.lvsnapshotusage.getValue(),
-                          'format':this.lvformat.getValue()};
+                options = { 'node':this.node_id, 'level':this.level };
             }else{
-                params = {
-                          'nid':this.node_id,
-                          'lv':lvname,
-                          'vg':this.vg.getValue(),
-                          'size':this.lvsize.getValue()+'M',
-                          'persnapshotusage':this.lvsnapshotusage.getValue(),
-                          'format':this.lvformat.getValue()};
+                options = { 'node':this.node_id };
             }
 
+            options['persnapshotusage'] = this.lvsnapshotusage.getValue();
+            options['format'] = this.lvformat.getValue();
+
+            var scope_form = this;
+            AsynchronousJob.Functions.Create( 'logicalvol', 'create',
+                                                {'name':lvname, 'volumegroup': vg, 'size':size+'M'},
+                                                options,
+                                                function(resp,opt) { // success fh
+                                                    /*var response = Ext.util.JSON.decode(resp.responseText);
+                                                    Ext.ux.Logger.info(response['agent'],response['response']);*/
+                                                    scope_form.fireEvent('updated');
+                                                });
+            /*
             var conn = new Ext.data.Connection({
                             listeners:{
                                 // wait message.....
@@ -332,6 +331,7 @@ Ext.extend(lvwin.createForm.Main, Ext.form.FormPanel, {
                                         
                 }
             });// END Ajax request
+            */
 
 
         }//end isValid

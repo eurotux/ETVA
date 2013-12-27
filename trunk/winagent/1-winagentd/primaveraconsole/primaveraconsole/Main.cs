@@ -10,11 +10,6 @@ using System.Data.SqlClient;
 
 using System.Globalization;
 
-using Interop.AdmBE800;
-using Interop.AdmBS800;
-using Interop.StdBE800;
-using Interop.ErpBS800;
-
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Common;
 using System.Collections.Generic;
@@ -262,7 +257,7 @@ namespace primaveraconsole
                         oWindowsUsers.list_users(groups);
                     }
                 } else if (args.Length > 0 && args[0].StartsWith("pri")){
-                    string adminuser, adminpassword, instance, type;
+                    string adminuser, adminpassword, instance, type, backupsdir;
 
                     if (!options.TryGetValue("adminuser", out adminuser) || !options.TryGetValue("adminpassword", out adminpassword))
                     {
@@ -279,6 +274,8 @@ namespace primaveraconsole
                         primavera.Instance = instance;
                     if (options.TryGetValue("type", out type))
                         primavera.Type = type;
+                    if (options.TryGetValue("backupsdir", out backupsdir))
+                        primavera.Backupsdir = backupsdir;
 
                     if (args.Length > 0 && args[0] == "pricopiaseg")
                     {
@@ -554,7 +551,7 @@ namespace primaveraconsole
 
                     primavera.end();
 				} else {
-                    string adminuser, adminpassword, instance, type;
+                    string adminuser, adminpassword, instance, type, backupsdir;
 
                     if (!options.TryGetValue("adminuser", out adminuser) || !options.TryGetValue("adminpassword", out adminpassword))
                     {
@@ -569,6 +566,8 @@ namespace primaveraconsole
                         primavera.Instance = instance;
                     if (options.TryGetValue("type", out type))
                         primavera.Type = type;
+                    if (options.TryGetValue("backupsdir", out backupsdir))
+                        primavera.Backupsdir = backupsdir;
                     
                     primavera.info();
                     primavera.end();

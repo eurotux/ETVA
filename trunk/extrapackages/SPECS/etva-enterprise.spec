@@ -1,7 +1,7 @@
 Name: etva-enterprise
 Summary: ETVA enterprise related files
-Version: 2.0.0
-Release: 11%{?dist}
+Version: 2.1.0
+Release: 13%{?dist}
 Group: System Environment/Base
 Source0: lvm.conf
 Source1: multipath.conf
@@ -33,9 +33,11 @@ install -m 644 %{SOURCE3} $RPM_BUILD_ROOT/tmp/
 
 %post
 if [ "$1" == "1" ]; then
-        #echo "depois de instalar pela 1a vez (-i)..."
+    #echo "depois de instalar pela 1a vez (-i)..."
+
 	mv /tmp/lvm.conf /etc/lvm/
 	mv /tmp/multipath.conf /etc/
+
 	#%{_sysconfdir}/scripts/libvirt.cert.sh
     ( cd /tmp ; tar xvzf libvirt_certs.tar.gz libvirt_certs/; cd libvirt_certs; /bin/sh ./libvirt_cp_certs.sh; cd ..; rm -rf libvirt_certs; rm -f libvirt_certs.tar.gz ) >/dev/null 2>&1
 	echo "tls_no_verify_certificate = 1" >> %{_sysconfdir}/libvirt/libvirtd.conf
@@ -59,3 +61,11 @@ fi
 %defattr(-, root, root)
 /tmp/*
 %{_sysconfdir}/scripts/libvirt.cert.sh
+
+%changelog
+* Fri Dec 20 2013 Carlos Rodrigues <cmar@eurotux.com> 2.0.0-13
+- Overwrite lvm.conf and multipath.conf and ignore ATA vendors
+
+* Fri Dec 20 2013 Carlos Rodrigues <cmar@eurotux.com> 2.0.0-12
+- Don't overwrite lvm.conf and multipath.conf
+

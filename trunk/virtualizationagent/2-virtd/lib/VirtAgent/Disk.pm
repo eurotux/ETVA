@@ -3285,6 +3285,46 @@ sub backupsnapshot {
     return retOk("_OK_","ok");
 }
 
+=item backupdisk
+
+    backup disk to standalone file
+
+    my $OK = VirtAgent::Disk->backupdisk( path=>$path, backup=>$backupfile );
+
+=cut
+
+sub backupdisk {
+    my $self = shift;
+    my ($path,$backup) = my %p = @_;
+
+    if( $p{'path'} || $p{'backup'} ){
+        $path = $p{'path'};
+        $backup = $p{'backup'};
+    }
+
+    $self->loaddiskdev();
+
+    if( my $LV = $self->getlv( 'device'=>$path, %p ) ){
+        $path = $LV->{'device'};
+
+        my $bs = "512";
+        $bs = "10M" if( $LV->{'size'} > (10 * 1024 * 1024) ); # if greater then 10Mb
+        my ($e,$m) = cmd_exec("/bin/dd if=$path of=$backup bs=$bs");
+
+        # TODO testing error cmd
+        unless( $e == 0 || $e == -1 ){
+            return retErr("_ERR_BACKUP_DISK_","Error backup disk: $m");
+        }
+    } else {
+        return retErr('_INVALID_LOG_VOL_',"Invalid logical volume: $path");
+    }
+
+    $self->loaddiskdev(1);  # update disk device info
+
+    # TODO change this
+    return retOk("_OK_BACKUP_DISK_","Backup disk with success");
+}
+
 # havemultipath
 #   testing multipath support
 #
@@ -3697,6 +3737,39 @@ sub get_fc_partitions {
 	return $p;
 }
 
+# check raid /proc/mdstat
+sub check_mdstat {
+    my $self = shift;
+
+	my ($l);
+	my ($s,$n,$f);
+    my ($status,$message);
+
+	if( open MDSTAT,"</proc/mdstat" ){
+        while( $l = <MDSTAT> ) {
+            if( $l =~ /^(\S+)\s+:/ ) { $n = $1; $f = ''; next; }
+            if( $l =~ /(\S+)\[\d+\]\(F\)/ ) { $f = $1; next; }
+            if( $l =~ /\s*.*\[([U_]+)\]/ ) {
+                $s = $1;
+                #next if(!valid($n));
+                if($s =~ /_/ ) {
+                    $status = 2;    # CRITICAL
+                    $message .= "md:$n:$f:$s ";
+                } else {
+                    $message .= "md:$n:$s ";
+                }
+            }
+        }
+        close MDSTAT;
+
+        unless( $status == 0 ){
+            return retErr("_ERR_CRITICAL_CHECK_MDSTAT_","Status of mdstat is critical: $message")
+        }
+        return retOk("_OK_CHECK_MDSTAT_","Status of mdstat is normal.");
+    } else {
+        return retErr("_ERR_CHECK_MDSTAT_","Couldn't open /proc/mdstat.");
+    }
+}
 1;
 
 =back

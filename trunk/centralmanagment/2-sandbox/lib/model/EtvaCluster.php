@@ -171,6 +171,8 @@ class EtvaCluster extends BaseEtvaCluster {
                                 ->groupBy('EtvaNode.Id')
                                 ->orderBy('EtvaNode.Memtotal','desc')
                                 ->filterByClusterId($this->getId())
+                                ->filterByState(EtvaNode::NODE_ACTIVE)
+                                ->filterByInitialize(EtvaNode::INITIALIZE_OK)
                                 ->find();
 
                 $n_hosts_tolerate = 0;
@@ -205,11 +207,13 @@ class EtvaCluster extends BaseEtvaCluster {
 
                     error_log("getAdmissionGate TYPE_N_HOSTS_TOLERATE n_hosts_tolerate_value=$n_hosts_tolerate_value sum_all_running_Servers_memfree_bytes_after=$sum_all_running_Servers_memfree_bytes_after sum_all_Nodes_memfree_after=$sum_all_Nodes_memfree_after sum_n_biggest_Nodes_memtotal=$sum_n_biggest_Nodes_memtotal max_cpu_Nodes=$max_cpu_Nodes vcpu=".$server->getVcpu()." mem=".$server->getMem()." name=".$server->getName());
 
+                    # the all free memory get from running server should not be less then total of sum of memory of biggest nodes
                     if( $sum_all_running_Servers_memfree_bytes_after < $sum_n_biggest_Nodes_memtotal )
-                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate.',array('%n_hosts_tolerate_value%'=>$n_hosts_tolerate_value)) );
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate. The calc of free memory from running servers say that has %free_mem% to garantee %total_mem%.',array('%n_hosts_tolerate_value%'=>$n_hosts_tolerate_value,'%free_mem%'=>$sum_all_running_Servers_memfree_bytes_after,'%total_mem%'=>$sum_n_biggest_Nodes_memtotal)) );
                     
+                    # the all free memory verified on nodes should not be less then total of sum of memory of biggest nodes
                     if( $sum_all_Nodes_memfree_after < $sum_n_biggest_Nodes_memtotal )
-                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate.',array('%n_hosts_tolerate_value%'=>$n_hosts_tolerate_value)) );
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%n_hosts_tolerate_value%) host(s) failures tolerate. The node info says that has %free_mem% free memory to garantee %total_mem%.',array('%n_hosts_tolerate_value%'=>$n_hosts_tolerate_value,'%free_mem%'=>$sum_all_Nodes_memfree_after,'%total_mem%'=>$sum_n_biggest_Nodes_memtotal)) );
 
                     if( $server->getVcpu() > $max_cpu_Nodes )
                         return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Number max. of cpus (%max_cpu_Nodes%) exceeded.',array('%max_cpu_Nodes%'=>$max_cpu_Nodes)) );
@@ -226,11 +230,13 @@ class EtvaCluster extends BaseEtvaCluster {
 
                     error_log("getAdmissionGate TYPE_PER_RESOURCES sum_all_running_Servers_memfree_bytes_after=$sum_all_running_Servers_memfree_bytes_after sum_all_Nodes_memfree_after=$sum_all_Nodes_memfree_after all_Node_memtotal_threshold=$all_Node_memtotal_threshold max_cpu_Nodes=$max_cpu_Nodes vcpu=".$server->getVcpu()." mem=".$server->getMem()." name=".$server->getName());
 
+                    # the all free memory get from running server should not be less then percentage of memory of nodes
                     if( $sum_all_running_Servers_memfree_bytes_after < $all_Node_memtotal_threshold )
-                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover.',array('%per_resources_value%'=>$per_resources_value)) );
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover. The calc of free memory from running servers say that has %free_mem% to garantee %total_mem%.',array('%per_resources_value%'=>$per_resources_value,'%free_mem%'=>$sum_all_running_Servers_memfree_bytes_after,'%total_mem%'=>$all_Node_memtotal_threshold)) );
 
+                    # the all free memory verified on nodes should not be less then percentage of memory of nodes
                     if( $sum_all_Nodes_memfree_after < $all_Node_memtotal_threshold )
-                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover.',array('%per_resources_value%'=>$per_resources_value)) );
+                        return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Unfulfilled policy for (%per_resources_value%) percentage of resources reserved to failover. The node info says that has %free_mem% free memory to garantee %total_mem%.',array('%per_resources_value%'=>$per_resources_value,'%free_mem%'=>$sum_all_Nodes_memfree_after,'%total_mem%.'=>$all_Node_memtotal_threshold)) );
 
                     if( $server->getVcpu() > $max_cpu_Nodes )
                         return array( 'success'=>false, 'info'=>sfContext::getInstance()->getI18N()->__('Number max. of cpus (%max_cpu_Nodes%) exceeded.',array('%max_cpu_Nodes%'=>$max_cpu_Nodes)) );

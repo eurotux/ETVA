@@ -47,9 +47,12 @@ use ETVA::Agent;
 use ETVA::Agent::SOAP;
 use ETVA::Agent::JSON;
 
+use ETVA::GuestHandle;
+
 use GuestAgent::Manager;
 
 use VirtAgent;
+use VirtAgent::Disk;
 use VirtAgentSOAP;
 use VirtAgentInterface;
 use PollStats;
@@ -65,10 +68,17 @@ my $Dispatcher = 'VirtAgentInterface';
 # Config load from config file
 my $CONF = { "CFG_FILE"=>"/etc/sysconfig/etva-vdaemon/virtd.conf" };
 
+# tmp dir
+my $TMP_DIR = "/var/tmp";
+
+# guest management sockets dir
+my $GUEST_MANAGEMENT_SOCKETS_DIR = "/var/tmp/virtagent-guestmngt-sockets-dir";
+
 my $run_poll = 0;
 my $RUNNING;
 my @CHILD_PIDS;
 my $GA_PID;
+my $GM_PID;
 
 # all stats data
 my %StatsData = ();
@@ -119,16 +129,16 @@ sub launch_agent {
 	}
 }
 
-=item launch_guestagent
+=item launch_virtio_guestagent
 start guestagent
 
     create ETVA::Agent::SOAP instance with VirtAgentInterface dispatcher module
 
 =cut
 
-sub launch_guestagent {
+sub launch_virtio_guestagent {
     if( VirtAgentInterface->get_hypervisor_type() ne 'kvm' ){
-        plog("launch_guestagent hypervisor not support guest agent");
+        plog("launch_virtio guestagent hypervisor not support guest agent");
         return;
     }
 
@@ -139,16 +149,13 @@ sub launch_guestagent {
     # child scope ####
     if($kidpid==0){
 
-        # Save the process pid
-
+        # rename process
+        $0 .= " launch_virtio_guestagent";
+    
         # Start working
         my $gm = GuestAgent::Manager->new('addr' => '127.0.0.1', 'port' => 7778, 'protocol' => 'tcp');
         plog("guest manager added");        
 
-#        $gm->addVASkt('addr' => '127.0.0.1', 'port' => 7778, 'protocol' => 'tcp');
-#        plog("Guest Agent Server created");        
-#        $gm->addSkt('skt' => '/tmp/foo/pipe', 'name' => 'centos6', 'cluster' => 'Default');
-        
         $RUNNING = 1;
         while($RUNNING){
             eval {
@@ -161,11 +168,11 @@ sub launch_guestagent {
                 &send_ga_info(\@readga);
             };
             if( $@ ){
-                plogNow("launch_guestagent: something goes wrong with guest agent - $@");
+                plogNow("launch_virtio_guestagent: something goes wrong with guest agent - $@");
             }
         }
 
-        plog("launch_guestagent: go exit...");
+        plog("launch_virtio_guestagent: go exit...");
         POSIX::_exit(0);
     } else {
         $GA_PID = $kidpid;
@@ -173,6 +180,49 @@ sub launch_guestagent {
         plog "register child pid \n" if( &debug_level > 3 );
         push(@CHILD_PIDS,$kidpid);
     }    
+}
+
+sub launch_guestmanagement_handle {
+
+    my $chldpid = fork();
+    if( !defined($chldpid) ){
+        die "cant fork: $!";
+    }
+
+
+    # guest management sockets dir
+    $GUEST_MANAGEMENT_SOCKETS_DIR = $ENV{'gm_socket_dir'} || $CONF->{'gm_socket_dir'} || "$TMP_DIR/virtagent-guestmngt-sockets-dir";
+
+    if( $chldpid==0 ){
+        # child work
+
+        # rename process
+        $0 .= " launch_guestmanagement_handle";
+
+        # configure handle of guest management agent sockets
+        my $guestHandle = new ETVA::GuestHandle(
+                                            LocalAddr   => $CONF->{'LocalIP'},
+                                            LocalPort   => $CONF->{'LocalPort'}+2009,
+                                            Proto       => 'tcp',
+                                            'sockets_dir' => $GUEST_MANAGEMENT_SOCKETS_DIR,
+                                            'cm_uri' => $CONF->{'cm_uri'},
+                                            'cm_namespace' => $CONF->{'cm_namespace'},
+                                            'typeuri' => $CONF->{'cm_namespace'}
+                            );
+
+        # put it loop
+        $guestHandle->mainLoop();
+
+        plogNow("launch_guestmanagement_handle: go exit...");
+
+        POSIX::_exit(0);
+    } else {
+        $GM_PID = $chldpid;
+        ETVA::Utils::regpid($chldpid);
+
+        plogNow("launch_guestmanagement_handle register child pid") if( &debug_level > 3 );
+        push(@CHILD_PIDS,$chldpid);
+    }
 }
 
 sub send_ga_info {
@@ -428,11 +478,17 @@ sub main {
     # load stuff
     loadfunc();
 
+    # tmp dir
+    $TMP_DIR = $CONF->{'tmpdir'} if( $CONF->{'tmpdir'} );
+
     # init stats
     poll_stats();
 
     # call guest agent process  
-    launch_guestagent();
+    &launch_virtio_guestagent();
+
+    # launch handle guest management agents
+    &launch_guestmanagement_handle();
 
     # call soap process
     launch_agent();
@@ -446,6 +502,12 @@ sub term_handler {
     plog("receive term signal... deamon terminate!");
 
     plog("...waiting for childs...\n");
+
+    if( defined($GM_PID) ){
+        kill SIGKILL, $GM_PID;
+        sleep(2);
+        waitpid(-1,&WNOHANG);
+    }
 
     for my $cpid (@CHILD_PIDS){
         kill SIGHUP, $cpid;
@@ -493,10 +555,18 @@ sub chld_handler {
 
 sub chld_exists {
     my ($dead_pid) = @_;
+
+    # for guest agent process
     if( defined($GA_PID) && ($dead_pid == $GA_PID) ){
         return 1;
     }
 
+    # for guest management handle process
+    if( defined($GM_PID) && ($dead_pid == $GM_PID) ){
+        return 1;
+    }
+
+    # other child process
     my $cc = $AgentClass->can('chld_exists');
     if( $cc ){
         return &$cc($dead_pid);
@@ -506,7 +576,8 @@ sub chld_exists {
 }
 sub chld_dies_handler {
     my ($dead_pid) = @_;
-    if( defined($GA_PID) ){
+
+    if( defined($GA_PID) || defined($GM_PID) ){
         &chld_handler_GA($dead_pid);
     }
 
@@ -519,15 +590,32 @@ sub chld_dies_handler {
 sub chld_handler_GA {
     my ($kpid) = @_;
 
-    if( defined($GA_PID) && ($kpid == $GA_PID) ){
-        plogNow "[info] - virtd - guest agent die... deamon go terminate! (kpid=$kpid GA_PID=$GA_PID)";
+    # for guest agent process
+    if( (defined($GA_PID) && ($kpid == $GA_PID)) ||
+            (defined($GM_PID) && ($kpid == $GM_PID)) ){
 
         $RUNNING = 0;
 
-        #VirtAgentSOAP->terminate_agent();   # terminate agent
-        #kill SIGHUP, $$; # kill my self
-        plogNow "[error] - guest agent die... so i will die too...";
-        die "guest agent die... so i will die too...";
+        # for guest agent process
+        if( defined($GA_PID) && ($kpid == $GA_PID) ){
+            plogNow("[ERROR] - virtd - guest agent die... deamon go terminate! (kpid=$kpid GA_PID=$GA_PID)");
+
+            #VirtAgentSOAP->terminate_agent();   # terminate agent
+            #kill SIGHUP, $$; # kill my self
+
+            plogNow("[error] - guest agent die... so i will die too...");
+        }
+
+        # for guest management handle process
+        if( defined($GM_PID) && ($kpid == $GM_PID) ){
+            plogNow "[ERROR] - virtd - guest management handle process die... deamon go terminate! (kpid=$kpid GM_PID=$GM_PID)";
+
+            #VirtAgentSOAP->terminate_agent();   # terminate agent
+            #kill SIGHUP, $$; # kill my self
+
+            plogNow("[ERROR] - guest management handle process die... so i will die too...");
+        }
+        #die "guest process die... so i will die too...";
     }
 }
 
@@ -937,6 +1025,13 @@ sub keepalive_handler {
         # TODO change this for Generic Agent
         # CM testing...
         if( $CONF->{'cm_uri'} ){
+            plogNow("updateVirtAgent ip state and mdstat");
+            my $checkmdstat = 1;
+            my $R = VirtAgent::Disk->check_mdstat();
+            if( isError($R) ){
+                $checkmdstat = 0;
+            }
+            plogNow("updateVirtAgent ip state and mdstat = $checkmdstat R=",Dumper($R));
             # update state
             my $R = new ETVA::Client::SOAP::HTTP( uri => $CONF->{'cm_uri'} )
                     -> call( $CONF->{'cm_namespace'},
@@ -945,8 +1040,9 @@ sub keepalive_handler {
                                 #field=>'state',value=>1,
                                 'data'=>{
                                     ip=>$CONF->{'LocalIP'},
-                                    state=>1
-                                }
+                                    state=>1,
+                                },
+                                'checkmdstat'=>{ 'success'=>$checkmdstat, 'message'=>$R->{'_okmsg_'}||$R->{'_errdetail_'}, %$R }
                             );
             if( !$R || $R->{'_error_'} ){
                 plogNow("Error CentralManagement connection problem.\n");

@@ -34,12 +34,16 @@ BEGIN {
     use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS  $CRLF);
     $VERSION = '0.0.1';
     @ISA = qw( Exporter );
-    @EXPORT = qw( soap_request soap_response parse_request response_soap_fault response_soap );
+    @EXPORT = qw( soap_request soap_response parse_soap_response parse_soap_request response_soap_fault response_soap get_params
+                    isSOAP isSOAPValid isSoapFault isSoapResponse isSoapResponseOrFault isSoapRequestOrFault
+            );
 }
 
 use ETVA::Utils;
 
 use SOAP::Lite;
+
+use Data::Dumper;
 
 # soap_request
 #  make soap request
@@ -68,6 +72,41 @@ sub soap_request {
     return $soap_request;
 }
 
+# parse soap response
+sub parse_soap_response {
+    my ($data) = @_;
+
+    my $data_xml;
+    # clear no xml lines
+    for my $line (split(/\r|\n/,$data)){
+        if( $line =~ /<\?xml/ || $data_xml ){
+            $data_xml .= $line . "\n";
+        }
+    }
+    plogNow "parse_soap_response = $data_xml\n" if( &debug_level > 3 );
+
+    my ($header,$body,$typeuri,$method,$id);
+
+    eval {
+        my $som = SOAP::Deserializer->deserialize($data_xml);
+
+        $som->match((ref $som)->method);
+        ($typeuri, $method) = ($som->namespaceuriof || '', $som->dataof->name);
+
+        my $st_body = $som->body();
+        $body = $st_body->{"$method"};
+
+        $header = $som->header();
+        $id = $header->{'soap_msg_id'} if( $header->{'soap_msg_id'} );
+    };
+    if( $@ ){
+        # handle error
+        $body = { _error_ => 1, detail=> $@ };
+    }
+
+    return ($header,$body,$typeuri,$method,$id);
+}
+
 # soap_response
 #  parsing soap response
 #  args: data message
@@ -80,37 +119,13 @@ sub soap_response {
         return wantarray() ? %r : \%r;
     }
 
-    my $data_xml;
-    # clear no xml lines
-    for my $line (split(/\r|\n/,$data)){
-        if( $line =~ /<\?xml/ || $data_xml ){
-            $data_xml .= $line . "\n";
-        }
-    }
-    plog "soap_response = $data_xml\n" if( &debug_level > 3 );
-
-    my ($headers,$body,$typeuri,$method);
-
-    eval {
-        my $som = SOAP::Deserializer->deserialize($data_xml);
-
-        $som->match((ref $som)->method);
-        ($typeuri, $method) = ($som->namespaceuriof || '', $som->dataof->name);
-
-        my $st_body = $som->body();
-        $body = $st_body->{"$method"};
-    };
-    if( $@ ){
-        # TODO handle error
-        my %r = ( _error_ => 1, detail=> $@ );
-        return wantarray() ? %r : \%r;
-    }
+    my ($header,$body,$typeuri,$method,$id) = &parse_soap_response($data);
 
     return wantarray() ?  %$body : $body;
 }
 
 # parse soap request
-sub parse_request {
+sub parse_soap_request {
     my ($request) = @_;
 
     my $request_xml;
@@ -120,7 +135,7 @@ sub parse_request {
             $request_xml .= $line . "\n";
         }
     }
-    my ($headers,$body,$typeuri,$method);
+    my ($header,$body,$typeuri,$method,$id);
 
     eval {
         my $som = SOAP::Deserializer->deserialize($request_xml);
@@ -130,38 +145,45 @@ sub parse_request {
 
         my $st_body = $som->body();
         $body = $st_body->{"$method"};
+
+        $header = $som->header();
+        $id = $header->{'soap_msg_id'} if( $header->{'soap_msg_id'} );
     };
 
-plog  "header Dump=",Dumper($headers),"\n" if( &debug_level > 3 );
+plog  "header Dump=",Dumper($header),"\n" if( &debug_level > 3 );
 plog  "body Dump=",Dumper($body),"\n" if( &debug_level > 3 );
 
-    return ($headers,$body,$typeuri,$method);
+    return ($header,$body,$typeuri,$method,$id);
 }
 
 sub response_soap_fault {
-    my ($typeuri, $faultcode, $faultstring, $result_desc) = @_;
+    my ($typeuri, $faultcode, $faultstring, $result_desc, $header) = @_;
     $faultcode = '' if( not defined $faultcode );
     $faultstring = '' if( not defined $faultstring );
     $result_desc = '' if( not defined $result_desc );
 
-    plog("SOAP_FAULT: faultcode: $faultcode, faultstring: $faultstring, detail: $result_desc") if( &debug_level );
+    plog("SOAP_FAULT: faultcode: $faultcode, faultstring: $faultstring, detail: $result_desc, header: $header") if( &debug_level > 3 );
 
     my %a = ( faultcode => encode_content($faultcode,1,1),
                 faultstring => encode_content($faultstring,1,1),
                 detail => encode_content($result_desc,1,1) );
 
-    my $response = SOAP::Lite
+    my $serializer = SOAP::Lite
                                 ->uri($typeuri)
-                                ->serializer()
-                                ->fault($a{"faultcode"},$a{"faultstring"},$a{"detail"} );
+                                ->serializer();
 
-    plog("response_soap_fault: $response") if(&debug_level);
+    my @extra = ();
+    push(@extra, make_soap($serializer,$header,1)) if( $header );
+
+    my $response = $serializer->fault($a{"faultcode"},$a{"faultstring"},$a{"detail"}, @extra );
+
+    plog("response_soap_fault: $response") if( &debug_level > 9 );
 
     return $response;
 }
 
 sub response_soap {
-    my ($typeuri, $method, $res) = @_;
+    my ($typeuri, $method, $res, $header) = @_;
     
     # CMAR 04/02/2010
     # force to dont enconde entities
@@ -170,7 +192,11 @@ sub response_soap {
     my $serializer = SOAP::Lite
                                 ->uri($typeuri)
                                 ->serializer();
-    my $soap_response = $serializer->envelope( response=>"${method}Response", make_soap($serializer,\%a) );
+
+    my @extra = ();
+    push(@extra, make_soap($serializer,$header,1)) if( $header );
+
+    my $soap_response = $serializer->envelope( response=>"${method}Response", make_soap($serializer,\%a), @extra );
 
     plog("response_soap: $soap_response") if(&debug_level > 3);
 
@@ -208,6 +234,41 @@ sub isSOAP {
         }
     }
     return 0;
+}
+
+sub isSOAPValid {
+    my ($request) = @_;
+
+    my $request_xml;
+    # clear no xml lines
+    for my $line (split(/\r|\n/,$request)){
+        if( $line =~ /<\?xml/ || $request_xml ){
+            $request_xml .= $line . "\n";
+        }
+    }
+
+    eval {
+        SOAP::Deserializer->deserialize($request_xml);
+    };
+    return $@ ? 0 : 1;
+}
+
+sub isSoapFault {
+    my ($message) = @_;
+    return ( $message =~ m/<\S+Fault/gsi )? 1 : 0;
+}
+sub isSoapResponse {
+    my ($message) = @_;
+    return ( $message =~ m/<\S+Response/gsi )? 1 : 0;
+}
+
+sub isSoapResponseOrFault {
+    my ($message) = @_;
+    return &isSoapFault($message) || &isSoapResponse($message);
+}
+sub isSoapRequestOrFault {
+    my ($message) = @_;
+    return &isSoapFault($message) || !&isSoapResponse($message);
 }
 
 1;

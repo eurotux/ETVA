@@ -9,10 +9,12 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
     ,initComponent:function() {
         
         this.items = [
-            {xtype:'hidden',name:'id'},            
+            {xtype:'hidden',name:'id'},
+            {xtype:'hidden',name:'vm_state'},
             {xtype:'tabpanel', 
              activeItem:0,
              id: 'server-edit-tabpanel',
+             ref: 'serverEditTabPanel',
              anchor: '100% 100%',             
              defaults:{
                  layout:'form'
@@ -612,14 +614,14 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                 }
             ]};
 
-        this.get(1).add(configuration);
+        this.serverEditTabPanel.add(configuration);
         
     }
     ,loadNetworksPanel:function(){
 
         var networks = {id:'server-edit-networks',title: <?php echo json_encode(__('Network interfaces')) ?>,layout:'fit',autoScroll:true};
 
-        this.get(1).add(networks);
+        this.serverEditTabPanel.add(networks);
 
         Ext.getCmp('server-edit-networks').on({
             beforerender:function(){
@@ -672,7 +674,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
             autoScroll:true
         };
 
-        this.get(1).add(devices);
+        this.serverEditTabPanel.add(devices);
 
         Ext.getCmp('server-edit-devices').on({
             beforerender:function(){
@@ -710,7 +712,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
         var disks = {id:'server-edit-disks',title: <?php echo json_encode(__('Disks')) ?>,layout:'fit',autoScroll:true};
 
-        this.get(1).add(disks);
+        this.serverEditTabPanel.add(disks);
 
         Ext.getCmp('server-edit-disks').on({
             beforerender:function(){
@@ -832,7 +834,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                 }
             ]
         };
-        this.get(1).add(vncoptions);
+        this.serverEditTabPanel.add(vncoptions);
     }
     ,loadVMHAPanel: function(){
         var vmhaoptions = {
@@ -918,7 +920,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                     }
             ]
         };
-        this.get(1).add(vmhaoptions);
+        this.serverEditTabPanel.add(vmhaoptions);
     }
     ,loadRecord:function(data){
         this.load({url:'server/jsonLoad',params:data
@@ -1163,6 +1165,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
         }
 
+        var controllers_changed = false;
         /*
          * gather device info
          */
@@ -1175,14 +1178,18 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                 var data = f.data;
                 var insert = {
                     'type': data['type']
-                    ,'idvendor': data['idvendor']    
-                    ,'idproduct': data['idproduct']    
-                    ,'description': data['description']    
+                    ,'idvendor': data['idvendor']
+                    ,'idproduct': data['idproduct']
+                    ,'description': data['description']
                     ,'bus': data['bus']
                     ,'slot': data['slot']
                     ,'function': data['function']
+                    ,'controller': data['controller']
                 };
                 devices.push(insert);
+                if( data['controller'] ){
+                    controllers_changed = true;
+                }
             });
             send_data['devices'] = devices;
         }
@@ -1193,15 +1200,6 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
         var grid_disks = Ext.getCmp('server-edit-disks-grid');
         if(grid_disks){
             
-//            if(!grid_disks.getSelected().isValid()){
-//
-//                Ext.Msg.show({title: <?php echo json_encode(__('Error!')) ?>,
-//                    buttons: Ext.MessageBox.OK,
-//                    msg: <?php echo json_encode(__('Missing disk data!')) ?>,
-//                    icon: Ext.MessageBox.ERROR});
-//                return false;
-//            }
-
             var disks=[];
             var disks_store = grid_disks.getSelected().getStore();
 
@@ -1211,19 +1209,15 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
                     disks.push(insert);
             });
+            send_data['disks'] = disks;
+        }
 
-//            if(Ext.isEmpty(disks)){
-//                Ext.Msg.show({
-//                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,'<?php echo sfConfig::get('config_acronym'); ?>'),
-//                    buttons: Ext.MessageBox.OK,
-//                    msg: String.format(<?php echo json_encode(__('Unable to edit virtual server {0}!')) ?>,name)+'<br>'+<?php echo json_encode(__('At least one disk is required!')) ?>,
-//                    icon: Ext.MessageBox.ERROR});
-//                return false;
-//                
-//            }
-//            else{
-              send_data['disks'] = disks;
-//            }
+        // check if need to reboot
+        var need_to_reboot = false;
+        if( form_values['vm_state'] == 'running' ){
+            if( controllers_changed ){
+                need_to_reboot = true;
+            }
         }
 
         // process delete
@@ -1258,8 +1252,21 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                 var response = Ext.util.JSON.decode(resp.responseText);                
 
                 Ext.ux.Logger.info(response['agent'],response['response']);
-                this.ownerCt.fireEvent('onSave');                
 
+                if( need_to_reboot ){
+                    Ext.Msg.show({
+                        title: String.format(<?php echo json_encode(__('Server changes')) ?>),
+                        buttons: Ext.MessageBox.OK,
+                        msg: String.format(<?php echo json_encode(__('Some changes will take effect after next restart of virtual server {0}.')) ?>,name),
+                        icon: Ext.MessageBox.INFO,
+                        scope: this,
+                        fn: function(btn){
+                            this.ownerCt.fireEvent('onSave');
+                        }
+                    });
+                } else {
+                    this.ownerCt.fireEvent('onSave');
+                }
             },
             failure: function(resp,opt) {
                 

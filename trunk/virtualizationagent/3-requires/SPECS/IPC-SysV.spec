@@ -22,6 +22,8 @@ group:     Applications/CPAN
 url:       http://www.cpan.org
 buildroot: %{_tmppath}/%{name}-%{version}-%(id -u -n)
 prefix:    %(echo %{_prefix})
+buildrequires:  perl(ExtUtils::MakeMaker)
+buildrequires:  perl(Test::More)
 source:    http://search.cpan.org//CPAN/authors/id/M/MH/MHX/IPC-SysV-2.03.tar.gz
 
 %description

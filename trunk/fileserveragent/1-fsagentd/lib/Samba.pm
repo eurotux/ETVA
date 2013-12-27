@@ -926,6 +926,21 @@ sub set_backupconf {
     return;
 }
 
+sub getstate {
+    my $self = shift;
+    return retOk("_OK_STATE_","I'm alive.");
+}
+
+# testing if fork func
+sub isForkable {
+    my $self = shift;
+    my ($method) = @_;
+
+    my $v = 0;
+    $v = 1 if ( $method eq 'list_users' );
+    plogNow("Samba isForkable method=$method flag=$v") if( 1 || &debug_level > 3 );
+    return $v;
+}
 1;
 
 =back

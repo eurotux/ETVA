@@ -1,0 +1,100 @@
+rcParallelTask plugin
+=====================
+
+Overview
+--------
+
+This plugin allow to create task that can fork for parallel processing.
+It provide an easy way to create as many child as you want and a simple queue and lock system.
+
+Installation
+------------
+
+To install rcParallelTaskPlugin, type:
+
+    $ symfony plugin-install rcParallelTaskPlugin
+
+
+**WARNING: this plugin isn't working on Windows system**
+
+Usage
+-----
+
+Here is a simple example that show how to use this plugin :
+
+    [php]
+    <?php
+    class simpleParallelTask extends rcParallelTask {
+
+        protected function configure() {
+
+            $this->addOptions(
+                array(
+                    new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name', 'frontend'),
+                    new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
+                    new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'propel'),
+                    // add your own options here
+                )
+            );
+
+            $this->namespace           = 'symofny';
+            $this->name                = 'simple-parallel';
+            $this->briefDescription    = '';
+            $this->detailedDescription = '';
+
+        }
+
+
+        protected function execute($arguments = array(), $options = array()) {
+
+            // Start 2 child
+            $this->startChildren(2);
+
+            // initialize the database connection
+            // Always start the database after starting the children because connexion can't be shared between multiple process
+            $databaseManager = new sfDatabaseManager($this->configuration);
+            $connection      = $databaseManager->getDatabase($options['connection'] ? $options['connection'] : null)->getConnection();
+
+            if ($this->iAmParent()) {
+                for ($i=0; $i < 10; $i++) {
+                    $testArray = array('id' => $i);
+                    $this->addToQueue($testArray);
+                }
+
+                $this->logSection(date('Y-m-d H:i:s'), 'I sent everything');
+
+                // Wait until queue is consume
+                $this->waitForEmptyQueue();
+            } else {
+                // Child process
+                while (($testArray = $this->getFromQueue())) {
+                    $this->logSection(date('Y-m-d H:i:s'), 'received : '.$testArray['id']);
+                }
+            }
+
+       }
+
+    }
+    ?>
+
+How to manage multiple lock in the same script ?
+------------------------------------------------
+
+The lock and queue system use a commun ressource for communication.
+
+This resource is build from the script name (``__FILE__``) and a resource identitifier of one letter ('A' by default).
+
+You can change this resource identifier at any time to create different lock or queue with the _setResourceIdentifier()_ method.
+
+The method use a fluent interface:
+
+    [php]
+    $this->setResourceIdentifier('B')->getLock();
+    $this->setResourceIdentifier('C')->getLock();
+    $this->setResourceIdentifier('B')->releaseLock();
+
+License
+-------
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.

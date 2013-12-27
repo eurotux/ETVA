@@ -92,6 +92,76 @@ class primaveraActions extends sfActions
 
     }
 
+    /*
+     * processes save user information
+     */
+    public function executeJsonSaveUser(sfWebRequest $request)
+    {
+        $service_id = $request->getParameter('id');
+        $etva_service = EtvaServicePeer::retrieveByPK($request->getParameter('id'));
+        if(!$etva_service){
+            $msg_i18n = $this->getContext()->getI18N()->__('No service with specified id',array());
+            $msg = array('success'=>false,'error'=>$msg_i18n,'info'=>$msg_i18n);
+            $result = $this->setJsonError($msg);
+            $this->getResponse()->setHttpHeader('Content-type', 'application/json');
+            return $this->renderText($result);
+        }
+
+        $etva_server = $etva_service->getEtvaServer();
+
+        $agent_tmpl =$etva_server->getAgentTmpl();
+        $service_tmpl = $etva_service->getNameTmpl();
+        $method = $request->getParameter('method');
+        $params = json_decode($request->getParameter('params'),true);
+
+        if(!$params) $params = array();
+
+        $call_params = $params;
+
+        // send soap request
+        $response = $etva_server->soapSend($method,$call_params);
+
+        // if soap response is ok
+        if($response['success']){
+
+            // insert/update with success
+
+            $response_decoded = (array) $response['response'];
+
+            $data = array();
+            $okmsg_i18n = $this->getContext()->getI18N()->__($response_decoded['_okmsg_'],array());
+            $return = array( 'success'=>true, 'data'=>$data, 'response'=>$okmsg_i18n );
+            $result = json_encode($return);
+
+            // update user permissions
+            if( isset($params['u_permissoes']) ){
+                $call_params_perms = array( 'u_permissoes'=>$params['u_permissoes'], 'u_user'=>$params['u_cod'] );
+                $res_perms = $etva_server->soapSend('primavera_updateuser_permissoes',$call_params_perms);
+            }
+
+            // update access to aplications
+            if( isset($params['u_aplicacoes']) ){
+                $call_params_apls = array( 'u_aplicacoes'=>$params['u_aplicacoes'], 'u_user'=>$params['u_cod'] );
+                $res_apls = $etva_server->soapSend('primavera_updateuser_aplicacoes',$call_params_apls);
+            }
+
+        }else{
+
+            $error_details = $response['info'];
+            $error_details = nl2br($error_details);
+            $error_details_i18n = $this->getContext()->getI18N()->__($error_details);
+            $error = $response['error'];
+
+            $return = array('success'=>false,'error'=>$error,'info'=>$error_details_i18n,'faultcode'=>$response['faultcode']);
+            $result = $this->setJsonError($return);
+        }
+
+        $this->getResponse()->setHttpHeader('Content-type', 'application/json; charset=utf-8');
+        $this->getResponse()->setHttpHeader("X-JSON", '()');
+
+        return $this->renderText($result);
+    }
+
     public function executePrimavera_ChangeIP(sfWebRequest $request)
     {
     }

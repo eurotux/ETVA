@@ -53,9 +53,9 @@ Primavera.Users.Panel = new Ext.extend( Ext.Panel, {
                             {header: __('Email'), dataIndex: 'email', width:120},
                             {header: __('Language'), dataIndex: 'idioma', width:120},
                             {header: __('Profile'), dataIndex: 'perfil', width:120},
-                            {header: __('Super Administrator'), dataIndex: 'suadmin', width:60, renderer:function(v){return v ? __('Yes') : __('No');}},
-                            {header: __('Administrator'), dataIndex: 'admin', width:60, renderer:function(v){return v ? __('Yes') : __('No');}},
-                            {header: __('Tecnico'), dataIndex: 'tecnico', width:60, renderer:function(v){return v ? __('Yes') : __('No');}},
+                            {header: __('Super Administrator'), dataIndex: 'suadmin', width:60, renderer:function(v){return (v=='true')? __('Yes') : __('No');}},
+                            {header: __('Administrator'), dataIndex: 'admin', width:60, renderer:function(v){return (v=='true')? __('Yes') : __('No');}},
+                            {header: __('Tecnico'), dataIndex: 'tecnico', width:60, renderer:function(v){return (v=='true')? __('Yes') : __('No');}},
                         ]
                     }),
                     sm: new Ext.grid.RowSelectionModel({ singleSelect:true,

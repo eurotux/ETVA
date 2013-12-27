@@ -786,6 +786,13 @@ sub get_todevices {
     $D{'controller'} = \@controllers;
     $D{'channel'} = \@channels;
 
+    my @serials = ();
+    if( $self->{'Serials'} ){
+        my $arr_serials = $self->{'Serials'};
+        push(@serials,@$arr_serials);
+    }
+    $D{'serial'} = \@serials;
+
     for my $H ( @{$self->{'Disks'}} ){
         my $DD = $H->todevice();
         push @{$D{'disk'}}, $DD;
@@ -871,6 +878,13 @@ sub loadfromxml {
         delete $p{'_channel_'};
 
         $p{'Channels'} = [@channels];
+    }
+
+    if( defined $p{'_serial_'} ){
+        my @serials = @{ $p{'_serial_'} };
+        delete $p{'_serial_'};
+
+        $p{'Serials'} = [@serials];
     }
 
     # virtual machine create
@@ -1151,6 +1165,16 @@ sub xml_domain_parser {
                         }
                     }
                     push(@{$D{'_channel_'}},\%C);
+                } elsif( $tn eq "serial" ){
+                    my %C = $self->xml_domain_parser_get_attr($cdev);
+                    for my $cdc ($cdev->getChildNodes()){
+                        my $ts = $cdc->getNodeName();
+                        if( $ts ne '#text' ){
+                            my %CC = $self->xml_domain_parser_get_attr($cdc);
+                            $C{"$ts"} = { %CC };
+                        }
+                    }
+                    push(@{$D{'_serial_'}},\%C);
                 }
             }
         }

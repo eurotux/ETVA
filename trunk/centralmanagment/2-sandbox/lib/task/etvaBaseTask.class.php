@@ -90,5 +90,23 @@ class etvaBaseTask extends sfBaseTask
         $file .= $extension;
         return $file;
     }
+
+  // send report by email
+  protected function sendReport($message,$subject_tail, $to=null)
+  {
+    $from = EtvaSettingPeer::retrieveByPK(EtvaSettingPeer::_ALERT_EMAIL_FROM_)->getValue();
+    if( !$from ) $from = 'nuxis@eurotux.com';
+    if( !$to ) $to = EtvaSettingPeer::retrieveByPK(EtvaSettingPeer::_ALERT_EMAIL_)->getValue();
+    if( !$to ) $to = 'tec@eurotux.com';
+    $subject_prefix = EtvaSettingPeer::retrieveByPK(EtvaSettingPeer::_ALERT_SUBJECT_PREFIX_)->getValue();
+    if( !$subject_prefix ) $subject_prefix = 'Nuxis -';
+
+    $subject = $subject_prefix . " " . $subject_tail;
+    $headers = "From: $from\r\n";
+    mail($to, $subject, $message, $headers);
+
+    $this->log("[INFO] The report was sent to '$to' with following subject '$subject'.\n");
+  }
+
 }
 

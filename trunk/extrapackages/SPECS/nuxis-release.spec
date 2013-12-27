@@ -26,6 +26,7 @@ Obsoletes: rawhide-release redhat-release-as redhat-release-es redhat-release-ws
 Obsoletes: rpmdb-redhat redhat-release whitebox-release fedora-release sl-release enterprise-release centos-release
 Provides: centos-release redhat-release yumconf etva-release nuxis-release
 Requires: centos-release-notes
+Requires: epel-release
 
 BuildRoot: %{_tmppath}/centos-release-root
 

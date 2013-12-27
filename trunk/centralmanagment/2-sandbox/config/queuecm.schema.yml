@@ -1,0 +1,21 @@
+propel:
+  _attributes:
+    defaultIdMethod: native
+    package: lib.model
+  asynchronous_job:
+    _attributes:   { phpName: EtvaAsynchronousJob }
+    id:            { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }
+    tasknamespace: { type: VARCHAR, size: '255' }
+    taskname:      { type: VARCHAR, size: '255' }
+    arguments:     { type: LONGVARCHAR }
+    options:       { type: LONGVARCHAR }
+    status:        { type: VARCHAR, size: '255' }
+    result:        { type: LONGVARCHAR }
+    created_at:    { type: TIMESTAMP }
+    updated_at:    { type: TIMESTAMP }
+    run_at:        { type: TIMESTAMP }
+    abort_at:      { type: TIMESTAMP }
+    depends:       { type: VARCHAR, size: '255' }
+    taskpid:       { type: INTEGER }
+    user:          { type: varchar, size: 128 }
+

@@ -11,7 +11,6 @@ etva-virtio-win*.src.rpm
 etva-xen-win*.src.rpm
 nuxis-release-6*.src.rpm
 libxml2-*.src.rpm
-perl-Sys-Virt-*.src.rpm
 perl-IPC-SysV-*.src.rpm
 perl-Capture-Tiny-*.src.rpm
 perl-Email-Sender-*.src.rpm
@@ -22,6 +21,7 @@ perl-SOAP-Lite-*.src.rpm
 symfony-1.*.src.rpm
 etva-etfw-*.src.rpm
 etva-etvoip-*.src.rpm
+etva-fsagent-*.src.rpm
 etva-etms-*.src.rpm
 etva-etasp-*.src.rpm
 etva-centralmanagement-*.src.rpm"

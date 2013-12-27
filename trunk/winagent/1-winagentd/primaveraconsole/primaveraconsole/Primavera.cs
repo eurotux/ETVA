@@ -22,15 +22,17 @@ namespace primaveraconsole
         public string Password { get; set; }
         public string Instance { get; set; }
         public string Type { get; set; }
+        public string Backupsdir { get; set; }
 
         private AdmBS adm { get; set; }
 
-        public Primavera(string user, string password, string instance = "DEFAULT", string type = "Executive")
+        public Primavera(string user, string password, string instance = "DEFAULT", string type = "Executive", string backupsdir = null)
         {
             User = user;
             Password = password;
             Instance = instance;
             Type = type;
+            if (backupsdir!=null) Backupsdir = backupsdir;
         }
         public void init()
         {
@@ -58,6 +60,7 @@ namespace primaveraconsole
             string bkpname = database + " backup";
             string bkpdescription = "Full backup for " + database;
             string dir = "";
+            if (Backupsdir != null) dir = Backupsdir;
 
             DateTime now = DateTime.Now;
             string nowString = now.ToString("yyyyMMddhhmmss");
@@ -79,11 +82,12 @@ namespace primaveraconsole
         public void lista_backups()
         {
             init();
-            string bkpdir = adm.SQLServer.DirectoriaBackup();
+            string backupsdir = Backupsdir;
+            if (backupsdir == null) backupsdir = adm.SQLServer.DirectoriaBackup();
 
-            //Common.WriteToConsoleOut( "bkpdir: " + bkpdir );
+            //Common.WriteToConsoleOut( "backupsdir: " + backupsdir );
 
-            DirectoryInfo dirInfo = new DirectoryInfo(bkpdir);
+            DirectoryInfo dirInfo = new DirectoryInfo(backupsdir);
             FileInfo[] filenames = dirInfo.GetFiles("*.*");
 
             // sort file names
@@ -194,7 +198,10 @@ namespace primaveraconsole
             xmlwriter.WriteAttributeString("incremental", incremental);
             xmlwriter.WriteAttributeString("overwrite", overwrite);
 
-            xmlwriter.WriteAttributeString("destination", adm.SQLServer.DirectoriaBackup());
+            string backupsdir = Backupsdir;
+            if( backupsdir==null ) backupsdir = adm.SQLServer.DirectoriaBackup();
+
+            xmlwriter.WriteAttributeString("destination", backupsdir);
             xmlwriter.WriteAttributeString("schedule", "{" + objCal.Id + "}");
 
             //Common.WriteToConsoleOut(" date: " + xmlreader.GetAttribute("date"));
@@ -528,7 +535,11 @@ namespace primaveraconsole
             Common.WriteToConsoleOut("Seguranca Pro Emp Activa: " + adm.Params.get_SegurancaPorEmpActiva());
             Common.WriteToConsoleOut("Modo Seguranca: " + adm.Params.get_SegurancaActiva());
             Common.WriteToConsoleOut("N Postos: " + adm.Postos.ListaPostos(ref _false).NumItens);
-            Common.WriteToConsoleOut("DirectoriaBackup: " + adm.SQLServer.DirectoriaBackup());
+
+            string backupsdir = Backupsdir;
+            if (backupsdir == null) backupsdir = adm.SQLServer.DirectoriaBackup();
+
+            Common.WriteToConsoleOut("DirectoriaBackup: " + backupsdir);
 
             StdBELista uList = adm.Consulta("SELECT * FROM utilizadores");
             Common.WriteToConsoleOut("N Utilizadores: " + uList.NumLinhas());

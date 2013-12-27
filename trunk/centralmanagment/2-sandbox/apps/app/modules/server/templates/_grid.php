@@ -43,8 +43,11 @@ $js_sfGuard = js_grid_info($sfGuardGroup_tableMap);
 Ext.namespace('Server');
 
 Server.Start = function(obj){
-                                var send_data = {'nid':obj.node_id,
-                                                 'server':obj.data['name']};
+                                var node_id = obj.node_id;
+                                var server_name = obj.data['name'];
+                                var server_id = obj.data['id'];
+                                var send_data = {'nid':node_id,
+                                                 'server':server_name};
 
                                 var start_openconsole = (obj.data['withconsole']) ? true : false;
 
@@ -61,6 +64,42 @@ Server.Start = function(obj){
                                     fn: function(btn){
                                         if (btn == 'yes'){
 
+                                            var scope_form = this;
+                                            AsynchronousJob.Functions.Create( 'server', 'start',
+                                                                                { 'server': server_name },
+                                                                                { 'node': node_id },
+                                                                                function(resp,opt) { // success fh
+                                                                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                                                                    AsynchronousJob.Functions.Create( 'server', 'check',
+                                                                                                                        { 'server': server_name },
+                                                                                                                        { 'node': node_id, 'check': 'running' },
+                                                                                                                        function(resp2,opt2){
+                                                                                                                            var res2 = Ext.util.JSON.decode(resp2.responseText);
+                                                                                                                            if( start_openconsole ){
+                                                                                                                                AsynchronousJob.Functions.CheckStatus(res2['asynchronousjob']['Id'],
+                                                                                                                                                    function(taskObj){
+                                                                                                                                                        if( taskObj['asynchronousjob']['Status'] == 'finished' ){
+                                                                                                                                                            var taskRes = taskObj['asynchronousjob']['Result'];
+                                                                                                                                                            if( taskRes ){
+                                                                                                                                                                taskResObj = Ext.util.JSON.decode(taskRes);
+                                                                                                                                                                if( taskResObj['success'] )
+                                                                                                                                                                {
+                                                                                                                                                                    Server.OpenConsole({'data':{'id':server_id,'vm_state':'running', 'sleep':'10'},'scope':obj.scope});
+                                                                                                                                                                }
+                                                                                                                                                            }
+                                                                                                                                                            return true;
+                                                                                                                                                        }
+                                                                                                                                                        return false;
+                                                                                                                                                    });
+                                                                                                                            }
+                                                                                                                        },
+                                                                                                                        null, response['asynchronousjob']['Id']);
+
+                                                                                    var sm = obj.grid.getSelectionModel();
+                                                                                    var sel = sm.getSelected();                                                            
+                                                                                    obj.grid.fireEvent('updateNodeState',{selected:false,parentNode:sel.data['node_id'],node:'s'+sel.data['id']},sel.data);
+                                                                                });
+                                            /*
                                             var conn = new Ext.data.Connection({
                                                 listeners:{
                                                     // wait message.....
@@ -107,6 +146,8 @@ Server.Start = function(obj){
                                                             icon: Ext.MessageBox.ERROR});
                                                 }
                                             });// END Ajax request
+                                            */
+
                                         }//END button==yes
                                     }// END fn
                                 }); //END Msg.show
@@ -178,6 +219,96 @@ Server.OpenConsole = function(obj){
                                 win.show();
                                 win.hide();
                 };
+
+Server.Stop = function(obj){
+                                var title = String.format(<?php echo json_encode(__('Stop server')) ?>);
+                                Ext.Msg.show({
+                                    title: title,
+                                    scope:this,
+                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                    msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,obj.data['vm_state'])+'<br>'
+                                         +String.format(<?php echo json_encode(__('Stop server {0} ?')) ?>,obj.data['name']),
+                                    icon: Ext.MessageBox.QUESTION,
+                                    fn: function(btn){
+
+                                        if (btn == 'yes'){
+
+                                            var node_id = obj.data['node_id'];
+                                            var server_name = obj.data['name'];
+                                            var forcestop = obj.forcestop;
+                                            AsynchronousJob.Functions.Create( 'server', 'stop',
+                                                                                { 'server': server_name },
+                                                                                { 'node': node_id, 'force': forcestop, 'destroy':forcestop },
+                                                                                function(resp,opt) { // success fh
+                                                                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                                                                    AsynchronousJob.Functions.Create( 'server', 'check',
+                                                                                                                        { 'server': server_name },
+                                                                                                                        { 'node': node_id, 'check': 'stop' },
+                                                                                                                        null,null, response['asynchronousjob']['Id']);
+                                                                                    store.reload({callback:function(){
+                                                                                            var sm = obj.grid.getSelectionModel();
+                                                                                            var sel = sm.getSelected();
+                                                                                            obj.grid.fireEvent('updateNodeState',{selected:false,parentNode:sel.data['node_id'],node:'s'+sel.data['id']},sel.data);
+                                                                                    }});
+                                                                                });
+                                            /*
+                                            var params = {'name':obj.data['name']};
+                                            var conn = new Ext.data.Connection({
+                                                listeners:{
+                                                    // wait message.....
+                                                    beforerequest:function(){
+                                                        Ext.MessageBox.show({
+                                                            title: <?php echo json_encode(__('Please wait...')) ?>,
+                                                            msg: <?php echo json_encode(__('Stoping virtual server...')) ?>,
+                                                            width:300,
+                                                            wait:true,
+                                                            modal: false
+                                                        });
+                                                    },// on request complete hide message
+                                                    requestcomplete:function(){Ext.MessageBox.hide();}
+                                                    ,requestexception:function(c,r,o){
+                                                        Ext.MessageBox.hide();
+                                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
+                                                }
+                                            });// end conn
+                                            conn.request({
+                                                url: <?php echo json_encode(url_for('server/jsonStop'))?>,
+                                                params: {'nid':node_id,'server': server_name, 'force': forcestop, 'destroy': forcestop},
+                                                scope:this,
+                                                success: function(resp,opt) {
+                                                    var response = Ext.util.JSON.decode(resp.responseText);
+                                                    Ext.ux.Logger.info(response['agent'],response['response']);
+
+
+                                                    store.reload({callback:function(){
+
+                                                            var sm = obj.grid.getSelectionModel();
+                                                            var sel = sm.getSelected();
+                                                            obj.grid.fireEvent('updateNodeState',{selected:false,parentNode:sel.data['node_id'],node:'s'+sel.data['id']},sel.data);
+                                                    }});
+
+
+
+                                                },
+                                                failure: function(resp,opt) {
+                                                    var response = Ext.util.JSON.decode(resp.responseText);
+
+                                                    Ext.ux.Logger.error(response['agent'], response['error']);
+
+                                                    Ext.Msg.show({
+                                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                                        width:300,
+                                                        buttons: Ext.MessageBox.OK,
+                                                        msg: String.format(<?php echo json_encode(__('Unable to stop virtual server {0}!')) ?>,server_name)+'<br>'+response['info'],
+                                                        icon: Ext.MessageBox.ERROR});
+                                                }
+                                            });// END Ajax request
+                                            */
+                                        }//END button==yes
+                                    }// END fn
+                                }); //END Msg.show
+                };
+
 Server.Grid = function(){
 
     return{        
@@ -616,70 +747,8 @@ $store_id = json_encode($js_grid['pk']);
                             var forcestop = ( item.menu.stop_force.checked ) ? 1 : 0;
 
                             if (sm.hasSelection()){
-                                Ext.Msg.show({
-                                    title: item.text,
-                                    scope:this,
-                                    buttons: Ext.MessageBox.YESNOCANCEL,
-                                    msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,sel.data['vm_state'])+'<br>'
-                                         +String.format(<?php echo json_encode(__('Stop server {0} ?')) ?>,sel.data['name']),
-                                    icon: Ext.MessageBox.QUESTION,
-                                    fn: function(btn){
-
-                                        if (btn == 'yes'){
-                                            var params = {'name':sel.data['name']};
-                                            var conn = new Ext.data.Connection({
-                                                listeners:{
-                                                    // wait message.....
-                                                    beforerequest:function(){
-                                                        Ext.MessageBox.show({
-                                                            title: <?php echo json_encode(__('Please wait...')) ?>,
-                                                            msg: <?php echo json_encode(__('Stoping virtual server...')) ?>,
-                                                            width:300,
-                                                            wait:true,
-                                                            modal: false
-                                                        });
-                                                    },// on request complete hide message
-                                                    requestcomplete:function(){Ext.MessageBox.hide();}
-                                                    ,requestexception:function(c,r,o){
-                                                        Ext.MessageBox.hide();
-                                                        Ext.Ajax.fireEvent('requestexception',c,r,o);}
-                                                }
-                                            });// end conn
-                                            conn.request({
-                                                url: <?php echo json_encode(url_for('server/jsonStop'))?>,
-                                                params: {'nid':this.node_id,'server': sel.data['name'], 'force': forcestop, 'destroy': forcestop},
-                                                scope:this,
-                                                success: function(resp,opt) {
-                                                    var response = Ext.util.JSON.decode(resp.responseText);
-                                                    Ext.ux.Logger.info(response['agent'],response['response']);
-
-
-                                                    store.reload({callback:function(){
-
-                                                            var sm = serverGrid.getSelectionModel();
-                                                            var sel = sm.getSelected();
-                                                            serverGrid.fireEvent('updateNodeState',{selected:false,parentNode:sel.data['node_id'],node:'s'+sel.data['id']},sel.data);
-                                                    }});
-
-
-
-                                                },
-                                                failure: function(resp,opt) {
-                                                    var response = Ext.util.JSON.decode(resp.responseText);
-
-                                                    Ext.ux.Logger.error(response['agent'], response['error']);
-
-                                                    Ext.Msg.show({
-                                                        title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
-                                                        width:300,
-                                                        buttons: Ext.MessageBox.OK,
-                                                        msg: String.format(<?php echo json_encode(__('Unable to stop virtual server {0}!')) ?>,sel.data['name'])+'<br>'+response['info'],
-                                                        icon: Ext.MessageBox.ERROR});
-                                                }
-                                            });// END Ajax request
-                                        }//END button==yes
-                                    }// END fn
-                                }); //END Msg.show
+                                var obj = { 'data':sel.data, scope: this, store: store, grid: serverGrid, 'node_id':this.node_id, 'forcestop': forcestop };
+                                Server.Stop(obj);
                             }//END if
                             else{
 
@@ -697,12 +766,46 @@ $store_id = json_encode($js_grid['pk']);
                                     ,checked: true
                                     ,group: 'stop_type'
                                     ,scope:this
+                                    ,handler: function(item) {
+                                        var sm = serverGrid.getSelectionModel();
+                                        var sel = sm.getSelected();
+
+                                        if (sm.hasSelection()){
+                                            var obj = { 'data':sel.data, scope: this, store: store, grid: serverGrid, 'node_id':this.node_id, 'forcestop': 0 };
+                                            Server.Stop(obj);
+                                        }//END if
+                                        else{
+
+                                            Ext.Msg.show({
+                                                title:item.text,
+                                                buttons: Ext.MessageBox.OK,
+                                                icon: Ext.MessageBox.INFO,
+                                                msg: item.el.child('button:first').dom.qtip});
+                                        }
+                                    }//END handler Stop
                                 },
                                 {
                                     text: <?php echo json_encode(__('Force stop')) ?>
                                     ,name:'forcestop',xtype:'menucheckitem',ref:'stop_force'
                                     ,group: 'stop_type'
                                     ,scope:this
+                                    ,handler: function(item) {
+                                        var sm = serverGrid.getSelectionModel();
+                                        var sel = sm.getSelected();
+
+                                        if (sm.hasSelection()){
+                                            var obj = { 'data':sel.data, scope: this, store: store, grid: serverGrid, 'node_id':this.node_id, 'forcestop': 1 };
+                                            Server.Stop(obj);
+                                        }//END if
+                                        else{
+
+                                            Ext.Msg.show({
+                                                title:item.text,
+                                                buttons: Ext.MessageBox.OK,
+                                                icon: Ext.MessageBox.INFO,
+                                                msg: item.el.child('button:first').dom.qtip});
+                                        }
+                                    }//END handler Stop
                                 }
                         ]
                     }

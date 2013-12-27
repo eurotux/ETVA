@@ -29,7 +29,8 @@ class EtvaPhysicalvolumePeer extends BaseEtvaPhysicalvolumePeer
 
   const _NONE_AVAILABLE_ = 'No physical volumes available';
 
-  const _ERR_INCONSISTENT_ = 'Shared physical volumes info reported inconsistent. %info%';
+  const _ERR_INCONSISTENT_ = 'Information of the physical volumes is reported as inconsistent. %info%';
+  const _ERR_SHARED_INCONSISTENT_ = 'Information of the shared physical volumes is reported as inconsistent. %info%';
 
   const _ERR_INIT_OTHER_CLUSTER_ = 'Node has some physical volumes that exists on cluster %name%.';  
   

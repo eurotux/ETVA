@@ -79,6 +79,7 @@ sub main {
         print help($method,"No method specified...");
     } else {
 
+        my $peer = $ENV{'va_peer'} || delete $Args{"peer"};
         my $port = $ENV{'va_port'} || delete $Args{"port"} || 7000;
         my $addr = $ENV{'va_addr'} || delete $Args{"addr"} || "localhost";
         my $uri = $ENV{'va_uri'} || delete $Args{'uri'} || 'http://www.eurotux.com/VirtAgent';
@@ -87,6 +88,7 @@ sub main {
 
         eval {
             my $client = new ETVA::Client::SOAP( address => $addr,
+                                            Peer => $peer,
                                             port => $port,
                                             proto=>'tcp',
                                             blocking=>$blocking );
@@ -109,7 +111,7 @@ sub main {
             }
         };
         if( $@ ){
-            print help($method,"Could possible connect to service...");
+            print help($method,"Could possible connect to service... $@");
         }
     }
 }

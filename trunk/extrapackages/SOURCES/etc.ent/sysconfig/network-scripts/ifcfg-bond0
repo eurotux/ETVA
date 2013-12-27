@@ -1,3 +1,4 @@
 DEVICE=bond0
 ONBOOT=yes
 BOOTPROTO=none
+NM_CONTROLLED="no"

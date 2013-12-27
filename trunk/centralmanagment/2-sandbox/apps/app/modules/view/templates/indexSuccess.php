@@ -57,6 +57,9 @@ use_javascript("ux/treegrid/TreeGrid.js");
 
 use_javascript('extjs/ext-util-format.js'); //load some util formats
 
+include_partial('asynchronousJob/grid');
+include_partial('asynchronousJob/functions');
+
 include_partial('node/storage');
 include_partial('cluster/changename');
 
@@ -737,6 +740,14 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 ,load:function(obj, node, resp ){
                                     var response = Ext.decode(resp.responseText);
 
+                                    /*var task = {
+                                        run: function(){
+                                            //Ext.fly('clock').update(new Date().format('g:i:s A'));
+                                            Ext.ux.Logger.info('teste','info teste');
+                                        },
+                                        interval: 10000 //1 second
+                                    }
+                                    Ext.TaskMgr.start(task);*/
                                 }
                             }
                         }),
@@ -1596,12 +1607,16 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                     }
                     ,startServer: function(btn, node){
                         
+                        var sId = node.attributes.id;
+                        var server_id = sId.replace('s','');
                         var server_name = node.attributes.text;
                         var nid = node.parentNode.attributes.id; 
                         var server_vm_state = node.attributes.vm_state;
 
                         var send_data = {'nid': nid,
                                          'server': server_name};
+
+                        var start_openconsole = false;  // TODO
 
                         Ext.Msg.show({
                             title: <?php echo json_encode(__('Start server')) ?>,
@@ -1612,6 +1627,39 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             fn: function(btn){
                                 if (btn == 'yes'){
 
+                                    AsynchronousJob.Functions.Create( 'server', 'start',
+                                                                        { 'server': server_name },
+                                                                        { 'node': nid },
+                                                                        function(resp,opt) { // success fh
+                                                                            var response = Ext.util.JSON.decode(resp.responseText);
+                                                                            AsynchronousJob.Functions.Create( 'server', 'check',
+                                                                                                                { 'server': server_name },
+                                                                                                                { 'node': nid, 'check': 'running' },
+                                                                                                                function(resp2,opt2){
+                                                                                                                    var res2 = Ext.util.JSON.decode(resp2.responseText);
+                                                                                                                    if( start_openconsole ){
+                                                                                                                        AsynchronousJob.Functions.CheckStatus(res2['asynchronousjob']['Id'],
+                                                                                                                                            function(taskObj){
+                                                                                                                                                if( taskObj['asynchronousjob']['Status'] == 'finished' ){
+                                                                                                                                                    var taskRes = taskObj['asynchronousjob']['Result'];
+                                                                                                                                                    if( taskRes ){
+                                                                                                                                                        taskResObj = Ext.util.JSON.decode(taskRes);
+                                                                                                                                                        if( taskResObj['success'] )
+                                                                                                                                                        {
+                                                                                                                                                            scope_form.openConsole( {'id':server_id, 'vm_state':'running', 'sleep':'10'} );
+                                                                                                                                                        }
+                                                                                                                                                    }
+                                                                                                                                                    return true;
+                                                                                                                                                }
+                                                                                                                                                return false;
+                                                                                                                                            });
+                                                                                                                    }
+                                                                                                                },
+                                                                                                                null, response['asynchronousjob']['Id']);
+                                                                            //var parentCmp = Ext.getCmp((item.scope).id);
+                                                                            //parentCmp.fireEvent('refresh',parentCmp);
+                                                                        });
+                                    /*
                                     var conn = new Ext.data.Connection({
                                         listeners:{
                                             // wait message.....
@@ -1649,6 +1697,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                 });
                                         }
                                     });// END Ajax request
+                                    */
+
                                 }//END button==yes
                             }// END fn
                         }); //END Msg.show
@@ -1681,6 +1731,20 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             fn: function(btn){
 
                                 if (btn == 'yes'){
+
+                                    AsynchronousJob.Functions.Create( 'server', 'stop',
+                                                                        { 'server': server_name },
+                                                                        { 'node': node_id, 'force': forcestop, 'destroy':forcestop },
+                                                                        function(resp,opt) { // success fh
+                                                                            var response = Ext.util.JSON.decode(resp.responseText);
+                                                                            AsynchronousJob.Functions.Create( 'server', 'check',
+                                                                                                                { 'server': server_name },
+                                                                                                                { 'node': node_id, 'check': 'stop' },
+                                                                                                                null,null, response['asynchronousjob']['Id']);
+                                                                            //var parentCmp = Ext.getCmp((item.scope).id);
+                                                                            //parentCmp.fireEvent('refresh',parentCmp);
+                                                                        });
+                                    /*
                                     var params = {'name':server_name};
                                     var conn = new Ext.data.Connection({
                                         listeners:{
@@ -1722,6 +1786,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                 icon: Ext.MessageBox.ERROR});
                                         }
                                     });// END Ajax request
+                                    */
                                 }//END button==yes
                             }// END fn
                         }); //END Msg.show
@@ -2458,44 +2523,26 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                  */
 
 
-
-
                 Ext.ux.Logger = function() {
                     var tpl = new Ext.Template("<div class='x-log-entry'><div class='x-log-level x-log-{0:lowercase}'>" +
                         "{0:capitalize}</div><span class='x-log-time'>{3:date('H:i:s')}</span>" +
                         "<span class='x-log-message'><b>{1}: </b>{2}</span></div>");
 
-                    var version_text = ''; //'<span style="color:#15428B; padding-left:3px; font-size:10px">';
-                    <?php if (sfConfig::get('config_version')): ?>;
-                        version_text += 'Ver. '+'<?php echo sfConfig::get('config_version'); ?>';
-                    <?php endif ?>
-                    
-                    <?php if (sfConfig::get('config_release')): ?>;
-                        version_text += ' Rel. '+'<?php echo sfConfig::get('config_release'); ?>';
-                    <?php endif ?>
-                    // version_text += '</span>';
-
                     return Ext.apply(new Ext.Panel({
+                        id: 'info-panel-logger',
                         region:'south',
                         // region:'center',
                         title: <?php echo json_encode(__('Info panel')) ?>,
-                        closeAction: 'hide',
-                        collapsible: true,
+                        headerAsText: false,
+                        //closeAction: 'hide',
+                        //collapsible: true,
                         margins: '0 3 3 3',
                         split: true,
                         useSplitTips: true,
                         height: 90,
                         autoScroll: true
                         ,tools:[{id:'help', qtip: __('Help'),handler:function(){View.showHelp({anchorid:'help-bottom-panel-main',autoLoad:{ params:'mod=view'},title: <?php echo json_encode(__('Info panel Help')) ?>});}}]
-                        ,bbar:[{   
-                                    cls: 'version_box',
-                                    xtype: 'tbtext',
-                                    text: version_text
-//                                },
-//                                {
-//                                    html: version_text
-                                    
-                                },'->',{
+                        ,bbar:['->',{
                                 text: __('Clear'),
                                 handler: function() {
                                     Ext.ux.Logger.body.update('');
@@ -2518,6 +2565,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 subject = '';
                             }
                             this.fn.call(tpl, this.body, ['debug', subject, msg, new Date()], true).scrollIntoView(this.body);
+                            Ext.getCmp('tasks-tab-panel').activate('info-panel-logger');
                         },
 
                         info: function(subject, msg) {
@@ -2526,6 +2574,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 subject = '';
                             }
                             this.fn.call(tpl, this.body, ['info', subject, msg, new Date()], true).scrollIntoView(this.body);
+                            Ext.getCmp('tasks-tab-panel').activate('info-panel-logger');
                         },
 
                         warning: function(subject, msg) {
@@ -2534,6 +2583,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 subject = '';
                             }
                             this.fn.call(tpl, this.body, ['warning', subject, msg, new Date()], true).scrollIntoView(this.body);
+                            Ext.getCmp('tasks-tab-panel').activate('info-panel-logger');
                         },
 
                         error: function(subject, msg) {
@@ -2542,6 +2592,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 subject = '';
                             }
                             this.fn.call(tpl, this.body, ['error', subject, msg, new Date()], true).scrollIntoView(this.body);
+                            Ext.getCmp('tasks-tab-panel').activate('info-panel-logger');
                         }
                     });
                 }();
@@ -2699,6 +2750,24 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                 });
 
 
+                /*var taskPanel = new AsynchronousJob.TaskPanel({
+                                                                title: <?php echo json_encode(__('Running tasks')) ?>, 
+                                                                headerAsText: false });
+                */
+                var taskGrid = new AsynchronousJob.TaskGrid({
+                                                                title: <?php echo json_encode(__('Running tasks')) ?>, 
+                                                                headerAsText: false });
+
+                var version_text = ''; //'<span style="color:#15428B; padding-left:3px; font-size:10px">';
+                <?php if (sfConfig::get('config_version')): ?>;
+                    version_text += 'Ver. '+'<?php echo sfConfig::get('config_version'); ?>';
+                <?php endif ?>
+                
+                <?php if (sfConfig::get('config_release')): ?>;
+                    version_text += ' Rel. '+'<?php echo sfConfig::get('config_release'); ?>';
+                <?php endif ?>
+                // version_text += '</span>';
+
                 var viewport = new Ext.Viewport({
                     layout:'border',
                     items:[
@@ -2709,7 +2778,30 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                             })
                         ,nodesPanel
                         ,mainPanel
-                        ,Ext.ux.Logger
+                        /*,Ext.ux.Logger*/
+                        ,new Ext.TabPanel({
+                            id: 'tasks-tab-panel',
+                            region:'south',
+                            activeTab: 0,
+                            split: true,
+                            //margins: '0 3 3 3',
+                            //defaults:{ minSize: 90, autoScroll: true },
+                            //autoScroll: true,
+                            margins: '0 3 3 3',
+                            height: 150,
+                            minSize: 150,
+                            maxSize: 300,
+                            items: [
+                                Ext.ux.Logger,
+                                taskGrid
+                            ]
+                            ,bbar:[{   
+                                        cls: 'version_box',
+                                        xtype: 'tbtext',
+                                        text: version_text
+                                    }
+                            ]
+                        })
                     ]
                     ,listeners:{
                         render:function(){
