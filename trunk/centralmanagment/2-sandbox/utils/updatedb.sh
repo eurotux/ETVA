@@ -85,10 +85,17 @@ echo "[INFO] clean event logs";
 # run flushlog to clean some event logs
 symfony event:flushlog
 
-echo "[INFO] backup database";
-# backup database data
-symfony propel:data-dump $BACKUPFILE
-BKPRES=$?
+BKPRES=0
+if [ ! -e "$BACKUPFILE" ]; then
+    echo "[INFO] backup database";
+    # backup database data
+    symfony propel:data-dump $BACKUPFILE
+    BKPRES=$?
+else
+    echo "[ERROR] Backup file '$BACKUPFILE' already exists! Process aborting.";
+    exit 1;
+fi
+
 cp $BACKUPFILE $BACKUPFILEMODIFIED;
 CPRES=$?
 if [ $BKPRES -ne 0 -o $CPRES -ne 0 ]; then

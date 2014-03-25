@@ -245,12 +245,11 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
 
                                 var bootlocation = Ext.getCmp('server-edit-config-boot-locationurl');
                                 if(bootlocation && !bootlocation.hidden){
-                                    var bootlocationurl = Ext.getCmp('server-edit-config-boot-locationurl-text');
-                                    bootlocationurl.setDisabled(false);
                                     bootlocation.setDisabled(false);
                                     if(bootlocation.getValue() == true){
-    //                                    var cdrom
-                                    }
+                                        var bootlocationurl = Ext.getCmp('server-edit-config-boot-locationurl-text');
+                                        bootlocationurl.setDisabled(false);
+				    }
                                 }else{
                                     var bootpxe = Ext.getCmp('server-edit-config-boot-pxe');
                                     if(bootpxe && !bootpxe.hidden)
@@ -311,15 +310,18 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                                 bootlocation.setDisabled(true);
                                 if(bootlocation.getValue() == true){
                                     showmsg = true;
-//                                    var cdrom
+                                    bootlocation.setValue(false);
+                                    var bootfs = Ext.getCmp('server-edit-config-boot-vmfilesystem');
+                                    bootfs.setValue(true);
                                 }
                             }else{
                                 var bootpxe = Ext.getCmp('server-edit-config-boot-pxe');
                                 if(bootpxe && !bootpxe.hidden){
                                     bootpxe.disable();
                                     if(bootpxe.getValue() == true){
-                                        var cdrom = Ext.getCmp('server-edit-config-boot-cdrom');
-                                        cdrom.setValue(true);
+					bootpxe.setValue(false);
+                                        var bootfs = Ext.getCmp('server-edit-config-boot-vmfilesystem');
+                                        bootfs.setValue(true);
                                         showmsg = true;
                                     }    
                                 }
@@ -327,7 +329,7 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                            
                             if(showmsg){
                                 var tabpanel = Ext.getCmp('server-edit-tabpanel');
-                                tabpanel.setActiveTab(0);
+                                tabpanel.setActiveTab(1);
             
                                 Ext.Msg.show({
                                     title: this.text,

@@ -41,7 +41,7 @@
             reader: new Ext.data.JsonReader({
                 root: 'response',
                 totalProperty: 'total'                
-            }, [{name: 'value', mapping:'id'},{name: 'text', mapping:'name'}])
+            }, [{name: 'value', mapping:'pv'},{name: 'text', mapping:'name'}])
         });
 
         this.vgname = new Ext.form.TextField({            
@@ -69,7 +69,10 @@
                                 height:200,
                                 width:150,
                                 legend: __('Selected'),
-                                store: [],
+                                store: new Ext.data.ArrayStore({
+				    fields: ['value','text'],
+				    data: []
+				}),
                                 tbar:[{
                                     text: __('Clear'),
                                     handler:function(){

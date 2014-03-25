@@ -149,11 +149,20 @@ lvwin.createForm.Main = function(node_id, level) {
             ,listeners:{
                 'loadexception':function(store,options,resp,error){
                     
-                    var response = Ext.util.JSON.decode(resp.responseText);
+                    console.log(resp);
+
+                    if(resp.status==401) return;
+
+                    var msg = <?php echo json_encode(__(EtvaVolumegroupPeer::_NOTAVAILABLE_)) ?>;
+
+                    if( resp.responseText ){
+                        var response = Ext.util.JSON.decode(resp.responseText);
+                        msg = response['error'];
+                    }
 
                     Ext.Msg.show({title: 'Error',
                         buttons: Ext.MessageBox.OK,
-                        msg: response['error'],
+                        msg: msg,
                         icon: Ext.MessageBox.ERROR});
                 }
 

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.11.4)  20 DEC 2013 17:25
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.11.4)  24 MAR 2014 11:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2816,7 +2816,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 83.
 Here is how much of TeX's memory you used:
  10782 strings out of 493356
  168069 string characters out of 6141781
- 272166 words of memory out of 5000000
+ 273166 words of memory out of 5000000
  13610 multiletter control sequences out of 15000+600000
  78119 words of font info for 128 fonts, out of 8000000 for 9000
  953 hyphenation exceptions out of 8191
@@ -2828,7 +2828,7 @@ t/fonts/type1/public/txfonts/txsy.pfb></usr/share/texlive/texmf-dist/fonts/type
 ic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pf
 b></usr/share/texlive/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on manual-etvm-cm.pdf (83 pages, 2971245 bytes).
+Output written on manual-etvm-cm.pdf (83 pages, 2971236 bytes).
 PDF statistics:
  1466 PDF objects out of 1728 (max. 8388607)
  1228 compressed objects within 13 object streams

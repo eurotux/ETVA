@@ -48,9 +48,47 @@ class EtvaAsynchronousJob extends BaseEtvaAsynchronousJob {
     }
 
 
+    private function register_runtask()
+    {
+        $runtask_file = $this->get_runtask_file();
+        file_put_contents($runtask_file,getmypid());
+    }
+    private function unregister_runtask()
+    {
+        $runtask_file = $this->get_runtask_file();
+        unlink($runtask_file);
+    }
+
+    private function get_runtask_file()
+    {
+        $var_run_dir = sfConfig::get('app_cron_alert_dir');
+        if( !$var_run_dir ) $var_run_dir = "/var/run/etva_etvm";
+
+        $task_file = "$var_run_dir/" . get_class($this) . "." . $this->getId() . ".task";
+
+        return $task_file;
+    }
+    private function acquireLock()
+    {
+        if( file_exists($this->get_runtask_file()) ) return false;
+        $this->register_runtask();
+        return true;
+    }
+    private function releaseLock()
+    {
+        $this->unregister_runtask();    // remove lock
+        return true;
+    }
     public function checkStatus($dispatcher = null)
     {
-        if( !$this->finished() ) return $this->handle($dispatcher);
+        $res = null;
+        //$res = array('success'=>false,'error'=>'already processed'); // TODO improve this message
+        if( $this->acquireLock() )
+        {
+            if( !$this->finished() ) $res = $this->handle($dispatcher);
+            $this->releaseLock();       // release lock
+        }
+        return $res;
     }
 
     private function runTask($dispatcher = null)

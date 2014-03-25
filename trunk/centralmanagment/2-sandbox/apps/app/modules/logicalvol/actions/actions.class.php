@@ -1513,8 +1513,11 @@ class logicalvolActions extends sfActions
         $msg_ok_type = EtvaLogicalvolumePeer::_OK_UNREGISTER_;
         $msg_err_type = EtvaLogicalvolumePeer::_ERR_UNREGISTER_;
 
-        // get node id from cluster context
-        $etva_node = EtvaNodePeer::getOrElectNode($request);
+        // get node id
+        if( !($etva_node = EtvaNodePeer::retrieveByPK($request->getParameter('nid'))) ){
+            // ... or elect from cluster context
+            $etva_node = EtvaNodePeer::getOrElectNode($request);
+        }
 
         if(!$etva_node){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));

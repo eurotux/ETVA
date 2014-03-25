@@ -199,6 +199,7 @@ sub dev_description{
         }
     }
 
+    $str = "Unknown (${idvendor}:${idproduct})" if( !$str );	# unkown string device
 #    my $tmp = `cat $filename | egrep -e '^$idvendor'`;
 #    chomp $tmp;
 #    $tmp =~ s/^$idvendor\s*//;

@@ -3151,6 +3151,11 @@ sub create_network {
             }
 
             $if = $N{'ifout'} = $p{'ifout'} = $I->{'device'};
+
+            # create network boot script
+            my %br = ( 'name'=>$N{'bridge'}, 'type'=>'Bridge', 'bootproto'=>'none', 'up'=>1 );
+            VirtAgent::Network->save_boot_interface( 'name'=>$N{'bridge'}, %br );
+
         } else {
             my ($ipaddr,$netmask,$network,$gateway) = VirtAgent::Network->get_ipaddr( 'if'=>$if );
 

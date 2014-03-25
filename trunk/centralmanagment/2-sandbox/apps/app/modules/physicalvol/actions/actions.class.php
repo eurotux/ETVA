@@ -539,9 +539,11 @@ class physicalvolActions extends sfActions
         if(sfConfig::get('sf_environment') == 'soap'){
             foreach ($etva_pvs as $elem){
                 $etva_pv = $elem->getEtvaPhysicalVolume();
+                $uuid = $etva_pv->getUuid();
                 $id = $etva_pv->getId();
-                $pv = $etva_pv->getPv();                
-                $elements[$id] = array('id'=>$id,'pv'=>$pv);
+                $name = $etva_pv->getName();
+                $pv = $etva_pv->getPv();
+                $elements[$id] = array('id'=>$id,'pv'=>$pv,'name'=>$name, 'uuid'=>$uuid);
             }
 
         }else{
@@ -552,11 +554,11 @@ class physicalvolActions extends sfActions
                 }elseif($level == 'cluster'){
                     $etva_pv = $elem;
                 }
-                // $id = $elem->getId();
-                //error_log(print_r($etva_pv, true));
+                $uuid = $etva_pv->getUuid();
+                $id = $etva_pv->getId();
                 $name = $etva_pv->getName();
-                $pv = $etva_pv->getPv();                
-                $elements[] = array('id'=>$pv,'name'=>$name);
+                $pv = $etva_pv->getPv();
+                $elements[] = array('id'=>$id, 'pv'=>$pv,'name'=>$name, 'uuid'=>$uuid);
             }
 
         }
@@ -942,8 +944,11 @@ class physicalvolActions extends sfActions
         //adding cluster id filter
         $elements = array();
 
-        // get node id from cluster context
-        $etva_node = EtvaNodePeer::getOrElectNode($request);
+        // get node id
+        if( !($etva_node = EtvaNodePeer::retrieveByPK($request->getParameter('nid'))) ){
+            // ... or elect from cluster context
+            $etva_node = EtvaNodePeer::getOrElectNode($request);
+        }
 
         if(!$etva_node){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));

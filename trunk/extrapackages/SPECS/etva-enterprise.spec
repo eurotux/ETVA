@@ -1,6 +1,6 @@
 Name: etva-enterprise
 Summary: ETVA enterprise related files
-Version: 2.1.0
+Version: 2.1.1
 Release: 13%{?dist}
 Group: System Environment/Base
 Source0: lvm.conf

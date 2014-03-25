@@ -2324,6 +2324,10 @@
         <source>Some changes will take effect after next restart of virtual server {0}.</source>
         <target>Algumas alterações serão efectivas após reiniciar o servidor virtual {0}.</target>
       </trans-unit>
+      <trans-unit id="edit_server_need_stop_start_msg">
+        <source>Some changes will take effect after complete shutdown and start again the virtual server {0}.</source>
+        <target>Algumas alterações serão efectivas após encerrar completamente e iniciar o servidor virtual {0}.</target>
+      </trans-unit>
       <trans-unit id="load_server_panel">
         <source>Loading server {0} panel...</source>
         <target>A carregar o painel {0} do servidor...</target>

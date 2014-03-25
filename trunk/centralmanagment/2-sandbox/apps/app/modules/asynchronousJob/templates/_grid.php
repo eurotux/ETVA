@@ -51,7 +51,7 @@ AsynchronousJob.TaskGrid = function(config){
                                 renderer: function (value, metadata){
                                             if( value=='success' ){
                                                 metadata.attr = 'style="background-color: green;color:white;"';
-                                            } else if( value=='pending' || value=='waiting' || value=='leased' ){
+                                            } else if( value=='pending' || value=='waiting' || value=='leased' || value=='queued' ){
                                                 metadata.attr = 'style="background-color: yellow;color:black;"';
                                             } else {
                                                 metadata.attr = 'style="background-color: red;color:white;"';

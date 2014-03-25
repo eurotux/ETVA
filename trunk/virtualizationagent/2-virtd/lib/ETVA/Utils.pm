@@ -911,7 +911,7 @@ sub parseSoapType {
     } elsif( lc($value) eq 'false' ){
         $type = 'boolean';
     } elsif( $value =~ m/^\d+$/ ){
-        $type = 'int';
+        $type = (length($value) < 32) ? 'int' : 'string';
     } elsif( $value =~ m/^\w+$/ ){
         $type = 'string';
     }

@@ -1257,7 +1257,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                     Ext.Msg.show({
                         title: String.format(<?php echo json_encode(__('Server changes')) ?>),
                         buttons: Ext.MessageBox.OK,
-                        msg: String.format(<?php echo json_encode(__('Some changes will take effect after next restart of virtual server {0}.')) ?>,name),
+                        msg: String.format(<?php echo json_encode(__('Some changes will take effect after complete shutdown and start again the virtual server {0}.')) ?>,name),
                         icon: Ext.MessageBox.INFO,
                         scope: this,
                         fn: function(btn){

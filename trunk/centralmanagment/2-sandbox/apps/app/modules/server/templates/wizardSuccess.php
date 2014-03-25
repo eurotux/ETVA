@@ -1729,12 +1729,15 @@
             networks.push(Ext.encode(network));
         }
         
+        var description = '';
+        if( send_data['description'] ) description = '"' + send_data['description'] + '"';
+
         AsynchronousJob.Functions.Create( 'server', 'create',
                                             { 'name': send_data['name'],
                                                 'vm_type': send_data['vm_type'], 'vm_os': send_data['vm_os'],
                                                 'mem': send_data['mem'], 'vcpu': send_data['vcpu'], 'boot': send_data['boot'] },
                                             { 'node': config.nodeId, 'location': send_data['location'],
-                                                'description': send_data['description'], 'ip': send_data['ip'],
+                                                'description': description, 'ip': send_data['ip'],
                                                 'disks': disks, 'networks': networks},
                                             function(resp,opt) { // success fh
                                                 var response = Ext.util.JSON.decode(resp.responseText);

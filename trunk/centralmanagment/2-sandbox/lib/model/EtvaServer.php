@@ -159,9 +159,10 @@ class EtvaServer extends BaseEtvaServer
    */
   public function getDevices_VA()
   {
-    $devices = $this->getDevices();
+    $devices = array();
 
-    $devices = json_decode($devices);
+    if( $devices = $this->getDevices() )
+        $devices = json_decode($devices);
 
     if(!$devices) $devices = array();
 
@@ -184,8 +185,12 @@ class EtvaServer extends BaseEtvaServer
    */
   public function controllers_VA()
   {
-    $devices_str = $this->getDevices();
-    $devices_arr = json_decode($devices_str);
+    $devices_arr = array();
+
+    if( $devices_str = $this->getDevices() )
+        $devices_arr = json_decode($devices_str);
+
+    if( !$devices_arr ) $devices_arr = array();
 
     $controllers_uniq = array();
     $controllers_to_send = array();
@@ -193,8 +198,10 @@ class EtvaServer extends BaseEtvaServer
     {
         if(!empty($d->controller)){
             $type = $d->controller;
-            if( !$controllers_uniq["$type"] ){
+            if(!isset($controllers_uniq["$type"]))
+            {
                 $controllers_to_send[] = "type=$type";
+                if(!isset($controllers_uniq["$type"])) $controllers_uniq["$type"] = 0;
                 $controllers_uniq["$type"]++;
             }
         }
@@ -279,7 +286,7 @@ class EtvaServer extends BaseEtvaServer
                          'controllers'=>$controllers
       );
       //if( $devices ) $server_VA['no_tablet'] = true;
-
+ 
       return $server_VA;
 
   }

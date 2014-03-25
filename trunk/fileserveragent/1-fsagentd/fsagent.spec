@@ -1,5 +1,5 @@
 Name: etva-fsagent
-Version: 2.1.0
+Version: 2.1.1
 Release: beta
 Summary: File Server Agent
 License: GPL

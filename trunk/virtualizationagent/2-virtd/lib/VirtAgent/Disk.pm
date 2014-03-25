@@ -1843,7 +1843,7 @@ sub insert_disk {
 sub cp_devicehash {
     my ($D,@fields) = @_;
     if( !@fields ){
-        @fields = qw( pvinit size freesize logical device allocatable exported mounted mountpoint partition partitioned uuid pv_uuid mp_uuid pv pvsize pvfreesize vg vgsize vgfreesize lv type lvm swap nopartitions fs_type dtype type diskdevice major minor multipath);  
+        @fields = qw( pvinit size freesize logical device allocatable exported mounted mountpoint partition partitioned uuid pv_uuid mp_uuid pv pvsize pvfreesize vg vgsize vgfreesize lv type lvm swap nopartitions fs_type dtype type diskdevice major minor multipath aliasdevice devmapper);  
     }
     my %H = ();
     for my $k (@fields){
@@ -1939,6 +1939,23 @@ create physical volume
 #
 #   args: device
 #   res: ok
+
+sub get_valid_physicaldevice {
+    my ($PD,@fields) = @_;
+
+    push(@fields,('device','devmapper','aliasdevice')); # add default fields
+
+    my $device = '';
+
+    # TODO get from /etc/lvm/lvm.conf
+    my @filter_pattern = ( "[hs][a-z][0-9]?", "cciss/c0d0", "mapper/mpath" );
+
+    for my $n (@fields){
+        $device = $PD->{"$n"};
+        last if( grep { $device =~ m#$_# } @filter_pattern );
+    }
+    return $device;
+}
 sub pvcreate {
     my $self = shift;
     my ($device) = my %p = @_;
@@ -1950,16 +1967,19 @@ sub pvcreate {
 
     if( my $PD = $self->getphydev(%p, 'name'=>$dn) ){ 
         if( !$self->getpv(%p, 'name'=>$dn) ){
-            $device = $PD->{'device'};
+            if( $device = &get_valid_physicaldevice($PD) ){
 
-            my ($e,$m) = cmd_exec("pvcreate $device");
+                my ($e,$m) = cmd_exec("pvcreate $device");
 
-            $self->loaddiskdev(1);  # update disk device info
-            unless( $e == 0 ){
-                return retErr("_ERR_DISK_PVCREATE_","Error creating physical volume.");
+                $self->loaddiskdev(1);  # update disk device info
+                unless( $e == 0 ){
+                    return retErr("_ERR_DISK_PVCREATE_","Error creating physical volume.");
+                }
+                my $PV = $self->getpv(%p, 'name'=>$dn);
+                return retOk("_OK_PVCREATE_","Physical volume successfully created.","_RET_OBJ_",$PV);
+            } else {
+                return retErr("_INVALID_DISK_DEVICE_","Invalid disk device");
             }
-            my $PV = $self->getpv(%p, 'name'=>$dn);
-            return retOk("_OK_PVCREATE_","Physical volume successfully created.","_RET_OBJ_",$PV);
         } else {
             return retErr("_ERR_DISK_DEVICE_ALREADY_INIT_","Disk device already initialized");
         }
@@ -1992,20 +2012,23 @@ sub pvremove {
     $self->loaddiskdev();
 
     if( my $PV = $self->getpv(%p, 'name'=>"$dn") ){
-        $device = $PV->{'device'};
-        my ($e,$m) = cmd_exec("pvremove",$device);
-        $self->loaddiskdev(1);  # update disk device info
-        unless( $e == 0 ){
-            return retErr("_ERR_DISK_PVREMOVE_","Error remove physical volume: $m");
+        if( $device = &get_valid_physicaldevice($PV, 'pv') ){
+            my ($e,$m) = cmd_exec("pvremove",$device);
+            $self->loaddiskdev(1);  # update disk device info
+            unless( $e == 0 ){
+                return retErr("_ERR_DISK_PVREMOVE_","Error remove physical volume: $m");
+            }
+            if( my $PD = $self->getphydev( %p, 'name'=>$dn ) ){
+                # update new device and alias device
+                $PV->{'device'} = $PD->{'device'};
+                $PV->{'aliasdevice'} = $PD->{'aliasdevice'};
+            }
+            return retOk("_OK_PVREMOVE_","Physical volume successfully removed.","_RET_OBJ_",$PV);
+        } else {
+            return retErr("_INVALID_PV_","Invalid physical volume '$dn'.");
         }
-        if( my $PD = $self->getphydev( %p, 'name'=>$dn ) ){
-            # update new device and alias device
-            $PV->{'device'} = $PD->{'device'};
-            $PV->{'aliasdevice'} = $PD->{'aliasdevice'};
-        }
-        return retOk("_OK_PVREMOVE_","Physical volume successfully removed.","_RET_OBJ_",$PV);
     } else {
-        return retErr("_INVALID_PV_","Invalid physical volume.");
+        return retErr("_INVALID_PV_","Invalid physical volume '$dn'.");
     }
 }
 
@@ -2037,18 +2060,21 @@ sub pvresize {
     $self->loaddiskdev();
 
     if( my $PV = $self->getpv(%p, 'name'=>"$dn") ){
-        $device = $PV->{'pv'} || $PV->{'device'};
-        my @a_size = ();
-        push( @a_size, "--setphysicalvolumesize", $size ) if( $size );
-        my ($e,$m) = cmd_exec("pvresize",@a_size,$device);
-        $self->loaddiskdev(1);  # update disk device info
-        unless( $e == 0 ){
-            return retErr("_ERR_DISK_PVRESIZE_","Error resizing physical volume.");
+        if( $device = &get_valid_physicaldevice($PV, 'pv') ){
+            my @a_size = ();
+            push( @a_size, "--setphysicalvolumesize", $size ) if( $size );
+            my ($e,$m) = cmd_exec("pvresize",@a_size,$device);
+            $self->loaddiskdev(1);  # update disk device info
+            unless( $e == 0 ){
+                return retErr("_ERR_DISK_PVRESIZE_","Error resizing physical volume.");
+            }
+            $PV = $self->getpv(%p, 'name'=>"$dn");
+            return retOk("_OK_PVRESIZE_","Physical volume successfully resized.","_RET_OBJ_",$PV);
+        } else {
+            return retErr("_INVALID_PV_","Invalid physical volume '$dn'.");
         }
-        $PV = $self->getpv(%p, 'name'=>"$dn");
-        return retOk("_OK_PVRESIZE_","Physical volume successfully resized.","_RET_OBJ_",$PV);
     } else {
-        return retErr("_INVALID_PV_","Invalid physical volume.");
+        return retErr("_INVALID_PV_","Invalid physical volume '$dn'.");
     }
 }
 
@@ -2158,10 +2184,17 @@ sub vgcreate {
 
     my @lpv = ();
     for my $pd (@pv){
+        next if( ref($pd) );    # ignore no string cases
         my $uuid;
         $uuid = $pd if( $pd !~ m/^\/dev/ );
         if( my $PV = $self->getpv( 'device'=>$pd, 'uuid'=>$uuid ) ){
-            push(@lpv,$PV->{'device'});
+            if( my $pvdevice = &get_valid_physicaldevice($PV, 'pv') ){
+                push(@lpv,$pvdevice);
+            } else {
+                return retErr("_ERR_VGCREATE_INVALID_PV_","Error creating volume group: invalid physical volume '$pd'.");
+            }
+        } else {
+            return retErr("_ERR_VGCREATE_INVALID_PV_","Error creating volume group: invalid physical volume '$pd'.");
         }
     }
     if( !$self->getvg( %p, 'name'=>$vgname ) ){
@@ -2251,10 +2284,17 @@ sub vgextend {
 
     my @lpv = ();
     for my $pd (@pv){
+        next if( ref($pd) );    # ignore no string cases
         my $uuid;
         $uuid = $pd if( $pd !~ m/^\/dev/ );
         if( my $PV = $self->getpv( 'device'=>$pd, 'uuid'=>$uuid ) ){
-            push(@lpv,$PV->{'device'});
+            if( my $pvdevice = &get_valid_physicaldevice($PV, 'pv') ){
+                push(@lpv,$pvdevice);
+            } else {
+                return retErr("_ERR_VGEXTEND_INVALID_PV_","Error extend volume group: invalid physical volume '$pd'.");
+            }
+        } else {
+            return retErr("_ERR_VGEXTEND_INVALID_PV_","Error extend volume group: invalid physical volume '$pd'.");
         }
     }
     if( my $VG = $self->getvg( %p, 'name'=>$vgname ) ){
@@ -2298,10 +2338,17 @@ sub vgreduce {
 
     my @lpv = ();
     for my $pd (@pv){
+        next if( ref($pd) );    # ignore no string cases
         my $uuid;
         $uuid = $pd if( $pd !~ m/^\/dev/ );
         if( my $PV = $self->getpv( 'device'=>$pd, 'uuid'=>$uuid ) ){
-            push(@lpv,$PV->{'device'});
+            if( my $pvdevice = &get_valid_physicaldevice($PV, 'pv') ){
+                push(@lpv,$pvdevice);
+            } else {
+                return retErr("_ERR_VGREDUCE_INVALID_PV_","Error reduce volume group: invalid physical volume '$pd'.");
+            }
+        } else {
+            return retErr("_ERR_VGREDUCE_INVALID_PV_","Error reduce volume group: invalid physical volume '$pd'.");
         }
     }
     if( my $VG = $self->getvg( %p, 'name'=>$vgname ) ){
@@ -2352,20 +2399,23 @@ sub vgpvremove {
         $vgname = $VG->{'vg_name'};
 
         if( $PV ){
-            $pv = $PV->{'device'};
-            my ($e,$m) = cmd_exec("vgreduce",$vgname,$pv);
+            if( $pv = &get_valid_physicaldevice($PV, 'pv') ){
+                my ($e,$m) = cmd_exec("vgreduce",$vgname,$pv);
 
-            $self->loaddiskdev(1);  # update disk device info
-            unless( $e == 0 ){
-                return retErr("_ERR_DISK_VGPVREMOVE_","Error remove physical volume from volume group.");
+                $self->loaddiskdev(1);  # update disk device info
+                unless( $e == 0 ){
+                    return retErr("_ERR_DISK_VGPVREMOVE_","Error remove physical volume from volume group.");
+                }
+
+                return retOk("_OK_VGPVREMOVE_","Physical volume successfully removed from volume group.","_RET_OBJ_",$PV);
+            } else {
+                return retErr("_INVALID_PV_","Invalid physical volume '$pv'.");
             }
-
-            return retOk("_OK_VGPVREMOVE_","Physical volume successfully removed from volume group.","_RET_OBJ_",$PV);
         } else {
-            return retErr("_INVALID_PV_","Invalid physical volume.");
+            return retErr("_INVALID_PV_","Invalid physical volume '$pv'.");
         }
     } else {
-        return retErr("_INVALID_VG_","Invalid volume group.");
+        return retErr("_INVALID_VG_","Invalid volume group '$vgname'.");
     }
 }
 
@@ -3522,11 +3572,11 @@ sub device_loadtable {
         my $dmsetup_cmd = &dmsetup_cmd();
         open(DMSETUP_LOAD,"| $dmsetup_cmd load $device 2>/dev/null");
         for my $l (@$table){
-            while( my ($tok) = ( $l =~ m/{(.+)}/ ) ){ # resolve major:minor to device/uuid
+            while( my ($tok) = ( $l =~ m/\{(.+)\}/ ) ){ # resolve major:minor to device/uuid
                 my %q = ( $tok =~ m/\/dev\// ) ? ('device'=>$tok) : ('uuid'=>$tok);
                 if( my $PD = $self->getphydev(%q) ){ 
                     my ($major,$minor) = ($PD->{'major'},$PD->{'minor'});
-                    $l =~ s/{$tok}/${major}:${minor}/;
+                    $l =~ s/\{$tok\}/${major}:${minor}/;
                 }
             }
             plog("device_loadtable: $l") if( &debug_level > 3 );

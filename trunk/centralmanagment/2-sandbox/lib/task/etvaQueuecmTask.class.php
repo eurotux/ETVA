@@ -6,6 +6,7 @@ class etvaQueuecmTask extends sfBaseTask
   protected $workers = array();
   protected $max_workers = 3;
 
+  protected $main_worker  = 0;
   protected $abort_worker = 0;
 
   protected $context;
@@ -16,6 +17,12 @@ class etvaQueuecmTask extends sfBaseTask
   protected $last_min;
   protected $last_hour;
   protected $last_day;
+
+  protected $queueTasks;
+  protected $queueTasks_msg_type = 1;
+  protected $queueTasks_identifier = 'Q';
+
+  protected $sem_task_base_id = 765;
 
   protected function configure()
   {
@@ -137,10 +144,62 @@ EOF;
     $this->context->shutdown();
   }
 
-  private function launch_worker($arguments,$options)
+  private function launch_asyncJob_worker($arguments, $options)
   {
     if( count($this->workers) < $this->max_workers )
     {
+        $cpid = pcntl_fork();
+
+        if( 0 === $cpid )
+        {
+            $this->log("[INFO] Worker - new with pid=".getmypid());
+
+            // dequeue task
+            $aJob_id = $this->dequeue_task();
+
+            if( $aJob_id )
+            {
+                $sem_lock = $this->init_proctask_lock($aJob_id);
+                if( $this->acquire_proctask_lock($sem_lock) )   // acquire lock
+                {
+                    // init database
+                    $this->init_database($arguments,$options);
+
+                    $aJob = EtvaAsynchronousJobPeer::retrieveByPK( $aJob_id );
+
+                    $this->log("[INFO] Worker - check status of request task id=".$aJob->getId()."   task=".$aJob->getTasknamespace().":".$aJob->getTaskname()." pid=".getmypid());
+                    $res = $aJob->checkStatus($this->dispatcher);
+                    if( isset($res['success']) && (!$res['success']) ){
+                        $this->log("[ERROR] Worker - Error execute task id=".$aJob->getId()." pid=".getmypid()." ".$res['error']);
+                    } else {
+                        //$this->log("[INFO] Worker - Task with id=".$aJob->getId()." pid=".getmypid(). " ... finished");
+                    }
+
+                    // close database
+                    $this->close_database($arguments,$options);
+
+                    $this->release_proctask_lock($sem_lock);    // release lock
+                }
+            }
+            exit(0);
+        }
+        else
+        {
+            array_push($this->workers, $cpid);
+        }
+    }
+  }
+
+  private function launch_worker($arguments,$options)
+  {
+    if( !$this->main_worker )
+    {
+        // launch workers
+        for($i=0; $i < $this->max_workers; $i++)
+        {
+            $this->launch_asyncJob_worker($arguments,$options);
+        }
+
         $cpid = pcntl_fork();
 
         if( 0 === $cpid )
@@ -154,7 +213,7 @@ EOF;
 
             // query
             $query_asyncJobs = EtvaAsynchronousJobQuery::create()
-                                ->add(EtvaAsynchronousJobPeer::STATUS,array(EtvaAsynchronousJob::LEASED,EtvaAsynchronousJob::ABORTED,EtvaAsynchronousJob::INVALID,EtvaAsynchronousJob::FINISHED),Criteria::NOT_IN)  // not this cases
+                                ->add(EtvaAsynchronousJobPeer::STATUS,array(EtvaAsynchronousJob::QUEUED,EtvaAsynchronousJob::LEASED,EtvaAsynchronousJob::ABORTED,EtvaAsynchronousJob::INVALID,EtvaAsynchronousJob::FINISHED),Criteria::NOT_IN)  // not this cases
                                 ->addOr(EtvaAsynchronousJobPeer::STATUS,null, Criteria::ISNULL)
                                 ->addAnd(EtvaAsynchronousJobPeer::RUN_AT,null, Criteria::ISNULL)
                                 ->addOr(EtvaAsynchronousJobPeer::RUN_AT,time(), CRITERIA::LESS_THAN);
@@ -166,23 +225,22 @@ EOF;
             for($i=0; ($i < count($asyncJobs)) && $this->running; $i++)
             {
                 $aJob = $asyncJobs[$i];
-
-                $this->log("[INFO] Worker - check status of request task id=".$aJob->getId());
-                $this->log("   task=".$aJob->getTasknamespace().":".$aJob->getTaskname() );
-
-                if( $aJob->dependsFinished() )
+                if( $aJob->dependsFinished() )  // no dependencies
                 {
-                    $res = $aJob->checkStatus($this->dispatcher);
-                    if( isset($res['success']) && (!$res['success']) ){
-                        $this->log("  error: ".$res['error']);
-                    }
+                    $this->log("[INFO] MainWorker - enqueue task id=".$aJob->getId()." status=".$aJob->getStatus()." pid=".getmypid());
+
+                    $aJob->setStatus(EtvaAsynchronousJob::QUEUED); // mark as queued
+                    $aJob->save();
+
+                    $this->enqueue_task($aJob);     // enqueue
+
                 } else {
-                    $this->log("  depends: ".$aJob->getDepends());
+                    //$this->log("[WARN] Worker - Task with id=".$aJob->getId()." pid=".getmypid()."  depends: ".$aJob->getDepends());
                 }
             }
             if( !$this->running )
             {
-                $this->log("[INFO] Worker exit normally....");
+                $this->log("[INFO] MainWorker exit normally....");
             }
 
             $this->close_database($arguments,$options);
@@ -190,10 +248,11 @@ EOF;
             exit(0);
 
         } else {
-            array_push($this->workers, $cpid);
+            $this->main_worker = $cpid;    // regist main worker
+            sleep(5);
         }
     } else {
-        //$this->log("[WARN] max of workers exceeded");
+        //$this->log("[WARN] main worker already running");
     }
   }
 
@@ -263,7 +322,13 @@ EOF;
         //pcntl_waitpid($status);
     }
 
-    if( $cpid = $this->abort_worker )
+    if( $cpid == $this->main_worker )
+    {
+        posix_kill( $cpid , SIGTERM );
+        sleep(2);
+        pcntl_waitpid(-1,$status, WNOHANG);
+    }
+    if( $cpid == $this->abort_worker )
     {
         posix_kill( $cpid , SIGTERM );
         sleep(2);
@@ -308,8 +373,17 @@ EOF;
   {
     if( $this->abort_worker == $dead_pid )
     {
+        //$this->log("[DEBUG] abort worker dead pid=$dead_pid");
         $this->abort_worker = 0;    // reset
-    } else {
+    }
+    else if( $this->main_worker == $dead_pid )
+    {
+        //$this->log("[DEBUG] main worker dead pid=$dead_pid");
+        $this->main_worker = 0;    // reset
+    }
+    else
+    {
+        //$this->log("[DEBUG] normal worker dead pid=$dead_pid");
         $aux_workers = array();
         foreach($this->workers as $pid)
         {
@@ -317,6 +391,69 @@ EOF;
         }
         $this->workers = $aux_workers;
     }
+  }
+
+  private function init_queue_tasks()
+  {
+    // queue of response
+    $this->queueTasks = msg_get_queue(ftok(__FILE__, $this->queueTasks_identifier));
+    $this->lockReceiveTask = sem_get(ftok(__FILE__, $this->queueTasks_identifier));
+  }
+  private function enqueue_task($task)
+  {
+    msg_send($this->queueTasks, $this->queueTasks_msg_type, $task->getId());
+  }
+  private function acquire_queue_lock()
+  {
+    if( sem_acquire($this->lockReceiveTask) ) return true;
+    return false;
+  }
+  private function release_queue_lock()
+  {
+    return sem_release($this->lockReceiveTask);    // release lock
+  }
+  private function dequeue_task($desiredType = null, $wait = true)
+  {
+    if( !$desiredType ) $desiredType = $this->queueTasks_msg_type;
+    $option_receive = $wait ? 0 : MSG_IPC_NOWAIT;
+
+    $stats = msg_stat_queue($this->queueTasks);
+    $queueMessageSize = $stats['msg_qbytes'];
+
+    if( $this->acquire_queue_lock() )   // acquire lock
+    {
+        $status = msg_receive($this->queueTasks, $desiredType, $type, $queueMessageSize, $mixed, true, $option_receive);
+        $this->release_queue_lock();    // release lock
+        if( $status == true ){
+            return $mixed;
+        }
+    }
+  }
+  private function destroy_queue_tasks()
+  {
+    msg_remove_queue($this->queueTasks);
+    sem_remove($this->lockReceiveTask);
+  }
+
+  private function init_proctask_lock($task_id)
+  {
+    $id = $this->sem_task_base_id + $task_id;
+    #$this->log("[DEBUG] init_proctask_lock task_id=$task_id semid=$id");
+    return sem_get($id);
+  }
+  private function acquire_proctask_lock($sem_lock)
+  {
+    #$this->log("[DEBUG] acquire_proctask_lock sem_lock=$sem_lock");
+    if( sem_acquire($sem_lock) ) return true;
+    return false;
+  }
+  private function release_proctask_lock($sem_lock)
+  {
+    #$this->log("[DEBUG] release_proctask_lock sem_lock=$sem_lock");
+    $re = sem_release($sem_lock);
+    sleep(1);   // wait some secs
+    sem_remove($sem_lock);
+    return $res;
   }
 
   // init the queue manager
@@ -335,6 +472,8 @@ EOF;
             pcntl_signal(SIGUSR1, array(&$this, 'inc_workers'));
             pcntl_signal(SIGUSR2, array(&$this, 'dec_workers'));
 
+            $this->init_queue_tasks();
+
             while ($this->running)
             {
                 if( $this->alarm_handler(5) )   // 5 min
@@ -347,13 +486,14 @@ EOF;
                 }
 
                 // wait...
-                sleep(1);
+                sleep(5);
             }
 
             $this->log("[INFO] Queue manager goes exit ...");
             $this->shutdown_queue_manager();
             $this->log("[INFO] ...exit...");
 
+            $this->destroy_queue_tasks();
             $this->unregister_pid();
         }
     } else {

@@ -323,13 +323,18 @@ sub valid_ipaddr {
 }
 
 # aux func validate netmask
+sub valid_netmask_range {
+    my ($v) = @_;
+    my @r = (255,254,252,248,240,224,192,128,0);
+    return (( grep { $v==$_ } @r ) ? 1 : 0);
+}
 sub valid_netmask {
     my ($ip) = @_;
     return ( ( $ip =~ m/(\d+)\.(\d+)\.(\d+)\.(\d+)/ ) && 
-                ( ($1 == 255 && $2 == 0 && $3 == 0 && $4 == 0) ||
-                    ($1 == 255 && $2 == 255 && $3 == 0 && $4 == 0) ||
-                    ($1 == 255 && $2 == 255 && $3 == 255 && $4 == 0) ||
-                    ($1 == 255 && $2 == 255 && $3 == 255 && $4 == 255) ) ) ? 1 : 0;
+                ( (&valid_netmask_range($1) && $2 == 0 && $3 == 0 && $4 == 0) ||
+                    ($1 == 255 && &valid_netmask_range($2) && $3 == 0 && $4 == 0) ||
+                    ($1 == 255 && $2 == 255 && &valid_netmask_range($3) && $4 == 0) ||
+                    ($1 == 255 && $2 == 255 && $3 == 255 && &valid_netmask_range($4)) ) ) ? 1 : 0;
 }
 
 # get ip configuration info

@@ -370,11 +370,11 @@ class volgroupActions extends sfActions
             $criteria->add(EtvaVolumegroupPeer::VG, sfConfig::get('app_volgroup_disk_flag'),Criteria::NOT_EQUAL);
         $etva_vgs = EtvaVolumegroupPeer::doSelect($criteria);
 
-        if(!$etva_vgs && !$gtMD){
+        if(!$etva_vgs && !$gtMB){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaVolumegroupPeer::_NOTAVAILABLE_);
 
             $info = array('success'=>false,'error'=>$msg_i18n);
-            $error = $this->setJsonError($info,204); // 204 => no content
+            $error = $this->setJsonError($info);//,204); // 204 => no content
             return $this->renderText($error);
         }
 
@@ -853,8 +853,11 @@ class volgroupActions extends sfActions
         $msg_ok_type = EtvaVolumegroupPeer::_OK_UNREGISTER_;
         $msg_err_type = EtvaVolumegroupPeer::_ERR_UNREGISTER_;
 
-        // get node id from cluster context
-        $etva_node = EtvaNodePeer::getOrElectNode($request);
+        // get node id
+        if( !($etva_node = EtvaNodePeer::retrieveByPK($request->getParameter('nid'))) ){
+            // ... or elect from cluster context
+            $etva_node = EtvaNodePeer::getOrElectNode($request);
+        }
 
         if(!$etva_node){
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$nid));

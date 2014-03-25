@@ -2,7 +2,7 @@
 %define nagios_plugins /usr/lib64/nagios/plugins  
 
 Name: etva-centralmanagement
-Version: 2.1.0
+Version: 2.1.1
 Release: 2536
 Summary: ETVA Central Management
 License: GPL

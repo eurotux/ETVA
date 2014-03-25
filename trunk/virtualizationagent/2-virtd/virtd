@@ -967,6 +967,8 @@ sub register_handler {
                             }
                         }
                     }
+                } else {
+                    plogNow("[ERROR] Error at synchronize virtual servers... ",Dumper($RV));
                 }
 
                 if( !$resetError && $R->{'return'}{'reset'} ){
