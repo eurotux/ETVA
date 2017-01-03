@@ -1,0 +1,35 @@
+From 7428ce6007fd0ac5c930409157f97105267567a6 Mon Sep 17 00:00:00 2001
+From: Jan Kiszka <jan.kiszka@siemens.com>
+Date: Wed, 17 Oct 2012 19:09:25 +0200
+Subject: [PATCH] configure: Fix CONFIG_QEMU_HELPERDIR generation
+
+We need to evaluate $libexecdir in configure, otherwise we literally end
+up with "${prefix}/libexec" instead of the absolute path as
+CONFIG_QEMU_HELPERDIR.
+
+Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit 38f419f35225decdbaea9fe1fd00218f8924ce84)
+
+Conflicts:
+
+	configure
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index f528146..2de0900 100755
+--- a/configure
++++ b/configure
+@@ -3201,7 +3201,7 @@ echo "sysconfdir=$sysconfdir" >> $config_host_mak
+ echo "qemu_confdir=$qemu_confdir" >> $config_host_mak
+ echo "qemu_datadir=$qemu_datadir" >> $config_host_mak
+ echo "qemu_docdir=$qemu_docdir" >> $config_host_mak
+-echo "CONFIG_QEMU_HELPERDIR=\"$libexecdir\"" >> $config_host_mak
++echo "CONFIG_QEMU_HELPERDIR=\"`eval echo $libexecdir`\"" >> $config_host_mak
+ 
+ echo "ARCH=$ARCH" >> $config_host_mak
+ if test "$debug_tcg" = "yes" ; then

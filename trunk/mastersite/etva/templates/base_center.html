@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block headcontent %}
+{% endblock %}
+{% block maincontent %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_available_languages as LANGUAGES %}
+<!-- user body -->
+    <div style="clear:both"></div>
+    <div class="centerBox">
+{% block usercontent %}
+{% endblock%}
+</div>
+<!-- end user body -->
+{% endblock%}
+

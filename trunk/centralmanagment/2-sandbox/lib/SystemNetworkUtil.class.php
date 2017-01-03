@@ -6,13 +6,19 @@
 class SystemNetworkUtil
 {
     private $networks;
+    private $ntpservers;
 
     static function getDefaultIP(){
         return $_SERVER['SERVER_ADDR'];
     }
 
-    public function getNetworks(){
+    public function getNetworks()
+    {
         return $this->networks;
+    }
+    public function getNtpServers()
+    {
+        return $this->ntpservers;
     }
 
     /*
@@ -64,7 +70,7 @@ class SystemNetworkUtil
             $r = fgets($p);
 
             //get profile for dns
-            $match="/(ProfileList\.[\w\.]+)\.Active=true/";
+            $match="/(ProfileList\.[\w\.]+)\.Active=true/i";
             if(preg_match($match,$r,$regs)){
 
                 $profile = $regs[1];
@@ -148,7 +154,65 @@ class SystemNetworkUtil
         else return false;
         
     }
+    
+    /*
+     * load NTP servers
+     */
+    public function loadNtpServers()
+    {
 
+        $this->ntpservers = array();       
+
+        $path = sfConfig::get('sf_root_dir').DIRECTORY_SEPARATOR."utils";
+                    
+        $command = "perl -I".$path.DIRECTORY_SEPARATOR."pl"." ".$path.DIRECTORY_SEPARATOR."pl".
+                    DIRECTORY_SEPARATOR."script_config_ntp.pl -list";
+
+        if(!($p = popen('echo '.$command.' 2>&1 | sudo /usr/bin/php -f '.$path.DIRECTORY_SEPARATOR.'sudoexec.php','r')))
+        {
+            throw new Exception('could not execute command '.$command);
+            return false;
+        }
+
+        while(!feof($p)){
+            if( $r = fgets($p) ){
+                $this->ntpservers[] = trim($r);
+            }
+        }//end while read data
+
+        fclose($p);
+
+        return true;
+    }
+
+     /**
+      *
+      * update ntp servers. invoques local perl script throught php
+      */
+    static function updateNtpServers($ntp_obj)
+    {
+
+        $args = implode(' ',array_merge(array('-set'),(array)$ntp_obj));
+
+        $path = sfConfig::get('sf_root_dir').DIRECTORY_SEPARATOR."utils";
+
+        $command = "perl -I".$path.DIRECTORY_SEPARATOR."pl"." ".$path.DIRECTORY_SEPARATOR."pl".
+                    DIRECTORY_SEPARATOR."script_config_ntp.pl ".$args;
+       
+        ob_start();
+
+        error_log("DEBUG  updateNtpServers command=$command");
+
+        passthru('echo '.$command.' | sudo /usr/bin/php -f '.$path.DIRECTORY_SEPARATOR.'sudoexec.php',$return);
+
+        $result = ob_get_contents();
+        ob_end_clean();        
+
+        if($result==0 && $return==0) return true;
+        else return false;
+        
+    }
+    
 
 }
 ?>

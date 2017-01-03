@@ -1,0 +1,47 @@
+From 75389bc658711f6d410e78a28a8217800711dfd7 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Fri, 23 Nov 2012 09:47:12 +0100
+Subject: [PATCH] qom: fix refcount of non-heap-allocated objects
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The reference count for embedded objects is always one too low, because
+object_initialize_with_type returns with zero references to the object.
+This causes premature finalization of the object (or an assertion failure)
+after calling object_ref to add an extra reference and object_unref to
+remove it.
+
+The fix is to move the initial object_ref call from object_new_with_type
+to object_initialize_with_type.
+
+Acked-by: Andreas Färber <afaerber@suse.de>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit 764b63125a77dab54ed405d493452a4e05679c2e)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qom/object.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qom/object.c b/qom/object.c
+index f33e84d..5499318 100644
+--- a/qom/object.c
++++ b/qom/object.c
+@@ -307,6 +307,7 @@ void object_initialize_with_type(void *data, TypeImpl *type)
+ 
+     memset(obj, 0, type->instance_size);
+     obj->class = type->class;
++    object_ref(obj);
+     QTAILQ_INIT(&obj->properties);
+     object_init_with_type(obj, type);
+ }
+@@ -395,7 +396,6 @@ Object *object_new_with_type(Type type)
+ 
+     obj = g_malloc(type->instance_size);
+     object_initialize_with_type(obj, type);
+-    object_ref(obj);
+ 
+     return obj;
+ }

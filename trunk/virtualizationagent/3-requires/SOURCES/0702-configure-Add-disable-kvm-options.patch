@@ -1,0 +1,69 @@
+From 56cb8139207993cc36b7221521564735f66a31f8 Mon Sep 17 00:00:00 2001
+From: Cole Robinson <crobinso@redhat.com>
+Date: Mon, 13 Aug 2012 18:39:54 -0400
+Subject: [PATCH] configure: Add --disable-kvm-options
+
+In Fedora, our qemu package is based on qemu-kvm, and we go to convoluted
+lengths to provide a qemu-kvm binary with KVM on by default, but all
+qemu-system-* with KVM off by default (using ./configure --disable-kvm)
+
+For qemu-system*, what we really want is upstream qemu symantics of TCG
+by default, but the opt in option for KVM. CONFIG_KVM_OPTIONS fits the
+bill, so let's expose it through ./configure. This will also simplify
+our packaging for non-x86 KVM.
+
+Signed-off-by: Cole Robinson <crobinso@redhat.com>
+---
+ configure | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index 8dac47b..1668f30 100755
+--- a/configure
++++ b/configure
+@@ -210,6 +210,7 @@ bsd_user="no"
+ guest_base=""
+ uname_release=""
+ mixemu="no"
++kvmoptions="yes"
+ aix="no"
+ blobs="yes"
+ pkgversion=" ($(kvm_version))"
+@@ -732,6 +733,8 @@ for opt do
+   ;;
+   --enable-kvm) kvm="yes"
+   ;;
++  --disable-kvm-options) kvmoptions="no"
++  ;;
+   --disable-tcg-interpreter) tcg_interpreter="no"
+   ;;
+   --enable-tcg-interpreter) tcg_interpreter="yes"
+@@ -1080,6 +1083,8 @@ echo "  --enable-bluez           enable bluez stack connectivity"
+ echo "  --disable-slirp          disable SLIRP userspace network connectivity"
+ echo "  --disable-kvm            disable KVM acceleration support"
+ echo "  --enable-kvm             enable KVM acceleration support"
++echo "  --disable-kvm-options    if KVM is enabled, default to KVM=off, and"
++echo "                           remove non-upstream cli options"
+ echo "  --enable-tcg-interpreter enable TCG with bytecode interpreter (TCI)"
+ echo "  --disable-nptl           disable usermode NPTL support"
+ echo "  --enable-nptl            enable usermode NPTL support"
+@@ -3159,6 +3164,7 @@ echo "ATTR/XATTR support $attr"
+ echo "Install blobs     $blobs"
+ echo "KVM support       $kvm"
+ echo "TCG interpreter   $tcg_interpreter"
++echo "KVM CLI options   $kvmoptions"
+ echo "fdt support       $fdt"
+ echo "preadv support    $preadv"
+ echo "fdatasync         $fdatasync"
+@@ -3892,7 +3898,10 @@ case "$target_arch2" in
+       \( "$target_arch2" = "x86_64" -a "$cpu" = "i386"   \) -o \
+       \( "$target_arch2" = "i386"   -a "$cpu" = "x86_64" \) \) ; then
+       echo "CONFIG_KVM=y" >> $config_target_mak
+-      echo "CONFIG_KVM_OPTIONS=y" >> $config_host_mak
++
++      if test "$kvmoptions" = "yes" ; then
++        echo "CONFIG_KVM_OPTIONS=y" >> $config_host_mak
++      fi
+       if test "$vhost_net" = "yes" ; then
+         echo "CONFIG_VHOST_NET=y" >> $config_target_mak
+       fi

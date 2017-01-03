@@ -1,0 +1,43 @@
+From 88f88277527cfbbd399f1964ee2c4b6e7cac2ca7 Mon Sep 17 00:00:00 2001
+From: David Gibson <david@gibson.dropbear.id.au>
+Date: Mon, 26 Nov 2012 12:33:52 +1100
+Subject: [PATCH] virtio-scsi: Fix subtle (guest) endian bug
+
+The virtio-scsi config space is, by specification, in guest endian (which
+is ill-defined, but there you go).  In virtio_scsi_get_config() we set up
+all the fields in there, using stl_raw().  Which is a problem for the
+max_channel and max_target fields, which are 16-bit, not 32-bit.  For
+little-endian targets we get away with it by accident, since the first
+two bytes will still be correct, and the extra two bytes written (with
+zeroes) will be overwritten correctly by the next store.
+
+But for big-endian guests, this means the max_target field ends up as zero,
+which means the guest will only recognize a single disk on the virtio-scsi
+bus.  This patch fixes the problem.
+
+Cc: Paolo Bonzini <pbonzini@redhat.com>
+Cc: Paul 'Rusty' Russell <rusty@rustcorp.com.au>
+Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+(cherry picked from commit 863d1050c96cff91dd478767c0da9cc288575919)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/virtio-scsi.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hw/virtio-scsi.c b/hw/virtio-scsi.c
+index c6d5290..5fcbdd8 100644
+--- a/hw/virtio-scsi.c
++++ b/hw/virtio-scsi.c
+@@ -534,8 +534,8 @@ static void virtio_scsi_get_config(VirtIODevice *vdev,
+     stl_raw(&scsiconf->event_info_size, sizeof(VirtIOSCSIEvent));
+     stl_raw(&scsiconf->sense_size, s->sense_size);
+     stl_raw(&scsiconf->cdb_size, s->cdb_size);
+-    stl_raw(&scsiconf->max_channel, VIRTIO_SCSI_MAX_CHANNEL);
+-    stl_raw(&scsiconf->max_target, VIRTIO_SCSI_MAX_TARGET);
++    stw_raw(&scsiconf->max_channel, VIRTIO_SCSI_MAX_CHANNEL);
++    stw_raw(&scsiconf->max_target, VIRTIO_SCSI_MAX_TARGET);
+     stl_raw(&scsiconf->max_lun, VIRTIO_SCSI_MAX_LUN);
+ }
+ 

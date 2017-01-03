@@ -1,0 +1,67 @@
+#!/usr/bin/perl
+#
+# Note that this example doesn't check the results of AGI calls, and doesn't use
+# Asterisk::AGI in an attempt to keep it simple and dependency free.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the same terms as Perl itself.
+#
+# Author: Simon P. Ditner / http://uc.org/simon
+#
+# Usage:
+#    - Create an AGI in /var/lib/asterisk/agi-bin, i.e.: perl.eagi
+#    - Call using EAGI from your dialplan: exten => 100,1,EAGI(perl.eagi)
+#   
+use warnings;
+use strict;
+
+use IO::Handle;
+
+$| = 1; # Turn of I/O Buffering
+my $buffer = undef;
+my $result = undef;
+my $AUDIO_FD = 3;    # Audio is delivered on file descriptor 3
+my $audio_fh = new IO::Handle;
+$audio_fh->fdopen( $AUDIO_FD, "r" );           # Open the audio file descriptor for reading
+
+# Skip over the preamble that Asterisk sends this AGI
+while( <STDIN> ) {
+  chomp($_);
+  last if length($_) == 0; 
+} 
+
+# Playback beep
+print "STREAM FILE beep \"#\"\n"; $result = <STDIN>;
+
+# Record 5 seconds of audio at 8,000 samples/second (uses 16 bit integers)
+#    5 seconds x 8000 samples/second x ( 16 bits / 8bits/byte ) = 800000 bytes
+my $bytes_read = $audio_fh->read( $buffer, 800000 );
+$audio_fh->close();
+
+# Playback beep
+print "STREAM FILE beep \"#\"\n"; $result = <STDIN>;
+
+# Write the raw audio to a file for later analysis
+my $fh;
+open( $fh, ">/tmp/recording.raw" );
+print $fh $buffer;
+close( $fh );
+
+# Also convert the raw audio on-the-fly to the GSM format using 'sox', so that 
+# we can play it back to the user right now.
+open( $fh, "|/usr/bin/sox -t raw -r 8000 -s -w -c 1 - /tmp/recording.gsm" );
+#                             |      |    |  |  |   |   |
+#                             |      |    |  |  |   |   '-- Write to this file
+#                             |      |    |  |  |   '-- Read from STDIN
+#                             |      |    |  |  '-- Mono Audio
+#                             |      |    |  '-- Samples are words (a word is 2 bytes = 16 bit audio)
+#                             |      |    '-- The audio is signed (32766..-32766)
+#                             |      '-- The sample rate is 8,000 samples/second
+#                             '-- The input format is SLIN, which is 'raw' audio
+print $fh $buffer;
+close( $fh );
+
+# Playback /tmp/recording.gsm
+print "STREAM FILE /tmp/recording \"#\"\n"; $result = <STDIN>;
+
+exit; 

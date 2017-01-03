@@ -1,0 +1,62 @@
+From e2c56a8c8019f712be87bd20ce82eed275d9c174 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 1 Sep 2012 13:00:48 +0200
+Subject: [PATCH] pflash_cfi01: Fix warning caused by unreachable code
+
+Report from smatch:
+hw/pflash_cfi01.c:431 pflash_write(180) info: ignoring unreachable code.
+
+Instead of removing the return statement after the switch statement,
+the patch replaces the return statements in the switch statement by
+break statements. Other switch statements in the same code do it also
+like that.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 12dabc79f976d66755025272f7e2e8e4da31715a)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/pflash_cfi01.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/hw/pflash_cfi01.c b/hw/pflash_cfi01.c
+index d56b51a..ac503cf 100644
+--- a/hw/pflash_cfi01.c
++++ b/hw/pflash_cfi01.c
+@@ -320,7 +320,7 @@ static void pflash_write(pflash_t *pfl, target_phys_addr_t offset,
+         }
+         pfl->wcycle++;
+         pfl->cmd = cmd;
+-        return;
++        break;
+     case 1:
+         switch (pfl->cmd) {
+         case 0x10: /* Single Byte Program */
+@@ -375,7 +375,7 @@ static void pflash_write(pflash_t *pfl, target_phys_addr_t offset,
+         default:
+             goto error_flash;
+         }
+-        return;
++        break;
+     case 2:
+         switch (pfl->cmd) {
+         case 0xe8: /* Block write */
+@@ -406,7 +406,7 @@ static void pflash_write(pflash_t *pfl, target_phys_addr_t offset,
+         default:
+             goto error_flash;
+         }
+-        return;
++        break;
+     case 3: /* Confirm mode */
+         switch (pfl->cmd) {
+         case 0xe8: /* Block write */
+@@ -422,7 +422,7 @@ static void pflash_write(pflash_t *pfl, target_phys_addr_t offset,
+         default:
+             goto error_flash;
+         }
+-        return;
++        break;
+     default:
+         /* Should never happen */
+         DPRINTF("%s: invalid write state\n",  __func__);

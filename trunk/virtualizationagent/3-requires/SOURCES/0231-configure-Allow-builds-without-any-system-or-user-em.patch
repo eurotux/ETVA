@@ -1,0 +1,56 @@
+From 84944d7bd7200d953f40b8522c11227ab4de030f Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Fri, 14 Sep 2012 19:02:30 +0200
+Subject: [PATCH] configure: Allow builds without any system or user emulation
+
+The old code aborted configure when no emulation target was selected.
+Even after removing the 'exit 1', it tried to read from STDIN
+when QEMU was configured with
+
+    configure' '--disable-user' '--disable-system'
+
+This is fixed here.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit 8bdd3d499fe0ddffa9901c56ab3bc8911d5b8be0)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ Makefile  | 5 +++++
+ configure | 4 ----
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 1cd5bc8..dd11e3c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -52,8 +52,13 @@ SUBDIR_MAKEFLAGS=$(if $(V),,--no-print-directory) BUILD_DIR=$(BUILD_DIR)
+ SUBDIR_DEVICES_MAK=$(patsubst %, %/config-devices.mak, $(TARGET_DIRS))
+ SUBDIR_DEVICES_MAK_DEP=$(patsubst %, %/config-devices.mak.d, $(TARGET_DIRS))
+ 
++ifeq ($(SUBDIR_DEVICES_MAK),)
++config-all-devices.mak:
++	$(call quiet-command,echo '# no devices' > $@,"  GEN   $@")
++else
+ config-all-devices.mak: $(SUBDIR_DEVICES_MAK)
+ 	$(call quiet-command,cat $(SUBDIR_DEVICES_MAK) | grep =y | sort -u > $@,"  GEN   $@")
++endif
+ 
+ -include $(SUBDIR_DEVICES_MAK_DEP)
+ 
+diff --git a/configure b/configure
+index a1f256c..f528146 100755
+--- a/configure
++++ b/configure
+@@ -1296,10 +1296,6 @@ if test -z "$target_list" ; then
+ else
+     target_list=`echo "$target_list" | sed -e 's/,/ /g'`
+ fi
+-if test -z "$target_list" ; then
+-    echo "No targets enabled"
+-    exit 1
+-fi
+ # see if system emulation was really requested
+ case " $target_list " in
+   *"-softmmu "*) softmmu=yes

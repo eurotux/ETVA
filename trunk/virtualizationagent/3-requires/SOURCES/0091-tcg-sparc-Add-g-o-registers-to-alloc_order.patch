@@ -1,0 +1,41 @@
+From 94073142a960c8933cc44f172d6ec64381c5b6c9 Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Sun, 25 Mar 2012 22:43:17 +0200
+Subject: [PATCH] tcg-sparc: Add %g/%o registers to alloc_order
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/sparc/tcg-target.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/tcg/sparc/tcg-target.c b/tcg/sparc/tcg-target.c
+index d401f8e..03c385a 100644
+--- a/tcg/sparc/tcg-target.c
++++ b/tcg/sparc/tcg-target.c
+@@ -78,12 +78,25 @@ static const int tcg_target_reg_alloc_order[] = {
+     TCG_REG_L5,
+     TCG_REG_L6,
+     TCG_REG_L7,
++
+     TCG_REG_I0,
+     TCG_REG_I1,
+     TCG_REG_I2,
+     TCG_REG_I3,
+     TCG_REG_I4,
+     TCG_REG_I5,
++
++    TCG_REG_G2,
++    TCG_REG_G3,
++    TCG_REG_G4,
++    TCG_REG_G5,
++
++    TCG_REG_O0,
++    TCG_REG_O1,
++    TCG_REG_O2,
++    TCG_REG_O3,
++    TCG_REG_O4,
++    TCG_REG_O5,
+ };
+ 
+ static const int tcg_target_call_iarg_regs[6] = {

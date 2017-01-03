@@ -1,0 +1,41 @@
+From d6ef534d5357e9b592cf6743f38688cf5bfaa280 Mon Sep 17 00:00:00 2001
+From: Peter Maydell <peter.maydell@linaro.org>
+Date: Fri, 28 Sep 2012 16:17:03 +0100
+Subject: [PATCH] fpu/softfloat.c: Return correctly signed values from
+ uint64_to_float32
+
+The uint64_to_float32() conversion function was incorrectly always
+returning numbers with the sign bit set (ie negative numbers). Correct
+this so we return positive numbers instead.
+
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit e744c06fca438dc08271e626034e632a270c91c8)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ fpu/softfloat.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fpu/softfloat.c b/fpu/softfloat.c
+index b29256a..91497e8 100644
+--- a/fpu/softfloat.c
++++ b/fpu/softfloat.c
+@@ -1238,7 +1238,7 @@ float32 uint64_to_float32( uint64 a STATUS_PARAM )
+     if ( a == 0 ) return float32_zero;
+     shiftCount = countLeadingZeros64( a ) - 40;
+     if ( 0 <= shiftCount ) {
+-        return packFloat32( 1 > 0, 0x95 - shiftCount, a<<shiftCount );
++        return packFloat32(0, 0x95 - shiftCount, a<<shiftCount);
+     }
+     else {
+         shiftCount += 7;
+@@ -1248,7 +1248,7 @@ float32 uint64_to_float32( uint64 a STATUS_PARAM )
+         else {
+             a <<= shiftCount;
+         }
+-        return roundAndPackFloat32( 1 > 0, 0x9C - shiftCount, a STATUS_VAR );
++        return roundAndPackFloat32(0, 0x9C - shiftCount, a STATUS_VAR);
+     }
+ }
+ 

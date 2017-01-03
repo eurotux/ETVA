@@ -1,0 +1,37 @@
+From 712f9b682d90378fb190f991642951a37cc19d73 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Thu, 6 Sep 2012 12:03:41 +0200
+Subject: [PATCH] usb-host: allow emulated (non-async) control requests without
+ USBPacket
+
+xhci needs this for USB_REQ_SET_ADDRESS due to the way
+usb addressing is handled by the xhci hardware.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 63587e31353b6652cadfcfb869f5692a2b69daeb)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/host-linux.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/usb/host-linux.c b/hw/usb/host-linux.c
+index 8df9207..44f1a64 100644
+--- a/hw/usb/host-linux.c
++++ b/hw/usb/host-linux.c
+@@ -1045,7 +1045,6 @@ static int usb_host_handle_control(USBDevice *dev, USBPacket *p,
+ 
+     /* Note request is (bRequestType << 8) | bRequest */
+     trace_usb_host_req_control(s->bus_num, s->addr, p, request, value, index);
+-    assert(p->result == 0);
+ 
+     switch (request) {
+     case DeviceOutRequest | USB_REQ_SET_ADDRESS:
+@@ -1074,6 +1073,7 @@ static int usb_host_handle_control(USBDevice *dev, USBPacket *p,
+     }
+ 
+     /* The rest are asynchronous */
++    assert(p && p->result == 0);
+ 
+     if (length > sizeof(dev->data_buf)) {
+         fprintf(stderr, "husb: ctrl buffer too small (%d > %zu)\n",

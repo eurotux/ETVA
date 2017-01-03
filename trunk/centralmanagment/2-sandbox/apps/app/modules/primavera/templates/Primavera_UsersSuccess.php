@@ -151,7 +151,7 @@ Primavera.Users.Panel = new Ext.extend( Ext.Panel, {
                                                         if( selected ){
                                                             Ext.Msg.show({
                                                                 title: item.text,
-                                                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                                                buttons: Ext.MessageBox.YESNO,
                                                                 scope:this,
                                                                 msg: String.format(<?php echo json_encode(__('Are you sure you want delete user {0}?')) ?>,selected.data['cod']),
                                                                 fn: function(btn){

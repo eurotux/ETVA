@@ -627,7 +627,7 @@ this.form.findField('nameStatus').setValue(<?php echo json_encode(__('Creating..
             if (sm.hasSelection()){
                 Ext.Msg.show({
                     title: <?php echo json_encode(__('Remove network')) ?>,
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     msg: String.format(<?php echo json_encode(__('Remove network {0} ?')) ?>,sel.data['name']),scope:this,
                     fn: function(btn){
 

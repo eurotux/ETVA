@@ -462,6 +462,7 @@ class nodeActions extends sfActions
 
     public function executeJsonInit(sfWebRequest $request)
     {
+        $force = $request->getParameter('force');
         $id = $request->getParameter('id');
         $etva_node = EtvaNodePeer::retrieveByPK($id);
 
@@ -538,6 +539,7 @@ class nodeActions extends sfActions
             //$response = array('success'=>false,'error'=>$errors);
             $response = array('success'=>false, 'agent'=>sfConfig::get('config_acronym'), 'error'=>$msg_i18n, 'info'=>$msg_i18n);
             $return = $this->setJsonError($response);
+            #if( !$force ) return  $this->renderText($return);
         }
 
         //accept node

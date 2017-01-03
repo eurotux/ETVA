@@ -1,0 +1,54 @@
+From 11ab09ddb7d4d33e7c3f7d366119f367e0d2f04d Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Thu, 13 Sep 2012 19:37:43 +0200
+Subject: [PATCH] w64: Fix TCG helper functions with 5 arguments
+
+TCG uses 6 registers for function arguments on 64 bit Linux hosts,
+but only 4 registers on W64 hosts.
+
+Commit 2999a0b20074a7e4a58f56572bb1436749368f59 increased the number
+of arguments for some important helper functions from 4 to 5
+which triggered a bug for W64 hosts: QEMU aborts when executing
+helper_lcall_real in the guest's BIOS because function
+tcg_target_get_call_iarg_regs_count always returned 6.
+
+As W64 has only 4 registers for arguments, the 5th argument must be
+passed on the stack using a correct stack offset.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/i386/tcg-target.c | 2 +-
+ tcg/i386/tcg-target.h | 4 ++++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/tcg/i386/tcg-target.c b/tcg/i386/tcg-target.c
+index aa1fa9f..85c6b81 100644
+--- a/tcg/i386/tcg-target.c
++++ b/tcg/i386/tcg-target.c
+@@ -118,7 +118,7 @@ static void patch_reloc(uint8_t *code_ptr, int type,
+ static inline int tcg_target_get_call_iarg_regs_count(int flags)
+ {
+     if (TCG_TARGET_REG_BITS == 64) {
+-        return 6;
++        return ARRAY_SIZE(tcg_target_call_iarg_regs);
+     }
+ 
+     return 0;
+diff --git a/tcg/i386/tcg-target.h b/tcg/i386/tcg-target.h
+index b356d76..ace63ba 100644
+--- a/tcg/i386/tcg-target.h
++++ b/tcg/i386/tcg-target.h
+@@ -67,7 +67,11 @@ typedef enum {
+ /* used for function call generation */
+ #define TCG_REG_CALL_STACK TCG_REG_ESP 
+ #define TCG_TARGET_STACK_ALIGN 16
++#if defined(_WIN64)
++#define TCG_TARGET_CALL_STACK_OFFSET 32
++#else
+ #define TCG_TARGET_CALL_STACK_OFFSET 0
++#endif
+ 
+ /* optional instructions */
+ #define TCG_TARGET_HAS_div2_i32         1

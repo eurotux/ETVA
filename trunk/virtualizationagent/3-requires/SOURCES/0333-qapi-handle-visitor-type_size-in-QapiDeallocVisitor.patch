@@ -1,0 +1,54 @@
+From 6e1431bdac779ef4c3332be51494eb7ae67826d9 Mon Sep 17 00:00:00 2001
+From: Stefan Hajnoczi <stefanha@redhat.com>
+Date: Mon, 26 Nov 2012 13:10:12 +0100
+Subject: [PATCH] qapi: handle visitor->type_size() in QapiDeallocVisitor
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+visit_type_size() requires either visitor->type_size() or
+visitor_uint64() to be implemented, otherwise a NULL function pointer is
+invoked.
+
+It is possible to trigger this crash as follows:
+
+  $ qemu-system-x86_64 -netdev tap,sndbuf=0,id=netdev0 \
+                       -device virtio-blk-pci,netdev=netdev0
+
+The 'sndbuf' option has type "size".
+
+Reviewed-by: Andreas Färber <afaerber@suse.de>
+Reviewed-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit 0c26f2eca40d6c65ea9edc62a10e510dc7f65cc8)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qapi/qapi-dealloc-visitor.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/qapi/qapi-dealloc-visitor.c b/qapi/qapi-dealloc-visitor.c
+index a154523..a07b171 100644
+--- a/qapi/qapi-dealloc-visitor.c
++++ b/qapi/qapi-dealloc-visitor.c
+@@ -132,6 +132,11 @@ static void qapi_dealloc_type_number(Visitor *v, double *obj, const char *name,
+ {
+ }
+ 
++static void qapi_dealloc_type_size(Visitor *v, size_t *obj, const char *name,
++                                   Error **errp)
++{
++}
++
+ static void qapi_dealloc_type_enum(Visitor *v, int *obj, const char *strings[],
+                                    const char *kind, const char *name,
+                                    Error **errp)
+@@ -164,6 +169,7 @@ QapiDeallocVisitor *qapi_dealloc_visitor_new(void)
+     v->visitor.type_bool = qapi_dealloc_type_bool;
+     v->visitor.type_str = qapi_dealloc_type_str;
+     v->visitor.type_number = qapi_dealloc_type_number;
++    v->visitor.type_size = qapi_dealloc_type_size;
+ 
+     QTAILQ_INIT(&v->stack);
+ 

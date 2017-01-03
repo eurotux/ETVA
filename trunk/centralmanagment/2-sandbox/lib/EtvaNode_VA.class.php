@@ -1078,7 +1078,11 @@ class EtvaNode_VA
         }
 
         // put node in maintenance
-        $this->etva_node->setState(EtvaNode::NODE_MAINTENANCE);
+        if( $this->etva_node != EtvaNode::NODE_ACTIVE ){
+            $this->etva_node->setState(EtvaNode::NODE_MAINTENANCE);
+        } else {
+            $this->etva_node->setState(EtvaNode::NODE_MAINTENANCE_UP);
+        }
         $this->etva_node->save();
     }
     public function systemCheck(){

@@ -156,7 +156,8 @@ class OvfEnvelope
             $disk_id = $disk_info->getAttribute('ovf:diskId');
             $file_ref = $disk_info->getAttribute('ovf:fileRef');
             $capacity = $disk_info->getAttribute('ovf:capacity');
-            $this->disksection->setDisk($disk_id,$file_ref,$capacity);
+            $units = $disk_info->getAttribute('ovf:capacityAllocationUnits');
+            $this->disksection->setDisk($disk_id,$file_ref,$capacity,$units);
 
         }
 
@@ -607,10 +608,15 @@ class OvfDiskSection
 {
     private $disks;
     private $info;
+    private $totalSize = 0;
 
-    function setDisk($disk_id,$file_ref,$capacity)
+    function setDisk($disk_id,$file_ref,$capacity,$units = 'byte')
     {        
-        $this->disks[$disk_id] = array('disk_id'=>$disk_id,'file_ref'=>$file_ref,'capacity'=>$capacity);
+        // convert capacity size to units
+        $size = Etva::to_ByteConvert_byType($capacity,$units);
+        // inc total size
+        $this->totalSize += $size;
+        $this->disks[$disk_id] = array('disk_id'=>$disk_id,'file_ref'=>$file_ref,'capacity'=>$size);
     }
 
     function setInfo($info)
@@ -623,6 +629,10 @@ class OvfDiskSection
         return $this->disks;
     }
 
+    function getTotalSize()
+    {
+        return $this->totalSize;
+    }
 }
 
 

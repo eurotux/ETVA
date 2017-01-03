@@ -1,0 +1,35 @@
+From f6e211c731f1197773920bc9e9ee8b8400b7face Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Wed, 5 Sep 2012 17:54:36 +0200
+Subject: [PATCH] scsi-disk: fix check for out-of-range LBA
+
+This fix is needed to correctly handle 0-block read and writes.
+Without it, a 0-block access at LBA 0 would underflow.
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+(cherry picked from commit 12ca76fc48081b3a0ad1a70546abfcf198aedfc4)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/scsi-disk.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/hw/scsi-disk.c b/hw/scsi-disk.c
+index 3959603..d621852 100644
+--- a/hw/scsi-disk.c
++++ b/hw/scsi-disk.c
+@@ -1456,9 +1456,13 @@ static inline bool check_lba_range(SCSIDiskState *s,
+      * The first line tests that no overflow happens when computing the last
+      * sector.  The second line tests that the last accessed sector is in
+      * range.
++     *
++     * Careful, the computations should not underflow for nb_sectors == 0,
++     * and a 0-block read to the first LBA beyond the end of device is
++     * valid.
+      */
+     return (sector_num <= sector_num + nb_sectors &&
+-            sector_num + nb_sectors - 1 <= s->qdev.max_lba);
++            sector_num + nb_sectors <= s->qdev.max_lba + 1);
+ }
+ 
+ typedef struct UnmapCBData {

@@ -1,0 +1,34 @@
+From 2daffb91f129dbe156a50c3df373f3db945074f2 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Tue, 28 Aug 2012 11:33:47 +0200
+Subject: [PATCH] usb-redir: Return babble when getting more bulk data then
+ requested
+
+Babble is the appropriate error in this case (rather then signalling a stall).
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 2979a36183a3902cd75665e7c6bbc8668668fd17)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/redirect.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index fd1f8cc..ee75217 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -1324,9 +1324,9 @@ static void usbredir_bulk_packet(void *priv, uint32_t id,
+             if (data_len <= p->iov.size) {
+                 usb_packet_copy(p, data, data_len);
+             } else {
+-                ERROR("bulk buffer too small (%d > %zd)\n", data_len,
+-                      p->iov.size);
+-                len = USB_RET_STALL;
++                ERROR("bulk got more data then requested (%d > %zd)\n",
++                      data_len, p->iov.size);
++                len = USB_RET_BABBLE;
+             }
+         }
+         p->result = len;

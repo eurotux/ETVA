@@ -1,0 +1,85 @@
+From a1dfd9b44ffb915fc6673b8f6f512ecf6489d628 Mon Sep 17 00:00:00 2001
+From: Peter Crosthwaite <peter.crosthwaite@xilinx.com>
+Date: Mon, 27 May 2013 14:20:57 +1000
+Subject: [PATCH] configure: dtc: Probe for libfdt_env.h
+
+Currently QEMU provides a local clone of the file libfdt_env.h in
+/include. This file is supposed to come with the libfdt package and is
+only needed for broken installs of libfdt. Now that we have submodule
+dtc, just ignore these broken installs and prompt for the dtc submodule
+install instead. QEMU's local libfdt_env.h is removed accordingly.
+
+Manifests as a bug when building QEMU with modern libfdt. The new
+version of libfdt does not compile when QEMUs libfdt_env.h takes
+precedence over the hosts.
+
+Signed-off-by: Peter Crosthwaite <peter.crosthwaite@xilinx.com>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Acked-by: David Gibson <david@gibson.dropbear.id.au>
+Signed-off-by: Kim Phillips <kim.phillips@freescale.com>
+Acked-by: Paolo Bonzini <pbonzini@redhat.com>
+Message-id: 9b6a3a52e3f46cfbc1ded9ab56385ec045e46705.1369628289.git.peter.crosthwaite@xilinx.com
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+(cherry picked from commit 96ce65457690561417ae8e6f0e85f3c6f135018b)
+---
+ configure    |  2 ++
+ libfdt_env.h | 36 ------------------------------------
+ 2 files changed, 2 insertions(+), 36 deletions(-)
+ delete mode 100644 libfdt_env.h
+
+diff --git a/configure b/configure
+index 12d506c..d77f82d 100755
+--- a/configure
++++ b/configure
+@@ -2283,7 +2283,9 @@ fi
+ # fdt probe
+ if test "$fdt" != "no" ; then
+   fdt_libs="-lfdt"
++  # explicitly check for libfdt_env.h as it is missing in some stable installs
+   cat > $TMPC << EOF
++#include <libfdt_env.h>
+ int main(void) { return 0; }
+ EOF
+   if compile_prog "" "$fdt_libs" ; then
+diff --git a/libfdt_env.h b/libfdt_env.h
+deleted file mode 100644
+index 90d7f3b..0000000
+--- a/libfdt_env.h
++++ /dev/null
+@@ -1,36 +0,0 @@
+-/*
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License, version 2, as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, see <http://www.gnu.org/licenses/>.
+- *
+- * Copyright IBM Corp. 2008
+- * Authors: Hollis Blanchard <hollisb@us.ibm.com>
+- *
+- */
+-
+-#ifndef _LIBFDT_ENV_H
+-#define _LIBFDT_ENV_H
+-
+-#include "bswap.h"
+-
+-#ifdef HOST_WORDS_BIGENDIAN
+-#define fdt32_to_cpu(x)		(x)
+-#define cpu_to_fdt32(x)		(x)
+-#define fdt64_to_cpu(x)		(x)
+-#define cpu_to_fdt64(x)		(x)
+-#else
+-#define fdt32_to_cpu(x)		(bswap_32((x)))
+-#define cpu_to_fdt32(x)		(bswap_32((x)))
+-#define fdt64_to_cpu(x)		(bswap_64((x)))
+-#define cpu_to_fdt64(x)		(bswap_64((x)))
+-#endif
+-
+-#endif /* _LIBFDT_ENV_H */

@@ -1,0 +1,30 @@
+From 13529cc74ba53fb032172a58dfb04ea4d6e64891 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Fri, 21 Sep 2012 04:18:07 +0400
+Subject: [PATCH] tcg/README: document tcg_gen_goto_tb restrictions
+
+See
+http://lists.nongnu.org/archive/html/qemu-devel/2012-09/msg03196.html
+for the whole story.
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/README | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/tcg/README b/tcg/README
+index d03ae05..33783ee 100644
+--- a/tcg/README
++++ b/tcg/README
+@@ -392,7 +392,8 @@ Exit the current TB and return the value t0 (word type).
+ 
+ Exit the current TB and jump to the TB index 'index' (constant) if the
+ current TB was linked to this TB. Otherwise execute the next
+-instructions.
++instructions. Only indices 0 and 1 are valid and tcg_gen_goto_tb may be issued
++at most once with each slot index per TB.
+ 
+ * qemu_ld8u t0, t1, flags
+ qemu_ld8s t0, t1, flags

@@ -10,7 +10,13 @@ use constant {
     UNKNOWN => 3,    
 };
 
-chdir '/srv/etva-centralmanagement' or &retCritical($!);
+# procedure log
+sub plog { print @_,"\n"; }
+
+if( !(chdir '/srv/etva-centralmanagement') ){
+    plog "CRITICAL: Unable to open directory '/srv/etva-centralmanagement': $!.";
+    exit CRITICAL;
+}
 
 # etva conf dir
 #my $etva_config_dir = $ENV{'etva_conf_dir'} || "/etc/sysconfig/etva-vdaemon/config";
@@ -21,17 +27,23 @@ sub check_etva {
     
     my $path = &getLogsPath;
     unless(-d $path){ 
+        plog "UNKNOWN: Path '$path' doesn't exists.";
         exit UNKNOWN; 
     }
 
     my @files = <$path/*.alert>;
-    return OK if(scalar @files == 0);
+    if( scalar(@files) ){
 
-    foreach (@files){
-        &readFile($_);
+        #foreach (@files){
+        #    &readFile($_);
+        #}
+
+        plog "CRITICAL: There are several critical alerts for this task: ".join(" | ",@files);
+        exit CRITICAL;
+    } else {
+        plog "OK: No alerts found.";
+        exit OK;
     }
-
-    exit CRITICAL;
 }
 
 sub readFile {

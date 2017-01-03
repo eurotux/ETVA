@@ -543,6 +543,21 @@ class EtvaVolumegroup_VA
 
             $etva_volgroup->delete();
 
+            // update physical volumes info
+            foreach($pvs as $pv => $pvInfo)
+            {
+                $pv_info = (array) $pvInfo;
+
+                $pv_type = $pv_info[EtvaPhysicalvolume::STORAGE_TYPE_MAP];
+                $pv_uuid = isset($pv_info[EtvaPhysicalvolume::UUID_MAP]) ? $pv_info[EtvaPhysicalvolume::UUID_MAP] : '';
+                $pv_device = $pv_info[EtvaPhysicalvolume::DEVICE_MAP];
+
+                //get physical volume based on node, type, uuid and device
+                $etva_physical = EtvaPhysicalvolumePeer::retrieveByNodeTypeUUIDDevice($etva_node->getId(), $pv_type, $pv_uuid, $pv_device);
+                $etva_physical->initData($pv_info);
+                $etva_physical->save();
+            }
+
             if($vg_type!=EtvaVolumegroup::STORAGE_TYPE_LOCAL_MAP)
             {
 

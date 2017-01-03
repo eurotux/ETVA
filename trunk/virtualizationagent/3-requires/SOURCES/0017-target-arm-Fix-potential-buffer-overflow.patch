@@ -1,0 +1,44 @@
+From d3bcdbc63927557fa949194b0a977873794b701b Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Tue, 4 Sep 2012 07:35:57 +0200
+Subject: [PATCH] target-arm: Fix potential buffer overflow
+
+Report from smatch:
+
+target-arm/helper.c:651 arm946_prbs_read(6) error:
+ buffer overflow 'env->cp15.c6_region' 8 <= 8
+target-arm/helper.c:661 arm946_prbs_write(6) error:
+ buffer overflow 'env->cp15.c6_region' 8 <= 8
+
+c7_region is an array with 8 elements, so the index must be less than 8.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-arm/helper.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/target-arm/helper.c b/target-arm/helper.c
+index dceaa95..e27df96 100644
+--- a/target-arm/helper.c
++++ b/target-arm/helper.c
+@@ -645,7 +645,7 @@ static int pmsav5_insn_ap_read(CPUARMState *env, const ARMCPRegInfo *ri,
+ static int arm946_prbs_read(CPUARMState *env, const ARMCPRegInfo *ri,
+                             uint64_t *value)
+ {
+-    if (ri->crm > 8) {
++    if (ri->crm >= 8) {
+         return EXCP_UDEF;
+     }
+     *value = env->cp15.c6_region[ri->crm];
+@@ -655,7 +655,7 @@ static int arm946_prbs_read(CPUARMState *env, const ARMCPRegInfo *ri,
+ static int arm946_prbs_write(CPUARMState *env, const ARMCPRegInfo *ri,
+                              uint64_t value)
+ {
+-    if (ri->crm > 8) {
++    if (ri->crm >= 8) {
+         return EXCP_UDEF;
+     }
+     env->cp15.c6_region[ri->crm] = value;

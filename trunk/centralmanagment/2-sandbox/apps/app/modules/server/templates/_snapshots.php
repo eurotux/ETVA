@@ -24,7 +24,7 @@ Server.Snapshots.Panel = Ext.extend(Ext.Panel, {
                                         colModel: new Ext.grid.ColumnModel({
                                                         columns: [
                                                             {header: __('Name'), dataIndex: 'name'},
-                                                            {header: __('Create Time'), dataIndex: 'createtime'},
+                                                            {header: __('Create Time'), dataIndex: 'createtime', renderer: Ext.util.Format.dateRenderer('Y-m-d H:i:s')},
                                                             {header: __('State'), dataIndex: 'state' }
                                                         ]
                                                     }),
@@ -48,7 +48,7 @@ Server.Snapshots.Panel = Ext.extend(Ext.Panel, {
                                                     ,url: myurl
                                                     ,fields:[
                                                         ,{name: 'name', mapping: 'name', type: 'string'}
-                                                        ,{name: 'createtime', mapping: 'createtime', type:'string'}
+                                                        ,{name: 'createtime', mapping: 'createtime', type: 'date', dateFormat: 'timestamp'}
                                                         ,{name: 'state', mapping: 'state', type:'string'}
                                                     ]
                                                 })
@@ -113,7 +113,7 @@ Server.Snapshots.Panel = Ext.extend(Ext.Panel, {
                                                                 Ext.MessageBox.show({
                                                                         title: <?php echo json_encode(__('Revert to snapshot')) ?>,
                                                                         msg: msg,
-                                                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                                                        buttons: Ext.MessageBox.YESNO,
                                                                         fn: function(btn){
 
                                                                             if(btn=='yes'){
@@ -177,7 +177,7 @@ Server.Snapshots.Panel = Ext.extend(Ext.Panel, {
                                                                 Ext.MessageBox.show({
                                                                         title: <?php echo json_encode(__('Remove snapshot')) ?>,
                                                                         msg: String.format(<?php echo json_encode(__('Do you want remove {0} snapshot?')) ?>,snapshot),
-                                                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                                                        buttons: Ext.MessageBox.YESNO,
                                                                         fn: function(btn){
 
                                                                             if(btn=='yes'){
@@ -242,7 +242,7 @@ Server.Snapshots.Panel = Ext.extend(Ext.Panel, {
                                                                 Ext.MessageBox.show({
                                                                         title: <?php echo json_encode(__('Download backup of snapshot')) ?>,
                                                                         msg: msg,
-                                                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                                                        buttons: Ext.MessageBox.YESNO,
                                                                         fn: function(btn){
 
                                                                             if(btn=='yes'){
@@ -327,7 +327,7 @@ Server.Snapshots.Panel = Ext.extend(Ext.Panel, {
                 ];
                 this.buttons = [
                             {
-                                text:__('Cancel'),
+                                text:__('Close'),
                                 scope:this,
                                 handler:function(){(this.ownerCt).close()}
                             }];

@@ -167,7 +167,7 @@ Ext.namespace('Node');
     //                if (sm.hasSelection()){
     //                    Ext.Msg.show({
     //                        title: <?php //echo json_encode(__('Remove Node'))?>,
-    //                        buttons: Ext.MessageBox.YESNOCANCEL,
+    //                        buttons: Ext.MessageBox.YESNO,
     //                        msg: String.format(<?php //echo json_encode(__('Remove Node {0} ?')) ?>,sel.data.Name),
     //                        fn: function(btn){
     //                            if (btn == 'yess'){

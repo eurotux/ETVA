@@ -1,0 +1,20 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}Group page{% endblock%}
+{% block section %}{%trans "Groups"%}{% endblock%}
+
+{% block mainCol%}
+{%if myGroups%}
+    <ul class="lists">
+    {% for group in myGroups%}
+    <li><a href="{{group.id}}">{{ group }}</a></li>
+    {% endfor %}
+    </ul>
+{%else%}
+    <p>{%trans "No groups"%}</p>
+{%endif%}
+<div class="space15">&nbsp;</div>
+<a href="new">{%blocktrans%}Add a new group{%endblocktrans%}</a>
+{%endblock%}
+
+

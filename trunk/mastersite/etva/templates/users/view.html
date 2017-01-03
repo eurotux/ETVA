@@ -1,0 +1,33 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}Group page{% endblock%}
+{% block section %}{%trans "Users"%}{% endblock%}
+
+{% block mainCol%}
+
+<h1>{%blocktrans%}User{%endblocktrans%} {{selUser}}:</h1>
+<div class="space15">&nbsp;</div>
+	{% if errorMessage%}
+	<div id="msgAlert">{{errorMessage}}</div>
+        {%endif%}
+
+
+<form method="post">
+<table class="form">
+    {{form.as_table}}
+</table>
+<div class="space15">&nbsp;</div>
+{% if showButtons %}
+<div>
+    <a href="/product/{{selUser.id}}">{% trans "User products" %}...</a>
+    <a href="/backups/{{selUser.id}}">{% trans "User backups" %}...</a>
+</div>
+{%endif%}
+<div class="space15">&nbsp;</div>
+<input class="button" type="submit" value="{% trans "Update" %}" />
+</form>
+
+
+{%endblock%}
+
+

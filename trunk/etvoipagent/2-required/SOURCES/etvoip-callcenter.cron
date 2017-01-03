@@ -1,0 +1,6 @@
+16 2 1 * * root (cd /usr/local/sap2elastix/; ./cleanoldcalls.pl) >/dev/null 2>&1
+*/2 * * * * root (cd /usr/local/sap2elastix/; ./agent-logoff-alert.pl) >/dev/null 2>&1
+*/2 * * * * root (cd /var/www/cgi-bin; ./missedcalls op=update) >/dev/null 2>&1
+16 7 * * * root (cd /usr/local/asterisk-ldap-sync/; ./ldapsync.pl) >/var/log/sap2elastix/ldapsync.log 2>&1
+00 20 * * * root (/sbin/service elastixdialer restart) >/dev/null 2>&1
+

@@ -1,0 +1,35 @@
+From 9bf88d4856ea45211d500fa6a1acbb61c497b7fe Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Mon, 10 Sep 2012 12:44:10 +0200
+Subject: [PATCH] ehci: Fix interrupts stopping when Interrupt Threshold
+ Control is 8
+
+If Interrupt Threshold Control is 8 or a multiple of 8, then
+s->usbsts_frindex can become exactly 0x4000, at which point
+(s->usbsts_frindex > s->frindex) will never become true, as
+s->usbsts_frindex will not be lowered / reset in this case.
+
+This patch fixes this.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit ffa1f2e088eb7e3d57f2fc35f21e7bdb23e592c5)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index f5ba8e1..54273d7 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -2413,7 +2413,7 @@ static void ehci_update_frindex(EHCIState *ehci, int frames)
+         if (ehci->frindex == 0x00004000) {
+             ehci_raise_irq(ehci, USBSTS_FLR);
+             ehci->frindex = 0;
+-            if (ehci->usbsts_frindex > 0x00004000) {
++            if (ehci->usbsts_frindex >= 0x00004000) {
+                 ehci->usbsts_frindex -= 0x00004000;
+             } else {
+                 ehci->usbsts_frindex = 0;

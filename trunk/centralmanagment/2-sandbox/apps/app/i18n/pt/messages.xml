@@ -86,7 +86,7 @@
       </trans-unit>
       <trans-unit id="gen_mac">
         <source>Generating MAC pool...</source>
-        <target>Gerando a MAC pool...</target>
+        <target>A gerar a MAC pool...</target>
       </trans-unit>
       <trans-unit id="gen">
         <source>Generate!</source>
@@ -1202,7 +1202,7 @@
       </trans-unit>
       <trans-unit id="adding_network">
         <source>Creating network...</source>
-        <target>Criando a rede...</target>
+        <target>A criar rede...</target>
       </trans-unit>
       <trans-unit id="err_network_init">
         <source>Network {0} could not be initialized: {1}</source>
@@ -1234,7 +1234,7 @@
       </trans-unit>
       <trans-unit id="removing_network">
         <source>Removing network...</source>
-        <target>Removendo a rede...</target>
+        <target>A remover a rede...</target>
       </trans-unit>
       <trans-unit id="using_network">
         <source>Network %1% in use!</source>
@@ -1443,7 +1443,7 @@
       </trans-unit>
       <trans-unit id="pv_initializing">
         <source>Initializing physical volume...</source>
-        <target>Inicializando physical volume...</target>
+        <target>A inicializar physical volume...</target>
       </trans-unit>
       <trans-unit id="remove_pv">
         <source>Remove physical volume</source>
@@ -1663,11 +1663,11 @@
       </trans-unit>
       <trans-unit id="vg_extending">
         <source>Adding physical volume to volume group...</source>
-        <target>Adicionando physical volume ao volume group...</target>
+        <target>A adicionar physical volume ao volume group...</target>
       </trans-unit>
       <trans-unit id="err_vg_extend">
-        <source>Unable to extend {0}!</source>
-        <target>Não foi possível extender {0}!</target>
+        <source>Unable to extend {0}</source>
+        <target>Não foi possível extender {0}</target>
       </trans-unit>
       <trans-unit id="err_add_vg">
         <source>Unable to create volume group {0}</source>
@@ -1948,9 +1948,13 @@
         <source>Can\'t remove logical volume with snapshots in use by any virtual server</source>
         <target>Não é possível remover um logical volume com snapshots em uso num servidor virtual</target>
       </trans-unit>
-      <trans-unit id="err_lv_resize_with_snapshots">
-        <source>Can\'t resize volumes if snapshots</source>
-        <target>Não é possível redimensionar logical volumes com snapshots</target>
+      <trans-unit id="err_lv_resize_with_snapshot">
+        <source>Can't change snapshots usage space if volume have snapshots!</source>
+        <target>Não é possível alterar o espaço de utilização de snapshots se o volume tiver snapshots</target>
+      </trans-unit>
+      <trans-unit id="err_lv_resize_snapshot_usage_for_non_qcow">
+        <source>Can't define snapshots usage space for volumes that doesn't support snapshots!</source>
+        <target>Não é possível definir o espaço de utilização de snapshots para volumes que não suportam snapshots!</target>
       </trans-unit>
       <trans-unit id="enabled_if_not_snapshot">
         <source>Enabled if volume is not snapshot.</source>
@@ -2075,7 +2079,7 @@
       </trans-unit>
       <trans-unit id="updating_hostname">
         <source>Updating hostname...</source>
-        <target>Atualizando hostname...</target>
+        <target>A atualizar hostname...</target>
       </trans-unit>
       <trans-unit id="ok_change_hostname">
         <source>Node %name_old% changed successfully to %name_new%</source>
@@ -2469,7 +2473,7 @@
       </trans-unit>
       <trans-unit id="adding_lv">
         <source>Creating logical volume...</source>
-        <target>Criando logical volume...</target>
+        <target>A criar logical volume...</target>
       </trans-unit>
       <trans-unit id="finish_server_wiz">
         <source>Thank you! Your data has been collected.&lt;br&gt;When you click on the "Finish" button, the virtual server will be created.</source>
@@ -2667,7 +2671,26 @@
         <source>Cannot exceed max cpu</source>
         <target>Não pode exceder o número máximo de CPUs</target>
       </trans-unit>
-
+      <trans-unit id="network_url">
+        <source>Network URL (http,ftp,...)</source>
+        <target>URL rede (http,ftp,...)</target>
+      </trans-unit>
+      <trans-unit id="network_url_options">
+        <source>Network URL options</source>
+        <target>Opções URL rede</target>
+      </trans-unit>
+      <trans-unit id="url_options">
+        <source>URL Options</source>
+        <target>Opções URL</target>
+      </trans-unit>
+      <trans-unit id="kernel_options">
+        <source>Kernel options</source>
+        <target>Opções Kernel</target>
+      </trans-unit>
+      <trans-unit id="os_boot_options">
+        <source>OS / Boot options</source>
+        <target>SO / Opções arranque</target>
+      </trans-unit>
 
       <trans-unit id="open_new_server_wiz">
         <source>Click to open new server wizard</source>
@@ -2777,9 +2800,25 @@
         <source>Server with name %name% started successfully</source>
         <target>Servidor %name% iniciado com sucesso</target>
       </trans-unit>
+      <trans-unit id="suspended_server">
+        <source>Server with name %name% suspended successfully</source>
+        <target>Servidor %name% suspenso com sucesso</target>
+      </trans-unit>
+      <trans-unit id="resumed_server">
+        <source>Server with name %name% resumed successfully</source>
+        <target>Servidor %name% retomado com sucesso</target>
+      </trans-unit>
       <trans-unit id="err_start_server">
         <source>Server with name %name% could not be started. %info%</source>
         <target>Não foi possível iniciar o servidor %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_suspend_server">
+        <source>Server with name %name% could not be suspended. %info%</source>
+        <target>Não foi possível suspender o servidor %name%. %info%</target>
+      </trans-unit>
+      <trans-unit id="err_resum_server">
+        <source>Server with name %name% could not be resumed. %info%</source>
+        <target>Não foi possível retomar o servidor %name%. %info%</target>
       </trans-unit>
       <trans-unit id="stopped_server">
         <source>Server with name %name% stopped successfully</source>
@@ -3030,7 +3069,7 @@
       </trans-unit>
       <trans-unit id="updating_settings">
         <source>Updating system settings...</source>
-        <target>Atualizando preferências...</target>
+        <target>A atualizar preferências...</target>
       </trans-unit>
       <trans-unit id="updated_settings">
         <source>Updated system settings</source>
@@ -3260,7 +3299,7 @@
       </trans-unit>      
       <trans-unit id="changing_ip">
         <source>Changing IP...</source>
-        <target>Alterando IP...</target>
+        <target>A alterar IP...</target>
       </trans-unit>
       <trans-unit id="general">
         <source>General</source>
@@ -3432,7 +3471,7 @@
       </trans-unit>
       <trans-unit id="retrieving_data">
         <source>Retrieving data...</source>
-        <target>Processando...</target>
+        <target>A processar...</target>
       </trans-unit>
       <trans-unit id="22">
         <source>Status</source>
@@ -3517,6 +3556,10 @@
       <trans-unit id="cannot_detach_ide_disk_running_server">
         <source>Cannot detach the IDE disk on running server!</source>
         <target>Não é possível retirar um disco IDE num servidor a correr!</target>
+      </trans-unit>
+      <trans-unit id="ntp_servers">
+        <source>NTP Servers</source>
+        <target>Servidores NTP</target>
       </trans-unit>
       
       <!-- MISC -->
@@ -4169,6 +4212,26 @@
         <trans-unit id="stop">
             <source>Stop</source>
             <target>Parar</target>
+        </trans-unit>
+        <trans-unit id="suspend">
+            <source>Suspend</source>
+            <target>Suspender</target>
+        </trans-unit>
+        <trans-unit id="resume">
+            <source>Resume</source>
+            <target>Retomar</target>
+        </trans-unit>
+        <trans-unit id="edit">
+            <source>Edit</source>
+            <target>Editar</target>
+        </trans-unit>
+        <trans-unit id="move">
+            <source>Move</source>
+            <target>Mover</target>
+        </trans-unit>
+        <trans-unit id="migrate">
+            <source>Migrate</source>
+            <target>Migrar</target>
         </trans-unit>
         <trans-unit id="forced">
             <source>Forced</source>

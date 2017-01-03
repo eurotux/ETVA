@@ -1,0 +1,40 @@
+From c77ab77e583ec05e0fbf29e45e8976c8c1a069d8 Mon Sep 17 00:00:00 2001
+From: Peter Maydell <peter.maydell@linaro.org>
+Date: Wed, 19 Sep 2012 14:51:38 +0100
+Subject: [PATCH] arch_init.c: Improve '-soundhw help' for non-HAS_AUDIO_CHOICE
+ archs
+
+For architectures which don't set HAS_AUDIO_CHOICE, improve the
+'-soundhw help' message so that it doesn't simply print an empty
+list, implying no sound support at all.
+
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: malc <av1474@comtv.ru>
+(cherry picked from commit 55d4fd3c24bd253bd96270c7fdf1bb862f3a3400)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ arch_init.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/arch_init.c b/arch_init.c
+index 47977de..f849f9b 100644
+--- a/arch_init.c
++++ b/arch_init.c
+@@ -922,11 +922,16 @@ void select_soundhw(const char *optarg)
+     if (is_help_option(optarg)) {
+     show_valid_cards:
+ 
++#ifdef HAS_AUDIO_CHOICE
+         printf("Valid sound card names (comma separated):\n");
+         for (c = soundhw; c->name; ++c) {
+             printf ("%-11s %s\n", c->name, c->descr);
+         }
+         printf("\n-soundhw all will enable all of the above\n");
++#else
++        printf("Machine has no user-selectable audio hardware "
++               "(it may or may not have always-present audio hardware).\n");
++#endif
+         exit(!is_help_option(optarg));
+     }
+     else {

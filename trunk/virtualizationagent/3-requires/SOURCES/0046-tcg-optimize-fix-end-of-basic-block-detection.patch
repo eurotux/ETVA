@@ -1,0 +1,59 @@
+From 3066878819419c80c650e8f18aee284c36c6cc6e Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Wed, 19 Sep 2012 21:40:30 +0200
+Subject: [PATCH] tcg/optimize: fix end of basic block detection
+
+Commit e31b0a7c050711884ad570fe73df806520953618 fixed copy propagation on
+32-bit host by restricting the copy between different types. This was the
+wrong fix.
+
+The real problem is that the all temps states should be reset at the end
+of a basic block. This was done by adding such operations in the switch,
+but brcond2 was forgotten (that's why the crash was only observed on 32-bit
+hosts).
+
+Fix that by looking at the TCG_OPF_BB_END instead. We need to keep the case
+for op_set_label as temps might be modified through another path.
+
+Cc: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 22 +++++++++-------------
+ 1 file changed, 9 insertions(+), 13 deletions(-)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index 10d9773..9da333c 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -632,21 +632,17 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                 i--;
+             }
+             break;
+-        case INDEX_op_set_label:
+-        case INDEX_op_jmp:
+-        case INDEX_op_br:
+-            memset(temps, 0, nb_temps * sizeof(struct tcg_temp_info));
+-            for (i = 0; i < def->nb_args; i++) {
+-                *gen_args = *args;
+-                args++;
+-                gen_args++;
+-            }
+-            break;
+         default:
+             /* Default case: we do know nothing about operation so no
+-               propagation is done.  We only trash output args.  */
+-            for (i = 0; i < def->nb_oargs; i++) {
+-                reset_temp(args[i], nb_temps, nb_globals);
++               propagation is done.  We trash everything if the operation
++               is the end of a basic block, otherwise we only trash the
++               output args.  */
++            if (def->flags & TCG_OPF_BB_END) {
++                memset(temps, 0, nb_temps * sizeof(struct tcg_temp_info));
++            } else {
++                for (i = 0; i < def->nb_oargs; i++) {
++                    reset_temp(args[i], nb_temps, nb_globals);
++                }
+             }
+             for (i = 0; i < def->nb_args; i++) {
+                 gen_args[i] = args[i];

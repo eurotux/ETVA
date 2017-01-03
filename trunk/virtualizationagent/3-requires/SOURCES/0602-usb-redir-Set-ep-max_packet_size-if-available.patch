@@ -1,0 +1,36 @@
+From 113e6f088425758a9394b44120210ba0412630d2 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Mon, 3 Sep 2012 11:49:07 +0200
+Subject: [PATCH] usb-redir: Set ep max_packet_size if available
+
+This is needed for usb-redir to work properly with the xhci emulation.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/usb/redirect.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index 321f5be..b9a3633 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -814,6 +814,7 @@ static void usbredir_chardev_open(USBRedirDevice *dev)
+ 
+     usbredirparser_caps_set_cap(caps, usb_redir_cap_connect_device_version);
+     usbredirparser_caps_set_cap(caps, usb_redir_cap_filter);
++    usbredirparser_caps_set_cap(caps, usb_redir_cap_ep_info_max_packet_size);
+     usbredirparser_caps_set_cap(caps, usb_redir_cap_64bits_ids);
+     usbredirparser_init(dev->parser, VERSION, caps, USB_REDIR_CAPS_SIZE, 0);
+     usbredirparser_do_write(dev->parser);
+@@ -1202,6 +1203,10 @@ static void usbredir_ep_info(void *priv,
+                             i & 0x0f);
+         usb_ep->type = dev->endpoint[i].type;
+         usb_ep->ifnum = dev->endpoint[i].interface;
++        if (usbredirparser_peer_has_cap(dev->parser,
++                                     usb_redir_cap_ep_info_max_packet_size)) {
++            usb_ep->max_packet_size = ep_info->max_packet_size[i];
++        }
+     }
+ }
+ 

@@ -1,0 +1,87 @@
+From a8bb0ad1185b51d6b42930d8074095c8885d9f7a Mon Sep 17 00:00:00 2001
+From: Hitoshi Mitake <h.mitake@gmail.com>
+Date: Sat, 15 Sep 2012 01:15:41 +0900
+Subject: [PATCH] curses: don't initialize curses when qemu is daemonized
+
+Current qemu initializes curses even if -daemonize option is
+passed. This cause problem because shell prompt appears without
+calling endwin().
+
+This patch adds new function, is_daemonized(), to OS dependent
+code. With this function, curses_display_init() can check that qemu is
+daemonized or not. If daemonized, curses_display_init() isn't called
+and the problem is avoided.
+
+Of course, -daemonize && -curses doesn't make sense. Users shouldn't
+pass the arguments at the same time. But the problem is very painful
+because Ctrl-C cannot be delivered to the terminal.
+
+Cc: Andrzej Zaborowski  <balrog@zabor.org>
+Cc: Stefan Hajnoczi <stefanha@gmail.com>
+Cc: Anthony Liguori <aliguori@us.ibm.com>
+Cc: Michael Roth <mdroth@linux.vnet.ibm.com>
+Signed-off-by: Hitoshi Mitake <h.mitake@gmail.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 995ee2bf469de6bbe5ce133ec853392b2a4ce34c)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ os-posix.c      | 5 +++++
+ qemu-os-posix.h | 2 ++
+ qemu-os-win32.h | 5 +++++
+ vl.c            | 4 +++-
+ 4 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/os-posix.c b/os-posix.c
+index 79fa228..eabccb8 100644
+--- a/os-posix.c
++++ b/os-posix.c
+@@ -360,3 +360,8 @@ int qemu_create_pidfile(const char *filename)
+     /* keep pidfile open & locked forever */
+     return 0;
+ }
++
++bool is_daemonized(void)
++{
++    return daemonize;
++}
+diff --git a/qemu-os-posix.h b/qemu-os-posix.h
+index 8e1149d..7f198e4 100644
+--- a/qemu-os-posix.h
++++ b/qemu-os-posix.h
+@@ -46,4 +46,6 @@ typedef struct timeval qemu_timeval;
+ typedef struct timespec qemu_timespec;
+ int qemu_utimens(const char *path, const qemu_timespec *times);
+ 
++bool is_daemonized(void);
++
+ #endif
+diff --git a/qemu-os-win32.h b/qemu-os-win32.h
+index 753679b..b3e451b 100644
+--- a/qemu-os-win32.h
++++ b/qemu-os-win32.h
+@@ -86,4 +86,9 @@ typedef struct {
+ } qemu_timeval;
+ int qemu_gettimeofday(qemu_timeval *tp);
+ 
++static inline bool is_daemonized(void)
++{
++    return false;
++}
++
+ #endif
+diff --git a/vl.c b/vl.c
+index c681c33..49d7a52 100644
+--- a/vl.c
++++ b/vl.c
+@@ -3692,7 +3692,9 @@ int main(int argc, char **argv, char **envp)
+         break;
+ #if defined(CONFIG_CURSES)
+     case DT_CURSES:
+-        curses_display_init(ds, full_screen);
++        if (!is_daemonized()) {
++            curses_display_init(ds, full_screen);
++        }
+         break;
+ #endif
+ #if defined(CONFIG_SDL)

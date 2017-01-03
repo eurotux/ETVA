@@ -125,7 +125,7 @@ Primavera.Backup.TabPanel = new Ext.extend( Ext.TabPanel, {
                                                             if( selected ){
                                                                 Ext.Msg.show({
                                                                     title: item.text,
-                                                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                                                    buttons: Ext.MessageBox.YESNO,
                                                                     scope:this,
                                                                     msg: String.format(<?php echo json_encode(__('Are you sure you want delete backup plan {0}?')) ?>,selected.data['id']),
                                                                     fn: function(btn){

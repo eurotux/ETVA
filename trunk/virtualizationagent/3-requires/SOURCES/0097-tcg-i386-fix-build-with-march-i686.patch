@@ -1,0 +1,31 @@
+From b6b73085fe939404092998a6653e44643a8fd430 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Wed, 26 Sep 2012 00:30:12 +0200
+Subject: [PATCH] tcg/i386: fix build with -march < i686
+
+The movcond_i32 op has to be protected with TCG_TARGET_HAS_movcond_i32
+to fix the build with -march < i686.
+
+Thanks to Richard Henderson for the hint.
+
+Reported-by: Alex Barcelo <abarcelo@ac.upc.edu>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/i386/tcg-target.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tcg/i386/tcg-target.c b/tcg/i386/tcg-target.c
+index 85c6b81..616ef23 100644
+--- a/tcg/i386/tcg-target.c
++++ b/tcg/i386/tcg-target.c
+@@ -1907,7 +1907,9 @@ static const TCGTargetOpDef x86_op_defs[] = {
+     { INDEX_op_setcond_i32, { "q", "r", "ri" } },
+ 
+     { INDEX_op_deposit_i32, { "Q", "0", "Q" } },
++#if TCG_TARGET_HAS_movcond_i32
+     { INDEX_op_movcond_i32, { "r", "r", "ri", "r", "0" } },
++#endif
+ 
+ #if TCG_TARGET_REG_BITS == 32
+     { INDEX_op_mulu2_i32, { "a", "d", "a", "r" } },

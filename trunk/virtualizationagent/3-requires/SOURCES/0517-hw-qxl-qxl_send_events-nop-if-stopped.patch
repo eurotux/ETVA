@@ -1,0 +1,47 @@
+From c7315f27ada69adffcfca0549cf5fa9d508c4215 Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Thu, 1 Nov 2012 14:56:00 +0200
+Subject: [PATCH] hw/qxl: qxl_send_events: nop if stopped
+
+Added a trace point for easy logging.
+
+RHBZ: https://bugzilla.redhat.com/show_bug.cgi?id=870972
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c     | 8 +++++++-
+ trace-events | 1 +
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 445705e..8111bb9 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -1714,7 +1714,13 @@ static void qxl_send_events(PCIQXLDevice *d, uint32_t events)
+     uint32_t le_events = cpu_to_le32(events);
+ 
+     trace_qxl_send_events(d->id, events);
+-    assert(qemu_spice_display_is_running(&d->ssd));
++    if (!qemu_spice_display_is_running(&d->ssd)) {
++        /* spice-server tracks guest running state and should not do this */
++        fprintf(stderr, "%s: spice-server bug: guest stopped, ignoring\n",
++                __func__);
++        trace_qxl_send_events_vm_stopped(d->id, events);
++        return;
++    }
+     old_pending = __sync_fetch_and_or(&d->ram->int_pending, le_events);
+     if ((old_pending & le_events) == le_events) {
+         return;
+diff --git a/trace-events b/trace-events
+index 07b63f1..992aef1 100644
+--- a/trace-events
++++ b/trace-events
+@@ -973,6 +973,7 @@ qxl_spice_update_area(int qid, uint32_t surface_id, uint32_t left, uint32_t righ
+ qxl_spice_update_area_rest(int qid, uint32_t num_dirty_rects, uint32_t clear_dirty_region) "%d #d=%d clear=%d"
+ qxl_surfaces_dirty(int qid, int surface, int offset, int size) "%d surface=%d offset=%d size=%d"
+ qxl_send_events(int qid, uint32_t events) "%d %d"
++qxl_send_events_vm_stopped(int qid, uint32_t events) "%d %d"
+ qxl_set_guest_bug(int qid) "%d"
+ qxl_interrupt_client_monitors_config(int qid, int num_heads, void *heads) "%d %d %p"
+ qxl_client_monitors_config_unsupported_by_guest(int qid, uint32_t int_mask, void *client_monitors_config) "%d %X %p"

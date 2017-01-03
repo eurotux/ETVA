@@ -73,11 +73,13 @@ class EtvaServerLogical extends BaseEtvaServerLogical {
     public function preDelete(PropelPDO $con = null)
     {
         $server = $this->getEtvaServer();
+        $node_uuid = '';
         $node = $server->getEtvaNode();
+        if( $node ) $node_uuid = $node->getUuid();
         $logicalvol = $this->getEtvaLogicalvolume();
         $lv = $logicalvol->getLv();
         //remove disk RRA files        
-        $server_disk_rw = new ServerDisk_rwRRA($node->getUuid(),$server->getUuid(),$lv,false);
+        $server_disk_rw = new ServerDisk_rwRRA($node_uuid,$server->getUuid(),$lv,false);
         $server_disk_rw->delete();        
 
         return true;

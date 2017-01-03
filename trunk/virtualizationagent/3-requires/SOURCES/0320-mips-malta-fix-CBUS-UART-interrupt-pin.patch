@@ -1,0 +1,38 @@
+From c815f5b939ad9486865ba25eefa10ea496a6e6ef Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Wed, 14 Nov 2012 15:04:42 +0100
+Subject: [PATCH] mips/malta: fix CBUS UART interrupt pin
+
+According to the MIPS Malta Developement Platform User's Manual, the
+i8259 interrupt controller is supposed to be connected to the hardware
+IRQ0, and the CBUS UART to the hardware interrupt 2.
+
+In QEMU they are both connected to hardware interrupt 0, the CBUS UART
+interrupt being wrong. This patch fixes that. It should be noted that
+the irq array in QEMU includes the software interrupts, hence
+env->irq[2] is the first hardware interrupt.
+
+Cc: Ralf Baechle <ralf@linux-mips.org>
+Reviewed-by: Eric Johnson <ericj@mips.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit 68d001928b151a0c50f367c0bdca645b3d5e9ed3)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/mips_malta.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/hw/mips_malta.c b/hw/mips_malta.c
+index ad23f26..9289a28 100644
+--- a/hw/mips_malta.c
++++ b/hw/mips_malta.c
+@@ -860,7 +860,8 @@ void mips_malta_init (ram_addr_t ram_size,
+     be = 0;
+ #endif
+     /* FPGA */
+-    malta_fpga_init(system_memory, FPGA_ADDRESS, env->irq[2], serial_hds[2]);
++    /* The CBUS UART is attached to the MIPS CPU INT2 pin, ie interrupt 4 */
++    malta_fpga_init(system_memory, FPGA_ADDRESS, env->irq[4], serial_hds[2]);
+ 
+     /* Load firmware in flash / BIOS. */
+     dinfo = drive_get(IF_PFLASH, 0, fl_idx);

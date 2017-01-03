@@ -1,0 +1,23 @@
+
+REST: (GET,PUT,POST,DELETE)
+
+/clusters/
+
+/nodes/
+/virtualmachines/
+
+/pools/
+/volumes/
+
+/networks/
+
+
+ETCD:
+
+    REST +
+    
+    /queues/
+
+    /queues/clusters/
+    /queues/nodes/
+

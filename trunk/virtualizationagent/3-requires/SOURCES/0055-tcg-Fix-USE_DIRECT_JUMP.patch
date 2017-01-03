@@ -1,0 +1,32 @@
+From f42ad07a5bbc83bd4d34138870aa29a9b51b44ce Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Mon, 17 Sep 2012 08:28:52 -0700
+Subject: [PATCH] tcg: Fix !USE_DIRECT_JUMP
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Commit 6375e09e changed the type of TranslationBlock.tb_next,
+but failed to change the type of TCGContext.tb_next.
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Reviewed-by: Andreas Färber <afaerber@suse.de>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/tcg.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tcg/tcg.h b/tcg/tcg.h
+index f454107..609ed86 100644
+--- a/tcg/tcg.h
++++ b/tcg/tcg.h
+@@ -344,7 +344,7 @@ struct TCGContext {
+ 
+     /* goto_tb support */
+     uint8_t *code_buf;
+-    unsigned long *tb_next;
++    uintptr_t *tb_next;
+     uint16_t *tb_next_offset;
+     uint16_t *tb_jmp_offset; /* != NULL if USE_DIRECT_JUMP */
+ 

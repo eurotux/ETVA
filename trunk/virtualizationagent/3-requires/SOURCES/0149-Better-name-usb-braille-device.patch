@@ -1,0 +1,30 @@
+From 3873affda62f39a112adc726968fd05ebd3bbc77 Mon Sep 17 00:00:00 2001
+From: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Date: Thu, 23 Aug 2012 09:59:27 +0200
+Subject: [PATCH] Better name usb braille device
+
+Windows users need to know that they have to use the Baum driver to make
+the qemu braille device work.
+
+Signed-off-by: Samuel Thibault <samuel.thibault@ens-lyon.org>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 2964cd9bfa5100e433471d3e3fedcc9d62891894)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/dev-serial.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/usb/dev-serial.c b/hw/usb/dev-serial.c
+index 8aa6552..69b6e48 100644
+--- a/hw/usb/dev-serial.c
++++ b/hw/usb/dev-serial.c
+@@ -113,7 +113,7 @@ enum {
+ static const USBDescStrings desc_strings = {
+     [STR_MANUFACTURER]    = "QEMU",
+     [STR_PRODUCT_SERIAL]  = "QEMU USB SERIAL",
+-    [STR_PRODUCT_BRAILLE] = "QEMU USB BRAILLE",
++    [STR_PRODUCT_BRAILLE] = "QEMU USB BAUM BRAILLE",
+     [STR_SERIALNUMBER]    = "1",
+ };
+ 

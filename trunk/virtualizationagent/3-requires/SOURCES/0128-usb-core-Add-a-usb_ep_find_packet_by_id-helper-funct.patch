@@ -1,0 +1,51 @@
+From 6d0e15637937d86b5d1fc1f8b53b56aac5cd9508 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Tue, 28 Aug 2012 09:43:18 +0200
+Subject: [PATCH] usb-core: Add a usb_ep_find_packet_by_id() helper function
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit c13a9e61366cc3e28299d8faeb65e65c6e5964cf)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb.h      |  2 ++
+ hw/usb/core.c | 15 +++++++++++++++
+ 2 files changed, 17 insertions(+)
+
+diff --git a/hw/usb.h b/hw/usb.h
+index b8fceec..684e3f4 100644
+--- a/hw/usb.h
++++ b/hw/usb.h
+@@ -377,6 +377,8 @@ void usb_ep_set_max_packet_size(USBDevice *dev, int pid, int ep,
+                                 uint16_t raw);
+ int usb_ep_get_max_packet_size(USBDevice *dev, int pid, int ep);
+ void usb_ep_set_pipeline(USBDevice *dev, int pid, int ep, bool enabled);
++USBPacket *usb_ep_find_packet_by_id(USBDevice *dev, int pid, int ep,
++                                    uint64_t id);
+ 
+ void usb_attach(USBPort *port);
+ void usb_detach(USBPort *port);
+diff --git a/hw/usb/core.c b/hw/usb/core.c
+index be6d936..fe431d0 100644
+--- a/hw/usb/core.c
++++ b/hw/usb/core.c
+@@ -726,3 +726,18 @@ void usb_ep_set_pipeline(USBDevice *dev, int pid, int ep, bool enabled)
+     struct USBEndpoint *uep = usb_ep_get(dev, pid, ep);
+     uep->pipeline = enabled;
+ }
++
++USBPacket *usb_ep_find_packet_by_id(USBDevice *dev, int pid, int ep,
++                                    uint64_t id)
++{
++    struct USBEndpoint *uep = usb_ep_get(dev, pid, ep);
++    USBPacket *p;
++
++    while ((p = QTAILQ_FIRST(&uep->queue)) != NULL) {
++        if (p->id == id) {
++            return p;
++        }
++    }
++
++    return NULL;
++}

@@ -1,0 +1,245 @@
+From f79d8d09405c736f2af71b1f9c17d289904bf4ac Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Tue, 28 Aug 2012 17:28:03 +0200
+Subject: [PATCH] usb3: superspeed endpoint companion
+
+Add support for building superspeed endpoint companion descriptors,
+create them for superspeed usb devices.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/usb.h      |  1 +
+ hw/usb/desc.c | 55 ++++++++++++++++++++++++++++++++++++++++---------------
+ hw/usb/desc.h | 26 +++++++++++++++++++++-----
+ 3 files changed, 62 insertions(+), 20 deletions(-)
+
+diff --git a/hw/usb.h b/hw/usb.h
+index 684e3f4..78ffdf4 100644
+--- a/hw/usb.h
++++ b/hw/usb.h
+@@ -137,6 +137,7 @@
+ #define USB_DT_INTERFACE_ASSOC          0x0B
+ #define USB_DT_CS_INTERFACE             0x24
+ #define USB_DT_CS_ENDPOINT              0x25
++#define USB_DT_ENDPOINT_COMPANION       0x30
+ 
+ #define USB_ENDPOINT_XFER_CONTROL	0
+ #define USB_ENDPOINT_XFER_ISOC		1
+diff --git a/hw/usb/desc.c b/hw/usb/desc.c
+index 3e8c6cb..8f5a8e5 100644
+--- a/hw/usb/desc.c
++++ b/hw/usb/desc.c
+@@ -76,7 +76,8 @@ int usb_desc_device_qualifier(const USBDescDevice *dev,
+     return bLength;
+ }
+ 
+-int usb_desc_config(const USBDescConfig *conf, uint8_t *dest, size_t len)
++int usb_desc_config(const USBDescConfig *conf, int flags,
++                    uint8_t *dest, size_t len)
+ {
+     uint8_t  bLength = 0x09;
+     uint16_t wTotalLength = 0;
+@@ -99,7 +100,7 @@ int usb_desc_config(const USBDescConfig *conf, uint8_t *dest, size_t len)
+ 
+     /* handle grouped interfaces if any */
+     for (i = 0; i < conf->nif_groups; i++) {
+-        rc = usb_desc_iface_group(&(conf->if_groups[i]),
++        rc = usb_desc_iface_group(&(conf->if_groups[i]), flags,
+                                   dest + wTotalLength,
+                                   len - wTotalLength);
+         if (rc < 0) {
+@@ -110,7 +111,8 @@ int usb_desc_config(const USBDescConfig *conf, uint8_t *dest, size_t len)
+ 
+     /* handle normal (ungrouped / no IAD) interfaces if any */
+     for (i = 0; i < conf->nif; i++) {
+-        rc = usb_desc_iface(conf->ifs + i, dest + wTotalLength, len - wTotalLength);
++        rc = usb_desc_iface(conf->ifs + i, flags,
++                            dest + wTotalLength, len - wTotalLength);
+         if (rc < 0) {
+             return rc;
+         }
+@@ -122,8 +124,8 @@ int usb_desc_config(const USBDescConfig *conf, uint8_t *dest, size_t len)
+     return wTotalLength;
+ }
+ 
+-int usb_desc_iface_group(const USBDescIfaceAssoc *iad, uint8_t *dest,
+-                         size_t len)
++int usb_desc_iface_group(const USBDescIfaceAssoc *iad, int flags,
++                         uint8_t *dest, size_t len)
+ {
+     int pos = 0;
+     int i = 0;
+@@ -147,7 +149,7 @@ int usb_desc_iface_group(const USBDescIfaceAssoc *iad, uint8_t *dest,
+ 
+     /* handle associated interfaces in this group */
+     for (i = 0; i < iad->nif; i++) {
+-        int rc = usb_desc_iface(&(iad->ifs[i]), dest + pos, len - pos);
++        int rc = usb_desc_iface(&(iad->ifs[i]), flags, dest + pos, len - pos);
+         if (rc < 0) {
+             return rc;
+         }
+@@ -157,7 +159,8 @@ int usb_desc_iface_group(const USBDescIfaceAssoc *iad, uint8_t *dest,
+     return pos;
+ }
+ 
+-int usb_desc_iface(const USBDescIface *iface, uint8_t *dest, size_t len)
++int usb_desc_iface(const USBDescIface *iface, int flags,
++                   uint8_t *dest, size_t len)
+ {
+     uint8_t bLength = 0x09;
+     int i, rc, pos = 0;
+@@ -188,7 +191,7 @@ int usb_desc_iface(const USBDescIface *iface, uint8_t *dest, size_t len)
+     }
+ 
+     for (i = 0; i < iface->bNumEndpoints; i++) {
+-        rc = usb_desc_endpoint(iface->eps + i, dest + pos, len - pos);
++        rc = usb_desc_endpoint(iface->eps + i, flags, dest + pos, len - pos);
+         if (rc < 0) {
+             return rc;
+         }
+@@ -198,13 +201,15 @@ int usb_desc_iface(const USBDescIface *iface, uint8_t *dest, size_t len)
+     return pos;
+ }
+ 
+-int usb_desc_endpoint(const USBDescEndpoint *ep, uint8_t *dest, size_t len)
++int usb_desc_endpoint(const USBDescEndpoint *ep, int flags,
++                      uint8_t *dest, size_t len)
+ {
+     uint8_t bLength = ep->is_audio ? 0x09 : 0x07;
+     uint8_t extralen = ep->extra ? ep->extra[0] : 0;
++    uint8_t superlen = (flags & USB_DESC_FLAG_SUPER) ? 0x06 : 0;
+     USBDescriptor *d = (void *)dest;
+ 
+-    if (len < bLength + extralen) {
++    if (len < bLength + extralen + superlen) {
+         return -1;
+     }
+ 
+@@ -224,7 +229,21 @@ int usb_desc_endpoint(const USBDescEndpoint *ep, uint8_t *dest, size_t len)
+         memcpy(dest + bLength, ep->extra, extralen);
+     }
+ 
+-    return bLength + extralen;
++    if (superlen) {
++        USBDescriptor *d = (void *)(dest + bLength + extralen);
++
++        d->bLength                       = 0x06;
++        d->bDescriptorType               = USB_DT_ENDPOINT_COMPANION;
++
++        d->u.super_endpoint.bMaxBurst    = ep->bMaxBurst;
++        d->u.super_endpoint.bmAttributes = ep->bmAttributes_super;
++        d->u.super_endpoint.wBytesPerInterval_lo =
++            usb_lo(ep->wBytesPerInterval);
++        d->u.super_endpoint.wBytesPerInterval_hi =
++            usb_hi(ep->wBytesPerInterval);
++    }
++
++    return bLength + extralen + superlen;
+ }
+ 
+ int usb_desc_other(const USBDescOther *desc, uint8_t *dest, size_t len)
+@@ -509,7 +528,7 @@ int usb_desc_get_descriptor(USBDevice *dev, int value, uint8_t *dest, size_t len
+     uint8_t buf[256];
+     uint8_t type = value >> 8;
+     uint8_t index = value & 0xff;
+-    int ret = -1;
++    int flags, ret = -1;
+ 
+     if (dev->speed == USB_SPEED_HIGH) {
+         other_dev = usb_device_get_usb_desc(dev)->full;
+@@ -517,6 +536,11 @@ int usb_desc_get_descriptor(USBDevice *dev, int value, uint8_t *dest, size_t len
+         other_dev = usb_device_get_usb_desc(dev)->high;
+     }
+ 
++    flags = 0;
++    if (dev->device->bcdUSB >= 0x0300) {
++        flags |= USB_DESC_FLAG_SUPER;
++    }
++
+     switch(type) {
+     case USB_DT_DEVICE:
+         ret = usb_desc_device(&desc->id, dev->device, buf, sizeof(buf));
+@@ -524,7 +548,8 @@ int usb_desc_get_descriptor(USBDevice *dev, int value, uint8_t *dest, size_t len
+         break;
+     case USB_DT_CONFIG:
+         if (index < dev->device->bNumConfigurations) {
+-            ret = usb_desc_config(dev->device->confs + index, buf, sizeof(buf));
++            ret = usb_desc_config(dev->device->confs + index, flags,
++                                  buf, sizeof(buf));
+         }
+         trace_usb_desc_config(dev->addr, index, len, ret);
+         break;
+@@ -532,7 +557,6 @@ int usb_desc_get_descriptor(USBDevice *dev, int value, uint8_t *dest, size_t len
+         ret = usb_desc_string(dev, index, buf, sizeof(buf));
+         trace_usb_desc_string(dev->addr, index, len, ret);
+         break;
+-
+     case USB_DT_DEVICE_QUALIFIER:
+         if (other_dev != NULL) {
+             ret = usb_desc_device_qualifier(other_dev, buf, sizeof(buf));
+@@ -541,7 +565,8 @@ int usb_desc_get_descriptor(USBDevice *dev, int value, uint8_t *dest, size_t len
+         break;
+     case USB_DT_OTHER_SPEED_CONFIG:
+         if (other_dev != NULL && index < other_dev->bNumConfigurations) {
+-            ret = usb_desc_config(other_dev->confs + index, buf, sizeof(buf));
++            ret = usb_desc_config(other_dev->confs + index, flags,
++                                  buf, sizeof(buf));
+             buf[0x01] = USB_DT_OTHER_SPEED_CONFIG;
+         }
+         trace_usb_desc_other_speed_config(dev->addr, index, len, ret);
+diff --git a/hw/usb/desc.h b/hw/usb/desc.h
+index d89fa41..4b5e88d 100644
+--- a/hw/usb/desc.h
++++ b/hw/usb/desc.h
+@@ -63,6 +63,12 @@ typedef struct USBDescriptor {
+             uint8_t           bRefresh;        /* only audio ep */
+             uint8_t           bSynchAddress;   /* only audio ep */
+         } endpoint;
++        struct {
++            uint8_t           bMaxBurst;
++            uint8_t           bmAttributes;
++            uint8_t           wBytesPerInterval_lo;
++            uint8_t           wBytesPerInterval_hi;
++        } super_endpoint;
+     } u;
+ } QEMU_PACKED USBDescriptor;
+ 
+@@ -139,6 +145,11 @@ struct USBDescEndpoint {
+ 
+     uint8_t                   is_audio; /* has bRefresh + bSynchAddress */
+     uint8_t                   *extra;
++
++    /* superspeed endpoint companion */
++    uint8_t                   bMaxBurst;
++    uint8_t                   bmAttributes_super;
++    uint16_t                  wBytesPerInterval;
+ };
+ 
+ struct USBDescOther {
+@@ -156,16 +167,21 @@ struct USBDesc {
+     const char* const         *str;
+ };
+ 
++#define USB_DESC_FLAG_SUPER (1 << 1)
++
+ /* generate usb packages from structs */
+ int usb_desc_device(const USBDescID *id, const USBDescDevice *dev,
+                     uint8_t *dest, size_t len);
+ int usb_desc_device_qualifier(const USBDescDevice *dev,
+                               uint8_t *dest, size_t len);
+-int usb_desc_config(const USBDescConfig *conf, uint8_t *dest, size_t len);
+-int usb_desc_iface_group(const USBDescIfaceAssoc *iad, uint8_t *dest,
+-                         size_t len);
+-int usb_desc_iface(const USBDescIface *iface, uint8_t *dest, size_t len);
+-int usb_desc_endpoint(const USBDescEndpoint *ep, uint8_t *dest, size_t len);
++int usb_desc_config(const USBDescConfig *conf, int flags,
++                    uint8_t *dest, size_t len);
++int usb_desc_iface_group(const USBDescIfaceAssoc *iad, int flags,
++                         uint8_t *dest, size_t len);
++int usb_desc_iface(const USBDescIface *iface, int flags,
++                   uint8_t *dest, size_t len);
++int usb_desc_endpoint(const USBDescEndpoint *ep, int flags,
++                      uint8_t *dest, size_t len);
+ int usb_desc_other(const USBDescOther *desc, uint8_t *dest, size_t len);
+ 
+ /* control message emulation helpers */

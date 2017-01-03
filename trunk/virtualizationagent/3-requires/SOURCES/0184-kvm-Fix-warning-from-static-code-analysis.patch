@@ -1,0 +1,46 @@
+From 668b771a36e2f547da4078b2ca27ac771d8adc5f Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Mon, 3 Sep 2012 22:40:40 +0200
+Subject: [PATCH] kvm: Fix warning from static code analysis
+
+Report from smatch:
+
+kvm-all.c:1373 kvm_init(135) warn:
+ variable dereferenced before check 's' (see line 1360)
+
+'s' cannot by NULL (it was alloced using g_malloc0), so there is no need
+to check it here.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 6d1cc3210ccc4372ffa337c187da9db68314c0c4)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ kvm-all.c | 12 +++++-------
+ 1 file changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/kvm-all.c b/kvm-all.c
+index 90c71f9..08d6051 100644
+--- a/kvm-all.c
++++ b/kvm-all.c
+@@ -1419,13 +1419,11 @@ int kvm_init(void)
+     return 0;
+ 
+ err:
+-    if (s) {
+-        if (s->vmfd >= 0) {
+-            close(s->vmfd);
+-        }
+-        if (s->fd != -1) {
+-            close(s->fd);
+-        }
++    if (s->vmfd >= 0) {
++        close(s->vmfd);
++    }
++    if (s->fd != -1) {
++        close(s->fd);
+     }
+     g_free(s);
+ 

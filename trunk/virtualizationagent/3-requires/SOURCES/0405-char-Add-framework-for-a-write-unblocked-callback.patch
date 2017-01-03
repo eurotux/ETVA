@@ -1,0 +1,59 @@
+From aa991a6ac231686beb911bf2f321668ed5fc59aa Mon Sep 17 00:00:00 2001
+From: Amit Shah <amit.shah@redhat.com>
+Date: Mon, 21 Mar 2011 21:41:42 +0100
+Subject: [PATCH] char: Add framework for a 'write unblocked' callback
+
+The char layer can let users know that the driver will block on further
+input.  For users interested in not blocking, they can assign a function
+pointer that will be called back when the driver becomes writable.  This
+patch just adds the function pointers to the CharDriverState structure,
+future patches will enable the nonblocking and callback functionality.
+
+Signed-off-by: Amit Shah <amit.shah@redhat.com>
+Signed-off-by: Cole Robinson <crobinso@redhat.com>
+---
+ qemu-char.c | 3 +++
+ qemu-char.h | 4 ++++
+ 2 files changed, 7 insertions(+)
+
+diff --git a/qemu-char.c b/qemu-char.c
+index bd443db..b5266d1 100644
+--- a/qemu-char.c
++++ b/qemu-char.c
+@@ -211,11 +211,14 @@ void qemu_chr_add_handlers(CharDriverState *s,
+     }
+     s->chr_can_read = handlers->fd_can_read;
+     s->chr_read = handlers->fd_read;
++    s->chr_write_unblocked = handlers->fd_write_unblocked;
+     s->chr_event = handlers->fd_event;
+     s->handler_opaque = opaque;
+     if (s->chr_update_read_handler)
+         s->chr_update_read_handler(s);
+ 
++    s->write_blocked = false;
++
+     /* We're connecting to an already opened device, so let's make sure we
+        also get the open event */
+     if (s->opened) {
+diff --git a/qemu-char.h b/qemu-char.h
+index dfa8c2d..b5e23a4 100644
+--- a/qemu-char.h
++++ b/qemu-char.h
+@@ -62,6 +62,9 @@ struct CharDriverState {
+     IOEventHandler *chr_event;
+     IOCanReadHandler *chr_can_read;
+     IOReadHandler *chr_read;
++    IOHandler *chr_write_unblocked;
++    void (*chr_enable_write_fd_handler)(struct CharDriverState *chr);
++    void (*chr_disable_write_fd_handler)(struct CharDriverState *chr);
+     void *handler_opaque;
+     void (*chr_close)(struct CharDriverState *chr);
+     void (*chr_accept_input)(struct CharDriverState *chr);
+@@ -74,6 +77,7 @@ struct CharDriverState {
+     char *filename;
+     int opened;
+     int avail_connections;
++    bool write_blocked; /* Are we in a blocked state? */
+     QTAILQ_ENTRY(CharDriverState) next;
+ };
+ 

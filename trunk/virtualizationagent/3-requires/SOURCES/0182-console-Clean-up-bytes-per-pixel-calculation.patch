@@ -1,0 +1,48 @@
+From b998279997e1f7d5341df54a247b7ece56750fcb Mon Sep 17 00:00:00 2001
+From: BALATON Zoltan <balaton@eik.bme.hu>
+Date: Wed, 22 Aug 2012 17:19:42 +0200
+Subject: [PATCH] console: Clean up bytes per pixel calculation
+
+Division with round up is the correct way to compute this even if the
+only case where division with round down gives incorrect result is
+probably 15 bpp. This case was explicitely patched up in one of these
+functions but was unhandled in the other. (I'm not sure about setting
+16 bpp for the 15bpp case either but I left that there for now.)
+
+Signed-off-by: BALATON Zoltan <balaton@eik.bme.hu>
+Signed-off-by: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+(cherry picked from commit feadf1a4de0d7468ffb671a2b9f681925469fa58)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ console.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/console.c b/console.c
+index 3b5cabb..8b5e21d 100644
+--- a/console.c
++++ b/console.c
+@@ -1611,7 +1611,7 @@ PixelFormat qemu_different_endianness_pixelformat(int bpp)
+     memset(&pf, 0x00, sizeof(PixelFormat));
+ 
+     pf.bits_per_pixel = bpp;
+-    pf.bytes_per_pixel = bpp / 8;
++    pf.bytes_per_pixel = DIV_ROUND_UP(bpp, 8);
+     pf.depth = bpp == 32 ? 24 : bpp;
+ 
+     switch (bpp) {
+@@ -1660,13 +1660,12 @@ PixelFormat qemu_default_pixelformat(int bpp)
+     memset(&pf, 0x00, sizeof(PixelFormat));
+ 
+     pf.bits_per_pixel = bpp;
+-    pf.bytes_per_pixel = bpp / 8;
++    pf.bytes_per_pixel = DIV_ROUND_UP(bpp, 8);
+     pf.depth = bpp == 32 ? 24 : bpp;
+ 
+     switch (bpp) {
+         case 15:
+             pf.bits_per_pixel = 16;
+-            pf.bytes_per_pixel = 2;
+             pf.rmask = 0x00007c00;
+             pf.gmask = 0x000003E0;
+             pf.bmask = 0x0000001F;

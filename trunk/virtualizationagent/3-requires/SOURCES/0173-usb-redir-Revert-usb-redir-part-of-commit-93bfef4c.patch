@@ -1,0 +1,60 @@
+From cd1882d37399867f5585eae08bc437a7a22787c9 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Wed, 12 Sep 2012 15:08:39 +0200
+Subject: [PATCH] usb-redir: Revert usb-redir part of commit 93bfef4c
+
+Commit 93bfef4c6e4b23caea9d51e1099d06433d8835a4 makes qemu-devices
+which report the qemu version string to the guest in some way use a
+qemu_get_version function which reports a machine-specific version string.
+
+However usb-redir does not expose the qemu version to the guest, only to
+the usbredir-host as part of the initial handshake. This can then be logged
+on the usbredir-host side for debugging purposes and is otherwise completely
+unused! For debugging purposes it is important to have the real qemu version
+in there, rather then the machine-specific version.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 35efba2cc6812dc980c336d7b9bf81dbfb5daf00)
+
+Conflicts:
+
+	hw/usb/redirect.c
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/redirect.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index ee75217..ab8d79a 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -134,6 +134,8 @@ static void usbredir_interrupt_packet(void *priv, uint32_t id,
+ static int usbredir_handle_status(USBRedirDevice *dev,
+                                        int status, int actual_len);
+ 
++#define VERSION "qemu usb-redir guest " QEMU_VERSION
++
+ /*
+  * Logging stuff
+  */
+@@ -777,9 +779,6 @@ static void usbredir_chardev_open(USBRedirDevice *dev)
+     usbredir_chardev_close_bh(dev);
+     qemu_bh_cancel(dev->chardev_close_bh);
+ 
+-    strcpy(version, "qemu usb-redir guest ");
+-    pstrcat(version, sizeof(version), qemu_get_version());
+-
+     dev->parser = qemu_oom_check(usbredirparser_create());
+     dev->parser->priv = dev;
+     dev->parser->log_func = usbredir_log;
+@@ -805,7 +804,7 @@ static void usbredir_chardev_open(USBRedirDevice *dev)
+ 
+     usbredirparser_caps_set_cap(caps, usb_redir_cap_connect_device_version);
+     usbredirparser_caps_set_cap(caps, usb_redir_cap_filter);
+-    usbredirparser_init(dev->parser, version, caps, USB_REDIR_CAPS_SIZE, 0);
++    usbredirparser_init(dev->parser, VERSION, caps, USB_REDIR_CAPS_SIZE, 0);
+     usbredirparser_do_write(dev->parser);
+ }
+ 

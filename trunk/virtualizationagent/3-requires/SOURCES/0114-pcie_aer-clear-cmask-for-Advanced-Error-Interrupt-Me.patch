@@ -1,0 +1,37 @@
+From 04b618a591606ed2736d7b83ab7477d97848d702 Mon Sep 17 00:00:00 2001
+From: Jason Baron <jbaron@redhat.com>
+Date: Tue, 4 Sep 2012 16:22:46 -0400
+Subject: [PATCH] pcie_aer: clear cmask for Advanced Error Interrupt Message
+ Number
+
+The Advanced Error Interrupt Message Number (bits 31:27 of the Root
+Error Status Register) is updated when the number of msi messages assigned to a
+device changes. Migration of windows 7 on q35 chipset failed because the check
+in get_pci_config_device() fails due to cmask being set on these bits. Its valid
+to update these bits and we must restore this state across migration.
+
+Signed-off-by: Jason Baron <jbaron@redhat.com>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+(cherry picked from commit 0e180d9c8a7429c55d23d2e7855f1e490a063aaa)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/pcie_aer.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/hw/pcie_aer.c b/hw/pcie_aer.c
+index 3b6981c..b04c164 100644
+--- a/hw/pcie_aer.c
++++ b/hw/pcie_aer.c
+@@ -738,6 +738,11 @@ void pcie_aer_root_init(PCIDevice *dev)
+                  PCI_ERR_ROOT_CMD_EN_MASK);
+     pci_set_long(dev->w1cmask + pos + PCI_ERR_ROOT_STATUS,
+                  PCI_ERR_ROOT_STATUS_REPORT_MASK);
++    /* PCI_ERR_ROOT_IRQ is RO but devices change it using a
++     * device-specific method.
++     */
++    pci_set_long(dev->cmask + pos + PCI_ERR_ROOT_STATUS,
++                 ~PCI_ERR_ROOT_IRQ);
+ }
+ 
+ void pcie_aer_root_reset(PCIDevice *dev)

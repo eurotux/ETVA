@@ -1,0 +1,69 @@
+From d0ea794ae1ecc03518824a0d91447d0ffe35f7cb Mon Sep 17 00:00:00 2001
+From: Bo Yang <boyang@suse.com>
+Date: Wed, 29 Aug 2012 19:26:11 +0800
+Subject: [PATCH] eepro100: Fix network hang when rx buffers run out
+
+This is reported by QA. When installing os with pxe, after the initial
+kernel and initrd are loaded, the procedure tries to copy files from install
+server to local harddisk, the network becomes stall because of running out of
+receive descriptor.
+
+[Whitespace fixes and removed qemu_notify_event() because Paolo's
+earlier net patches have moved it into qemu_flush_queued_packets().
+
+Additional info:
+
+I can reproduce the network hang with a tap device doing a iPXE HTTP
+boot as follows:
+
+  $ qemu -enable-kvm -m 1024 \
+    -netdev tap,id=netdev0,script=no,downscript=no \
+    -device i82559er,netdev=netdev0,romfile=80861209.rom \
+    -drive if=virtio,cache=none,file=test.img
+  iPXE> ifopen net0
+  iPXE> config # set static network configuration
+  iPXE> kernel http://mirror.bytemark.co.uk/fedora/linux/releases/17/Fedora/x86_64/os/images/pxeboot/vmlinuz
+
+I needed a vanilla iPXE ROM to get to the iPXE prompt.  I think the boot
+prompt has been disabled in the ROMs that ship with QEMU to reduce boot
+time.
+
+During the vmlinuz HTTP download there is a network hang.  hw/eepro100.c
+has reached the end of the rx descriptor list.  When the iPXE driver
+replenishes the rx descriptor list we don't kick the QEMU net subsystem
+and event loop, thereby leaving the tap netdev without its file
+descriptor in select(2).
+
+Stefan Hajnoczi <stefanha@gmail.com>]
+
+Signed-off-by: Bo Yang <boyang@suse.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 1069985fb132cd4324fc02d371f1e61492a1823f)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/eepro100.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/hw/eepro100.c b/hw/eepro100.c
+index 50d117e..5b23116 100644
+--- a/hw/eepro100.c
++++ b/hw/eepro100.c
+@@ -1036,6 +1036,7 @@ static void eepro100_ru_command(EEPRO100State * s, uint8_t val)
+         }
+         set_ru_state(s, ru_ready);
+         s->ru_offset = e100_read_reg4(s, SCBPointer);
++        qemu_flush_queued_packets(&s->nic->nc);
+         TRACE(OTHER, logout("val=0x%02x (rx start)\n", val));
+         break;
+     case RX_RESUME:
+@@ -1770,7 +1771,8 @@ static ssize_t nic_receive(NetClientState *nc, const uint8_t * buf, size_t size)
+     if (rfd_command & COMMAND_EL) {
+         /* EL bit is set, so this was the last frame. */
+         logout("receive: Running out of frames\n");
+-        set_ru_state(s, ru_suspended);
++        set_ru_state(s, ru_no_resources);
++        eepro100_rnr_interrupt(s);
+     }
+     if (rfd_command & COMMAND_S) {
+         /* S bit is set. */

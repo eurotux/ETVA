@@ -1,0 +1,24 @@
+From 6223ebfa2a80275b47feafa3f342c3dfc11dd566 Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Sun, 2 Sep 2012 02:04:16 +0300
+Subject: [PATCH] dtrace backend: add function to reserved words
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+---
+ scripts/tracetool/backend/dtrace.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/tracetool/backend/dtrace.py b/scripts/tracetool/backend/dtrace.py
+index 9cab75c..6be7047 100644
+--- a/scripts/tracetool/backend/dtrace.py
++++ b/scripts/tracetool/backend/dtrace.py
+@@ -87,7 +87,7 @@ def stap(events):
+         if len(e.args) > 0:
+             for name in e.args.names():
+                 # Append underscore to reserved keywords
+-                if name in ('limit', 'in', 'next', 'self'):
++                if name in ('limit', 'in', 'next', 'self', 'function'):
+                     name += '_'
+                 out('  %s = $arg%d;' % (name, i))
+                 i += 1

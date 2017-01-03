@@ -1,0 +1,132 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use locale;
+use utf8;
+
+use lib '/usr/local/sap2elastix';
+
+use utilcommon;
+use utilsql;
+
+use Data::Dumper;
+
+sub main {
+    my %args = utilcommon::read_args({ 'page'=>'int' },@_);
+
+    my $size = 32;
+    my $page = $args{'page'} || 1;
+    my $nxpage = $page+1;
+    my $pvpage = ($page > 1)? $page-1 : 0;
+
+    my $title = "Lista";    # Title of phone directory
+    my $hostip = $ENV{'HTTP_HOST'} || "10.10.4.206";
+
+    # load configuration
+    my %conf = utilcommon::load_conf('/usr/local/sap2elastix/config.conf');
+    my ($dbhost,$dbuser,$dbpass) = ($conf{'mysql'}{'host'} || "127.0.0.1", $conf{'mysql'}{'user'} || "sap", $conf{'mysql'}{'pass'} || "ola123");
+
+    # connect to asterisk database
+    my %entries = ();
+    my $astDBH = utilsql::sqlConnect("DBI:mysql:database=asterisk;host=$dbhost", $dbuser, $dbpass);
+    if( my $c = utilsql::sqlSelect($astDBH, "user, description", "devices", {'tech'=>'sip'},"ORDER BY user") ){
+        while( my $R = $c->fetchrow_hashref() ){
+            my $phone = $R->{'user'};
+            $entries{"$phone"} = {'Name'=>$R->{'description'}, 'Telephone'=>$R->{'user'}};
+        }
+        $c->finish();
+    }
+    utilsql::sqlDisconnect($astDBH);
+
+    # get address book db
+    my $sqliteDBH = utilsql::sqlConnect("dbi:SQLite:dbname=/var/www/db/address_book.db", "","");
+    if( my $c = utilsql::sqlSelect($sqliteDBH, "name, last_name, telefono", "contact", {},"") ){
+        while( my $R = $c->fetchrow_hashref() ){
+            my $phone = $R->{'telefono'};
+            $entries{"$phone"} = {'Name'=>join(" ",$R->{'name'},$R->{'last_name'}), 'Telephone'=>$R->{'telefono'}};
+        }
+        $c->finish();
+    }
+    utilsql::sqlDisconnect($astDBH);
+
+    my @l_entries = sort { $a->{'Name'} cmp $b->{'Name'} } values %entries;
+    my $len = scalar(@l_entries);
+    my $i = ($page-1)*$size;
+    my $n = ($nxpage-1)*$size;
+
+    my ($prevPage_xml,$nextPage_xml) = ("","");
+    if( $n > $len ){
+        $n = $len;
+        # prev page xml softKey
+        $prevPage_xml = <<__XML_PREVPAGE__;
+<SoftKeyItem> 
+<Name>Previous</Name> 
+<URL>http://$hostip/cgi-bin/phonedir?page=$pvpage</URL> 
+<Position>2</Position> 
+</SoftKeyItem> 
+__XML_PREVPAGE__
+    } else {
+        # prev page xml softKey
+        if( $pvpage ){
+            $prevPage_xml = <<__XML_PREVPAGE__;
+<SoftKeyItem> 
+<Name>Previous</Name> 
+<URL>http://$hostip/cgi-bin/phonedir?page=$pvpage</URL> 
+<Position>2</Position> 
+</SoftKeyItem> 
+__XML_PREVPAGE__
+        }
+        # next page xml softKey
+        $nextPage_xml = <<__XML_NEXTPAGE__;
+<SoftKeyItem> 
+<Name>Next</Name> 
+<URL>http://$hostip/cgi-bin/phonedir?page=$nxpage</URL> 
+<Position>3</Position> 
+</SoftKeyItem> 
+__XML_NEXTPAGE__
+    }
+
+    # xml entries
+    my $entries_xml = "";
+
+    if( my @l_entries_i = splice(@l_entries,$i,$n) ){
+        $entries_xml = join("\n", (map { "<DirectoryEntry><Name>$_->{'Name'}</Name><Telephone>$_->{'Telephone'}</Telephone></DirectoryEntry>" } @l_entries_i));
+    }
+
+    print "Content-Type: text/xml;","\n\n";
+    my $xml = <<__XML__;
+<CiscoIPPhoneDirectory>
+    <Title>$title</Title>
+$entries_xml
+
+<SoftKeyItem> 
+<Name>Dial</Name> 
+<URL>SoftKey:Dial</URL> 
+<Position>1</Position> 
+</SoftKeyItem> 
+
+<!--
+<SoftKeyItem> 
+<Name>EditDial</Name> 
+<URL>SoftKey:EditDial</URL> 
+<Position>2</Position> 
+</SoftKeyItem> 
+-->
+
+$prevPage_xml
+$nextPage_xml
+
+<SoftKeyItem> 
+<Name>Cancel</Name> 
+<URL>SoftKey:Cancel</URL> 
+<Position>4</Position> 
+</SoftKeyItem> 
+
+</CiscoIPPhoneDirectory>
+__XML__
+    print $xml;
+}
+&main(@ARGV);
+
+1;
+__END__

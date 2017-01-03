@@ -133,6 +133,8 @@ class physicalvolActions extends sfActions
     {
         $nid = $request->getParameter('nid');
         $dev = $request->getParameter('dev');        
+        $uuid = $request->getParameter('uuid');
+
         $etva_node = EtvaNodePeer::getOrElectNode($request);
 
         if(!$etva_node){
@@ -158,7 +160,14 @@ class physicalvolActions extends sfActions
         }        
 
         // get DB info        
-        if(!$etva_pv = $etva_node->retrievePhysicalvolumeByDevice($dev)){
+        if($uuid){
+            $etva_pv = $etva_node->retrievePhysicalvolumeByUuid($uuid);
+        }else{
+            $etva_pv = $etva_node->retrievePhysicalvolumeByDevice($dev);
+        }
+
+        if(!$etva_pv){
+        //if(!$etva_pv = $etva_node->retrievePhysicalvolumeByDevice($dev)){
 
             $msg = Etva::getLogMessage(array('name'=>$etva_node->getName(),'dev'=>$dev), EtvaNodePeer::_ERR_NODEV_);
             $msg_i18n = $this->getContext()->getI18N()->__(EtvaNodePeer::_ERR_NODEV_,array('%name%'=>$etva_node->getName(),'%dev%'=>$dev));
@@ -297,6 +306,8 @@ class physicalvolActions extends sfActions
 
 //            $dev = new EtvaPhysicalvolume();
 
+            # get physical volume path
+            $pv = $dev->getPv();
 
             $id = $dev->getId();
             $device = $dev->getDevice();
@@ -339,10 +350,10 @@ class physicalvolActions extends sfActions
             }
 
             if(sfConfig::get('sf_environment') == 'soap'){
-                $children = array('device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'leaf'=>true);
+                $children = array('id'=>$id,'device'=>$device, 'pv'=>$pv,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'leaf'=>true);
             }else
             {
-                $children = array('id'=>$id,'device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'uuid'=>$uuid,'leaf'=>true);
+                $children = array('id'=>$id,'device'=>$device, 'pv'=>$pv,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'uuid'=>$uuid,'leaf'=>true);
 
             }
 
@@ -408,7 +419,9 @@ class physicalvolActions extends sfActions
             $qtip_i18n = $this->getContext()->getI18N()->__(EtvaPhysicalvolumePeer::_PVUNINIT_,array('%name%'=>$tag));
             $qtip = $qtip_i18n;
             $type = $cls = 'dev-pd';
-            
+
+            # get physical volume path
+            $pv = $dev->getPv();
 
             $pvsize = $dev->getPvsize();
             $pretty_pvsize = $dev->getPvsize();
@@ -442,10 +455,10 @@ class physicalvolActions extends sfActions
 
 
             if(sfConfig::get('sf_environment') == 'soap'){
-                $children = array('device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'leaf'=>true);
+                $children = array('id'=>$id,'device'=>$device,'pv'=>$pv,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'leaf'=>true);
             }else
             {
-                $children = array('id'=>$id,'device'=>$device,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'uuid'=>$uuid,'leaf'=>true);
+                $children = array('id'=>$id,'device'=>$device,'pv'=>$pv,'iconCls'=>'task','cls'=>$cls,'text'=>$tag,'size'=>$size,'storage_type'=>$storage_type,'prettysize'=>$pretty_size,'pvsize'=>$pvsize,'pretty-pvsize'=>$pretty_pvsize,'devicesize'=>$devicesize,'pretty-devicesize'=>$pretty_devicesize, 'singleClickExpand'=>true,'type'=>$type,'qtip'=>$qtip,'uuid'=>$uuid,'leaf'=>true);
 
             }
 
@@ -543,7 +556,8 @@ class physicalvolActions extends sfActions
                 $id = $etva_pv->getId();
                 $name = $etva_pv->getName();
                 $pv = $etva_pv->getPv();
-                $elements[$id] = array('id'=>$id,'pv'=>$pv,'name'=>$name, 'uuid'=>$uuid);
+                $device = $etva_pv->getDevice();
+                $elements[$id] = array('id'=>$id,'pv'=>$pv,'name'=>$name, 'uuid'=>$uuid, 'device'=>$device);
             }
 
         }else{
@@ -558,7 +572,8 @@ class physicalvolActions extends sfActions
                 $id = $etva_pv->getId();
                 $name = $etva_pv->getName();
                 $pv = $etva_pv->getPv();
-                $elements[] = array('id'=>$id, 'pv'=>$pv,'name'=>$name, 'uuid'=>$uuid);
+                $device = $etva_pv->getDevice();
+                $elements[] = array('id'=>$id, 'pv'=>$pv,'name'=>$name, 'uuid'=>$uuid, 'device'=>$device);
             }
 
         }

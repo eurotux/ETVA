@@ -1,0 +1,42 @@
+From 9ac0b154ffa07fa3b5c059b03d9c5be2103d854e Mon Sep 17 00:00:00 2001
+From: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+Date: Mon, 20 Aug 2012 10:28:53 +0100
+Subject: [PATCH] net: EAGAIN handling for net/socket.c UDP
+
+Implement asynchronous send for UDP (or other SOCK_DGRAM) sockets.  If
+send fails with EAGAIN we wait for the socket to become writable again.
+
+Signed-off-by: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+(cherry picked from commit 213fd5087e2e4e2da10ad266df0ba950cf7618bf)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ net/socket.c | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/net/socket.c b/net/socket.c
+index 54e32f0..e5e4e8d 100644
+--- a/net/socket.c
++++ b/net/socket.c
+@@ -102,9 +102,19 @@ static ssize_t net_socket_receive(NetClientState *nc, const uint8_t *buf, size_t
+ static ssize_t net_socket_receive_dgram(NetClientState *nc, const uint8_t *buf, size_t size)
+ {
+     NetSocketState *s = DO_UPCAST(NetSocketState, nc, nc);
++    ssize_t ret;
+ 
+-    return sendto(s->fd, (const void *)buf, size, 0,
+-                  (struct sockaddr *)&s->dgram_dst, sizeof(s->dgram_dst));
++    do {
++        ret = sendto(s->fd, buf, size, 0,
++                     (struct sockaddr *)&s->dgram_dst,
++                     sizeof(s->dgram_dst));
++    } while (ret == -1 && errno == EINTR);
++
++    if (ret == -1 && errno == EAGAIN) {
++        net_socket_write_poll(s, true);
++        return 0;
++    }
++    return ret;
+ }
+ 
+ static void net_socket_send(void *opaque)

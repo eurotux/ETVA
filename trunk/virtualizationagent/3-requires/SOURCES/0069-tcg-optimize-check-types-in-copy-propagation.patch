@@ -1,0 +1,75 @@
+From 6a2e2cec5504f331c49b60c70e2a31f8d39a3215 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Tue, 11 Sep 2012 12:26:23 +0200
+Subject: [PATCH] tcg/optimize: check types in copy propagation
+
+The copy propagation doesn't check the types of the temps during copy
+propagation. However TCG is using the mov_i32 for the i64 to i32
+conversion and thus the two are not equivalent.
+
+With this patch tcg_opt_gen_mov() doesn't consider two temps of
+different type as copies anymore.
+
+So far it seems the optimization was not aggressive enough to trigger
+this bug, but it will be triggered later in this series once the copy
+propagation is improved.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 18 ++++++++----------
+ 1 file changed, 8 insertions(+), 10 deletions(-)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index 308b7f9..da8dffe 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -106,12 +106,13 @@ static TCGOpcode op_to_movi(TCGOpcode op)
+     }
+ }
+ 
+-static void tcg_opt_gen_mov(TCGArg *gen_args, TCGArg dst, TCGArg src,
+-                            int nb_temps, int nb_globals)
++static void tcg_opt_gen_mov(TCGContext *s, TCGArg *gen_args,
++                            TCGArg dst, TCGArg src)
+ {
+-        reset_temp(dst, nb_temps, nb_globals);
++        reset_temp(dst, s->nb_temps, s->nb_globals);
+         assert(temps[src].state != TCG_TEMP_COPY);
+-        if (src >= nb_globals) {
++        /* Only consider temps with the same type (width) as copies. */
++        if (src >= s->nb_globals && s->temps[dst].type == s->temps[src].type) {
+             assert(temps[src].state != TCG_TEMP_CONST);
+             if (temps[src].state != TCG_TEMP_HAS_COPY) {
+                 temps[src].state = TCG_TEMP_HAS_COPY;
+@@ -461,8 +462,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                     gen_opc_buf[op_index] = INDEX_op_nop;
+                 } else {
+                     gen_opc_buf[op_index] = op_to_mov(op);
+-                    tcg_opt_gen_mov(gen_args, args[0], args[1],
+-                                    nb_temps, nb_globals);
++                    tcg_opt_gen_mov(s, gen_args, args[0], args[1]);
+                     gen_args += 2;
+                 }
+                 args += 3;
+@@ -499,8 +499,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                     gen_opc_buf[op_index] = INDEX_op_nop;
+                 } else {
+                     gen_opc_buf[op_index] = op_to_mov(op);
+-                    tcg_opt_gen_mov(gen_args, args[0], args[1], nb_temps,
+-                                    nb_globals);
++                    tcg_opt_gen_mov(s, gen_args, args[0], args[1]);
+                     gen_args += 2;
+                 }
+                 args += 3;
+@@ -524,8 +523,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                 break;
+             }
+             if (temps[args[1]].state != TCG_TEMP_CONST) {
+-                tcg_opt_gen_mov(gen_args, args[0], args[1],
+-                                nb_temps, nb_globals);
++                tcg_opt_gen_mov(s, gen_args, args[0], args[1]);
+                 gen_args += 2;
+                 args += 2;
+                 break;

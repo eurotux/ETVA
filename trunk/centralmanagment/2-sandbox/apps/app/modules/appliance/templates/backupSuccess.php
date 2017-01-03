@@ -72,7 +72,7 @@ Appliance.Backup.Form = Ext.extend(Ext.form.FormPanel, {
                                 title: <?php echo json_encode(__('Appliance not registered')) ?>,
                                 width:300,
                                 msg: <?php echo json_encode(__('Need to register Appliance first before creating backup.<br><br>Register now?')) ?>,
-                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                buttons: Ext.MessageBox.YESNO,
                                 fn: function(btn){
                                     if(btn=='yes') this.fireEvent('needRegister');
                                 },
@@ -196,7 +196,7 @@ Appliance.Backup.Form = Ext.extend(Ext.form.FormPanel, {
                                 ,<?php echo json_encode(__('Some virtual machines agents reported down. If you proceed agent configuration WILL NOT BE SAVED IN BACKUP.')) ?>
                                 ,resp['info']
                                 ,<?php echo json_encode(__('Are you sure you want to do this?')) ?>),
-                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        buttons: Ext.MessageBox.YESNO,
                         fn: function(btn){
 
                             if(btn=='yes') this.save({force:true});

@@ -96,6 +96,7 @@ class nodeBackupserversTask extends rcParallelTask
       new sfCommandOption('processes', null, sfCommandOption::PARAMETER_REQUIRED, 'Number of processes to handle backups', 1),
       new sfCommandOption('exclude', null, sfCommandOption::PARAMETER_OPTIONAL, 'Exclude servers from backup by comma separated'),
       new sfCommandOption('filter', null, sfCommandOption::PARAMETER_OPTIONAL, 'Filter of servers to backup by comma separated'),
+      new sfCommandOption('delete_backups_n_days', null, sfCommandOption::PARAMETER_OPTIONAL, 'Delete backups of servers with n days',2),
     ));
 
     $this->namespace        = 'node';
@@ -190,7 +191,7 @@ EOF;
                                             'location'=>$backup_location,
                                             'shutdown'=>'true',
                                             'do_not_generate_tar'=>'true',
-                                            'delete_backups_n_days'=>2
+                                            'delete_backups_n_days'=>$options['delete_backups_n_days']
                                         )
                                     );
             $error = $task_server_backup->getLastError();

@@ -64,6 +64,9 @@ Node.View.Info = Ext.extend(Ext.form.FormPanel, {
                                                     handler: function(button,event)
                                                     {                                                
                                                         this.loadRecord({id:this.node_id});                                                
+                                                        var parentCmp = Ext.getCmp((button.scope).id);
+                                                        parentCmp.fireEvent('reloadTree',{ 'node_id': this.node_id });
+
                                                     }
                                                 }
                                             ]//end items flex

@@ -78,6 +78,12 @@ class EtvaServerPeer extends BaseEtvaServerPeer
 
     const _HASDEVICES_ = 'The server has devices attached';
 
+    const _ERR_SUSPEND_   = 'Server with name %name% could not be suspended. %info%';
+    const _OK_SUSPEND_   = 'Server with name %name% suspended successfully';
+
+    const _ERR_RESUME_   = 'Server with name %name% could not be resumed. %info%';
+    const _OK_RESUME_   = 'Server with name %name% resumed successfully';
+
     static public function getServers(Criteria $criteria = null)
     {
         if (is_null($criteria))

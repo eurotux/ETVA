@@ -1,0 +1,44 @@
+From 0a3313062b30332c750fa5ac69ad85d6d12fda3c Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 1 Sep 2012 12:43:41 +0200
+Subject: [PATCH] lm4549: Fix buffer overflow
+
+Report from smatch:
+lm4549.c:234 lm4549_write_samples(14) error:
+ buffer overflow 's->buffer' 1024 <= 1024
+
+There must be enough space to add two entries starting with index
+s->buffer_level, therefore the old check was wrong.
+
+[Peter Maydell <peter.maydell@linaro.org> clarifies the nature of the
+analyser warning:
+
+I don't object to making the change to placate the analyser,
+but I don't think this is actually a buffer overrun. We always
+add and remove samples from the buffer two at a time, so it's
+not possible to get here with s->buffer_level == BUFFER_SIZE-1
+(which is the only case where the old and new conditions
+give different answers).]
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 8139626643cbe8dc07bd9acc88057effeedf8064)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/lm4549.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/lm4549.c b/hw/lm4549.c
+index 80b3ec4..e0137d5 100644
+--- a/hw/lm4549.c
++++ b/hw/lm4549.c
+@@ -224,7 +224,7 @@ uint32_t lm4549_write_samples(lm4549_state *s, uint32_t left, uint32_t right)
+        This model supports 16-bit playback.
+     */
+ 
+-    if (s->buffer_level >= LM4549_BUFFER_SIZE) {
++    if (s->buffer_level > LM4549_BUFFER_SIZE - 2) {
+         DPRINTF("write_sample Buffer full\n");
+         return 0;
+     }

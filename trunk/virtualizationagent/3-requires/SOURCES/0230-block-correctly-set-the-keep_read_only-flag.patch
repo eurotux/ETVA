@@ -1,0 +1,101 @@
+From 25eb004d45df9ebba75f66472031f55bd2a09384 Mon Sep 17 00:00:00 2001
+From: Jeff Cody <jcody@redhat.com>
+Date: Thu, 20 Sep 2012 15:13:17 -0400
+Subject: [PATCH] block: correctly set the keep_read_only flag
+
+I believe the bs->keep_read_only flag is supposed to reflect
+the initial open state of the device. If the device is initially
+opened R/O, then commit operations, or reopen operations changing
+to R/W, are prohibited.
+
+Currently, the keep_read_only flag is only accurate for the active
+layer, and its backing file. Subsequent images end up always having
+the keep_read_only flag set.
+
+For instance, what happens now:
+
+[  base  ]  kro = 1, ro = 1
+    |
+    v
+[ snap-1 ]  kro = 1, ro = 1
+    |
+    v
+[ snap-2 ]  kro = 0, ro = 1
+    |
+    v
+[ active ]  kro = 0, ro = 0
+
+What we want:
+
+[  base  ]  kro = 0, ro = 1
+    |
+    v
+[ snap-1 ]  kro = 0, ro = 1
+    |
+    v
+[ snap-2 ]  kro = 0, ro = 1
+    |
+    v
+[ active ]  kro = 0, ro = 0
+
+Signed-off-by: Jeff Cody <jcody@redhat.com>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit be028adcedd68ca4d78fdc43e7e2fa4f1cdbc653)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block.c | 14 +++++++-------
+ block.h |  1 +
+ 2 files changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/block.c b/block.c
+index e78039b..4c0e7f5 100644
+--- a/block.c
++++ b/block.c
+@@ -668,7 +668,7 @@ static int bdrv_open_common(BlockDriverState *bs, const char *filename,
+         open_flags |= BDRV_O_RDWR;
+     }
+ 
+-    bs->keep_read_only = bs->read_only = !(open_flags & BDRV_O_RDWR);
++    bs->read_only = !(open_flags & BDRV_O_RDWR);
+ 
+     /* Open the image, either directly or using a protocol */
+     if (drv->bdrv_file_open) {
+@@ -808,6 +808,12 @@ int bdrv_open(BlockDriverState *bs, const char *filename, int flags,
+         goto unlink_and_fail;
+     }
+ 
++    if (flags & BDRV_O_RDWR) {
++        flags |= BDRV_O_ALLOW_RDWR;
++    }
++
++    bs->keep_read_only = !(flags & BDRV_O_ALLOW_RDWR);
++
+     /* Open the image */
+     ret = bdrv_open_common(bs, filename, flags, drv);
+     if (ret < 0) {
+@@ -837,12 +843,6 @@ int bdrv_open(BlockDriverState *bs, const char *filename, int flags,
+             bdrv_close(bs);
+             return ret;
+         }
+-        if (bs->is_temporary) {
+-            bs->backing_hd->keep_read_only = !(flags & BDRV_O_RDWR);
+-        } else {
+-            /* base image inherits from "parent" */
+-            bs->backing_hd->keep_read_only = bs->keep_read_only;
+-        }
+     }
+ 
+     if (!bdrv_key_required(bs)) {
+diff --git a/block.h b/block.h
+index 2e2be11..4d919c2 100644
+--- a/block.h
++++ b/block.h
+@@ -80,6 +80,7 @@ typedef struct BlockDevOps {
+ #define BDRV_O_COPY_ON_READ 0x0400 /* copy read backing sectors into image */
+ #define BDRV_O_INCOMING    0x0800  /* consistency hint for incoming migration */
+ #define BDRV_O_CHECK       0x1000  /* open solely for consistency check */
++#define BDRV_O_ALLOW_RDWR  0x2000  /* allow reopen to change from r/o to r/w */
+ 
+ #define BDRV_O_CACHE_MASK  (BDRV_O_NOCACHE | BDRV_O_CACHE_WB | BDRV_O_NO_FLUSH)
+ 

@@ -1,0 +1,29 @@
+From 7ecf65f14f6c14e2bf12bef2bb313e62fe28cf10 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 1 Sep 2012 09:40:26 +0200
+Subject: [PATCH] qemu-sockets: Fix potential memory leak
+
+The old code leaks variable 'peer'.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 39b384591fda27d6e1213cea0b11b1ebe0ed4b74)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qemu-sockets.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qemu-sockets.c b/qemu-sockets.c
+index 361d890..037775b 100644
+--- a/qemu-sockets.c
++++ b/qemu-sockets.c
+@@ -353,7 +353,7 @@ int inet_dgram_opts(QemuOpts *opts)
+     if (0 != (rc = getaddrinfo(addr, port, &ai, &local))) {
+         fprintf(stderr,"getaddrinfo(%s,%s): %s\n", addr, port,
+                 gai_strerror(rc));
+-        return -1;
++        goto err;
+     }
+ 
+     /* create socket */

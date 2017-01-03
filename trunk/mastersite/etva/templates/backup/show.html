@@ -1,0 +1,58 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}backup page{% endblock%}
+{% block section %}{%trans "Backups"%}{% endblock%}
+{% block mainCol%}
+
+{%if backups.object_list %}
+
+{%if backupOwner%}
+<h1>{% blocktrans %}{{backupOwner}} backups{%endblocktrans%}</h1>
+{%endif%}
+
+    <div class="pagination">
+    <span class="step-links">
+        {% if backups.has_previous %}
+            <a href="?page={{ backups.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ backups.number }} of {{ backups.paginator.num_pages }}.
+        </span>
+
+        {% if backups.has_next %}
+            <a href="?page={{ backups.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
+    <table class="msg sml">
+        <tr>
+            <th class="sorted">{% trans "User" %}</th>
+            <th class="sorted">{% trans "Serial number" %}</th>
+            <th class="sorted">{% trans "File name" %}</th>
+            <th class="sorted">{% trans "Content type" %}</th>
+            <th class="sorted">{% trans "size (bytes)" %}</th>
+            <th class="sorted">{% trans "Date" %}</th>
+            <th ></th>
+            </tr>
+                {% for backup in backups.object_list%}
+                <tr class="{% if forloop.counter|divisibleby:2 %}odd{% endif %}">
+                    <td>{{backup.user}}</td>
+                    <td>{{backup.product.serial}}</td>
+                    <td><a title="{{backup.notes}}" href="get/{{backup.id}}">{{ backup.file_name }}</a></td>
+                    <td>{{backup.mime}}</td><td class="c">{{backup.size}}</td>
+                    <td>{{backup.date_created}}</td>
+                    <td class="c"><a href="delete/{{backup.id}}">Delete</a></td>
+                </tr>
+        {% endfor %}
+    </table>
+    {% else%}
+    <p>{%trans "No backups"%}</p>
+    {%endif%}
+    <div class="space15">&nbsp;</div>
+    {% comment%}
+    <a href="new">{%blocktrans%}Add a new backup{%endblocktrans%}</a>
+    {% endcomment %}
+{%endblock%}
+
+

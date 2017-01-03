@@ -1,0 +1,80 @@
+From a81d0a7f3e269679b53ff54083adc966475a107d Mon Sep 17 00:00:00 2001
+From: "Daniel P. Berrange" <berrange@redhat.com>
+Date: Mon, 10 Sep 2012 12:26:29 +0100
+Subject: [PATCH] Add ability to force enable/disable of tools build
+
+The qemu-img, qemu-nbd and qemu-io tools are built conditionally
+based on whether any softmmu target is enabled. These are useful
+self-contained tools which can be used in many other scenarios.
+Add new --enable-tools/--disable-tools args to configure to allow
+the user to explicitly turn on / off their build. The default
+behaviour is now to build these tools are all times, regardless
+of whether any softmmu target is enabled
+
+Signed-off-by: Daniel P. Berrange <berrange@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit 4b1c11fd20e8901f04a2d9c225cd10fc05a762ff)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure | 21 +++++++++++++++------
+ 1 file changed, 15 insertions(+), 6 deletions(-)
+
+diff --git a/configure b/configure
+index d01f9dc..a8061c1 100755
+--- a/configure
++++ b/configure
+@@ -225,6 +225,7 @@ usb_redir=""
+ opengl=""
+ zlib="yes"
+ guest_agent="yes"
++want_tools="yes"
+ libiscsi=""
+ coroutine=""
+ seccomp=""
+@@ -857,6 +858,10 @@ for opt do
+   ;;
+   --disable-guest-agent) guest_agent="no"
+   ;;
++  --enable-tools) want_tools="yes"
++  ;;
++  --disable-tools) want_tools="no"
++  ;;
+   --enable-seccomp) seccomp="yes"
+   ;;
+   --disable-seccomp) seccomp="no"
+@@ -3017,9 +3022,14 @@ fi
+ qemu_confdir=$sysconfdir$confsuffix
+ qemu_datadir=$datadir$confsuffix
+ 
+-tools=
+-if test "$softmmu" = yes ; then
++tools=""
++if test "$want_tools" = "yes" ; then
+   tools="qemu-img\$(EXESUF) qemu-io\$(EXESUF) $tools"
++  if [ "$linux" = "yes" -o "$bsd" = "yes" -o "$solaris" = "yes" ] ; then
++    tools="qemu-nbd\$(EXESUF) $tools"
++  fi
++fi
++if test "$softmmu" = yes ; then
+   if test "$virtfs" != no ; then
+     if test "$cap" = yes && test "$linux" = yes && test "$attr" = yes ; then
+       virtfs=yes
+@@ -3033,14 +3043,13 @@ if test "$softmmu" = yes ; then
+     fi
+   fi
+   if [ "$linux" = "yes" -o "$bsd" = "yes" -o "$solaris" = "yes" ] ; then
+-      tools="qemu-nbd\$(EXESUF) $tools"
+     if [ "$guest_agent" = "yes" ]; then
+       tools="qemu-ga\$(EXESUF) $tools"
+     fi
+   fi
+-fi
+-if test "$smartcard_nss" = "yes" ; then
+-  tools="vscclient\$(EXESUF) $tools"
++  if test "$smartcard_nss" = "yes" ; then
++    tools="vscclient\$(EXESUF) $tools"
++  fi
+ fi
+ 
+ # Mac OS X ships with a broken assembler

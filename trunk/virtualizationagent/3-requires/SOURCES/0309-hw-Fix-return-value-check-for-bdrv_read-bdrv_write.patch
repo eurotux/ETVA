@@ -1,0 +1,198 @@
+From 3708305e13b287803c33d99deb4d930835fdeff5 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sun, 23 Sep 2012 08:51:01 +0200
+Subject: [PATCH] hw: Fix return value check for bdrv_read, bdrv_write
+
+Those functions return -errno in case of an error.
+The old code would typically only detect EPERM (1) errors.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 7a608f562ebd91e811ed0b725e528c894e4f19c4)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/nand.c    | 34 ++++++++++++++++++++++------------
+ hw/onenand.c |  2 +-
+ hw/sd.c      | 16 +++++++++-------
+ 3 files changed, 32 insertions(+), 20 deletions(-)
+
+diff --git a/hw/nand.c b/hw/nand.c
+index e9501ae..01f3ada 100644
+--- a/hw/nand.c
++++ b/hw/nand.c
+@@ -654,7 +654,7 @@ static void glue(nand_blk_write_, PAGE_SIZE)(NANDFlashState *s)
+         sector = SECTOR(s->addr);
+         off = (s->addr & PAGE_MASK) + s->offset;
+         soff = SECTOR_OFFSET(s->addr);
+-        if (bdrv_read(s->bdrv, sector, iobuf, PAGE_SECTORS) == -1) {
++        if (bdrv_read(s->bdrv, sector, iobuf, PAGE_SECTORS) < 0) {
+             printf("%s: read error in sector %" PRIu64 "\n", __func__, sector);
+             return;
+         }
+@@ -666,21 +666,23 @@ static void glue(nand_blk_write_, PAGE_SIZE)(NANDFlashState *s)
+                             MIN(OOB_SIZE, off + s->iolen - PAGE_SIZE));
+         }
+ 
+-        if (bdrv_write(s->bdrv, sector, iobuf, PAGE_SECTORS) == -1)
++        if (bdrv_write(s->bdrv, sector, iobuf, PAGE_SECTORS) < 0) {
+             printf("%s: write error in sector %" PRIu64 "\n", __func__, sector);
++        }
+     } else {
+         off = PAGE_START(s->addr) + (s->addr & PAGE_MASK) + s->offset;
+         sector = off >> 9;
+         soff = off & 0x1ff;
+-        if (bdrv_read(s->bdrv, sector, iobuf, PAGE_SECTORS + 2) == -1) {
++        if (bdrv_read(s->bdrv, sector, iobuf, PAGE_SECTORS + 2) < 0) {
+             printf("%s: read error in sector %" PRIu64 "\n", __func__, sector);
+             return;
+         }
+ 
+         mem_and(iobuf + soff, s->io, s->iolen);
+ 
+-        if (bdrv_write(s->bdrv, sector, iobuf, PAGE_SECTORS + 2) == -1)
++        if (bdrv_write(s->bdrv, sector, iobuf, PAGE_SECTORS + 2) < 0) {
+             printf("%s: write error in sector %" PRIu64 "\n", __func__, sector);
++        }
+     }
+     s->offset = 0;
+ }
+@@ -704,31 +706,37 @@ static void glue(nand_blk_erase_, PAGE_SIZE)(NANDFlashState *s)
+         i = SECTOR(addr);
+         page = SECTOR(addr + (ADDR_SHIFT + s->erase_shift));
+         for (; i < page; i ++)
+-            if (bdrv_write(s->bdrv, i, iobuf, 1) == -1)
++            if (bdrv_write(s->bdrv, i, iobuf, 1) < 0) {
+                 printf("%s: write error in sector %" PRIu64 "\n", __func__, i);
++            }
+     } else {
+         addr = PAGE_START(addr);
+         page = addr >> 9;
+-        if (bdrv_read(s->bdrv, page, iobuf, 1) == -1)
++        if (bdrv_read(s->bdrv, page, iobuf, 1) < 0) {
+             printf("%s: read error in sector %" PRIu64 "\n", __func__, page);
++        }
+         memset(iobuf + (addr & 0x1ff), 0xff, (~addr & 0x1ff) + 1);
+-        if (bdrv_write(s->bdrv, page, iobuf, 1) == -1)
++        if (bdrv_write(s->bdrv, page, iobuf, 1) < 0) {
+             printf("%s: write error in sector %" PRIu64 "\n", __func__, page);
++        }
+ 
+         memset(iobuf, 0xff, 0x200);
+         i = (addr & ~0x1ff) + 0x200;
+         for (addr += ((PAGE_SIZE + OOB_SIZE) << s->erase_shift) - 0x200;
+                         i < addr; i += 0x200)
+-            if (bdrv_write(s->bdrv, i >> 9, iobuf, 1) == -1)
++            if (bdrv_write(s->bdrv, i >> 9, iobuf, 1) < 0) {
+                 printf("%s: write error in sector %" PRIu64 "\n",
+                        __func__, i >> 9);
++            }
+ 
+         page = i >> 9;
+-        if (bdrv_read(s->bdrv, page, iobuf, 1) == -1)
++        if (bdrv_read(s->bdrv, page, iobuf, 1) < 0) {
+             printf("%s: read error in sector %" PRIu64 "\n", __func__, page);
++        }
+         memset(iobuf, 0xff, ((addr - 1) & 0x1ff) + 1);
+-        if (bdrv_write(s->bdrv, page, iobuf, 1) == -1)
++        if (bdrv_write(s->bdrv, page, iobuf, 1) < 0) {
+             printf("%s: write error in sector %" PRIu64 "\n", __func__, page);
++        }
+     }
+ }
+ 
+@@ -740,18 +748,20 @@ static void glue(nand_blk_load_, PAGE_SIZE)(NANDFlashState *s,
+ 
+     if (s->bdrv) {
+         if (s->mem_oob) {
+-            if (bdrv_read(s->bdrv, SECTOR(addr), s->io, PAGE_SECTORS) == -1)
++            if (bdrv_read(s->bdrv, SECTOR(addr), s->io, PAGE_SECTORS) < 0) {
+                 printf("%s: read error in sector %" PRIu64 "\n",
+                                 __func__, SECTOR(addr));
++            }
+             memcpy(s->io + SECTOR_OFFSET(s->addr) + PAGE_SIZE,
+                             s->storage + (PAGE(s->addr) << OOB_SHIFT),
+                             OOB_SIZE);
+             s->ioaddr = s->io + SECTOR_OFFSET(s->addr) + offset;
+         } else {
+             if (bdrv_read(s->bdrv, PAGE_START(addr) >> 9,
+-                                    s->io, (PAGE_SECTORS + 2)) == -1)
++                                    s->io, (PAGE_SECTORS + 2)) < 0) {
+                 printf("%s: read error in sector %" PRIu64 "\n",
+                                 __func__, PAGE_START(addr) >> 9);
++            }
+             s->ioaddr = s->io + (PAGE_START(addr) & 0x1ff) + offset;
+         }
+     } else {
+diff --git a/hw/onenand.c b/hw/onenand.c
+index db6af68..0f7b755 100644
+--- a/hw/onenand.c
++++ b/hw/onenand.c
+@@ -351,7 +351,7 @@ static inline int onenand_erase(OneNANDState *s, int sec, int num)
+     for (; num > 0; num--, sec++) {
+         if (s->bdrv_cur) {
+             int erasesec = s->secs_cur + (sec >> 5);
+-            if (bdrv_write(s->bdrv_cur, sec, blankbuf, 1)) {
++            if (bdrv_write(s->bdrv_cur, sec, blankbuf, 1) < 0) {
+                 goto fail;
+             }
+             if (bdrv_read(s->bdrv_cur, erasesec, tmpbuf, 1) < 0) {
+diff --git a/hw/sd.c b/hw/sd.c
+index ec26407..297580a 100644
+--- a/hw/sd.c
++++ b/hw/sd.c
+@@ -1407,7 +1407,7 @@ static void sd_blk_read(SDState *sd, uint64_t addr, uint32_t len)
+ 
+     DPRINTF("sd_blk_read: addr = 0x%08llx, len = %d\n",
+             (unsigned long long) addr, len);
+-    if (!sd->bdrv || bdrv_read(sd->bdrv, addr >> 9, sd->buf, 1) == -1) {
++    if (!sd->bdrv || bdrv_read(sd->bdrv, addr >> 9, sd->buf, 1) < 0) {
+         fprintf(stderr, "sd_blk_read: read error on host side\n");
+         return;
+     }
+@@ -1415,7 +1415,7 @@ static void sd_blk_read(SDState *sd, uint64_t addr, uint32_t len)
+     if (end > (addr & ~511) + 512) {
+         memcpy(sd->data, sd->buf + (addr & 511), 512 - (addr & 511));
+ 
+-        if (bdrv_read(sd->bdrv, end >> 9, sd->buf, 1) == -1) {
++        if (bdrv_read(sd->bdrv, end >> 9, sd->buf, 1) < 0) {
+             fprintf(stderr, "sd_blk_read: read error on host side\n");
+             return;
+         }
+@@ -1429,29 +1429,31 @@ static void sd_blk_write(SDState *sd, uint64_t addr, uint32_t len)
+     uint64_t end = addr + len;
+ 
+     if ((addr & 511) || len < 512)
+-        if (!sd->bdrv || bdrv_read(sd->bdrv, addr >> 9, sd->buf, 1) == -1) {
++        if (!sd->bdrv || bdrv_read(sd->bdrv, addr >> 9, sd->buf, 1) < 0) {
+             fprintf(stderr, "sd_blk_write: read error on host side\n");
+             return;
+         }
+ 
+     if (end > (addr & ~511) + 512) {
+         memcpy(sd->buf + (addr & 511), sd->data, 512 - (addr & 511));
+-        if (bdrv_write(sd->bdrv, addr >> 9, sd->buf, 1) == -1) {
++        if (bdrv_write(sd->bdrv, addr >> 9, sd->buf, 1) < 0) {
+             fprintf(stderr, "sd_blk_write: write error on host side\n");
+             return;
+         }
+ 
+-        if (bdrv_read(sd->bdrv, end >> 9, sd->buf, 1) == -1) {
++        if (bdrv_read(sd->bdrv, end >> 9, sd->buf, 1) < 0) {
+             fprintf(stderr, "sd_blk_write: read error on host side\n");
+             return;
+         }
+         memcpy(sd->buf, sd->data + 512 - (addr & 511), end & 511);
+-        if (bdrv_write(sd->bdrv, end >> 9, sd->buf, 1) == -1)
++        if (bdrv_write(sd->bdrv, end >> 9, sd->buf, 1) < 0) {
+             fprintf(stderr, "sd_blk_write: write error on host side\n");
++        }
+     } else {
+         memcpy(sd->buf + (addr & 511), sd->data, len);
+-        if (!sd->bdrv || bdrv_write(sd->bdrv, addr >> 9, sd->buf, 1) == -1)
++        if (!sd->bdrv || bdrv_write(sd->bdrv, addr >> 9, sd->buf, 1) < 0) {
+             fprintf(stderr, "sd_blk_write: write error on host side\n");
++        }
+     }
+ }
+ 

@@ -1,0 +1,170 @@
+From 43e6fcfb29f1b1196d0be526a640392606b39a2a Mon Sep 17 00:00:00 2001
+From: Yonit Halperin <yhalperi@redhat.com>
+Date: Tue, 21 Aug 2012 11:51:56 +0300
+Subject: [PATCH] spice: notify on vm state change only via
+ spice_server_vm_start/stop
+
+QXLWorker->start/stop are deprecated since spice-server 0.11.2
+
+Signed-off-by: Yonit Halperin <yhalperi@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 71d388d420e68ac77cd42f15f7e68cf5a6fb01b2)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/qxl.c           |  7 ++++---
+ ui/spice-core.c    |  4 ++++
+ ui/spice-display.c | 32 ++++++++++++++++++++++++++++++--
+ ui/spice-display.h |  9 +++++++--
+ 4 files changed, 45 insertions(+), 7 deletions(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index c2dd3b4..95bbc03 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -958,9 +958,10 @@ static void qxl_update_irq(PCIQXLDevice *d)
+ static void qxl_check_state(PCIQXLDevice *d)
+ {
+     QXLRam *ram = d->ram;
++    int spice_display_running = qemu_spice_display_is_running(&d->ssd);
+ 
+-    assert(!d->ssd.running || SPICE_RING_IS_EMPTY(&ram->cmd_ring));
+-    assert(!d->ssd.running || SPICE_RING_IS_EMPTY(&ram->cursor_ring));
++    assert(!spice_display_running || SPICE_RING_IS_EMPTY(&ram->cmd_ring));
++    assert(!spice_display_running || SPICE_RING_IS_EMPTY(&ram->cursor_ring));
+ }
+ 
+ static void qxl_reset_state(PCIQXLDevice *d)
+@@ -1538,7 +1539,7 @@ static void qxl_send_events(PCIQXLDevice *d, uint32_t events)
+     uint32_t old_pending;
+     uint32_t le_events = cpu_to_le32(events);
+ 
+-    assert(d->ssd.running);
++    assert(qemu_spice_display_is_running(&d->ssd));
+     old_pending = __sync_fetch_and_or(&d->ram->int_pending, le_events);
+     if ((old_pending & le_events) == le_events) {
+         return;
+diff --git a/ui/spice-core.c b/ui/spice-core.c
+index a515c94..1a7a773 100644
+--- a/ui/spice-core.c
++++ b/ui/spice-core.c
+@@ -37,6 +37,7 @@
+ #include "migration.h"
+ #include "monitor.h"
+ #include "hw/hw.h"
++#include "spice-display.h"
+ 
+ /* core bits */
+ 
+@@ -551,9 +552,11 @@ static void vm_change_state_handler(void *opaque, int running,
+ {
+ #if SPICE_SERVER_VERSION >= 0x000b02 /* 0.11.2 */
+     if (running) {
++        qemu_spice_display_start();
+         spice_server_vm_start(spice_server);
+     } else {
+         spice_server_vm_stop(spice_server);
++        qemu_spice_display_stop();
+     }
+ #endif
+ }
+@@ -755,6 +758,7 @@ int qemu_spice_add_interface(SpiceBaseInstance *sin)
+         spice_server = spice_server_new();
+         spice_server_init(spice_server, &core_interface);
+     }
++
+     return spice_server_add_interface(spice_server, sin);
+ }
+ 
+diff --git a/ui/spice-display.c b/ui/spice-display.c
+index 3e8f0b3..1c31418 100644
+--- a/ui/spice-display.c
++++ b/ui/spice-display.c
+@@ -126,18 +126,44 @@ void qemu_spice_wakeup(SimpleSpiceDisplay *ssd)
+     ssd->worker->wakeup(ssd->worker);
+ }
+ 
+-void qemu_spice_start(SimpleSpiceDisplay *ssd)
++#if SPICE_SERVER_VERSION < 0x000b02 /* before 0.11.2 */
++static void qemu_spice_start(SimpleSpiceDisplay *ssd)
+ {
+     trace_qemu_spice_start(ssd->qxl.id);
+     ssd->worker->start(ssd->worker);
+ }
+ 
+-void qemu_spice_stop(SimpleSpiceDisplay *ssd)
++static void qemu_spice_stop(SimpleSpiceDisplay *ssd)
+ {
+     trace_qemu_spice_stop(ssd->qxl.id);
+     ssd->worker->stop(ssd->worker);
+ }
+ 
++#else
++
++static int spice_display_is_running;
++
++void qemu_spice_display_start(void)
++{
++    spice_display_is_running = true;
++}
++
++void qemu_spice_display_stop(void)
++{
++    spice_display_is_running = false;
++}
++
++#endif
++
++int qemu_spice_display_is_running(SimpleSpiceDisplay *ssd)
++{
++#if SPICE_SERVER_VERSION < 0x000b02 /* before 0.11.2 */
++    return ssd->running;
++#else
++    return spice_display_is_running;
++#endif
++}
++
+ static SimpleSpiceUpdate *qemu_spice_create_update(SimpleSpiceDisplay *ssd)
+ {
+     SimpleSpiceUpdate *update;
+@@ -272,6 +298,7 @@ void qemu_spice_destroy_host_primary(SimpleSpiceDisplay *ssd)
+ void qemu_spice_vm_change_state_handler(void *opaque, int running,
+                                         RunState state)
+ {
++#if SPICE_SERVER_VERSION < 0x000b02 /* before 0.11.2 */
+     SimpleSpiceDisplay *ssd = opaque;
+ 
+     if (running) {
+@@ -281,6 +308,7 @@ void qemu_spice_vm_change_state_handler(void *opaque, int running,
+         qemu_spice_stop(ssd);
+         ssd->running = false;
+     }
++#endif
+ }
+ 
+ void qemu_spice_display_init_common(SimpleSpiceDisplay *ssd, DisplayState *ds)
+diff --git a/ui/spice-display.h b/ui/spice-display.h
+index 12e50b6..672d65e 100644
+--- a/ui/spice-display.h
++++ b/ui/spice-display.h
+@@ -82,7 +82,9 @@ struct SimpleSpiceDisplay {
+ 
+     QXLRect dirty;
+     int notify;
++#if SPICE_SERVER_VERSION < 0x000b02 /* before 0.11.2 */
+     int running;
++#endif
+ 
+     /*
+      * All struct members below this comment can be accessed from
+@@ -129,5 +131,8 @@ void qemu_spice_create_primary_surface(SimpleSpiceDisplay *ssd, uint32_t id,
+ void qemu_spice_destroy_primary_surface(SimpleSpiceDisplay *ssd,
+                                         uint32_t id, qxl_async_io async);
+ void qemu_spice_wakeup(SimpleSpiceDisplay *ssd);
+-void qemu_spice_start(SimpleSpiceDisplay *ssd);
+-void qemu_spice_stop(SimpleSpiceDisplay *ssd);
++#if SPICE_SERVER_VERSION >= 0x000b02 /* before 0.11.2 */
++void qemu_spice_display_start(void);
++void qemu_spice_display_stop(void);
++#endif
++int qemu_spice_display_is_running(SimpleSpiceDisplay *ssd);

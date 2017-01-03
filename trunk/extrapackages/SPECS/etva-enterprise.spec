@@ -1,12 +1,13 @@
 Name: etva-enterprise
 Summary: ETVA enterprise related files
-Version: 2.1.1
-Release: 13%{?dist}
+Version: 2.2
+Release: 14%{?dist}
 Group: System Environment/Base
 Source0: lvm.conf
 Source1: multipath.conf
 Source2: libvirt.cert.sh
 Source3: libvirt_certs.tar.gz
+Source4: check-libvirt-certs.sh
 License: Copyright © 2010-2011 Eurotux Informaca S.A.  All rights reserved.
 BuildRoot: %{_tmppath}/%{name}-root
 BuildArch: noarch
@@ -30,6 +31,7 @@ install -m 644 %{SOURCE0} $RPM_BUILD_ROOT/tmp/
 install -m 644 %{SOURCE1} $RPM_BUILD_ROOT/tmp/
 install -m 755 %{SOURCE2} $RPM_BUILD_ROOT/%{_sysconfdir}/scripts/
 install -m 644 %{SOURCE3} $RPM_BUILD_ROOT/tmp/
+install -m 755 %{SOURCE4} $RPM_BUILD_ROOT/%{_sysconfdir}/scripts/
 
 %post
 if [ "$1" == "1" ]; then
@@ -54,15 +56,20 @@ if [ "$1" == "1" ]; then
 	%{__perl} -pi -e 's/#ON_BOOT=start/ON_BOOT=ignore/' %{_sysconfdir}/sysconfig/libvirt-guests
 	%{__perl} -pi -e 's/#ON_SHUTDOWN=suspend/ON_SHUTDOWN=shutdown/' %{_sysconfdir}/sysconfig/libvirt-guests
 	%{__perl} -pi -e 's/#SHUTDOWN_TIMEOUT=0/SHUTDOWN_TIMEOUT=120/' %{_sysconfdir}/sysconfig/libvirt-guests
-
 fi
+
+%{_sysconfdir}/scripts/check-libvirt-certs.sh
 
 %files
 %defattr(-, root, root)
 /tmp/*
 %{_sysconfdir}/scripts/libvirt.cert.sh
+%{_sysconfdir}/scripts/check-libvirt-certs.sh
 
 %changelog
+* Mon Oct 20 2014 Carlos Rodrigues <cmar@eurotux.com> 2.1.1-14
+- Check certificates scripts
+
 * Fri Dec 20 2013 Carlos Rodrigues <cmar@eurotux.com> 2.0.0-13
 - Overwrite lvm.conf and multipath.conf and ignore ATA vendors
 

@@ -1,0 +1,29 @@
+From 10fe5df0584aed056c3b07477df41053b1a5d6be Mon Sep 17 00:00:00 2001
+From: Orit Wasserman <owasserm@redhat.com>
+Date: Mon, 24 Sep 2012 13:11:10 +0200
+Subject: [PATCH] Clear handler only for valid fd
+
+Signed-off-by: Orit Wasserman <owasserm@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit 3202becaa2b805497ce9e6faa6edfb83665f91b1)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ migration.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/migration.c b/migration.c
+index 1edeec5..22a05c4 100644
+--- a/migration.c
++++ b/migration.c
+@@ -240,7 +240,9 @@ static int migrate_fd_cleanup(MigrationState *s)
+ {
+     int ret = 0;
+ 
+-    qemu_set_fd_handler2(s->fd, NULL, NULL, NULL, NULL);
++    if (s->fd != -1) {
++        qemu_set_fd_handler2(s->fd, NULL, NULL, NULL, NULL);
++    }
+ 
+     if (s->file) {
+         DPRINTF("closing file\n");

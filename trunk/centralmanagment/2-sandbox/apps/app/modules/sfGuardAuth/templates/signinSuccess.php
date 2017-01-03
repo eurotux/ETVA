@@ -210,7 +210,8 @@ Ext.namespace('Login');
             case false:
                 var str = resp.error;
                 for(prop in str)
-                    msg += prop + ' '+ str[prop]+'<br />';//Concat prop and its value from object
+                    if( msg ) msg += '<br/>';
+                    msg += str[prop];   //Concat prop and its value from object
                 break;
             default:
                 msg = <?php echo json_encode(__('Unknown error')) ?>;

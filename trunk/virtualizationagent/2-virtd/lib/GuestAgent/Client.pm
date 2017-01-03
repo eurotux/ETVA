@@ -75,6 +75,7 @@ sub _receive{
     my $s = $self->{'socket'};
     my $msg;
 
+    my $bkp_alrmhandler = $SIG{ALRM} || sub {};   # backup it
     eval {
         local $SIG{ALRM} = sub { die "alarm\n" }; # NB: \n required
 
@@ -88,10 +89,12 @@ sub _receive{
 
         alarm 0;
     };
-    if( $@ ){
-        die unless $@ eq "alarm\n";   # propagate unexpected errors
+    my $err = $@;
+    $SIG{ALRM} = $bkp_alrmhandler;   # restore it
+    if( $err ){
+        die $err unless $err eq "alarm\n";   # propagate unexpected errors
         # timed out
-        plog( "{_receive} timeout..." )  if( &debug_level > 3 );
+        plogNow( "{_receive} timeout..." );
     }
 
     return $msg;

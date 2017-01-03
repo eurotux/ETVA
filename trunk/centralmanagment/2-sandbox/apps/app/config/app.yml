@@ -44,6 +44,8 @@ all:
         fence_ilo: 'ilo'
         fence_ipmilan: 'ipmilan'
         fence_rsa: 'rsa'
+        fence_cisco_mds: 'cisco mds'
+        fence_cisco_ucs: 'cisco ucs'
     disk_formats:
         - raw
         - qcow2
@@ -57,6 +59,35 @@ all:
         - disk
         - iscsi
         - logical
+    cpu_models:
+        - '486'
+        - 'pentium'
+        - 'pentium2'
+        - 'pentium3'
+        - 'pentiumpro'
+        - 'coreduo'
+        - 'n270'
+        - 'core2duo'
+        - 'qemu32'
+        - 'kvm32'
+        - 'cpu64-rhel5'
+        - 'cpu64-rhel6'
+        - 'kvm64'
+        - 'qemu64'
+        - 'Conroe'
+        - 'Penryn'
+        - 'Nehalem'
+        - 'Westmere'
+        - 'SandyBridge'
+        - 'Haswell'
+        - 'Broadwell'
+        - 'athlon'
+        - 'phenom'
+        - 'Opteron_G1'
+        - 'Opteron_G2'
+        - 'Opteron_G3'
+        - 'Opteron_G4'
+        - 'Opteron_G5'
   storage_pool_title: 'Storage iSCSI'
   mac:
     default_first_octect: 0x00 #default first three octects for mac pool
@@ -87,7 +118,7 @@ all:
     dir: '%SF_DATA_DIR%/rra' 
   sf_guard_plugin:
     import_encrypted_passwords: true
-  dbrequired: 2.1
+  dbrequired: 2.2
   cron:
     alert_dir: '/var/run/etva_etvm'
     log_dir: '/var/log/etva_etvm'
@@ -97,8 +128,8 @@ all:
     mailscript: '%SF_ROOT_DIR%/utils/pl/EmailLogs.pl'   # Script responsible for sending emails (with the diagnostic file attached)
     toemail: 'etva@eurotux.com' # rcpt to
   sshkey:
-    pubfile: '%SF_ROOT_DIR%/.ssh/id_rsa.pub'
-    privfile: '%SF_ROOT_DIR%/.ssh/id_rsa'
+    pubfile: '%SF_ROOT_DIR%/.ssh/id_dsa.pub'
+    privfile: '%SF_ROOT_DIR%/.ssh/id_dsa'
 
 extdirect:
   ds_ext_direct_plugin:

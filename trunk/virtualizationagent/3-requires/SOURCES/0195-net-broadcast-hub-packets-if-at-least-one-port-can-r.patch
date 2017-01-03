@@ -1,0 +1,48 @@
+From 7e8d33b027316936a7659007117b644b65bc01dd Mon Sep 17 00:00:00 2001
+From: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+Date: Fri, 24 Aug 2012 13:50:30 +0100
+Subject: [PATCH] net: broadcast hub packets if at least one port can receive
+
+In commit 60c07d933c66c4b30a83b7ccbc8a0cb3df1b2d0e ("net: fix
+qemu_can_send_packet logic") the "VLAN" broadcast behavior was changed
+to queue packets if any net client cannot receive.  It turns out that
+this was not actually the right fix and just hides the real bug that
+hw/usb/dev-network.c:usbnet_receive() clobbers its receive buffer when
+called multiple times in a row.  The commit also introduced a new bug
+that "VLAN" packets would not be sent if one of multiple net clients was
+down.
+
+The hw/usb/dev-network.c bug has since been fixed, so this patch reverts
+broadcast behavior to send packets as long as one net client can
+receive.  Packets simply get queued for the net clients that are
+temporarily unable to receive.
+
+Reported-by: Roy.Li <rongqing.li@windriver.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+(cherry picked from commit 61518a74ca98870e8ff132f91dd5dda252e31f58)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ net/hub.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/net/hub.c b/net/hub.c
+index ac157e3..650a8b4 100644
+--- a/net/hub.c
++++ b/net/hub.c
+@@ -97,12 +97,12 @@ static int net_hub_port_can_receive(NetClientState *nc)
+             continue;
+         }
+ 
+-        if (!qemu_can_send_packet(&port->nc)) {
+-            return 0;
++        if (qemu_can_send_packet(&port->nc)) {
++            return 1;
+         }
+     }
+ 
+-    return 1;
++    return 0;
+ }
+ 
+ static ssize_t net_hub_port_receive(NetClientState *nc,

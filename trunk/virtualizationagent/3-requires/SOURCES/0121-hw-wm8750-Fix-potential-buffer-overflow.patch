@@ -1,0 +1,40 @@
+From c25623230650b19a74d653fb9f01b71ed060783e Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Mon, 3 Sep 2012 22:56:00 +0200
+Subject: [PATCH] hw/wm8750: Fix potential buffer overflow
+
+Report from smatch:
+
+hw/wm8750.c:369 wm8750_tx(12) error: buffer overflow 's->i2c_data' 2 <= 2
+
+It looks like the preprocessor statements were simply misplaced.
+
+Replace also __FUNCTION__ by __func__ to please checkpatch.pl.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit 149eeb5fe57b853081e8059575d91b8a58a4f96c)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/wm8750.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hw/wm8750.c b/hw/wm8750.c
+index 11bcec3..44f138f 100644
+--- a/hw/wm8750.c
++++ b/hw/wm8750.c
+@@ -361,10 +361,10 @@ static int wm8750_tx(I2CSlave *i2c, uint8_t data)
+     uint16_t value;
+ 
+     if (s->i2c_len >= 2) {
+-        printf("%s: long message (%i bytes)\n", __FUNCTION__, s->i2c_len);
+ #ifdef VERBOSE
+-        return 1;
++        printf("%s: long message (%i bytes)\n", __func__, s->i2c_len);
+ #endif
++        return 1;
+     }
+     s->i2c_data[s->i2c_len ++] = data;
+     if (s->i2c_len != 2)

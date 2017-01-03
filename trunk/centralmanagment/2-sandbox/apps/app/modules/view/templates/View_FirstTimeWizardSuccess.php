@@ -1,7 +1,7 @@
 <script>
 
 Ext.ns("View.FirstTimeWizard");
-View.FirstTimeWizard.Main = function() {
+View.FirstTimeWizard.Main = function(init_options) {
 
     Ext.QuickTips.init();    
 
@@ -857,7 +857,7 @@ View.FirstTimeWizard.Main = function() {
             if (sm.hasSelection()){
                 Ext.Msg.show({
                     title: <?php echo json_encode(__('Remove network')) ?>,
-                    buttons: Ext.MessageBox.YESNOCANCEL,                   
+                    buttons: Ext.MessageBox.YESNO,                   
                     msg: String.format(<?php echo json_encode(__('Remove network {0} ?')) ?>,sel.data['name']),scope:this,
                     fn: function(btn){
 
@@ -962,6 +962,14 @@ View.FirstTimeWizard.Main = function() {
     var windowHeight = viewerSize.height * 0.95;
     windowHeight = Ext.util.Format.round(windowHeight,0);
 
+    var isFullFirstTimeSetupWizard = false;
+    <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
+    isFullFirstTimeSetupWizard = <?php echo ($full_first_time_wizard ? 1: 0) ?>;
+    if( init_options['full-first-time-setup-wizard'] ){
+        isFullFirstTimeSetupWizard = true;
+    }
+    <?php endif; ?>
+
     var cards = [
             // card with welcome message
                 new Ext.ux.Wiz.Card({
@@ -976,19 +984,20 @@ View.FirstTimeWizard.Main = function() {
                         }]
                 })
                 ,new password_cardPanel({id:'ft-wiz-password'})
-                <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
-                ,new macPool_cardPanel({id:'ft-wiz-macpool'})
-                ,new connectivity_cardPanel({id:'ft-wiz-preferences'})
-                <?php endif; ?>
                 ];
+
+    if( isFullFirstTimeSetupWizard ){
+        cards.push(new macPool_cardPanel({id:'ft-wiz-macpool'})
+                    ,new connectivity_cardPanel({id:'ft-wiz-preferences'}));
+    }
 
     //var startupCard = new startup_cardPanel({id:'server-wiz-startup'});
     var config = {etvamodel:<?php echo json_encode($sf_user->getAttribute('etvamodel')); ?>};
     switch(config.etvamodel){
         case 'enterprise' :
-                        <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
-                        cards.push(new network_cardPanel({id:'ft-wiz-network'}));
-                        <?php endif; ?>
+                        if( isFullFirstTimeSetupWizard ){
+                            cards.push(new network_cardPanel({id:'ft-wiz-network'}));
+                        }
                         break;
         default           :
                         break;

@@ -1,0 +1,712 @@
+From a28b2838b7797bddd649ebabb54655c893b3369d Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Sun, 2 Sep 2012 08:39:22 +0000
+Subject: [PATCH] target-microblaze: switch to AREG0 free mode
+
+Add an explicit CPUState parameter instead of relying on AREG0
+and switch to AREG0 free mode.
+
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure                       |   2 +-
+ target-microblaze/Makefile.objs |   2 -
+ target-microblaze/helper.h      |  48 ++++++++---------
+ target-microblaze/op_helper.c   | 115 ++++++++++++++++++----------------------
+ target-microblaze/translate.c   |  61 +++++++++++----------
+ 5 files changed, 110 insertions(+), 118 deletions(-)
+
+diff --git a/configure b/configure
+index e8806f0..0b4ef4a 100755
+--- a/configure
++++ b/configure
+@@ -3839,7 +3839,7 @@ symlink "$source_path/Makefile.target" "$target_dir/Makefile"
+ 
+ 
+ case "$target_arch2" in
+-  alpha | arm* | i386 | lm32 | m68k | or32 | s390x | sparc* | unicore32 | x86_64 | xtensa* | ppc*)
++  alpha | arm* | i386 | lm32 | m68k | microblaze* | or32 | s390x | sparc* | unicore32 | x86_64 | xtensa* | ppc*)
+     echo "CONFIG_TCG_PASS_AREG0=y" >> $config_target_mak
+   ;;
+ esac
+diff --git a/target-microblaze/Makefile.objs b/target-microblaze/Makefile.objs
+index 4b09e8c..afb87bc 100644
+--- a/target-microblaze/Makefile.objs
++++ b/target-microblaze/Makefile.objs
+@@ -1,4 +1,2 @@
+ obj-y += translate.o op_helper.o helper.o cpu.o
+ obj-$(CONFIG_SOFTMMU) += mmu.o machine.o
+-
+-$(obj)/op_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/target-microblaze/helper.h b/target-microblaze/helper.h
+index 9dcfb0f..a1a732c 100644
+--- a/target-microblaze/helper.h
++++ b/target-microblaze/helper.h
+@@ -1,39 +1,39 @@
+ #include "def-helper.h"
+ 
+-DEF_HELPER_1(raise_exception, void, i32)
+-DEF_HELPER_0(debug, void)
++DEF_HELPER_2(raise_exception, void, env, i32)
++DEF_HELPER_1(debug, void, env)
+ DEF_HELPER_FLAGS_3(carry, TCG_CALL_PURE | TCG_CALL_CONST, i32, i32, i32, i32)
+ DEF_HELPER_2(cmp, i32, i32, i32)
+ DEF_HELPER_2(cmpu, i32, i32, i32)
+ DEF_HELPER_FLAGS_1(clz, TCG_CALL_PURE | TCG_CALL_CONST, i32, i32)
+ 
+-DEF_HELPER_2(divs, i32, i32, i32)
+-DEF_HELPER_2(divu, i32, i32, i32)
+-
+-DEF_HELPER_2(fadd, i32, i32, i32)
+-DEF_HELPER_2(frsub, i32, i32, i32)
+-DEF_HELPER_2(fmul, i32, i32, i32)
+-DEF_HELPER_2(fdiv, i32, i32, i32)
+-DEF_HELPER_1(flt, i32, i32)
+-DEF_HELPER_1(fint, i32, i32)
+-DEF_HELPER_1(fsqrt, i32, i32)
+-
+-DEF_HELPER_2(fcmp_un, i32, i32, i32)
+-DEF_HELPER_2(fcmp_lt, i32, i32, i32)
+-DEF_HELPER_2(fcmp_eq, i32, i32, i32)
+-DEF_HELPER_2(fcmp_le, i32, i32, i32)
+-DEF_HELPER_2(fcmp_gt, i32, i32, i32)
+-DEF_HELPER_2(fcmp_ne, i32, i32, i32)
+-DEF_HELPER_2(fcmp_ge, i32, i32, i32)
++DEF_HELPER_3(divs, i32, env, i32, i32)
++DEF_HELPER_3(divu, i32, env, i32, i32)
++
++DEF_HELPER_3(fadd, i32, env, i32, i32)
++DEF_HELPER_3(frsub, i32, env, i32, i32)
++DEF_HELPER_3(fmul, i32, env, i32, i32)
++DEF_HELPER_3(fdiv, i32, env, i32, i32)
++DEF_HELPER_2(flt, i32, env, i32)
++DEF_HELPER_2(fint, i32, env, i32)
++DEF_HELPER_2(fsqrt, i32, env, i32)
++
++DEF_HELPER_3(fcmp_un, i32, env, i32, i32)
++DEF_HELPER_3(fcmp_lt, i32, env, i32, i32)
++DEF_HELPER_3(fcmp_eq, i32, env, i32, i32)
++DEF_HELPER_3(fcmp_le, i32, env, i32, i32)
++DEF_HELPER_3(fcmp_gt, i32, env, i32, i32)
++DEF_HELPER_3(fcmp_ne, i32, env, i32, i32)
++DEF_HELPER_3(fcmp_ge, i32, env, i32, i32)
+ 
+ DEF_HELPER_FLAGS_2(pcmpbf, TCG_CALL_PURE | TCG_CALL_CONST, i32, i32, i32)
+ #if !defined(CONFIG_USER_ONLY)
+-DEF_HELPER_1(mmu_read, i32, i32)
+-DEF_HELPER_2(mmu_write, void, i32, i32)
++DEF_HELPER_2(mmu_read, i32, env, i32)
++DEF_HELPER_3(mmu_write, void, env, i32, i32)
+ #endif
+ 
+-DEF_HELPER_4(memalign, void, i32, i32, i32, i32)
+-DEF_HELPER_1(stackprot, void, i32)
++DEF_HELPER_5(memalign, void, env, i32, i32, i32, i32)
++DEF_HELPER_2(stackprot, void, env, i32)
+ 
+ DEF_HELPER_2(get, i32, i32, i32)
+ DEF_HELPER_3(put, void, i32, i32, i32)
+diff --git a/target-microblaze/op_helper.c b/target-microblaze/op_helper.c
+index 3b1f072..c9789f4 100644
+--- a/target-microblaze/op_helper.c
++++ b/target-microblaze/op_helper.c
+@@ -20,7 +20,6 @@
+ 
+ #include <assert.h>
+ #include "cpu.h"
+-#include "dyngen-exec.h"
+ #include "helper.h"
+ #include "host-utils.h"
+ 
+@@ -42,17 +41,12 @@
+ /* Try to fill the TLB and return an exception if error. If retaddr is
+    NULL, it means that the function was called in C code (i.e. not
+    from generated code or from helper.c) */
+-/* XXX: fix it to restore all registers */
+-void tlb_fill(CPUMBState *env1, target_ulong addr, int is_write, int mmu_idx,
++void tlb_fill(CPUMBState *env, target_ulong addr, int is_write, int mmu_idx,
+               uintptr_t retaddr)
+ {
+     TranslationBlock *tb;
+-    CPUMBState *saved_env;
+     int ret;
+ 
+-    saved_env = env;
+-    env = env1;
+-
+     ret = cpu_mb_handle_mmu_fault(env, addr, is_write, mmu_idx);
+     if (unlikely(ret)) {
+         if (retaddr) {
+@@ -66,7 +60,6 @@ void tlb_fill(CPUMBState *env1, target_ulong addr, int is_write, int mmu_idx,
+         }
+         cpu_loop_exit(env);
+     }
+-    env = saved_env;
+ }
+ #endif
+ 
+@@ -105,13 +98,13 @@ uint32_t helper_get(uint32_t id, uint32_t ctrl)
+     return 0xdead0000 | id;
+ }
+ 
+-void helper_raise_exception(uint32_t index)
++void helper_raise_exception(CPUMBState *env, uint32_t index)
+ {
+     env->exception_index = index;
+     cpu_loop_exit(env);
+ }
+ 
+-void helper_debug(void)
++void helper_debug(CPUMBState *env)
+ {
+     int i;
+ 
+@@ -176,7 +169,7 @@ uint32_t helper_carry(uint32_t a, uint32_t b, uint32_t cf)
+     return ncf;
+ }
+ 
+-static inline int div_prepare(uint32_t a, uint32_t b)
++static inline int div_prepare(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     if (b == 0) {
+         env->sregs[SR_MSR] |= MSR_DZ;
+@@ -184,7 +177,7 @@ static inline int div_prepare(uint32_t a, uint32_t b)
+         if ((env->sregs[SR_MSR] & MSR_EE)
+             && !(env->pvr.regs[2] & PVR2_DIV_ZERO_EXC_MASK)) {
+             env->sregs[SR_ESR] = ESR_EC_DIVZERO;
+-            helper_raise_exception(EXCP_HW_EXCP);
++            helper_raise_exception(env, EXCP_HW_EXCP);
+         }
+         return 0;
+     }
+@@ -192,28 +185,30 @@ static inline int div_prepare(uint32_t a, uint32_t b)
+     return 1;
+ }
+ 
+-uint32_t helper_divs(uint32_t a, uint32_t b)
++uint32_t helper_divs(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+-    if (!div_prepare(a, b))
++    if (!div_prepare(env, a, b)) {
+         return 0;
++    }
+     return (int32_t)a / (int32_t)b;
+ }
+ 
+-uint32_t helper_divu(uint32_t a, uint32_t b)
++uint32_t helper_divu(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+-    if (!div_prepare(a, b))
++    if (!div_prepare(env, a, b)) {
+         return 0;
++    }
+     return a / b;
+ }
+ 
+ /* raise FPU exception.  */
+-static void raise_fpu_exception(void)
++static void raise_fpu_exception(CPUMBState *env)
+ {
+     env->sregs[SR_ESR] = ESR_EC_FPU;
+-    helper_raise_exception(EXCP_HW_EXCP);
++    helper_raise_exception(env, EXCP_HW_EXCP);
+ }
+ 
+-static void update_fpu_flags(int flags)
++static void update_fpu_flags(CPUMBState *env, int flags)
+ {
+     int raise = 0;
+ 
+@@ -236,11 +231,11 @@ static void update_fpu_flags(int flags)
+     if (raise
+         && (env->pvr.regs[2] & PVR2_FPU_EXC_MASK)
+         && (env->sregs[SR_MSR] & MSR_EE)) {
+-        raise_fpu_exception();
++        raise_fpu_exception(env);
+     }
+ }
+ 
+-uint32_t helper_fadd(uint32_t a, uint32_t b)
++uint32_t helper_fadd(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fd, fa, fb;
+     int flags;
+@@ -251,11 +246,11 @@ uint32_t helper_fadd(uint32_t a, uint32_t b)
+     fd.f = float32_add(fa.f, fb.f, &env->fp_status);
+ 
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags);
++    update_fpu_flags(env, flags);
+     return fd.l;
+ }
+ 
+-uint32_t helper_frsub(uint32_t a, uint32_t b)
++uint32_t helper_frsub(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fd, fa, fb;
+     int flags;
+@@ -265,11 +260,11 @@ uint32_t helper_frsub(uint32_t a, uint32_t b)
+     fb.l = b;
+     fd.f = float32_sub(fb.f, fa.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags);
++    update_fpu_flags(env, flags);
+     return fd.l;
+ }
+ 
+-uint32_t helper_fmul(uint32_t a, uint32_t b)
++uint32_t helper_fmul(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fd, fa, fb;
+     int flags;
+@@ -279,12 +274,12 @@ uint32_t helper_fmul(uint32_t a, uint32_t b)
+     fb.l = b;
+     fd.f = float32_mul(fa.f, fb.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags);
++    update_fpu_flags(env, flags);
+ 
+     return fd.l;
+ }
+ 
+-uint32_t helper_fdiv(uint32_t a, uint32_t b)
++uint32_t helper_fdiv(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fd, fa, fb;
+     int flags;
+@@ -294,12 +289,12 @@ uint32_t helper_fdiv(uint32_t a, uint32_t b)
+     fb.l = b;
+     fd.f = float32_div(fb.f, fa.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags);
++    update_fpu_flags(env, flags);
+ 
+     return fd.l;
+ }
+ 
+-uint32_t helper_fcmp_un(uint32_t a, uint32_t b)
++uint32_t helper_fcmp_un(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fa, fb;
+     uint32_t r = 0;
+@@ -308,7 +303,7 @@ uint32_t helper_fcmp_un(uint32_t a, uint32_t b)
+     fb.l = b;
+ 
+     if (float32_is_signaling_nan(fa.f) || float32_is_signaling_nan(fb.f)) {
+-        update_fpu_flags(float_flag_invalid);
++        update_fpu_flags(env, float_flag_invalid);
+         r = 1;
+     }
+ 
+@@ -319,7 +314,7 @@ uint32_t helper_fcmp_un(uint32_t a, uint32_t b)
+     return r;
+ }
+ 
+-uint32_t helper_fcmp_lt(uint32_t a, uint32_t b)
++uint32_t helper_fcmp_lt(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fa, fb;
+     int r;
+@@ -330,12 +325,12 @@ uint32_t helper_fcmp_lt(uint32_t a, uint32_t b)
+     fb.l = b;
+     r = float32_lt(fb.f, fa.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags & float_flag_invalid);
++    update_fpu_flags(env, flags & float_flag_invalid);
+ 
+     return r;
+ }
+ 
+-uint32_t helper_fcmp_eq(uint32_t a, uint32_t b)
++uint32_t helper_fcmp_eq(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fa, fb;
+     int flags;
+@@ -346,12 +341,12 @@ uint32_t helper_fcmp_eq(uint32_t a, uint32_t b)
+     fb.l = b;
+     r = float32_eq_quiet(fa.f, fb.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags & float_flag_invalid);
++    update_fpu_flags(env, flags & float_flag_invalid);
+ 
+     return r;
+ }
+ 
+-uint32_t helper_fcmp_le(uint32_t a, uint32_t b)
++uint32_t helper_fcmp_le(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fa, fb;
+     int flags;
+@@ -362,13 +357,13 @@ uint32_t helper_fcmp_le(uint32_t a, uint32_t b)
+     set_float_exception_flags(0, &env->fp_status);
+     r = float32_le(fa.f, fb.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags & float_flag_invalid);
++    update_fpu_flags(env, flags & float_flag_invalid);
+ 
+ 
+     return r;
+ }
+ 
+-uint32_t helper_fcmp_gt(uint32_t a, uint32_t b)
++uint32_t helper_fcmp_gt(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fa, fb;
+     int flags, r;
+@@ -378,11 +373,11 @@ uint32_t helper_fcmp_gt(uint32_t a, uint32_t b)
+     set_float_exception_flags(0, &env->fp_status);
+     r = float32_lt(fa.f, fb.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags & float_flag_invalid);
++    update_fpu_flags(env, flags & float_flag_invalid);
+     return r;
+ }
+ 
+-uint32_t helper_fcmp_ne(uint32_t a, uint32_t b)
++uint32_t helper_fcmp_ne(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fa, fb;
+     int flags, r;
+@@ -392,12 +387,12 @@ uint32_t helper_fcmp_ne(uint32_t a, uint32_t b)
+     set_float_exception_flags(0, &env->fp_status);
+     r = !float32_eq_quiet(fa.f, fb.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags & float_flag_invalid);
++    update_fpu_flags(env, flags & float_flag_invalid);
+ 
+     return r;
+ }
+ 
+-uint32_t helper_fcmp_ge(uint32_t a, uint32_t b)
++uint32_t helper_fcmp_ge(CPUMBState *env, uint32_t a, uint32_t b)
+ {
+     CPU_FloatU fa, fb;
+     int flags, r;
+@@ -407,12 +402,12 @@ uint32_t helper_fcmp_ge(uint32_t a, uint32_t b)
+     set_float_exception_flags(0, &env->fp_status);
+     r = !float32_lt(fa.f, fb.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags & float_flag_invalid);
++    update_fpu_flags(env, flags & float_flag_invalid);
+ 
+     return r;
+ }
+ 
+-uint32_t helper_flt(uint32_t a)
++uint32_t helper_flt(CPUMBState *env, uint32_t a)
+ {
+     CPU_FloatU fd, fa;
+ 
+@@ -421,7 +416,7 @@ uint32_t helper_flt(uint32_t a)
+     return fd.l;
+ }
+ 
+-uint32_t helper_fint(uint32_t a)
++uint32_t helper_fint(CPUMBState *env, uint32_t a)
+ {
+     CPU_FloatU fa;
+     uint32_t r;
+@@ -431,12 +426,12 @@ uint32_t helper_fint(uint32_t a)
+     fa.l = a;
+     r = float32_to_int32(fa.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags);
++    update_fpu_flags(env, flags);
+ 
+     return r;
+ }
+ 
+-uint32_t helper_fsqrt(uint32_t a)
++uint32_t helper_fsqrt(CPUMBState *env, uint32_t a)
+ {
+     CPU_FloatU fd, fa;
+     int flags;
+@@ -445,7 +440,7 @@ uint32_t helper_fsqrt(uint32_t a)
+     fa.l = a;
+     fd.l = float32_sqrt(fa.f, &env->fp_status);
+     flags = get_float_exception_flags(&env->fp_status);
+-    update_fpu_flags(flags);
++    update_fpu_flags(env, flags);
+ 
+     return fd.l;
+ }
+@@ -463,7 +458,8 @@ uint32_t helper_pcmpbf(uint32_t a, uint32_t b)
+     return 0;
+ }
+ 
+-void helper_memalign(uint32_t addr, uint32_t dr, uint32_t wr, uint32_t mask)
++void helper_memalign(CPUMBState *env, uint32_t addr, uint32_t dr, uint32_t wr,
++                     uint32_t mask)
+ {
+     if (addr & mask) {
+             qemu_log_mask(CPU_LOG_INT,
+@@ -478,45 +474,39 @@ void helper_memalign(uint32_t addr, uint32_t dr, uint32_t wr, uint32_t mask)
+             if (!(env->sregs[SR_MSR] & MSR_EE)) {
+                 return;
+             }
+-            helper_raise_exception(EXCP_HW_EXCP);
++            helper_raise_exception(env, EXCP_HW_EXCP);
+     }
+ }
+ 
+-void helper_stackprot(uint32_t addr)
++void helper_stackprot(CPUMBState *env, uint32_t addr)
+ {
+     if (addr < env->slr || addr > env->shr) {
+             qemu_log("Stack protector violation at %x %x %x\n",
+                      addr, env->slr, env->shr);
+             env->sregs[SR_EAR] = addr;
+             env->sregs[SR_ESR] = ESR_EC_STACKPROT;
+-            helper_raise_exception(EXCP_HW_EXCP);
++            helper_raise_exception(env, EXCP_HW_EXCP);
+     }
+ }
+ 
+ #if !defined(CONFIG_USER_ONLY)
+ /* Writes/reads to the MMU's special regs end up here.  */
+-uint32_t helper_mmu_read(uint32_t rn)
++uint32_t helper_mmu_read(CPUMBState *env, uint32_t rn)
+ {
+     return mmu_read(env, rn);
+ }
+ 
+-void helper_mmu_write(uint32_t rn, uint32_t v)
++void helper_mmu_write(CPUMBState *env, uint32_t rn, uint32_t v)
+ {
+     mmu_write(env, rn, v);
+ }
+ 
+-void cpu_unassigned_access(CPUMBState *env1, target_phys_addr_t addr,
++void cpu_unassigned_access(CPUMBState *env, target_phys_addr_t addr,
+                            int is_write, int is_exec, int is_asi, int size)
+ {
+-    CPUMBState *saved_env;
+-
+-    saved_env = env;
+-    env = env1;
+-
+     qemu_log_mask(CPU_LOG_INT, "Unassigned " TARGET_FMT_plx " wr=%d exe=%d\n",
+              addr, is_write, is_exec);
+     if (!(env->sregs[SR_MSR] & MSR_EE)) {
+-        env = saved_env;
+         return;
+     }
+ 
+@@ -524,14 +514,13 @@ void cpu_unassigned_access(CPUMBState *env1, target_phys_addr_t addr,
+     if (is_exec) {
+         if ((env->pvr.regs[2] & PVR2_IOPB_BUS_EXC_MASK)) {
+             env->sregs[SR_ESR] = ESR_EC_INSN_BUS;
+-            helper_raise_exception(EXCP_HW_EXCP);
++            helper_raise_exception(env, EXCP_HW_EXCP);
+         }
+     } else {
+         if ((env->pvr.regs[2] & PVR2_DOPB_BUS_EXC_MASK)) {
+             env->sregs[SR_ESR] = ESR_EC_DATA_BUS;
+-            helper_raise_exception(EXCP_HW_EXCP);
++            helper_raise_exception(env, EXCP_HW_EXCP);
+         }
+     }
+-    env = saved_env;
+ }
+ #endif
+diff --git a/target-microblaze/translate.c b/target-microblaze/translate.c
+index 7470149..9c7d77f 100644
+--- a/target-microblaze/translate.c
++++ b/target-microblaze/translate.c
+@@ -126,7 +126,7 @@ static inline void t_gen_raise_exception(DisasContext *dc, uint32_t index)
+ 
+     t_sync_flags(dc);
+     tcg_gen_movi_tl(cpu_SR[SR_PC], dc->pc);
+-    gen_helper_raise_exception(tmp);
++    gen_helper_raise_exception(cpu_env, tmp);
+     tcg_temp_free_i32(tmp);
+     dc->is_jmp = DISAS_UPDATE;
+ }
+@@ -503,9 +503,9 @@ static void dec_msr(DisasContext *dc)
+         sr &= 7;
+         LOG_DIS("m%ss sr%d r%d imm=%x\n", to ? "t" : "f", sr, dc->ra, dc->imm);
+         if (to)
+-            gen_helper_mmu_write(tcg_const_tl(sr), cpu_R[dc->ra]);
++            gen_helper_mmu_write(cpu_env, tcg_const_tl(sr), cpu_R[dc->ra]);
+         else
+-            gen_helper_mmu_read(cpu_R[dc->rd], tcg_const_tl(sr));
++            gen_helper_mmu_read(cpu_R[dc->rd], cpu_env, tcg_const_tl(sr));
+         return;
+     }
+ #endif
+@@ -704,9 +704,11 @@ static void dec_div(DisasContext *dc)
+     }
+ 
+     if (u)
+-        gen_helper_divu(cpu_R[dc->rd], *(dec_alu_op_b(dc)), cpu_R[dc->ra]);
++        gen_helper_divu(cpu_R[dc->rd], cpu_env, *(dec_alu_op_b(dc)),
++                        cpu_R[dc->ra]);
+     else
+-        gen_helper_divs(cpu_R[dc->rd], *(dec_alu_op_b(dc)), cpu_R[dc->ra]);
++        gen_helper_divs(cpu_R[dc->rd], cpu_env, *(dec_alu_op_b(dc)),
++                        cpu_R[dc->ra]);
+     if (!dc->rd)
+         tcg_gen_movi_tl(cpu_R[dc->rd], 0);
+ }
+@@ -912,7 +914,7 @@ static inline TCGv *compute_ldst_addr(DisasContext *dc, TCGv *t)
+         tcg_gen_add_tl(*t, cpu_R[dc->ra], cpu_R[dc->rb]);
+ 
+         if (stackprot) {
+-            gen_helper_stackprot(*t);
++            gen_helper_stackprot(cpu_env, *t);
+         }
+         return t;
+     }
+@@ -930,7 +932,7 @@ static inline TCGv *compute_ldst_addr(DisasContext *dc, TCGv *t)
+     }
+ 
+     if (stackprot) {
+-        gen_helper_stackprot(*t);
++        gen_helper_stackprot(cpu_env, *t);
+     }
+     return t;
+ }
+@@ -1056,7 +1058,7 @@ static void dec_load(DisasContext *dc)
+         gen_load(dc, v, *addr, size);
+ 
+         tcg_gen_movi_tl(cpu_SR[SR_PC], dc->pc);
+-        gen_helper_memalign(*addr, tcg_const_tl(dc->rd),
++        gen_helper_memalign(cpu_env, *addr, tcg_const_tl(dc->rd),
+                             tcg_const_tl(0), tcg_const_tl(size - 1));
+         if (dc->rd) {
+             if (rev) {
+@@ -1218,7 +1220,7 @@ static void dec_store(DisasContext *dc)
+          *        the alignment checks in between the probe and the mem
+          *        access.
+          */
+-        gen_helper_memalign(*addr, tcg_const_tl(dc->rd),
++        gen_helper_memalign(cpu_env, *addr, tcg_const_tl(dc->rd),
+                             tcg_const_tl(1), tcg_const_tl(size - 1));
+     }
+ 
+@@ -1493,49 +1495,53 @@ static void dec_fpu(DisasContext *dc)
+ 
+     switch (fpu_insn) {
+         case 0:
+-            gen_helper_fadd(cpu_R[dc->rd], cpu_R[dc->ra], cpu_R[dc->rb]);
++            gen_helper_fadd(cpu_R[dc->rd], cpu_env, cpu_R[dc->ra],
++                            cpu_R[dc->rb]);
+             break;
+ 
+         case 1:
+-            gen_helper_frsub(cpu_R[dc->rd], cpu_R[dc->ra], cpu_R[dc->rb]);
++            gen_helper_frsub(cpu_R[dc->rd], cpu_env, cpu_R[dc->ra],
++                             cpu_R[dc->rb]);
+             break;
+ 
+         case 2:
+-            gen_helper_fmul(cpu_R[dc->rd], cpu_R[dc->ra], cpu_R[dc->rb]);
++            gen_helper_fmul(cpu_R[dc->rd], cpu_env, cpu_R[dc->ra],
++                            cpu_R[dc->rb]);
+             break;
+ 
+         case 3:
+-            gen_helper_fdiv(cpu_R[dc->rd], cpu_R[dc->ra], cpu_R[dc->rb]);
++            gen_helper_fdiv(cpu_R[dc->rd], cpu_env, cpu_R[dc->ra],
++                            cpu_R[dc->rb]);
+             break;
+ 
+         case 4:
+             switch ((dc->ir >> 4) & 7) {
+                 case 0:
+-                    gen_helper_fcmp_un(cpu_R[dc->rd],
++                    gen_helper_fcmp_un(cpu_R[dc->rd], cpu_env,
+                                        cpu_R[dc->ra], cpu_R[dc->rb]);
+                     break;
+                 case 1:
+-                    gen_helper_fcmp_lt(cpu_R[dc->rd],
++                    gen_helper_fcmp_lt(cpu_R[dc->rd], cpu_env,
+                                        cpu_R[dc->ra], cpu_R[dc->rb]);
+                     break;
+                 case 2:
+-                    gen_helper_fcmp_eq(cpu_R[dc->rd],
++                    gen_helper_fcmp_eq(cpu_R[dc->rd], cpu_env,
+                                        cpu_R[dc->ra], cpu_R[dc->rb]);
+                     break;
+                 case 3:
+-                    gen_helper_fcmp_le(cpu_R[dc->rd],
++                    gen_helper_fcmp_le(cpu_R[dc->rd], cpu_env,
+                                        cpu_R[dc->ra], cpu_R[dc->rb]);
+                     break;
+                 case 4:
+-                    gen_helper_fcmp_gt(cpu_R[dc->rd],
++                    gen_helper_fcmp_gt(cpu_R[dc->rd], cpu_env,
+                                        cpu_R[dc->ra], cpu_R[dc->rb]);
+                     break;
+                 case 5:
+-                    gen_helper_fcmp_ne(cpu_R[dc->rd],
++                    gen_helper_fcmp_ne(cpu_R[dc->rd], cpu_env,
+                                        cpu_R[dc->ra], cpu_R[dc->rb]);
+                     break;
+                 case 6:
+-                    gen_helper_fcmp_ge(cpu_R[dc->rd],
++                    gen_helper_fcmp_ge(cpu_R[dc->rd], cpu_env,
+                                        cpu_R[dc->ra], cpu_R[dc->rb]);
+                     break;
+                 default:
+@@ -1552,21 +1558,21 @@ static void dec_fpu(DisasContext *dc)
+             if (!dec_check_fpuv2(dc)) {
+                 return;
+             }
+-            gen_helper_flt(cpu_R[dc->rd], cpu_R[dc->ra]);
++            gen_helper_flt(cpu_R[dc->rd], cpu_env, cpu_R[dc->ra]);
+             break;
+ 
+         case 6:
+             if (!dec_check_fpuv2(dc)) {
+                 return;
+             }
+-            gen_helper_fint(cpu_R[dc->rd], cpu_R[dc->ra]);
++            gen_helper_fint(cpu_R[dc->rd], cpu_env, cpu_R[dc->ra]);
+             break;
+ 
+         case 7:
+             if (!dec_check_fpuv2(dc)) {
+                 return;
+             }
+-            gen_helper_fsqrt(cpu_R[dc->rd], cpu_R[dc->ra]);
++            gen_helper_fsqrt(cpu_R[dc->rd], cpu_env, cpu_R[dc->ra]);
+             break;
+ 
+         default:
+@@ -1654,15 +1660,14 @@ static struct decoder_info {
+     {{0, 0}, dec_null}
+ };
+ 
+-static inline void decode(DisasContext *dc)
++static inline void decode(DisasContext *dc, uint32_t ir)
+ {
+-    uint32_t ir;
+     int i;
+ 
+     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP)))
+         tcg_gen_debug_insn_start(dc->pc);
+ 
+-    dc->ir = ir = ldl_code(dc->pc);
++    dc->ir = ir;
+     LOG_DIS("%8.8x\t", dc->ir);
+ 
+     if (dc->ir)
+@@ -1796,7 +1801,7 @@ gen_intermediate_code_internal(CPUMBState *env, TranslationBlock *tb,
+             gen_io_start();
+ 
+         dc->clear_imm = 1;
+-	decode(dc);
++        decode(dc, cpu_ldl_code(env, dc->pc));
+         if (dc->clear_imm)
+             dc->tb_flags &= ~IMM_FLAG;
+         dc->pc += 4;
+@@ -1871,7 +1876,7 @@ gen_intermediate_code_internal(CPUMBState *env, TranslationBlock *tb,
+         if (dc->is_jmp != DISAS_JUMP) {
+             tcg_gen_movi_tl(cpu_SR[SR_PC], npc);
+         }
+-        gen_helper_raise_exception(tmp);
++        gen_helper_raise_exception(cpu_env, tmp);
+         tcg_temp_free_i32(tmp);
+     } else {
+         switch(dc->is_jmp) {

@@ -1,0 +1,14 @@
+--- admin/modules/queues/page.queues.php.orig	2014-10-06 12:12:32.000000000 +0100
++++ admin/modules/queues/page.queues.php	2014-10-06 12:14:41.000000000 +0100
+@@ -611,6 +611,11 @@
+ 				for ($i=0; $i <= 20; $i++) {
+ 					echo '<option value="'.$i.'" '.(("$i" == "$default") ? 'SELECTED' : '').'>'.$i.' '._("seconds").'</option>';
+ 				}
++				# CMAR 02/10/2014
++				#   add big time values
++				for ($i=40; $i <= 300; $i+=20) {
++					echo '<option value="'.$i.'" '.(("$i" == "$default") ? 'SELECTED' : '').'>'.$i.' '._("seconds").'</option>';
++				}
+ 			?>		
+ 			</select>		
+ 		</td>

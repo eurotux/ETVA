@@ -228,7 +228,7 @@ ETFW.DHCP.Hosts.Data_Grid = Ext.extend(Ext.grid.GridPanel, {
                             Ext.MessageBox.show({
                                 title:'Delete host',
                                 msg: 'You are about to delete this host. <br />Are you sure you want to delete?',
-                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                buttons: Ext.MessageBox.YESNO,
                                 fn: function(btn){
 
                                     if(btn=='yes'){
@@ -273,7 +273,7 @@ ETFW.DHCP.Hosts.Data_Grid = Ext.extend(Ext.grid.GridPanel, {
                             Ext.MessageBox.show({
                                 title:'Delete host group',
                                 msg: 'You are about to delete this host group. <br />Are you sure you want to delete?',
-                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                buttons: Ext.MessageBox.YESNO,
                                 fn: function(btn){
 
                                     if(btn=='yes'){

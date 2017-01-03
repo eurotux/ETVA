@@ -25,8 +25,12 @@ class serverCreateTask extends sfBaseTask
       new sfCommandOption('networks', null, sfCommandOption::PARAMETER_OPTIONAL | sfCommandOption::IS_ARRAY, 'The networks of server'),
 
       new sfCommandOption('location', null, sfCommandOption::PARAMETER_OPTIONAL, 'The location of installation of server'),
+      new sfCommandOption('extra', null, sfCommandOption::PARAMETER_OPTIONAL, 'The extra args for installation of server'),
       new sfCommandOption('ip', null, sfCommandOption::PARAMETER_OPTIONAL, 'The IP address of server'),
       new sfCommandOption('description', null, sfCommandOption::PARAMETER_OPTIONAL, 'The description of server'),
+      new sfCommandOption('cpu_sockets', null, sfCommandOption::PARAMETER_OPTIONAL, 'The number of sockets of CPU'),
+      new sfCommandOption('cpu_cores', null, sfCommandOption::PARAMETER_OPTIONAL, 'The number of cores of CPU'),
+      new sfCommandOption('cpu_threads', null, sfCommandOption::PARAMETER_OPTIONAL, 'The number of threads of CPU'),
     ));
 
     $this->namespace        = 'server';
@@ -164,6 +168,7 @@ EOF;
     {
         $msg_i18n = $context->getI18N()->__(EtvaNodePeer::_ERR_NOTFOUND_ID_,array('%id%'=>$node));
         $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+        $this->log("[ERROR] ".$error['error']);
         return $error;
     }
 
@@ -172,6 +177,7 @@ EOF;
         if($valid == false){
             $msg_i18n = $context->getI18N()->__('Could not validate the location URL!');
             $error = array('agent'=>sfConfig::get('config_acronym'),'success'=>false,'error'=>$msg_i18n,'info'=>$msg_i18n);
+            $this->log("[ERROR] ".$error['error']);
             return $error;
         }
     }

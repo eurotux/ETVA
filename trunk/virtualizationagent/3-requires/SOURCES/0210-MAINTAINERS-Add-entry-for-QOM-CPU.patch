@@ -1,0 +1,33 @@
+From e510581c7dc3af5e009355e6fe1f98d7e33c13aa Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>
+Date: Mon, 17 Sep 2012 19:10:32 +0200
+Subject: [PATCH] MAINTAINERS: Add entry for QOM CPU
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Andreas Färber <afaerber@suse.de>
+(cherry picked from commit f2ca052414d7eddc10517e98a5a27ba8099b19b1)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ MAINTAINERS | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 61f8b45..25733fc 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -531,6 +531,12 @@ M: Anthony Liguori <aliguori@us.ibm.com>
+ S: Maintained
+ F: qemu-char.c
+ 
++CPU
++M: Andreas Färber <afaerber@suse.de>
++S: Supported
++F: qom/cpu.c
++F: include/qemu/cpu.h
++
+ Device Tree
+ M: Peter Crosthwaite <peter.crosthwaite@petalogix.com>
+ M: Alexander Graf <agraf@suse.de>

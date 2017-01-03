@@ -1,0 +1,77 @@
+From 97efa24f71b142e1a7b182c69db67cea0f0000a3 Mon Sep 17 00:00:00 2001
+From: Natanael Copa <natanael.copa@gmail.com>
+Date: Wed, 12 Sep 2012 09:06:51 +0000
+Subject: [PATCH] configure: properly check if -lrt and -lm is needed
+
+Fixes build against uClibc.
+
+uClibc provides 2 versions of clock_gettime(), one with realtime
+support and one without (this is so you can avoid linking in -lrt
+unless actually needed). This means that the clock_gettime() don't
+need -lrt. We still need it for timer_create() so we check for this
+function in addition.
+
+We also need check if -lm is needed for isnan().
+
+Both -lm and -lrt are needed for libs_qga.
+
+Signed-off-by: Natanael Copa <ncopa@alpinelinux.org>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit 8bacde8d86a09699207d85d4bab06162aed18dc4)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure | 31 +++++++++++++++++++++++++++++--
+ 1 file changed, 29 insertions(+), 2 deletions(-)
+
+diff --git a/configure b/configure
+index 9e53cc2..a1f256c 100755
+--- a/configure
++++ b/configure
+@@ -2645,17 +2645,44 @@ fi
+ 
+ 
+ ##########################################
++# Do we need libm
++cat > $TMPC << EOF
++#include <math.h>
++int main(void) { return isnan(sin(0.0)); }
++EOF
++if compile_prog "" "" ; then
++  :
++elif compile_prog "" "-lm" ; then
++  LIBS="-lm $LIBS"
++  libs_qga="-lm $libs_qga"
++else
++  echo
++  echo "Error: libm check failed"
++  echo
++  exit 1
++fi
++
++##########################################
+ # Do we need librt
++# uClibc provides 2 versions of clock_gettime(), one with realtime
++# support and one without. This means that the clock_gettime() don't
++# need -lrt. We still need it for timer_create() so we check for this
++# function in addition.
+ cat > $TMPC <<EOF
+ #include <signal.h>
+ #include <time.h>
+-int main(void) { return clock_gettime(CLOCK_REALTIME, NULL); }
++int main(void) {
++  timer_create(CLOCK_REALTIME, NULL, NULL);
++  return clock_gettime(CLOCK_REALTIME, NULL);
++}
+ EOF
+ 
+ if compile_prog "" "" ; then
+   :
+-elif compile_prog "" "-lrt" ; then
++# we need pthread for static linking. use previous pthread test result
++elif compile_prog "" "-lrt $pthread_lib" ; then
+   LIBS="-lrt $LIBS"
++  libs_qga="-lrt $libs_qga"
+ fi
+ 
+ if test "$darwin" != "yes" -a "$mingw32" != "yes" -a "$solaris" != yes -a \

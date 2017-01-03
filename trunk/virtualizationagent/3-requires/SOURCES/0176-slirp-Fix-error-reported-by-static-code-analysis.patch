@@ -1,0 +1,34 @@
+From 4aff755e039d12dfc8f6dde6a04bdb9548c18d66 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Tue, 4 Sep 2012 23:20:36 +0200
+Subject: [PATCH] slirp: Fix error reported by static code analysis
+
+Report from smatch:
+
+slirp/tcp_subr.c:127 tcp_respond(17) error:
+ we previously assumed 'tp' could be null (see line 124)
+
+Return if 'tp' is NULL.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+(cherry picked from commit e56afbc54a2132c56931f44bae1992c28119944f)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ slirp/tcp_subr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/slirp/tcp_subr.c b/slirp/tcp_subr.c
+index 5890d7a..1542e43 100644
+--- a/slirp/tcp_subr.c
++++ b/slirp/tcp_subr.c
+@@ -124,7 +124,7 @@ tcp_respond(struct tcpcb *tp, struct tcpiphdr *ti, struct mbuf *m,
+ 	if (tp)
+ 		win = sbspace(&tp->t_socket->so_rcv);
+         if (m == NULL) {
+-		if ((m = m_get(tp->t_socket->slirp)) == NULL)
++		if (!tp || (m = m_get(tp->t_socket->slirp)) == NULL)
+ 			return;
+ 		tlen = 0;
+ 		m->m_data += IF_MAXLINKHDR;

@@ -423,12 +423,20 @@ sub domBlockStats {
 
     my $dev = $p{'dev'};
     if( $dev ){
+        my $timeout_blockstats = 10;    # time out for blockstats (default: 10s)
         my $stats;
+        my $bkp_alrmhandler = $SIG{ALRM} || sub {};   # backup it
         eval {
+            local $SIG{ALRM} = sub { die "Domain block_stats: Timeout!\n"; };
+            alarm($timeout_blockstats);
             $stats = $dom->block_stats( $dev );
+            alarm(0);
         };
-        if( $@ ){
-            return retErr('_DOM_BLOCK_STATS_ERROR_',"Error get block stats: $@");
+        my $err = $@;	# backup error message
+	    $SIG{ALRM} = $bkp_alrmhandler;   # restore it
+        if( $err ){
+            plogNow "[ERROR] get domain '$p{'name'}' block stats for device '$dev': $err";
+            return retErr('_DOM_BLOCK_STATS_ERROR_',"Error get block stats: $err");
         }
         return wantarray() ? %$stats : $stats;
     } else {
@@ -764,6 +772,8 @@ sub suspendDomain {
         if( $@ ){
             return retErr('_SUSPEND_DOMAIN_',"Can't suspend domain: $@");
         }
+    } else {
+        return retErr('_NOTRUNNING_DOMAIN_',"Domain is not running.");
     }
     return retDomainInfo($dom);
 }
@@ -796,6 +806,8 @@ sub resumeDomain {
         if( $@ ){
             return retErr('_RESUME_DOMAIN_',"Can't resume domain: $@");
         }
+    } else {
+        return retErr('_RESUME_DOMAIN_',"Domain is not suspended.");
     }
     return retDomainInfo($dom);
 }
@@ -1328,6 +1340,7 @@ sub create_snapshot {
         my $xml = sprintf('%s', $X->domainsnapshot(@domainsnapshot_params) );
 
         my $flags;
+        #$flags |= Sys::Virt::DomainSnapshot::CREATE_LIVE if( !$p{'nolive'} );
         my $snapshot;
         eval {
             $snapshot = $dom->create_snapshot($xml,$flags);
@@ -2436,7 +2449,7 @@ sub load_kernel_params {
         $params{'arch'} = $self->get_arch( %params );
         my ( $kernelfn,
                 $initrdfn,
-                $args) = $self->get_kernel( $params{'location'}, $params{'type'}, $params{'arch'}, $params{'distro'} );
+                $args) = $self->get_kernel( $params{'location'}, $params{'type'}, $params{'arch'}, $params{'distro'}, $params{'extra'} );
 
         $params{'os'}{'kernel'} = $kernelfn;
         $params{'os'}{'initrd'} = $initrdfn;
@@ -2459,14 +2472,14 @@ get kernel from location
 
 sub get_kernel {
     my $self = shift;
-    my ( $location, $type, $arch, $adistro ) = @_;
+    my ( $location, $type, $arch, $adistro, $aextra ) = @_;
     my $TMP_DIR = $self->get_tmpdir(); 
 
     my ($kernelfn,$initrdfn,$args);
 
     my $kernel_file = ETVA::Utils::rand_tmpfile("$TMP_DIR/vmlinuz");
     my $initrd_file = ETVA::Utils::rand_tmpfile("$TMP_DIR/initrd.img");
-    my $extras = "";
+    my $extra = "";
 
     my @distros = ( );
 
@@ -2491,7 +2504,7 @@ sub get_kernel {
             my $child;
             LWP::Simple::getstore("$location/$kernelpath",$kernel_file);
             LWP::Simple::getstore("$location/$initrdpath",$initrd_file);
-            $extras = "text method=$location";
+            $extra = "text method=$location";
         } elsif( $location =~ m/^nfs:/ ){
             # nfs source
             my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
@@ -2502,12 +2515,12 @@ sub get_kernel {
             copy("$tmpdir/$initrdpath",$initrd_file);
             cmd_exec("umount",$tmpdir);
             rmdir($tmpdir);
-            $extras = "text method=nfs:$nl";
+            $extra = "text method=nfs:$nl";
         } elsif( -d $location ){ 
             # is dir
             copy("$location/$kernelpath",$kernel_file);
             copy("$location/$initrdpath",$initrd_file);
-            $extras = "text method=$location";
+            $extra = "text method=$location";
         } elsif( -b $location ){
             # is block device
             my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
@@ -2516,7 +2529,7 @@ sub get_kernel {
             copy("$tmpdir/$initrdpath",$initrd_file);
             cmd_exec("umount",$tmpdir);
             rmdir($tmpdir);
-            $extras = "text method=$location";
+            $extra = "text method=$location";
         } elsif( -e $location ){ 
             # is file
             my $tmpdir = ETVA::Utils::rand_tmpdir("$TMP_DIR/virtagent-tmpdir");
@@ -2525,7 +2538,7 @@ sub get_kernel {
             copy("$tmpdir/$initrdpath",$initrd_file);
             cmd_exec("umount",$tmpdir);
             rmdir($tmpdir);
-            $extras = "text method=$location";
+            $extra = "text method=$location";
         }
 
         # if it fails lets try other distro paths
@@ -2535,7 +2548,9 @@ sub get_kernel {
             last;
         }
     }
-    return ( $kernel_file,$initrd_file,$extras );
+    $extra .= " $aextra" if( $aextra );
+
+    return ( $kernel_file,$initrd_file,$extra );
 }
 
 =item get_bootdisk

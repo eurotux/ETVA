@@ -1,0 +1,41 @@
+From 47694021e532ef04ff0f4df67ed4da39e504852d Mon Sep 17 00:00:00 2001
+From: Dunrong Huang <riegamaths@gmail.com>
+Date: Fri, 31 Aug 2012 00:44:44 +0800
+Subject: [PATCH] qxl: dont update invalid area
+
+This patch fixes the following error:
+
+$ ~/usr/bin/qemu-system-x86_64 -enable-kvm -m 1024 -spice port=5900,disable-ticketing -vga qxl -cdrom ~/Images/linuxmint-13-mate-dvd-32bit.iso
+(/home/mathslinux/usr/bin/qemu-system-x86_64:10068): SpiceWorker-CRITICAL **: red_worker.c:4599:red_update_area: condition `area->left >= 0 && area->top >= 0 && area->left < area->right && area->top < area->bottom' failed
+Aborted
+
+spice server terminates QEMU process if we pass invalid area to it,
+so dont update those invalid areas.
+
+Signed-off-by: Dunrong Huang <riegamaths@gmail.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit ccc2960d654a233a6ed415b37d8ff41728d817c5)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/qxl.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 27f3779..038a8bb 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -1448,6 +1448,13 @@ async_common:
+             return;
+         }
+ 
++        if (update.left < 0 || update.top < 0 || update.left >= update.right ||
++            update.top >= update.bottom) {
++            qxl_set_guest_bug(d, "QXL_IO_UPDATE_AREA: "
++                              "invalid area(%d,%d,%d,%d)\n", update.left,
++                              update.right, update.top, update.bottom);
++            break;
++        }
+         if (async == QXL_ASYNC) {
+             cookie = qxl_cookie_new(QXL_COOKIE_TYPE_IO,
+                                     QXL_IO_UPDATE_AREA_ASYNC);

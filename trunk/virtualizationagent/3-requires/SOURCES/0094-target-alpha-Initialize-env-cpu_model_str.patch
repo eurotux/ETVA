@@ -1,0 +1,30 @@
+From 9cec603abce19ed4352afa939f383d22b3a10c65 Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Fri, 21 Sep 2012 14:15:36 +0200
+Subject: [PATCH] target-alpha: Initialize env->cpu_model_str
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Save the cpu_model_str so that we have a non-null value when
+creating a new cpu during clone.
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Andreas Färber <afaerber@suse.de>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-alpha/translate.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/target-alpha/translate.c b/target-alpha/translate.c
+index 4a9011a..3f9aee1 100644
+--- a/target-alpha/translate.c
++++ b/target-alpha/translate.c
+@@ -3543,6 +3543,7 @@ CPUAlphaState * cpu_alpha_init (const char *cpu_model)
+     }
+     env->implver = implver;
+     env->amask = amask;
++    env->cpu_model_str = cpu_model;
+ 
+     qemu_init_vcpu(env);
+     return env;

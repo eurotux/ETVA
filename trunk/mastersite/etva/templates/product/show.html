@@ -1,0 +1,73 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}Product page{% endblock%}
+{% block section %}{%trans "Products"%}{% endblock%}
+
+{% block mainCol%}
+
+<h1>{%blocktrans%}User:{%endblocktrans%} {{user.username}}</h1>
+<div class="space15">&nbsp;</div>
+	{% if errorMessage%}
+	<div id="msgAlert">{{errorMessage}}</div>
+        {%endif%}
+
+{%if products.object_list %}
+    <div class="pagination">
+    <span class="step-links">
+        {% if products.has_previous %}
+            <a href="?page={{ products.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ products.number }} of {{ products.paginator.num_pages }}.
+        </span>
+
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
+    <table class="msg sml">
+        <tr>
+            <th class="sorted">{% trans "Serial" %}</th>
+            <th class="sorted">{% trans "User" %}</th>
+            <th class="sorted" style="width:200px">{% trans "Notes" %}</th>
+            <th class="sorted">{% trans "Description" %}</th>
+            <th class="sorted">{% trans "Message" %}</th>
+            <th class="sorted">{% trans "Added" %}</th>
+            <th class="sorted">{% trans "Active" %}</th>
+            <th class="sorted">{% trans "Activation Date" %}</th>
+            {% if isAgent%}
+            <th class="sorted"></th>
+            {%endif%}
+            </tr>
+                {% for p in products.object_list%}
+                <tr class="{% if forloop.counter|divisibleby:2 %}odd{% endif %}">
+                    <td><b>{{p.serial}}</b></td>
+                    {% if isAgent%}
+                        <td><a href="{{p.client.id}}">{{p.client}}</a></td>
+                        {%else%}
+                        <td>{{p.client}}</td>
+                        {%endif%}
+                    <td>{{p.notes}}</td>
+                    <td>{{p.description}}</td>
+                    <td>{{p.message}}</td>
+                    <td>{{p.add_date}}</td>
+                    <td class="c"><img src="/static/img/{% if p.activated %}true{%else%}false{%endif%}.png"></td>
+                    <td class="c">{% if p.activation_date%}{{p.activation_date}}{%else%}-{%endif%}</td>
+                    {% if isAgent%}
+                        <td class="c"><a href="delete/{{p.id}}">{% trans "Delete"%}</a></td>
+                        {%endif%}
+                </tr>
+        {% endfor %}
+    </table>
+    {% else%}
+    <p>{%trans "No Products"%}</p>
+    {%endif%}
+<div class="space15">&nbsp;</div>
+
+
+
+{%endblock%}
+
+

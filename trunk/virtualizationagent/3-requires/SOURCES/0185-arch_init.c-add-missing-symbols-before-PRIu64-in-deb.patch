@@ -1,0 +1,51 @@
+From f5fd54bfb540c6ac51c85ca93d8abd13b3c2bd21 Mon Sep 17 00:00:00 2001
+From: Igor Mitsyanko <i.mitsyanko@samsung.com>
+Date: Wed, 5 Sep 2012 13:04:56 +0400
+Subject: [PATCH] arch_init.c: add missing '%' symbols before PRIu64 in debug
+ printfs
+
+'%' symbols were missing in front of PRIu64 macros in DPRINTF() messages in
+arch_init.c, this caused compilation warnings when compiled with DEBUG_ARCH_INIT defined.
+
+Signed-off-by: Igor Mitsyanko <i.mitsyanko@samsung.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit ef37a699a06f96e098ee00683b7052b5fbb6ad7d)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ arch_init.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch_init.c b/arch_init.c
+index 5a1173e..47977de 100644
+--- a/arch_init.c
++++ b/arch_init.c
+@@ -562,7 +562,7 @@ static int ram_save_iterate(QEMUFile *f, void *opaque)
+         if ((i & 63) == 0) {
+             uint64_t t1 = (qemu_get_clock_ns(rt_clock) - bwidth) / 1000000;
+             if (t1 > MAX_WAIT) {
+-                DPRINTF("big wait: " PRIu64 " milliseconds, %d iterations\n",
++                DPRINTF("big wait: %" PRIu64 " milliseconds, %d iterations\n",
+                         t1, i);
+                 break;
+             }
+@@ -587,7 +587,7 @@ static int ram_save_iterate(QEMUFile *f, void *opaque)
+ 
+     expected_time = ram_save_remaining() * TARGET_PAGE_SIZE / bwidth;
+ 
+-    DPRINTF("ram_save_live: expected(" PRIu64 ") <= max(" PRIu64 ")?\n",
++    DPRINTF("ram_save_live: expected(%" PRIu64 ") <= max(%" PRIu64 ")?\n",
+             expected_time, migrate_max_downtime());
+ 
+     if (expected_time <= migrate_max_downtime()) {
+@@ -799,8 +799,8 @@ static int ram_load(QEMUFile *f, void *opaque, int version_id)
+     } while (!(flags & RAM_SAVE_FLAG_EOS));
+ 
+ done:
+-    DPRINTF("Completed load of VM with exit code %d seq iteration " PRIu64 "\n",
+-            ret, seq_iter);
++    DPRINTF("Completed load of VM with exit code %d seq iteration "
++            "%" PRIu64 "\n", ret, seq_iter);
+     return ret;
+ }
+ 

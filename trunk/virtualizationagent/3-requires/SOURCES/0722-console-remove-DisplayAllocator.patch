@@ -1,0 +1,372 @@
+From 984836153d323fde6d2714542596913c19a98c42 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Tue, 16 Apr 2013 17:06:56 +0200
+Subject: [PATCH] console: remove DisplayAllocator
+
+Causes [temporary] preformance regression with 24bpp vga modes @ sdl.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+
+Conflicts:
+
+	console.h
+	ui/sdl.c
+---
+ console.c     |  52 ++++++++++----------------
+ console.h     |  34 +++--------------
+ qemu-common.h |   1 -
+ ui/sdl.c      | 117 +++-------------------------------------------------------
+ 4 files changed, 31 insertions(+), 173 deletions(-)
+
+diff --git a/console.c b/console.c
+index 314f5a5..13e4c0f 100644
+--- a/console.c
++++ b/console.c
+@@ -1290,9 +1290,10 @@ static TextConsole *new_console(DisplayState *ds, console_type_t console_type)
+     return s;
+ }
+ 
+-static DisplaySurface* defaultallocator_create_displaysurface(int width, int height)
++DisplaySurface *qemu_create_displaysurface(DisplayState *ds,
++                                           int width, int height)
+ {
+-    DisplaySurface *surface = (DisplaySurface*) g_malloc0(sizeof(DisplaySurface));
++    DisplaySurface *surface = g_new0(DisplaySurface, 1);
+ 
+     int linesize = width * 4;
+     qemu_alloc_display(surface, width, height, linesize,
+@@ -1300,13 +1301,15 @@ static DisplaySurface* defaultallocator_create_displaysurface(int width, int hei
+     return surface;
+ }
+ 
+-static DisplaySurface* defaultallocator_resize_displaysurface(DisplaySurface *surface,
+-                                          int width, int height)
++DisplaySurface *qemu_resize_displaysurface(DisplayState *ds,
++                                           int width, int height)
+ {
+     int linesize = width * 4;
+-    qemu_alloc_display(surface, width, height, linesize,
++
++    trace_displaysurface_resize(ds, ds->surface, width, height);
++    qemu_alloc_display(ds->surface, width, height, linesize,
+                        qemu_default_pixelformat(32), 0);
+-    return surface;
++    return ds->surface;
+ }
+ 
+ void qemu_alloc_display(DisplaySurface *surface, int width, int height,
+@@ -1319,7 +1322,7 @@ void qemu_alloc_display(DisplaySurface *surface, int width, int height,
+     surface->pf = pf;
+     if (surface->flags & QEMU_ALLOCATED_FLAG) {
+         data = g_realloc(surface->data,
+-                            surface->linesize * surface->height);
++                         surface->linesize * surface->height);
+     } else {
+         data = g_malloc(surface->linesize * surface->height);
+     }
+@@ -1330,7 +1333,7 @@ void qemu_alloc_display(DisplaySurface *surface, int width, int height,
+ #endif
+ }
+ 
+-DisplaySurface* qemu_create_displaysurface_from(int width, int height, int bpp,
++DisplaySurface *qemu_create_displaysurface_from(int width, int height, int bpp,
+                                               int linesize, uint8_t *data)
+ {
+     DisplaySurface *surface = (DisplaySurface*) g_malloc0(sizeof(DisplaySurface));
+@@ -1347,28 +1350,24 @@ DisplaySurface* qemu_create_displaysurface_from(int width, int height, int bpp,
+     return surface;
+ }
+ 
+-static void defaultallocator_free_displaysurface(DisplaySurface *surface)
++void qemu_free_displaysurface(DisplayState *ds)
+ {
+-    if (surface == NULL)
++    trace_displaysurface_free(ds, ds->surface);
++    if (ds->surface == NULL) {
+         return;
+-    if (surface->flags & QEMU_ALLOCATED_FLAG)
+-        g_free(surface->data);
+-    g_free(surface);
++    }
++    if (ds->surface->flags & QEMU_ALLOCATED_FLAG) {
++        g_free(ds->surface->data);
++    }
++    g_free(ds->surface);
+ }
+ 
+-static struct DisplayAllocator default_allocator = {
+-    defaultallocator_create_displaysurface,
+-    defaultallocator_resize_displaysurface,
+-    defaultallocator_free_displaysurface
+-};
+-
+ static void dumb_display_init(void)
+ {
+     DisplayState *ds = g_malloc0(sizeof(DisplayState));
+     int width = 640;
+     int height = 480;
+ 
+-    ds->allocator = &default_allocator;
+     if (is_fixedsize_console()) {
+         width = active_console->g_width;
+         height = active_console->g_height;
+@@ -1398,18 +1397,6 @@ DisplayState *get_displaystate(void)
+     return display_state;
+ }
+ 
+-DisplayAllocator *register_displayallocator(DisplayState *ds, DisplayAllocator *da)
+-{
+-    if(ds->allocator ==  &default_allocator) {
+-        DisplaySurface *surf;
+-        surf = da->create_displaysurface(ds_get_width(ds), ds_get_height(ds));
+-        defaultallocator_free_displaysurface(ds->surface);
+-        ds->surface = surf;
+-        ds->allocator = da;
+-    }
+-    return ds->allocator;
+-}
+-
+ DisplayState *graphic_console_init(vga_hw_update_ptr update,
+                                    vga_hw_invalidate_ptr invalidate,
+                                    vga_hw_screen_dump_ptr screen_dump,
+@@ -1420,7 +1407,6 @@ DisplayState *graphic_console_init(vga_hw_update_ptr update,
+     DisplayState *ds;
+ 
+     ds = (DisplayState *) g_malloc0(sizeof(DisplayState));
+-    ds->allocator = &default_allocator; 
+     ds->surface = qemu_create_displaysurface(ds, 640, 480);
+ 
+     s = new_console(ds, GRAPHIC_CONSOLE);
+diff --git a/console.h b/console.h
+index 4334db5..755a537 100644
+--- a/console.h
++++ b/console.h
+@@ -105,7 +105,6 @@ void kbd_put_keysym(int keysym);
+ 
+ #define QEMU_BIG_ENDIAN_FLAG    0x01
+ #define QEMU_ALLOCATED_FLAG     0x02
+-#define QEMU_REALPIXELS_FLAG    0x04
+ 
+ struct PixelFormat {
+     uint8_t bits_per_pixel;
+@@ -165,18 +164,11 @@ struct DisplayChangeListener {
+     struct DisplayChangeListener *next;
+ };
+ 
+-struct DisplayAllocator {
+-    DisplaySurface* (*create_displaysurface)(int width, int height);
+-    DisplaySurface* (*resize_displaysurface)(DisplaySurface *surface, int width, int height);
+-    void (*free_displaysurface)(DisplaySurface *surface);
+-};
+-
+ struct DisplayState {
+     struct DisplaySurface *surface;
+     void *opaque;
+     struct QEMUTimer *gui_timer;
+ 
+-    struct DisplayAllocator* allocator;
+     struct DisplayChangeListener* listeners;
+ 
+     void (*mouse_set)(int x, int y, int on);
+@@ -194,24 +186,11 @@ void qemu_alloc_display(DisplaySurface *surface, int width, int height,
+ PixelFormat qemu_different_endianness_pixelformat(int bpp);
+ PixelFormat qemu_default_pixelformat(int bpp);
+ 
+-DisplayAllocator *register_displayallocator(DisplayState *ds, DisplayAllocator *da);
+-
+-static inline DisplaySurface* qemu_create_displaysurface(DisplayState *ds, int width, int height)
+-{
+-    return ds->allocator->create_displaysurface(width, height);    
+-}
+-
+-static inline DisplaySurface* qemu_resize_displaysurface(DisplayState *ds, int width, int height)
+-{
+-    trace_displaysurface_resize(ds, ds->surface, width, height);
+-    return ds->allocator->resize_displaysurface(ds->surface, width, height);
+-}
+-
+-static inline void qemu_free_displaysurface(DisplayState *ds)
+-{
+-    trace_displaysurface_free(ds, ds->surface);
+-    ds->allocator->free_displaysurface(ds->surface);
+-}
++DisplaySurface *qemu_create_displaysurface(DisplayState *ds,
++                                           int width, int height);
++DisplaySurface *qemu_resize_displaysurface(DisplayState *ds,
++                                           int width, int height);
++void qemu_free_displaysurface(DisplayState *ds);
+ 
+ static inline int is_surface_bgr(DisplaySurface *surface)
+ {
+@@ -223,8 +202,7 @@ static inline int is_surface_bgr(DisplaySurface *surface)
+ 
+ static inline int is_buffer_shared(DisplaySurface *surface)
+ {
+-    return (!(surface->flags & QEMU_ALLOCATED_FLAG) &&
+-            !(surface->flags & QEMU_REALPIXELS_FLAG));
++    return !(surface->flags & QEMU_ALLOCATED_FLAG);
+ }
+ 
+ static inline void register_displaychangelistener(DisplayState *ds, DisplayChangeListener *dcl)
+diff --git a/qemu-common.h b/qemu-common.h
+index 15d9e4e..7d6e1a9 100644
+--- a/qemu-common.h
++++ b/qemu-common.h
+@@ -254,7 +254,6 @@ typedef struct DriveInfo DriveInfo;
+ typedef struct DisplayState DisplayState;
+ typedef struct DisplayChangeListener DisplayChangeListener;
+ typedef struct DisplaySurface DisplaySurface;
+-typedef struct DisplayAllocator DisplayAllocator;
+ typedef struct PixelFormat PixelFormat;
+ typedef struct TextConsole TextConsole;
+ typedef TextConsole QEMUConsole;
+diff --git a/ui/sdl.c b/ui/sdl.c
+index f6f711c..9e4a86e 100644
+--- a/ui/sdl.c
++++ b/ui/sdl.c
+@@ -55,7 +55,6 @@ static int absolute_enabled = 0;
+ static int guest_cursor = 0;
+ static int guest_x, guest_y;
+ static SDL_Cursor *guest_sprite = NULL;
+-static uint8_t allocator;
+ static SDL_PixelFormat host_format;
+ static int scaling_active = 0;
+ static Notifier mouse_mode_notifier;
+@@ -117,108 +116,13 @@ static void do_sdl_resize(int width, int height, int bpp)
+ 
+ static void sdl_resize(DisplayState *ds)
+ {
+-    if  (!allocator) {
+-        if (!scaling_active)
+-            do_sdl_resize(ds_get_width(ds), ds_get_height(ds), 0);
+-        else if (real_screen->format->BitsPerPixel != ds_get_bits_per_pixel(ds))
+-            do_sdl_resize(real_screen->w, real_screen->h, ds_get_bits_per_pixel(ds));
+-        sdl_setdata(ds);
+-    } else {
+-        if (guest_screen != NULL) {
+-            SDL_FreeSurface(guest_screen);
+-            guest_screen = NULL;
+-        }
+-    }
+-}
+-
+-static PixelFormat sdl_to_qemu_pixelformat(SDL_PixelFormat *sdl_pf)
+-{
+-    PixelFormat qemu_pf;
+-
+-    memset(&qemu_pf, 0x00, sizeof(PixelFormat));
+-
+-    qemu_pf.bits_per_pixel = sdl_pf->BitsPerPixel;
+-    qemu_pf.bytes_per_pixel = sdl_pf->BytesPerPixel;
+-    qemu_pf.depth = (qemu_pf.bits_per_pixel) == 32 ? 24 : (qemu_pf.bits_per_pixel);
+-
+-    qemu_pf.rmask = sdl_pf->Rmask;
+-    qemu_pf.gmask = sdl_pf->Gmask;
+-    qemu_pf.bmask = sdl_pf->Bmask;
+-    qemu_pf.amask = sdl_pf->Amask;
+-
+-    qemu_pf.rshift = sdl_pf->Rshift;
+-    qemu_pf.gshift = sdl_pf->Gshift;
+-    qemu_pf.bshift = sdl_pf->Bshift;
+-    qemu_pf.ashift = sdl_pf->Ashift;
+-
+-    qemu_pf.rbits = 8 - sdl_pf->Rloss;
+-    qemu_pf.gbits = 8 - sdl_pf->Gloss;
+-    qemu_pf.bbits = 8 - sdl_pf->Bloss;
+-    qemu_pf.abits = 8 - sdl_pf->Aloss;
+-
+-    qemu_pf.rmax = ((1 << qemu_pf.rbits) - 1);
+-    qemu_pf.gmax = ((1 << qemu_pf.gbits) - 1);
+-    qemu_pf.bmax = ((1 << qemu_pf.bbits) - 1);
+-    qemu_pf.amax = ((1 << qemu_pf.abits) - 1);
+-
+-    return qemu_pf;
+-}
+-
+-static DisplaySurface* sdl_create_displaysurface(int width, int height)
+-{
+-    DisplaySurface *surface = (DisplaySurface*) g_malloc0(sizeof(DisplaySurface));
+-
+-    surface->width = width;
+-    surface->height = height;
+-
+-    if (scaling_active) {
+-        int linesize;
+-        PixelFormat pf;
+-        if (host_format.BytesPerPixel != 2 && host_format.BytesPerPixel != 4) {
+-            linesize = width * 4;
+-            pf = qemu_default_pixelformat(32);
+-        } else {
+-            linesize = width * host_format.BytesPerPixel;
+-            pf = sdl_to_qemu_pixelformat(&host_format);
+-        }
+-        qemu_alloc_display(surface, width, height, linesize, pf, 0);
+-        return surface;
++    if (!scaling_active) {
++        do_sdl_resize(ds_get_width(ds), ds_get_height(ds), 0);
++    } else if (real_screen->format->BitsPerPixel != ds_get_bits_per_pixel(ds)) {
++        do_sdl_resize(real_screen->w, real_screen->h,
++                      ds_get_bits_per_pixel(ds));
+     }
+-
+-    if (host_format.BitsPerPixel == 16)
+-        do_sdl_resize(width, height, 16);
+-    else
+-        do_sdl_resize(width, height, 32);
+-
+-    surface->pf = sdl_to_qemu_pixelformat(real_screen->format);
+-    surface->linesize = real_screen->pitch;
+-    surface->data = real_screen->pixels;
+-
+-#ifdef HOST_WORDS_BIGENDIAN
+-    surface->flags = QEMU_REALPIXELS_FLAG | QEMU_BIG_ENDIAN_FLAG;
+-#else
+-    surface->flags = QEMU_REALPIXELS_FLAG;
+-#endif
+-    allocator = 1;
+-
+-    return surface;
+-}
+-
+-static void sdl_free_displaysurface(DisplaySurface *surface)
+-{
+-    allocator = 0;
+-    if (surface == NULL)
+-        return;
+-
+-    if (surface->flags & QEMU_ALLOCATED_FLAG)
+-        g_free(surface->data);
+-    g_free(surface);
+-}
+-
+-static DisplaySurface* sdl_resize_displaysurface(DisplaySurface *surface, int width, int height)
+-{
+-    sdl_free_displaysurface(surface);
+-    return sdl_create_displaysurface(width, height);
++    sdl_setdata(ds);
+ }
+ 
+ /* generic keyboard conversion */
+@@ -955,7 +859,6 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
+ {
+     int flags;
+     uint8_t data = 0;
+-    DisplayAllocator *da;
+     const SDL_VideoInfo *vi;
+     char *filename;
+ 
+@@ -1029,14 +932,6 @@ void sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
+     ds->cursor_define = sdl_mouse_define;
+     register_displaychangelistener(ds, dcl);
+ 
+-    da = g_malloc0(sizeof(DisplayAllocator));
+-    da->create_displaysurface = sdl_create_displaysurface;
+-    da->resize_displaysurface = sdl_resize_displaysurface;
+-    da->free_displaysurface = sdl_free_displaysurface;
+-    if (register_displayallocator(ds, da) == da) {
+-        dpy_resize(ds);
+-    }
+-
+     mouse_mode_notifier.notify = sdl_mouse_mode_change;
+     qemu_add_mouse_mode_change_notifier(&mouse_mode_notifier);
+ 

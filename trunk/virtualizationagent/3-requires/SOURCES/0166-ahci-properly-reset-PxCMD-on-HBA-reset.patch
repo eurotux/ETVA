@@ -1,0 +1,61 @@
+From 10d5ce98cc29e06928b24891cf6fd75438b95604 Mon Sep 17 00:00:00 2001
+From: Jason Baron <jbaron@redhat.com>
+Date: Tue, 4 Sep 2012 16:08:08 -0400
+Subject: [PATCH] ahci: properly reset PxCMD on HBA reset
+
+While testing q35, I found that windows 7 (specifically, windows 7 ultimate
+with sp1 x64), wouldn't install because it can't find the cdrom or disk drive.
+The failure message is: 'A required cd/dvd device driver is missing. If you
+have a driver floppy disk, CD, DVD, or USB flash drive, please insert it now.'
+This can also be reproduced on piix by adding an ahci controller, and
+observing that windows 7 does not see any devices behind it.
+
+The problem is that when windows issues a HBA reset, qemu does not reset the
+individual ports' PxCMD register. Windows 7 then reads back the PxCMD register
+and presumably assumes that the ahci controller has already been initialized.
+Windows then never sets up the PxIE register to enable interrupts, and thus it
+never gets irqs back when it sends ata device inquiry commands.
+
+This change brings qemu into ahci 1.3 specification compliance.
+
+Section 10.4.3 HBA Reset:
+
+"
+When GHC.HR is set to '1', GHC.AE, GHC.IE, the IS register, and all port
+register fields (except PxFB/PxFBU/PxCLB/PxCLBU) that are not HwInit in the
+HBA's register memory space are reset.
+"
+
+I've also re-tested Fedora 16 and 17 to verify that they continue to work with
+this change.
+
+Signed-off-by: Jason Baron <jbaron@redhat.com>
+Acked-by: Alexander Graf <agraf@suse.de>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit 2a4f4f34e6fe55f4c82507c3e7ec9b58c2e24ad4)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/ide/ahci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/ide/ahci.c b/hw/ide/ahci.c
+index 5ea3cad..68671bc 100644
+--- a/hw/ide/ahci.c
++++ b/hw/ide/ahci.c
+@@ -1175,7 +1175,6 @@ void ahci_init(AHCIState *s, DeviceState *qdev, DMAContext *dma, int ports)
+         ad->port_no = i;
+         ad->port.dma = &ad->dma;
+         ad->port.dma->ops = &ahci_dma_ops;
+-        ad->port_regs.cmd = PORT_CMD_SPIN_UP | PORT_CMD_POWER_ON;
+     }
+ }
+ 
+@@ -1199,6 +1198,7 @@ void ahci_reset(AHCIState *s)
+         pr->irq_stat = 0;
+         pr->irq_mask = 0;
+         pr->scr_ctl = 0;
++        pr->cmd = PORT_CMD_SPIN_UP | PORT_CMD_POWER_ON;
+         ahci_reset_port(s, i);
+     }
+ }

@@ -1,0 +1,36 @@
+From 734f2d30608fcbe82db17a62653c825f70463a90 Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Wed, 22 Aug 2012 11:16:26 +0300
+Subject: [PATCH] configure: print spice-protocol and spice-server versions
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 2e0e3c399aa8067148055b9ea0edb822c5b584d2)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index b5cea26..d7a948f 100755
+--- a/configure
++++ b/configure
+@@ -2670,6 +2670,8 @@ EOF
+     spice="yes"
+     libs_softmmu="$libs_softmmu $spice_libs"
+     QEMU_CFLAGS="$QEMU_CFLAGS $spice_cflags"
++    spice_protocol_version=$($pkg_config --modversion spice-protocol)
++    spice_server_version=$($pkg_config --modversion spice-server)
+     if $pkg_config --atleast-version=0.12.0 spice-protocol >/dev/null 2>&1; then
+         spice_qxl_io_monitors_config_async="yes"
+     fi
+@@ -3128,7 +3130,7 @@ echo "libcap-ng support $cap_ng"
+ echo "vhost-net support $vhost_net"
+ echo "Trace backend     $trace_backend"
+ echo "Trace output file $trace_file-<pid>"
+-echo "spice support     $spice"
++echo "spice support     $spice ($spice_protocol_version/$spice_server_version)"
+ echo "rbd support       $rbd"
+ echo "xfsctl support    $xfs"
+ echo "nss used          $smartcard_nss"

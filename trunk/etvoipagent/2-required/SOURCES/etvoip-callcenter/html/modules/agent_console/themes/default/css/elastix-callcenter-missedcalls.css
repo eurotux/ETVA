@@ -1,0 +1,37 @@
+#elastix-callcenter-llamadas-perdidas-contenido {
+    position: absolute;
+    left: 80%;
+    top: 0;
+    right: 0;
+    margin-left: 8px;
+    overflow: auto;
+    height: 100%;
+}
+.llamadas-perdidas-bar {
+    margin: 0 0 0 0;
+    padding: .2em .2em 0;
+}
+.llamadas-perdidas-header {
+    float: right;
+    padding: .5em 1em;
+    text-align: right;
+}
+.llamada-perdida-list {
+    margin: 0;
+    padding: .2em .2em 0;
+    border-bottom: 1px #aaaaaa solid;
+}
+.llamada-perdida-line {
+    list-style: none;
+    text-align: right;
+    color: #000000;
+    font-family: verdana, arial, helvetica, sans-serif;
+    font-size: 8pt;
+    border-bottom: 1px #eeeeee solid;
+    padding: 4px 4px 4px 4px;
+}
+#elastix-callcenter-llamadas-perdidas-queue {
+    overflow: auto;
+}
+
+

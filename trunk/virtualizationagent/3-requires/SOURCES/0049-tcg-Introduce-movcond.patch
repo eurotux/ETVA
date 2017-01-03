@@ -1,0 +1,330 @@
+From 27a9e1f8447f773082825c3f81b4091cf3ffcd3f Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Fri, 21 Sep 2012 10:13:34 -0700
+Subject: [PATCH] tcg: Introduce movcond
+
+Implemented with setcond if the target does not provide
+the optional opcode.
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/README             |  6 ++++++
+ tcg/arm/tcg-target.h   |  1 +
+ tcg/hppa/tcg-target.h  |  1 +
+ tcg/i386/tcg-target.h  |  2 ++
+ tcg/ia64/tcg-target.h  |  2 ++
+ tcg/mips/tcg-target.h  |  1 +
+ tcg/ppc/tcg-target.h   |  1 +
+ tcg/ppc64/tcg-target.h |  2 ++
+ tcg/s390/tcg-target.h  |  2 ++
+ tcg/sparc/tcg-target.h |  2 ++
+ tcg/tcg-op.h           | 40 ++++++++++++++++++++++++++++++++++++++++
+ tcg/tcg-opc.h          |  2 ++
+ tcg/tcg.c              | 11 +++++------
+ tcg/tcg.h              |  1 +
+ tcg/tci/tcg-target.h   |  2 ++
+ 15 files changed, 70 insertions(+), 6 deletions(-)
+
+diff --git a/tcg/README b/tcg/README
+index cfdfd96..d03ae05 100644
+--- a/tcg/README
++++ b/tcg/README
+@@ -307,6 +307,12 @@ dest = (t1 cond t2)
+ 
+ Set DEST to 1 if (T1 cond T2) is true, otherwise set to 0.
+ 
++* movcond_i32/i64 cond, dest, c1, c2, v1, v2
++
++dest = (c1 cond c2 ? v1 : v2)
++
++Set DEST to V1 if (C1 cond C2) is true, otherwise set to V2.
++
+ ********* Type conversions
+ 
+ * ext_i32_i64 t0, t1
+diff --git a/tcg/arm/tcg-target.h b/tcg/arm/tcg-target.h
+index c0b8f72..e2299ca 100644
+--- a/tcg/arm/tcg-target.h
++++ b/tcg/arm/tcg-target.h
+@@ -73,6 +73,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i32         0
+ #define TCG_TARGET_HAS_nor_i32          0
+ #define TCG_TARGET_HAS_deposit_i32      0
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ #define TCG_TARGET_HAS_GUEST_BASE
+ 
+diff --git a/tcg/hppa/tcg-target.h b/tcg/hppa/tcg-target.h
+index 01ef960..4defd28 100644
+--- a/tcg/hppa/tcg-target.h
++++ b/tcg/hppa/tcg-target.h
+@@ -96,6 +96,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i32         0
+ #define TCG_TARGET_HAS_nor_i32          0
+ #define TCG_TARGET_HAS_deposit_i32      1
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ /* optional instructions automatically implemented */
+ #define TCG_TARGET_HAS_neg_i32          0 /* sub rd, 0, rs */
+diff --git a/tcg/i386/tcg-target.h b/tcg/i386/tcg-target.h
+index 8be42f3..504f953 100644
+--- a/tcg/i386/tcg-target.h
++++ b/tcg/i386/tcg-target.h
+@@ -86,6 +86,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i32         0
+ #define TCG_TARGET_HAS_nor_i32          0
+ #define TCG_TARGET_HAS_deposit_i32      1
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ #if TCG_TARGET_REG_BITS == 64
+ #define TCG_TARGET_HAS_div2_i64         1
+@@ -107,6 +108,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i64         0
+ #define TCG_TARGET_HAS_nor_i64          0
+ #define TCG_TARGET_HAS_deposit_i64      1
++#define TCG_TARGET_HAS_movcond_i64      0
+ #endif
+ 
+ #define TCG_TARGET_deposit_i32_valid(ofs, len) \
+diff --git a/tcg/ia64/tcg-target.h b/tcg/ia64/tcg-target.h
+index c22962a..368aee4 100644
+--- a/tcg/ia64/tcg-target.h
++++ b/tcg/ia64/tcg-target.h
+@@ -133,6 +133,8 @@ typedef enum {
+ #define TCG_TARGET_HAS_rot_i64          1
+ #define TCG_TARGET_HAS_deposit_i32      0
+ #define TCG_TARGET_HAS_deposit_i64      0
++#define TCG_TARGET_HAS_movcond_i32      0
++#define TCG_TARGET_HAS_movcond_i64      0
+ 
+ /* optional instructions automatically implemented */
+ #define TCG_TARGET_HAS_neg_i32          0 /* sub r1, r0, r3 */
+diff --git a/tcg/mips/tcg-target.h b/tcg/mips/tcg-target.h
+index 1c61931..9c68a32 100644
+--- a/tcg/mips/tcg-target.h
++++ b/tcg/mips/tcg-target.h
+@@ -90,6 +90,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_eqv_i32          0
+ #define TCG_TARGET_HAS_nand_i32         0
+ #define TCG_TARGET_HAS_deposit_i32      0
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ /* optional instructions automatically implemented */
+ #define TCG_TARGET_HAS_neg_i32          0 /* sub  rd, zero, rt   */
+diff --git a/tcg/ppc/tcg-target.h b/tcg/ppc/tcg-target.h
+index 2f37fd2..177eea1 100644
+--- a/tcg/ppc/tcg-target.h
++++ b/tcg/ppc/tcg-target.h
+@@ -92,6 +92,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i32         1
+ #define TCG_TARGET_HAS_nor_i32          1
+ #define TCG_TARGET_HAS_deposit_i32      1
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ #define TCG_AREG0 TCG_REG_R27
+ 
+diff --git a/tcg/ppc64/tcg-target.h b/tcg/ppc64/tcg-target.h
+index 97eec08..57569e8 100644
+--- a/tcg/ppc64/tcg-target.h
++++ b/tcg/ppc64/tcg-target.h
+@@ -83,6 +83,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i32         0
+ #define TCG_TARGET_HAS_nor_i32          0
+ #define TCG_TARGET_HAS_deposit_i32      0
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ #define TCG_TARGET_HAS_div_i64          1
+ #define TCG_TARGET_HAS_rot_i64          0
+@@ -103,6 +104,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i64         0
+ #define TCG_TARGET_HAS_nor_i64          0
+ #define TCG_TARGET_HAS_deposit_i64      0
++#define TCG_TARGET_HAS_movcond_i64      0
+ 
+ #define TCG_AREG0 TCG_REG_R27
+ 
+diff --git a/tcg/s390/tcg-target.h b/tcg/s390/tcg-target.h
+index 4f7dfab..ed55c33 100644
+--- a/tcg/s390/tcg-target.h
++++ b/tcg/s390/tcg-target.h
+@@ -63,6 +63,7 @@ typedef enum TCGReg {
+ #define TCG_TARGET_HAS_nand_i32         0
+ #define TCG_TARGET_HAS_nor_i32          0
+ #define TCG_TARGET_HAS_deposit_i32      0
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ #if TCG_TARGET_REG_BITS == 64
+ #define TCG_TARGET_HAS_div2_i64         1
+@@ -84,6 +85,7 @@ typedef enum TCGReg {
+ #define TCG_TARGET_HAS_nand_i64         0
+ #define TCG_TARGET_HAS_nor_i64          0
+ #define TCG_TARGET_HAS_deposit_i64      0
++#define TCG_TARGET_HAS_movcond_i64      0
+ #endif
+ 
+ #define TCG_TARGET_HAS_GUEST_BASE
+diff --git a/tcg/sparc/tcg-target.h b/tcg/sparc/tcg-target.h
+index 0ea87be..d762574 100644
+--- a/tcg/sparc/tcg-target.h
++++ b/tcg/sparc/tcg-target.h
+@@ -102,6 +102,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i32         0
+ #define TCG_TARGET_HAS_nor_i32          0
+ #define TCG_TARGET_HAS_deposit_i32      0
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ #if TCG_TARGET_REG_BITS == 64
+ #define TCG_TARGET_HAS_div_i64          1
+@@ -123,6 +124,7 @@ typedef enum {
+ #define TCG_TARGET_HAS_nand_i64         0
+ #define TCG_TARGET_HAS_nor_i64          0
+ #define TCG_TARGET_HAS_deposit_i64      0
++#define TCG_TARGET_HAS_movcond_i64      0
+ #endif
+ 
+ #ifdef CONFIG_SOLARIS
+diff --git a/tcg/tcg-op.h b/tcg/tcg-op.h
+index 169d3b2..6d28f82 100644
+--- a/tcg/tcg-op.h
++++ b/tcg/tcg-op.h
+@@ -2118,6 +2118,44 @@ static inline void tcg_gen_deposit_i64(TCGv_i64 ret, TCGv_i64 arg1,
+     tcg_temp_free_i64(t1);
+ }
+ 
++static inline void tcg_gen_movcond_i32(TCGCond cond, TCGv_i32 ret,
++                                       TCGv_i32 c1, TCGv_i32 c2,
++                                       TCGv_i32 v1, TCGv_i32 v2)
++{
++    if (TCG_TARGET_HAS_movcond_i32) {
++        tcg_gen_op6i_i32(INDEX_op_movcond_i32, ret, c1, c2, v1, v2, cond);
++    } else {
++        TCGv_i32 t0 = tcg_temp_new_i32();
++        TCGv_i32 t1 = tcg_temp_new_i32();
++        tcg_gen_setcond_i32(cond, t0, c1, c2);
++        tcg_gen_neg_i32(t0, t0);
++        tcg_gen_and_i32(t1, v1, t0);
++        tcg_gen_andc_i32(ret, v2, t0);
++        tcg_gen_or_i32(ret, ret, t1);
++        tcg_temp_free_i32(t0);
++        tcg_temp_free_i32(t1);
++    }
++}
++
++static inline void tcg_gen_movcond_i64(TCGCond cond, TCGv_i64 ret,
++                                       TCGv_i64 c1, TCGv_i64 c2,
++                                       TCGv_i64 v1, TCGv_i64 v2)
++{
++    if (TCG_TARGET_HAS_movcond_i64) {
++        tcg_gen_op6i_i64(INDEX_op_movcond_i64, ret, c1, c2, v1, v2, cond);
++    } else {
++        TCGv_i64 t0 = tcg_temp_new_i64();
++        TCGv_i64 t1 = tcg_temp_new_i64();
++        tcg_gen_setcond_i64(cond, t0, c1, c2);
++        tcg_gen_neg_i64(t0, t0);
++        tcg_gen_and_i64(t1, v1, t0);
++        tcg_gen_andc_i64(ret, v2, t0);
++        tcg_gen_or_i64(ret, ret, t1);
++        tcg_temp_free_i64(t0);
++        tcg_temp_free_i64(t1);
++    }
++}
++
+ /***************************************/
+ /* QEMU specific operations. Their type depend on the QEMU CPU
+    type. */
+@@ -2434,6 +2472,7 @@ static inline void tcg_gen_qemu_st64(TCGv_i64 arg, TCGv addr, int mem_index)
+ #define tcg_gen_deposit_tl tcg_gen_deposit_i64
+ #define tcg_const_tl tcg_const_i64
+ #define tcg_const_local_tl tcg_const_local_i64
++#define tcg_gen_movcond_tl tcg_gen_movcond_i64
+ #else
+ #define tcg_gen_movi_tl tcg_gen_movi_i32
+ #define tcg_gen_mov_tl tcg_gen_mov_i32
+@@ -2505,6 +2544,7 @@ static inline void tcg_gen_qemu_st64(TCGv_i64 arg, TCGv addr, int mem_index)
+ #define tcg_gen_deposit_tl tcg_gen_deposit_i32
+ #define tcg_const_tl tcg_const_i32
+ #define tcg_const_local_tl tcg_const_local_i32
++#define tcg_gen_movcond_tl tcg_gen_movcond_i32
+ #endif
+ 
+ #if TCG_TARGET_REG_BITS == 32
+diff --git a/tcg/tcg-opc.h b/tcg/tcg-opc.h
+index d12e8d0..dbb0e39 100644
+--- a/tcg/tcg-opc.h
++++ b/tcg/tcg-opc.h
+@@ -51,6 +51,7 @@ DEF(br, 0, 0, 1, TCG_OPF_BB_END | TCG_OPF_SIDE_EFFECTS)
+ DEF(mov_i32, 1, 1, 0, 0)
+ DEF(movi_i32, 1, 0, 1, 0)
+ DEF(setcond_i32, 1, 2, 1, 0)
++DEF(movcond_i32, 1, 4, 1, IMPL(TCG_TARGET_HAS_movcond_i32))
+ /* load/store */
+ DEF(ld8u_i32, 1, 1, 1, 0)
+ DEF(ld8s_i32, 1, 1, 1, 0)
+@@ -107,6 +108,7 @@ DEF(nor_i32, 1, 2, 0, IMPL(TCG_TARGET_HAS_nor_i32))
+ DEF(mov_i64, 1, 1, 0, IMPL64)
+ DEF(movi_i64, 1, 0, 1, IMPL64)
+ DEF(setcond_i64, 1, 2, 1, IMPL64)
++DEF(movcond_i64, 1, 4, 1, IMPL64 | IMPL(TCG_TARGET_HAS_movcond_i64))
+ /* load/store */
+ DEF(ld8u_i64, 1, 1, 1, IMPL64)
+ DEF(ld8s_i64, 1, 1, 1, IMPL64)
+diff --git a/tcg/tcg.c b/tcg/tcg.c
+index c002a88..24ce830 100644
+--- a/tcg/tcg.c
++++ b/tcg/tcg.c
+@@ -991,16 +991,15 @@ void tcg_dump_ops(TCGContext *s)
+             }
+             switch (c) {
+             case INDEX_op_brcond_i32:
+-#if TCG_TARGET_REG_BITS == 32
+-            case INDEX_op_brcond2_i32:
+-#elif TCG_TARGET_REG_BITS == 64
+-            case INDEX_op_brcond_i64:
+-#endif
+             case INDEX_op_setcond_i32:
++            case INDEX_op_movcond_i32:
+ #if TCG_TARGET_REG_BITS == 32
++            case INDEX_op_brcond2_i32:
+             case INDEX_op_setcond2_i32:
+-#elif TCG_TARGET_REG_BITS == 64
++#else
++            case INDEX_op_brcond_i64:
+             case INDEX_op_setcond_i64:
++            case INDEX_op_movcond_i64:
+ #endif
+                 if (args[k] < ARRAY_SIZE(cond_name) && cond_name[args[k]]) {
+                     qemu_log(",%s", cond_name[args[k++]]);
+diff --git a/tcg/tcg.h b/tcg/tcg.h
+index 8fbbc81..f454107 100644
+--- a/tcg/tcg.h
++++ b/tcg/tcg.h
+@@ -79,6 +79,7 @@ typedef uint64_t TCGRegSet;
+ #define TCG_TARGET_HAS_nand_i64         0
+ #define TCG_TARGET_HAS_nor_i64          0
+ #define TCG_TARGET_HAS_deposit_i64      0
++#define TCG_TARGET_HAS_movcond_i64      0
+ #endif
+ 
+ #ifndef TCG_TARGET_deposit_i32_valid
+diff --git a/tcg/tci/tcg-target.h b/tcg/tci/tcg-target.h
+index 30a0f21..6d89495 100644
+--- a/tcg/tci/tcg-target.h
++++ b/tcg/tci/tcg-target.h
+@@ -75,6 +75,7 @@
+ #define TCG_TARGET_HAS_not_i32          1
+ #define TCG_TARGET_HAS_orc_i32          0
+ #define TCG_TARGET_HAS_rot_i32          1
++#define TCG_TARGET_HAS_movcond_i32      0
+ 
+ #if TCG_TARGET_REG_BITS == 64
+ #define TCG_TARGET_HAS_bswap16_i64      1
+@@ -98,6 +99,7 @@
+ #define TCG_TARGET_HAS_not_i64          1
+ #define TCG_TARGET_HAS_orc_i64          0
+ #define TCG_TARGET_HAS_rot_i64          1
++#define TCG_TARGET_HAS_movcond_i64      0
+ #endif /* TCG_TARGET_REG_BITS == 64 */
+ 
+ /* Offset to user memory in user mode. */

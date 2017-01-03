@@ -1,0 +1,37 @@
+From 9640ba89224217dbc1b94e12667cd6f847b94719 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Mon, 3 Sep 2012 21:19:11 +0200
+Subject: [PATCH] json-parser: Fix potential NULL pointer segfault
+
+Report from smatch:
+json-parser.c:474 parse_object(62) error: potential null derefence 'dict'.
+json-parser.c:553 parse_array(75) error: potential null derefence 'list'.
+
+Label 'out' in json-parser.c can be called with list == NULL
+which is passed to QDECREF.
+
+Modify QDECREF to handle a NULL argument (inline function qobject_decref
+already handles them, too).
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Luiz Capitulino <lcapitulino@redhat.com>
+(cherry picked from commit 149474c93490e1c66f838391bd491db83136d91d)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qobject.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qobject.h b/qobject.h
+index d42386d..9124649 100644
+--- a/qobject.h
++++ b/qobject.h
+@@ -71,7 +71,7 @@ typedef struct QObject {
+ 
+ /* High-level interface for qobject_decref() */
+ #define QDECREF(obj)              \
+-    qobject_decref(QOBJECT(obj))
++    qobject_decref(obj ? QOBJECT(obj) : NULL)
+ 
+ /* Initialize an object to default values */
+ #define QOBJECT_INIT(obj, qtype_type)   \

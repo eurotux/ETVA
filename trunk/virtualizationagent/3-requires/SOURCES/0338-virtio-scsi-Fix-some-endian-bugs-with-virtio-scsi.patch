@@ -1,0 +1,54 @@
+From 8d94963135d206a7afb700628a463b78206d6513 Mon Sep 17 00:00:00 2001
+From: David Gibson <david@gibson.dropbear.id.au>
+Date: Fri, 23 Nov 2012 16:08:44 +1100
+Subject: [PATCH] virtio-scsi: Fix some endian bugs with virtio-scsi
+
+The virtio-scsi specification does not specify the correct endianness for
+fields in the request structure.  It's therefore best to assume that it is
+"guest native" endian since that's the (stupid and poorly defined) norm in
+virtio.
+
+However, the qemu device for virtio-scsi has no byteswaps at all, and so
+will break if the guest has different endianness from the host.  This patch
+fixes it by adding tswap() calls for the sense_len and resid fields in
+the request structure.  In theory status_qualifier needs swaps as well,
+but that field is never actually touched.  The tag field is a uint64_t, but
+since its value is completely arbitrary, it might as well be uint8_t[8]
+and so it does not need swapping.
+
+Cc: Paolo Bonzini <pbonzini@redhat.com>
+Cc: Paul 'Rusty' Russell <rusty@rustcorp.com.au>
+Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+(cherry picked from commit 474ee55a18765e7de8f0b2cc00db5d26286bb24d)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/virtio-scsi.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/hw/virtio-scsi.c b/hw/virtio-scsi.c
+index c1b47a8..c6d5290 100644
+--- a/hw/virtio-scsi.c
++++ b/hw/virtio-scsi.c
+@@ -424,15 +424,17 @@ static void virtio_scsi_command_complete(SCSIRequest *r, uint32_t status,
+                                          size_t resid)
+ {
+     VirtIOSCSIReq *req = r->hba_private;
++    uint32_t sense_len;
+ 
+     req->resp.cmd->response = VIRTIO_SCSI_S_OK;
+     req->resp.cmd->status = status;
+     if (req->resp.cmd->status == GOOD) {
+-        req->resp.cmd->resid = resid;
++        req->resp.cmd->resid = tswap32(resid);
+     } else {
+         req->resp.cmd->resid = 0;
+-        req->resp.cmd->sense_len =
+-            scsi_req_get_sense(r, req->resp.cmd->sense, VIRTIO_SCSI_SENSE_SIZE);
++        sense_len = scsi_req_get_sense(r, req->resp.cmd->sense,
++                                       VIRTIO_SCSI_SENSE_SIZE);
++        req->resp.cmd->sense_len = tswap32(sense_len);
+     }
+     virtio_scsi_complete_req(req);
+ }

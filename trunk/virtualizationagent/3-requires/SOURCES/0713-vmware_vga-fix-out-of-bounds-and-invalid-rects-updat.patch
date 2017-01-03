@@ -1,0 +1,109 @@
+From 881091219766ddc3d5ad293fa5dc2bf06637a7bd Mon Sep 17 00:00:00 2001
+From: Michael Tokarev <mjt@tls.msk.ru>
+Date: Fri, 25 Jan 2013 21:23:24 +0400
+Subject: [PATCH] vmware_vga: fix out of bounds and invalid rects updating
+
+This is a follow up for several attempts to fix this issue.
+
+Previous incarnations:
+
+1. http://thread.gmane.org/gmane.linux.ubuntu.bugs.general/3156089
+https://bugs.launchpad.net/bugs/918791
+"qemu-kvm dies when using vmvga driver and unity in the guest" bug.
+Fix by Serge Hallyn:
+ https://launchpadlibrarian.net/94916786/qemu-vmware.debdiff
+This fix is incomplete, since it does not check width and height
+for being negative.  Serge weren't sure if that's the right place
+to fix it, maybe the fix should be up the stack somewhere.
+
+2. http://thread.gmane.org/gmane.comp.emulators.qemu/166064
+by Marek Vasut: "vmware_vga: Redraw only visible area"
+
+This one adds the (incomplete) check to vmsvga_update_rect_delayed(),
+the routine just queues the rect updating but does no interesting
+stuff.  It is also incomplete in the same way as patch by Serge,
+but also does not touch width&height at all after adjusting x&y,
+which is wrong.
+
+As far as I can see, when processing guest requests, the device
+places them into a queue (vmsvga_update_rect_delayed()) and
+processes this queue in different place/time, namely, in
+vmsvga_update_rect().  Sometimes, vmsvga_update_rect() is
+called directly, without placing the request to the gueue.
+This is the place this patch changes, which is the last
+(deepest) in the stack.  I'm not sure if this is the right
+place still, since it is possible we have some queue optimization
+(or may have in the future) which will be upset by negative/wrong
+values here, so maybe we should check for validity of input
+right when receiving request from the guest (and maybe even
+use unsigned types there).  But I don't know the protocol
+and implementation enough to have a definitive answer.
+
+But since vmsvga_update_rect() has other sanity checks already,
+I'm adding the missing ones there as well.
+
+Cc'ing BALATON Zoltan and Andrzej Zaborowski who shows in `git blame'
+output and may know something in this area.
+
+If this patch is accepted, it should be applied to all active
+stable branches (at least since 1.1, maybe even before), with
+minor context change (ds_get_*(s->vga.ds) => s->*).  I'm not
+Cc'ing -stable yet, will do it explicitly once the patch is
+accepted.
+
+BTW, these checks use fprintf(stderr) -- it should be converted
+to something more appropriate, since stderr will most likely
+disappear somewhere.
+
+Cc: Marek Vasut <marex@denx.de>
+CC: Serge Hallyn <serge.hallyn@ubuntu.com>
+Cc: BALATON Zoltan <balaton@eik.bme.hu>
+Cc: Andrzej Zaborowski <balrogg@gmail.com>
+Signed-off-by: Michael Tokarev <mjt@tls.msk.ru>
+Reviewed-by: Marek Vasut <marex@denx.de>
+Signed-off-by: Serge Hallyn <serge.hallyn@ubuntu.com>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit 8cb6bfb54e91b1a31a6ae704def595c2099efde1)
+
+Conflicts:
+	hw/vmware_vga.c
+---
+ hw/vmware_vga.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/hw/vmware_vga.c b/hw/vmware_vga.c
+index f5e4f44..4c54946 100644
+--- a/hw/vmware_vga.c
++++ b/hw/vmware_vga.c
+@@ -298,6 +298,15 @@ static inline void vmsvga_update_rect(struct vmsvga_state_s *s,
+     uint8_t *src;
+     uint8_t *dst;
+ 
++    if (x < 0) {
++        fprintf(stderr, "%s: update x was < 0 (%d)\n", __func__, x);
++        w += x;
++        x = 0;
++    }
++    if (w < 0) {
++        fprintf(stderr, "%s: update w was < 0 (%d)\n", __func__, w);
++        w = 0;
++    }
+     if (x + w > s->width) {
+         fprintf(stderr, "%s: update width too large x: %d, w: %d\n",
+                         __FUNCTION__, x, w);
+@@ -305,6 +314,15 @@ static inline void vmsvga_update_rect(struct vmsvga_state_s *s,
+         w = s->width - x;
+     }
+ 
++    if (y < 0) {
++        fprintf(stderr, "%s: update y was < 0 (%d)\n",  __func__, y);
++        h += y;
++        y = 0;
++    }
++    if (h < 0) {
++        fprintf(stderr, "%s: update h was < 0 (%d)\n",  __func__, h);
++        h = 0;
++    }
+     if (y + h > s->height) {
+         fprintf(stderr, "%s: update height too large y: %d, h: %d\n",
+                         __FUNCTION__, y, h);

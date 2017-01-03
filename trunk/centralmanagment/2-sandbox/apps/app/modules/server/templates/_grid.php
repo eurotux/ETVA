@@ -47,7 +47,7 @@ Server.Start = function(obj){
                                 var server_name = obj.data['name'];
                                 var server_id = obj.data['id'];
                                 var send_data = {'nid':node_id,
-                                                 'server':server_name};
+                                                 'server':server_id};
 
                                 var start_openconsole = (obj.data['withconsole']) ? true : false;
 
@@ -58,7 +58,7 @@ Server.Start = function(obj){
                                 }
                                 Ext.Msg.show({
                                     title: title,
-                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                    buttons: Ext.MessageBox.YESNO,
                                     msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,obj.data['vm_state'])+'<br>'
                                          +String.format(<?php echo json_encode(__('Start server {0} ?')) ?>,obj.data['name']),
                                     fn: function(btn){
@@ -66,12 +66,12 @@ Server.Start = function(obj){
 
                                             var scope_form = this;
                                             AsynchronousJob.Functions.Create( 'server', 'start',
-                                                                                { 'server': server_name },
+                                                                                { 'server': server_id },
                                                                                 { 'node': node_id },
                                                                                 function(resp,opt) { // success fh
                                                                                     var response = Ext.util.JSON.decode(resp.responseText);
                                                                                     AsynchronousJob.Functions.Create( 'server', 'check',
-                                                                                                                        { 'server': server_name },
+                                                                                                                        { 'server': server_id },
                                                                                                                         { 'node': node_id, 'check': 'running' },
                                                                                                                         function(resp2,opt2){
                                                                                                                             var res2 = Ext.util.JSON.decode(resp2.responseText);
@@ -225,7 +225,7 @@ Server.Stop = function(obj){
                                 Ext.Msg.show({
                                     title: title,
                                     scope:this,
-                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                    buttons: Ext.MessageBox.YESNO,
                                     msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,obj.data['vm_state'])+'<br>'
                                          +String.format(<?php echo json_encode(__('Stop server {0} ?')) ?>,obj.data['name']),
                                     icon: Ext.MessageBox.QUESTION,
@@ -234,15 +234,16 @@ Server.Stop = function(obj){
                                         if (btn == 'yes'){
 
                                             var node_id = obj.data['node_id'];
+                                            var server_id = obj.data['id'];
                                             var server_name = obj.data['name'];
                                             var forcestop = obj.forcestop;
                                             AsynchronousJob.Functions.Create( 'server', 'stop',
-                                                                                { 'server': server_name },
+                                                                                { 'server': server_id },
                                                                                 { 'node': node_id, 'force': forcestop, 'destroy':forcestop },
                                                                                 function(resp,opt) { // success fh
                                                                                     var response = Ext.util.JSON.decode(resp.responseText);
                                                                                     AsynchronousJob.Functions.Create( 'server', 'check',
-                                                                                                                        { 'server': server_name },
+                                                                                                                        { 'server': server_id },
                                                                                                                         { 'node': node_id, 'check': 'stop' },
                                                                                                                         null,null, response['asynchronousjob']['Id']);
                                                                                     store.reload({callback:function(){
@@ -307,6 +308,36 @@ Server.Stop = function(obj){
                                         }//END button==yes
                                     }// END fn
                                 }); //END Msg.show
+                };
+Server.Suspend = function(obj){
+                        var node_id = obj.data['node_id'];
+                        var server_name = obj.data['name'];
+                        AsynchronousJob.Functions.Create( 'server', 'suspend',
+                                                            { 'server': server_id },
+                                                            { 'node': node_id },
+                                                            function(resp,opt) { // success fh
+                                                                var response = Ext.util.JSON.decode(resp.responseText);
+                                                                store.reload({callback:function(){
+                                                                        var sm = obj.grid.getSelectionModel();
+                                                                        var sel = sm.getSelected();
+                                                                        obj.grid.fireEvent('updateNodeState',{selected:false,parentNode:sel.data['node_id'],node:'s'+sel.data['id']},sel.data);
+                                                                }});
+                                                            });
+                };
+Server.Resume = function(obj){
+                        var node_id = obj.data['node_id'];
+                        var server_name = obj.data['name'];
+                        AsynchronousJob.Functions.Create( 'server', 'resume',
+                                                            { 'server': server_id },
+                                                            { 'node': node_id },
+                                                            function(resp,opt) { // success fh
+                                                                var response = Ext.util.JSON.decode(resp.responseText);
+                                                                store.reload({callback:function(){
+                                                                        var sm = obj.grid.getSelectionModel();
+                                                                        var sel = sm.getSelected();
+                                                                        obj.grid.fireEvent('updateNodeState',{selected:false,parentNode:sel.data['node_id'],node:'s'+sel.data['id']},sel.data);
+                                                                }});
+                                                            });
                 };
 
 Server.Grid = function(){
@@ -460,7 +491,7 @@ $store_id = json_encode($js_grid['pk']);
                 tpl : new Ext.XTemplate(
                 '<p><b>UUID:</b> {uuid}&nbsp&nbsp <b>VNC Port:</b> {vnc_port}&nbsp&nbsp <b>VNC Keymap:</b> {vnc_keymap}<br>',
                 '<b>Status:</b>',
-                '<span style="color:{[values.vm_state === "running" ? "green" : "red"]}">',
+                '<span style="color:{[values.vm_state === "running" ? "green" : values.vm_state === "suspended" ? "yellow" : "red"]}">',
                     ' {values.vm_state}',
                 '</span>&nbsp&nbsp <b>Created at:</b> {created_at}<br>',
                 '</p>'
@@ -478,8 +509,9 @@ $store_id = json_encode($js_grid['pk']);
                             {header:__('IP'), dataIndex:'ip',sortable:true},
                             {header:__('Type'), dataIndex:'vm_type', sortable:true},
                             {header:__('State'), dataIndex:'vm_state', sortable:true, renderer: function (value, metadata, record, rowIndex, colIndex, store) {
-                                if(value!='running') metadata.attr = 'style="background-color: red;color:white;"';
-                                else metadata.attr = 'style="background-color: green;color:white;"';
+                                if(value=='running') metadata.attr = 'style="background-color: green;color:white;"';
+                                else if(value=='suspended') metadata.attr = 'style="background-color: yellow;color:black;"';
+                                else metadata.attr = 'style="background-color: red;color:white;"';
                                 return value;
                             }}                            
             ]);
@@ -660,7 +692,7 @@ $store_id = json_encode($js_grid['pk']);
                         iconCls: 'icon-vm-start',
                         disabled:true,
                         scope:this,
-                        text: <?php echo json_encode(__('Start server')) ?>,
+                        text: <?php echo json_encode(__('Start')) ?>,
                         menu: [{text: <?php echo json_encode(__('Boot From')) ?>
 
                                   ,menu: menu_boot
@@ -735,8 +767,57 @@ $store_id = json_encode($js_grid['pk']);
                         }//END handler
                     },
                     {
+                        text: <?php echo json_encode(__('Suspend')) ?>,
+                        ref: '../suspendBtn',
+                        iconCls: 'icon-vm-suspend',
+                        disabled:true,
+                        scope:this,
+                        handler: function(item) {
+                            var sm = serverGrid.getSelectionModel();
+                            var sel = sm.getSelected();
+
+                            if (sm.hasSelection()){
+                                var obj = { 'data':sel.data, scope: this, store: store, grid: serverGrid, 'node_id':this.node_id };
+                                Server.Suspend(obj);
+                            }//END if
+                            else{
+
+                                Ext.Msg.show({
+                                    title:item.text,
+                                    buttons: Ext.MessageBox.OK,
+                                    icon: Ext.MessageBox.INFO,
+                                    msg: item.el.child('button:first').dom.qtip});
+                            }
+                        }//END handler Stop
+                    },
+                    {
+                        text: <?php echo json_encode(__('Resume')) ?>,
+                        ref: '../resumeBtn',
+                        iconCls: 'icon-vm-resume',
+                        disabled:true,
+                        hidden: true,
+                        scope:this,
+                        handler: function(item) {
+                            var sm = serverGrid.getSelectionModel();
+                            var sel = sm.getSelected();
+
+                            if (sm.hasSelection()){
+                                var obj = { 'data':sel.data, scope: this, store: store, grid: serverGrid, 'node_id':this.node_id };
+                                Server.Resume(obj);
+                            }//END if
+                            else{
+
+                                Ext.Msg.show({
+                                    title:item.text,
+                                    buttons: Ext.MessageBox.OK,
+                                    icon: Ext.MessageBox.INFO,
+                                    msg: item.el.child('button:first').dom.qtip});
+                            }
+                        }//END handler Stop
+                    },
+                    {
                         xtype:'splitbutton',
-                        text: <?php echo json_encode(__('Stop server')) ?>,
+                        text: <?php echo json_encode(__('Stop')) ?>,
                         ref: '../stopBtn',
                         iconCls: 'icon-vm-stop',
                         disabled:true,
@@ -811,7 +892,7 @@ $store_id = json_encode($js_grid['pk']);
                     }
                     ,'-',
                     {
-                        text: <?php echo json_encode(__('Edit server')) ?>,
+                        text: <?php echo json_encode(__('Edit')) ?>,
                         ref: '../editBtn',
                         disabled:true,
                         iconCls:'icon-edit-record',                        
@@ -855,7 +936,7 @@ $store_id = json_encode($js_grid['pk']);
                         }
                     },
                     {
-                        text: <?php echo json_encode(__('Remove server')) ?>,
+                        text: <?php echo json_encode(__('Remove')) ?>,
                         ref: '../removeBtn',
                         disabled:true,
                         iconCls:'icon-remove',
@@ -920,7 +1001,7 @@ $store_id = json_encode($js_grid['pk']);
                         handler: function(btn){View.loadComponent(btn);}
                     }
                     <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
-                    ,{text: <?php echo json_encode(__('Migrate server')) ?>,
+                    ,{text: <?php echo json_encode(__('Migrate')) ?>,
                         ref: '../migrateBtn',
                         iconCls: 'go-action',
                         disabled:true,
@@ -984,6 +1065,8 @@ $store_id = json_encode($js_grid['pk']);
                 serverGrid.consoleBtn.setTooltip(btnState ? selectItem_msg : is_selectItem_msg);
                 serverGrid.startBtn.setTooltip(btnState ? selectItem_msg : is_selectItem_msg);
                 serverGrid.stopBtn.setTooltip(btnState ? selectItem_msg : is_selectItem_msg);
+                serverGrid.suspendBtn.setTooltip(btnState ? selectItem_msg : is_selectItem_msg);
+                serverGrid.resumeBtn.setTooltip(btnState ? selectItem_msg : is_selectItem_msg);
                 if(serverGrid.migrateBtn) serverGrid.migrateBtn.setTooltip(btnState ? selectItem_msg : is_selectItem_msg);
                 serverGrid.editBtn.setTooltip(btnState ? selectItem_msg : is_selectItem_msg);
 
@@ -995,13 +1078,26 @@ $store_id = json_encode($js_grid['pk']);
                 serverGrid.stopBtn.setDisabled(btnState);
                 serverGrid.stopBtn.menu.stop_normal.setChecked(true);
                 serverGrid.stopBtn.menu.stop_force.setChecked(false);
+                serverGrid.suspendBtn.setDisabled(btnState);
+                serverGrid.resumeBtn.setDisabled(btnState);
                 if(serverGrid.migrateBtn) serverGrid.migrateBtn.setDisabled(btnState);
                 
                 if(selected){
 
-                      serverGrid.startBtn.setDisabled(selected.data['vm_state']=='running');
+                      serverGrid.startBtn.setDisabled(selected.data['vm_state']=='running' || selected.data['vm_state']=='suspended');
                       // disable boot from cdrom when dont have cdrom defined
                       serverGrid.startBtn.menu.get(0).menu.boot_cdrom.setDisabled((selected.data['location']!=null)? false: true);  
+                      serverGrid.suspendBtn.setDisabled(selected.data['vm_state']!='running');
+
+                     if( selected.data['vm_state']=='suspended' ){
+                         serverGrid.resumeBtn.show();
+                         serverGrid.suspendBtn.hide();
+                         serverGrid.resumeBtn.setDisabled(false);
+                     } else {
+                         serverGrid.resumeBtn.hide();
+                         serverGrid.suspendBtn.show();
+                         serverGrid.resumeBtn.setDisabled(true);
+                     }
 
                      if(selected.data['vm_state']=='running')
                      {
@@ -1021,7 +1117,7 @@ $store_id = json_encode($js_grid['pk']);
                         */
                          serverGrid.migrateBtn.type = 'migrate';
                          serverGrid.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate, the server must be stopped!')); ?>);
-                         serverGrid.migrateBtn.setText(<?php echo json_encode(__('Migrate server')) ?>);
+                         serverGrid.migrateBtn.setText(<?php echo json_encode(__('Migrate')) ?>);
 
                        <?php endif; ?>
 
@@ -1039,7 +1135,7 @@ $store_id = json_encode($js_grid['pk']);
                           */
                          serverGrid.migrateBtn.type = 'move';
                          serverGrid.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move, the server must be running!')); ?>);
-                         serverGrid.migrateBtn.setText(<?php echo json_encode(__('Move server')) ?>);
+                         serverGrid.migrateBtn.setText(<?php echo json_encode(__('Move')) ?>);
 
                          <?php endif; ?>
                      }

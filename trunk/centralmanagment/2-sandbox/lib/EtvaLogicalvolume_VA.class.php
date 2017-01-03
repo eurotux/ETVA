@@ -160,7 +160,7 @@ class EtvaLogicalvolume_VA
     /*
      * send lvresize
      */
-    public function send_resize(EtvaNode $etva_node, $size)
+    public function send_resize(EtvaNode $etva_node, $size,$persnapshotusage=null)
     {
         $method = self::LVRESIZE;
 
@@ -210,6 +210,16 @@ class EtvaLogicalvolume_VA
         $params = array(
                         'lv'    => $lvdevice,
                         'size'  => $size);
+
+        if( $persnapshotusage == null ){
+            if( ($etva_lv->getVirtualSize() > 0) && ($etva_lv->getVirtualSize() < $etva_lv->getSize()) ){
+                // set usage ratio
+                $persnapshotusage = 100 * ( 1 - ($etva_lv->getVirtualSize() / $etva_lv->getSize()));
+            }
+        }
+
+        if( $persnapshotusage )
+            $params['usagesize'] = Etva::MB_to_Byteconvert($size) * ( 1 - ($persnapshotusage/100) );
 
         // send soap request
         $response = $etva_node->soapSend($method,$params);

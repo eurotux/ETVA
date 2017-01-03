@@ -1,0 +1,48 @@
+From dd7a6c7d6f15f1c9e5efafc10f3f606dbb3b567f Mon Sep 17 00:00:00 2001
+From: Brendan Fennell <bfennell@skynet.ie>
+Date: Wed, 26 Sep 2012 16:46:28 +0100
+Subject: [PATCH] pl190: fix read of VECTADDR
+
+Reading VECTADDR was causing us to set the current priority to
+the wrong value, the most obvious effect of which was that we
+would return the vector for the wrong interrupt as the result
+of the read.
+
+Signed-off-by: Brendan Fennell <bfennell@skynet.ie>
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+(cherry picked from commit 14c126baf1c38607c5bd988878de85a06cefd8cf)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/pl190.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/hw/pl190.c b/hw/pl190.c
+index cb50afb..7332f4d 100644
+--- a/hw/pl190.c
++++ b/hw/pl190.c
+@@ -117,12 +117,18 @@ static uint64_t pl190_read(void *opaque, target_phys_addr_t offset,
+         return s->protected;
+     case 12: /* VECTADDR */
+         /* Read vector address at the start of an ISR.  Increases the
+-           current priority level to that of the current interrupt.  */
+-        for (i = 0; i < s->priority; i++)
+-          {
+-            if ((s->level | s->soft_level) & s->prio_mask[i])
+-              break;
+-          }
++         * current priority level to that of the current interrupt.
++         *
++         * Since an enabled interrupt X at priority P causes prio_mask[Y]
++         * to have bit X set for all Y > P, this loop will stop with
++         * i == the priority of the highest priority set interrupt.
++         */
++        for (i = 0; i < s->priority; i++) {
++            if ((s->level | s->soft_level) & s->prio_mask[i + 1]) {
++                break;
++            }
++        }
++
+         /* Reading this value with no pending interrupts is undefined.
+            We return the default address.  */
+         if (i == PL190_NUM_PRIO)

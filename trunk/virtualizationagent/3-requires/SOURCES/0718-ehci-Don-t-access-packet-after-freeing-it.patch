@@ -1,0 +1,37 @@
+From a45514e1d05579e7a718f95263bf10c0a58d3562 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Wed, 14 Nov 2012 16:21:36 +0000
+Subject: [PATCH] ehci: Don't access packet after freeing it
+
+ehci_state_writeback() will free the packet, so we should not access
+the packet after calling ehci_state_writeback().
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from 30d68cf6e156b97fc462e18f38ce83f44702cd7f)
+---
+ hw/usb/hcd-ehci.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 46f6d99..4229061 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -752,12 +752,13 @@ static EHCIPacket *ehci_alloc_packet(EHCIQueue *q)
+ static void ehci_free_packet(EHCIPacket *p)
+ {
+     if (p->async == EHCI_ASYNC_FINISHED) {
+-        int state = ehci_get_state(p->queue->ehci, p->queue->async);
++        EHCIQueue *q = p->queue;
++        int state = ehci_get_state(q->ehci, q->async);
+         /* This is a normal, but rare condition (cancel racing completion) */
+         fprintf(stderr, "EHCI: Warning packet completed but not processed\n");
+-        ehci_state_executing(p->queue);
+-        ehci_state_writeback(p->queue);
+-        ehci_set_state(p->queue->ehci, p->queue->async, state);
++        ehci_state_executing(q);
++        ehci_state_writeback(q);
++        ehci_set_state(q->ehci, q->async, state);
+         /* state_writeback recurses into us with async == EHCI_ASYNC_NONE!! */
+         return;
+     }

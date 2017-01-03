@@ -1,0 +1,64 @@
+From 8cf5a1be042202e1ad927bd17b95782e80dfd36e Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Mon, 3 Sep 2012 22:13:56 +0200
+Subject: [PATCH] ide: Fix error messages from static code analysis (no real
+ error)
+
+Report from smatch:
+hw/ide/core.c:1472 ide_exec_cmd(423) error: buffer overflow 'smart_attributes' 8 <= 29
+hw/ide/core.c:1474 ide_exec_cmd(425) error: buffer overflow 'smart_attributes' 8 <= 29
+hw/ide/core.c:1475 ide_exec_cmd(426) error: buffer overflow 'smart_attributes' 8 <= 29
+...
+
+The upper limit of 30 was never reached because both for loops terminated
+when 'smart_attributes' reached end of list, so there was no real buffer
+overflow.
+
+Nevertheless, changing the code not only fixes the error report, but also
+reduces the size of smart_attributes and simplifies the for loops.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit 1e53537fdaa4657d11f130a0f2673fcfb1956381)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/ide/core.c | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
+
+diff --git a/hw/ide/core.c b/hw/ide/core.c
+index d65ef3d..d6fb69c 100644
+--- a/hw/ide/core.c
++++ b/hw/ide/core.c
+@@ -53,8 +53,6 @@ static const int smart_attributes[][12] = {
+     { 0x0c, 0x03, 0x00, 0x64, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+     /* airflow-temperature-celsius */
+     { 190,  0x03, 0x00, 0x45, 0x45, 0x1f, 0x00, 0x1f, 0x1f, 0x00, 0x00, 0x32},
+-    /* end of list */
+-    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+ };
+ 
+ static int ide_handle_rw_error(IDEState *s, int error, int op);
+@@ -1468,9 +1466,7 @@ void ide_exec_cmd(IDEBus *bus, uint32_t val)
+ 	case SMART_READ_THRESH:
+ 		memset(s->io_buffer, 0, 0x200);
+ 		s->io_buffer[0] = 0x01; /* smart struct version */
+-		for (n=0; n<30; n++) {
+-		if (smart_attributes[n][0] == 0)
+-			break;
++		for (n = 0; n < ARRAY_SIZE(smart_attributes); n++) {
+ 		s->io_buffer[2+0+(n*12)] = smart_attributes[n][0];
+ 		s->io_buffer[2+1+(n*12)] = smart_attributes[n][11];
+ 		}
+@@ -1484,10 +1480,7 @@ void ide_exec_cmd(IDEBus *bus, uint32_t val)
+ 	case SMART_READ_DATA:
+ 		memset(s->io_buffer, 0, 0x200);
+ 		s->io_buffer[0] = 0x01; /* smart struct version */
+-		for (n=0; n<30; n++) {
+-		    if (smart_attributes[n][0] == 0) {
+-			break;
+-		    }
++		for (n = 0; n < ARRAY_SIZE(smart_attributes); n++) {
+ 		    int i;
+ 		    for(i = 0; i < 11; i++) {
+ 			s->io_buffer[2+i+(n*12)] = smart_attributes[n][i];

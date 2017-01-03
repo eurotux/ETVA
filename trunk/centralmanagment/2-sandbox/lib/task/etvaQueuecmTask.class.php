@@ -183,6 +183,10 @@ EOF;
             }
             exit(0);
         }
+        else if( -1 === $cpid )
+        {
+            $this->log("[ERROR] create worker");
+        }
         else
         {
             array_push($this->workers, $cpid);
@@ -247,12 +251,14 @@ EOF;
 
             exit(0);
 
+        } else if( -1 === $cpid ) {
+            $this->log("[ERROR] create main worker");
         } else {
             $this->main_worker = $cpid;    // regist main worker
             sleep(5);
         }
     } else {
-        //$this->log("[WARN] main worker already running");
+        $this->log("[WARN] main worker already running");
     }
   }
 
@@ -305,6 +311,8 @@ EOF;
 
             exit(0);
 
+        } else if( -1 === $cpid ) {
+            $this->log("[ERROR] create abort worker");
         } else {
             $this->abort_worker = $cpid;    // regist abort worker
         }

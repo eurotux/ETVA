@@ -1,0 +1,257 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use locale;
+use utf8;
+
+use lib '/usr/local/sap2elastix';
+
+use utilcommon;
+use utilsql;
+
+use POSIX;
+use JSON;
+
+use Data::Dumper;
+
+my $DBPREFIX = 'etux_';     # database tables prefix
+
+my ($sapDBH,$astDBH,$ccDBH,$cdrDBH) = @_;
+
+sub init_connections {
+    my %conf = @_;
+
+    my ($dbhost,$dbuser,$dbpass) = ($conf{'mysql'}{'host'} || "127.0.0.1", $conf{'mysql'}{'user'} || "sap", $conf{'mysql'}{'pass'} || "123456");
+    $DBPREFIX = $conf{'mysql'}{'prefix'} || 'etux_';
+
+    # connect to sap2elastix
+    $sapDBH ||= utilsql::sqlConnect("DBI:mysql:database=sap2elastix;host=$dbhost", $dbuser, $dbpass);
+
+    # connect to sap2elastix
+    $astDBH ||= utilsql::sqlConnect("DBI:mysql:database=asterisk;host=$dbhost", $dbuser, $dbpass);
+
+    # connect to call_center
+    $ccDBH ||= utilsql::sqlConnect("DBI:mysql:database=call_center;host=$dbhost", $dbuser, $dbpass);
+
+    # connect to asteriskcdrdb
+    $cdrDBH ||= utilsql::sqlConnect("DBI:mysql:database=asteriskcdrdb;host=$dbhost", $dbuser, $dbpass);
+
+}
+sub end_connections {
+    utilsql::sqlDisconnect($cdrDBH);    # disconnect cdr
+    utilsql::sqlDisconnect($sapDBH);    # disconnect sap2elastix
+    utilsql::sqlDisconnect($astDBH);    # disconnect asterisk
+    utilsql::sqlDisconnect($ccDBH);     # disconnect call center
+}
+
+sub get_client_info {
+
+    my %Clients = ();
+    if( my $c = utilsql::sqlSelect($sapDBH, "*", "contacts") ){
+        while( my $R = $c->fetchrow_hashref() ){
+            my $phone = $R->{'phone'};
+            $Clients{"$phone"} = $R;
+        }
+        $c->finish();
+    }
+    if( $astDBH ){
+        if( my $c = utilsql::sqlSelect($astDBH, "*", "callerid") ){
+            while( my $R = $c->fetchrow_hashref() ){
+                if( my $phone = $R->{'number'} ){
+                    $Clients{"$phone"} = { %$R, 'phone'=>$phone };
+                }
+                if( my $mobile = $R->{'mobile'} ){
+                    $Clients{"$mobile"} = { %$R, 'phone'=>$mobile };
+                }
+            }
+            $c->finish();
+        }
+    }
+    if( $ccDBH ){
+        if( my $c = utilsql::sqlSelect($ccDBH, "*", "contact") ){
+            while( my $R = $c->fetchrow_hashref() ){
+                if( my $phone = $R->{'telefono'} ){
+                    $Clients{"$phone"} = { %$R, 'phone'=>$phone };
+                }
+            }
+            $c->finish();
+        }
+    }
+    return wantarray() ? %Clients : \%Clients;
+}
+sub calc_missedcalls {
+    my ($timelimit) = @_;
+
+    my $date_limit = utilcommon::nowStr( 1 - $timelimit );
+
+    # get client information
+    my %Clients = &get_client_info();
+
+    my %queuePhones = ();
+
+    # get calls that stop on IVR or Announcements
+    if( my $c = utilsql::sqlSelect($cdrDBH,"src as phone, dst, calldate as start_date, disposition as status, duration, billsec as duration_wait, uniqueid",
+                                            "cdr",
+                                            "calldate>'$date_limit' AND (dcontext LIKE 'ivr-%' OR dcontext LIKE 'app-announcement-%')",
+                                            "ORDER BY calldate DESC")){
+        while(my $R = $c->fetchrow_hashref()){
+            # source phone
+            if( my $phone = $R->{'phone'} ){
+                if( !$queuePhones{"$phone"} ){
+                    my $C = {};
+                    $C = $Clients{"$phone"} if( $Clients{"$phone"} );
+                    $queuePhones{"$phone"} = { %$R, %$C, '_history_'=>[$R->{'start_date'}] };
+                } else {
+                    $queuePhones{"$phone"}{'_history_'} = [] if( !$queuePhones{"$phone"}{'_history_'} );
+                    push(@{$queuePhones{"$phone"}{'_history_'}}, $R->{'start_date'});
+                }
+            }
+        }
+
+        $c->finish();
+    }
+
+    # get missed calls from queue
+    if( my $c = utilsql::sqlSelect($ccDBH,
+                                        "IF(call_entry.datetime_init IS NULL,call_entry.datetime_entry_queue,call_entry.datetime_init) AS start_date"
+                                        . ", call_entry.status, call_entry.datetime_end AS end_date, call_entry.duration, call_entry.duration_wait"
+                                        . ", IF(contact.telefono IS NULL, call_entry.callerid, contact.telefono) AS phone"
+                                        . ", queue_call_entry.queue, call_entry.uniqueid ",
+                                    "(call_entry, queue_call_entry)"
+                                        . " LEFT JOIN contact"
+                                            . " ON contact.id = call_entry.id_contact"
+                                        . " LEFT JOIN agent"
+                                            . " ON agent.id = call_entry.id_agent",
+                                    "call_entry.id_queue_call_entry = queue_call_entry.id"
+                                        . " AND call_entry.datetime_entry_queue>'$date_limit'",
+                                    "ORDER BY start_date" ) ){
+        while(my $R = $c->fetchrow_hashref()){
+            if( my $phone = $R->{'phone'} ){
+                if( $R->{'status'} eq 'abandonada' ){
+                    if( !$queuePhones{"$phone"} || ($R->{'start_date'} gt $queuePhones{"$phone"}{'start_date'}) ){
+                        my $C = {};
+                        $C = $Clients{"$phone"} if( $Clients{"$phone"} );
+                        #print STDERR "[DEBUG] phone=$phone $R->{'start_date'}","\n";
+                        my $history = [];
+                        $history = $queuePhones{"$phone"}{'_history_'} if( $queuePhones{"$phone"}{'_history_'} );
+                        $queuePhones{"$phone"} = { %$R, %$C, '_history_'=>[@$history,$R->{'start_date'}] };
+                    }
+                } elsif( $queuePhones{"$phone"} && ($R->{'start_date'} gt $queuePhones{"$phone"}{'start_date'}) ){
+                    #print STDERR "[DEBUG] delete phone=$phone $R->{'start_date'}","\n";
+                    delete $queuePhones{"$phone"};
+                }
+            }
+        }
+        $c->finish();
+    }
+
+    # get calls from cdr
+    if( my $c = utilsql::sqlSelect($cdrDBH,"src, dst, calldate",
+                                            "cdr",
+                                            "lastapp = 'Dial' AND disposition = 'ANSWERED' AND billsec > 0"
+                                                . " AND calldate>'$date_limit'",
+                                            "ORDER BY calldate")){
+        while(my $R = $c->fetchrow_hashref()){
+            # destination phone
+            my $phone = $R->{'dst'};
+            #  and call made after missed call
+            if( $queuePhones{"$phone"} && ($R->{'calldate'} gt $queuePhones{"$phone"}{'start_date'}) ){
+                #print STDERR "[DEBUG] cdr delete phone=$phone $R->{'calldate'}","\n";
+                delete $queuePhones{"$phone"};
+            } else {
+                #print STDERR "[DEBUG] cdr phone=$phone $R->{'calldate'}","\n";
+            }
+        }
+
+        $c->finish();
+    }
+
+    # get call entries from sap2elastix using sapcall
+    if( my $c = utilsql::sqlSelect($cdrDBH, "*", "${DBPREFIX}callentry", "created>'$date_limit'", "ORDER BY created") ){
+        while( my $R = $c->fetchrow_hashref() ){
+            my $phone = $R->{'phone'};
+            if( $queuePhones{"$phone"} && ($R->{'created'} gt $queuePhones{"$phone"}{'start_date'}) ){
+                delete $queuePhones{"$phone"};
+            }
+        }
+        $c->finish();
+    }
+
+    my @queue = sort { $b->{'start_date'} cmp $a->{'start_date'} } values %queuePhones;
+    return wantarray() ? @queue : [@queue];
+}
+sub last_missedcalls {
+    my ($timelimit) = @_;
+
+    my $date_limit = utilcommon::nowStr( 1 - $timelimit );
+
+    my @list = ();
+    if( my $c = utilsql::sqlSelect($cdrDBH, "*", "${DBPREFIX}missedcalls", "start_date>'$date_limit'", "ORDER BY start_date") ){
+        while( my $R = $c->fetchrow_hashref() ){
+            my $phone = $R->{'phone'};
+            push(@list, $R);
+        }
+        $c->finish();
+    }
+    return wantarray() ? @list : [ @list ];
+}
+sub update_missedcalls {
+    my ($conf, $timelimit,$queue) = @_;
+    my @list = &last_missedcalls($timelimit);
+
+    foreach my $C (reverse @$queue){
+        if( !grep { ($_->{'phone'} eq $C->{'phone'}) && ($_->{'uniqueid'} == $C->{'uniqueid'}) && ($C->{'start_date'} ge $_->{'start_date'}) } @list ){
+            #print STDERR "[DEBUG] utilsql::sqlInsert(\$cdrDBH, \"${DBPREFIX}missedcalls\",{ 'phone'=>$C->{'phone'}, 'uniqueid'=>$C->{'uniqueid'}, 'start_date'=>$C->{'start_date'}, 'queue'=>$C->{'queue'}, 'duration_wait'=>$C->{'duration_wait'}, 'status'=>$C->{'status'} })","\n";
+            utilsql::sqlInsert($cdrDBH, "${DBPREFIX}missedcalls",{ 'phone'=>$C->{'phone'}, 'uniqueid'=>$C->{'uniqueid'}, 'start_date'=>$C->{'start_date'}, 'queue'=>$C->{'queue'}||'', 'duration_wait'=>$C->{'duration_wait'}, 'status'=>$C->{'status'} });
+            &alert_newmissedcall($conf, $C);
+        }
+    }
+}
+sub alert_newmissedcall {
+    my ($conf,$R) = @_;
+    
+    my @call_data = ();
+    push(@call_data, "Name: $R->{'name'}", "\n") if( $R->{'name'} );
+    push(@call_data, "Company: $R->{'company'}", "\n") if( $R->{'company'} );
+    utilcommon::sendEmail( 'debug'=>0,
+                'from' => $conf->{'missedcalls'}{'from'} || 'etvoip@eurotux.com',
+                'to'   => $conf->{'missedcalls'}{'to'} || 'callcenter@suporte.eurotux.com',
+                'subject' => "ETVOIP: Chamada não atendida de $R->{'phone'}",
+                'msg'     => <<__MSG__
+Olá,
+
+Recebemos uma chamada não atendida do número '$R->{'phone'}'
+
+@call_data
+
+__MSG__
+    );
+
+}
+sub main {
+    my %args = utilcommon::read_args;
+    print "Content-Type: application/json;","\n";
+    print "\n\n";
+
+    my %conf = utilcommon::load_conf('/usr/local/sap2elastix/config.conf');
+
+    &init_connections(%conf);
+
+    # TODO improve this
+    my $ndays = $args{'ndays'} || 7;
+    my $timelimit_i = int($ndays)*24*60*60;    # initial time limit
+
+    # TODO improve this
+    my $queue_id = 4321;    # filter by queue support
+
+    my @queue = grep { $_->{'queue'} and ($_->{'queue'} eq $queue_id) } &calc_missedcalls($timelimit_i);
+    &update_missedcalls({%conf}, $timelimit_i, [@queue] ) if( $args{'op'} eq 'update' );
+    #print encode_json( { 'total'=>scalar(@queue), 'result'=>[@queue] } ),"\n";
+    my $json = JSON->new;
+    print $json->utf8(0)->encode( { 'total'=>scalar(@queue), 'result'=>[@queue] } ),"\n";
+
+    &end_connections();
+}
+
+&main;

@@ -1,0 +1,35 @@
+From b1fffeed071302ff3a7f69a680ec0aa930bc403e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=E9=99=B3=E9=9F=8B=E4=BB=BB=20=28Wei-Ren=20Chen=29?=
+ <chenwj@iis.sinica.edu.tw>
+Date: Wed, 14 Nov 2012 10:49:55 +0800
+Subject: [PATCH] target-mips: fix wrong microMIPS opcode encoding
+
+While reading microMIPS decoding, I found a possible wrong opcode
+encoding. According to [1] page 166, the bits 13..12 for MULTU is
+0x01 rather than 0x00. Please review, thanks.
+
+[1] MIPS Architecture for Programmers VolumeIV-e: The MIPS DSP
+    Application-Specific Extension to the microMIPS32 Architecture
+
+Signed-off-by: Chen Wei-Ren <chenwj@iis.sinica.edu.tw>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit 6801038bc52d61f81ac8a25fbe392f1bad982887)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-mips/translate.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/target-mips/translate.c b/target-mips/translate.c
+index 4e04e97..49907bb 100644
+--- a/target-mips/translate.c
++++ b/target-mips/translate.c
+@@ -9486,7 +9486,7 @@ enum {
+ 
+     /* bits 13..12 for 0x32 */
+     MULT_ACC = 0x0,
+-    MULTU_ACC = 0x0,
++    MULTU_ACC = 0x1,
+ 
+     /* bits 15..12 for 0x2c */
+     SEB = 0x2,

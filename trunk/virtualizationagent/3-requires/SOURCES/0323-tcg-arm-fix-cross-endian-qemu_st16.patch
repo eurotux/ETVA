@@ -1,0 +1,74 @@
+From 01dc1f3913245ad06c4a6e274648682c190a1cd6 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Tue, 9 Oct 2012 21:53:11 +0200
+Subject: [PATCH] tcg/arm: fix cross-endian qemu_st16
+
+The bswap16 TCG opcode assumes that the high bytes of the temp equal
+to 0 before calling it. The ARM backend implementation takes this
+assumption to slightly optimize the generated code.
+
+The same implementation is called for implementing the cross-endian
+qemu_st16 opcode, where this assumption is not true anymore. One way to
+fix that would be to zero the high bytes before calling it. Given the
+store instruction just ignore them, it is possible to provide a slightly
+more optimized version. With ARMv6+ the rev16 instruction does the work
+correctly. For lower ARM versions the patch provides a version which
+behaves correctly with non-zero high bytes, but fill them with junk.
+
+Cc: Andrzej Zaborowski <balrogg@gmail.com>
+Cc: Peter Maydell <peter.maydell@linaro.org>
+Cc: qemu-stable@nongnu.org
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit 7aab08aa786e3a8838beac758ee61c5000144937)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/arm/tcg-target.c | 20 ++++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/tcg/arm/tcg-target.c b/tcg/arm/tcg-target.c
+index fbad716..83aa856 100644
+--- a/tcg/arm/tcg-target.c
++++ b/tcg/arm/tcg-target.c
+@@ -602,6 +602,22 @@ static inline void tcg_out_bswap16(TCGContext *s, int cond, int rd, int rn)
+     }
+ }
+ 
++/* swap the two low bytes assuming that the two high input bytes and the
++   two high output bit can hold any value. */
++static inline void tcg_out_bswap16st(TCGContext *s, int cond, int rd, int rn)
++{
++    if (use_armv6_instructions) {
++        /* rev16 */
++        tcg_out32(s, 0x06bf0fb0 | (cond << 28) | (rd << 12) | rn);
++    } else {
++        tcg_out_dat_reg(s, cond, ARITH_MOV,
++                        TCG_REG_R8, 0, rn, SHIFT_IMM_LSR(8));
++        tcg_out_dat_imm(s, cond, ARITH_AND, TCG_REG_R8, TCG_REG_R8, 0xff);
++        tcg_out_dat_reg(s, cond, ARITH_ORR,
++                        rd, TCG_REG_R8, rn, SHIFT_IMM_LSL(8));
++    }
++}
++
+ static inline void tcg_out_bswap32(TCGContext *s, int cond, int rd, int rn)
+ {
+     if (use_armv6_instructions) {
+@@ -1367,7 +1383,7 @@ static inline void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, int opc)
+         break;
+     case 1:
+         if (bswap) {
+-            tcg_out_bswap16(s, COND_EQ, TCG_REG_R0, data_reg);
++            tcg_out_bswap16st(s, COND_EQ, TCG_REG_R0, data_reg);
+             tcg_out_st16_r(s, COND_EQ, TCG_REG_R0, addr_reg, TCG_REG_R1);
+         } else {
+             tcg_out_st16_r(s, COND_EQ, data_reg, addr_reg, TCG_REG_R1);
+@@ -1453,7 +1469,7 @@ static inline void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, int opc)
+         break;
+     case 1:
+         if (bswap) {
+-            tcg_out_bswap16(s, COND_AL, TCG_REG_R0, data_reg);
++            tcg_out_bswap16st(s, COND_AL, TCG_REG_R0, data_reg);
+             tcg_out_st16_8(s, COND_AL, TCG_REG_R0, addr_reg, 0);
+         } else {
+             tcg_out_st16_8(s, COND_AL, data_reg, addr_reg, 0);

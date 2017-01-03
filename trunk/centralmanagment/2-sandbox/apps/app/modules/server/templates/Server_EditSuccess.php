@@ -11,15 +11,18 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
         this.items = [
             {xtype:'hidden',name:'id'},
             {xtype:'hidden',name:'vm_state'},
+            {xtype:'hidden',name:'_libvirt_extend'},
             {xtype:'tabpanel', 
-             activeItem:0,
-             id: 'server-edit-tabpanel',
-             ref: 'serverEditTabPanel',
-             anchor: '100% 100%',             
-             defaults:{
-                 layout:'form'
-                 ,labelWidth:140                 
-            }
+                activeItem:0,
+                id: 'server-edit-tabpanel',
+                ref: 'serverEditTabPanel',
+                autoScroll: true,
+                enableTabScroll: true,
+                anchor: '100% 100%',             
+                defaults:{
+                    layout:'form'
+                    ,labelWidth:140                 
+                }
            }
         ];        
 
@@ -39,12 +42,18 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
         Server.Edit.Form.superclass.initComponent.call(this);
 
         this.loadConfigurationPanel();
+        this.loadOSBootOptions();
         this.loadNetworksPanel();
         this.loadDisksPanel();
         this.loadDevicesPanel(); 
         this.loadOtherOptionsPanel(); 
         this.loadVMHAPanel();
 
+        <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
+        if( Ext.util.Cookies.get('engineeringMode') ){
+            this.loadLibvirtExtend();
+        }
+        <?php endif; ?>
     }
     ,onRender:function(){
         // call parent
@@ -72,108 +81,6 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
      */
     ,loadBootOptions:function(data){
 
-        var cdromstore = new Ext.data.JsonStore({
-                //id:'id'
-                root:'data'
-                ,totalProperty:'total'
-                ,fields:[
-                    {name:'name', type:'string'},'full_path'
-                ]
-                ,proxy: new Ext.data.HttpProxy({
-                        url:<?php echo json_encode(url_for('view/iso'))?>
-                    })
-                ,baseParams:{doAction:'jsonList',params:Ext.encode({emptyValue:true})}
-        });        
-
-        //build cdrom com for menu bar
-
-        var cdromcheckbox = new Ext.form.Checkbox({ fieldLabel:'',hideLabel:true,ref:'cdrom_ckb',name:'cdrom_ckb',boxLabel:'',inputValue: '1'
-                                                            ,checked: ((data['location']!=null)? true : false)
-                                                            ,listeners:{
-                                                                    check:{scope:this,fn:function(ckb,ck){
-                                                                            this.getForm().findField('cdrom_cb').setDisabled(!ck);
-                                                                            if( ck ){
-                                                                                Ext.getCmp('server-edit-config-boot-cdrom').setDisabled(false);
-                                                                            } else {
-                                                                                Ext.getCmp('server-edit-config-boot-cdrom').setDisabled(!this.getForm().findField('cdromextra_ckb').getValue());
-                                                                            }
-                                                                    }}
-                                                            }
-                                                        });
-        var cdromcombo = new Ext.form.ComboBox({
-                fieldLabel:'CD-ROM',
-                editable:false
-                ,disabled: (data['boot']=='location') ? true : false
-                ,valueField:'full_path'
-                ,hiddenName:'cdrom_cb'
-                ,ref:'cdrom_cb'
-                ,displayField:'name'
-                ,pageSize:10
-                ,triggerAction:'all'
-                ,forceSelection:true
-                ,selectOnFocus:true
-                ,valueNotFoundText: __('Invalid')            
-                ,resizable:true
-                ,minListWidth:250
-                ,anchor:'80%'
-                ,store:cdromstore
-                ,validator:function(v){                    
-                    
-                    var boot_cdrom = (this.ownerCt).ownerCt.boot_cdrom;
-                    if(boot_cdrom)
-                        if(boot_cdrom.getValue() && cdromstore.getAt(0) && cdromstore.getAt(0).data['name']==v) return <?php echo json_encode(__('Choose iso to load')) ?>;
-
-                    return true;
-                    
-                }
-                ,listeners:{
-                    // set tooltip and validate
-                    render:function() {
-                        this.el.set({qtip: <?php echo json_encode(__('Choose iso to load')) ?>});
-                        this.validate();
-                    }
-                    
-                }
-        });
-
-        var cdromcheckboxExtra = new Ext.form.Checkbox({ fieldLabel:'',hideLabel:true,ref:'cdromextra_ckb',name:'cdromextra_ckb',boxLabel:'',inputValue: '1'
-                                                            ,checked: ((data['cdromextra']!=null) ? true : false)
-                                                            ,listeners:{
-                                                                    check:{scope:this,fn:function(ckb,ck){
-                                                                            this.getForm().findField('cdromextra_cb').setDisabled(!ck);
-
-                                                                            if( ck ){
-                                                                                Ext.getCmp('server-edit-config-boot-cdrom').setDisabled(false);
-                                                                            } else {
-                                                                                Ext.getCmp('server-edit-config-boot-cdrom').setDisabled(!this.getForm().findField('cdrom_ckb').getValue());
-                                                                            }
-                                                                    }}
-                                                            }
-                                                });
-        var cdromcomboExtra = new Ext.form.ComboBox({
-                fieldLabel:'Extra CD-ROM',
-                editable:false
-                ,valueField:'full_path'
-                ,hiddenName:'cdromextra_cb'
-                ,ref:'cdromextra_cb'
-                ,displayField:'name'
-                ,pageSize:10
-                ,triggerAction:'all'
-                ,forceSelection:true
-                ,selectOnFocus:true
-                ,valueNotFoundText: __('Invalid')            
-                ,resizable:true
-                ,minListWidth:250
-                ,anchor:'80%'
-                ,store:cdromstore
-                ,listeners:{
-                    // set tooltip and validate
-                    render:function() {
-                        this.el.set({qtip: <?php echo json_encode(__('Choose iso to load')) ?>});
-                    }
-                    
-                }
-        });
         var fieldset_items = 
                         [
                             {
@@ -231,75 +138,44 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
             fieldset_items.push(
                         {
-                            boxLabel: 'Location URL',
+                            boxLabel: <?php echo json_encode(__('Network URL (http,ftp,...)')) ?>,
                             xtype:'radio', checked: (data['boot']=='location') ? true : false,
                             inputValue: 'location',ref:'boot_location'
                             ,name: 'boot_from'
-                            ,disabled: !data['server_has_netifs']
+                            //,disabled: !data['server_has_netifs']
                             ,id: 'server-edit-config-boot-locationurl'
                             ,scope:this
                             ,handler:function(box,check){
                                 var boot_location_field = this.form.findField('location');
-                                var cdrom_field = this.form.findField('cdrom_cb');
                                 boot_location_field.setDisabled(!check);
                                 boot_location_field.clearInvalid();
-                                //cdrom_field.setDisabled(check);
+
+                                var extra_kickstart_field = this.form.findField('extra_kickstart');
+                                extra_kickstart_field.setDisabled(!check);
+                                extra_kickstart_field.clearInvalid();
+
+                                var extra_kerneloptions_field = this.form.findField('extra_kerneloptions');
+                                extra_kerneloptions_field.setDisabled(!check);
+                                extra_kerneloptions_field.clearInvalid();
+
+                                Ext.getCmp('server-edit-config-boot-locationurl-options').setDisabled(!check);
+                                if( !check ){
+                                    Ext.getCmp('server-edit-config-boot-locationurl-options').collapse();
+                                }
+
+                                //Ext.getCmp('server-edit-fieldset-removable-media').setDisabled(check);
+                                this.getForm().findField('cdrom_ckb').setDisabled(check);
+                                this.getForm().findField('cdrom_cb').setDisabled(check);
+                                this.getForm().findField('cdromextra_ckb').setDisabled(check);
+                                this.getForm().findField('cdromextra_cb').setDisabled(check);
 
                                 if(check) boot_location_field.focus();
 
                             }
                         }
-                        ,{
-                            xtype:'textfield',
-                            labelStyle:'width:30px',
-                            name:'location', anchor:'80%',
-                            id: 'server-edit-config-boot-locationurl-text',
-                            disabled:((data['server_has_netifs'])&&(data['boot']=='location')) ? false : true,
-                            validator:function(v){
-                                if(!v) return 'needed';
-                            },
-                            value: (data['cdrom']==1) ? '': data['location']
-                        }
             );            
             //end push
         //}
-
-        // populate cdrom combo items
-        if(cdromcombo.getStore().getTotalCount()>0){
-            if(data['cdrom']) cdromcombo.setValue(data['location']);
-        } else {
-            cdromcombo.getStore().reload({scope:this,callback:function(){
-                        var cb_store = cdromcombo.getStore();
-                        if(cb_store){
-                            cdromcombo.setValue('');
-                            if(data['cdrom'] || data['boot']=='cdrom'){
-                                var matched = cb_store.findExact('full_path',data['location']);
-
-                                if(matched != -1) cdromcombo.setValue(data['location']);
-
-                            }
-                        }
-            }});
-        }
-
-        // populate cdrom extra combo items
-        if(cdromcomboExtra.getStore().getTotalCount()>0){
-            if(data['cdromextra']) cdromcomboExtra.setValue(data['cdromextra']);
-        } else {
-            cdromcomboExtra.getStore().reload({scope:this,callback:function(){
-                        var cb_store = cdromcomboExtra.getStore();
-                        if(cb_store){
-                            cdromcomboExtra.setValue('');
-                            if(data['cdromextra']){
-                                var matched = cb_store.findExact('full_path',data['cdromextra']);
-                                if(matched != -1) cdromcomboExtra.setValue(data['cdromextra']);
-                            }
-                        }
-            }});
-        }
-
-        /*cdromcheckbox.setValue((data['location']!=null) ? true : false);
-        cdromcheckboxExtra.setValue((data['cdromextra']!=null) ? true : false);*/
 
         var fieldset = [];
         if(data['node_hypervisor']=='kvm'){
@@ -351,16 +227,22 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                                                         Ext.getCmp('server-edit-devices').setDisabled(true);
                                                         Ext.getCmp('server-edit-config-boot-locationurl').show();
                                                         Ext.getCmp('server-edit-config-boot-locationurl-text').show();
+                                                        Ext.getCmp('server-edit-config-boot-locationurl-fieldset').show();
                                                         Ext.getCmp('server-edit-config-boot-pxe').hide();
                                                         Ext.getCmp('server-edit-config-boot-cdrom').hide();
                                                         Ext.getCmp('server-edit-fieldset-removable-media').hide();
                                                     } else {
                                                         Ext.getCmp('server-edit-devices').setDisabled(false);
-                                                        Ext.getCmp('server-edit-config-boot-locationurl').hide();
-                                                        Ext.getCmp('server-edit-config-boot-locationurl-text').hide();
+                                                        //Ext.getCmp('server-edit-config-boot-locationurl').hide();
+                                                        //Ext.getCmp('server-edit-config-boot-locationurl-text').hide();
+                                                        //Ext.getCmp('server-edit-config-boot-locationurl-fieldset').hide();
+                                                        Ext.getCmp('server-edit-config-boot-locationurl').show();
+                                                        Ext.getCmp('server-edit-config-boot-locationurl-text').show();
+                                                        Ext.getCmp('server-edit-config-boot-locationurl-fieldset').show();
                                                         Ext.getCmp('server-edit-config-boot-pxe').show();
                                                         Ext.getCmp('server-edit-config-boot-cdrom').show();
                                                         Ext.getCmp('server-edit-fieldset-removable-media').show();
+                                                        Ext.getCmp('server-edit-fieldset-removable-media').doLayout();
                                                     }
                                                 }
                                             }
@@ -408,6 +290,166 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                             labelWidth:10,                            
                             items:fieldset_items
                         });
+        return fieldset;
+    }
+    ,loadURLMedia:function(data){
+
+        var cdromstore = new Ext.data.JsonStore({
+                //id:'id'
+                root:'data'
+                ,totalProperty:'total'
+                ,fields:[
+                    {name:'name', type:'string'},'full_path'
+                ]
+                ,proxy: new Ext.data.HttpProxy({
+                        url:<?php echo json_encode(url_for('view/iso'))?>
+                    })
+                ,baseParams:{doAction:'jsonList',params:Ext.encode({emptyValue:true})}
+        });        
+
+        //build cdrom com for menu bar
+
+        var cdromcheckbox = new Ext.form.Checkbox({ fieldLabel:'',hideLabel:true,ref:'cdrom_ckb',name:'cdrom_ckb',boxLabel:'',inputValue: '1'
+                                                            ,disabled: (data['boot']=='location') ? true : false
+                                                            ,checked: (((data['boot']!='location') && (data['location']!=null))? true : false)
+                                                            ,listeners:{
+                                                                    check:{scope:this,fn:function(ckb,ck){
+                                                                            this.getForm().findField('cdrom_cb').setDisabled(!ck);
+                                                                            if( ck ){
+                                                                                Ext.getCmp('server-edit-config-boot-cdrom').setDisabled(false);
+                                                                            } else {
+                                                                                Ext.getCmp('server-edit-config-boot-cdrom').setDisabled(!this.getForm().findField('cdromextra_ckb').getValue());
+                                                                                if( Ext.getCmp('server-edit-config-boot-cdrom').getValue() ){
+                                                                                    Ext.getCmp('server-edit-config-boot-cdrom').setValue(false);
+                                                                                    var boot_opts = this.find('name','boot_from');
+                                                                                    var boot_selopt;
+                                                                                    for(var i=0; i<boot_opts.length && !boot_selopt; i++){
+                                                                                        if( !boot_opts[i].disabled ){
+                                                                                            boot_selopt = true;
+                                                                                            boot_opts[i].setValue(true);
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                    }}
+                                                            }
+                                                        });
+        var cdromcombo = new Ext.form.ComboBox({
+                fieldLabel:'CD-ROM',
+                editable:false
+                ,disabled: (data['boot']=='location') ? true : false
+                ,valueField:'full_path'
+                ,hiddenName:'cdrom_cb'
+                ,ref:'cdrom_cb'
+                ,displayField:'name'
+                ,pageSize:10
+                ,triggerAction:'all'
+                ,forceSelection:true
+                ,selectOnFocus:true
+                ,valueNotFoundText: __('Invalid')            
+                ,resizable:true
+                ,minListWidth:250
+                ,anchor:'80%'
+                ,store:cdromstore
+                ,validator:function(v){                    
+                    
+                    var boot_cdrom = (this.ownerCt).ownerCt.boot_cdrom;
+                    if(boot_cdrom)
+                        if(boot_cdrom.getValue() && cdromstore.getAt(0) && cdromstore.getAt(0).data['name']==v) return <?php echo json_encode(__('Choose iso to load')) ?>;
+
+                    return true;
+                    
+                }
+                ,listeners:{
+                    // set tooltip and validate
+                    render:function() {
+                        this.el.set({qtip: <?php echo json_encode(__('Choose iso to load')) ?>});
+                        this.validate();
+                    }
+                    
+                }
+        });
+
+        var cdromcheckboxExtra = new Ext.form.Checkbox({ fieldLabel:'',hideLabel:true,ref:'cdromextra_ckb',name:'cdromextra_ckb',boxLabel:'',inputValue: '1'
+                                                            ,disabled: (data['boot']=='location') ? true : false
+                                                            ,checked: ((data['cdromextra']!=null) ? true : false)
+                                                            ,listeners:{
+                                                                    check:{scope:this,fn:function(ckb,ck){
+                                                                            this.getForm().findField('cdromextra_cb').setDisabled(!ck);
+
+                                                                            if( ck ){
+                                                                                Ext.getCmp('server-edit-config-boot-cdrom').setDisabled(false);
+                                                                            } else {
+                                                                                Ext.getCmp('server-edit-config-boot-cdrom').setDisabled(!this.getForm().findField('cdrom_ckb').getValue());
+                                                                            }
+                                                                    }}
+                                                            }
+                                                });
+        var cdromcomboExtra = new Ext.form.ComboBox({
+                fieldLabel:'Extra CD-ROM',
+                editable:false
+                ,disabled: (data['boot']=='location') ? true : false
+                ,valueField:'full_path'
+                ,hiddenName:'cdromextra_cb'
+                ,ref:'cdromextra_cb'
+                ,displayField:'name'
+                ,pageSize:10
+                ,triggerAction:'all'
+                ,forceSelection:true
+                ,selectOnFocus:true
+                ,valueNotFoundText: __('Invalid')            
+                ,resizable:true
+                ,minListWidth:250
+                ,anchor:'80%'
+                ,store:cdromstore
+                ,listeners:{
+                    // set tooltip and validate
+                    render:function() {
+                        this.el.set({qtip: <?php echo json_encode(__('Choose iso to load')) ?>});
+                    }
+                    
+                }
+        });
+
+        // populate cdrom combo items
+        if(cdromcombo.getStore().getTotalCount()>0){
+            if(data['cdrom']) cdromcombo.setValue(data['location']);
+        } else {
+            cdromcombo.getStore().reload({scope:this,callback:function(){
+                        var cb_store = cdromcombo.getStore();
+                        if(cb_store){
+                            cdromcombo.setValue('');
+                            if(data['cdrom'] || data['boot']=='cdrom'){
+                                var matched = cb_store.findExact('full_path',data['location']);
+
+                                if(matched != -1) cdromcombo.setValue(data['location']);
+
+                            }
+                        }
+            }});
+        }
+
+        // populate cdrom extra combo items
+        if(cdromcomboExtra.getStore().getTotalCount()>0){
+            if(data['cdromextra']) cdromcomboExtra.setValue(data['cdromextra']);
+        } else {
+            cdromcomboExtra.getStore().reload({scope:this,callback:function(){
+                        var cb_store = cdromcomboExtra.getStore();
+                        if(cb_store){
+                            cdromcomboExtra.setValue('');
+                            if(data['cdromextra']){
+                                var matched = cb_store.findExact('full_path',data['cdromextra']);
+                                if(matched != -1) cdromcomboExtra.setValue(data['cdromextra']);
+                            }
+                        }
+            }});
+        }
+
+        /*cdromcheckbox.setValue((data['location']!=null) ? true : false);
+        cdromcheckboxExtra.setValue((data['cdromextra']!=null) ? true : false);*/
+
+        var fieldset = [];
+        
         //if(1 || this.getVmType(this.getForm().getValues())!='pv'){
             fieldset.push(
                                 {
@@ -415,6 +457,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                                     xtype:'fieldset',
                                     title: <?php echo json_encode(__('Removable media')) ?>,
                                     //items:[cdromcombo,cdromcomboExtra]
+                                    //disabled: (data['boot']=='location') ? true : false,
                                     defaults:{border:false},
                                     items: [
                                         {
@@ -440,8 +483,59 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                             );
         //}
                     
+        fieldset.push(
+                    {
+                        xtype: 'fieldset',
+                        //border: false,
+                        labelWidth: 90,
+                        autoHeight:true,
+                        defaultType:'textfield',
+                        id: 'server-edit-config-boot-locationurl-fieldset',
+                        title: <?php echo json_encode(__('Network URL options')) ?>,
+                        items: [
+                            {
+                                xtype:'textfield',
+                                labelStyle:'width:30px',
+                                fieldLabel: <?php echo json_encode(__('URL')) ?>,
+                                name:'location', anchor:'80%',
+                                emptyText : 'url://path/to/image kernel',
+                                id: 'server-edit-config-boot-locationurl-text',
+                                //disabled:((data['server_has_netifs'])&&(data['boot']=='location')) ? false : true,
+                                disabled: (data['boot']=='location') ? false : true,
+                                validator:function(v){
+                                    if(!v) return 'needed';
+                                },
+                                value: (data['cdrom']==1) ? '': data['location']
+                            },{
+                                xtype: 'fieldset',
+                                'id': 'server-edit-config-boot-locationurl-options',
+                                collapsible: true,
+                                collapsed: (data['boot']=='location') ? false : true,
+                                disabled: (data['boot']=='location') ? false : true,
+                                title: <?php echo json_encode(__('URL Options')) ?>,
+                                items: [
+                                    {
+                                        fieldLabel: <?php echo json_encode(__('Kickstart URL')) ?>,
+                                        xtype: 'textfield',
+                                        name: 'extra_kickstart',
+                                        disabled: (data['boot']=='location') ? false : true,
+                                        anchor:'90%',
+                                        //allowBlank:false,
+                                        emptyText : 'url://path/to/kickstart',
+                                    },{
+                                        fieldLabel: <?php echo json_encode(__('Kernel options')) ?>,
+                                        xtype: 'textfield',
+                                        name: 'extra_kerneloptions',
+                                        disabled: (data['boot']=='location') ? false : true,
+                                        anchor:'90%',
+                                        //allowBlank:false,
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+        );            
         return fieldset;
-        
     }
     ,loadConfigurationPanel:function(){
 
@@ -507,11 +601,15 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                                     if(val <= parseFloat(max_mem_value)) return true;
                                 else return <?php echo json_encode(__('Cannot exceed total allocatable memory size')) ?>;
                             }
-                        },
+                        }
+                    ]//end items flex
+                }
+                ,{
+                    flex:1,
+                    id:'server-edit-config-right_panel'                    
+                    ,items: [
                         {
                             xtype:'fieldset',title: <?php echo json_encode(__('CPUs')) ?>,
-                            /*layout: 'hbox',
-                            defaults: { border: false },*/
                             items:[
                                     /*{
                                         xtype:'fieldset',
@@ -545,24 +643,27 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                                                                     // set sockets and cores by default
                                                                     if( (vcpu>2) && ((vcpu % 2) == 0) ){
                                                                         var half_vcpu = vcpu/2;
-                                                                        (f.ownerCt).cpu_sockets.setValue(half_vcpu);
-                                                                        (f.ownerCt).cpu_cores.setValue(half_vcpu);
+                                                                        (f.ownerCt).cpu_topology.cpu_sockets.setValue(half_vcpu);
+                                                                        (f.ownerCt).cpu_topology.cpu_cores.setValue(half_vcpu);
                                                                     } else {
-                                                                        (f.ownerCt).cpu_sockets.setValue(vcpu);
-                                                                        (f.ownerCt).cpu_cores.setValue(1);
+                                                                        (f.ownerCt).cpu_topology.cpu_sockets.setValue(vcpu);
+                                                                        (f.ownerCt).cpu_topology.cpu_cores.setValue(1);
                                                                     }
-                                                                    (f.ownerCt).cpu_threads.setValue(1);
+                                                                    (f.ownerCt).cpu_topology.cpu_threads.setValue(1);
                                                             }
                                                     },
                                                     scope:this,
                                                     width: 50
                                                 },
                                         /*]
-                                    },
+                                    },*/
                                     {
                                         xtype:'fieldset',
-                                        items: [*/
-                                                { xtype: 'spacer', height: '10' },
+                                        title: <?php echo json_encode(__('Topology')) ?>,
+                                        collapsible: true,
+                                        ref: 'cpu_topology',
+                                        items: [
+                                                //{ xtype: 'spacer', height: '10' },
                                                 {
                                                     xtype         : 'numberfield',
                                                     name          : 'cpu_sockets',
@@ -602,15 +703,108 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                                                             'change': this.onVCPUChange
                                                     }
                                                 }
-                                        /*]
-                                    }*/
+                                        ]
+                                    }
+                                    ,{
+                                        xtype:'fieldset',
+                                        title: <?php echo json_encode(__('Configuration')) ?>,
+                                        collapsible: true,
+                                        collapsed: true,
+                                        ref: 'cpu_configuration',
+                                        'id': 'server-edit-cpu-configuration',
+                                        items: [
+                                            {
+                                                xtype     : 'checkbox',
+                                                name      : 'cpu_host_model',
+                                                ref       : 'cpu_host_model_ck',
+                                                fieldLabel  : <?php echo json_encode(__('Use host CPU model')) ?>,
+                                                checked   : false,
+                                                listeners : {
+                                                    'check':{
+                                                        scope:this,
+                                                        fn:function(cbox,ck){
+                                                            if( ck ){
+                                                                cbox.ownerCt.cpu_model_cb.disable();
+                                                            } else {
+                                                                cbox.ownerCt.cpu_model_cb.enable();
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            new Ext.form.ComboBox({
+                                                    fieldLabel:'CPU Model',
+                                                    editable:false
+                                                    //,disabled: (data['boot']=='location') ? true : false
+                                                    ,valueField:'model'
+                                                    ,hiddenName:'cpu_model'
+                                                    ,ref:'cpu_model_cb'
+                                                    ,displayField:'model'
+                                                    //,pageSize:10
+                                                    ,triggerAction:'all'
+                                                    ,forceSelection:true
+                                                    ,selectOnFocus:true
+                                                    ,valueNotFoundText: __('Invalid')            
+                                                    ,resizable: false
+                                                    //,minListWidth:250
+                                                    ,anchor: '100%'
+                                                    ,store: new Ext.data.ArrayStore({
+                                                            fields: ['model'],
+                                                            data : <?php
+                                                                        /*
+                                                                         * build cpu models dynamic
+                                                                         */
+                                                                        $cpu_models = sfConfig::get('app_cpu_models');
+                                                                        $cpu_model_elem = array();
+
+                                                                        foreach($cpu_models as $emodel)
+                                                                            $cpu_model_elem[] = '['.json_encode($emodel).']';
+                                                                        echo '['.implode(',',$cpu_model_elem).']'."\n";
+                                                                    ?>
+                                                            })
+                                                    ,mode: 'local'
+                                                    ,validator:function(v){                    
+                                                        return true;
+                                                    }
+                                                    ,listeners:{
+                                                        // set tooltip and validate
+                                                        render:function() {
+                                                            this.el.set({qtip: <?php echo json_encode(__('Choose CPU model')) ?>});
+                                                            this.validate();
+                                                        }
+                                                        
+                                                    }
+                                            })
+                                        ]
+                                    }
                                 ]
                         }
-                    ]//end items flex
+                    ]
                 }
-                ,{
+            ]};
+
+        this.serverEditTabPanel.add(configuration);
+        
+    }
+    ,loadOSBootOptions:function(){
+
+
+        var configuration = {
+            title: <?php echo json_encode(__('OS / Boot options')) ?>
+            ,bodyStyle:'padding:5px'
+            ,autoScroll:true 
+            ,layout: {
+                type: 'hbox',
+                align: 'stretch'  // Child items are stretched to full width
+            }            
+            ,defaults:{layout:'form',bodyStyle:'padding:10px;',border:false}
+            ,items:[
+                {
                     flex:1,
-                    id:'server-edit-config-right_panel'                    
+                    id:'server-edit-os-bootoptions-left_panel' 
+                },{
+                    flex:1,
+                    id:'server-edit-os-bootoptions-right_panel' 
                 }
             ]};
 
@@ -922,6 +1116,41 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
         };
         this.serverEditTabPanel.add(vmhaoptions);
     }
+    ,loadLibvirtExtend: function(){
+
+        var libvirtExtendOptions = {
+            id:'server-edit-libvirtextend',
+            title: <?php echo json_encode(__('Extend')) ?>
+            ,bodyStyle:'padding:5px'
+            ,autoScroll:true 
+            ,layout: {
+                type: 'hbox',
+                align: 'stretch'  // Child items are stretched to full width
+            }            
+            ,defaults:{layout:'form',bodyStyle:'padding:10px;',border:false}
+            ,items: [
+                {
+                    flex: 1,
+                    xtype:'fieldset',
+                    title: <?php echo json_encode(__('Libvirt extend')) ?>,
+                    //collapsible: true,
+                    items: [
+                        new Ext.form.TextArea({
+                                fieldLabel: <?php echo json_encode(__('Extend')) ?>,
+                                name: 'libvirt_extend',
+                                //maxLength: 15,
+                                //vtype:'ip_addr',
+                                //allowBlank:false,
+                                //disabled:true,
+                                width: '90%',
+                                height: '90%'
+                        })
+                    ]
+                }
+            ]
+        };
+        this.serverEditTabPanel.add(libvirtExtendOptions);
+    }
     ,loadRecord:function(data){
         this.load({url:'server/jsonLoad',params:data
             ,scope:this
@@ -966,9 +1195,14 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
                 /*
                  * set boot options based on vm_type
-                 */
                 Ext.getCmp('server-edit-config-right_panel').add(this.loadBootOptions(data));
                 Ext.getCmp('server-edit-config-right_panel').doLayout();
+                 */
+
+                Ext.getCmp('server-edit-os-bootoptions-left_panel').add(this.loadBootOptions(data));
+                Ext.getCmp('server-edit-os-bootoptions-left_panel').doLayout();
+                Ext.getCmp('server-edit-os-bootoptions-right_panel').add(this.loadURLMedia(data));
+                Ext.getCmp('server-edit-os-bootoptions-right_panel').doLayout();
 
                 Ext.getCmp('server-edit-otheroptions-left_panel').add(this.loadVNCOptions(data));
                 Ext.getCmp('server-edit-otheroptions-left_panel').doLayout();
@@ -1005,6 +1239,8 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                         form.findField('cpu_sockets').setDisabled(true);
                         form.findField('cpu_cores').setDisabled(true);
                         form.findField('cpu_threads').setDisabled(true);
+                        form.findField('cpu_host_model').setDisabled(true);
+                        form.findField('cpu_model').setDisabled(true);
                         form.findField('cdrom_ckb').setDisabled(true);
                         form.findField('cdromextra_ckb').setDisabled(true);
                     }
@@ -1018,16 +1254,59 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                     Ext.getCmp('server-edit-devices').setDisabled(true);
                     Ext.getCmp('server-edit-config-boot-locationurl').show();
                     Ext.getCmp('server-edit-config-boot-locationurl-text').show();
+                    Ext.getCmp('server-edit-config-boot-locationurl-fieldset').show();
                     Ext.getCmp('server-edit-config-boot-pxe').hide();
                     Ext.getCmp('server-edit-config-boot-cdrom').hide();
                     Ext.getCmp('server-edit-fieldset-removable-media').hide();
                 } else {
                     Ext.getCmp('server-edit-devices').setDisabled(false);
-                    Ext.getCmp('server-edit-config-boot-locationurl').hide();
-                    Ext.getCmp('server-edit-config-boot-locationurl-text').hide();
+                    //Ext.getCmp('server-edit-config-boot-locationurl').hide();
+                    //Ext.getCmp('server-edit-config-boot-locationurl-text').hide();
+                    //Ext.getCmp('server-edit-config-boot-locationurl-fieldset').hide();
+                    Ext.getCmp('server-edit-config-boot-locationurl').show();
+                    Ext.getCmp('server-edit-config-boot-locationurl-text').show();
+                    Ext.getCmp('server-edit-config-boot-locationurl-fieldset').show();
                     Ext.getCmp('server-edit-config-boot-pxe').show();
                     Ext.getCmp('server-edit-config-boot-cdrom').show();
                     Ext.getCmp('server-edit-fieldset-removable-media').show();
+                    Ext.getCmp('server-edit-fieldset-removable-media').doLayout();
+                }
+                if( data['extra'] ){
+                    var extra = data['extra'];
+
+                    var ks_arr = extra.match(/ks=(\S+)/);
+                    if( ks_arr ){
+                        var kickstart = ks_arr[1];
+                        form.findField('extra_kickstart').setValue(kickstart);
+                        var extra_aux = extra.replace(/ks=\S+\s*/,'');
+                        extra = extra_aux;
+                    }
+                    var kerneloptions = extra;
+                    form.findField('extra_kerneloptions').setValue(kerneloptions);
+                    //Ext.getCmp('server-edit-config-boot-locationurl-options').expand();
+                }
+
+                if( data['extend'] ){
+                    var extendData = data['extend'];
+                    //console.log(extendData);
+                    if( form.findField('libvirt_extend') ){
+                        form.findField('libvirt_extend').setValue(extendData);
+                    }
+                    form.findField('_libvirt_extend').setValue(extendData);
+
+                    var extendObject = Ext.decode(extendData);
+                    if( extendObject['cpu'] ){
+                        if( extendObject['cpu']['mode'] == 'host-model' ){
+                            form.findField('cpu_host_model').setValue(1);
+                            Ext.getCmp('server-edit-cpu-configuration').expand();
+                        } else if( extendObject['cpu']['mode'] == 'custom' ){
+                            var model = extendObject['cpu']['model'];
+                            form.findField('cpu_model').setValue(model);
+                            Ext.getCmp('server-edit-cpu-configuration').expand();
+                        } else {
+                            Ext.getCmp('server-edit-cpu-configuration').collapse();
+                        }
+                    }
                 }
             } 
         });
@@ -1036,12 +1315,12 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
         
         var name = this.getForm().findField('name').getValue();
         var form_fieldvalues = this.getForm().getFieldValues();
-        /*console.log('form_fieldvalues');
-        console.log(form_fieldvalues);*/
+        //console.log('form_fieldvalues');
+        //console.log(form_fieldvalues);
 
         var form_values = this.getForm().getValues();
-        /*console.log('form_values');
-        console.log(form_values);*/
+        //console.log('form_values');
+        //console.log(form_values);
 
         var form_vm_os = form_values['vm_OS'] ? form_values['vm_OS'] : '';
         var vm_os = '';
@@ -1074,34 +1353,53 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
          *
          */
 
-        send_data['autostart'] = form_values['autostart'] ? true : false;
+        send_data['autostart'] = form_fieldvalues['autostart'] ? true : false;
         send_data['boot'] = form_values['boot_from'];
-        send_data['cdrom'] = 0;
-        send_data['cdromextra'] = null;
-        send_data['location'] = null;
+
+        if( send_data['boot'] ){    // reset cdrom and location
+            send_data['cdrom'] = 0;
+            send_data['cdromextra'] = null;
+            send_data['location'] = null;
+        }
 
         if(send_data['boot']=='location'){
-            send_data['location'] = form_values['location'];
+            send_data['location'] = form_fieldvalues['location'];
+
+            var extra = "";
+            if(form_fieldvalues['extra_kerneloptions']){
+                extra = form_fieldvalues['extra_kerneloptions'];
+            }
+            if(form_fieldvalues['extra_kickstart']){
+                var kickstart_field = this.getForm().findField('extra_kickstart'); 
+                //console.log("extra_kickstart ");
+                //console.log(kickstart_field.emptyText);
+                if(form_fieldvalues['extra_kickstart'] != kickstart_field.emptyText){
+                    if( extra ) extra += " ";
+                    extra += "ks=" + form_fieldvalues['extra_kickstart'];
+                }
+            }
+            send_data['extra'] = extra;
+
         } else if( send_data['vm_type'] != 'pv' ){
             if( form_fieldvalues['cdrom_ckb'] ){
                 send_data['cdrom'] = 1;
                 send_data['location'] = '';
-                if(send_data['boot']=='cdrom') send_data['location'] = form_values['cdrom_cb'];
+                if(send_data['boot']=='cdrom') send_data['location'] = form_fieldvalues['cdrom_cb'];
                 else{
-                    if(form_values['cdrom_cb']){
+                    if(form_fieldvalues['cdrom_cb']){
                         send_data['cdrom'] = 1;
-                        send_data['location'] = form_values['cdrom_cb'];
+                        send_data['location'] = form_fieldvalues['cdrom_cb'];
                     }
                 }
             }
             if( form_fieldvalues['cdromextra_ckb'] ){
                 send_data['cdromextra'] = '';
-                if(form_values['cdromextra_cb']){
-                    send_data['cdromextra'] = form_values['cdromextra_cb'];
+                if(form_fieldvalues['cdromextra_cb']){
+                    send_data['cdromextra'] = form_fieldvalues['cdromextra_cb'];
                 }
             }
         }
-        
+ 
         /*
          * gather vnc options
          *
@@ -1130,6 +1428,51 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
             send_data['features'] = '';
         }
 
+        // extend Field
+        var cExtend = 0;
+        var extendField = {};
+
+        if( form_fieldvalues['libvirt_extend'] ){
+            var ext = form_fieldvalues['libvirt_extend'];
+            if( ext )
+                extendField = Ext.decode(ext);
+            cExtend++;
+        } else if( form_fieldvalues['_libvirt_extend'] ){
+            var ext = form_fieldvalues['_libvirt_extend'];
+            if( ext )
+                extendField = Ext.decode(ext);
+            cExtend++;
+        }
+
+        for(f in form_fieldvalues){
+            if( f.match(/^extend_/) ){
+                var fv = f.replace('extend_','');
+                extendField[fv] = form_fieldvalues[f];
+                cExtend++;
+            }
+        }
+        if( form_fieldvalues['cpu_host_model'] ){
+            var cpu = extendField['cpu'];
+            if( !cpu  ) cpu = {};
+            cpu['mode'] = 'host-model';
+            delete cpu['model'];
+            extendField['cpu'] = cpu;
+            cExtend++;
+        } else if( form_fieldvalues['cpu_model'] ){
+            var model = form_fieldvalues['cpu_model'];
+            var cpu = extendField['cpu'];
+            if( !cpu  ) cpu = {};
+            cpu['mode'] = 'custom';
+            cpu['model'] = model;
+            extendField['cpu'] = cpu;
+            cExtend++;
+        }
+        if( cExtend > 0 ){
+            send_data['extend'] = Ext.encode(extendField);
+        /*} else {
+            send_data['extend'] = '';*/
+        }
+
         /*
          * gather network interfaces info
          */
@@ -1151,10 +1494,11 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
 
             nets_store.each(function(f){
                     var data = f.data;
+                    var model = ((send_data['vm_type']=='pv') || Ext.isEmpty(data['intf_model'])) ? '': data['intf_model'];
                     var insert = {
                         'port':i,
                         'vlan_id':data['vlan_id'],
-                        'intf_model': Ext.isEmpty(data['intf_model']) ? '': data['intf_model'],
+                        'intf_model': model,
                         'mac':data['mac']};
 
                     networks.push(insert);
@@ -1287,7 +1631,7 @@ Server.Edit.Form = Ext.extend(Ext.form.FormPanel, {
                             var ncores = (f.ownerCt).cpu_cores.getValue();
                             var nthreads = (f.ownerCt).cpu_threads.getValue();
                             var vcpu = nsockets * ncores * nthreads;
-                            (f.ownerCt).vcpu.setValue(vcpu);
+                            (f.ownerCt.ownerCt).vcpu.setValue(vcpu);
     }
 });
 
@@ -1298,7 +1642,7 @@ Server.Edit.Window = function(config) {
 
     Ext.apply(Ext.form.VTypes, {
                 vm_vcpu_topology : function(val, field) {
-                            var max_cpu = (field.ownerCt).node_ncpus.getValue();
+                            var max_cpu = (field.ownerCt.ownerCt).node_ncpus.getValue();
                             var nsockets = (field.ownerCt).cpu_sockets.getValue();
                             var ncores = (field.ownerCt).cpu_cores.getValue();
                             var nthreads = (field.ownerCt).cpu_threads.getValue();
@@ -1311,7 +1655,7 @@ Server.Edit.Window = function(config) {
             });
 
     Server.Edit.Window.superclass.constructor.call(this, {
-        width:800
+        width:660
         ,height:480
         ,border:false
         ,modal:true

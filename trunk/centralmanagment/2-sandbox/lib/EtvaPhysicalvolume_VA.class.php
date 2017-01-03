@@ -289,8 +289,11 @@ class EtvaPhysicalvolume_VA
                     $etva_physicalvol = EtvaPhysicalvolumePeer::retrieveByNodeTypeDevice($etva_node->getId(), $dev_type, $dev_device);
                 }
 
+                /* CMAR 22/10/2014
+                    * FIX update wrong device by device name
                 if( !$etva_physicalvol )
                     $etva_physicalvol = EtvaPhysicalvolumePeer::retrieveByNodeTypeDevice($etva_node->getId(), $dev_type, $dev_device);
+                */
 
                 if( !$etva_physicalvol )
                     $etva_physicalvol = EtvaPhysicalvolumePeer::retrieveByClusterTypeUUIDDevice($etva_node->getClusterId(), $dev_type, $dev_info[EtvaPhysicalvolume::UUID_MAP], $dev_device);

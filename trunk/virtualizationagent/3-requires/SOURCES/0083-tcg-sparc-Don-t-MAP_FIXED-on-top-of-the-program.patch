@@ -1,0 +1,42 @@
+From 3399e5800a1ae2e41adb24c3741852c4a3ff7726 Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Fri, 21 Sep 2012 10:40:48 -0700
+Subject: [PATCH] tcg-sparc: Don't MAP_FIXED on top of the program
+
+The address we pick in sparc64.ld is also 0x60000000, so doing a fixed map
+on top of that is guaranteed to blow up.  Choosing 0x40000000 is exactly
+right for the max of code_gen_buffer_size set below.
+
+No need to ever use MAP_FIXED.  While getting our desired address helps
+optimize the generated code, we won't fail if we don't get it.
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ exec.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/exec.c b/exec.c
+index 5834766..871a68a 100644
+--- a/exec.c
++++ b/exec.c
+@@ -543,8 +543,7 @@ static void code_gen_alloc(unsigned long tb_size)
+             code_gen_buffer_size = (800 * 1024 * 1024);
+ #elif defined(__sparc_v9__)
+         // Map the buffer below 2G, so we can use direct calls and branches
+-        flags |= MAP_FIXED;
+-        start = (void *) 0x60000000UL;
++        start = (void *) 0x40000000UL;
+         if (code_gen_buffer_size > (512 * 1024 * 1024))
+             code_gen_buffer_size = (512 * 1024 * 1024);
+ #elif defined(__arm__)
+@@ -584,8 +583,7 @@ static void code_gen_alloc(unsigned long tb_size)
+             code_gen_buffer_size = (800 * 1024 * 1024);
+ #elif defined(__sparc_v9__)
+         // Map the buffer below 2G, so we can use direct calls and branches
+-        flags |= MAP_FIXED;
+-        addr = (void *) 0x60000000UL;
++        addr = (void *) 0x40000000UL;
+         if (code_gen_buffer_size > (512 * 1024 * 1024)) {
+             code_gen_buffer_size = (512 * 1024 * 1024);
+         }

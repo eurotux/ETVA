@@ -1,0 +1,51 @@
+From 24518f0b7d9101f3d313aaa257a73cfb66e97cd0 Mon Sep 17 00:00:00 2001
+From: "Peter A. G. Crosthwaite" <peter.crosthwaite@petalogix.com>
+Date: Thu, 28 Jun 2012 12:52:23 +1000
+Subject: [PATCH] xilinx_timer: Removed comma in device name
+
+Fixes an error in a61e4b07a30c062260d2d01771773f14820d1eb7
+
+Signed-off-by: Peter A. G. Crosthwaite <peter.crosthwaite@petalogix.com>
+(cherry picked from commit c0a1dcb9f0baf9269f8baeb02cbcca8dad75454c)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/xilinx.h       | 2 +-
+ hw/xilinx_timer.c | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/hw/xilinx.h b/hw/xilinx.h
+index 556c5aa..df06a00 100644
+--- a/hw/xilinx.h
++++ b/hw/xilinx.h
+@@ -21,7 +21,7 @@ xilinx_timer_create(target_phys_addr_t base, qemu_irq irq, int oto, int freq)
+ {
+     DeviceState *dev;
+ 
+-    dev = qdev_create(NULL, "xlnx,xps-timer");
++    dev = qdev_create(NULL, "xlnx.xps-timer");
+     qdev_prop_set_uint32(dev, "one-timer-only", oto);
+     qdev_prop_set_uint32(dev, "frequency", freq);
+     qdev_init_nofail(dev);
+diff --git a/hw/xilinx_timer.c b/hw/xilinx_timer.c
+index b562bd0..053ba02 100644
+--- a/hw/xilinx_timer.c
++++ b/hw/xilinx_timer.c
+@@ -217,7 +217,7 @@ static int xilinx_timer_init(SysBusDevice *dev)
+         ptimer_set_freq(xt->ptimer, t->freq_hz);
+     }
+ 
+-    memory_region_init_io(&t->mmio, &timer_ops, t, "xlnx,xps-timer",
++    memory_region_init_io(&t->mmio, &timer_ops, t, "xlnx.xps-timer",
+                           R_MAX * 4 * num_timers(t));
+     sysbus_init_mmio(dev, &t->mmio);
+     return 0;
+@@ -239,7 +239,7 @@ static void xilinx_timer_class_init(ObjectClass *klass, void *data)
+ }
+ 
+ static TypeInfo xilinx_timer_info = {
+-    .name          = "xlnx,xps-timer",
++    .name          = "xlnx.xps-timer",
+     .parent        = TYPE_SYS_BUS_DEVICE,
+     .instance_size = sizeof(struct timerblock),
+     .class_init    = xilinx_timer_class_init,

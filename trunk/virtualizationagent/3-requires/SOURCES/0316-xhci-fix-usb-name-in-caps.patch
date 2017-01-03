@@ -1,0 +1,37 @@
+From 2665cef7d2df17086fa03328f3a0314b4dc55847 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Wed, 24 Oct 2012 16:19:21 +0200
+Subject: [PATCH] xhci: fix usb name in caps
+
+Used to be "UTB" not "USB".
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 0ebfb144e8ad3f2da436d630fdcc5aa9ab646341)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-xhci.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hw/usb/hcd-xhci.c b/hw/usb/hcd-xhci.c
+index 333df59..30cb0d5 100644
+--- a/hw/usb/hcd-xhci.c
++++ b/hw/usb/hcd-xhci.c
+@@ -2098,7 +2098,7 @@ static uint32_t xhci_cap_read(XHCIState *xhci, uint32_t reg)
+         ret = 0x02000402; /* USB 2.0 */
+         break;
+     case 0x24: /* Supported Protocol:04 */
+-        ret = 0x20425455; /* "USB " */
++        ret = 0x20425355; /* "USB " */
+         break;
+     case 0x28: /* Supported Protocol:08 */
+         ret = 0x00000001 | (USB2_PORTS<<8);
+@@ -2110,7 +2110,7 @@ static uint32_t xhci_cap_read(XHCIState *xhci, uint32_t reg)
+         ret = 0x03000002; /* USB 3.0 */
+         break;
+     case 0x34: /* Supported Protocol:04 */
+-        ret = 0x20425455; /* "USB " */
++        ret = 0x20425355; /* "USB " */
+         break;
+     case 0x38: /* Supported Protocol:08 */
+         ret = 0x00000000 | (USB2_PORTS+1) | (USB3_PORTS<<8);

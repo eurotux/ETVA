@@ -1,0 +1,434 @@
+From 5968c571f5a53f6d8e20089649071bfebb12583e Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Sun, 2 Sep 2012 07:42:33 +0000
+Subject: [PATCH] target-unicore32: switch to AREG0 free mode
+
+Add an explicit CPUState parameter instead of relying on AREG0
+and switch to AREG0 free mode.
+
+Tested-by: Guan Xuetao <gxt@mprc.pku.edu.cn>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure                      |  2 +-
+ target-unicore32/Makefile.objs |  2 --
+ target-unicore32/helper.h      | 26 ++++++++---------
+ target-unicore32/op_helper.c   | 65 ++++++++++++++++--------------------------
+ target-unicore32/translate.c   | 38 ++++++++++++------------
+ 5 files changed, 58 insertions(+), 75 deletions(-)
+
+diff --git a/configure b/configure
+index af03942..a8827ba 100755
+--- a/configure
++++ b/configure
+@@ -3839,7 +3839,7 @@ symlink "$source_path/Makefile.target" "$target_dir/Makefile"
+ 
+ 
+ case "$target_arch2" in
+-  alpha | i386 | lm32 | m68k | or32 | s390x | sparc* | x86_64 | xtensa* | ppc*)
++  alpha | i386 | lm32 | m68k | or32 | s390x | sparc* | unicore32 | x86_64 | xtensa* | ppc*)
+     echo "CONFIG_TCG_PASS_AREG0=y" >> $config_target_mak
+   ;;
+ esac
+diff --git a/target-unicore32/Makefile.objs b/target-unicore32/Makefile.objs
+index 777f01f..8e143da 100644
+--- a/target-unicore32/Makefile.objs
++++ b/target-unicore32/Makefile.objs
+@@ -2,5 +2,3 @@ obj-y += translate.o op_helper.o helper.o cpu.o
+ obj-y += ucf64_helper.o
+ 
+ obj-$(CONFIG_SOFTMMU) += machine.o softmmu.o
+-
+-$(obj)/op_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/target-unicore32/helper.h b/target-unicore32/helper.h
+index 305318a..a4b8149 100644
+--- a/target-unicore32/helper.h
++++ b/target-unicore32/helper.h
+@@ -17,26 +17,26 @@ DEF_HELPER_1(cp1_putc, void, i32)
+ DEF_HELPER_1(clz, i32, i32)
+ DEF_HELPER_1(clo, i32, i32)
+ 
+-DEF_HELPER_1(exception, void, i32)
++DEF_HELPER_2(exception, void, env, i32)
+ 
+-DEF_HELPER_2(asr_write, void, i32, i32)
+-DEF_HELPER_0(asr_read, i32)
++DEF_HELPER_3(asr_write, void, env, i32, i32)
++DEF_HELPER_1(asr_read, i32, env)
+ 
+-DEF_HELPER_1(get_user_reg, i32, i32)
+-DEF_HELPER_2(set_user_reg, void, i32, i32)
++DEF_HELPER_2(get_user_reg, i32, env, i32)
++DEF_HELPER_3(set_user_reg, void, env, i32, i32)
+ 
+-DEF_HELPER_2(add_cc, i32, i32, i32)
+-DEF_HELPER_2(adc_cc, i32, i32, i32)
+-DEF_HELPER_2(sub_cc, i32, i32, i32)
+-DEF_HELPER_2(sbc_cc, i32, i32, i32)
++DEF_HELPER_3(add_cc, i32, env, i32, i32)
++DEF_HELPER_3(adc_cc, i32, env, i32, i32)
++DEF_HELPER_3(sub_cc, i32, env, i32, i32)
++DEF_HELPER_3(sbc_cc, i32, env, i32, i32)
+ 
+ DEF_HELPER_2(shl, i32, i32, i32)
+ DEF_HELPER_2(shr, i32, i32, i32)
+ DEF_HELPER_2(sar, i32, i32, i32)
+-DEF_HELPER_2(shl_cc, i32, i32, i32)
+-DEF_HELPER_2(shr_cc, i32, i32, i32)
+-DEF_HELPER_2(sar_cc, i32, i32, i32)
+-DEF_HELPER_2(ror_cc, i32, i32, i32)
++DEF_HELPER_3(shl_cc, i32, env, i32, i32)
++DEF_HELPER_3(shr_cc, i32, env, i32, i32)
++DEF_HELPER_3(sar_cc, i32, env, i32, i32)
++DEF_HELPER_3(ror_cc, i32, env, i32, i32)
+ 
+ DEF_HELPER_1(ucf64_get_fpscr, i32, env)
+ DEF_HELPER_2(ucf64_set_fpscr, void, env, i32)
+diff --git a/target-unicore32/op_helper.c b/target-unicore32/op_helper.c
+index c63789d..f474d1b 100644
+--- a/target-unicore32/op_helper.c
++++ b/target-unicore32/op_helper.c
+@@ -9,19 +9,18 @@
+  * later version. See the COPYING file in the top-level directory.
+  */
+ #include "cpu.h"
+-#include "dyngen-exec.h"
+ #include "helper.h"
+ 
+ #define SIGNBIT (uint32_t)0x80000000
+ #define SIGNBIT64 ((uint64_t)1 << 63)
+ 
+-void HELPER(exception)(uint32_t excp)
++void HELPER(exception)(CPUUniCore32State *env, uint32_t excp)
+ {
+     env->exception_index = excp;
+     cpu_loop_exit(env);
+ }
+ 
+-static target_ulong asr_read(void)
++static target_ulong asr_read(CPUUniCore32State *env)
+ {
+     int ZF;
+     ZF = (env->ZF == 0);
+@@ -29,24 +28,18 @@ static target_ulong asr_read(void)
+         (env->CF << 29) | ((env->VF & 0x80000000) >> 3);
+ }
+ 
+-target_ulong cpu_asr_read(CPUUniCore32State *env1)
++target_ulong cpu_asr_read(CPUUniCore32State *env)
+ {
+-    CPUUniCore32State *saved_env;
+-    target_ulong ret;
+-
+-    saved_env = env;
+-    env = env1;
+-    ret = asr_read();
+-    env = saved_env;
+-    return ret;
++    return asr_read(env);
+ }
+ 
+-target_ulong HELPER(asr_read)(void)
++target_ulong HELPER(asr_read)(CPUUniCore32State *env)
+ {
+-    return asr_read();
++    return asr_read(env);
+ }
+ 
+-static void asr_write(target_ulong val, target_ulong mask)
++static void asr_write(CPUUniCore32State *env, target_ulong val,
++                      target_ulong mask)
+ {
+     if (mask & ASR_NZCV) {
+         env->ZF = (~val) & ASR_Z;
+@@ -62,23 +55,19 @@ static void asr_write(target_ulong val, target_ulong mask)
+     env->uncached_asr = (env->uncached_asr & ~mask) | (val & mask);
+ }
+ 
+-void cpu_asr_write(CPUUniCore32State *env1, target_ulong val, target_ulong mask)
++void cpu_asr_write(CPUUniCore32State *env, target_ulong val, target_ulong mask)
+ {
+-    CPUUniCore32State *saved_env;
+-
+-    saved_env = env;
+-    env = env1;
+-    asr_write(val, mask);
+-    env = saved_env;
++    asr_write(env, val, mask);
+ }
+ 
+-void HELPER(asr_write)(target_ulong val, target_ulong mask)
++void HELPER(asr_write)(CPUUniCore32State *env, target_ulong val,
++                       target_ulong mask)
+ {
+-    asr_write(val, mask);
++    asr_write(env, val, mask);
+ }
+ 
+ /* Access to user mode registers from privileged modes.  */
+-uint32_t HELPER(get_user_reg)(uint32_t regno)
++uint32_t HELPER(get_user_reg)(CPUUniCore32State *env, uint32_t regno)
+ {
+     uint32_t val;
+ 
+@@ -92,7 +81,7 @@ uint32_t HELPER(get_user_reg)(uint32_t regno)
+     return val;
+ }
+ 
+-void HELPER(set_user_reg)(uint32_t regno, uint32_t val)
++void HELPER(set_user_reg)(CPUUniCore32State *env, uint32_t regno, uint32_t val)
+ {
+     if (regno == 29) {
+         env->banked_r29[0] = val;
+@@ -107,7 +96,7 @@ void HELPER(set_user_reg)(uint32_t regno, uint32_t val)
+    The only way to do that in TCG is a conditional branch, which clobbers
+    all our temporaries.  For now implement these as helper functions.  */
+ 
+-uint32_t HELPER(add_cc)(uint32_t a, uint32_t b)
++uint32_t HELPER(add_cc)(CPUUniCore32State *env, uint32_t a, uint32_t b)
+ {
+     uint32_t result;
+     result = a + b;
+@@ -117,7 +106,7 @@ uint32_t HELPER(add_cc)(uint32_t a, uint32_t b)
+     return result;
+ }
+ 
+-uint32_t HELPER(adc_cc)(uint32_t a, uint32_t b)
++uint32_t HELPER(adc_cc)(CPUUniCore32State *env, uint32_t a, uint32_t b)
+ {
+     uint32_t result;
+     if (!env->CF) {
+@@ -132,7 +121,7 @@ uint32_t HELPER(adc_cc)(uint32_t a, uint32_t b)
+     return result;
+ }
+ 
+-uint32_t HELPER(sub_cc)(uint32_t a, uint32_t b)
++uint32_t HELPER(sub_cc)(CPUUniCore32State *env, uint32_t a, uint32_t b)
+ {
+     uint32_t result;
+     result = a - b;
+@@ -142,7 +131,7 @@ uint32_t HELPER(sub_cc)(uint32_t a, uint32_t b)
+     return result;
+ }
+ 
+-uint32_t HELPER(sbc_cc)(uint32_t a, uint32_t b)
++uint32_t HELPER(sbc_cc)(CPUUniCore32State *env, uint32_t a, uint32_t b)
+ {
+     uint32_t result;
+     if (!env->CF) {
+@@ -186,7 +175,7 @@ uint32_t HELPER(sar)(uint32_t x, uint32_t i)
+     return (int32_t)x >> shift;
+ }
+ 
+-uint32_t HELPER(shl_cc)(uint32_t x, uint32_t i)
++uint32_t HELPER(shl_cc)(CPUUniCore32State *env, uint32_t x, uint32_t i)
+ {
+     int shift = i & 0xff;
+     if (shift >= 32) {
+@@ -203,7 +192,7 @@ uint32_t HELPER(shl_cc)(uint32_t x, uint32_t i)
+     return x;
+ }
+ 
+-uint32_t HELPER(shr_cc)(uint32_t x, uint32_t i)
++uint32_t HELPER(shr_cc)(CPUUniCore32State *env, uint32_t x, uint32_t i)
+ {
+     int shift = i & 0xff;
+     if (shift >= 32) {
+@@ -220,7 +209,7 @@ uint32_t HELPER(shr_cc)(uint32_t x, uint32_t i)
+     return x;
+ }
+ 
+-uint32_t HELPER(sar_cc)(uint32_t x, uint32_t i)
++uint32_t HELPER(sar_cc)(CPUUniCore32State *env, uint32_t x, uint32_t i)
+ {
+     int shift = i & 0xff;
+     if (shift >= 32) {
+@@ -233,7 +222,7 @@ uint32_t HELPER(sar_cc)(uint32_t x, uint32_t i)
+     return x;
+ }
+ 
+-uint32_t HELPER(ror_cc)(uint32_t x, uint32_t i)
++uint32_t HELPER(ror_cc)(CPUUniCore32State *env, uint32_t x, uint32_t i)
+ {
+     int shift1, shift;
+     shift1 = i & 0xff;
+@@ -264,16 +253,13 @@ uint32_t HELPER(ror_cc)(uint32_t x, uint32_t i)
+ #define SHIFT 3
+ #include "softmmu_template.h"
+ 
+-void tlb_fill(CPUUniCore32State *env1, target_ulong addr, int is_write,
+-        int mmu_idx, uintptr_t retaddr)
++void tlb_fill(CPUUniCore32State *env, target_ulong addr, int is_write,
++              int mmu_idx, uintptr_t retaddr)
+ {
+     TranslationBlock *tb;
+-    CPUUniCore32State *saved_env;
+     unsigned long pc;
+     int ret;
+ 
+-    saved_env = env;
+-    env = env1;
+     ret = uc32_cpu_handle_mmu_fault(env, addr, is_write, mmu_idx);
+     if (unlikely(ret)) {
+         if (retaddr) {
+@@ -287,6 +273,5 @@ void tlb_fill(CPUUniCore32State *env1, target_ulong addr, int is_write,
+         }
+         cpu_loop_exit(env);
+     }
+-    env = saved_env;
+ }
+ #endif
+diff --git a/target-unicore32/translate.c b/target-unicore32/translate.c
+index 188bf8c..b786a6b 100644
+--- a/target-unicore32/translate.c
++++ b/target-unicore32/translate.c
+@@ -253,7 +253,7 @@ static void disas_ocd_insn(CPUUniCore32State *env, DisasContext *s,
+ static inline void gen_set_asr(TCGv var, uint32_t mask)
+ {
+     TCGv tmp_mask = tcg_const_i32(mask);
+-    gen_helper_asr_write(var, tmp_mask);
++    gen_helper_asr_write(cpu_env, var, tmp_mask);
+     tcg_temp_free_i32(tmp_mask);
+ }
+ /* Set NZCV flags from the high 4 bits of var.  */
+@@ -263,7 +263,7 @@ static void gen_exception(int excp)
+ {
+     TCGv tmp = new_tmp();
+     tcg_gen_movi_i32(tmp, excp);
+-    gen_helper_exception(tmp);
++    gen_helper_exception(cpu_env, tmp);
+     dead_tmp(tmp);
+ }
+ 
+@@ -416,16 +416,16 @@ static inline void gen_uc32_shift_reg(TCGv var, int shiftop,
+     if (flags) {
+         switch (shiftop) {
+         case 0:
+-            gen_helper_shl_cc(var, var, shift);
++            gen_helper_shl_cc(var, cpu_env, var, shift);
+             break;
+         case 1:
+-            gen_helper_shr_cc(var, var, shift);
++            gen_helper_shr_cc(var, cpu_env, var, shift);
+             break;
+         case 2:
+-            gen_helper_sar_cc(var, var, shift);
++            gen_helper_sar_cc(var, cpu_env, var, shift);
+             break;
+         case 3:
+-            gen_helper_ror_cc(var, var, shift);
++            gen_helper_ror_cc(var, cpu_env, var, shift);
+             break;
+         }
+     } else {
+@@ -1323,11 +1323,11 @@ static void do_datap(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+             if (IS_USER(s)) {
+                 ILLEGAL;
+             }
+-            gen_helper_sub_cc(tmp, tmp, tmp2);
++            gen_helper_sub_cc(tmp, cpu_env, tmp, tmp2);
+             gen_exception_return(s, tmp);
+         } else {
+             if (UCOP_SET_S) {
+-                gen_helper_sub_cc(tmp, tmp, tmp2);
++                gen_helper_sub_cc(tmp, cpu_env, tmp, tmp2);
+             } else {
+                 tcg_gen_sub_i32(tmp, tmp, tmp2);
+             }
+@@ -1336,7 +1336,7 @@ static void do_datap(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+         break;
+     case 0x03:
+         if (UCOP_SET_S) {
+-            gen_helper_sub_cc(tmp, tmp2, tmp);
++            gen_helper_sub_cc(tmp, cpu_env, tmp2, tmp);
+         } else {
+             tcg_gen_sub_i32(tmp, tmp2, tmp);
+         }
+@@ -1344,7 +1344,7 @@ static void do_datap(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+         break;
+     case 0x04:
+         if (UCOP_SET_S) {
+-            gen_helper_add_cc(tmp, tmp, tmp2);
++            gen_helper_add_cc(tmp, cpu_env, tmp, tmp2);
+         } else {
+             tcg_gen_add_i32(tmp, tmp, tmp2);
+         }
+@@ -1352,7 +1352,7 @@ static void do_datap(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+         break;
+     case 0x05:
+         if (UCOP_SET_S) {
+-            gen_helper_adc_cc(tmp, tmp, tmp2);
++            gen_helper_adc_cc(tmp, cpu_env, tmp, tmp2);
+         } else {
+             gen_add_carry(tmp, tmp, tmp2);
+         }
+@@ -1360,7 +1360,7 @@ static void do_datap(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+         break;
+     case 0x06:
+         if (UCOP_SET_S) {
+-            gen_helper_sbc_cc(tmp, tmp, tmp2);
++            gen_helper_sbc_cc(tmp, cpu_env, tmp, tmp2);
+         } else {
+             gen_sub_carry(tmp, tmp, tmp2);
+         }
+@@ -1368,7 +1368,7 @@ static void do_datap(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+         break;
+     case 0x07:
+         if (UCOP_SET_S) {
+-            gen_helper_sbc_cc(tmp, tmp2, tmp);
++            gen_helper_sbc_cc(tmp, cpu_env, tmp2, tmp);
+         } else {
+             gen_sub_carry(tmp, tmp2, tmp);
+         }
+@@ -1390,13 +1390,13 @@ static void do_datap(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+         break;
+     case 0x0a:
+         if (UCOP_SET_S) {
+-            gen_helper_sub_cc(tmp, tmp, tmp2);
++            gen_helper_sub_cc(tmp, cpu_env, tmp, tmp2);
+         }
+         dead_tmp(tmp);
+         break;
+     case 0x0b:
+         if (UCOP_SET_S) {
+-            gen_helper_add_cc(tmp, tmp, tmp2);
++            gen_helper_add_cc(tmp, cpu_env, tmp, tmp2);
+         }
+         dead_tmp(tmp);
+         break;
+@@ -1536,7 +1536,7 @@ static void do_misc(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+             tmp = load_cpu_field(bsr);
+         } else {
+             tmp = new_tmp();
+-            gen_helper_asr_read(tmp);
++            gen_helper_asr_read(tmp, cpu_env);
+         }
+         store_reg(s, UCOP_REG_D, tmp);
+         return;
+@@ -1760,7 +1760,7 @@ static void do_ldst_m(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+                     gen_bx(s, tmp);
+                 } else if (user) {
+                     tmp2 = tcg_const_i32(reg);
+-                    gen_helper_set_user_reg(tmp2, tmp);
++                    gen_helper_set_user_reg(cpu_env, tmp2, tmp);
+                     tcg_temp_free_i32(tmp2);
+                     dead_tmp(tmp);
+                 } else if (reg == UCOP_REG_N) {
+@@ -1778,7 +1778,7 @@ static void do_ldst_m(CPUUniCore32State *env, DisasContext *s, uint32_t insn)
+                 } else if (user) {
+                     tmp = new_tmp();
+                     tmp2 = tcg_const_i32(reg);
+-                    gen_helper_get_user_reg(tmp, tmp2);
++                    gen_helper_get_user_reg(tmp, cpu_env, tmp2);
+                     tcg_temp_free_i32(tmp2);
+                 } else {
+                     tmp = load_reg(s, reg);
+@@ -1861,7 +1861,7 @@ static void disas_uc32_insn(CPUUniCore32State *env, DisasContext *s)
+ {
+     unsigned int insn;
+ 
+-    insn = ldl_code(s->pc);
++    insn = cpu_ldl_code(env, s->pc);
+     s->pc += 4;
+ 
+     /* UniCore instructions class:

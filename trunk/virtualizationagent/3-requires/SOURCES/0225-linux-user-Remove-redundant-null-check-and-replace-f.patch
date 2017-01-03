@@ -1,0 +1,39 @@
+From c8cd687674033a2a0c362171821f2f6b33dd59ff Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Tue, 4 Sep 2012 22:14:19 +0200
+Subject: [PATCH] linux-user: Remove redundant null check and replace free by
+ g_free
+
+Report from smatch:
+
+linux-user/syscall.c:3632 do_ioctl_dm(220) info:
+ redundant null check on big_buf calling free()
+
+'big_buf' was allocated by g_malloc0, therefore free was also
+replaced by g_free.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit ad11ad77748bdd8016370db210751683dc038dd6)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ linux-user/syscall.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/linux-user/syscall.c b/linux-user/syscall.c
+index 6257a04..471d060 100644
+--- a/linux-user/syscall.c
++++ b/linux-user/syscall.c
+@@ -3628,9 +3628,7 @@ static abi_long do_ioctl_dm(const IOCTLEntry *ie, uint8_t *buf_temp, int fd,
+         unlock_user(argptr, arg, target_size);
+     }
+ out:
+-    if (big_buf) {
+-        free(big_buf);
+-    }
++    g_free(big_buf);
+     return ret;
+ }
+ 

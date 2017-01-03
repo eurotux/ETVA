@@ -1,0 +1,62 @@
+From 5a209896529b47df2b3ec64382e2b0cccd1d8fee Mon Sep 17 00:00:00 2001
+From: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+Date: Fri, 17 Aug 2012 21:16:42 +0100
+Subject: [PATCH] net: add receive_disabled logic to iov delivery path
+
+This patch adds the missing NetClient->receive_disabled logic in the
+sendv delivery code path.  It seems that commit
+893379efd0e1b84ceb0c42a713293f3dbd27b1bd ("net: disable receiving if
+client returns zero") only added the logic to qemu_deliver_packet() and
+not qemu_deliver_packet_iov().
+
+The receive_disabled flag should be automatically set when .receive(),
+.receive_raw(), or .receive_iov() return 0.  No further packets will be
+delivered to the NetClient until the receive_disabled flag is cleared
+again by calling qemu_flush_queued_packets().
+
+Typically the NetClient will wait until its file descriptor becomes
+writable and then invoke qemu_flush_queued_packets() to resume
+transmission.
+
+Signed-off-by: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+(cherry picked from commit c67f5dc10573687497f0f5c3aec19b15c35c63d7)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ net.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/net.c b/net.c
+index 76a8336..1303819 100644
+--- a/net.c
++++ b/net.c
+@@ -423,16 +423,27 @@ ssize_t qemu_deliver_packet_iov(NetClientState *sender,
+                                 void *opaque)
+ {
+     NetClientState *nc = opaque;
++    int ret;
+ 
+     if (nc->link_down) {
+         return iov_size(iov, iovcnt);
+     }
+ 
++    if (nc->receive_disabled) {
++        return 0;
++    }
++
+     if (nc->info->receive_iov) {
+-        return nc->info->receive_iov(nc, iov, iovcnt);
++        ret = nc->info->receive_iov(nc, iov, iovcnt);
+     } else {
+-        return nc_sendv_compat(nc, iov, iovcnt);
++        ret = nc_sendv_compat(nc, iov, iovcnt);
+     }
++
++    if (ret == 0) {
++        nc->receive_disabled = 1;
++    }
++
++    return ret;
+ }
+ 
+ ssize_t qemu_sendv_packet_async(NetClientState *sender,

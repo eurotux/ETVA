@@ -1224,7 +1224,7 @@
                 monitorValid : true,
                 items:[{
                     border    : false,
-                    bodyStyle : 'background:none;padding-bottom:30px;',
+                    bodyStyle : 'background:none;padding-bottom:15px;',
                     html      : <?php echo json_encode(__('Specify the boot/location parameters used by the virtual server.')) ?>
                     }]
                 ,listeners:{
@@ -1359,7 +1359,7 @@
                             {
                             xtype:'panel',
                             border    : false,
-                            bodyStyle : 'background:none;padding-bottom:20px;',
+                            bodyStyle : 'background:none;padding-bottom:10px;',
                             html      : <?php echo json_encode(__('Specify the installation source.')) ?>
                         },
                         {
@@ -1447,7 +1447,7 @@
                                 {
                                     xtype:'panel',
                                     border    : false,
-                                    bodyStyle : 'background:none;padding-bottom:20px;',
+                                    bodyStyle : 'background:none;padding-bottom:10px;',
                                     html      : <?php echo json_encode(__('Specify boot device.')) ?>
                                 },
                                 //AKIII
@@ -1479,6 +1479,120 @@
                                         boot_cdrom_field.setDisabled(!check);
                                         boot_cdrom_field.clearInvalid();}
                                 },this.cdromcombo
+                                ,{
+                                    boxLabel: <?php echo json_encode(__('Network install (http,ftp,...)')) ?>,
+                                    name: 'vm_boot',
+                                    id: 'vm_boot_netinstall',
+                                    hideLabel:true,
+                                    inputValue: 'remote',
+                                    scope:this,
+                                    handler:function(box,check){
+                                        var remote_field = this.form.findField('vm_boot_remotelocation');
+                                        remote_field.setDisabled(!check);
+                                        remote_field.clearInvalid();
+                                        var kickstart_field = this.form.findField('vm_boot_kickstart');
+                                        kickstart_field.setDisabled(!check);
+                                        kickstart_field.clearInvalid();
+                                        var kerneloptions_field = this.form.findField('vm_boot_kerneloptions');
+                                        kerneloptions_field.setDisabled(!check);
+                                        kerneloptions_field.clearInvalid();
+                                        Ext.getCmp('vm-boot-remote-url-options').setDisabled(!check);
+                                        if( !check ){
+                                            Ext.getCmp('vm-boot-remote-url-options').collapse();
+                                        }
+                                    }
+                                },{
+                                    xtype: 'fieldset',
+                                    border: false,
+                                    labelWidth: 90,
+                                    autoHeight:true,
+                                    defaultType:'textfield',
+                                    items: [
+                                        {
+                                            xtype: 'textfield',
+                                            fieldLabel: <?php echo json_encode(__('URL')) ?>,
+                                            name: 'vm_boot_remotelocation',
+                                            disabled:true,
+                                            anchor:'90%',
+                                            allowBlank:false,
+                                            emptyText : 'url://path/to/image kernel',
+                                            enableKeyEvents: false,
+                                            locationValid: false
+                                            ,validator: function(v){
+                                                return this.locationValid;
+                                            }
+                                            ,listeners:{
+                                                specialkey:{scope:this,fn:function(field,e){
+
+                                                    if(e.getKey()==e.ENTER){
+                                                        if(!this.wizard.nextButton.disabled) this.wizard.nextButton.focus();
+                                                        checkLocation(field.getValue(), field);
+                                                    }
+                                                    
+                                                    if(e.getKey() == e.BACKSPACE){
+                                                        field.locationValid = false;
+                                                    }
+
+                                                }}
+                                                ,focus:{scope:this, fn:function(field,e){
+                                                    field.locationValid = false;
+                                                }}
+                                                ,blur:{scope:this, fn:function(field,e){
+                                                    checkLocation(field.getValue(), field);           
+                                                }}
+                                            }
+                                        }
+                                        ,{ xtype: 'fieldset',
+                                            'id': 'vm-boot-remote-url-options',
+                                            collapsible: true,
+                                            collapsed: true,
+                                            disabled: true,
+                                            title: <?php echo json_encode(__('URL Options')) ?>,
+                                            items: [
+                                                {
+                                                    fieldLabel: <?php echo json_encode(__('Kickstart URL')) ?>,
+                                                    xtype: 'textfield',
+                                                    name: 'vm_boot_kickstart',
+                                                    disabled:true,
+                                                    anchor:'90%',
+                                                    //allowBlank:false,
+                                                    emptyText : 'url://path/to/kickstart',
+                                                    enableKeyEvents: false,
+                                                    /*locationValid: false
+                                                    ,validator: function(v){
+                                                        return this.locationValid;
+                                                    }
+                                                    ,listeners:{
+                                                        specialkey:{scope:this,fn:function(field,e){
+                                                            if(e.getKey()==e.ENTER){
+                                                                if(!this.wizard.nextButton.disabled) this.wizard.nextButton.focus();
+                                                                checkLocation(field.getValue(), field);
+                                                            }
+                                                            
+                                                            if(e.getKey() == e.BACKSPACE){
+                                                                field.locationValid = false;
+                                                            }
+
+                                                        }}
+                                                        ,focus:{scope:this, fn:function(field,e){
+                                                            field.locationValid = false;
+                                                        }}
+                                                        ,blur:{scope:this, fn:function(field,e){
+                                                            checkLocation(field.getValue(), field);           
+                                                        }}
+                                                    }*/
+                                                },{
+                                                    fieldLabel: <?php echo json_encode(__('Kernel options')) ?>,
+                                                    xtype: 'textfield',
+                                                    name: 'vm_boot_kerneloptions',
+                                                    disabled:true,
+                                                    anchor:'90%',
+                                                    //allowBlank:false,
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
                             ]
                     });
             }
@@ -1729,6 +1843,8 @@
             networks.push(Ext.encode(network));
         }
         
+        var extra = '';
+        if( send_data['extra'] ) extra = '"' + send_data['extra'] + '"';
         var description = '';
         if( send_data['description'] ) description = '"' + send_data['description'] + '"';
 
@@ -1736,9 +1852,10 @@
                                             { 'name': send_data['name'],
                                                 'vm_type': send_data['vm_type'], 'vm_os': send_data['vm_os'],
                                                 'mem': send_data['mem'], 'vcpu': send_data['vcpu'], 'boot': send_data['boot'] },
-                                            { 'node': config.nodeId, 'location': send_data['location'],
+                                            { 'node': config.nodeId, 'location': send_data['location'], 'extra': extra,
                                                 'description': description, 'ip': send_data['ip'],
-                                                'disks': disks, 'networks': networks},
+                                                'disks': disks, 'networks': networks,
+						'cpu_cores': send_data['cpu_cores'], 'cpu_sockets': send_data['cpu_sockets'], 'cpu_threads': send_data['cpu_threads']},
                                             function(resp,opt) { // success fh
                                                 var response = Ext.util.JSON.decode(resp.responseText);
                                                 console.log(response);
@@ -1815,12 +1932,11 @@
         var networks=[];
         networks_store.each(function(f){
             var data = f.data;
-            networks.push({
-                'port':i,
-                'vlan_id':data['vlan_id'],
-                'intf_model':data['intf_model'],
-                'mac':data['mac']
-            });
+            var net = {'port':i};
+            if( data['vlan_id'] ) net['vlan_id'] = data['vlan_id'];
+            if( data['intf_model'] ) net['intf_model'] = data['intf_model'];
+            if( data['mac'] ) net['mac'] = data['mac'];
+            networks.push(net);
             i++;
         });
 
@@ -1855,6 +1971,9 @@
             //,'nettype':nettype
             ,'mem':mem
             ,'vcpu':cpuset
+            ,'cpu_sockets'  : cpuset_raw['cpu_sockets']
+            ,'cpu_cores'    : cpuset_raw['cpu_cores']
+            ,'cpu_threads'  : cpuset_raw['cpu_threads']
         }
 
         var startup_raw = wizData['server-wiz-startup'];
@@ -1863,7 +1982,7 @@
             case 'Linux PV' :
                                 var location_data = startup_raw['vm_location'];
                                 var location = '';                                
-                                var remote_field = startupPanel.form.findField('vm_location_remote');                                
+                                var remote_field = startupPanel.form.findField('vm_location_remote'); 
 
                                 if(location_data =='remote'){
 
@@ -1880,17 +1999,39 @@
                                 //else send_data['vm_type'] = 'kvm';
 
                                 var boot_data = startup_raw['vm_boot'];
-                                var cdrom_field = startupPanel.form.findField('vm_boot_cdrom_iso');
 
                                 if(boot_data == 'cdrom'){
-
+                                    var cdrom_field = startupPanel.form.findField('vm_boot_cdrom_iso');
                                     if(startup_raw['vm_boot_cdrom_iso'] != cdrom_field.emptyText){
                                         send_data['location'] = startup_raw['vm_boot_cdrom_iso'];
                                         send_data['boot'] = boot_data;
                                     }
                                 }
 
-                                 if(boot_data == 'network'){
+                                if(boot_data == 'remote'){
+                                    var remote_field = startupPanel.form.findField('vm_boot_remotelocation'); 
+                                    if(startup_raw['vm_boot_remotelocation'] != remote_field.emptyText){
+                                        send_data['location'] = startup_raw['vm_boot_remotelocation'];
+                                        send_data['boot'] = 'location';
+                                    } else {
+                                        send_data['boot'] = 'filesystem';
+                                    }
+                                    var extra = "";
+                                    var kerneloptions_field = startupPanel.form.findField('vm_boot_kerneloptions'); 
+                                    if(startup_raw['vm_boot_kerneloptions'] != kerneloptions_field.emptyText){
+                                        extra = startup_raw['vm_boot_kerneloptions'];
+                                    }
+                                    if( startup_raw['vm_boot_kickstart'] ){
+                                        var kickstart_field = startupPanel.form.findField('vm_boot_kickstart'); 
+                                        if(startup_raw['vm_boot_kickstart'] != kickstart_field.emptyText){
+                                            if( extra ) extra += " ";
+                                            extra += "ks=" + startup_raw['vm_boot_kickstart'];
+                                        }
+                                    }
+                                    if( extra ) send_data['extra'] = extra;
+                                }
+
+                                if(boot_data == 'network'){
                                     send_data['boot'] = 'pxe';
                                 }
 
@@ -1930,8 +2071,6 @@
             send_data['disks'] = disks;
         }
         vmcreate(send_data);
-
-
     }
 
     // show the wizard

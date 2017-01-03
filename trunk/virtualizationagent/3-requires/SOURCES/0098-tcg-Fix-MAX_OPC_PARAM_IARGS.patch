@@ -1,0 +1,49 @@
+From 0db63b6f9d059bf9a1f4841a2c3be92530880e4b Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Wed, 12 Sep 2012 19:18:55 +0200
+Subject: [PATCH] tcg: Fix MAX_OPC_PARAM_IARGS
+
+DEF_HELPER_FLAGS_5 was added some time ago without adjusting
+MAX_OPC_PARAM_IARGS.
+
+Fixing the definition becomes more important as QEMU is using
+an increasing number of helper functions called with 5 arguments.
+
+Add also a comment to avoid future problems when DEF_HELPER_FLAGS_6
+will be added.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ def-helper.h | 2 ++
+ exec-all.h   | 2 +-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/def-helper.h b/def-helper.h
+index b98ff69..022a9ce 100644
+--- a/def-helper.h
++++ b/def-helper.h
+@@ -128,6 +128,8 @@
+ #define DEF_HELPER_5(name, ret, t1, t2, t3, t4, t5) \
+     DEF_HELPER_FLAGS_5(name, 0, ret, t1, t2, t3, t4, t5)
+ 
++/* MAX_OPC_PARAM_IARGS must be set to n if last entry is DEF_HELPER_FLAGS_n. */
++
+ #endif /* DEF_HELPER_H */
+ 
+ #ifndef GEN_HELPER
+diff --git a/exec-all.h b/exec-all.h
+index 1f81da7..6516da0 100644
+--- a/exec-all.h
++++ b/exec-all.h
+@@ -51,7 +51,7 @@ typedef struct TranslationBlock TranslationBlock;
+ #else
+ #define MAX_OPC_PARAM_PER_ARG 1
+ #endif
+-#define MAX_OPC_PARAM_IARGS 4
++#define MAX_OPC_PARAM_IARGS 5
+ #define MAX_OPC_PARAM_OARGS 1
+ #define MAX_OPC_PARAM_ARGS (MAX_OPC_PARAM_IARGS + MAX_OPC_PARAM_OARGS)
+ 

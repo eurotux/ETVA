@@ -11,6 +11,7 @@ class EtvaServer extends BaseEtvaServer
     const DISKS_MAP = 'Disks';
     const NETWORKS_MAP = 'Network';
     const FEATURES_MAP = 'features';
+    const EXTEND_MAP = 'extend';
 
     const RUNNING = 'running';
     const STATE_RUNNING = 'running';
@@ -47,6 +48,7 @@ class EtvaServer extends BaseEtvaServer
         if(array_key_exists(self::DISKS_MAP, $arr)) $this->setDisks($arr[self::DISKS_MAP]);
         if(array_key_exists(self::NETWORKS_MAP, $arr)) $this->setNetworks($arr[self::NETWORKS_MAP]);
         if(array_key_exists(self::FEATURES_MAP, $arr)) $this->setFeatures(json_encode($arr[self::FEATURES_MAP]));
+        if(array_key_exists(self::EXTEND_MAP, $arr)) $this->setExtend(json_encode($arr[self::EXTEND_MAP]));
         
 	}
 
@@ -258,11 +260,13 @@ class EtvaServer extends BaseEtvaServer
       $controllers = $this->controllers_VA();
 
       $features = (array)json_decode($this->getFeatures());
+      $extend = (array)json_decode($this->getExtend());
 
       $server_VA = array('uuid'=>$this->getUuid(),
                          'name'=> $this->getName(),
                          'boot'=> $this->getBoot(),
                          'location'=> $this->getLocation(),
+                         'extra'=> $this->getExtra(),
                          'cdrom'=> $this->getCdrom(),
                          'ram' => $this->getMem(),
                          'vcpu'=>$this->getVcpu(),
@@ -283,6 +287,7 @@ class EtvaServer extends BaseEtvaServer
                          'priority_ha'=>$this->getPriorityHa(),
                          'hasHA'=>$this->getHasHa(),
                          'features'=>$features,
+                         'extend'=>$extend,
                          'controllers'=>$controllers
       );
       //if( $devices ) $server_VA['no_tablet'] = true;
@@ -420,8 +425,10 @@ class EtvaServer extends BaseEtvaServer
             EtvaServerPeer::doDelete($this, $con);
 
             
-            $server_node->updateMemFree();
-            $server_node->save();            
+            if( $server_node ){
+                $server_node->updateMemFree();
+                $server_node->save();            
+            }
 
             $con->commit();
 
@@ -494,8 +501,10 @@ class EtvaServer extends BaseEtvaServer
 
   public function deleteRRAFiles()
   {
+      $node_uuid = '';
       $node = $this->getEtvaNode();
-      $node_uuid = $node->getUuid();
+        error_log("[DEBUG] deleteRRAFiles node=$node \n");
+      if( null !== $node ) $node_uuid = $node->getUuid();
 
       $cpu_per_rra = new ServerCpuUsageRRA($node_uuid, $this->getUuid(),false);
       $cpu_per_rra->delete();

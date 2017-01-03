@@ -1,0 +1,44 @@
+From 3946ff444587b2efc3313ae4ac7dcf6c7f8bcf39 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Mon, 3 Sep 2012 09:25:16 +0000
+Subject: [PATCH] audio: Fix warning from static code analysis
+
+smatch report:
+audio/audio_template.h:416 AUD_open_out(18) warn:
+ variable dereferenced before check 'as' (see line 414)
+
+Moving the ldebug statement after the statement which checks 'as'
+fixes that warning.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: malc <av1474@comtv.ru>
+(cherry picked from commit 93b6599734f81328ee3d608f57667742cafeea72)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ audio/audio_template.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/audio/audio_template.h b/audio/audio_template.h
+index 519432a..16f7880 100644
+--- a/audio/audio_template.h
++++ b/audio/audio_template.h
+@@ -410,15 +410,15 @@ SW *glue (AUD_open_, TYPE) (
+     SW *old_sw = NULL;
+ #endif
+ 
+-    ldebug ("open %s, freq %d, nchannels %d, fmt %d\n",
+-            name, as->freq, as->nchannels, as->fmt);
+-
+     if (audio_bug (AUDIO_FUNC, !card || !name || !callback_fn || !as)) {
+         dolog ("card=%p name=%p callback_fn=%p as=%p\n",
+                card, name, callback_fn, as);
+         goto fail;
+     }
+ 
++    ldebug ("open %s, freq %d, nchannels %d, fmt %d\n",
++            name, as->freq, as->nchannels, as->fmt);
++
+     if (audio_bug (AUDIO_FUNC, audio_validate_settings (as))) {
+         audio_print_settings (as);
+         goto fail;

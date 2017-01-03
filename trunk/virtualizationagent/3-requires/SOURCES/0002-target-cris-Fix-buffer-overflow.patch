@@ -1,0 +1,32 @@
+From 787514a7c1b9a3a23eebe70c76d76ed4e45031c3 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Fri, 7 Sep 2012 22:36:08 +0200
+Subject: [PATCH] target-cris: Fix buffer overflow
+
+Report from smatch:
+
+target-cris/translate.c:3464 cpu_dump_state(32) error:
+ buffer overflow 'env->sregs' 4 <= 255
+
+sregs is declared 'uint32_t sregs[4][16]', so the first index must be
+less than 4 or ARRAY_SIZE(env->sregs).
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-cris/translate.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/target-cris/translate.c b/target-cris/translate.c
+index 1ad9ec7..ad31877 100644
+--- a/target-cris/translate.c
++++ b/target-cris/translate.c
+@@ -3458,7 +3458,7 @@ void cpu_dump_state (CPUCRISState *env, FILE *f, fprintf_function cpu_fprintf,
+ 	}
+ 	srs = env->pregs[PR_SRS];
+ 	cpu_fprintf(f, "\nsupport function regs bank %x:\n", srs);
+-	if (srs < 256) {
++	if (srs < ARRAY_SIZE(env->sregs)) {
+ 		for (i = 0; i < 16; i++) {
+ 			cpu_fprintf(f, "s%2.2d=%8.8x ",
+ 				    i, env->sregs[srs][i]);

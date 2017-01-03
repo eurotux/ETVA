@@ -1,0 +1,56 @@
+--- modules/endpoint_configurator/libs/vendors/Linksys.cfg.php.orig	2014-10-06 14:35:28.000000000 +0100
++++ modules/endpoint_configurator/libs/vendors/Linksys.cfg.php	2014-10-06 14:39:33.000000000 +0100
+@@ -32,12 +32,44 @@
+ 
+  <!-- Additional -->
+  <!-- <Time_Zone  ua=\"na\">GMT-06:00</Time_Zone> -->
++   <Time_Zone ua=\"na\">GMT</Time_Zone> <!-- options: GMT-12:00/GMT-11:00/GMT-10:00/GMT-09:00/GMT-08:00/GMT-07:00/GMT-06:00/GMT-05:00/GMT-04:00/GMT-03:30/GMT-03:00/GMT-02:00/GMT-01:00/GMT/GMT+01:00/GMT+02:00/GMT+03:00/GMT+03:30/GMT+04:00/GMT+05:00/GMT+05:30/GMT+05:45/GMT+06:00/GMT+06:30/GMT+07:00/GMT+08:00/GMT+09:00/GMT+09:30/GMT+10:00/GMT+11:00/GMT+12:00/GMT+13:00 -->
++
+    <Voice_Mail_Number  ua=\"na\">*97</Voice_Mail_Number>
+    <Paging_Code ua=\"na\">*80</Paging_Code>
+    <Select_Logo ua=\"ua\">BMP Picture</Select_Logo>
+    <Text_Logo ua=\"na\">Linksys</Text_Logo>
+    <Select_Background_Picture ua=\"ua\">BMP Picture</Select_Background_Picture>
+  <!-- <BMP_Picture_Download_URL ua=\"ua\">tftp://$ipAdressServer/Linksys.bmp</BMP_Picture_Download_URL> -->
++
++  <!-- ETVoIP Configurations -->
++  <CTI_Enable group=\"SIP/SIP_Parameters\">Yes</CTI_Enable>
++  <Time_Format group=\"User/Supplementary_Services\">24hr</Time_Format>
++  <Date_Format group=\"User/Supplementary_Services\">day/month</Date_Format>
++  <Call_Pickup_Code group=\"Regional/Vertical_Service_Activation_Codes\">**#</Call_Pickup_Code>
++
++  <!-- Dictionary Portuguese -->
++  <Dictionary_Server_Script ua=\"na\">serv=tftp://$ipAdressServer/;d0=English;x0=/spa50x_30x_en_v746.xml;d1=Portugues;x1=/spa50x_30x_pt_v746.xml</Dictionary_Server_Script>
++  <Dictionary_Server_Copy ua=\"na\"></Dictionary_Server_Copy>
++  <Language_Selection ua=\"na\">Portugues</Language_Selection>
++  <Language_Selection_Copy ua=\"na\"></Language_Selection_Copy>
++  <Dictionary_Update_Status ua=\"na\">255</Dictionary_Update_Status>
++
++  <!-- Define Dial Plan -->
++  <Dial_Plan_1_ ua=\"na\">([x*].)</Dial_Plan_1_>
++
++  <!-- Resync hour -->
++  <Resync_At__HHmm_ group=\"Provisioning/Configuration_Profile\">2359</Resync_At__HHmm_>
++
++  <!-- Call pickup from attendant console -->
++  <Attendant_Console_Call_Pickup_Code group=\"Attendant_Console/General\">**#</Attendant_Console_Call_Pickup_Code>
++
++  <!-- Navigation with pad by call -->
++  <Line_Navigation group=\"Phone/Miscellaneous_Line_Key_Settings\">Per Call</Line_Navigation>
++
++  <!-- Change Programmable Softkeys -->
++  <Programmable_Softkey_Enable group=\"Phone/Programmable_Softkeys\">Yes</Programmable_Softkey_Enable>
++  <Connected_Key_List group=\"Phone/Programmable_Softkeys\">hold|1;conf|2;bxfer|3;xfer|4;endcall;toggle;confLx;xferLx;park;phold;flash;</Connected_Key_List>
++
+ </flat-profile>";
+ 
+     return $content;
+@@ -54,7 +86,7 @@
+   <Primary_NTP_Server ua="na">$ipAdressServer</Primary_NTP_Server>
+   <Voice_Mail_Number  ua="na">*97</Voice_Mail_Number>
+   <Display_Name_1_ ua="na">\$USER</Display_Name_1_>
+-  <Dial_Plan_1_ ua="na">(**xxx|**xxxx|*xx|xxx*|xxx**|xxxx*|xxxx**[3469]11|0|00|[2-9]xxxxxx|1xxx[2-9]xxxxxxS0|xxxxxxxxxxxx.)</Dial_Plan_1_>
++  <Dial_Plan_1_ ua="na">(**xxx|**xxxx|*xx|*xxx|*xxx.|xxx*|xxx**|xxxx*|xxxx**[3469]11|0|00|[2-9]xxxxxx|1xxx[2-9]xxxxxxS0|xxxxxxxxxxxx.)</Dial_Plan_1_>
+   <Time_Zone  ua="na">GMT-08:00</Time_Zone>
+   <Text_Logo group="Phone/General">Elastix</Text_Logo> 
+   <BMP_Picture_Download_URL group="Phone/General" /> 

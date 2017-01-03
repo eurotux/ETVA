@@ -1,0 +1,33 @@
+From 8fc8e4f23a5de51034c9c39c54aee98ea6eb70d1 Mon Sep 17 00:00:00 2001
+From: Kevin Wolf <kwolf@redhat.com>
+Date: Fri, 26 Oct 2012 16:33:32 +0200
+Subject: [PATCH] qcow2: Fix refcount table size calculation
+
+A missing factor for the refcount table entry size in the calculation
+could mean that too little memory was allocated for the in-memory
+representation of the table, resulting in a buffer overflow.
+
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+Reviewed-by: Michael Tokarev <mjt@tls.msk.ru>
+Tested-by: Michael Tokarev <mjt@tls.msk.ru>
+(cherry picked from commit a3548077062dd9dc2701ebffd931ba6eaef40bec)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block/qcow2-refcount.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/block/qcow2-refcount.c b/block/qcow2-refcount.c
+index 5e3f915..96224d1 100644
+--- a/block/qcow2-refcount.c
++++ b/block/qcow2-refcount.c
+@@ -301,7 +301,8 @@ static int alloc_refcount_block(BlockDriverState *bs,
+     uint64_t last_table_size;
+     uint64_t blocks_clusters;
+     do {
+-        uint64_t table_clusters = size_to_clusters(s, table_size);
++        uint64_t table_clusters =
++            size_to_clusters(s, table_size * sizeof(uint64_t));
+         blocks_clusters = 1 +
+             ((table_clusters + refcount_block_clusters - 1)
+             / refcount_block_clusters);

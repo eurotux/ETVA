@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use locale;
+use utf8;
+
+use lib '/usr/local/sap2elastix';
+
+use utilcommon;
+use utilsql;
+
+sub main {
+    my %args = utilcommon::read_args;
+
+    my $phone = "";
+    if( $args{'phone'} =~ m/^\s*(\+?[\s\d]+)$/ ){
+        $phone = $1;
+        $phone =~ s/\s+//g;
+    }
+
+    if( $phone ){
+        my %conf = utilcommon::load_conf('/usr/local/sap2elastix/config.conf');
+        my ($dbhost,$dbuser,$dbpass) = ($conf{'mysql'}{'host'} || "127.0.0.1",$conf{'mysql'}{'user'} || "cmar", $conf{'mysql'}{'pass'} || "ola123");
+
+        my $sapDBH = utilsql::sqlConnect("DBI:mysql:database=sap2elastix;host=$dbhost", $dbuser, $dbpass);
+        my $c = utilsql::sqlSelect($sapDBH, "*", "contacts", {'phone'=>$phone});
+        my $R = $c->fetchrow_hashref();
+	$c->finish();
+        utilsql::sqlDisconnect($sapDBH);
+
+        if( $R && $R->{'client_id'} ){
+            my $sapurl = $conf{'sap'}{'url'} || 'http://192.10.10.227/TelevendasQLD/Pages/DetalheCliente.aspx';
+            print "Content-Type: text/plain;","\n";
+            print "Location: ${sapurl}?ClientID=$R->{'client_id'}","\n";
+            print "\n\n";
+        } else {
+            print "Content-Type: text/plain;","\n";
+            print "\n\n";
+        }
+    }
+}
+
+&main;
+
+1;

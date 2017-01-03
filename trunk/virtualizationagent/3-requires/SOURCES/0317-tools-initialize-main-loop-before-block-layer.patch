@@ -1,0 +1,54 @@
+From 907c03e5f2c053df7bb3756b2a2200af10a42577 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Sat, 3 Nov 2012 18:10:17 +0100
+Subject: [PATCH] tools: initialize main loop before block layer
+
+Tools were broken because they initialized the block layer while
+qemu_aio_context was still NULL.
+
+Reported-by: malc <av1474@comtv.ru>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Signed-off-by: malc <av1474@comtv.ru>
+(cherry picked from commit 2592c59a66d456fe98fe96cb5787b356c40ee66f)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qemu-img.c | 3 +--
+ qemu-io.c  | 3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/qemu-img.c b/qemu-img.c
+index 7615e91..c90ae4a 100644
+--- a/qemu-img.c
++++ b/qemu-img.c
+@@ -1698,14 +1698,13 @@ int main(int argc, char **argv)
+ 
+     error_set_progname(argv[0]);
+ 
++    qemu_init_main_loop();
+     bdrv_init();
+     if (argc < 2)
+         help();
+     cmdname = argv[1];
+     argc--; argv++;
+ 
+-    qemu_init_main_loop();
+-
+     /* find the command */
+     for(cmd = img_cmds; cmd->name != NULL; cmd++) {
+         if (!strcmp(cmdname, cmd->name)) {
+diff --git a/qemu-io.c b/qemu-io.c
+index d0f4fb7..1ad7d3a 100644
+--- a/qemu-io.c
++++ b/qemu-io.c
+@@ -1892,9 +1892,8 @@ int main(int argc, char **argv)
+         exit(1);
+     }
+ 
+-    bdrv_init();
+-
+     qemu_init_main_loop();
++    bdrv_init();
+ 
+     /* initialize commands */
+     quit_init();

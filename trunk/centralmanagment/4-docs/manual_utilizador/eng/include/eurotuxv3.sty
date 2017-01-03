@@ -1,0 +1,475 @@
+
+% color-related definitions
+% =============================================================================
+%\usepackage[utf8]{inputenc}
+
+\usepackage[dvipsnames,table]{xcolor}
+
+% Eurotux red
+\definecolor{eurotux}{cmyk}{0, 0.98, 0.85, 0.10}
+
+% Secondary color (dark gray)
+%\definecolor{eurotuxsec}{cmyk}{0.80, 0.74, 0.69, 0.34}
+\definecolor{eurotuxsec}{cmyk}{1.0, 1.0, 1.0, 1.0}
+
+% Table bottom row color (light gray)
+\definecolor{eurotuxtablerowbottom}{cmyk}{0.14, 0.07, 0.06, 0}
+
+% Color for picture frames (light gray)
+\definecolor{eurotuxpictureframe}{cmyk}{0.14, 0.07, 0.06, 0}
+
+\definecolor{eurotuxsec2}{cmyk}{0, 0.86, 0.65, 0.20}
+\colorlet{lightgray}{gray!25}
+
+\colorlet{eurotuxsuperlight}{red!5}
+%\pagecolor{eurotuxsuperlight}
+\pagecolor{white}
+
+\color{eurotuxsec}
+
+%\renewcommand*\sfdefault{iwona}
+\renewcommand{\familydefault}{\sfdefault}
+
+\colorlet{tableheadcolor}{eurotuxsec2}
+\colorlet{tableheadcolor}{eurotux}
+\colorlet{tablerowcolor}{white}
+
+% remove borders
+% =============================================================================
+
+\hypersetup{%
+	pdfborder = {0 0 0}
+}
+
+
+% setup captions
+% =============================================================================
+
+%setting size of caption font
+\usepackage[font=footnotesize]{caption}
+
+% reducing space above and below caption
+\setlength{\abovecaptionskip}{2pt plus 0pt minus 0pt}
+\setlength{\belowcaptionskip}{0pt plus 0pt minus 0pt}
+
+% setting caption text to italic
+\let\LaTeXcaption\caption
+\renewcommand{\caption}[1]{\LaTeXcaption{\emph{#1}}}
+
+
+% commands for images
+
+\newcommand{\eurotuxpicture}[3]{
+	\begin{figure}[htbn]
+		
+		\begin{center}
+			\setlength{\fboxsep}{2pt}%
+			\setlength{\fboxrule}{0.2pt}%
+			\color{eurotuxpictureframe}
+			\fbox{\includegraphics[width=15.8cm]{#1}}
+		\end{center}
+		
+		\caption{#2}
+		\label{#3}
+	\end{figure}
+}
+
+
+
+% section-related style definitions
+% =============================================================================
+
+% \def\todday%
+% {% Displays today's date and time as ``yyyy-mm-dd hh:mm''
+%   \zeroPadTwo{\the\day}-\zeroPadTwo{\the\month}-\the\year%
+% }% --- \today ---
+% 
+% \def\zeroPadTwo#1%
+% {% Left zero pad of the argument to 2 digits.  The argument
+% %  should be a number between 1 and 99.  This macro outputs
+% %  a `0' if the argument is less than ten, then it outputs
+% %  the argument.
+% %
+%   \ifnum #1<10 0\fi    % Conditionally output a zero
+%   #1%    Then output the argument
+% }% --- \zeroPadTwo ---
+
+\def\directoryname{includes}
+
+\usepackage{titlesec}
+
+\titleformat{\chapter}[hang]
+{\color{eurotuxsec}\bfseries\LARGE\filright}{\thechapter}{1em}{}
+\titleformat{\section}[hang]
+{\color{eurotuxsec}\bfseries\Large\filright}{\thesection}{1em}{}
+\titleformat{\subsection}[hang]
+{\bfseries\large\filright}{\thesubsection}{1em}{}
+\titleformat{\subsection}[hang]
+{\color{eurotuxsec}\bfseries\large\filright}{\thesubsection}{1em}{}
+
+% numerate sections
+\setcounter{secnumdepth}{3}
+
+% header and footer definitions
+% =============================================================================
+\usepackage{fancyhdr}
+%\usepackage{lastpage}
+
+% redifine plain (used in first pages) 
+\fancypagestyle{plain}{%
+	\fancyhf{}
+	%\fancyhead[L]{\slshape \nouppercase{\leftmark}}
+	%\fancyhead[R]{\includegraphics[height=1cm]{imagens/empresa/logo.png}}
+	\fancyfoot[R]{\thepage}
+	\renewcommand{\headrulewidth}{0pt}%
+	\renewcommand{\footrulewidth}{0.5pt}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{
+	%\includegraphics[height=0.8cm]{include/img/logo_h_peq.png}
+	\includegraphics[height=0.6cm]{include/img/logo-horizontal.png}
+	%\includegraphics[height=0.8cm]{include/img/logo_PME_excelencia_14.png}
+	%\includegraphics[height=0.8cm]{include/img/logo_premios-cert}
+}
+\fancyhead[L]{\large\slshape \nouppercase{\leftmark}}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{0.5pt}%
+\renewcommand{\footrulewidth}{0.5pt}
+
+% tabular-related style definitions
+% =============================================================================
+
+\usepackage{tabularx}
+
+\newenvironment{eurotuxtabularx}[2]{%
+	\newcommand{\cellhead}[1]{%
+		\textcolor{white}{\em ##1}%
+	}%
+	\newcommand{\bottomhline}{%
+		\rowcolor{eurotuxtablerowbottom}%
+		\hline%
+	}%
+	\newcommand{\cellbottom}[1]{%
+		\textbf{##1}%
+	}%
+	%\rowcolors{2}{tablerowcolor}{eurotuxsuperlight}%
+	%\arrayrulecolor{red!75!gray}%
+	\arrayrulecolor{eurotuxsec}%
+	\extrarowheight2pt%
+	\tabularx{#1}{#2}%
+	\rowcolor{tableheadcolor}%
+}{%
+\endtabularx%
+}
+
+\newenvironment{eurotuxrevisionlog}{%
+  \extrarowheight2pt%
+  \tabularx{\linewidth}{@{}llllX@{}}%
+  {\em Versão} & {\em Referência} & {\em Autor} &%
+    {\em Data} & {\em Comentários} \\%
+  \hline%
+}{%
+  \endtabularx%
+}
+
+
+% paragraph-related style definitions
+% =============================================================================
+
+%\usepackage{indentfirst}
+%\raggedright
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{0.75em}
+
+% definir posicao fixa para imagens e tabelas [H]
+
+%\usepackage{float}
+
+%\floatstyle{plain}
+%\restylefloat{table}
+%\restylefloat{figure}
+%\floatplacement{table}{H}
+%\floatplacement{figure}{H}
+
+
+% title-related style definitions
+% =============================================================================
+
+\newcommand{\subtitlevar}{}
+\newcommand{\subtitle}[1]{\renewcommand{\subtitlevar}{#1}}
+
+\def\todday%
+{% Displays today's date and time as ``yyyy-mm-dd hh:mm''
+  \zeroPadTwo{\the\day}-\zeroPadTwo{\the\month}-\the\year%
+}% --- \today ---
+
+\def\zeroPadTwo#1%
+{% Left zero pad of the argument to 2 digits.  The argument
+%  should be a number between 1 and 99.  This macro outputs
+%  a `0' if the argument is less than ten, then it outputs
+%  the argument.
+%
+  \ifnum #1<10 0\fi    % Conditionally output a zero
+  #1%    Then output the argument
+}% --- \zeroPadTwo ---
+
+
+
+\def\maketitle{
+  \thispagestyle{empty}
+  \setlength{\unitlength}{1cm}
+        \begin{picture}(0,0)
+                
+                % large vertical gray bar
+                %\linethickness{3.5cm}
+                %\put(0,1.5){\color{lightgray}\line(0,-1){25.5}}
+                %\linethickness{0.15cm}
+                
+                % gray bar
+                %\put(2.6,-20.1){\color{gray}\line(1,0){14}}
+                
+                % red bar
+                %\put(2.5,-20){\color{eurotux}\line(1,0){14}}
+                
+                % Company logo
+                %\put(4,-2.5){\begin{minipage}[t]{14cm}
+                %    {\includegraphics[height=2.8cm]{logo_h.png}\par}
+                %  \end{minipage}}
+                
+                % Company image and logo
+                \put(-2.8,-6){
+                	\begin{minipage}[t]{20cm}
+                	{\includegraphics[height=7.2cm]{include/img/eurotux_bubbles1.png}\par}
+                	\end{minipage}
+                }
+
+                % Document title
+                \put(0.0,-9.7){\begin{minipage}[t]{14cm}
+                	{\sf \Huge \@title\par}
+                	\vspace{1cm}
+                	{\sf \Large \textit \subtitlevar\par}
+                	\end{minipage}}
+                
+                
+                \put(9.3,-23){
+                	\begin{minipage}[t]{20cm}
+                	{\includegraphics[height=2.75cm]{include/img/eurotux_logo_slogan.png}\par}
+                	\end{minipage}}
+                	
+                \put(0.0,-22.35){
+                	\begin{minipage}[t]{20cm}
+                	{\includegraphics[height=1.75cm]{include/img/logo_premios-cert.png}\par}
+                	\end{minipage}}
+
+
+                %\put(2.5,-19){\begin{minipage}[t]{14cm}
+                %        {\sf\@date\par}
+                %\end{minipage}}
+                
+                %\put(2.5,-21.1){\begin{minipage}[t]{14cm}
+                %        {\sf
+                %        Rua Irmãs Missionárias do Espírito Santo, 27\\
+                %        4715-340 Braga\\
+                %        Portugal
+                %        \begin{tabbing}
+                %        Tel: \= +351 \= 253 \= 680 \= 300\\
+                %        Fax: \> +351 \> 253 \> 680 \> 319
+                %        \end{tabbing}
+                %        }
+                %\end{minipage}}
+                
+                %\put(13.5,-23){\begin{minipage}[t]{10cm}
+                %     {\includegraphics[height=2.3cm]{logo_PME_excelencia_11.png}}
+                %\end{minipage}}
+                
+                % Eurotux URL
+                %\put(12, -23.5){
+                %  \begin{minipage}[t]{10cm}
+                %    {\color{eurotuxsec}\large\textbf{http://eurotux.com}}
+                %  \end{minipage}
+                %}
+
+        \end{picture}
+        \null
+        \cleardoublepage
+}
+
+
+\let\LaTeXtitle\title
+\renewcommand{\title}[1]{%
+  \LaTeXtitle{\color{eurotuxsec}\bfseries#1}%
+}
+
+
+% misc definitions
+% =============================================================================
+
+\let\LaTeXtableofcontents\tableofcontents
+\renewcommand{\tableofcontents}{%
+  \setlength{\parskip}{0cm}
+  \renewcommand{\contentsname}{Índice}
+  \LaTeXtableofcontents%
+  \setlength{\parskip}{0.75em}
+}
+
+
+% provider and client-related definitions
+% =============================================================================
+
+\usepackage{xspace}
+
+\newcommand{\deffornecedor}[4]{
+  \newcommand{\fornecedor}{#2\xspace}
+  \newcommand{\ofornecedor}{#1 #2\xspace}
+  \newcommand{\Ofornecedor}{\MakeUppercase{#1} #2\xspace}
+  \newcommand{\fornecedorcompleto}{#4\xspace}
+  \newcommand{\ofornecedorcompleto}{#3 #4\xspace}
+  \newcommand{\Ofornecedorcompleto}{\MakeUppercase{#3} #4\xspace}
+  \newcommand{\aofornecedor}{\if #1aà #2\xspace\else ao #2\xspace\fi}
+  \newcommand{\Aofornecedor}{\if #1aÀ #2\xspace\else Ao #2\xspace\fi}
+  \newcommand{\aofornecedorcompleto}{\if #1aà #2\xspace\else ao #2\xspace\fi}
+  \newcommand{\Aofornecedorcompleto}{\if #1aÀ #2\xspace\else Ao #2\xspace\fi}
+}
+\newcommand{\defcliente}[4]{
+  \newcommand{\cliente}{#2\xspace}
+  \newcommand{\ocliente}{#1 #2\xspace}
+  \newcommand{\Ocliente}{\MakeUppercase{#1} #2\xspace}
+  \newcommand{\clientecompleto}{#4\xspace}
+  \newcommand{\oclientecompleto}{#3 #4\xspace}
+  \newcommand{\Oclientecompleto}{\MakeUppercase{#3} #4\xspace}
+  \newcommand{\aocliente}{\if #1aà #2\xspace\else ao #2\xspace\fi}
+  \newcommand{\Aocliente}{\if #1aÀ #2\xspace\else Ao #2\xspace\fi}
+  \newcommand{\aoclientecompleto}{\if #1aà #2\xspace\else ao #2\xspace\fi}
+  \newcommand{\Aoclientecompleto}{\if #1aÀ #2\xspace\else Ao #2\xspace\fi}
+}
+
+
+% project designation
+% =============================================================================
+\newcommand{\defprojecto}[4]{
+  \newcommand{\projecto}{#2\xspace}
+  \newcommand{\oprojecto}{#1 #2\xspace}
+  \newcommand{\Oprojecto}{\MakeUppercase{#1} #2\xspace}
+  \newcommand{\projectocompleto}{#4\xspace}
+  \newcommand{\oprojectocompleto}{#3 #4\xspace}
+  \newcommand{\Oprojectocompleto}{\MakeUppercase{#3} #4\xspace}
+  \newcommand{\aoprojecto}{\if #1aà #2\xspace\else ao #2\xspace\fi}
+  \newcommand{\Aoprojecto}{\if #1aÀ #2\xspace\else Ao #2\xspace\fi}
+  \newcommand{\aoprojectocompleto}{\if #1aà #2\xspace\else ao #2\xspace\fi}
+  \newcommand{\Aoprojectocompleto}{\if #1aÀ #2\xspace\else Ao #2\xspace\fi}
+}
+
+
+% budget tables
+% =============================================================================
+
+\newenvironment{orcamento2}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{p{.80\textwidth}r}%
+\textbf{   Descrição resumida} &%
+\hbox to .14\textwidth {\hfill\textbf{Preço}}\\%
+\hline\hline}%
+{\hline%
+\end{tabular}}
+
+\newenvironment{orcamento2en}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{p{.80\textwidth}r}%
+\textbf{   Short Description} &%
+\hbox to .14\textwidth {\hfill\textbf{Price}}\\%
+\hline\hline}%
+{\hline%
+\end{tabular}}
+
+\newenvironment{orcamento2T}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{p{.78\textwidth}r}%
+\textbf{   Descrição resumida} &%
+\hbox to .16\textwidth {\hfill\textbf{Preço}}\\%
+\hline\hline}%
+{\hline%
+\multicolumn{1}{r}{\textbf{Total =}} & \textbf{\vartot}\\%
+\end{tabular}}
+
+\newenvironment{orcamento2TMes}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{p{.78\textwidth}r}%
+\textbf{   Descrição resumida} &%
+\hbox to .16\textwidth {\hfill\textbf{Mensalidade}}\\%
+\hline\hline}%
+{\hline%
+\multicolumn{1}{r}{\textbf{Total =}} & \textbf{\vartot}\\%
+\end{tabular}}
+
+\newenvironment{orcamento2TT}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{@{}p{\textwidth}@{}}%
+\multicolumn{1}{c}{\textbf{Descrição resumida}}\\
+\hline\hline}%
+{\hline%
+\multicolumn{1}{r@{}}{\textbf{TOTAL = \vartot}}\\%
+\end{tabular}}
+
+
+\newenvironment{orcamento3}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{@{}p{.06\textwidth}@{}p{.74\textwidth}@{}r@{}}%
+\textbf{Qt.} & \textbf{Descrição} &%
+\hbox to .20\textwidth {\hfill\textbf{Valor}}\\%
+\hline\hline}%
+{\hline%
+\end{tabular}}
+
+\newenvironment{orcamento3T}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{@{}p{.06\textwidth}@{}p{.74\textwidth}@{}r@{}}%
+\textbf{Qt.} & \textbf{Descrição} &%
+\hbox to .20\textwidth {\hfill\textbf{Valor}}\\%
+\hline\hline}%
+{\hline%
+\multicolumn{3}{r@{}}{\textbf{TOTAL = \vartot}}\\
+\end{tabular}}
+
+\newenvironment{orcamento3C}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{@{}p{.06\textwidth}@{}p{.74\textwidth}@{}r@{}}%
+\textbf{Qt.} & \textbf{   Tipo de Alojamento} &%
+\hbox to .20\textwidth {\hfill\textbf{Preço Anual}}\\%
+\hline\hline}%
+{\hline%
+\end{tabular}}
+
+\newenvironment{orcamento7}[1]
+{
+\newcommand{\vartot}{#1}
+\begin{tabular}{@{}rp{.62\textwidth}rr@{}}
+ & & \textbf{Preço} & \textbf{Preço}\\
+\textbf{Qt.} &\textbf{ Descrição resumida} & \textbf{Unitário} & \textbf{Total}\\
+\hline \hline
+}
+{\hline
+\multicolumn{4}{r@{}}{\textbf{TOTAL = \vartot}}\\
+\end{tabular}}
+
+\newenvironment{orcamento7S}[1]
+{
+\newcommand{\vartot}{#1}
+\begin{tabular}{@{}lp{.62\textwidth}rr@{}}
+ & & \textbf{Preço} & \textbf{Preço}\\
+\textbf{Qt.} &\textbf{ Descrição resumida} & \textbf{Unitário} & \textbf{Total}\\
+\hline \hline
+}
+{\hline%
+\end{tabular}}
+
+\newenvironment{orcamento9}[1]{%
+\newcommand{\vartot}{#1}
+\begin{tabular}{@{}p{.05\textwidth}@{}p{.66\textwidth}@{}r@{}@{}r@{}}%
+\textbf{Qt.} & \textbf{   Descrição resumida} &%
+\hbox to .14\textwidth {\hfill\textbf{Preço Unit.}} &
+\hbox to .15\textwidth {\hfill\textbf{Preço Tot.}}\\%
+\hline\hline}%
+{\hline%
+\multicolumn{4}{r@{}}{\textbf{TOTAL = \vartot}}\\
+\end{tabular}}

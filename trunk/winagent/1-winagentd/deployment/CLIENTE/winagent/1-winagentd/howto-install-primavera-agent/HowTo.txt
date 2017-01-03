@@ -1,0 +1,36 @@
+install cygwin
+
+ * install perl 5.10
+ * install perl-libwin32
+# * install perl_vendor
+ * install perl-XML-Simple
+ * install make
+ * install autoconf
+ * install automake
+ * install gcc
+ * install gcc-core
+
+ * /usr/sbin/update-alternatives     --install "/usr/bin/gcc-4.exe" "gcc-4" "/usr/bin/gcc.exe" 40
+ * /usr/sbin/update-alternatives     --install "/usr/bin/g++-4.exe" "g++-4" "/usr/bin/g++.exe" 40
+
+ * install openssl
+ * install openssl-devel
+
+run cpan and install:
+
+ * install Math::Int64
+ * install Win32::API
+ * install Win32::DriveInfo
+ * install SOAP::Lite
+ * install Win32::Service
+
+
+copy primavera-agent-package\* para c:\
+
+edit c:\Users\Administrator\winagentd\primaveraagentd.ini to change :value of cm_uri to IP of Central management
+
+
+run install-as-service/add-primavera-agent-to-registry.bat
+
+
+IMPORTANTE: Nao esquecer de configurar as permissoes nos perfis associados aos módulos e empresas

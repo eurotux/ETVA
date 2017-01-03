@@ -1593,7 +1593,12 @@ class serverActions extends sfActions
             }
 
             $server = $request->getParameter('server');
-            if(!$etva_server = $etva_node->retrieveServerByName($server)){
+
+            $etva_server = EtvaServerPeer::retrieveByPK($server);
+            if( !$etva_server ) $etva_server = EtvaServerPeer::retrieveByUuid($server);
+            if( !$etva_server ) $etva_node->retrieveServerByName($server);
+
+            if(!$etva_server){
 
                 //notify event log
                 $msg_i18n = Etva::makeNotifyLogMessage($etva_node->getName(),
@@ -1732,7 +1737,11 @@ class serverActions extends sfActions
 
         }
 
-        if(!$etva_server = $etva_node->retrieveServerByName($server)){
+        $etva_server = EtvaServerPeer::retrieveByPK($server);
+        if( !$etva_server ) $etva_server = EtvaServerPeer::retrieveByUuid($server);
+        if( !$etva_server ) $etva_node->retrieveServerByName($server);
+
+        if(!$etva_server){
 
             //notify event log
             $msg_i18n = Etva::makeNotifyLogMessage($etva_node->getName(),
@@ -2461,13 +2470,16 @@ class serverActions extends sfActions
 
                         if($vm_is_running)
                         {
-                            $has_servers_running = true;
-                            if($aoncontextmenugent_server_port)
-                            {
-                                if(!$state_server) $cls_server = 'some-active';
+                            if($vm_state=='suspended') $cls_server = 'suspended';
+                            else {
+                                $has_servers_running = true;
+                                if($aoncontextmenugent_server_port)
+                                {
+                                    if(!$state_server) $cls_server = 'some-active';
+                                    else $cls_server = 'active';
+                                }
                                 else $cls_server = 'active';
                             }
-                            else $cls_server = 'active';
 
                         }else
                         {
@@ -2542,13 +2554,16 @@ class serverActions extends sfActions
 
                     if($vm_is_running)
                     {
-                        $has_servers_running = true;
-                        if($aoncontextmenugent_server_port)
-                        {
-                            if(!$state_server) $cls_server = 'some-active';
+                        if($vm_state=='suspended') $cls_server = 'suspended';
+                        else {
+                            $has_servers_running = true;
+                            if($aoncontextmenugent_server_port)
+                            {
+                                if(!$state_server) $cls_server = 'some-active';
+                                else $cls_server = 'active';
+                            }
                             else $cls_server = 'active';
                         }
-                        else $cls_server = 'active';
 
                     }else
                     {

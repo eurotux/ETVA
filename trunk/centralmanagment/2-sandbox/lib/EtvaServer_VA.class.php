@@ -18,6 +18,8 @@ class EtvaServer_VA
     const SERVER_CREATE_SNAPSHOT = 'vm_create_snapshot_may_fork';
     const SERVER_REVERT_SNAPSHOT = 'vm_revert_snapshot_may_fork';
     const SERVER_REMOVE_SNAPSHOT = 'vm_remove_snapshot_may_fork';
+    const SERVER_SUSPEND = 'suspend_vm';
+    const SERVER_RESUME = 'resume_vm';
 
     private $etva_server;
     private $collNetworks;
@@ -34,7 +36,7 @@ class EtvaServer_VA
     }
 
 
-    public function send_remove(EtvaNode $etva_node, $keep_fs)
+    public function send_remove(EtvaNode $etva_node = null, $keep_fs)
     {
         $method = self::SERVER_REMOVE;
         $etva_server = $this->etva_server;
@@ -43,11 +45,14 @@ class EtvaServer_VA
         
         if( !$etva_server->getUnassigned() ){
             $response = $etva_node->soapSend($method,$params);
+            $result = $this->processRemoveResponse($etva_node,$response,$method,$keep_fs);
         } else {
-            $response = array('success'=>true);
+            $etva_server->deleteServer(1);  // always keep fs
+
+            $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_OK_REMOVE_,array('%name%'=>$etva_server->getName(),'%info%'=>''));
+            $result = array('success'=>true, 'response'=>$msg_i18n);
         }
 
-        $result = $this->processRemoveResponse($etva_node,$response,$method,$keep_fs);
         return $result;
     }
 
@@ -180,7 +185,29 @@ class EtvaServer_VA
         //error processing parameters
         if(!$check_disks_available['success']) return $check_disks_available;
 
+        $criteria = new Criteria();
+        $criteria->add(EtvaServerPeer::CLUSTER_ID,$etva_node->getClusterId());
 
+        // If name changes
+        $etva_server_aux = EtvaServerPeer::retrieveByName($server_data['name'],$criteria);
+        if( $etva_server_aux ){
+
+            $msg = Etva::getLogMessage(array('name'=>$server_data['name']), EtvaServerPeer::_ERR_EXIST_);
+            $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_ERR_EXIST_,array('%name%'=>$server_data['name']));
+
+            $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+            //notify event log
+            $message = Etva::getLogMessage(array('name'=>$etva_server->getName(),
+                            'node'=>$etva_node->getName(),
+                            'info'=>$msg), EtvaServerPeer::_ERR_CREATE_);
+
+            sfContext::getInstance()->getEventDispatcher()->notify(
+                new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                    array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+            return $error;
+        }
 
 
         $this->buildServer($method);
@@ -253,6 +280,35 @@ class EtvaServer_VA
         $etva_server = $this->etva_server;
 
         $etva_server->fromArray($server_data,BasePeer::TYPE_FIELDNAME);        
+
+        if( $orig_server->getName() !== $server_data['name'] ){
+            $criteria = new Criteria();
+            $criteria->add(EtvaServerPeer::CLUSTER_ID,$etva_node->getClusterId());
+
+            // If name changes
+            $etva_server_aux = EtvaServerPeer::retrieveByName($server_data['name'], $criteria);
+            if( $etva_server_aux ){
+                // check if exist one server with this name
+                if( $etva_server->getUuid() !== $etva_server_aux->getUuid() ){
+
+                    $msg = Etva::getLogMessage(array('name'=>$server_data['name']), EtvaServerPeer::_ERR_EXIST_);
+                    $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_ERR_EXIST_,array('%name%'=>$server_data['name']));
+
+                    $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+                    //notify event log
+                    $message = Etva::getLogMessage(array('name'=>$orig_server->getName(),
+                                    'node'=>$etva_node->getName(),
+                                    'info'=>$msg), EtvaServerPeer::_ERR_EDIT_);
+
+                    sfContext::getInstance()->getEventDispatcher()->notify(
+                        new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                            array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+                    return $error;
+                }
+            }
+        }
 
         /*
          * process networks
@@ -832,6 +888,32 @@ class EtvaServer_VA
 
         }
 
+        // check server name collision on destination cluster
+        $server_name = $etva_server->getName();
+
+        $criteria = new Criteria();
+        $criteria->add(EtvaServerPeer::CLUSTER_ID,$to_etva_node->getClusterId());
+
+        $etva_server_aux = EtvaServerPeer::retrieveByName($server_name, $criteria);
+        if( $etva_server_aux ){
+            // check if exist one server with this name
+            if( $etva_server->getUuid() !== $etva_server_aux->getUuid() ){
+
+                $msg = Etva::getLogMessage(array('name'=>$server_name), EtvaServerPeer::_ERR_EXIST_);
+                $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_ERR_EXIST_,array('%name%'=>$server_name));
+
+                $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+                //notify event log
+                $message = Etva::getLogMessage(array('name'=>$etva_server->getName(), 'info'=>$msg), $err);
+
+                sfContext::getInstance()->getEventDispatcher()->notify(
+                    new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                        array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+                return $error;
+            }
+        }
 
         /*
          * check server memory
@@ -1178,6 +1260,34 @@ class EtvaServer_VA
         $method = self::SERVER_MOVE;
         $err_op = EtvaServerPeer::_ERR_ASSIGNED_;
 
+        // check server name collision on destination cluster
+        $server_name = $etva_server->getName();
+
+        $criteria = new Criteria();
+        $criteria->add(EtvaServerPeer::CLUSTER_ID,$to_etva_node->getClusterId());
+
+        $etva_server_aux = EtvaServerPeer::retrieveByName($server_name, $criteria);
+        if( $etva_server_aux ){
+            // check if exist one server with this name
+            if( $etva_server->getUuid() !== $etva_server_aux->getUuid() ){
+
+                $msg = Etva::getLogMessage(array('name'=>$server_name), EtvaServerPeer::_ERR_EXIST_);
+                $msg_i18n = sfContext::getInstance()->getI18N()->__(EtvaServerPeer::_ERR_EXIST_,array('%name%'=>$server_name));
+
+                $error = array('success'=>false,'agent'=>sfConfig::get('config_acronym'),'error'=>$msg_i18n,'info'=>$msg_i18n);
+
+                //notify event log
+                $message = Etva::getLogMessage(array('name'=>$etva_server->getName(),
+                                                        'node'=>$to_etva_node->getName(), 'info'=>$msg), $err_op);
+
+                sfContext::getInstance()->getEventDispatcher()->notify(
+                    new sfEvent(sfConfig::get('config_acronym'), 'event.log',
+                        array('message' => $message,'priority'=>EtvaEventLogger::ERR)));
+
+                return $error;
+            }
+        }
+
         $preHaveMem = $this->haveMemoryAvailable($method,$to_etva_node);
         if( !$preHaveMem['success'] ) return $preHaveMem;
 
@@ -1303,6 +1413,7 @@ class EtvaServer_VA
         
         $params['boot'] = $boot; 
         if($boot=='location' || $boot=='cdrom') $params['location'] = $location; 
+        if($boot=='location') $params['extra'] = $etva_server->getExtra();
         $params['vnc_keymap'] = $etva_server->getVncKeymap(); 
 
         $response = $etva_node->soapSend($method,$params);
@@ -1403,5 +1514,69 @@ class EtvaServer_VA
     }
     public function remove_snapshot(EtvaNode $etva_node,$snapshot){
         return $etva_node->soapSend(self::SERVER_REMOVE_SNAPSHOT,array('uuid'=>$this->etva_server->getUuid(),'name'=>$this->etva_server->getName(),'snapshot'=>$snapshot));
+    }
+    public function send_suspend(EtvaNode $etva_node){
+        $etva_server = $this->etva_server;
+        $method = self::SERVER_SUSPEND;
+
+        $params = array();
+        $params['uuid'] = $etva_server->getUuid();
+        
+        $response = $etva_node->soapSend($method,$params);
+        return $this->processSuspendResume($etva_node,$response,$method);
+    }
+    public function send_resume(EtvaNode $etva_node){
+        $etva_server = $this->etva_server;
+        $method = self::SERVER_RESUME;
+
+        $params = array();
+        $params['uuid'] = $etva_server->getUuid();
+        
+        $response = $etva_node->soapSend($method,$params);
+        return $this->processSuspendResume($etva_node,$response,$method);
+    }
+    protected function processSuspendResume(EtvaNode $etva_node, $response, $method )
+    {
+
+        $etva_server = $this->etva_server;
+
+        switch($method){
+            case self::SERVER_SUSPEND :
+                                $msg_ok_type = EtvaServerPeer::_OK_SUSPEND_;
+                                $msg_err_type = EtvaServerPeer::_ERR_SUSPEND_;
+                                break;
+            case self::SERVER_RESUME :
+                                $msg_ok_type = EtvaServerPeer::_OK_RESUME_;
+                                $msg_err_type = EtvaServerPeer::_ERR_RESUME_; 
+                                break;
+        }
+        if(!$response['success']){
+            $result = $response;
+            $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
+                                                        $response['info'],array(),
+                                                        $msg_err_type, array('name'=>$etva_server->getName()));
+            $result['error'] = $msg_i18n;
+            return $result;
+        }
+
+        $response_decoded = (array) $response['response'];
+        $returned_status = $response_decoded['_okmsg_'];
+        $returned_object = (array) $response_decoded['_obj_'];
+
+        // get some info from response...
+
+        //update some server data from agent response
+        $etva_server->initData($returned_object);
+        
+        $etva_server->save();
+
+        //notify event log
+        $msg_i18n = Etva::makeNotifyLogMessage($response['agent'],
+                                                        $msg_ok_type, array('name'=>$etva_server->getName()),
+                                                        null,array(),EtvaEventLogger::INFO);
+
+        $result = array('success'=>true,'agent'=>$response['agent'],'response'=>$msg_i18n);
+
+        return $result;
     }
 }

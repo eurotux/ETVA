@@ -1,0 +1,38 @@
+From ca4fed79d88ae1da90ed8cd6c4bd7e8ad2ff3020 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Fri, 7 Sep 2012 21:29:22 +0200
+Subject: [PATCH] qxl: Ignore set_client_capabilities pre/post migrate
+
+The recent introduction of set_client_capabilities has broken
+(seamless) migration by trying to call qxl_send_events pre (seamless
+incoming) and post (*) migration, triggering the following assert:
+qxl_send_events: Assertion `qemu_spice_display_is_running(&d->ssd)' failed.
+
+The solution is easy, pre migration the guest will have already received
+the client caps on the migration source side, and post migration there no
+longer is a guest, so we can simply ignore the set_client_capabilities call
+in both those scenarios.
+
+*) Post migration, so not fatal for to the migration itself, but still a crash
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ hw/qxl.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 743082d..8a86ffc 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -955,6 +955,11 @@ static void interface_set_client_capabilities(QXLInstance *sin,
+ {
+     PCIQXLDevice *qxl = container_of(sin, PCIQXLDevice, ssd.qxl);
+ 
++    if (runstate_check(RUN_STATE_INMIGRATE) ||
++        runstate_check(RUN_STATE_POSTMIGRATE)) {
++        return;
++    }
++
+     qxl->shadow_rom.client_present = client_present;
+     memcpy(qxl->shadow_rom.client_capabilities, caps, sizeof(caps));
+     qxl->rom->client_present = client_present;

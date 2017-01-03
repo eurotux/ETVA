@@ -1,0 +1,28 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}New Group{% endblock%}
+{% block section %}{%trans "Groups"%}{% endblock%}
+
+{% block mainCol%}
+
+	{% if errorMsg%}
+	<div id="msgAlert">{{errorMsg}}</div>
+	{%endif%}
+
+{% if form.subject.errors %}
+    <ol>
+    {% for error in form.subject.errors %}
+        <li><strong>{{ error|escape }}</strong></li>
+    {% endfor %}
+    </ol>
+{% endif %}
+
+<form method="post">
+<table class="form">
+    {{form.as_table}}
+</table>
+<input class="button" type="submit" value="{% trans "Submit" %}" />
+</form>
+{%endblock%}
+
+

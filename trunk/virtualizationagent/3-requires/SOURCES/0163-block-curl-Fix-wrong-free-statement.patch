@@ -1,0 +1,34 @@
+From fcff99019db09b59416cfc8e2b22827c18dfcd9a Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 1 Sep 2012 11:06:45 +0200
+Subject: [PATCH] block/curl: Fix wrong free statement
+
+Report from smatch:
+block/curl.c:546 curl_close(21) info: redundant null check on s->url calling free()
+
+The check was redundant, and free was also wrong because the memory
+was allocated using g_strdup.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit 45724d6d02383b0d7d4a90e05787fca7c55cb070)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block/curl.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/block/curl.c b/block/curl.c
+index e7c3634..c1074cd 100644
+--- a/block/curl.c
++++ b/block/curl.c
+@@ -542,8 +542,7 @@ static void curl_close(BlockDriverState *bs)
+     }
+     if (s->multi)
+         curl_multi_cleanup(s->multi);
+-    if (s->url)
+-        free(s->url);
++    g_free(s->url);
+ }
+ 
+ static int64_t curl_getlength(BlockDriverState *bs)

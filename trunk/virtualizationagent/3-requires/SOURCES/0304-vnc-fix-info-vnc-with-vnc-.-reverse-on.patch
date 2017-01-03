@@ -1,0 +1,51 @@
+From d6a6c617a00a1595bcc56c9f1d823189ad8ba43e Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Wed, 10 Oct 2012 14:30:58 +0200
+Subject: [PATCH] vnc: fix "info vnc" with "-vnc ..., reverse=on"
+
+When reverse connection is in use, there is no active VNC server
+socket.  Because of this, getsockopt(-1, ...) is attempted and
+the following error is emitted:
+
+    $ socat TCP-LISTEN:5900,reuseaddr TCP-LISTEN:5901,reuseaddr &
+    $ x86_64-softmmu/qemu-system-x86_64 -vnc localhost:5900,reverse -monitor stdio
+    QEMU 1.2.50 monitor - type 'help' for more information
+    (qemu) info vnc
+    An undefined error has occurred
+
+Because however the host, family, service and auth fields are
+optional, we can just exit if there is no active server socket.
+
+    $ x86_64-softmmu/qemu-system-x86_64 -vnc localhost:5900,reverse -monitor stdio
+    QEMU 1.2.50 monitor - type 'help' for more information
+    (qemu) info vnc
+    Server:
+    Client:
+         address: 127.0.0.1:5900
+      x509_dname: none
+        username: none
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>
+(cherry picked from commit 417b0b88904fe1dd8c41bff8092dfbab0134d9cb)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ ui/vnc.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ui/vnc.c b/ui/vnc.c
+index 18ec101..66ae930 100644
+--- a/ui/vnc.c
++++ b/ui/vnc.c
+@@ -372,6 +372,10 @@ VncInfo *qmp_query_vnc(Error **errp)
+             }
+         }
+ 
++        if (vnc_display->lsock == -1) {
++            return info;
++        }
++
+         if (getsockname(vnc_display->lsock, (struct sockaddr *)&sa,
+                         &salen) == -1) {
+             error_set(errp, QERR_UNDEFINED_ERROR);

@@ -1,0 +1,55 @@
+From 49b98c0d2dba189cd0c0dc133bbf0d636678eeea Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Fri, 17 Aug 2012 11:39:16 +0200
+Subject: [PATCH] usb: controllers do not need to check for babble themselves
+
+If an (emulated) usb-device tries to write more data to a packet then
+its iov len, this will trigger an assert in usb_packet_copy(), and if
+a driver somehow circumvents that check and writes more data to the
+iov then there is space, we have a much bigger problem then not correctly
+reporting babble to the guest.
+
+In practice babble will only happen with (real) redirected devices, and there
+both the usb-host os and the qemu usb-device code already check for it.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 45b339b18c660eb85af2ba25bfcaed5469660d77)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 4 ----
+ hw/usb/hcd-uhci.c | 5 -----
+ 2 files changed, 9 deletions(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 017342b..9523247 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -1481,10 +1481,6 @@ static void ehci_execute_complete(EHCIQueue *q)
+             assert(0);
+             break;
+         }
+-    } else if ((p->usb_status > p->tbytes) && (p->pid == USB_TOKEN_IN)) {
+-        p->usb_status = USB_RET_BABBLE;
+-        q->qh.token |= (QTD_TOKEN_HALT | QTD_TOKEN_BABBLE);
+-        ehci_raise_irq(q->ehci, USBSTS_ERRINT);
+     } else {
+         // TODO check 4.12 for splits
+ 
+diff --git a/hw/usb/hcd-uhci.c b/hw/usb/hcd-uhci.c
+index b0db921..c7c8786 100644
+--- a/hw/usb/hcd-uhci.c
++++ b/hw/usb/hcd-uhci.c
+@@ -729,11 +729,6 @@ static int uhci_complete_td(UHCIState *s, UHCI_TD *td, UHCIAsync *async, uint32_
+         *int_mask |= 0x01;
+ 
+     if (pid == USB_TOKEN_IN) {
+-        if (len > max_len) {
+-            ret = USB_RET_BABBLE;
+-            goto out;
+-        }
+-
+         if ((td->ctrl & TD_CTRL_SPD) && len < max_len) {
+             *int_mask |= 0x02;
+             /* short packet: do not update QH */

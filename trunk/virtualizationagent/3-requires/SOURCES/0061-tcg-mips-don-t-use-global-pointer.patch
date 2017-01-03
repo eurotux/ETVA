@@ -1,0 +1,34 @@
+From 4818ab7f1cad3d14e933f3bf5781ba3d5d1373a7 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Fri, 21 Sep 2012 18:20:26 +0200
+Subject: [PATCH] tcg/mips: don't use global pointer
+
+Don't use the global pointer in TCG, in case helpers try access global
+variables.
+
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/mips/tcg-target.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tcg/mips/tcg-target.c b/tcg/mips/tcg-target.c
+index 8b38f98..0ea6a76 100644
+--- a/tcg/mips/tcg-target.c
++++ b/tcg/mips/tcg-target.c
+@@ -1529,7 +1529,6 @@ static int tcg_target_callee_save_regs[] = {
+     TCG_REG_S5,
+     TCG_REG_S6,
+     TCG_REG_S7,
+-    TCG_REG_GP,
+     TCG_REG_FP,
+     TCG_REG_RA,       /* should be last for ABI compliance */
+ };
+@@ -1595,6 +1594,7 @@ static void tcg_target_init(TCGContext *s)
+     tcg_regset_set_reg(s->reserved_regs, TCG_REG_T0);   /* internal use */
+     tcg_regset_set_reg(s->reserved_regs, TCG_REG_RA);   /* return address */
+     tcg_regset_set_reg(s->reserved_regs, TCG_REG_SP);   /* stack pointer */
++    tcg_regset_set_reg(s->reserved_regs, TCG_REG_GP);   /* global pointer */
+ 
+     tcg_add_target_add_op_defs(mips_op_defs);
+     tcg_set_frame(s, TCG_AREG0, offsetof(CPUArchState, temp_buf),

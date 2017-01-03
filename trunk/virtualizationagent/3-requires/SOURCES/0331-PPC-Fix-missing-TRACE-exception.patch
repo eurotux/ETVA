@@ -1,0 +1,82 @@
+From 2e96d542eed371bfcfb2e999a71b2b88bef96028 Mon Sep 17 00:00:00 2001
+From: Julio Guerra <guerr@julio.in>
+Date: Fri, 19 Oct 2012 00:17:13 +0000
+Subject: [PATCH] PPC: Fix missing TRACE exception
+
+This patch fixes bug 1031698 :
+https://bugs.launchpad.net/qemu/+bug/1031698
+
+If we look at the (truncated) translation of the conditional branch
+instruction in the test submitted in the bug post, the call to the
+exception helper is missing in the "bne-false" chunk of translated
+code :
+
+IN:
+bne-    0x1800278
+
+OUT:
+0xb544236d:  jne    0xb5442396
+
+0xb5442373:  mov    %ebp,(%esp)
+0xb5442376:  mov    $0x44,%ebx
+0xb544237b:  mov    %ebx,0x4(%esp)
+0xb544237f:  mov    $0x1800278,%ebx
+0xb5442384:  mov    %ebx,0x25c(%ebp)
+0xb544238a:  call   0x827475a
+                     ^^^^^^^^^^^^^^^^^^
+
+0xb5442396:  mov    %ebp,(%esp)
+0xb5442399:  mov    $0x44,%ebx
+0xb544239e:  mov    %ebx,0x4(%esp)
+0xb54423a2:  mov    $0x1800270,%ebx
+0xb54423a7:  mov    %ebx,0x25c(%ebp)
+
+Indeed, gen_exception(ctx, excp) called by gen_goto_tb (called by
+gen_bcond) changes ctx->exception's value to excp's :
+
+gen_bcond()
+{
+  gen_goto_tb(ctx, 0, ctx->nip + li - 4);
+  /* ctx->exception value is POWERPC_EXCP_BRANCH */
+
+  gen_goto_tb(ctx, 1, ctx->nip);
+  /* ctx->exception now value is POWERPC_EXCP_TRACE */
+}
+
+Making the following gen_goto_tb()'s test false during the second call :
+
+if ((ctx->singlestep_enabled &
+    (CPU_BRANCH_STEP | CPU_SINGLE_STEP)) &&
+    ctx->exception == POWERPC_EXCP_BRANCH /* false...*/) {
+         target_ulong tmp = ctx->nip;
+         ctx->nip = dest;
+         /* ... and this is the missing call */
+         gen_exception(ctx, POWERPC_EXCP_TRACE);
+         ctx->nip = tmp;
+}
+
+So the patch simply adds the missing matching case, fixing our problem.
+
+Signed-off-by: Julio Guerra <guerr@julio.in>
+Signed-off-by: Alexander Graf <agraf@suse.de>
+(cherry picked from commit f0cc4aa8450376ca2aee3ebb09db71f9f2ff333b)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-ppc/translate.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/target-ppc/translate.c b/target-ppc/translate.c
+index ac915cc..3c49ca9 100644
+--- a/target-ppc/translate.c
++++ b/target-ppc/translate.c
+@@ -3466,7 +3466,8 @@ static inline void gen_goto_tb(DisasContext *ctx, int n, target_ulong dest)
+         if (unlikely(ctx->singlestep_enabled)) {
+             if ((ctx->singlestep_enabled &
+                 (CPU_BRANCH_STEP | CPU_SINGLE_STEP)) &&
+-                ctx->exception == POWERPC_EXCP_BRANCH) {
++                (ctx->exception == POWERPC_EXCP_BRANCH ||
++                 ctx->exception == POWERPC_EXCP_TRACE)) {
+                 target_ulong tmp = ctx->nip;
+                 ctx->nip = dest;
+                 gen_exception(ctx, POWERPC_EXCP_TRACE);

@@ -1,7 +1,7 @@
 Summary: Xen Windows PVDrivers
 Name: etva-xen-win
 Version: 0.11.0
-Release: 372
+Release: 373
 License: GPLv2
 URL: http://wiki.univention.de/
 Packager: Nuno Fernandes <npf@eurotux.com>
@@ -48,7 +48,7 @@ mkisofs -r -R -J -T -v -p "Eurotux Informatica S.A." -A "XEN GPLPv %{version}-%{
 %{__cp} %{name}-%{version}-%{release}.iso %{buildroot}/usr/share/etva-isos/
 
 %clean
-%{__rm} -rf $RPM_BUILD_DIR
+%{__rm} -rf %{buildroot}
 
 %files
 %defattr(-, root, root, 0755)

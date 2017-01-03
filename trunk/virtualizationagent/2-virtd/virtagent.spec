@@ -1,7 +1,7 @@
 %{!?rhel:%define rhel   %(cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//')}
 
 Name:           virtagent
-Version: 2.1.1
+Version: 2.2
 Release: 5751
 Summary:        Virtualization Agent
 License:        GPL
@@ -28,6 +28,11 @@ Requires:  samba-client
 %if 0%{?rhel} == 6
 Requires:  cifs-utils
 %endif
+%if 0%{?rhel} == 6
+Requires:  util-linux-ng
+%else
+Requires:  util-linux
+%endif
 Requires:  nfs-utils
 
 Requires:  perl-Sys-Virt >= 0.2.0
@@ -40,7 +45,7 @@ Requires:  perl-version >= 0.77
 
 Requires:  lvm2 >= 2.02.88
 Requires:  e2fsprogs
-Requires:  coreutils initscripts bridge-utils util-linux net-tools
+Requires:  coreutils initscripts bridge-utils net-tools
 Requires:  vconfig
 Requires:  device-mapper-multipath
 Requires:  system-config-network-tui
@@ -81,7 +86,12 @@ Requires:  perl-Crypt-SSLeay
 Requires:  perl(JSON)
 Requires:  perl(JSON::XS)
 
-Requires:  coreutils initscripts bridge-utils util-linux net-tools
+%if 0%{?rhel} == 6
+Requires:  util-linux-ng
+%else
+Requires:  util-linux
+%endif
+Requires:  coreutils initscripts bridge-utils net-tools
 Requires:  vconfig
 Requires:  device-mapper-multipath
 Requires:  system-config-network-tui

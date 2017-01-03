@@ -1,0 +1,48 @@
+From 0eaa13af113d95c9f31cb48bee7a9480ed2b31b1 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Thu, 9 Aug 2012 16:45:56 +0200
+Subject: [PATCH] e1000: flush queue whenever can_receive can go from false to
+ true
+
+When the guests replenish the receive ring buffer, the network device
+should flush its queue of pending packets.  This is done with
+qemu_flush_queued_packets.
+
+e1000's can_receive can go from false to true when RCTL or RDT are
+modified.
+
+Reported-by: Luigi Rizzo <rizzo@iet.unipi.it>
+Cc: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+Cc: Jan Kiszka <jan.kiszka@siemens.de>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Reviewed-by: Amos Kong <akong@redhat.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+(cherry picked from commit e8b4c680b41bd960ecccd9ff076b7b058e0afcd4)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/e1000.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/hw/e1000.c b/hw/e1000.c
+index ae8a6c5..ec3a7c4 100644
+--- a/hw/e1000.c
++++ b/hw/e1000.c
+@@ -295,6 +295,7 @@ set_rx_control(E1000State *s, int index, uint32_t val)
+     s->rxbuf_min_shift = ((val / E1000_RCTL_RDMTS_QUAT) & 3) + 1;
+     DBGOUT(RX, "RCTL: %d, mac_reg[RCTL] = 0x%x\n", s->mac_reg[RDT],
+            s->mac_reg[RCTL]);
++    qemu_flush_queued_packets(&s->nic->nc);
+ }
+ 
+ static void
+@@ -926,6 +927,9 @@ set_rdt(E1000State *s, int index, uint32_t val)
+ {
+     s->check_rxov = 0;
+     s->mac_reg[index] = val & 0xffff;
++    if (e1000_has_rxbufs(s, 1)) {
++        qemu_flush_queued_packets(&s->nic->nc);
++    }
+ }
+ 
+ static void

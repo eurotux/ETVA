@@ -1,0 +1,54 @@
+From 6c060fe5be4a95215632f355d7b946333974396a Mon Sep 17 00:00:00 2001
+From: Avi Kivity <avi@redhat.com>
+Date: Mon, 29 Oct 2012 18:22:36 +0200
+Subject: [PATCH] memory: fix rendering of a region obscured by another
+
+The memory core drops regions that are hidden by another region (for example,
+during BAR sizing), but it doesn't do so correctly if the lower address of the
+existing range is below the lower address of the new range.
+
+Example (qemu-system-mips -M malta -kernel vmlinux-2.6.32-5-4kc-malta
+         -append "console=ttyS0"  -nographic -vga cirrus):
+
+Existing range: 10000000-107fffff
+New range:      100a0000-100bffff
+
+Correct behaviour: drop new range
+Incorrect behaviour: add new range
+
+Fix by taking this case into account (previously we only considered
+equal lower boundaries).
+
+Tested-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Avi Kivity <avi@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit d26a8caea3f160782841efb87b5e8bea606b512b)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ memory.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/memory.c b/memory.c
+index d528d1f..7144020 100644
+--- a/memory.c
++++ b/memory.c
+@@ -538,12 +538,12 @@ static void render_memory_region(FlatView *view,
+             offset_in_region += int128_get64(now);
+             int128_subfrom(&remain, now);
+         }
+-        if (int128_eq(base, view->ranges[i].addr.start)) {
+-            now = int128_min(remain, view->ranges[i].addr.size);
+-            int128_addto(&base, now);
+-            offset_in_region += int128_get64(now);
+-            int128_subfrom(&remain, now);
+-        }
++        now = int128_sub(int128_min(int128_add(base, remain),
++                                    addrrange_end(view->ranges[i].addr)),
++                         base);
++        int128_addto(&base, now);
++        offset_in_region += int128_get64(now);
++        int128_subfrom(&remain, now);
+     }
+     if (int128_nz(remain)) {
+         fr.mr = mr;

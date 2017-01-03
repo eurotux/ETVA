@@ -80,6 +80,10 @@ Node.View.Main = function(config) {
         'updateNodeState':{fn:function(node_attrs,data_to_check){this.fireEvent('updateNodeCss',node_attrs,data_to_check);},scope:this}
         ,'reloadTree': { fn: function(attrs){ this.fireEvent('reloadTree',attrs); }, scope:this}
     });
+    node_info.on({
+        'updateNodeState':{fn:function(node_attrs,data_to_check){this.fireEvent('updateNodeCss',node_attrs,data_to_check);},scope:this}
+        ,'reloadTree': { fn: function(attrs){ this.fireEvent('reloadTree',attrs); }, scope:this}
+    });
 
 
     var tab_storage = this.loadStorage();

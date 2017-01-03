@@ -6,6 +6,9 @@
 \usepackage[pdftex]{color,graphicx}
 \usepackage{a4wide}
 
+\usepackage{enumitem}
+\usepackage{booktabs}
+
 % Arial && Times New Roman
 \usepackage{txfonts}
 
@@ -18,20 +21,20 @@
 \fancypagestyle{plain}{%
 \fancyhf{}
 \fancyhead[L]{\slshape \nouppercase{\leftmark}}
-\fancyhead[R]{\includegraphics[height=0.6cm]{../include/img/logo}}
+\fancyhead[R]{\includegraphics[height=0.6cm]{include/img/logo}}
 \fancyfoot[R]{Pág. \thepage/\pageref{LastPage}}
 \renewcommand{\headrulewidth}{0.5pt}%
 \renewcommand{\footrulewidth}{0pt}}
 
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[R]{\includegraphics[height=0.6cm]{../include/img/logo}}
+\fancyhead[R]{\includegraphics[height=0.6cm]{include/img/logo}}
 \fancyhead[L]{\slshape \nouppercase{\leftmark}}
 \fancyfoot[R]{Pág. \thepage/\pageref{LastPage}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % variaveis
-\input{../include/vars}
+\input{include/vars}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % ambiente Output
@@ -55,7 +58,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % comando subtitle
-\newcommand{\subtitlevar}{}
+\newcommand{\subtitlevar}{\nomeCliente}
 \providecommand{\subtitle}[1]{\renewcommand{\subtitlevar}{#1}}
 \newcommand{\subtitulo}[1]{\renewcommand{\subtitlevar}{#1}}
 
@@ -72,7 +75,7 @@
 		%\put(1,2){\color{greentux}\line(0,-1){25.5}}
 		\put(2.5,-2.5){\begin{minipage}[t]{14cm}
 		%\begin{center}
-			{\includegraphics[width=5cm]{../include/img/logo}\par}
+			{\includegraphics[width=5cm]{include/img/logo}\par}
 			%{\Large \sf \textbf \@author\par}
 		%\end{center}
 		\end{minipage}}
@@ -95,15 +98,15 @@
 			4715-340 Braga\\
 			Portugal
 			\begin{tabbing}
-			Tel: \= +351 \= 253 \= 680 \= 300\\
-			Fax: \> +351 \> 253 \> 680 \> 319
+			Tel:~~ \= +351 \= 253 \= 680 \= 300\\
+			Fax:~~ \> +351 \> 253 \> 680 \> 319
 			\end{tabbing}
 			%\end{right}
 			}
 		%\end{center}
 		\end{minipage}}
-		\put(14.5,-24.1){\begin{minipage}[t]{14cm}
-			\includegraphics[width=2cm]{../include/img/logo_PME_excelencia_12}\par
+		\put(11.9,-24.1){\begin{minipage}[t]{14cm}
+			\includegraphics[height=2cm]{include/img/logo_PME_excelencia_14_ISO_IDI}\par
 		\end{minipage}}
 	\end{picture}
 	\null
@@ -188,11 +191,15 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % capitulo sobre RT
-\newcommand{\makertchapter}{\input{../include/rt}}
+\newcommand{\makertchapter}{\input{include/rt}}
+\newcommand{\makertchapterao}{\input{include/rt-ao}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% nao numerar section e niveis inferiores
-\setcounter{secnumdepth}{0}
+% nao numerar section e niveis inferiores (1)
+\setcounter{secnumdepth}{2}
+
+% mostrar chapters (0) + sections (1) no indice. alterar numero se queremos mostrar subsections (2) e subsubsections (3)
+\setcounter{tocdepth}{1}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % definir espacamento
@@ -201,7 +208,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % texto de confidencialidade
-\newcommand{\makeconftext}{\input{../include/conftext}}
+\newcommand{\makeconftext}{\input{include/conftext}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % color-related definitions - importado do eurotux.sty udp
@@ -248,7 +255,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Serviços
-\newcommand{\makeservice}[1]{\input{../include/srv/#1}}
+\newcommand{\makeservice}[1]{\input{include/srv/#1}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % comando para listar operações num serviço

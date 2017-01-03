@@ -118,6 +118,24 @@ class Etva
         return $rounded;
 
     }
+
+    static public function to_ByteConvert_byType($val,$units = 'byte')
+    {
+        $size = $val;
+        if( $units == 'kilobytes' ){
+            $size = $val * 1024;
+        } elseif( $units == 'megabytes' ){
+            $size = $val * 1024 * 1024;
+        } elseif( $units == 'gigabytes' ){
+            $size = $val * 1024 * 1024 * 1024;
+        } elseif( preg_match('/(\w+)\s*\*\s*(\d+)\s*\^\s*(\d+)/',$units,$m) ){
+            $usize = pow($m[2],$m[3]);
+            if( $usize == 0 ) $usize = 1;
+            $nsize = $val * $usize;
+            $size = self::to_ByteConvert_byType($nsize,$m[1]);
+        }
+        return $size;
+    }
     
     /*
      * parses $params array in $code message format

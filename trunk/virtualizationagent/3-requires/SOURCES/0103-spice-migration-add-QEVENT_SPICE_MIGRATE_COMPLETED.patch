@@ -1,0 +1,90 @@
+From 4a88d76be3b2f912f15eef878daf00855afa7185 Mon Sep 17 00:00:00 2001
+From: Yonit Halperin <yhalperi@redhat.com>
+Date: Tue, 21 Aug 2012 11:51:57 +0300
+Subject: [PATCH] spice migration: add QEVENT_SPICE_MIGRATE_COMPLETED
+
+When migrating, libvirt queries the migration status, and upon migration
+completions, it closes the migration src. On the other hand, when
+migration is completed, spice transfers data from the src to destination
+via the client. This data is required for keeping the spice session
+after migration, without suffering from data loss and inconsistencies.
+In order to allow this data transfer, we add QEVENT for signaling
+libvirt that spice migration has completed, and libvirt needs to wait
+for this event before quitting the src process.
+
+Signed-off-by: Yonit Halperin <yhalperi@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 2fdd16e239c2a2763aa3266e637718123328688c)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ monitor.c       | 1 +
+ monitor.h       | 1 +
+ ui/spice-core.c | 9 ++++++++-
+ 3 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/monitor.c b/monitor.c
+index 29e4287..f45cf92 100644
+--- a/monitor.c
++++ b/monitor.c
+@@ -455,6 +455,7 @@ static const char *monitor_event_names[] = {
+     [QEVENT_SUSPEND_DISK] = "SUSPEND_DISK",
+     [QEVENT_WAKEUP] = "WAKEUP",
+     [QEVENT_BALLOON_CHANGE] = "BALLOON_CHANGE",
++    [QEVENT_SPICE_MIGRATE_COMPLETED] = "SPICE_MIGRATE_COMPLETED",
+ };
+ QEMU_BUILD_BUG_ON(ARRAY_SIZE(monitor_event_names) != QEVENT_MAX)
+ 
+diff --git a/monitor.h b/monitor.h
+index 47d556b..5fc2983 100644
+--- a/monitor.h
++++ b/monitor.h
+@@ -43,6 +43,7 @@ typedef enum MonitorEvent {
+     QEVENT_SUSPEND_DISK,
+     QEVENT_WAKEUP,
+     QEVENT_BALLOON_CHANGE,
++    QEVENT_SPICE_MIGRATE_COMPLETED,
+ 
+     /* Add to 'monitor_event_names' array in monitor.c when
+      * defining new events here */
+diff --git a/ui/spice-core.c b/ui/spice-core.c
+index 1a7a773..851e869 100644
+--- a/ui/spice-core.c
++++ b/ui/spice-core.c
+@@ -285,6 +285,7 @@ typedef struct SpiceMigration {
+ } SpiceMigration;
+ 
+ static void migrate_connect_complete_cb(SpiceMigrateInstance *sin);
++static void migrate_end_complete_cb(SpiceMigrateInstance *sin);
+ 
+ static const SpiceMigrateInterface migrate_interface = {
+     .base.type = SPICE_INTERFACE_MIGRATION,
+@@ -292,7 +293,7 @@ static const SpiceMigrateInterface migrate_interface = {
+     .base.major_version = SPICE_INTERFACE_MIGRATION_MAJOR,
+     .base.minor_version = SPICE_INTERFACE_MIGRATION_MINOR,
+     .migrate_connect_complete = migrate_connect_complete_cb,
+-    .migrate_end_complete = NULL,
++    .migrate_end_complete = migrate_end_complete_cb,
+ };
+ 
+ static SpiceMigration spice_migrate;
+@@ -305,6 +306,11 @@ static void migrate_connect_complete_cb(SpiceMigrateInstance *sin)
+     }
+     sm->connect_complete.cb = NULL;
+ }
++
++static void migrate_end_complete_cb(SpiceMigrateInstance *sin)
++{
++    monitor_protocol_event(QEVENT_SPICE_MIGRATE_COMPLETED, NULL);
++}
+ #endif
+ 
+ /* config string parsing */
+@@ -489,6 +495,7 @@ static void migration_state_notifier(Notifier *notifier, void *data)
+     } else if (migration_has_finished(s)) {
+ #ifndef SPICE_INTERFACE_MIGRATION
+         spice_server_migrate_switch(spice_server);
++        monitor_protocol_event(QEVENT_SPICE_MIGRATE_COMPLETED, NULL);
+ #else
+         spice_server_migrate_end(spice_server, true);
+     } else if (migration_has_failed(s)) {

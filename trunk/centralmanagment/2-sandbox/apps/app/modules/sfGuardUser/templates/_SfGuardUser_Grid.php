@@ -162,7 +162,7 @@ SfGuardUser.Grid = Ext.extend(Ext.grid.GridPanel, {
         if (sm.hasSelection()){
             Ext.Msg.show({
                 title: <?php echo json_encode(__('Remove user')) ?>,
-                buttons: Ext.MessageBox.YESNOCANCEL,
+                buttons: Ext.MessageBox.YESNO,
                 msg: String.format(<?php echo json_encode(__('Remove user {0} ?')) ?>,sel.data.username),
                 scope:this,
                 fn: function(btn){

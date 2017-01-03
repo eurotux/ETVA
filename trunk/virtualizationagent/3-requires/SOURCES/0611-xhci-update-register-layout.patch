@@ -1,0 +1,60 @@
+From c37308c76f78310a36cc1725121b86ad00d698ae Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Thu, 23 Aug 2012 13:26:25 +0200
+Subject: [PATCH] xhci: update register layout
+
+Change the register layout to be a bit more sparse and also not depend
+on the number of ports.  Useful when for making the number of ports
+runtime-configurable.
+---
+ hw/usb/hcd-xhci.c | 21 +++++++++++++--------
+ 1 file changed, 13 insertions(+), 8 deletions(-)
+
+diff --git a/hw/usb/hcd-xhci.c b/hw/usb/hcd-xhci.c
+index a938ad3..11cb3bc 100644
+--- a/hw/usb/hcd-xhci.c
++++ b/hw/usb/hcd-xhci.c
+@@ -36,13 +36,12 @@
+ #define FIXME() do { fprintf(stderr, "FIXME %s:%d\n", \
+                              __func__, __LINE__); abort(); } while (0)
+ 
+-#define MAXSLOTS 8
+-#define MAXINTRS 1
+-
+ #define USB2_PORTS 4
+ #define USB3_PORTS 4
+ 
+ #define MAXPORTS (USB2_PORTS+USB3_PORTS)
++#define MAXSLOTS MAXPORTS
++#define MAXINTRS 1 /* MAXPORTS */
+ 
+ #define TD_QUEUE 24
+ 
+@@ -53,16 +52,22 @@
+ #define ER_FULL_HACK
+ 
+ #define LEN_CAP         0x40
+-#define OFF_OPER        LEN_CAP
+ #define LEN_OPER        (0x400 + 0x10 * MAXPORTS)
+-#define OFF_RUNTIME     ((OFF_OPER + LEN_OPER + 0x20) & ~0x1f)
+-#define LEN_RUNTIME     (0x20 + MAXINTRS * 0x20)
+-#define OFF_DOORBELL    (OFF_RUNTIME + LEN_RUNTIME)
++#define LEN_RUNTIME     ((MAXINTRS + 1) * 0x20)
+ #define LEN_DOORBELL    ((MAXSLOTS + 1) * 0x20)
+ 
++#define OFF_OPER        LEN_CAP
++#define OFF_RUNTIME     0x1000
++#define OFF_DOORBELL    0x2000
+ /* must be power of 2 */
+-#define LEN_REGS        0x2000
++#define LEN_REGS        0x4000
+ 
++#if (OFF_OPER + LEN_OPER) > OFF_RUNTIME
++#error Increase OFF_RUNTIME
++#endif
++#if (OFF_RUNTIME + LEN_RUNTIME) > OFF_DOORBELL
++#error Increase OFF_DOORBELL
++#endif
+ #if (OFF_DOORBELL + LEN_DOORBELL) > LEN_REGS
+ # error Increase LEN_REGS
+ #endif

@@ -1,0 +1,27 @@
+From 8a6240daff8338a63dd7ce676578d2f467bb4eb7 Mon Sep 17 00:00:00 2001
+From: Christoffer Dall <c.dall@virtualopensystems.com>
+Date: Wed, 30 Jan 2013 15:39:01 +0000
+Subject: [PATCH] hw/arm_sysctl: Clear sysctl cfgctrl start bit
+
+The start bit should only be set to indicate that a function call is
+underway, right now.  When done with function, clear it.
+
+Signed-off-by: Christoffer Dall <c.dall@virtualopensystems.com>
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+(cherry picked from commit 706872a56630a206897742b70c69ff99727672d3)
+---
+ hw/arm_sysctl.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/hw/arm_sysctl.c b/hw/arm_sysctl.c
+index 5f1237b..98943cb 100644
+--- a/hw/arm_sysctl.c
++++ b/hw/arm_sysctl.c
+@@ -330,6 +330,7 @@ static void arm_sysctl_write(void *opaque, target_phys_addr_t offset,
+         default:
+             s->sys_cfgstat |= 2;        /* error */
+         }
++        s->sys_cfgctrl &= ~(1 << 31);
+         return;
+     case 0xa8: /* SYS_CFGSTAT */
+         if (board_id(s) != BOARD_ID_VEXPRESS) {

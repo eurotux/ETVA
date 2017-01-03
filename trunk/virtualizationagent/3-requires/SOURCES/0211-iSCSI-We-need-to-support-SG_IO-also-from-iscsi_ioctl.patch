@@ -1,0 +1,56 @@
+From 9904b973b4dcb96dbffc4cf85d2c47f7484a6811 Mon Sep 17 00:00:00 2001
+From: Ronnie Sahlberg <ronniesahlberg@gmail.com>
+Date: Thu, 30 Aug 2012 17:28:40 -0700
+Subject: [PATCH] iSCSI: We need to support SG_IO also from iscsi_ioctl()
+
+We need to support SG_IO from the synchronous iscsi_ioctl() since
+scsi-block uses this to do an INQ to the device to discover its properties
+This patch makes scsi-block work with iscsi.
+
+Signed-off-by: Ronnie Sahlberg <ronniesahlberg@gmail.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+(cherry picked from commit f1a12821d7df2e4d21be4f2206f84b4640533e53)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block/iscsi.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
+
+diff --git a/block/iscsi.c b/block/iscsi.c
+index 0b96165..ea16609 100644
+--- a/block/iscsi.c
++++ b/block/iscsi.c
+@@ -628,9 +628,17 @@ static BlockDriverAIOCB *iscsi_aio_ioctl(BlockDriverState *bs,
+     return &acb->common;
+ }
+ 
++
++static void ioctl_cb(void *opaque, int status)
++{
++    int *p_status = opaque;
++    *p_status = status;
++}
++
+ static int iscsi_ioctl(BlockDriverState *bs, unsigned long int req, void *buf)
+ {
+     IscsiLun *iscsilun = bs->opaque;
++    int status;
+ 
+     switch (req) {
+     case SG_GET_VERSION_NUM:
+@@ -639,6 +647,15 @@ static int iscsi_ioctl(BlockDriverState *bs, unsigned long int req, void *buf)
+     case SG_GET_SCSI_ID:
+         ((struct sg_scsi_id *)buf)->scsi_type = iscsilun->type;
+         break;
++    case SG_IO:
++        status = -EINPROGRESS;
++        iscsi_aio_ioctl(bs, req, buf, ioctl_cb, &status);
++
++        while (status == -EINPROGRESS) {
++            qemu_aio_wait();
++        }
++
++        return 0;
+     default:
+         return -1;
+     }

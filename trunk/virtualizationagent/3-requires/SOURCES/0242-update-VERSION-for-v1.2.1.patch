@@ -1,0 +1,17 @@
+From 38e1d37a7c43409d3450c89dd376027a155d3368 Mon Sep 17 00:00:00 2001
+From: Michael Roth <mdroth@linux.vnet.ibm.com>
+Date: Thu, 11 Oct 2012 21:46:55 -0500
+Subject: [PATCH] update VERSION for v1.2.1
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ VERSION | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/VERSION b/VERSION
+index 26aaba0..6085e94 100644
+--- a/VERSION
++++ b/VERSION
+@@ -1 +1 @@
+-1.2.0
++1.2.1

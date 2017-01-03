@@ -1,0 +1,26 @@
+From 36326ed415fa251fb7dd2d8bfec1e02ffc8609f2 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Thu, 6 Sep 2012 16:47:14 +0200
+Subject: [PATCH] tcg/optimize: simplify and r, a, 0 cases
+
+and r, a, 0 is equivalent to a movi r, 0.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index 0db849e..c12cb2b 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -360,6 +360,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+ 
+         /* Simplify expression for "op r, a, 0 => movi r, 0" cases */
+         switch (op) {
++        CASE_OP_32_64(and):
+         CASE_OP_32_64(mul):
+             if ((temps[args[2]].state == TCG_TEMP_CONST
+                 && temps[args[2]].val == 0)) {

@@ -159,9 +159,9 @@ class macActions extends sfActions
 
                 $rmac = join(":",array(
 
-                    sprintf('%02x',sfConfig::get('mod_mac_default_octects_first')),
-                    sprintf('%02x',sfConfig::get('mod_mac_default_octects_second')),
-                    sprintf('%02x',sfConfig::get('mod_mac_default_octects_third')),
+                    sprintf('%02x',sfConfig::get('app_mac_default_first_octect')),
+                    sprintf('%02x',sfConfig::get('app_mac_default_second_octect')),
+                    sprintf('%02x',sfConfig::get('app_mac_default_third_octect')),
                     sprintf('%02x',$oct4),
                     sprintf('%02x',$oct5),
                     sprintf('%02x',$oct6)

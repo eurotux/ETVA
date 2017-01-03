@@ -1,0 +1,43 @@
+From 94234bbb0657c37b0a0c4f69c32108a31bf4ca4d Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Fri, 23 Nov 2012 16:56:18 +0100
+Subject: [PATCH] hmp: do not crash on invalid SCSI hotplug
+
+Commit 0d93692 (qdev: Convert busses to QEMU Object Model, 2012-05-02)
+removed a check on the type of the bus where a SCSI disk is hotplugged.
+However, hot-plugging to the wrong kind of device now causes a crash
+due to either a NULL pointer dereference (avoided by the previous patch)
+or a failed QOM cast.
+
+Instead, in this case we need to use object_dynamic_cast and check for
+the result, similar to what was done before that commit.
+
+Reported-by: Markus Armbruster <armbru@redhat.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit b5007bcc9729acd995518c52eb1038c4d8416b5d)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/pci-hotplug.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/hw/pci-hotplug.c b/hw/pci-hotplug.c
+index e7fb780..0ca5546 100644
+--- a/hw/pci-hotplug.c
++++ b/hw/pci-hotplug.c
+@@ -80,7 +80,13 @@ static int scsi_hot_add(Monitor *mon, DeviceState *adapter,
+     SCSIBus *scsibus;
+     SCSIDevice *scsidev;
+ 
+-    scsibus = SCSI_BUS(QLIST_FIRST(&adapter->child_bus));
++    scsibus = (SCSIBus *)
++        object_dynamic_cast(OBJECT(QLIST_FIRST(&adapter->child_bus)),
++                            TYPE_SCSI_BUS);
++    if (!scsibus) {
++	error_report("Device is not a SCSI adapter");
++	return -1;
++    }
+ 
+     /*
+      * drive_init() tries to find a default for dinfo->unit.  Doesn't

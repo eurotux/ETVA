@@ -1,0 +1,53 @@
+From 546d9a410baf651c2bdcc5319e4cf6b78c6ffdab Mon Sep 17 00:00:00 2001
+From: Francesco Lavra <francescolavra.fl@gmail.com>
+Date: Wed, 19 Sep 2012 05:51:58 +0000
+Subject: [PATCH] Versatile Express: Fix NOR flash 0 address and remove flash
+ alias
+
+In the A series memory map (implemented in the Cortex A15 CoreTile), the
+first NOR flash bank (flash 0) is mapped to address 0x08000000, while
+address 0x00000000 can be configured as alias to either the first or the
+second flash bank. This patch fixes the definition of flash 0 address,
+and for simplicity removes the alias definition.
+
+Signed-off-by: Francesco Lavra <francescolavra.fl@gmail.com>
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+(cherry picked from commit 661bafb3e14bfffcb0a7c7910534c7944608ca45)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/vexpress.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/hw/vexpress.c b/hw/vexpress.c
+index b615844..454c2bb 100644
+--- a/hw/vexpress.c
++++ b/hw/vexpress.c
+@@ -62,7 +62,6 @@ enum {
+     VE_COMPACTFLASH,
+     VE_CLCD,
+     VE_NORFLASH0,
+-    VE_NORFLASH0ALIAS,
+     VE_NORFLASH1,
+     VE_SRAM,
+     VE_VIDEORAM,
+@@ -104,9 +103,8 @@ static target_phys_addr_t motherboard_legacy_map[] = {
+ };
+ 
+ static target_phys_addr_t motherboard_aseries_map[] = {
+-    /* CS0: 0x00000000 .. 0x0c000000 */
+-    [VE_NORFLASH0] = 0x00000000,
+-    [VE_NORFLASH0ALIAS] = 0x08000000,
++    /* CS0: 0x08000000 .. 0x0c000000 */
++    [VE_NORFLASH0] = 0x08000000,
+     /* CS4: 0x0c000000 .. 0x10000000 */
+     [VE_NORFLASH1] = 0x0c000000,
+     /* CS5: 0x10000000 .. 0x14000000 */
+@@ -413,7 +411,6 @@ static void vexpress_common_init(const VEDBoardInfo *daughterboard,
+     sysbus_create_simple("pl111", map[VE_CLCD], pic[14]);
+ 
+     /* VE_NORFLASH0: not modelled */
+-    /* VE_NORFLASH0ALIAS: not modelled */
+     /* VE_NORFLASH1: not modelled */
+ 
+     sram_size = 0x2000000;

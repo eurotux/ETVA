@@ -1,0 +1,520 @@
+From 90193bff4bc1aaec99135eed2d0d64d1a0c3fb59 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Thu, 30 Aug 2012 16:56:39 +0200
+Subject: [PATCH] target-cris: Avoid AREG0 for helpers
+
+Add an explicit CPUCRISState parameter instead of relying on AREG0.
+
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-cris/helper.h        | 37 +++++++++++----------
+ target-cris/op_helper.c     | 80 ++++++++++++++++++++++++---------------------
+ target-cris/translate.c     | 44 +++++++++++++------------
+ target-cris/translate_v10.c |  4 +--
+ 4 files changed, 88 insertions(+), 77 deletions(-)
+
+diff --git a/target-cris/helper.h b/target-cris/helper.h
+index 093063a..99fb326 100644
+--- a/target-cris/helper.h
++++ b/target-cris/helper.h
+@@ -1,26 +1,29 @@
+ #include "def-helper.h"
+ 
+-DEF_HELPER_1(raise_exception, void, i32)
+-DEF_HELPER_1(tlb_flush_pid, void, i32)
+-DEF_HELPER_1(spc_write, void, i32)
++DEF_HELPER_2(raise_exception, void, env, i32)
++DEF_HELPER_2(tlb_flush_pid, void, env, i32)
++DEF_HELPER_2(spc_write, void, env, i32)
+ DEF_HELPER_3(dump, void, i32, i32, i32)
+-DEF_HELPER_0(rfe, void);
+-DEF_HELPER_0(rfn, void);
++DEF_HELPER_1(rfe, void, env);
++DEF_HELPER_1(rfn, void, env);
+ 
+-DEF_HELPER_2(movl_sreg_reg, void, i32, i32)
+-DEF_HELPER_2(movl_reg_sreg, void, i32, i32)
++DEF_HELPER_3(movl_sreg_reg, void, env, i32, i32)
++DEF_HELPER_3(movl_reg_sreg, void, env, i32, i32)
+ 
+ DEF_HELPER_FLAGS_1(lz, TCG_CALL_PURE, i32, i32);
+-DEF_HELPER_FLAGS_3(btst, TCG_CALL_PURE, i32, i32, i32, i32);
++DEF_HELPER_FLAGS_4(btst, TCG_CALL_PURE, i32, env, i32, i32, i32);
+ 
+-DEF_HELPER_FLAGS_3(evaluate_flags_muls, TCG_CALL_PURE, i32, i32, i32, i32)
+-DEF_HELPER_FLAGS_3(evaluate_flags_mulu, TCG_CALL_PURE, i32, i32, i32, i32)
+-DEF_HELPER_FLAGS_4(evaluate_flags_mcp, TCG_CALL_PURE, i32, i32, i32, i32, i32)
+-DEF_HELPER_FLAGS_4(evaluate_flags_alu_4, TCG_CALL_PURE, i32, i32, i32, i32, i32)
+-DEF_HELPER_FLAGS_4(evaluate_flags_sub_4, TCG_CALL_PURE, i32, i32, i32, i32, i32)
+-DEF_HELPER_FLAGS_2(evaluate_flags_move_4, TCG_CALL_PURE, i32, i32, i32)
+-DEF_HELPER_FLAGS_2(evaluate_flags_move_2, TCG_CALL_PURE, i32, i32, i32)
+-DEF_HELPER_0(evaluate_flags, void)
+-DEF_HELPER_0(top_evaluate_flags, void)
++DEF_HELPER_FLAGS_4(evaluate_flags_muls, TCG_CALL_PURE, i32, env, i32, i32, i32)
++DEF_HELPER_FLAGS_4(evaluate_flags_mulu, TCG_CALL_PURE, i32, env, i32, i32, i32)
++DEF_HELPER_FLAGS_5(evaluate_flags_mcp, TCG_CALL_PURE, i32, env,
++                                                      i32, i32, i32, i32)
++DEF_HELPER_FLAGS_5(evaluate_flags_alu_4, TCG_CALL_PURE, i32, env,
++                                                        i32, i32, i32, i32)
++DEF_HELPER_FLAGS_5(evaluate_flags_sub_4, TCG_CALL_PURE, i32, env,
++                                                        i32, i32, i32, i32)
++DEF_HELPER_FLAGS_3(evaluate_flags_move_4, TCG_CALL_PURE, i32, env, i32, i32)
++DEF_HELPER_FLAGS_3(evaluate_flags_move_2, TCG_CALL_PURE, i32, env, i32, i32)
++DEF_HELPER_1(evaluate_flags, void, env)
++DEF_HELPER_1(top_evaluate_flags, void, env)
+ 
+ #include "def-helper.h"
+diff --git a/target-cris/op_helper.c b/target-cris/op_helper.c
+index ac7c98c..5ca85a0 100644
+--- a/target-cris/op_helper.c
++++ b/target-cris/op_helper.c
+@@ -79,7 +79,7 @@ void tlb_fill(CPUCRISState *env1, target_ulong addr, int is_write, int mmu_idx,
+                 cpu_restore_state(tb, env, retaddr);
+ 
+ 		/* Evaluate flags after retranslation.  */
+-                helper_top_evaluate_flags();
++                helper_top_evaluate_flags(env);
+             }
+         }
+         cpu_loop_exit(env);
+@@ -89,13 +89,13 @@ void tlb_fill(CPUCRISState *env1, target_ulong addr, int is_write, int mmu_idx,
+ 
+ #endif
+ 
+-void helper_raise_exception(uint32_t index)
++void helper_raise_exception(CPUCRISState *env, uint32_t index)
+ {
+ 	env->exception_index = index;
+         cpu_loop_exit(env);
+ }
+ 
+-void helper_tlb_flush_pid(uint32_t pid)
++void helper_tlb_flush_pid(CPUCRISState *env, uint32_t pid)
+ {
+ #if !defined(CONFIG_USER_ONLY)
+ 	pid &= 0xff;
+@@ -104,7 +104,7 @@ void helper_tlb_flush_pid(uint32_t pid)
+ #endif
+ }
+ 
+-void helper_spc_write(uint32_t new_spc)
++void helper_spc_write(CPUCRISState *env, uint32_t new_spc)
+ {
+ #if !defined(CONFIG_USER_ONLY)
+ 	tlb_flush_page(env, env->pregs[PR_SPC]);
+@@ -121,7 +121,7 @@ void helper_dump(uint32_t a0, uint32_t a1, uint32_t a2)
+ #define EXTRACT_FIELD(src, start, end) \
+ 	    (((src) >> start) & ((1 << (end - start + 1)) - 1))
+ 
+-void helper_movl_sreg_reg (uint32_t sreg, uint32_t reg)
++void helper_movl_sreg_reg(CPUCRISState *env, uint32_t sreg, uint32_t reg)
+ {
+ 	uint32_t srs;
+ 	srs = env->pregs[PR_SRS];
+@@ -171,7 +171,7 @@ void helper_movl_sreg_reg (uint32_t sreg, uint32_t reg)
+ #endif
+ }
+ 
+-void helper_movl_reg_sreg (uint32_t reg, uint32_t sreg)
++void helper_movl_reg_sreg(CPUCRISState *env, uint32_t reg, uint32_t sreg)
+ {
+ 	uint32_t srs;
+ 	env->pregs[PR_SRS] &= 3;
+@@ -216,7 +216,7 @@ static void cris_ccs_rshift(CPUCRISState *env)
+ 	env->pregs[PR_CCS] = ccs;
+ }
+ 
+-void helper_rfe(void)
++void helper_rfe(CPUCRISState *env)
+ {
+ 	int rflag = env->pregs[PR_CCS] & R_FLAG;
+ 
+@@ -232,7 +232,7 @@ void helper_rfe(void)
+ 		env->pregs[PR_CCS] |= P_FLAG;
+ }
+ 
+-void helper_rfn(void)
++void helper_rfn(CPUCRISState *env)
+ {
+ 	int rflag = env->pregs[PR_CCS] & R_FLAG;
+ 
+@@ -256,7 +256,7 @@ uint32_t helper_lz(uint32_t t0)
+ 	return clz32(t0);
+ }
+ 
+-uint32_t helper_btst(uint32_t t0, uint32_t t1, uint32_t ccs)
++uint32_t helper_btst(CPUCRISState *env, uint32_t t0, uint32_t t1, uint32_t ccs)
+ {
+ 	/* FIXME: clean this up.  */
+ 
+@@ -284,7 +284,8 @@ uint32_t helper_btst(uint32_t t0, uint32_t t1, uint32_t ccs)
+ 	return ccs;
+ }
+ 
+-static inline uint32_t evaluate_flags_writeback(uint32_t flags, uint32_t ccs)
++static inline uint32_t evaluate_flags_writeback(CPUCRISState *env,
++                                                uint32_t flags, uint32_t ccs)
+ {
+ 	unsigned int x, z, mask;
+ 
+@@ -303,7 +304,8 @@ static inline uint32_t evaluate_flags_writeback(uint32_t flags, uint32_t ccs)
+ 	return ccs;
+ }
+ 
+-uint32_t helper_evaluate_flags_muls(uint32_t ccs, uint32_t res, uint32_t mof)
++uint32_t helper_evaluate_flags_muls(CPUCRISState *env,
++                                    uint32_t ccs, uint32_t res, uint32_t mof)
+ {
+ 	uint32_t flags = 0;
+ 	int64_t tmp;
+@@ -321,10 +323,11 @@ uint32_t helper_evaluate_flags_muls(uint32_t ccs, uint32_t res, uint32_t mof)
+ 	if ((dneg && mof != -1)
+ 	    || (!dneg && mof != 0))
+ 		flags |= V_FLAG;
+-	return evaluate_flags_writeback(flags, ccs);
++        return evaluate_flags_writeback(env, flags, ccs);
+ }
+ 
+-uint32_t helper_evaluate_flags_mulu(uint32_t ccs, uint32_t res, uint32_t mof)
++uint32_t helper_evaluate_flags_mulu(CPUCRISState *env,
++                                    uint32_t ccs, uint32_t res, uint32_t mof)
+ {
+ 	uint32_t flags = 0;
+ 	uint64_t tmp;
+@@ -339,10 +342,10 @@ uint32_t helper_evaluate_flags_mulu(uint32_t ccs, uint32_t res, uint32_t mof)
+ 	if (mof)
+ 		flags |= V_FLAG;
+ 
+-	return evaluate_flags_writeback(flags, ccs);
++        return evaluate_flags_writeback(env, flags, ccs);
+ }
+ 
+-uint32_t helper_evaluate_flags_mcp(uint32_t ccs,
++uint32_t helper_evaluate_flags_mcp(CPUCRISState *env, uint32_t ccs,
+ 				   uint32_t src, uint32_t dst, uint32_t res)
+ {
+ 	uint32_t flags = 0;
+@@ -368,10 +371,10 @@ uint32_t helper_evaluate_flags_mcp(uint32_t ccs,
+ 			flags |= R_FLAG;
+ 	}
+ 
+-	return evaluate_flags_writeback(flags, ccs);
++        return evaluate_flags_writeback(env, flags, ccs);
+ }
+ 
+-uint32_t helper_evaluate_flags_alu_4(uint32_t ccs,
++uint32_t helper_evaluate_flags_alu_4(CPUCRISState *env, uint32_t ccs,
+ 				     uint32_t src, uint32_t dst, uint32_t res)
+ {
+ 	uint32_t flags = 0;
+@@ -397,10 +400,10 @@ uint32_t helper_evaluate_flags_alu_4(uint32_t ccs,
+ 			flags |= C_FLAG;
+ 	}
+ 
+-	return evaluate_flags_writeback(flags, ccs);
++        return evaluate_flags_writeback(env, flags, ccs);
+ }
+ 
+-uint32_t helper_evaluate_flags_sub_4(uint32_t ccs,
++uint32_t helper_evaluate_flags_sub_4(CPUCRISState *env, uint32_t ccs,
+ 				     uint32_t src, uint32_t dst, uint32_t res)
+ {
+ 	uint32_t flags = 0;
+@@ -427,10 +430,11 @@ uint32_t helper_evaluate_flags_sub_4(uint32_t ccs,
+ 	}
+ 
+ 	flags ^= C_FLAG;
+-	return evaluate_flags_writeback(flags, ccs);
++        return evaluate_flags_writeback(env, flags, ccs);
+ }
+ 
+-uint32_t helper_evaluate_flags_move_4(uint32_t ccs, uint32_t res)
++uint32_t helper_evaluate_flags_move_4(CPUCRISState *env,
++                                      uint32_t ccs, uint32_t res)
+ {
+ 	uint32_t flags = 0;
+ 
+@@ -439,9 +443,10 @@ uint32_t helper_evaluate_flags_move_4(uint32_t ccs, uint32_t res)
+ 	else if (res == 0L)
+ 		flags |= Z_FLAG;
+ 
+-	return evaluate_flags_writeback(flags, ccs);
++        return evaluate_flags_writeback(env, flags, ccs);
+ }
+-uint32_t helper_evaluate_flags_move_2(uint32_t ccs, uint32_t res)
++uint32_t helper_evaluate_flags_move_2(CPUCRISState *env,
++                                      uint32_t ccs, uint32_t res)
+ {
+ 	uint32_t flags = 0;
+ 
+@@ -450,12 +455,12 @@ uint32_t helper_evaluate_flags_move_2(uint32_t ccs, uint32_t res)
+ 	else if (res == 0)
+ 		flags |= Z_FLAG;
+ 
+-	return evaluate_flags_writeback(flags, ccs);
++        return evaluate_flags_writeback(env, flags, ccs);
+ }
+ 
+ /* TODO: This is expensive. We could split things up and only evaluate part of
+    CCR on a need to know basis. For now, we simply re-evaluate everything.  */
+-void  helper_evaluate_flags(void)
++void helper_evaluate_flags(CPUCRISState *env)
+ {
+ 	uint32_t src, dst, res;
+ 	uint32_t flags = 0;
+@@ -571,25 +576,26 @@ void  helper_evaluate_flags(void)
+ 	if (env->cc_op == CC_OP_SUB || env->cc_op == CC_OP_CMP)
+ 		flags ^= C_FLAG;
+ 
+-	env->pregs[PR_CCS] = evaluate_flags_writeback(flags, env->pregs[PR_CCS]);
++        env->pregs[PR_CCS] = evaluate_flags_writeback(env, flags,
++                                                      env->pregs[PR_CCS]);
+ }
+ 
+-void helper_top_evaluate_flags(void)
++void helper_top_evaluate_flags(CPUCRISState *env)
+ {
+ 	switch (env->cc_op)
+ 	{
+ 		case CC_OP_MCP:
+-			env->pregs[PR_CCS] = helper_evaluate_flags_mcp(
++                        env->pregs[PR_CCS] = helper_evaluate_flags_mcp(env,
+ 					env->pregs[PR_CCS], env->cc_src,
+ 					env->cc_dest, env->cc_result);
+ 			break;
+ 		case CC_OP_MULS:
+-			env->pregs[PR_CCS] = helper_evaluate_flags_muls(
++                        env->pregs[PR_CCS] = helper_evaluate_flags_muls(env,
+ 					env->pregs[PR_CCS], env->cc_result,
+ 					env->pregs[PR_MOF]);
+ 			break;
+ 		case CC_OP_MULU:
+-			env->pregs[PR_CCS] = helper_evaluate_flags_mulu(
++                        env->pregs[PR_CCS] = helper_evaluate_flags_mulu(env,
+ 					env->pregs[PR_CCS], env->cc_result,
+ 					env->pregs[PR_MOF]);
+ 			break;
+@@ -604,18 +610,18 @@ void helper_top_evaluate_flags(void)
+ 		{
+ 			case 4:
+ 				env->pregs[PR_CCS] =
+-					helper_evaluate_flags_move_4(
++                                        helper_evaluate_flags_move_4(env,
+ 							env->pregs[PR_CCS],
+ 							env->cc_result);
+ 				break;
+ 			case 2:
+ 				env->pregs[PR_CCS] =
+-					helper_evaluate_flags_move_2(
++                                        helper_evaluate_flags_move_2(env,
+ 							env->pregs[PR_CCS],
+ 							env->cc_result);
+ 				break;
+ 			default:
+-				helper_evaluate_flags();
++                                helper_evaluate_flags(env);
+ 				break;
+ 		}
+ 		break;
+@@ -626,12 +632,12 @@ void helper_top_evaluate_flags(void)
+ 		case CC_OP_CMP:
+ 			if (env->cc_size == 4)
+ 				env->pregs[PR_CCS] =
+-					helper_evaluate_flags_sub_4(
++                                        helper_evaluate_flags_sub_4(env,
+ 						env->pregs[PR_CCS],
+ 						env->cc_src, env->cc_dest,
+ 						env->cc_result);
+ 			else
+-				helper_evaluate_flags();
++                                helper_evaluate_flags(env);
+ 			break;
+ 		default:
+ 		{
+@@ -639,13 +645,13 @@ void helper_top_evaluate_flags(void)
+ 			{
+ 			case 4:
+ 				env->pregs[PR_CCS] =
+-					helper_evaluate_flags_alu_4(
++                                        helper_evaluate_flags_alu_4(env,
+ 						env->pregs[PR_CCS],
+ 						env->cc_src, env->cc_dest,
+ 						env->cc_result);
+ 				break;
+ 			default:
+-				helper_evaluate_flags();
++                                helper_evaluate_flags(env);
+ 				break;
+ 			}
+ 		}
+diff --git a/target-cris/translate.c b/target-cris/translate.c
+index ad31877..283dd98 100644
+--- a/target-cris/translate.c
++++ b/target-cris/translate.c
+@@ -211,9 +211,9 @@ static inline void t_gen_mov_preg_TN(DisasContext *dc, int r, TCGv tn)
+ 		tcg_gen_andi_tl(cpu_PR[r], tn, 3);
+ 	else {
+ 		if (r == PR_PID) 
+-			gen_helper_tlb_flush_pid(tn);
++                        gen_helper_tlb_flush_pid(cpu_env, tn);
+ 		if (dc->tb_flags & S_FLAG && r == PR_SPC) 
+-			gen_helper_spc_write(tn);
++                        gen_helper_spc_write(cpu_env, tn);
+ 		else if (r == PR_CCS)
+ 			dc->cpustate_changed = 1;
+ 		tcg_gen_mov_tl(cpu_PR[r], tn);
+@@ -278,7 +278,7 @@ static void cris_lock_irq(DisasContext *dc)
+ static inline void t_gen_raise_exception(uint32_t index)
+ {
+         TCGv_i32 tmp = tcg_const_i32(index);
+-	gen_helper_raise_exception(tmp);
++        gen_helper_raise_exception(cpu_env, tmp);
+         tcg_temp_free_i32(tmp);
+ }
+ 
+@@ -624,17 +624,17 @@ static void cris_evaluate_flags(DisasContext *dc)
+ 	switch (dc->cc_op)
+ 	{
+ 	case CC_OP_MCP:
+-		gen_helper_evaluate_flags_mcp(cpu_PR[PR_CCS],
++                gen_helper_evaluate_flags_mcp(cpu_PR[PR_CCS], cpu_env,
+ 					cpu_PR[PR_CCS], cc_src,
+ 					cc_dest, cc_result);
+ 		break;
+ 	case CC_OP_MULS:
+-		gen_helper_evaluate_flags_muls(cpu_PR[PR_CCS],
++                gen_helper_evaluate_flags_muls(cpu_PR[PR_CCS], cpu_env,
+ 					cpu_PR[PR_CCS], cc_result,
+ 					cpu_PR[PR_MOF]);
+ 		break;
+ 	case CC_OP_MULU:
+-		gen_helper_evaluate_flags_mulu(cpu_PR[PR_CCS],
++                gen_helper_evaluate_flags_mulu(cpu_PR[PR_CCS], cpu_env,
+ 					cpu_PR[PR_CCS], cc_result,
+ 					cpu_PR[PR_MOF]);
+ 		break;
+@@ -648,15 +648,15 @@ static void cris_evaluate_flags(DisasContext *dc)
+ 		switch (dc->cc_size)
+ 		{
+ 		case 4:
+-			gen_helper_evaluate_flags_move_4(cpu_PR[PR_CCS],
+-						cpu_PR[PR_CCS], cc_result);
++                        gen_helper_evaluate_flags_move_4(cpu_PR[PR_CCS],
++                                           cpu_env, cpu_PR[PR_CCS], cc_result);
+ 			break;
+ 		case 2:
+-			gen_helper_evaluate_flags_move_2(cpu_PR[PR_CCS],
+-						cpu_PR[PR_CCS], cc_result);
++                        gen_helper_evaluate_flags_move_2(cpu_PR[PR_CCS],
++                                           cpu_env, cpu_PR[PR_CCS], cc_result);
+ 			break;
+ 		default:
+-			gen_helper_evaluate_flags();
++                        gen_helper_evaluate_flags(cpu_env);
+ 			break;
+ 		}
+ 		break;
+@@ -666,21 +666,21 @@ static void cris_evaluate_flags(DisasContext *dc)
+ 	case CC_OP_SUB:
+ 	case CC_OP_CMP:
+ 		if (dc->cc_size == 4)
+-			gen_helper_evaluate_flags_sub_4(cpu_PR[PR_CCS],
++                        gen_helper_evaluate_flags_sub_4(cpu_PR[PR_CCS], cpu_env,
+ 				cpu_PR[PR_CCS], cc_src, cc_dest, cc_result);
+ 		else
+-			gen_helper_evaluate_flags();
++                        gen_helper_evaluate_flags(cpu_env);
+ 
+ 		break;
+ 	default:
+ 		switch (dc->cc_size)
+ 		{
+ 			case 4:
+-			gen_helper_evaluate_flags_alu_4(cpu_PR[PR_CCS],
++                        gen_helper_evaluate_flags_alu_4(cpu_PR[PR_CCS], cpu_env,
+ 				cpu_PR[PR_CCS], cc_src, cc_dest, cc_result);
+ 				break;
+ 			default:
+-				gen_helper_evaluate_flags();
++                                gen_helper_evaluate_flags(cpu_env);
+ 				break;
+ 		}
+ 		break;
+@@ -1475,7 +1475,7 @@ static int dec_btstq(DisasContext *dc)
+ 
+ 	cris_cc_mask(dc, CC_MASK_NZ);
+ 	cris_evaluate_flags(dc);
+-	gen_helper_btst(cpu_PR[PR_CCS], cpu_R[dc->op2],
++        gen_helper_btst(cpu_PR[PR_CCS], cpu_env, cpu_R[dc->op2],
+ 			tcg_const_tl(dc->op1), cpu_PR[PR_CCS]);
+ 	cris_alu(dc, CC_OP_MOVE,
+ 		 cpu_R[dc->op2], cpu_R[dc->op2], cpu_R[dc->op2], 4);
+@@ -1925,7 +1925,7 @@ static int dec_btst_r(DisasContext *dc)
+ 		    dc->op1, dc->op2);
+ 	cris_cc_mask(dc, CC_MASK_NZ);
+ 	cris_evaluate_flags(dc);
+-	gen_helper_btst(cpu_PR[PR_CCS], cpu_R[dc->op2],
++        gen_helper_btst(cpu_PR[PR_CCS], cpu_env, cpu_R[dc->op2],
+ 			cpu_R[dc->op1], cpu_PR[PR_CCS]);
+ 	cris_alu(dc, CC_OP_MOVE, cpu_R[dc->op2],
+ 		 cpu_R[dc->op2], cpu_R[dc->op2], 4);
+@@ -2135,14 +2135,16 @@ static int dec_move_rs(DisasContext *dc)
+ {
+ 	LOG_DIS("move $r%u, $s%u\n", dc->op1, dc->op2);
+ 	cris_cc_mask(dc, 0);
+-	gen_helper_movl_sreg_reg(tcg_const_tl(dc->op2), tcg_const_tl(dc->op1));
++        gen_helper_movl_sreg_reg(cpu_env, tcg_const_tl(dc->op2),
++                                 tcg_const_tl(dc->op1));
+ 	return 2;
+ }
+ static int dec_move_sr(DisasContext *dc)
+ {
+ 	LOG_DIS("move $s%u, $r%u\n", dc->op2, dc->op1);
+ 	cris_cc_mask(dc, 0);
+-	gen_helper_movl_reg_sreg(tcg_const_tl(dc->op1), tcg_const_tl(dc->op2));
++        gen_helper_movl_reg_sreg(cpu_env, tcg_const_tl(dc->op1),
++                                 tcg_const_tl(dc->op2));
+ 	return 2;
+ }
+ 
+@@ -2906,14 +2908,14 @@ static int dec_rfe_etc(DisasContext *dc)
+ 			/* rfe.  */
+ 			LOG_DIS("rfe\n");
+ 			cris_evaluate_flags(dc);
+-			gen_helper_rfe();
++                        gen_helper_rfe(cpu_env);
+ 			dc->is_jmp = DISAS_UPDATE;
+ 			break;
+ 		case 5:
+ 			/* rfn.  */
+ 			LOG_DIS("rfn\n");
+ 			cris_evaluate_flags(dc);
+-			gen_helper_rfn();
++                        gen_helper_rfn(cpu_env);
+ 			dc->is_jmp = DISAS_UPDATE;
+ 			break;
+ 		case 6:
+diff --git a/target-cris/translate_v10.c b/target-cris/translate_v10.c
+index 3629629..9a39c6a 100644
+--- a/target-cris/translate_v10.c
++++ b/target-cris/translate_v10.c
+@@ -289,7 +289,7 @@ static unsigned int dec10_quick_imm(DisasContext *dc)
+             } else {
+                 /* BTST */
+                 cris_update_cc_op(dc, CC_OP_FLAGS, 4);
+-                gen_helper_btst(cpu_PR[PR_CCS], cpu_R[dc->dst],
++                gen_helper_btst(cpu_PR[PR_CCS], cpu_env, cpu_R[dc->dst],
+                            tcg_const_tl(imm), cpu_PR[PR_CCS]);
+             }
+             break;
+@@ -723,7 +723,7 @@ static unsigned int dec10_reg(DisasContext *dc)
+                 LOG_DIS("btst $r%d, $r%d sz=%d\n", dc->src, dc->dst, size);
+                 cris_cc_mask(dc, CC_MASK_NZVC);
+                 cris_update_cc_op(dc, CC_OP_FLAGS, 4);
+-                gen_helper_btst(cpu_PR[PR_CCS], cpu_R[dc->dst],
++                gen_helper_btst(cpu_PR[PR_CCS], cpu_env, cpu_R[dc->dst],
+                            cpu_R[dc->src], cpu_PR[PR_CCS]);
+                 break;
+             case CRISV10_REG_DSTEP:

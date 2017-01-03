@@ -1,0 +1,30 @@
+From 8b3510ce83cbefd4244fd0c27942ba50333f3c28 Mon Sep 17 00:00:00 2001
+From: Don Slutz <Don@CloudSwitch.com>
+Date: Fri, 21 Sep 2012 20:13:13 -0400
+Subject: [PATCH] target-i386: Allow tsc-frequency to be larger then 2.147G
+
+The check using INT_MAX (2147483647) is wrong in this case.
+
+Signed-off-by: Fred Oliveira <foliveira@cloudswitch.com>
+Signed-off-by: Don Slutz <Don@CloudSwitch.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 2e84849aa2cc7f220d3b3668f5f7e3c57bb1b590)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-i386/cpu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/target-i386/cpu.c b/target-i386/cpu.c
+index 423e009..cbc172e 100644
+--- a/target-i386/cpu.c
++++ b/target-i386/cpu.c
+@@ -846,7 +846,7 @@ static void x86_cpuid_set_tsc_freq(Object *obj, Visitor *v, void *opaque,
+ {
+     X86CPU *cpu = X86_CPU(obj);
+     const int64_t min = 0;
+-    const int64_t max = INT_MAX;
++    const int64_t max = INT64_MAX;
+     int64_t value;
+ 
+     visit_type_int(v, &value, name, errp);

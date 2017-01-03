@@ -79,9 +79,12 @@ class EtvaNetwork extends BaseEtvaNetwork
         $mac_strip = str_replace(':','',$this->getMac());
 
         $server = $this->getEtvaServer();
-        $node = $server->getEtvaNode();
 
-        $network_rra = new ServerNetworkRRA($node->getUuid(),$server->getUuid(),$mac_strip,false);
+        $node_uuid = '';
+        $node = $server->getEtvaNode();
+        if( $node ) $node_uuid = $node->getUuid();
+
+        $network_rra = new ServerNetworkRRA($node_uuid,$server->getUuid(),$mac_strip,false);
         $network_rra->delete();
 
       return true;

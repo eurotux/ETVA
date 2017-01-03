@@ -1,0 +1,187 @@
+From 569db8db7081ba480e60b5fc55f457793959e4f5 Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Sun, 2 Sep 2012 07:33:38 +0000
+Subject: [PATCH] target-s390x: avoid AREG0 for condition code helpers
+
+Make condition code helpers take a parameter for CPUState instead
+of relying on global env.
+
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Alexander Graf <agraf@suse.de>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-s390x/Makefile.objs |  1 -
+ target-s390x/cc_helper.c   | 11 +++++------
+ target-s390x/helper.h      | 10 +++++-----
+ target-s390x/translate.c   | 16 ++++++++--------
+ 4 files changed, 18 insertions(+), 20 deletions(-)
+
+diff --git a/target-s390x/Makefile.objs b/target-s390x/Makefile.objs
+index 7b2c5c1..736cf33 100644
+--- a/target-s390x/Makefile.objs
++++ b/target-s390x/Makefile.objs
+@@ -3,6 +3,5 @@ obj-y += int_helper.o fpu_helper.o cc_helper.o mem_helper.o misc_helper.o
+ obj-$(CONFIG_SOFTMMU) += machine.o
+ obj-$(CONFIG_KVM) += kvm.o
+ 
+-$(obj)/cc_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+ $(obj)/mem_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+ $(obj)/misc_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/target-s390x/cc_helper.c b/target-s390x/cc_helper.c
+index 9c3a2c4..19ef145 100644
+--- a/target-s390x/cc_helper.c
++++ b/target-s390x/cc_helper.c
+@@ -19,7 +19,6 @@
+  */
+ 
+ #include "cpu.h"
+-#include "dyngen-exec.h"
+ #include "helper.h"
+ 
+ /* #define DEBUG_HELPER */
+@@ -500,14 +499,14 @@ uint32_t calc_cc(CPUS390XState *env, uint32_t cc_op, uint64_t src, uint64_t dst,
+     return do_calc_cc(env, cc_op, src, dst, vr);
+ }
+ 
+-uint32_t HELPER(calc_cc)(uint32_t cc_op, uint64_t src, uint64_t dst,
+-                         uint64_t vr)
++uint32_t HELPER(calc_cc)(CPUS390XState *env, uint32_t cc_op, uint64_t src,
++                         uint64_t dst, uint64_t vr)
+ {
+     return do_calc_cc(env, cc_op, src, dst, vr);
+ }
+ 
+ /* insert psw mask and condition code into r1 */
+-void HELPER(ipm)(uint32_t cc, uint32_t r1)
++void HELPER(ipm)(CPUS390XState *env, uint32_t cc, uint32_t r1)
+ {
+     uint64_t r = env->regs[r1];
+ 
+@@ -519,13 +518,13 @@ void HELPER(ipm)(uint32_t cc, uint32_t r1)
+ }
+ 
+ #ifndef CONFIG_USER_ONLY
+-void HELPER(load_psw)(uint64_t mask, uint64_t addr)
++void HELPER(load_psw)(CPUS390XState *env, uint64_t mask, uint64_t addr)
+ {
+     load_psw(env, mask, addr);
+     cpu_loop_exit(env);
+ }
+ 
+-void HELPER(sacf)(uint64_t a1)
++void HELPER(sacf)(CPUS390XState *env, uint64_t a1)
+ {
+     HELPER_LOG("%s: %16" PRIx64 "\n", __func__, a1);
+ 
+diff --git a/target-s390x/helper.h b/target-s390x/helper.h
+index c03cd59..876b88e 100644
+--- a/target-s390x/helper.h
++++ b/target-s390x/helper.h
+@@ -36,7 +36,7 @@ DEF_HELPER_FLAGS_1(abs_i64, TCG_CALL_PURE|TCG_CALL_CONST, i64, s64)
+ DEF_HELPER_FLAGS_1(nabs_i64, TCG_CALL_PURE|TCG_CALL_CONST, s64, s64)
+ DEF_HELPER_3(stcmh, void, i32, i64, i32)
+ DEF_HELPER_3(icmh, i32, i32, i64, i32)
+-DEF_HELPER_2(ipm, void, i32, i32)
++DEF_HELPER_3(ipm, void, env, i32, i32)
+ DEF_HELPER_FLAGS_3(addc_u32, TCG_CALL_PURE|TCG_CALL_CONST, i32, i32, i32, i32)
+ DEF_HELPER_FLAGS_3(set_cc_addc_u64, TCG_CALL_PURE|TCG_CALL_CONST, i32, i64, i64, i64)
+ DEF_HELPER_3(stam, void, i32, i64, i32)
+@@ -115,7 +115,7 @@ DEF_HELPER_3(tr, void, i32, i64, i64)
+ 
+ DEF_HELPER_2(servc, i32, i32, i64)
+ DEF_HELPER_3(diag, i64, i32, i64, i64)
+-DEF_HELPER_2(load_psw, void, i64, i64)
++DEF_HELPER_3(load_psw, void, env, i64, i64)
+ DEF_HELPER_1(program_interrupt, void, i32)
+ DEF_HELPER_FLAGS_1(stidp, TCG_CALL_CONST, void, i64)
+ DEF_HELPER_FLAGS_1(spx, TCG_CALL_CONST, void, i64)
+@@ -139,14 +139,14 @@ DEF_HELPER_2(csp, i32, i32, i32)
+ DEF_HELPER_3(mvcs, i32, i64, i64, i64)
+ DEF_HELPER_3(mvcp, i32, i64, i64, i64)
+ DEF_HELPER_3(sigp, i32, i64, i32, i64)
+-DEF_HELPER_1(sacf, void, i64)
++DEF_HELPER_2(sacf, void, env, i64)
+ DEF_HELPER_FLAGS_2(ipte, TCG_CALL_CONST, void, i64, i64)
+ DEF_HELPER_FLAGS_0(ptlb, TCG_CALL_CONST, void)
+ DEF_HELPER_2(lra, i32, i64, i32)
+ DEF_HELPER_2(stura, void, i64, i32)
+ DEF_HELPER_2(cksm, void, i32, i32)
+ 
+-DEF_HELPER_FLAGS_4(calc_cc, TCG_CALL_PURE|TCG_CALL_CONST,
+-                   i32, i32, i64, i64, i64)
++DEF_HELPER_FLAGS_5(calc_cc, TCG_CALL_PURE|TCG_CALL_CONST,
++                   i32, env, i32, i64, i64, i64)
+ 
+ #include "def-helper.h"
+diff --git a/target-s390x/translate.c b/target-s390x/translate.c
+index 2a61e92..1d87272 100644
+--- a/target-s390x/translate.c
++++ b/target-s390x/translate.c
+@@ -722,7 +722,7 @@ static void gen_op_calc_cc(DisasContext *s)
+     case CC_OP_NZ_F32:
+     case CC_OP_NZ_F64:
+         /* 1 argument */
+-        gen_helper_calc_cc(cc_op, local_cc_op, dummy, cc_dst, dummy);
++        gen_helper_calc_cc(cc_op, cpu_env, local_cc_op, dummy, cc_dst, dummy);
+         break;
+     case CC_OP_ICM:
+     case CC_OP_LTGT_32:
+@@ -735,7 +735,7 @@ static void gen_op_calc_cc(DisasContext *s)
+     case CC_OP_LTGT_F64:
+     case CC_OP_SLAG:
+         /* 2 arguments */
+-        gen_helper_calc_cc(cc_op, local_cc_op, cc_src, cc_dst, dummy);
++        gen_helper_calc_cc(cc_op, cpu_env, local_cc_op, cc_src, cc_dst, dummy);
+         break;
+     case CC_OP_ADD_64:
+     case CC_OP_ADDU_64:
+@@ -746,11 +746,11 @@ static void gen_op_calc_cc(DisasContext *s)
+     case CC_OP_SUB_32:
+     case CC_OP_SUBU_32:
+         /* 3 arguments */
+-        gen_helper_calc_cc(cc_op, local_cc_op, cc_src, cc_dst, cc_vr);
++        gen_helper_calc_cc(cc_op, cpu_env, local_cc_op, cc_src, cc_dst, cc_vr);
+         break;
+     case CC_OP_DYNAMIC:
+         /* unknown operation - assume 3 arguments and cc_op in env */
+-        gen_helper_calc_cc(cc_op, cc_op, cc_src, cc_dst, cc_vr);
++        gen_helper_calc_cc(cc_op, cpu_env, cc_op, cc_src, cc_dst, cc_vr);
+         break;
+     default:
+         tcg_abort();
+@@ -2628,7 +2628,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+     case 0x22: /* IPM    R1               [RRE] */
+         tmp32_1 = tcg_const_i32(r1);
+         gen_op_calc_cc(s);
+-        gen_helper_ipm(cc_op, tmp32_1);
++        gen_helper_ipm(cpu_env, cc_op, tmp32_1);
+         tcg_temp_free_i32(tmp32_1);
+         break;
+     case 0x41: /* CKSM    R1,R2     [RRE] */
+@@ -2916,7 +2916,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_sacf(tmp);
++        gen_helper_sacf(cpu_env, tmp);
+         tcg_temp_free_i64(tmp);
+         /* addressing mode has changed, so end the block */
+         s->pc += ilc * 2;
+@@ -2967,7 +2967,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         tcg_gen_qemu_ld64(tmp2, tmp, get_mem_index(s));
+         tcg_gen_addi_i64(tmp, tmp, 8);
+         tcg_gen_qemu_ld64(tmp3, tmp, get_mem_index(s));
+-        gen_helper_load_psw(tmp2, tmp3);
++        gen_helper_load_psw(cpu_env, tmp2, tmp3);
+         /* we need to keep cc_op intact */
+         s->is_jmp = DISAS_JUMP;
+         tcg_temp_free_i64(tmp);
+@@ -4527,7 +4527,7 @@ static void disas_s390_insn(DisasContext *s)
+         tcg_gen_qemu_ld32u(tmp2, tmp, get_mem_index(s));
+         tcg_gen_addi_i64(tmp, tmp, 4);
+         tcg_gen_qemu_ld32u(tmp3, tmp, get_mem_index(s));
+-        gen_helper_load_psw(tmp2, tmp3);
++        gen_helper_load_psw(cpu_env, tmp2, tmp3);
+         tcg_temp_free_i64(tmp);
+         tcg_temp_free_i64(tmp2);
+         tcg_temp_free_i64(tmp3);

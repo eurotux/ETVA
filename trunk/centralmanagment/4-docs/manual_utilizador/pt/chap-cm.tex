@@ -119,7 +119,7 @@ Na figura \ref{fig:main_networks} as interfaces de rede listadas são as que est
 \subsubsection{Administração das redes}
 
 Para criar uma rede clica-se em \emph{Adicionar rede}.
-A informação da rede consiste no seu nome e ID\footnote{Caso a rede/vlan seja \emph{tagged} o campo \emph{ID da rede} refere-se à \emph{VLAN ID}} (ver figura \ref{fig:network_create}).
+A informação da rede consiste no seu nome, ID\footnote{Caso a rede/vlan seja \emph{tagged} o campo \emph{ID da rede} refere-se à \emph{VLAN ID}} (ver figura \ref{fig:network_create}) e interface física associada à rede.
 
 Para remover uma rede selecciona-se a rede pretendida e clica-se em \emph{Remover rede}.
 
@@ -411,8 +411,10 @@ Este assistente é constituído pelas seguintes etapas:
 				\end{itemize}
 			\item Outros
 				\begin{itemize}
+                    \item Disco
 					\item Boot de rede (PXE)
 					\item CD-ROM (ISO)
+					\item Instalação via rede. Url do kernel a carregar e opções do kernel.
 				\end{itemize}
 		\end{itemize}
         A figura \ref{fig:server_createwiz_startup} refere-se às opções de uma máquina virtual \emph{Linux} em \emph{KVM}.
@@ -448,13 +450,22 @@ Para editar um servidor, selecciona-se a máquina pretendida e clica-se em \emph
 
 A edição de uma máquina virtual permite a configuração de:
 \begin{description}
-	\item[Opções gerais:] Neste painel é permitido alterar o nome, memória, número de CPUs e número de \emph{sockets}, \emph{cores} e \emph{threads}, sistema operativo e parâmetros de arranque da máquina.
-        Os parâmetros de arranque variam consoante o tipo da máquina virtual e sistema de virtualização (ver secção \ref{sec:add_server_boot}).
+	\item[Opções gerais:] Neste painel é permitido alterar o nome, memória, número de CPUs e número de \emph{sockets}, \emph{cores} e \emph{threads} e o modelo do CPU que pretendemos virtualizar.
 		\begin{figure}[H]
         		\begin{center}
 		        \includegraphics[scale=0.5]{screenshots/server_edit_general.png}
         		\caption{Edição de um servidor - Opções gerais}
 	        	\label{fig:server_edit_general}
+	        	\end{center}
+		\end{figure}
+
+	\item[SO/Opções arranque:] Neste painel é possível alterar configuração do sistema operativo e parâmetros de arranque da máquina virtual.
+        Os parâmetros de arranque variam consoante o tipo da máquina virtual e sistema de virtualização (ver secção \ref{sec:add_server_boot}).
+		\begin{figure}[H]
+        		\begin{center}
+		        \includegraphics[scale=0.5]{screenshots/server_edit_options.png}
+        		\caption{Edição de um servidor - SO/Opções arranque}
+	        	\label{fig:server_edit_options}
 	        	\end{center}
 		\end{figure}
 
@@ -845,6 +856,7 @@ No redimensionamento selecciona-se o \emph{logical volume} que se pretende redim
 	Ao reduzir o tamanho do \emph{logical volume} poderá tornar os dados existentes inutilizados. É da responsabilidade do utilizador verificar se é comportável/seguro o redimensionamento do \emph{logical volume} sem afectar os dados nele contidos.
 \end{quote}
 
+No redimensionamento de um \emph{logical volume}, caso o volume suporte \emph{snapshosts}, dever-se-á ter em atenção a percentagem de alocação para possibilitar os \emph{snapshots}.
 
 \begin{figure}[H]
         \begin{center}
@@ -1349,7 +1361,7 @@ No processo de autorização, o \textit{Central Management} verifica se o node p
  
 \subsection{Alterar preferências}
 Acedendo a \emph{Preferências} é possível definir alguns parâmetros globais ao sistema.
-No painel \emph{Geral} é permitido especificar o \emph{keymap} usado por omissão no acesso por VNC às máquinas virtuais, bem como definir a duração dos registos de eventos do sistema.
+No painel \emph{Geral} é permitido especificar o endereço de email e uma prefixo no assunto para envio de alertas, permite definir \emph{keymap} usado por omissão no acesso por VNC às máquinas virtuais, bem como definir a duração dos registos de eventos do sistema.
 
 \begin{figure}[H]
         \begin{center}
@@ -1360,6 +1372,7 @@ No painel \emph{Geral} é permitido especificar o \emph{keymap} usado por omiss�
 \end{figure}
 
 No painel \emph{Conectividade} é permitido alterar o IP do CM e da rede LAN caso se trate de um \emph{NUXIS}. No modelo \emph{UnitBox} permite apenas configurar o IP do CM.
+Permite ainda alterar a configuração para os servidores DNS e NTP.
 
 \begin{figure}[H]
         \begin{center}

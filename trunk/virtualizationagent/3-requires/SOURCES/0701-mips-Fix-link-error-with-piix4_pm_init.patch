@@ -1,0 +1,27 @@
+From c1c704ab4a9f62367d044eaafcab555d1a15f85a Mon Sep 17 00:00:00 2001
+From: Cole Robinson <crobinso@redhat.com>
+Date: Mon, 6 Aug 2012 17:12:40 -0400
+Subject: [PATCH] mips: Fix link error with 'piix4_pm_init'
+
+  LINK  mips-softmmu/qemu-system-mips
+  LINK  m68k-softmmu/qemu-system-m68k
+hw/mips/../mips_malta.o: In function `mips_malta_init':
+/home/crobinso/qemu-kvm/hw/mips/../mips_malta.c:961: undefined reference to `piix4_pm_init'
+
+Signed-off-by: Cole Robinson <crobinso@redhat.com>
+---
+ hw/mips/Makefile.objs | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/hw/mips/Makefile.objs b/hw/mips/Makefile.objs
+index 29a5d0d..89af0e9 100644
+--- a/hw/mips/Makefile.objs
++++ b/hw/mips/Makefile.objs
+@@ -1,6 +1,7 @@
+ obj-y = mips_r4k.o mips_jazz.o mips_malta.o mips_mipssim.o
+ obj-y += mips_addr.o mips_timer.o mips_int.o
+ obj-y += gt64xxx.o mc146818rtc.o
++obj-y += acpi.o acpi_piix4.o
+ obj-$(CONFIG_FULONG) += bonito.o vt82c686.o mips_fulong2e.o
+ 
+ obj-y := $(addprefix ../,$(obj-y))

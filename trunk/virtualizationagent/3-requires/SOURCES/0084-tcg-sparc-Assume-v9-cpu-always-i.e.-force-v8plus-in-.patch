@@ -1,0 +1,283 @@
+From 764010fd034a93bd1d266e443097d5e8f4d11b09 Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Fri, 21 Sep 2012 10:34:21 -0700
+Subject: [PATCH] tcg-sparc: Assume v9 cpu always, i.e. force v8plus in 32-bit
+ mode.
+
+Current code doesn't actually work in 32-bit mode at all.  Since
+no one really noticed, drop the complication of v7 and v8 cpus.
+Eliminate the --sparc_cpu configure option and standardize macro
+testing on TCG_TARGET_REG_BITS / HOST_LONG_BITS
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure              | 40 ++++------------------------------------
+ disas.c                |  2 --
+ exec.c                 |  6 +++---
+ qemu-timer.h           |  8 +++++---
+ tcg/sparc/tcg-target.c | 20 +++++---------------
+ tcg/sparc/tcg-target.h |  7 ++++---
+ tcg/tcg.c              |  3 ++-
+ 7 files changed, 23 insertions(+), 63 deletions(-)
+
+diff --git a/configure b/configure
+index 816f0f9..0590f16 100755
+--- a/configure
++++ b/configure
+@@ -111,7 +111,6 @@ source_path=`dirname "$0"`
+ cpu=""
+ interp_prefix="/usr/gnemul/qemu-%M"
+ static="no"
+-sparc_cpu=""
+ cross_prefix=""
+ audio_drv_list=""
+ audio_card_list="ac97 es1370 sb16 hda"
+@@ -249,21 +248,6 @@ for opt do
+   ;;
+   --disable-debug-info) debug_info="no"
+   ;;
+-  --sparc_cpu=*)
+-    sparc_cpu="$optarg"
+-    case $sparc_cpu in
+-    v7|v8|v8plus|v8plusa)
+-      cpu="sparc"
+-    ;;
+-    v9)
+-      cpu="sparc64"
+-    ;;
+-    *)
+-      echo "undefined SPARC architecture. Exiting";
+-      exit 1
+-    ;;
+-    esac
+-  ;;
+   esac
+ done
+ # OS specific
+@@ -351,8 +335,6 @@ elif check_define __i386__ ; then
+ elif check_define __x86_64__ ; then
+   cpu="x86_64"
+ elif check_define __sparc__ ; then
+-  # We can't check for 64 bit (when gcc is biarch) or V8PLUSA
+-  # They must be specified using --sparc_cpu
+   if check_define __arch64__ ; then
+     cpu="sparc64"
+   else
+@@ -798,8 +780,6 @@ for opt do
+   ;;
+   --enable-uname-release=*) uname_release="$optarg"
+   ;;
+-  --sparc_cpu=*)
+-  ;;
+   --enable-werror) werror="yes"
+   ;;
+   --disable-werror) werror="no"
+@@ -883,31 +863,19 @@ for opt do
+   esac
+ done
+ 
+-#
+-# If cpu ~= sparc and  sparc_cpu hasn't been defined, plug in the right
+-# QEMU_CFLAGS/LDFLAGS (assume sparc_v8plus for 32-bit and sparc_v9 for 64-bit)
+-#
+ host_guest_base="no"
+ case "$cpu" in
+-    sparc) case $sparc_cpu in
+-           v7|v8)
+-             QEMU_CFLAGS="-mcpu=${sparc_cpu} -D__sparc_${sparc_cpu}__ $QEMU_CFLAGS"
+-           ;;
+-           v8plus|v8plusa)
+-             QEMU_CFLAGS="-mcpu=ultrasparc -D__sparc_${sparc_cpu}__ $QEMU_CFLAGS"
+-           ;;
+-           *) # sparc_cpu not defined in the command line
+-             QEMU_CFLAGS="-mcpu=ultrasparc -D__sparc_v8plus__ $QEMU_CFLAGS"
+-           esac
++    sparc)
+            LDFLAGS="-m32 $LDFLAGS"
+-           QEMU_CFLAGS="-m32 -ffixed-g2 -ffixed-g3 $QEMU_CFLAGS"
++           QEMU_CFLAGS="-m32 -mcpu=ultrasparc $QEMU_CFLAGS"
++           QEMU_CFLAGS="-ffixed-g2 -ffixed-g3 $QEMU_CFLAGS"
+            if test "$solaris" = "no" ; then
+              QEMU_CFLAGS="-ffixed-g1 -ffixed-g6 $QEMU_CFLAGS"
+            fi
+            ;;
+     sparc64)
+-           QEMU_CFLAGS="-m64 -mcpu=ultrasparc -D__sparc_v9__ $QEMU_CFLAGS"
+            LDFLAGS="-m64 $LDFLAGS"
++           QEMU_CFLAGS="-m64 -mcpu=ultrasparc $QEMU_CFLAGS"
+            QEMU_CFLAGS="-ffixed-g5 -ffixed-g6 -ffixed-g7 $QEMU_CFLAGS"
+            if test "$solaris" != "no" ; then
+              QEMU_CFLAGS="-ffixed-g1 $QEMU_CFLAGS"
+diff --git a/disas.c b/disas.c
+index 7b2acc9..b801c8f 100644
+--- a/disas.c
++++ b/disas.c
+@@ -316,9 +316,7 @@ void disas(FILE *out, void *code, unsigned long size)
+     print_insn = print_insn_alpha;
+ #elif defined(__sparc__)
+     print_insn = print_insn_sparc;
+-#if defined(__sparc_v8plus__) || defined(__sparc_v8plusa__) || defined(__sparc_v9__)
+     disasm_info.mach = bfd_mach_sparc_v9b;
+-#endif
+ #elif defined(__arm__)
+     print_insn = print_insn_arm;
+ #elif defined(__MIPSEB__)
+diff --git a/exec.c b/exec.c
+index 871a68a..ad175db 100644
+--- a/exec.c
++++ b/exec.c
+@@ -86,7 +86,7 @@ static int nb_tbs;
+ /* any access to the tbs or the page table must use this lock */
+ spinlock_t tb_lock = SPIN_LOCK_UNLOCKED;
+ 
+-#if defined(__arm__) || defined(__sparc_v9__)
++#if defined(__arm__) || defined(__sparc__)
+ /* The prologue must be reachable with a direct jump. ARM and Sparc64
+  have limited branch ranges (possibly also PPC) so place it in a
+  section close to code segment. */
+@@ -541,7 +541,7 @@ static void code_gen_alloc(unsigned long tb_size)
+         /* Cannot map more than that */
+         if (code_gen_buffer_size > (800 * 1024 * 1024))
+             code_gen_buffer_size = (800 * 1024 * 1024);
+-#elif defined(__sparc_v9__)
++#elif defined(__sparc__) && HOST_LONG_BITS == 64
+         // Map the buffer below 2G, so we can use direct calls and branches
+         start = (void *) 0x40000000UL;
+         if (code_gen_buffer_size > (512 * 1024 * 1024))
+@@ -581,7 +581,7 @@ static void code_gen_alloc(unsigned long tb_size)
+         /* Cannot map more than that */
+         if (code_gen_buffer_size > (800 * 1024 * 1024))
+             code_gen_buffer_size = (800 * 1024 * 1024);
+-#elif defined(__sparc_v9__)
++#elif defined(__sparc__) && HOST_LONG_BITS == 64
+         // Map the buffer below 2G, so we can use direct calls and branches
+         addr = (void *) 0x40000000UL;
+         if (code_gen_buffer_size > (512 * 1024 * 1024)) {
+diff --git a/qemu-timer.h b/qemu-timer.h
+index f8af595..da7e97c 100644
+--- a/qemu-timer.h
++++ b/qemu-timer.h
+@@ -218,7 +218,7 @@ static inline int64_t cpu_get_real_ticks(void)
+     return val;
+ }
+ 
+-#elif defined(__sparc_v8plus__) || defined(__sparc_v8plusa__) || defined(__sparc_v9__)
++#elif defined(__sparc__)
+ 
+ static inline int64_t cpu_get_real_ticks (void)
+ {
+@@ -227,6 +227,8 @@ static inline int64_t cpu_get_real_ticks (void)
+     asm volatile("rd %%tick,%0" : "=r"(rval));
+     return rval;
+ #else
++    /* We need an %o or %g register for this.  For recent enough gcc
++       there is an "h" constraint for that.  Don't bother with that.  */
+     union {
+         uint64_t i64;
+         struct {
+@@ -234,8 +236,8 @@ static inline int64_t cpu_get_real_ticks (void)
+             uint32_t low;
+         }       i32;
+     } rval;
+-    asm volatile("rd %%tick,%1; srlx %1,32,%0"
+-                 : "=r"(rval.i32.high), "=r"(rval.i32.low));
++    asm volatile("rd %%tick,%%g1; srlx %%g1,32,%0; mov %%g1,%1"
++                 : "=r"(rval.i32.high), "=r"(rval.i32.low) : : "g1");
+     return rval.i64;
+ #endif
+ }
+diff --git a/tcg/sparc/tcg-target.c b/tcg/sparc/tcg-target.c
+index 0a19313..23c2fda 100644
+--- a/tcg/sparc/tcg-target.c
++++ b/tcg/sparc/tcg-target.c
+@@ -621,18 +621,10 @@ static void tcg_out_setcond_i32(TCGContext *s, TCGCond cond, TCGArg ret,
+ 
+     default:
+         tcg_out_cmp(s, c1, c2, c2const);
+-#if defined(__sparc_v9__) || defined(__sparc_v8plus__)
+         tcg_out_movi_imm13(s, ret, 0);
+-        tcg_out32 (s, ARITH_MOVCC | INSN_RD(ret)
+-                   | INSN_RS1(tcg_cond_to_bcond[cond])
+-                   | MOVCC_ICC | INSN_IMM11(1));
+-#else
+-        t = gen_new_label();
+-        tcg_out_branch_i32(s, INSN_COND(tcg_cond_to_bcond[cond], 1), t);
+-        tcg_out_movi_imm13(s, ret, 1);
+-        tcg_out_movi_imm13(s, ret, 0);
+-        tcg_out_label(s, t, s->code_ptr);
+-#endif
++        tcg_out32(s, ARITH_MOVCC | INSN_RD(ret)
++                  | INSN_RS1(tcg_cond_to_bcond[cond])
++                  | MOVCC_ICC | INSN_IMM11(1));
+         return;
+     }
+ 
+@@ -742,7 +734,7 @@ static const void * const qemu_st_helpers[4] = {
+ #endif
+ #endif
+ 
+-#ifdef __arch64__
++#if TCG_TARGET_REG_BITS == 64
+ #define HOST_LD_OP LDX
+ #define HOST_ST_OP STX
+ #define HOST_SLL_OP SHIFT_SLLX
+@@ -1600,11 +1592,9 @@ static void tcg_target_init(TCGContext *s)
+ 
+ #if TCG_TARGET_REG_BITS == 64
+ # define ELF_HOST_MACHINE  EM_SPARCV9
+-#elif defined(__sparc_v8plus__)
++#else
+ # define ELF_HOST_MACHINE  EM_SPARC32PLUS
+ # define ELF_HOST_FLAGS    EF_SPARC_32PLUS
+-#else
+-# define ELF_HOST_MACHINE  EM_SPARC
+ #endif
+ 
+ typedef struct {
+diff --git a/tcg/sparc/tcg-target.h b/tcg/sparc/tcg-target.h
+index d762574..adca1d2 100644
+--- a/tcg/sparc/tcg-target.h
++++ b/tcg/sparc/tcg-target.h
+@@ -67,7 +67,8 @@ typedef enum {
+ 
+ /* used for function call generation */
+ #define TCG_REG_CALL_STACK TCG_REG_I6
+-#ifdef __arch64__
++
++#if TCG_TARGET_REG_BITS == 64
+ // Reserve space for AREG0
+ #define TCG_TARGET_STACK_MINFRAME (176 + 4 * (int)sizeof(long) + \
+                                    TCG_STATIC_CALL_ARGS_SIZE)
+@@ -81,7 +82,7 @@ typedef enum {
+ #define TCG_TARGET_STACK_ALIGN 8
+ #endif
+ 
+-#ifdef __arch64__
++#if TCG_TARGET_REG_BITS == 64
+ #define TCG_TARGET_EXTEND_ARGS 1
+ #endif
+ 
+@@ -129,7 +130,7 @@ typedef enum {
+ 
+ #ifdef CONFIG_SOLARIS
+ #define TCG_AREG0 TCG_REG_G2
+-#elif defined(__sparc_v9__)
++#elif HOST_LONG_BITS == 64
+ #define TCG_AREG0 TCG_REG_G5
+ #else
+ #define TCG_AREG0 TCG_REG_G6
+diff --git a/tcg/tcg.c b/tcg/tcg.c
+index 93421cd..16c4e1d 100644
+--- a/tcg/tcg.c
++++ b/tcg/tcg.c
+@@ -1450,7 +1450,8 @@ static void temp_allocate_frame(TCGContext *s, int temp)
+ {
+     TCGTemp *ts;
+     ts = &s->temps[temp];
+-#ifndef __sparc_v9__ /* Sparc64 stack is accessed with offset of 2047 */
++#if !(defined(__sparc__) && TCG_TARGET_REG_BITS == 64)
++    /* Sparc64 stack is accessed with offset of 2047 */
+     s->current_frame_offset = (s->current_frame_offset +
+                                (tcg_target_long)sizeof(tcg_target_long) - 1) &
+         ~(sizeof(tcg_target_long) - 1);

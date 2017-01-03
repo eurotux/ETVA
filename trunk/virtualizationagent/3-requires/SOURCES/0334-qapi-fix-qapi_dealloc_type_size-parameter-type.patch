@@ -1,0 +1,33 @@
+From 4ce9c54234a391106923f962fadfc5641fed8fa5 Mon Sep 17 00:00:00 2001
+From: Bruce Rogers <brogers@suse.com>
+Date: Tue, 27 Nov 2012 13:11:25 -0700
+Subject: [PATCH] qapi: fix qapi_dealloc_type_size parameter type
+
+The second parameter to qapi_dealloc_type_size should be a uint64_t *,
+not a size_t *. This was causing our 32 bit x86 build to fail, since
+warnings are treated as errors.
+
+Signed-off-by: Bruce Rogers <brogers@suse.com>
+Reviewed-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+Reviewed-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Luiz Capitulino <lcapitulino@redhat.com>
+(cherry picked from commit 1d16252652688a775b244fffa1b9ac9b719ceffc)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qapi/qapi-dealloc-visitor.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/qapi/qapi-dealloc-visitor.c b/qapi/qapi-dealloc-visitor.c
+index a07b171..75214e7 100644
+--- a/qapi/qapi-dealloc-visitor.c
++++ b/qapi/qapi-dealloc-visitor.c
+@@ -132,7 +132,7 @@ static void qapi_dealloc_type_number(Visitor *v, double *obj, const char *name,
+ {
+ }
+ 
+-static void qapi_dealloc_type_size(Visitor *v, size_t *obj, const char *name,
++static void qapi_dealloc_type_size(Visitor *v, uint64_t *obj, const char *name,
+                                    Error **errp)
+ {
+ }

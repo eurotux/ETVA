@@ -138,7 +138,7 @@ Network.Grid = function(){
                             if (sm.hasSelection()){
                                 Ext.Msg.show({
                                     title: <?php echo json_encode(__('Remove interface'))?>,
-                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                    buttons: Ext.MessageBox.YESNO,
                                     icon: Ext.MessageBox.QUESTION,
                                     msg: String.format(<?php echo json_encode(__('Remove network interface with mac {0} ?')) ?>,sel.data.Mac),
                                     fn: function(btn){

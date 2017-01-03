@@ -1,0 +1,255 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use locale;
+use utf8;
+
+use lib '/usr/local/sap2elastix';
+
+use utilcommon;
+use utilsql;
+use utilallocnumber;
+
+use CGI qw/:standard *table/;        # load standard CGI routines
+use Template;
+use JSON;
+
+my $default_ttl = 60; # default ttl
+
+sub main {
+
+    utilallocnumber::initdb();
+
+    my %vars = ( 'default_ttl'=>$default_ttl, 'url'=>url() );
+
+    my @body = ();
+    my $op = param('op') || "";
+    if( $op eq 'save' ){
+        my ($number,$ext,$ttl,$descr) = (param('phone'),param('extension'),param('ttl'),param('descr'));
+        if( $number && $ext ){
+            my ($start,$end) = (param('start'),param('end'));
+            if( $start && $end ){
+                utilallocnumber::allocNumberRange($number,$ext,$start,$end, 'descr'=>$descr );
+            } else {
+                utilallocnumber::allocNumber($number,$ext,$ttl*60, 'descr'=>$descr);
+            }
+
+            $vars{'message'} = "Saved.";
+        } else {
+            $vars{'message'} = "Can't save.";
+        } 
+    } elsif( $op eq 'del' ){
+        my ($number,$ext) = (param('phone'),param('extension'));
+        if( $number && $ext ){
+            utilallocnumber::deleteAllocNumber($number, $ext);
+
+            $vars{'message'} = "Deleted.";
+        } else {
+            $vars{'message'} = "Can't delete.";
+        }
+    } else {
+
+        my %allocnumbers = ();
+        if( my @listallocnumbers = utilallocnumber::listAllocNumbers() ){
+
+            $vars{'allocnumbers'} = [ @listallocnumbers ];
+
+            foreach my $A (@listallocnumbers){
+                $allocnumbers{"$A->{'phone'}"} = $A;
+            }
+        }
+
+        # load external numbers
+        my @externalnumbers = utilallocnumber::listExternalNumbers();
+
+        # filter by free numbers
+        $vars{'freenumbers'} = [ grep { !$allocnumbers{"$_"} } @externalnumbers ];
+    }
+    utilallocnumber::closedb();
+
+    my $ref = \*DATA;
+
+    my $mode = param('mode') || "";
+    if( $mode eq 'json' ){
+        my $jsontt = <<__JSON__;
+Content-type: application/json; charset=utf-8;
+
+[% json.result %]
+__JSON__
+        $ref = \$jsontt;
+        $vars{'json'}{'result'} = encode_json(\%vars);
+    }
+    $vars{'start'} = utilcommon::nowStr();
+    $vars{'end'} = utilcommon::nowStr( $default_ttl*60 );
+
+    Template->new()
+        ->process($ref, \%vars );
+}
+&main(@ARGV);
+
+1;
+__END__
+Content-type: text/html; charset=utf-8;
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Numbers allocation</title>
+    <style>
+body {
+    font-size: 12pt;
+    width: 720px;
+    margin: 0 auto;
+}
+a {
+    color: #999999;
+}
+div.field {
+    padding: 2px;
+}
+span.label {
+    float: left;
+    width: 220px;
+}
+span.sidebside {
+    margin: 0px;
+    display: inline-block;
+}
+table.allocnumbers {
+    border: 1px solid #aaaaaa;
+    margin-bottom: 10px;
+}
+table.allocnumbers td {
+    border-top: 1px solid #aaaaaa;
+}
+table.allocnumbers th, table.allocnumbers td {
+    padding: 4px;
+    text-align: center;
+}
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>Request number</h1>
+    </div>
+    <div id="content">
+        [% IF message != "" %]
+            <div id="message">
+                [% message %]
+            </div>
+            <form method="post" action="[% url %]" enctype="multipart/form-data">
+            <div class="field">
+            <input id="btn_back" type="submit" name="op" value="back"/>
+            <script>
+                setTimeout(function(){ jQuery('#btn_back').click(); }, 3000);
+            </script>
+            </div>
+            </form>
+        [% END %]
+        [% IF allocnumbers.list.size > 0 %]
+            <table class="allocnumbers" cellspacing="0" cellpadding="0" width="100%">
+                <tr><th>External</th>
+                    <th>Internal</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Descr.</th>
+                    <th/></tr>
+                [% BLOCK tr_allocnumber %]
+                    <tr><td>[% phone %]</td>
+                        <td>[% extension %]</td>
+                        <td>[% start %]</td>
+                        <td>[% end %]</td>
+                        <td>[% descr %]</td>
+                        <td><a href="[% myurl %]?op=del&amp;phone=[% phone %]&amp;extension=[% extension %]">Delete</a></td>
+                [% END %]
+                [% FOREACH obj IN allocnumbers %]
+                    [% PROCESS tr_allocnumber phone=obj.phone extension=obj.extension start=obj.start end=obj.end descr=obj.descr %]
+                [% END %]
+            </table>
+        [% END %]
+        [% IF freenumbers.list.size > 0 %]
+            <form method="post" action="[% url %]" enctype="multipart/form-data">
+            <div class="field">
+                <span class="label">Available free numbers:</span>
+                <select name="phone">
+                    [% BLOCK option_phone %]
+                        <option value="[% opt_value %]"> [% opt_name %] </option>
+                    [% END %]
+
+                    [% FOREACH number IN freenumbers %]
+                        [% PROCESS option_phone opt_value=number opt_name=number %]
+                    [% END %]
+                </select>
+            </div>
+            <div class="field">
+                <span class="label">TTL (min.):</span>
+                <input type="text" name="ttl" value="[% default_ttl %]"/>
+            </div>
+            <div class="field">
+                <span class="label">Dates:</span>
+                <span class="sidebside">
+                    <input id="dtpicker_start" type="text" name="start" value="[% start %]" disabled="disabled" />
+                    <input id="dtpicker_end" type="text" name="end" value="[% end %]" disabled="disabled" />
+                    <input id="ckb_dates" type="checkbox" name="dates_check" value="1"/>
+                </span>
+            </div>
+            <div class="field">
+                <span class="label">Extension:</span>
+                <input type="text" name="extension" value=""/>
+            </div>
+            <div class="field">
+                <span class="label">Descr.:</span>
+                <input type="text" name="descr" value="" maxlength="70"/>
+            </div>
+            <div class="field">
+                <input id="btn_save" type="submit" name="op" value="save"/>
+            </div>
+            </form>
+        [% END %]
+        [% content %]
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="/static/js/datetimepicker/jquery.datetimepicker.css"></link>
+<script src="/static/js/datetimepicker/jquery.js"></script>
+<script src="/static/js/datetimepicker/jquery.datetimepicker.js"></script>
+<script>
+jQuery('#ckb_dates').click(function() {
+    var $this = $(this);
+    // $this will contain a reference to the checkbox   
+    if ($this.is(':checked')) {
+        // the checkbox was checked 
+        jQuery('#dtpicker_start').removeAttr('disabled');
+        jQuery('#dtpicker_end').removeAttr('disabled');
+    } else {
+        // the checkbox was unchecked
+        jQuery('#dtpicker_start').attr('disabled','disabled');
+        jQuery('#dtpicker_end').attr('disabled','disabled');
+    }
+});
+
+jQuery('#dtpicker_start').datetimepicker({
+    format:'Y-m-d H:i:s',
+    onChangeDateTime:function(dp,$input){
+        if( $input.val() > jQuery('#dtpicker_end').val() ){
+            jQuery('#btn_save').attr('disabled','disabled');
+            alert("Start date is later then end date.");
+        } else {
+            jQuery('#btn_save').removeAttr('disabled');
+        }
+    }
+});
+jQuery('#dtpicker_end').datetimepicker({
+    format:'Y-m-d H:i:s',
+    onChangeDateTime:function(dp,$input){
+        if( $input.val() < jQuery('#dtpicker_start').val() ){
+            jQuery('#btn_save').attr('disabled','disabled');
+            alert("End date is prior then start date.");
+        } else {
+            jQuery('#btn_save').removeAttr('disabled');
+        }
+    }
+});
+</script>
+</html>

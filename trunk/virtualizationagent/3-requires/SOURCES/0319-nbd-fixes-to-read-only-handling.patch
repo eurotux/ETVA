@@ -1,0 +1,59 @@
+From 643bf61b8a2283513ccbe736eab9556a9aeb614f Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 13 Nov 2012 10:34:17 +0100
+Subject: [PATCH] nbd: fixes to read-only handling
+
+We do not need BLKROSET if the kernel supports setting flags.
+Also, always do BLKROSET even for a read-write export, otherwise
+the read-only state remains "sticky" after the invocation of
+"qemu-nbd -r".
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+(cherry picked from commit c8969eded252058e90e91f12f75f32aceae46ec9)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ nbd.c | 25 ++++++++++++-------------
+ 1 file changed, 12 insertions(+), 13 deletions(-)
+
+diff --git a/nbd.c b/nbd.c
+index 206f75c..19f6cd8 100644
+--- a/nbd.c
++++ b/nbd.c
+@@ -399,24 +399,23 @@ int nbd_init(int fd, int csock, uint32_t flags, off_t size, size_t blocksize)
+         return -serrno;
+     }
+ 
+-    if (flags & NBD_FLAG_READ_ONLY) {
+-        int read_only = 1;
+-        TRACE("Setting readonly attribute");
+-
+-        if (ioctl(fd, BLKROSET, (unsigned long) &read_only) < 0) {
++    if (ioctl(fd, NBD_SET_FLAGS, flags) < 0) {
++        if (errno == ENOTTY) {
++            int read_only = (flags & NBD_FLAG_READ_ONLY) != 0;
++            TRACE("Setting readonly attribute");
++
++            if (ioctl(fd, BLKROSET, (unsigned long) &read_only) < 0) {
++                int serrno = errno;
++                LOG("Failed setting read-only attribute");
++                return -serrno;
++            }
++        } else {
+             int serrno = errno;
+-            LOG("Failed setting read-only attribute");
++            LOG("Failed setting flags");
+             return -serrno;
+         }
+     }
+ 
+-    if (ioctl(fd, NBD_SET_FLAGS, flags) < 0
+-        && errno != ENOTTY) {
+-        int serrno = errno;
+-        LOG("Failed setting flags");
+-        return -serrno;
+-    }
+-
+     TRACE("Negotiation ended");
+ 
+     return 0;

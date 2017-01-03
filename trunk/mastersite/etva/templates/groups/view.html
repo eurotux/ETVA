@@ -1,0 +1,27 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}Group page{% endblock%}
+{% block section %}{%trans "Groups"%}{% endblock%}
+
+{% block mainCol%}
+
+<h1>{%blocktrans%}group{%endblocktrans%} {{groupName}}:</h1>
+<div class="space15">&nbsp;</div>
+	{% if errorMessage%}
+            <div id="msgAlert">{{errorMessage}}</div>
+	{%endif%}
+
+{% if users %}
+    <ul class="lists">
+    {% for user in users%}
+    <li><a href="/users/{{user.id}}">{{ user.username }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+<p>{%trans "Sem utilizadores"%}</p>
+{% endif%}
+<div class="space15">&nbsp;</div>
+<a href="/users/new/{{group}}">{%blocktrans%}Add a new user to this group{%endblocktrans%}</a>
+    {%endblock%}
+
+

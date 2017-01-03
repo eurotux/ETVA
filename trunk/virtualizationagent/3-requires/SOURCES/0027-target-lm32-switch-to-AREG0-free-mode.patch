@@ -1,0 +1,279 @@
+From 8d2c36442129f5b9f2d6f11b296bce31aa7466f0 Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Sun, 2 Sep 2012 06:57:17 +0000
+Subject: [PATCH] target-lm32: switch to AREG0 free mode
+
+Add an explicit CPUState parameter instead of relying on AREG0
+and switch to AREG0 free mode.
+
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure                 |  2 +-
+ target-lm32/Makefile.objs |  2 --
+ target-lm32/helper.h      | 20 ++++++++++----------
+ target-lm32/op_helper.c   | 29 +++++++++++------------------
+ target-lm32/translate.c   | 28 +++++++++++++---------------
+ 5 files changed, 35 insertions(+), 46 deletions(-)
+
+diff --git a/configure b/configure
+index 3ad6f74..1e3ea7f 100755
+--- a/configure
++++ b/configure
+@@ -3839,7 +3839,7 @@ symlink "$source_path/Makefile.target" "$target_dir/Makefile"
+ 
+ 
+ case "$target_arch2" in
+-  alpha | i386 | or32 | s390x | sparc* | x86_64 | xtensa* | ppc*)
++  alpha | i386 | lm32 | or32 | s390x | sparc* | x86_64 | xtensa* | ppc*)
+     echo "CONFIG_TCG_PASS_AREG0=y" >> $config_target_mak
+   ;;
+ esac
+diff --git a/target-lm32/Makefile.objs b/target-lm32/Makefile.objs
+index 2e0e093..ca20f21 100644
+--- a/target-lm32/Makefile.objs
++++ b/target-lm32/Makefile.objs
+@@ -1,4 +1,2 @@
+ obj-y += translate.o op_helper.o helper.o cpu.o
+ obj-$(CONFIG_SOFTMMU) += machine.o
+-
+-$(obj)/op_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/target-lm32/helper.h b/target-lm32/helper.h
+index 9d335ef..07f5670 100644
+--- a/target-lm32/helper.h
++++ b/target-lm32/helper.h
+@@ -1,14 +1,14 @@
+ #include "def-helper.h"
+ 
+-DEF_HELPER_1(raise_exception, void, i32)
+-DEF_HELPER_0(hlt, void)
+-DEF_HELPER_1(wcsr_im, void, i32)
+-DEF_HELPER_1(wcsr_ip, void, i32)
+-DEF_HELPER_1(wcsr_jtx, void, i32)
+-DEF_HELPER_1(wcsr_jrx, void, i32)
+-DEF_HELPER_0(rcsr_im, i32)
+-DEF_HELPER_0(rcsr_ip, i32)
+-DEF_HELPER_0(rcsr_jtx, i32)
+-DEF_HELPER_0(rcsr_jrx, i32)
++DEF_HELPER_2(raise_exception, void, env, i32)
++DEF_HELPER_1(hlt, void, env)
++DEF_HELPER_2(wcsr_im, void, env, i32)
++DEF_HELPER_2(wcsr_ip, void, env, i32)
++DEF_HELPER_2(wcsr_jtx, void, env, i32)
++DEF_HELPER_2(wcsr_jrx, void, env, i32)
++DEF_HELPER_1(rcsr_im, i32, env)
++DEF_HELPER_1(rcsr_ip, i32, env)
++DEF_HELPER_1(rcsr_jtx, i32, env)
++DEF_HELPER_1(rcsr_jrx, i32, env)
+ 
+ #include "def-helper.h"
+diff --git a/target-lm32/op_helper.c b/target-lm32/op_helper.c
+index 51edc1a..7b91d8c 100644
+--- a/target-lm32/op_helper.c
++++ b/target-lm32/op_helper.c
+@@ -1,6 +1,5 @@
+ #include <assert.h>
+ #include "cpu.h"
+-#include "dyngen-exec.h"
+ #include "helper.h"
+ #include "host-utils.h"
+ 
+@@ -18,55 +17,55 @@
+ #define SHIFT 3
+ #include "softmmu_template.h"
+ 
+-void helper_raise_exception(uint32_t index)
++void helper_raise_exception(CPULM32State *env, uint32_t index)
+ {
+     env->exception_index = index;
+     cpu_loop_exit(env);
+ }
+ 
+-void helper_hlt(void)
++void helper_hlt(CPULM32State *env)
+ {
+     env->halted = 1;
+     env->exception_index = EXCP_HLT;
+     cpu_loop_exit(env);
+ }
+ 
+-void helper_wcsr_im(uint32_t im)
++void helper_wcsr_im(CPULM32State *env, uint32_t im)
+ {
+     lm32_pic_set_im(env->pic_state, im);
+ }
+ 
+-void helper_wcsr_ip(uint32_t im)
++void helper_wcsr_ip(CPULM32State *env, uint32_t im)
+ {
+     lm32_pic_set_ip(env->pic_state, im);
+ }
+ 
+-void helper_wcsr_jtx(uint32_t jtx)
++void helper_wcsr_jtx(CPULM32State *env, uint32_t jtx)
+ {
+     lm32_juart_set_jtx(env->juart_state, jtx);
+ }
+ 
+-void helper_wcsr_jrx(uint32_t jrx)
++void helper_wcsr_jrx(CPULM32State *env, uint32_t jrx)
+ {
+     lm32_juart_set_jrx(env->juart_state, jrx);
+ }
+ 
+-uint32_t helper_rcsr_im(void)
++uint32_t helper_rcsr_im(CPULM32State *env)
+ {
+     return lm32_pic_get_im(env->pic_state);
+ }
+ 
+-uint32_t helper_rcsr_ip(void)
++uint32_t helper_rcsr_ip(CPULM32State *env)
+ {
+     return lm32_pic_get_ip(env->pic_state);
+ }
+ 
+-uint32_t helper_rcsr_jtx(void)
++uint32_t helper_rcsr_jtx(CPULM32State *env)
+ {
+     return lm32_juart_get_jtx(env->juart_state);
+ }
+ 
+-uint32_t helper_rcsr_jrx(void)
++uint32_t helper_rcsr_jrx(CPULM32State *env)
+ {
+     return lm32_juart_get_jrx(env->juart_state);
+ }
+@@ -74,17 +73,12 @@ uint32_t helper_rcsr_jrx(void)
+ /* Try to fill the TLB and return an exception if error. If retaddr is
+    NULL, it means that the function was called in C code (i.e. not
+    from generated code or from helper.c) */
+-/* XXX: fix it to restore all registers */
+-void tlb_fill(CPULM32State *env1, target_ulong addr, int is_write, int mmu_idx,
++void tlb_fill(CPULM32State *env, target_ulong addr, int is_write, int mmu_idx,
+               uintptr_t retaddr)
+ {
+     TranslationBlock *tb;
+-    CPULM32State *saved_env;
+     int ret;
+ 
+-    saved_env = env;
+-    env = env1;
+-
+     ret = cpu_lm32_handle_mmu_fault(env, addr, is_write, mmu_idx);
+     if (unlikely(ret)) {
+         if (retaddr) {
+@@ -98,7 +92,6 @@ void tlb_fill(CPULM32State *env1, target_ulong addr, int is_write, int mmu_idx,
+         }
+         cpu_loop_exit(env);
+     }
+-    env = saved_env;
+ }
+ #endif
+ 
+diff --git a/target-lm32/translate.c b/target-lm32/translate.c
+index 872a2ba..5f6dcba 100644
+--- a/target-lm32/translate.c
++++ b/target-lm32/translate.c
+@@ -116,7 +116,7 @@ static inline void t_gen_raise_exception(DisasContext *dc, uint32_t index)
+ {
+     TCGv_i32 tmp = tcg_const_i32(index);
+ 
+-    gen_helper_raise_exception(tmp);
++    gen_helper_raise_exception(cpu_env, tmp);
+     tcg_temp_free_i32(tmp);
+ }
+ 
+@@ -179,7 +179,7 @@ static void dec_and(DisasContext *dc)
+     } else  {
+         if (dc->r0 == 0 && dc->r1 == 0 && dc->r2 == 0) {
+             tcg_gen_movi_tl(cpu_pc, dc->pc + 4);
+-            gen_helper_hlt();
++            gen_helper_hlt(cpu_env);
+         } else {
+             tcg_gen_and_tl(cpu_R[dc->r2], cpu_R[dc->r0], cpu_R[dc->r1]);
+         }
+@@ -601,10 +601,10 @@ static void dec_rcsr(DisasContext *dc)
+         tcg_gen_mov_tl(cpu_R[dc->r2], cpu_ie);
+         break;
+     case CSR_IM:
+-        gen_helper_rcsr_im(cpu_R[dc->r2]);
++        gen_helper_rcsr_im(cpu_R[dc->r2], cpu_env);
+         break;
+     case CSR_IP:
+-        gen_helper_rcsr_ip(cpu_R[dc->r2]);
++        gen_helper_rcsr_ip(cpu_R[dc->r2], cpu_env);
+         break;
+     case CSR_CC:
+         tcg_gen_mov_tl(cpu_R[dc->r2], cpu_cc);
+@@ -622,10 +622,10 @@ static void dec_rcsr(DisasContext *dc)
+         tcg_gen_mov_tl(cpu_R[dc->r2], cpu_deba);
+         break;
+     case CSR_JTX:
+-        gen_helper_rcsr_jtx(cpu_R[dc->r2]);
++        gen_helper_rcsr_jtx(cpu_R[dc->r2], cpu_env);
+         break;
+     case CSR_JRX:
+-        gen_helper_rcsr_jrx(cpu_R[dc->r2]);
++        gen_helper_rcsr_jrx(cpu_R[dc->r2], cpu_env);
+         break;
+     case CSR_ICC:
+     case CSR_DCC:
+@@ -812,7 +812,7 @@ static void dec_wcsr(DisasContext *dc)
+         if (use_icount) {
+             gen_io_start();
+         }
+-        gen_helper_wcsr_im(cpu_R[dc->r1]);
++        gen_helper_wcsr_im(cpu_env, cpu_R[dc->r1]);
+         tcg_gen_movi_tl(cpu_pc, dc->pc + 4);
+         if (use_icount) {
+             gen_io_end();
+@@ -824,7 +824,7 @@ static void dec_wcsr(DisasContext *dc)
+         if (use_icount) {
+             gen_io_start();
+         }
+-        gen_helper_wcsr_ip(cpu_R[dc->r1]);
++        gen_helper_wcsr_ip(cpu_env, cpu_R[dc->r1]);
+         tcg_gen_movi_tl(cpu_pc, dc->pc + 4);
+         if (use_icount) {
+             gen_io_end();
+@@ -844,10 +844,10 @@ static void dec_wcsr(DisasContext *dc)
+         tcg_gen_mov_tl(cpu_deba, cpu_R[dc->r1]);
+         break;
+     case CSR_JTX:
+-        gen_helper_wcsr_jtx(cpu_R[dc->r1]);
++        gen_helper_wcsr_jtx(cpu_env, cpu_R[dc->r1]);
+         break;
+     case CSR_JRX:
+-        gen_helper_wcsr_jrx(cpu_R[dc->r1]);
++        gen_helper_wcsr_jrx(cpu_env, cpu_R[dc->r1]);
+         break;
+     case CSR_DC:
+         tcg_gen_mov_tl(cpu_dc, cpu_R[dc->r1]);
+@@ -940,15 +940,13 @@ static const DecoderInfo decinfo[] = {
+     dec_cmpne
+ };
+ 
+-static inline void decode(DisasContext *dc)
++static inline void decode(DisasContext *dc, uint32_t ir)
+ {
+-    uint32_t ir;
+-
+     if (unlikely(qemu_loglevel_mask(CPU_LOG_TB_OP))) {
+         tcg_gen_debug_insn_start(dc->pc);
+     }
+ 
+-    dc->ir = ir = ldl_code(dc->pc);
++    dc->ir = ir;
+     LOG_DIS("%8.8x\t", dc->ir);
+ 
+     /* try guessing 'empty' instruction memory, although it may be a valid
+@@ -1068,7 +1066,7 @@ static void gen_intermediate_code_internal(CPULM32State *env,
+             gen_io_start();
+         }
+ 
+-        decode(dc);
++        decode(dc, cpu_ldl_code(env, dc->pc));
+         dc->pc += 4;
+         num_insns++;
+ 

@@ -109,7 +109,7 @@ Vlan.Grid = Ext.extend(Ext.grid.GridPanel,{
                     if (sm.hasSelection()){
                         Ext.Msg.show({
                             title: <?php echo json_encode(__('Remove network')) ?>,
-                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            buttons: Ext.MessageBox.YESNO,
                             msg: String.format(<?php echo json_encode(__('Remove network {0} ?')) ?>,sel.data['name']),
                             scope:this,
                             fn: function(btn){
@@ -158,8 +158,8 @@ Vlan.Grid = Ext.extend(Ext.grid.GridPanel,{
                                             var response = Ext.decode(resp.responseText);
 
                                             if(response && resp.status!=401){
-                                                var errors = response['error'];
-                                                var oks = response['ok'];
+                                                var errors = response['errors'];
+                                                var oks = response['oks'];
                                                 var errors_length = errors.length;
                                                 var oks_length = oks.length;
                                                 var agents = '<br>';
@@ -170,8 +170,8 @@ Vlan.Grid = Ext.extend(Ext.grid.GridPanel,{
                                                 var logger_error = [];
                                                 var logger_ok = [];
                                                 for(var i=0;i<errors_length;i++){
-                                                    agents += '<b>'+errors[i]['agent']+'</b> - '+errors[i]['error']+'<br>';
-                                                    logger_error[i] = '<b>'+errors[i]['agent']+'</b>('+errors[i]['error']+')';
+                                                    agents += '<b>'+errors[i]['agent']+'</b> - '+errors[i]['info']+'<br>';
+                                                    logger_error[i] = '<b>'+errors[i]['agent']+'</b>('+errors[i]['info']+')';
                                                 }
 
                                                 for(var i=0;i<oks_length;i++){
@@ -196,9 +196,6 @@ Vlan.Grid = Ext.extend(Ext.grid.GridPanel,{
                                                     msg: msg,
                                                     icon: Ext.MessageBox.ERROR});
                                             }
-
-
-
                                         }
                                     });// END Ajax request
 

@@ -1,0 +1,30 @@
+From 83f998ff20f3a38878274a6cbb6c4d56ac4e9c63 Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Wed, 28 Nov 2012 11:16:26 +0200
+Subject: [PATCH] libcacard: fix missing symbol in libcacard.so
+
+Before patch:
+$ make libcacard.la
+$ nm ./libcacard/.libs/libcacard.so.0.0.0 | grep " U " | \
+    egrep -v "(g_)|(GLIBC)|(SECMOD)|(PK11)|(CERT)|(NSS)|(PORT)|(PR)"
+                 U error_set
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+---
+ libcacard/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libcacard/Makefile b/libcacard/Makefile
+index 88ed064..7973f8d 100644
+--- a/libcacard/Makefile
++++ b/libcacard/Makefile
+@@ -7,7 +7,7 @@ libcacard_includedir=$(includedir)/cacard
+ $(call set-vpath, $(SRC_PATH))
+ 
+ # objects linked into a shared library, built with libtool with -fPIC if required
+-QEMU_OBJS=$(oslib-obj-y) qemu-timer-common.o iov.o cutils.o qemu-user.o $(trace-obj-y)
++QEMU_OBJS=$(oslib-obj-y) qemu-timer-common.o error.o iov.o cutils.o qemu-user.o $(trace-obj-y)
+ QEMU_OBJS_LIB=$(patsubst %.o,%.lo,$(QEMU_OBJS))
+ 
+ QEMU_CFLAGS+=-I../

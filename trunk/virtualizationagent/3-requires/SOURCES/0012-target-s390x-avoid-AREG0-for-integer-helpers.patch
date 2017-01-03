@@ -1,0 +1,199 @@
+From b81c73d5f5fcf2ed6446ecf887351fa60129359b Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Sun, 2 Sep 2012 07:33:37 +0000
+Subject: [PATCH] target-s390x: avoid AREG0 for integer helpers
+
+Make integer helpers take a parameter for CPUState instead
+of relying on global env.
+
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Alexander Graf <agraf@suse.de>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-s390x/Makefile.objs |  1 -
+ target-s390x/helper.h      | 10 +++++-----
+ target-s390x/int_helper.c  | 12 ++++++------
+ target-s390x/translate.c   | 16 ++++++++--------
+ 4 files changed, 19 insertions(+), 20 deletions(-)
+
+diff --git a/target-s390x/Makefile.objs b/target-s390x/Makefile.objs
+index 7d965e9..7b2c5c1 100644
+--- a/target-s390x/Makefile.objs
++++ b/target-s390x/Makefile.objs
+@@ -3,7 +3,6 @@ obj-y += int_helper.o fpu_helper.o cc_helper.o mem_helper.o misc_helper.o
+ obj-$(CONFIG_SOFTMMU) += machine.o
+ obj-$(CONFIG_KVM) += kvm.o
+ 
+-$(obj)/int_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+ $(obj)/cc_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+ $(obj)/mem_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+ $(obj)/misc_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/target-s390x/helper.h b/target-s390x/helper.h
+index af98773..c03cd59 100644
+--- a/target-s390x/helper.h
++++ b/target-s390x/helper.h
+@@ -12,8 +12,8 @@ DEF_HELPER_FLAGS_1(set_cc_comp_s64, TCG_CALL_PURE|TCG_CALL_CONST, i32, s64)
+ DEF_HELPER_FLAGS_2(set_cc_icm, TCG_CALL_PURE|TCG_CALL_CONST, i32, i32, i32)
+ DEF_HELPER_3(clm, i32, i32, i32, i64)
+ DEF_HELPER_3(stcm, void, i32, i32, i64)
+-DEF_HELPER_2(mlg, void, i32, i64)
+-DEF_HELPER_2(dlg, void, i32, i64)
++DEF_HELPER_3(mlg, void, env, i32, i64)
++DEF_HELPER_3(dlg, void, env, i32, i64)
+ DEF_HELPER_FLAGS_3(set_cc_add64, TCG_CALL_PURE|TCG_CALL_CONST, i32, s64, s64, s64)
+ DEF_HELPER_FLAGS_3(set_cc_addu64, TCG_CALL_PURE|TCG_CALL_CONST, i32, i64, i64, i64)
+ DEF_HELPER_FLAGS_3(set_cc_add32, TCG_CALL_PURE|TCG_CALL_CONST, i32, s32, s32, s32)
+@@ -43,8 +43,8 @@ DEF_HELPER_3(stam, void, i32, i64, i32)
+ DEF_HELPER_3(lam, void, i32, i64, i32)
+ DEF_HELPER_3(mvcle, i32, i32, i64, i32)
+ DEF_HELPER_3(clcle, i32, i32, i64, i32)
+-DEF_HELPER_3(slb, i32, i32, i32, i32)
+-DEF_HELPER_4(slbg, i32, i32, i32, i64, i64)
++DEF_HELPER_4(slb, i32, env, i32, i32, i32)
++DEF_HELPER_5(slbg, i32, env, i32, i32, i64, i64)
+ DEF_HELPER_3(cefbr, void, env, i32, s32)
+ DEF_HELPER_3(cdfbr, void, env, i32, s32)
+ DEF_HELPER_3(cxfbr, void, env, i32, s32)
+@@ -107,7 +107,7 @@ DEF_HELPER_3(lxdb, void, env, i32, i64)
+ DEF_HELPER_FLAGS_3(tceb, TCG_CALL_PURE, i32, env, i32, i64)
+ DEF_HELPER_FLAGS_3(tcdb, TCG_CALL_PURE, i32, env, i32, i64)
+ DEF_HELPER_FLAGS_3(tcxb, TCG_CALL_PURE, i32, env, i32, i64)
+-DEF_HELPER_2(flogr, i32, i32, i64)
++DEF_HELPER_3(flogr, i32, env, i32, i64)
+ DEF_HELPER_3(sqdbr, void, env, i32, i32)
+ DEF_HELPER_FLAGS_1(cvd, TCG_CALL_PURE|TCG_CALL_CONST, i64, s32)
+ DEF_HELPER_3(unpk, void, i32, i64, i64)
+diff --git a/target-s390x/int_helper.c b/target-s390x/int_helper.c
+index e2eeb07..f202a7e 100644
+--- a/target-s390x/int_helper.c
++++ b/target-s390x/int_helper.c
+@@ -19,7 +19,6 @@
+  */
+ 
+ #include "cpu.h"
+-#include "dyngen-exec.h"
+ #include "host-utils.h"
+ #include "helper.h"
+ 
+@@ -31,7 +30,7 @@
+ #endif
+ 
+ /* 64/64 -> 128 unsigned multiplication */
+-void HELPER(mlg)(uint32_t r1, uint64_t v2)
++void HELPER(mlg)(CPUS390XState *env, uint32_t r1, uint64_t v2)
+ {
+ #if HOST_LONG_BITS == 64 && defined(__GNUC__)
+     /* assuming 64-bit hosts have __uint128_t */
+@@ -46,7 +45,7 @@ void HELPER(mlg)(uint32_t r1, uint64_t v2)
+ }
+ 
+ /* 128 -> 64/64 unsigned division */
+-void HELPER(dlg)(uint32_t r1, uint64_t v2)
++void HELPER(dlg)(CPUS390XState *env, uint32_t r1, uint64_t v2)
+ {
+     uint64_t divisor = v2;
+ 
+@@ -129,7 +128,7 @@ uint32_t HELPER(addc_u32)(uint32_t cc, uint32_t v1, uint32_t v2)
+ }
+ 
+ /* subtract unsigned v2 from v1 with borrow */
+-uint32_t HELPER(slb)(uint32_t cc, uint32_t r1, uint32_t v2)
++uint32_t HELPER(slb)(CPUS390XState *env, uint32_t cc, uint32_t r1, uint32_t v2)
+ {
+     uint32_t v1 = env->regs[r1];
+     uint32_t res = v1 + (~v2) + (cc >> 1);
+@@ -144,7 +143,8 @@ uint32_t HELPER(slb)(uint32_t cc, uint32_t r1, uint32_t v2)
+ }
+ 
+ /* subtract unsigned v2 from v1 with borrow */
+-uint32_t HELPER(slbg)(uint32_t cc, uint32_t r1, uint64_t v1, uint64_t v2)
++uint32_t HELPER(slbg)(CPUS390XState *env, uint32_t cc, uint32_t r1,
++                      uint64_t v1, uint64_t v2)
+ {
+     uint64_t res = v1 + (~v2) + (cc >> 1);
+ 
+@@ -158,7 +158,7 @@ uint32_t HELPER(slbg)(uint32_t cc, uint32_t r1, uint64_t v1, uint64_t v2)
+ }
+ 
+ /* find leftmost one */
+-uint32_t HELPER(flogr)(uint32_t r1, uint64_t v2)
++uint32_t HELPER(flogr)(CPUS390XState *env, uint32_t r1, uint64_t v2)
+ {
+     uint64_t res = 0;
+     uint64_t ov2 = v2;
+diff --git a/target-s390x/translate.c b/target-s390x/translate.c
+index b1f2071..2a61e92 100644
+--- a/target-s390x/translate.c
++++ b/target-s390x/translate.c
+@@ -1803,7 +1803,7 @@ static void disas_e3(DisasContext* s, int op, int r1, int x2, int b2, int d2)
+         tmp2 = tcg_temp_new_i64();
+         tmp32_1 = tcg_const_i32(r1);
+         tcg_gen_qemu_ld64(tmp2, addr, get_mem_index(s));
+-        gen_helper_mlg(tmp32_1, tmp2);
++        gen_helper_mlg(cpu_env, tmp32_1, tmp2);
+         tcg_temp_free_i64(tmp2);
+         tcg_temp_free_i32(tmp32_1);
+         break;
+@@ -1811,7 +1811,7 @@ static void disas_e3(DisasContext* s, int op, int r1, int x2, int b2, int d2)
+         tmp2 = tcg_temp_new_i64();
+         tmp32_1 = tcg_const_i32(r1);
+         tcg_gen_qemu_ld64(tmp2, addr, get_mem_index(s));
+-        gen_helper_dlg(tmp32_1, tmp2);
++        gen_helper_dlg(cpu_env, tmp32_1, tmp2);
+         tcg_temp_free_i64(tmp2);
+         tcg_temp_free_i32(tmp32_1);
+         break;
+@@ -1837,7 +1837,7 @@ static void disas_e3(DisasContext* s, int op, int r1, int x2, int b2, int d2)
+         tcg_gen_qemu_ld64(tmp2, addr, get_mem_index(s));
+         /* XXX possible optimization point */
+         gen_op_calc_cc(s);
+-        gen_helper_slbg(cc_op, cc_op, tmp32_1, regs[r1], tmp2);
++        gen_helper_slbg(cc_op, cpu_env, cc_op, tmp32_1, regs[r1], tmp2);
+         set_cc_static(s);
+         tcg_temp_free_i64(tmp2);
+         tcg_temp_free_i32(tmp32_1);
+@@ -1917,7 +1917,7 @@ static void disas_e3(DisasContext* s, int op, int r1, int x2, int b2, int d2)
+         tcg_gen_trunc_i64_i32(tmp32_2, tmp2);
+         /* XXX possible optimization point */
+         gen_op_calc_cc(s);
+-        gen_helper_slb(cc_op, cc_op, tmp32_1, tmp32_2);
++        gen_helper_slb(cc_op, cpu_env, cc_op, tmp32_1, tmp32_2);
+         set_cc_static(s);
+         tcg_temp_free_i64(tmp2);
+         tcg_temp_free_i32(tmp32_1);
+@@ -3535,7 +3535,7 @@ static void disas_b9(DisasContext *s, int op, int r1, int r2)
+     case 0x83: /* FLOGR R1,R2 [RRE] */
+         tmp = load_reg(r2);
+         tmp32_1 = tcg_const_i32(r1);
+-        gen_helper_flogr(cc_op, tmp32_1, tmp);
++        gen_helper_flogr(cc_op, cpu_env, tmp32_1, tmp);
+         set_cc_static(s);
+         tcg_temp_free_i64(tmp);
+         tcg_temp_free_i32(tmp32_1);
+@@ -3555,7 +3555,7 @@ static void disas_b9(DisasContext *s, int op, int r1, int r2)
+     case 0x87: /* DLGR      R1,R2     [RRE] */
+         tmp32_1 = tcg_const_i32(r1);
+         tmp = load_reg(r2);
+-        gen_helper_dlg(tmp32_1, tmp);
++        gen_helper_dlg(cpu_env, tmp32_1, tmp);
+         tcg_temp_free_i64(tmp);
+         tcg_temp_free_i32(tmp32_1);
+         break;
+@@ -3580,7 +3580,7 @@ static void disas_b9(DisasContext *s, int op, int r1, int r2)
+         tmp2 = load_reg(r2);
+         tmp32_1 = tcg_const_i32(r1);
+         gen_op_calc_cc(s);
+-        gen_helper_slbg(cc_op, cc_op, tmp32_1, tmp, tmp2);
++        gen_helper_slbg(cc_op, cpu_env, cc_op, tmp32_1, tmp, tmp2);
+         set_cc_static(s);
+         tcg_temp_free_i64(tmp);
+         tcg_temp_free_i64(tmp2);
+@@ -3647,7 +3647,7 @@ static void disas_b9(DisasContext *s, int op, int r1, int r2)
+         tmp32_1 = load_reg32(r2);
+         tmp32_2 = tcg_const_i32(r1);
+         gen_op_calc_cc(s);
+-        gen_helper_slb(cc_op, cc_op, tmp32_2, tmp32_1);
++        gen_helper_slb(cc_op, cpu_env, cc_op, tmp32_2, tmp32_1);
+         set_cc_static(s);
+         tcg_temp_free_i32(tmp32_1);
+         tcg_temp_free_i32(tmp32_2);

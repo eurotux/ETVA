@@ -121,6 +121,10 @@ class settingActions extends sfActions
                       }
                   }
               }
+
+              $cm_networks->loadNtpServers();
+
+              $data['ntp_servers'] = (array)$cm_networks->getNtpServers();
        
               $msg =  array('success'=>true,'data'=>$data);
 
@@ -151,6 +155,9 @@ class settingActions extends sfActions
         
         $networks = $request->getParameter('networks');
         $network_decoded = json_decode($networks,true);
+
+        $ntp_servers = $request->getParameter('ntp_servers');
+        $ntp_decoded = json_decode($ntp_servers,true);
 
         if($networks)
         {
@@ -411,6 +418,16 @@ class settingActions extends sfActions
                 
 
             }// end if changed networks
+        }
+        if( $ntp_servers ){
+            $updated_ntp = SystemNetworkUtil::updateNtpServers($ntp_decoded);
+
+            # send update to all nodes of all clusters
+            $etva_clusters = EtvaClusterQuery::create()
+                                ->find();
+            foreach($etva_clusters as $cluster){
+                $bulk_responses = $cluster->soapSend('update_ntp_config',array());
+            }
         }
 
         foreach($settings_decoded as $data){

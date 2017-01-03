@@ -91,7 +91,11 @@ class viewActions extends sfActions
     $this->min_vlanname = $vlanname_val->getOption('min_length');
     $this->max_vlanname = $vlanname_val->getOption('max_length');
 
-
+    $this->full_first_time_wizard = true;
+    if( $etva_setting = EtvaSettingPeer::retrieveByPk('initialized-first-time-wizard') ){
+        $this->full_first_time_wizard = !$etva_setting->getValue();
+    }
+    EtvaSettingPeer::updateSetting('initialized-first-time-wizard',true);
   }
 
     /**

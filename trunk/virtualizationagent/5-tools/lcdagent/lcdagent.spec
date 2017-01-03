@@ -1,5 +1,5 @@
 Name:           lcdagent
-Version:        2.1.0
+Version: 2.2
 Release: 4103
 Summary:        LCD Agent
 License:        GPL

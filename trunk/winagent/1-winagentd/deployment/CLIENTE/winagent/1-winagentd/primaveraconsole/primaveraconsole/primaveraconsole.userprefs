@@ -1,0 +1,38 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Main.cs">
+    <Files>
+      <File FileName="Main.cs" Line="645" Column="3" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="primaveraconsole" expanded="True">
+            <Node name="References" expanded="True" />
+            <Node name="Main.cs" selected="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.ItemProperties.primaveraconsole>
+    <MonoDevelop.Ide.CustomExecutionModes>
+      <Data Name="Restore" Id="9f020d5e-20fd-4eac-a08e-ebc2f47450ea" ModeId="Default">
+        <CommandData>
+          <Item Key="MonoDevelop.Ide.Execution.CustomArgsCustomizer">
+            <Value Arguments="restore sa sa123 .\PRIMAVERA PRIDEMO &quot;C:\Program Files\Microsoft SQL Server\MSSQL10.PRIMAVERA\MSSQL\Backup\Full_Backup_PRIDEMO_20110510084713&quot;" ctype="CustomArgsExecutionModeData">
+              <EnvironmentVariables />
+            </Value>
+          </Item>
+          <Item Key="MonoDevelop.Ide.Execution.MonoExecutionCustomizer">
+            <Value ctype="MonoExecutionParameters" />
+          </Item>
+        </CommandData>
+      </Data>
+    </MonoDevelop.Ide.CustomExecutionModes>
+  </MonoDevelop.Ide.ItemProperties.primaveraconsole>
+</Properties>

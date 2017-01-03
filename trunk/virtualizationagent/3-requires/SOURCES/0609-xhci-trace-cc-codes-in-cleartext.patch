@@ -1,0 +1,97 @@
+From 0b7b97bbf155c3411c59a4c7af1f6130c01fb894 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Mon, 27 Aug 2012 16:09:20 +0200
+Subject: [PATCH] xhci: trace cc codes in cleartext
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/usb/hcd-xhci.c | 48 +++++++++++++++++++++++++++++++++++++++++++++++-
+ trace-events      |  2 +-
+ 2 files changed, 48 insertions(+), 2 deletions(-)
+
+diff --git a/hw/usb/hcd-xhci.c b/hw/usb/hcd-xhci.c
+index f3f1d61..ad2226f 100644
+--- a/hw/usb/hcd-xhci.c
++++ b/hw/usb/hcd-xhci.c
+@@ -465,6 +465,45 @@ static const char *TRBType_names[] = {
+     [CR_VENDOR_NEC_CHALLENGE_RESPONSE] = "CR_VENDOR_NEC_CHALLENGE_RESPONSE",
+ };
+ 
++static const char *TRBCCode_names[] = {
++    [CC_INVALID]                       = "CC_INVALID",
++    [CC_SUCCESS]                       = "CC_SUCCESS",
++    [CC_DATA_BUFFER_ERROR]             = "CC_DATA_BUFFER_ERROR",
++    [CC_BABBLE_DETECTED]               = "CC_BABBLE_DETECTED",
++    [CC_USB_TRANSACTION_ERROR]         = "CC_USB_TRANSACTION_ERROR",
++    [CC_TRB_ERROR]                     = "CC_TRB_ERROR",
++    [CC_STALL_ERROR]                   = "CC_STALL_ERROR",
++    [CC_RESOURCE_ERROR]                = "CC_RESOURCE_ERROR",
++    [CC_BANDWIDTH_ERROR]               = "CC_BANDWIDTH_ERROR",
++    [CC_NO_SLOTS_ERROR]                = "CC_NO_SLOTS_ERROR",
++    [CC_INVALID_STREAM_TYPE_ERROR]     = "CC_INVALID_STREAM_TYPE_ERROR",
++    [CC_SLOT_NOT_ENABLED_ERROR]        = "CC_SLOT_NOT_ENABLED_ERROR",
++    [CC_EP_NOT_ENABLED_ERROR]          = "CC_EP_NOT_ENABLED_ERROR",
++    [CC_SHORT_PACKET]                  = "CC_SHORT_PACKET",
++    [CC_RING_UNDERRUN]                 = "CC_RING_UNDERRUN",
++    [CC_RING_OVERRUN]                  = "CC_RING_OVERRUN",
++    [CC_VF_ER_FULL]                    = "CC_VF_ER_FULL",
++    [CC_PARAMETER_ERROR]               = "CC_PARAMETER_ERROR",
++    [CC_BANDWIDTH_OVERRUN]             = "CC_BANDWIDTH_OVERRUN",
++    [CC_CONTEXT_STATE_ERROR]           = "CC_CONTEXT_STATE_ERROR",
++    [CC_NO_PING_RESPONSE_ERROR]        = "CC_NO_PING_RESPONSE_ERROR",
++    [CC_EVENT_RING_FULL_ERROR]         = "CC_EVENT_RING_FULL_ERROR",
++    [CC_INCOMPATIBLE_DEVICE_ERROR]     = "CC_INCOMPATIBLE_DEVICE_ERROR",
++    [CC_MISSED_SERVICE_ERROR]          = "CC_MISSED_SERVICE_ERROR",
++    [CC_COMMAND_RING_STOPPED]          = "CC_COMMAND_RING_STOPPED",
++    [CC_COMMAND_ABORTED]               = "CC_COMMAND_ABORTED",
++    [CC_STOPPED]                       = "CC_STOPPED",
++    [CC_STOPPED_LENGTH_INVALID]        = "CC_STOPPED_LENGTH_INVALID",
++    [CC_MAX_EXIT_LATENCY_TOO_LARGE_ERROR]
++    = "CC_MAX_EXIT_LATENCY_TOO_LARGE_ERROR",
++    [CC_ISOCH_BUFFER_OVERRUN]          = "CC_ISOCH_BUFFER_OVERRUN",
++    [CC_EVENT_LOST_ERROR]              = "CC_EVENT_LOST_ERROR",
++    [CC_UNDEFINED_ERROR]               = "CC_UNDEFINED_ERROR",
++    [CC_INVALID_STREAM_ID_ERROR]       = "CC_INVALID_STREAM_ID_ERROR",
++    [CC_SECONDARY_BANDWIDTH_ERROR]     = "CC_SECONDARY_BANDWIDTH_ERROR",
++    [CC_SPLIT_TRANSACTION_ERROR]       = "CC_SPLIT_TRANSACTION_ERROR",
++};
++
+ static const char *lookup_name(uint32_t index, const char **list, uint32_t llen)
+ {
+     if (index >= llen || list[index] == NULL) {
+@@ -479,6 +518,12 @@ static const char *trb_name(XHCITRB *trb)
+                        ARRAY_SIZE(TRBType_names));
+ }
+ 
++static const char *event_name(XHCIEvent *event)
++{
++    return lookup_name(event->ccode, TRBCCode_names,
++                       ARRAY_SIZE(TRBCCode_names));
++}
++
+ static uint64_t xhci_mfindex_get(XHCIState *xhci)
+ {
+     int64_t now = qemu_get_clock_ns(vm_clock);
+@@ -574,7 +619,8 @@ static void xhci_write_event(XHCIState *xhci, XHCIEvent *event)
+     ev_trb.control = cpu_to_le32(ev_trb.control);
+ 
+     trace_usb_xhci_queue_event(xhci->er_ep_idx, trb_name(&ev_trb),
+-                               ev_trb.parameter, ev_trb.status, ev_trb.control);
++                               event_name(event), ev_trb.parameter,
++                               ev_trb.status, ev_trb.control);
+ 
+     addr = xhci->er_start + TRB_SIZE*xhci->er_ep_idx;
+     pci_dma_write(&xhci->pci_dev, addr, &ev_trb, TRB_SIZE);
+diff --git a/trace-events b/trace-events
+index 992aef1..9fa7673 100644
+--- a/trace-events
++++ b/trace-events
+@@ -316,7 +316,7 @@ usb_xhci_runtime_write(uint32_t off, uint32_t val) "off 0x%04x, val 0x%08x"
+ usb_xhci_doorbell_write(uint32_t off, uint32_t val) "off 0x%04x, val 0x%08x"
+ usb_xhci_irq_intx(uint32_t level) "level %d"
+ usb_xhci_irq_msi(uint32_t nr) "nr %d"
+-usb_xhci_queue_event(uint32_t idx, const char *name, uint64_t param, uint32_t status, uint32_t control) "idx %d, %s, p %016" PRIx64 ", s %08x, c 0x%08x"
++usb_xhci_queue_event(uint32_t idx, const char *trb, const char *evt, uint64_t param, uint32_t status, uint32_t control) "idx %d, %s, %s, p %016" PRIx64 ", s %08x, c 0x%08x"
+ usb_xhci_fetch_trb(uint64_t addr, const char *name, uint64_t param, uint32_t status, uint32_t control) "addr %016" PRIx64 ", %s, p %016" PRIx64 ", s %08x, c 0x%08x"
+ usb_xhci_slot_enable(uint32_t slotid) "slotid %d"
+ usb_xhci_slot_disable(uint32_t slotid) "slotid %d"

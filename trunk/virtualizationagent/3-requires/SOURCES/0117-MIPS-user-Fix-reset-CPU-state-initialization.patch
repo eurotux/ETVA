@@ -1,0 +1,193 @@
+From d18b56657f8a22c1c174dfb6a603cd28b605fa6f Mon Sep 17 00:00:00 2001
+From: "Maciej W. Rozycki" <macro@codesourcery.com>
+Date: Fri, 8 Jun 2012 02:04:40 +0100
+Subject: [PATCH] MIPS/user: Fix reset CPU state initialization
+
+ This change updates the CPU reset sequence to use a common piece of code
+that figures out CPU state flags, fixing the problem with MIPS_HFLAG_COP1X
+not being set where applicable that causes floating-point MADD family
+instructions (and other instructions from the MIPS IV FP subset) to trap.
+
+ As compute_hflags is now shared between op_helper.c and translate.c, the
+function is now moved to a common header.  There are no changes to this
+function.
+
+ The problem was seen with the 24Kf MIPS32r2 processor in user emulation.
+The new approach prevents system and user emulation from diverging -- all
+the hflags state is initialized in one place now.
+
+Signed-off-by: Maciej W. Rozycki <macro@codesourcery.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit 03e6e5017757645f00b2f3b4f3a257973985e455)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-mips/cpu.h       | 49 +++++++++++++++++++++++++++++++++++++++++++++++++
+ target-mips/op_helper.c | 49 -------------------------------------------------
+ target-mips/translate.c | 16 +++-------------
+ 3 files changed, 52 insertions(+), 62 deletions(-)
+
+diff --git a/target-mips/cpu.h b/target-mips/cpu.h
+index be4f805..b7a5112 100644
+--- a/target-mips/cpu.h
++++ b/target-mips/cpu.h
+@@ -742,4 +742,53 @@ static inline void cpu_pc_from_tb(CPUMIPSState *env, TranslationBlock *tb)
+     env->hflags |= tb->flags & MIPS_HFLAG_BMASK;
+ }
+ 
++static inline void compute_hflags(CPUMIPSState *env)
++{
++    env->hflags &= ~(MIPS_HFLAG_COP1X | MIPS_HFLAG_64 | MIPS_HFLAG_CP0 |
++                     MIPS_HFLAG_F64 | MIPS_HFLAG_FPU | MIPS_HFLAG_KSU |
++                     MIPS_HFLAG_UX);
++    if (!(env->CP0_Status & (1 << CP0St_EXL)) &&
++        !(env->CP0_Status & (1 << CP0St_ERL)) &&
++        !(env->hflags & MIPS_HFLAG_DM)) {
++        env->hflags |= (env->CP0_Status >> CP0St_KSU) & MIPS_HFLAG_KSU;
++    }
++#if defined(TARGET_MIPS64)
++    if (((env->hflags & MIPS_HFLAG_KSU) != MIPS_HFLAG_UM) ||
++        (env->CP0_Status & (1 << CP0St_PX)) ||
++        (env->CP0_Status & (1 << CP0St_UX))) {
++        env->hflags |= MIPS_HFLAG_64;
++    }
++    if (env->CP0_Status & (1 << CP0St_UX)) {
++        env->hflags |= MIPS_HFLAG_UX;
++    }
++#endif
++    if ((env->CP0_Status & (1 << CP0St_CU0)) ||
++        !(env->hflags & MIPS_HFLAG_KSU)) {
++        env->hflags |= MIPS_HFLAG_CP0;
++    }
++    if (env->CP0_Status & (1 << CP0St_CU1)) {
++        env->hflags |= MIPS_HFLAG_FPU;
++    }
++    if (env->CP0_Status & (1 << CP0St_FR)) {
++        env->hflags |= MIPS_HFLAG_F64;
++    }
++    if (env->insn_flags & ISA_MIPS32R2) {
++        if (env->active_fpu.fcr0 & (1 << FCR0_F64)) {
++            env->hflags |= MIPS_HFLAG_COP1X;
++        }
++    } else if (env->insn_flags & ISA_MIPS32) {
++        if (env->hflags & MIPS_HFLAG_64) {
++            env->hflags |= MIPS_HFLAG_COP1X;
++        }
++    } else if (env->insn_flags & ISA_MIPS4) {
++        /* All supported MIPS IV CPUs use the XX (CU3) to enable
++           and disable the MIPS IV extensions to the MIPS III ISA.
++           Some other MIPS IV CPUs ignore the bit, so the check here
++           would be too restrictive for them.  */
++        if (env->CP0_Status & (1 << CP0St_CU3)) {
++            env->hflags |= MIPS_HFLAG_COP1X;
++        }
++    }
++}
++
+ #endif /* !defined (__MIPS_CPU_H__) */
+diff --git a/target-mips/op_helper.c b/target-mips/op_helper.c
+index d2a8a55..ce5ddaf 100644
+--- a/target-mips/op_helper.c
++++ b/target-mips/op_helper.c
+@@ -30,55 +30,6 @@
+ static inline void cpu_mips_tlb_flush (CPUMIPSState *env, int flush_global);
+ #endif
+ 
+-static inline void compute_hflags(CPUMIPSState *env)
+-{
+-    env->hflags &= ~(MIPS_HFLAG_COP1X | MIPS_HFLAG_64 | MIPS_HFLAG_CP0 |
+-                     MIPS_HFLAG_F64 | MIPS_HFLAG_FPU | MIPS_HFLAG_KSU |
+-                     MIPS_HFLAG_UX);
+-    if (!(env->CP0_Status & (1 << CP0St_EXL)) &&
+-        !(env->CP0_Status & (1 << CP0St_ERL)) &&
+-        !(env->hflags & MIPS_HFLAG_DM)) {
+-        env->hflags |= (env->CP0_Status >> CP0St_KSU) & MIPS_HFLAG_KSU;
+-    }
+-#if defined(TARGET_MIPS64)
+-    if (((env->hflags & MIPS_HFLAG_KSU) != MIPS_HFLAG_UM) ||
+-        (env->CP0_Status & (1 << CP0St_PX)) ||
+-        (env->CP0_Status & (1 << CP0St_UX))) {
+-        env->hflags |= MIPS_HFLAG_64;
+-    }
+-    if (env->CP0_Status & (1 << CP0St_UX)) {
+-        env->hflags |= MIPS_HFLAG_UX;
+-    }
+-#endif
+-    if ((env->CP0_Status & (1 << CP0St_CU0)) ||
+-        !(env->hflags & MIPS_HFLAG_KSU)) {
+-        env->hflags |= MIPS_HFLAG_CP0;
+-    }
+-    if (env->CP0_Status & (1 << CP0St_CU1)) {
+-        env->hflags |= MIPS_HFLAG_FPU;
+-    }
+-    if (env->CP0_Status & (1 << CP0St_FR)) {
+-        env->hflags |= MIPS_HFLAG_F64;
+-    }
+-    if (env->insn_flags & ISA_MIPS32R2) {
+-        if (env->active_fpu.fcr0 & (1 << FCR0_F64)) {
+-            env->hflags |= MIPS_HFLAG_COP1X;
+-        }
+-    } else if (env->insn_flags & ISA_MIPS32) {
+-        if (env->hflags & MIPS_HFLAG_64) {
+-            env->hflags |= MIPS_HFLAG_COP1X;
+-        }
+-    } else if (env->insn_flags & ISA_MIPS4) {
+-        /* All supported MIPS IV CPUs use the XX (CU3) to enable
+-           and disable the MIPS IV extensions to the MIPS III ISA.
+-           Some other MIPS IV CPUs ignore the bit, so the check here
+-           would be too restrictive for them.  */
+-        if (env->CP0_Status & (1 << CP0St_CU3)) {
+-            env->hflags |= MIPS_HFLAG_COP1X;
+-        }
+-    }
+-}
+-
+ /*****************************************************************************/
+ /* Exceptions processing helpers */
+ 
+diff --git a/target-mips/translate.c b/target-mips/translate.c
+index aba7935..4e04e97 100644
+--- a/target-mips/translate.c
++++ b/target-mips/translate.c
+@@ -12816,18 +12816,13 @@ void cpu_state_reset(CPUMIPSState *env)
+     env->insn_flags = env->cpu_model->insn_flags;
+ 
+ #if defined(CONFIG_USER_ONLY)
+-    env->hflags = MIPS_HFLAG_UM;
++    env->CP0_Status = (MIPS_HFLAG_UM << CP0St_KSU);
+     /* Enable access to the CPUNum, SYNCI_Step, CC, and CCRes RDHWR
+        hardware registers.  */
+     env->CP0_HWREna |= 0x0000000F;
+     if (env->CP0_Config1 & (1 << CP0C1_FP)) {
+-        env->hflags |= MIPS_HFLAG_FPU;
++        env->CP0_Status |= (1 << CP0St_CU1);
+     }
+-#ifdef TARGET_MIPS64
+-    if (env->active_fpu.fcr0 & (1 << FCR0_F64)) {
+-        env->hflags |= MIPS_HFLAG_F64;
+-    }
+-#endif
+ #else
+     if (env->hflags & MIPS_HFLAG_BMASK) {
+         /* If the exception was raised from a delay slot,
+@@ -12857,7 +12852,6 @@ void cpu_state_reset(CPUMIPSState *env)
+     }
+     /* Count register increments in debug mode, EJTAG version 1 */
+     env->CP0_Debug = (1 << CP0DB_CNT) | (0x1 << CP0DB_VER);
+-    env->hflags = MIPS_HFLAG_CP0;
+ 
+     if (env->CP0_Config3 & (1 << CP0C3_MT)) {
+         int i;
+@@ -12885,11 +12879,7 @@ void cpu_state_reset(CPUMIPSState *env)
+         }
+     }
+ #endif
+-#if defined(TARGET_MIPS64)
+-    if (env->cpu_model->insn_flags & ISA_MIPS3) {
+-        env->hflags |= MIPS_HFLAG_64;
+-    }
+-#endif
++    compute_hflags(env);
+     env->exception_index = EXCP_NONE;
+ }
+ 

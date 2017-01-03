@@ -1,0 +1,130 @@
+From 304944bc4ff1b2d30d605d7af9d44286e0b17116 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Fri, 7 Sep 2012 17:13:28 +0200
+Subject: [PATCH] target-sparc: fix fcmp{s,d,q} instructions wrt exception
+
+fcmp{s,d,q} instructions are supposed to ignore quiet NaN (contrary to
+the fcmpe{s,d,q} instructions), but the current code is wrongly setting
+the NV exception in that case. Moreover the current code is duplicated:
+first the arguments are checked for NaN to generate an exception, and
+later in case the comparison is unordered (which can only happens if one
+of the argument is a NaN), the same check is done to generate an
+exception.
+
+Fix that by calling clear_float_exceptions() followed by
+check_ieee_exceptions() as for the other floating point instructions.
+Use the _compare_quiet functions for fcmp{s,d,q} and the _compare ones
+for fcmpe{s,d,q}. Simplify the flag setting by not clearing a flag that
+is set the line just below.
+
+This fix allows the math glibc testsuite to pass.
+
+Cc: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-sparc/fop_helper.c | 67 +++++++++++++++++++----------------------------
+ 1 file changed, 27 insertions(+), 40 deletions(-)
+
+diff --git a/target-sparc/fop_helper.c b/target-sparc/fop_helper.c
+index 9c64ef8..f4b62a5 100644
+--- a/target-sparc/fop_helper.c
++++ b/target-sparc/fop_helper.c
+@@ -334,34 +334,28 @@ void helper_fsqrtq(CPUSPARCState *env)
+ }
+ 
+ #define GEN_FCMP(name, size, reg1, reg2, FS, E)                         \
+-    void glue(helper_, name) (CPUSPARCState *env)                            \
++    void glue(helper_, name) (CPUSPARCState *env)                       \
+     {                                                                   \
+-        env->fsr &= FSR_FTT_NMASK;                                      \
+-        if (E && (glue(size, _is_any_nan)(reg1) ||                      \
+-                  glue(size, _is_any_nan)(reg2)) &&                     \
+-            (env->fsr & FSR_NVM)) {                                     \
+-            env->fsr |= FSR_NVC;                                        \
+-            env->fsr |= FSR_FTT_IEEE_EXCP;                              \
+-            helper_raise_exception(env, TT_FP_EXCP);                    \
++        int ret;                                                        \
++        clear_float_exceptions(env);                                    \
++        if (E) {                                                        \
++            ret = glue(size, _compare)(reg1, reg2, &env->fp_status);    \
++        } else {                                                        \
++            ret = glue(size, _compare_quiet)(reg1, reg2,                \
++                                             &env->fp_status);          \
+         }                                                               \
+-        switch (glue(size, _compare) (reg1, reg2, &env->fp_status)) {   \
++        check_ieee_exceptions(env);                                     \
++        switch (ret) {                                                  \
+         case float_relation_unordered:                                  \
+-            if ((env->fsr & FSR_NVM)) {                                 \
+-                env->fsr |= FSR_NVC;                                    \
+-                env->fsr |= FSR_FTT_IEEE_EXCP;                          \
+-                helper_raise_exception(env, TT_FP_EXCP);                \
+-            } else {                                                    \
+-                env->fsr &= ~((FSR_FCC1 | FSR_FCC0) << FS);             \
+-                env->fsr |= (FSR_FCC1 | FSR_FCC0) << FS;                \
+-                env->fsr |= FSR_NVA;                                    \
+-            }                                                           \
++            env->fsr |= (FSR_FCC1 | FSR_FCC0) << FS;                    \
++            env->fsr |= FSR_NVA;                                        \
+             break;                                                      \
+         case float_relation_less:                                       \
+-            env->fsr &= ~((FSR_FCC1 | FSR_FCC0) << FS);                 \
++            env->fsr &= ~(FSR_FCC1) << FS;                              \
+             env->fsr |= FSR_FCC0 << FS;                                 \
+             break;                                                      \
+         case float_relation_greater:                                    \
+-            env->fsr &= ~((FSR_FCC1 | FSR_FCC0) << FS);                 \
++            env->fsr &= ~(FSR_FCC0) << FS;                              \
+             env->fsr |= FSR_FCC1 << FS;                                 \
+             break;                                                      \
+         default:                                                        \
+@@ -370,34 +364,27 @@ void helper_fsqrtq(CPUSPARCState *env)
+         }                                                               \
+     }
+ #define GEN_FCMP_T(name, size, FS, E)                                   \
+-    void glue(helper_, name)(CPUSPARCState *env, size src1, size src2)       \
++    void glue(helper_, name)(CPUSPARCState *env, size src1, size src2)  \
+     {                                                                   \
+-        env->fsr &= FSR_FTT_NMASK;                                      \
+-        if (E && (glue(size, _is_any_nan)(src1) ||                      \
+-                  glue(size, _is_any_nan)(src2)) &&                     \
+-            (env->fsr & FSR_NVM)) {                                     \
+-            env->fsr |= FSR_NVC;                                        \
+-            env->fsr |= FSR_FTT_IEEE_EXCP;                              \
+-            helper_raise_exception(env, TT_FP_EXCP);                    \
++        int ret;                                                        \
++        clear_float_exceptions(env);                                    \
++        if (E) {                                                        \
++            ret = glue(size, _compare)(src1, src2, &env->fp_status);    \
++        } else {                                                        \
++            ret = glue(size, _compare_quiet)(src1, src2,                \
++                                             &env->fp_status);          \
+         }                                                               \
+-        switch (glue(size, _compare) (src1, src2, &env->fp_status)) {   \
++        check_ieee_exceptions(env);                                     \
++        switch (ret) {                                                  \
+         case float_relation_unordered:                                  \
+-            if ((env->fsr & FSR_NVM)) {                                 \
+-                env->fsr |= FSR_NVC;                                    \
+-                env->fsr |= FSR_FTT_IEEE_EXCP;                          \
+-                helper_raise_exception(env, TT_FP_EXCP);                \
+-            } else {                                                    \
+-                env->fsr &= ~((FSR_FCC1 | FSR_FCC0) << FS);             \
+-                env->fsr |= (FSR_FCC1 | FSR_FCC0) << FS;                \
+-                env->fsr |= FSR_NVA;                                    \
+-            }                                                           \
++            env->fsr |= (FSR_FCC1 | FSR_FCC0) << FS;                    \
+             break;                                                      \
+         case float_relation_less:                                       \
+-            env->fsr &= ~((FSR_FCC1 | FSR_FCC0) << FS);                 \
++            env->fsr &= ~(FSR_FCC1 << FS);                              \
+             env->fsr |= FSR_FCC0 << FS;                                 \
+             break;                                                      \
+         case float_relation_greater:                                    \
+-            env->fsr &= ~((FSR_FCC1 | FSR_FCC0) << FS);                 \
++            env->fsr &= ~(FSR_FCC0 << FS);                              \
+             env->fsr |= FSR_FCC1 << FS;                                 \
+             break;                                                      \
+         default:                                                        \

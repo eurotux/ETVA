@@ -1,0 +1,34 @@
+From 36cdee8966226efacb4455db25ab61ca3bb71826 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Mon, 3 Sep 2012 12:17:48 +0200
+Subject: [PATCH] ehci: Correct a comment in fetchqtd packet processing
+
+Since my previous comment said "Should never happen", I tried changing the
+next line to an assert(0), which did not go well, which as the new comments
+explains is logical if you think about it for a moment.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit cf1f81691d1998fa8fe5bfcb8b498fb3723cf3c3)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 2534394..2f3e9c0 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -2045,7 +2045,10 @@ static int ehci_state_fetchqtd(EHCIQueue *q)
+             ehci_set_state(q->ehci, q->async, EST_HORIZONTALQH);
+             break;
+         case EHCI_ASYNC_FINISHED:
+-            /* Should never happen, as this case is caught by fetchqh */
++            /*
++             * We get here when advqueue moves to a packet which is already
++             * finished, which can happen with packets queued up by fill_queue
++             */
+             ehci_set_state(q->ehci, q->async, EST_EXECUTING);
+             break;
+         }

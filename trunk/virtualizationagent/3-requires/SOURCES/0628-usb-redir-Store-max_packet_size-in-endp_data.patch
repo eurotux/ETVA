@@ -1,0 +1,35 @@
+From d89352366dc0a0445e0f1699b8b1d3747719df86 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Thu, 6 Sep 2012 20:52:36 +0200
+Subject: [PATCH] usb-redir: Store max_packet_size in endp_data
+
+So that we've a place to migrate it to / from to allow restoring it after
+migration.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ hw/usb/redirect.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index cdd705f..6eb3c6d 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -57,6 +57,7 @@ struct endp_data {
+     uint8_t type;
+     uint8_t interval;
+     uint8_t interface; /* bInterfaceNumber this ep belongs to */
++    uint16_t max_packet_size; /* In bytes, not wMaxPacketSize format !! */
+     uint8_t iso_started;
+     uint8_t iso_error; /* For reporting iso errors to the HC */
+     uint8_t interrupt_started;
+@@ -1300,7 +1301,8 @@ static void usbredir_ep_info(void *priv,
+         usb_ep->ifnum = dev->endpoint[i].interface;
+         if (usbredirparser_peer_has_cap(dev->parser,
+                                      usb_redir_cap_ep_info_max_packet_size)) {
+-            usb_ep->max_packet_size = ep_info->max_packet_size[i];
++            dev->endpoint[i].max_packet_size =
++                usb_ep->max_packet_size = ep_info->max_packet_size[i];
+         }
+         if (ep_info->type[i] == usb_redir_type_bulk) {
+             usb_ep->pipeline = true;

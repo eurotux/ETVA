@@ -2,7 +2,7 @@
 %define nagios_plugins /usr/lib64/nagios/plugins  
 
 Name: etva-centralmanagement
-Version: 2.1.1
+Version: 2.2
 Release: 2536
 Summary: ETVA Central Management
 License: GPL
@@ -36,6 +36,9 @@ Requires: gpg
 Requires: perl-Email-Sender
 Requires: perl-MIME-tools
 Requires: perl-Net-SMTP-SSL
+%if 0%{?rhel} == 6
+Requires: perl-Class-Inspector
+%endif
 Requires: sos
 Requires(post): chkconfig perl
 BuildRequires: symfony
@@ -180,8 +183,14 @@ symfony cc;
 
 # add Queue CM service
 if [ ! -f "/var/lock/subsys/etva-queue-cm" ]; then
+    echo "Configure queue manager service"
     /sbin/chkconfig --add etva-queue-cm
     /sbin/chkconfig etva-queue-cm on
+    /sbin/service etva-queue-cm start
+else
+    echo "Restarting queue manager"
+    /sbin/service etva-queue-cm stop
+    sleep 2
     /sbin/service etva-queue-cm start
 fi
 

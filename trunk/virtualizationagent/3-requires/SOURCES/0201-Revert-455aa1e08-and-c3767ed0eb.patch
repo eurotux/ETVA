@@ -1,0 +1,48 @@
+From 8ed315bfd095856ad0c8a6d1d81d2f8b1ffe430b Mon Sep 17 00:00:00 2001
+From: Anthony Liguori <aliguori@us.ibm.com>
+Date: Wed, 12 Sep 2012 14:34:07 -0500
+Subject: [PATCH] Revert 455aa1e08 and c3767ed0eb
+
+    commit c3767ed0eb5d0bb25fe409ae5dec06e3411ff1b6
+    qemu-char: (Re-)connect for tcp_chr_write() unconnected writing
+
+Has no hope of working because tcp_chr_connect() does not actually connect.
+
+455aa1e08 just fixes the SEGV with server() but the attempt to connect a client
+socket is still completely broken.
+
+This patch reverts both.
+
+Reported-by: Richard W.M. Jones <rjones@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit 6db0fdce02d72546a4c47100a9b2cd0090cf464d)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qemu-char.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/qemu-char.c b/qemu-char.c
+index 767da93..10d1504 100644
+--- a/qemu-char.c
++++ b/qemu-char.c
+@@ -2141,18 +2141,13 @@ typedef struct {
+ 
+ static void tcp_chr_accept(void *opaque);
+ 
+-static void tcp_chr_connect(void *opaque);
+-
+ static int tcp_chr_write(CharDriverState *chr, const uint8_t *buf, int len)
+ {
+     TCPCharDriver *s = chr->opaque;
+     if (s->connected) {
+         return send_all(s->fd, buf, len);
+-    } else if (s->listen_fd == -1) {
+-        /* (Re-)connect for unconnected writing */
+-        tcp_chr_connect(chr);
+-        return 0;
+     } else {
++        /* XXX: indicate an error ? */
+         return len;
+     }
+ }

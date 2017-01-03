@@ -31,6 +31,7 @@ elif [ "$CENTOSVER" == "6" ]; then
 fi
 mock --configdir=$MOCKCONF $MOCKDEBUG -r etva-$CENTOSVER-x86_64 --copyin etva-ks$CENTOSVER.cfg /tmp/etva-ks.cfg
 mock --configdir=$MOCKCONF $MOCKDEBUG -r etva-$CENTOSVER-x86_64 --copyin isolinux /tmp/isolinux/
+mock --configdir=$MOCKCONF $MOCKDEBUG -r etva-$CENTOSVER-x86_64 --copyin install.img /tmp/install.img
 mock --configdir=$MOCKCONF $MOCKDEBUG -r etva-$CENTOSVER-x86_64 --copyin comps/comps$CENTOSVER.xml /tmp/comps.xml
 mock --configdir=$MOCKCONF $MOCKDEBUG -r etva-$CENTOSVER-x86_64 --copyin etc/revisor/revisor$CENTOSVER.conf /etc/revisor/revisor.conf
 mock --configdir=$MOCKCONF $MOCKDEBUG -r etva-$CENTOSVER-x86_64 --copyin etc/revisor/conf.d/revisor-el$CENTOSVER-x86_64-updates.conf /etc/revisor/conf.d/revisor-el$CENTOSVER-x86_64-updates.conf

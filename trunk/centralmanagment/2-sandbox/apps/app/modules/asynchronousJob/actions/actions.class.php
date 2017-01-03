@@ -24,38 +24,15 @@ class asynchronousJobActions extends sfActions
   {
     $requestTasks_query = EtvaAsynchronousJobQuery::create();
 
-    // use query for filter
-    if( $query_str = $request->getParameter('query') )
+    // list task that not end yet
+    $requestTasks_query->add(EtvaAsynchronousJobPeer::STATUS,array(EtvaAsynchronousJob::ABORTED,EtvaAsynchronousJob::INVALID,EtvaAsynchronousJob::FINISHED),Criteria::NOT_IN)  // not this cases
+                        ->addOr(EtvaAsynchronousJobPeer::STATUS,null, Criteria::ISNULL);
+
+    // filter by interval of query
+    if( $interval = $request->getParameter('interval') )
     {
-        $query = (array)json_decode($query_str);
-
-        foreach($query as $oEl)
-        {
-            $el = (array) $oEl;
-
-            $field = $el['field'];
-            $value = $el['value'];
-
-            //error_log("field=$field value=$value min=".$el['min']." max=".$el['max']);
-            $column = EtvaAsynchronousJobPeer::translateFieldName(sfInflector::camelize($field), BasePeer::TYPE_PHPNAME, BasePeer::TYPE_COLNAME);
-
-            if( isset($el['min']) && isset($el['max']) ){   // betwee min and max
-                $requestTasks_query->addUsingAlias($column, $el['min'], Criteria::GREATER_EQUAL);
-                $requestTasks_query->addUsingAlias($column, $el['max'], Criteria::LESS_EQUAL);
-            } else if( isset($el['min']) ){ // great or equal
-                $requestTasks_query->addUsingAlias($column, $el['min'], Criteria::GREATER_EQUAL);
-            } else if( isset($el['max']) ){ // less or equal
-                $requestTasks_query->addUsingAlias($column, $el['max'], Criteria::LESS_EQUAL);
-            } else if( isset($el['in']) ){  // in set
-                $in_arr = (array)$el['in'];
-                $op = $el['not'] ? Criteria::NOT_IN : Criteria::IN;
-                $requestTasks_query->addUsingAlias($column, $in_arr, $op);
-            } else {    // equal
-                $op = $el['not'] ? Criteria::NOT_EQUAL : Criteria::EQUAL;
-                $requestTasks_query->addUsingAlias($column, $el['value'], $op);
-            }
-        }
-
+        //$requestTasks_query->filterByUpdatedAt(array('min'=>$interval));
+        $requestTasks_query->addOr(EtvaAsynchronousJobPeer::UPDATED_AT,$interval,Criteria::GREATER_EQUAL);
     }
 
     //error_log("EtvaAsynchronousJob List SQL Query = ".$requestTasks_query->toString());

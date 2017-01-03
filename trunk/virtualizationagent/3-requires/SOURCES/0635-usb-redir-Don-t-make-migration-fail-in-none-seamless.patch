@@ -1,0 +1,39 @@
+From 30b7466e12a541a486dae5a022055fe63269bc79 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Thu, 27 Sep 2012 16:57:41 +0200
+Subject: [PATCH] usb-redir: Don't make migration fail in none seamless case
+
+Instead simple disconnect the device like host redirection does on
+migration.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ hw/usb/redirect.c | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index 5d16aff..022ba42 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -1637,12 +1637,17 @@ static int usbredir_get_parser(QEMUFile *f, void *priv, size_t unused)
+     }
+ 
+     /*
+-     * Our chardev should be open already at this point, otherwise
+-     * the usbredir channel will be broken (ie spice without seamless)
++     * If our chardev is not open already at this point the usbredir connection
++     * has been broken (non seamless migration, or restore from disk).
++     *
++     * In this case create a temporary parser to receive the migration data,
++     * and schedule the close_bh to report the device as disconnected to the
++     * guest and to destroy the parser again.
+      */
+     if (dev->parser == NULL) {
+-        ERROR("get_parser called with closed chardev, failing migration\n");
+-        return -1;
++        WARNING("usb-redir connection broken during migration\n");
++        usbredir_create_parser(dev);
++        qemu_bh_schedule(dev->chardev_close_bh);
+     }
+ 
+     data = g_malloc(len);

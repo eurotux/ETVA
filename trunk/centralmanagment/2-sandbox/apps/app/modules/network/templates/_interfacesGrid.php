@@ -260,7 +260,7 @@ $store_id = json_encode($js_grid['pk']);
             
             Ext.Msg.show({
                 title: <?php echo json_encode(__('Remove network interface')) ?>,
-                buttons: Ext.MessageBox.YESNOCANCEL,
+                buttons: Ext.MessageBox.YESNO,
                 icon: Ext.MessageBox.QUESTION,
                 msg: String.format(<?php echo json_encode(__('Remove network interface with mac {0} ?')) ?>,macaddr),
                 scope:this,

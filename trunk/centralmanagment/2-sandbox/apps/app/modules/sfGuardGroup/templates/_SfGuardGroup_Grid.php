@@ -165,7 +165,7 @@ SfGuardGroup.Grid = Ext.extend(Ext.grid.GridPanel, {
         if (sm.hasSelection()){
             Ext.Msg.show({
                 title: <?php echo json_encode(__('Remove group')) ?>,
-                buttons: Ext.MessageBox.YESNOCANCEL,
+                buttons: Ext.MessageBox.YESNO,
                 msg: String.format(<?php echo json_encode(__('Remove group {0} ?')) ?>,sel.data.name),
                 scope:this,
                 fn: function(btn){

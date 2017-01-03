@@ -1,0 +1,33 @@
+--- modules/agent_console/index.php.orig	2013-12-19 20:46:38.000000000 +0000
++++ modules/agent_console/index.php	2014-05-14 10:51:09.000000000 +0100
+@@ -62,6 +62,15 @@
+     $sDirPlantillas = (isset($arrConf['templates_dir'])) 
+         ? $arrConf['templates_dir'] : 'themes';
+     $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['theme'];
++
++    /*
++     * CMAR 05/02/2014
++     *  made this change to theme works...
++     */
++    if( file_exists("$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['mainTheme']) ){
++        $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['mainTheme'];
++    }
++
+     $smarty->assign("MODULE_NAME", $module_name);
+ 
+     // Incluir todas las bibliotecas y CSS necesarios
+@@ -747,6 +756,7 @@
+     }
+     $json = new Services_JSON();
+     $smarty->assign(array(
++        'ID_EXTENSION'      =>  $_SESSION['callcenter']['extension'],
+         'APPLY_UI_STYLES'   =>  $json->encode(array(
+             'break_commit'              =>  _tr('Take Break'),
+             'break_dismiss'             =>  _tr('Dismiss'),
+@@ -1586,4 +1596,4 @@
+     return $s;
+ }
+ 
+-?>
+\ No newline at end of file
++?>

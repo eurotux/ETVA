@@ -1,0 +1,102 @@
+From f920c464888d6b0a9675546a5d34e103a3c8f322 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Thu, 9 Aug 2012 16:45:55 +0200
+Subject: [PATCH] net: notify iothread after flushing queue
+
+virtio-net has code to flush the queue and notify the iothread
+whenever new receive buffers are added by the guest.  That is
+fine, and indeed we need to do the same in all other drivers.
+However, notifying the iothread should be work for the network
+subsystem.  And since we are at it we can add a little smartness:
+if some of the queued packets already could not be delivered,
+there is no need to notify the iothread.
+
+Reported-by: Luigi Rizzo <rizzo@iet.unipi.it>
+Cc: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+Cc: Jan Kiszka <jan.kiszka@siemens.de>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Reviewed-by: Amos Kong <akong@redhat.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+(cherry picked from commit 987a9b4800003567b1a47a379255e886a77d57ea)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/virtio-net.c | 4 ----
+ net.c           | 7 ++++++-
+ net/queue.c     | 5 +++--
+ net/queue.h     | 2 +-
+ 4 files changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/hw/virtio-net.c b/hw/virtio-net.c
+index b1998b2..6490743 100644
+--- a/hw/virtio-net.c
++++ b/hw/virtio-net.c
+@@ -447,10 +447,6 @@ static void virtio_net_handle_rx(VirtIODevice *vdev, VirtQueue *vq)
+     VirtIONet *n = to_virtio_net(vdev);
+ 
+     qemu_flush_queued_packets(&n->nic->nc);
+-
+-    /* We now have RX buffers, signal to the IO thread to break out of the
+-     * select to re-poll the tap file descriptor */
+-    qemu_notify_event();
+ }
+ 
+ static int virtio_net_can_receive(NetClientState *nc)
+diff --git a/net.c b/net.c
+index 60043dd..76a8336 100644
+--- a/net.c
++++ b/net.c
+@@ -357,7 +357,12 @@ void qemu_flush_queued_packets(NetClientState *nc)
+ {
+     nc->receive_disabled = 0;
+ 
+-    qemu_net_queue_flush(nc->send_queue);
++    if (qemu_net_queue_flush(nc->send_queue)) {
++        /* We emptied the queue successfully, signal to the IO thread to repoll
++         * the file descriptor (for tap, for example).
++         */
++        qemu_notify_event();
++    }
+ }
+ 
+ static ssize_t qemu_send_packet_async_with_flags(NetClientState *sender,
+diff --git a/net/queue.c b/net/queue.c
+index e8030aa..6e64091 100644
+--- a/net/queue.c
++++ b/net/queue.c
+@@ -228,7 +228,7 @@ void qemu_net_queue_purge(NetQueue *queue, NetClientState *from)
+     }
+ }
+ 
+-void qemu_net_queue_flush(NetQueue *queue)
++bool qemu_net_queue_flush(NetQueue *queue)
+ {
+     while (!QTAILQ_EMPTY(&queue->packets)) {
+         NetPacket *packet;
+@@ -244,7 +244,7 @@ void qemu_net_queue_flush(NetQueue *queue)
+                                      packet->size);
+         if (ret == 0) {
+             QTAILQ_INSERT_HEAD(&queue->packets, packet, entry);
+-            break;
++            return false;
+         }
+ 
+         if (packet->sent_cb) {
+@@ -253,4 +253,5 @@ void qemu_net_queue_flush(NetQueue *queue)
+ 
+         g_free(packet);
+     }
++    return true;
+ }
+diff --git a/net/queue.h b/net/queue.h
+index 9d44a9b..fc02b33 100644
+--- a/net/queue.h
++++ b/net/queue.h
+@@ -53,6 +53,6 @@ ssize_t qemu_net_queue_send_iov(NetQueue *queue,
+                                 NetPacketSent *sent_cb);
+ 
+ void qemu_net_queue_purge(NetQueue *queue, NetClientState *from);
+-void qemu_net_queue_flush(NetQueue *queue);
++bool qemu_net_queue_flush(NetQueue *queue);
+ 
+ #endif /* QEMU_NET_QUEUE_H */

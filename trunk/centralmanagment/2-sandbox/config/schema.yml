@@ -30,6 +30,7 @@ propel:
     cpu_cores: { type: INTEGER }
     cpu_threads: { type: INTEGER }
     location: { type: VARCHAR, size: '255' }
+    extra: { type: VARCHAR, size: '255' }
     boot: { type: VARCHAR, size: '255' }
     cdromextra: { type: VARCHAR, size: '255' }
     cdrom: { type: INTEGER, default: '0' }
@@ -56,6 +57,7 @@ propel:
     hblaststart: { type: TIMESTAMP }
     hbnrestarts: { type: INTEGER, default: '0' }
     hasSnapshots: { type: INTEGER, default: '0' }
+    extend: { type: LONGVARCHAR }
   node:
     _attributes: { phpName: EtvaNode }
     id: { type: INTEGER, primaryKey: true, required: true, autoIncrement: true }

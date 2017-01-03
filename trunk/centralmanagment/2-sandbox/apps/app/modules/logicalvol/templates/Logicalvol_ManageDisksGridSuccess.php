@@ -307,7 +307,7 @@ Logicalvol.ManageDisksGrid = function(config) {
                 if( f.data['in_use'] )
                     Ext.Msg.show({
                         title: String.format(<?php echo json_encode(__('Disk {0} in use')) ?>, f.data['lv']),
-                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        buttons: Ext.MessageBox.YESNO,
                         scope:this,
                         msg: String.format(<?php echo json_encode(__('The server {0} is using this disk.')) ?>,f.data['vm_name'])+'<br>'
                              +String.format(<?php echo json_encode(__('Do you want add it any way?')) ?>),

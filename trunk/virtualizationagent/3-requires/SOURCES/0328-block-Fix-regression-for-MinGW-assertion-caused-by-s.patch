@@ -1,0 +1,38 @@
+From 767241bd6e8982aebff143967a5808224c61b83e Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Thu, 22 Nov 2012 07:25:48 +0100
+Subject: [PATCH] block: Fix regression for MinGW (assertion caused by short
+ string)
+
+The local string tmp_filename is passed to function get_tmp_filename
+which expects a string with minimum size MAX_PATH for w32 hosts.
+
+MAX_PATH is 260 and PATH_MAX is 259, so tmp_filename was too short.
+
+Commit eba25057b9a5e19d10ace2bc7716667a31297169 introduced this
+regression.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Stefan Hajnoczi <stefanha@redhat.com>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit 89c9bc3d147fdaa932db99b0463b4af1d3e7cda1)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/block.c b/block.c
+index 4c0e7f5..e49a999 100644
+--- a/block.c
++++ b/block.c
+@@ -739,7 +739,8 @@ int bdrv_open(BlockDriverState *bs, const char *filename, int flags,
+               BlockDriver *drv)
+ {
+     int ret;
+-    char tmp_filename[PATH_MAX];
++    /* TODO: extra byte is a hack to ensure MAX_PATH space on Windows. */
++    char tmp_filename[PATH_MAX + 1];
+ 
+     if (flags & BDRV_O_SNAPSHOT) {
+         BlockDriverState *bs1;

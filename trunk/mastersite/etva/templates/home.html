@@ -1,0 +1,15 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}Main page{% endblock%}
+{% block mainCol%}
+<div>
+{% if user.is_authenticated %}
+    <p>{% trans "Welcome" %}, {{ user.username }}. {% trans "Thanks for logging in" %}.</p>
+    
+{% else %}
+<p>{% block trans %}Welcome, new user. Please log in.{%endblock%}</p>
+{% endif %}
+
+</div>
+{% endblock %}
+

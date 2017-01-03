@@ -1,0 +1,39 @@
+From 6c8c0ad29914f84654267ec147e4223a28ac8ea3 Mon Sep 17 00:00:00 2001
+From: Jan Kiszka <jan.kiszka@web.de>
+Date: Sat, 8 Sep 2012 11:52:39 +0200
+Subject: [PATCH] musicpal: Fix flash mapping
+
+The old arithmetic assumed 32 physical address bits which is no longer
+true for ARM since 3cc0cd61f4.
+
+Signed-off-by: Jan Kiszka <jan.kiszka@web.de>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit 0c267217ca9985e6d118ec8368bebd382db7a099)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/musicpal.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hw/musicpal.c b/hw/musicpal.c
+index ad725b5..f305e21 100644
+--- a/hw/musicpal.c
++++ b/hw/musicpal.c
+@@ -1583,7 +1583,7 @@ static void musicpal_init(ram_addr_t ram_size,
+          * image is smaller than 32 MB.
+          */
+ #ifdef TARGET_WORDS_BIGENDIAN
+-        pflash_cfi02_register(0-MP_FLASH_SIZE_MAX, NULL,
++        pflash_cfi02_register(0x100000000ULL-MP_FLASH_SIZE_MAX, NULL,
+                               "musicpal.flash", flash_size,
+                               dinfo->bdrv, 0x10000,
+                               (flash_size + 0xffff) >> 16,
+@@ -1591,7 +1591,7 @@ static void musicpal_init(ram_addr_t ram_size,
+                               2, 0x00BF, 0x236D, 0x0000, 0x0000,
+                               0x5555, 0x2AAA, 1);
+ #else
+-        pflash_cfi02_register(0-MP_FLASH_SIZE_MAX, NULL,
++        pflash_cfi02_register(0x100000000ULL-MP_FLASH_SIZE_MAX, NULL,
+                               "musicpal.flash", flash_size,
+                               dinfo->bdrv, 0x10000,
+                               (flash_size + 0xffff) >> 16,

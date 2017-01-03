@@ -1,0 +1,34 @@
+From 444f8f04b433d73c17d0a4bc785a50eeaf72499e Mon Sep 17 00:00:00 2001
+From: Alexander Graf <agraf@suse.de>
+Date: Wed, 19 Sep 2012 17:24:46 +0200
+Subject: [PATCH] s390x: fix -initrd in virtio machine
+
+When using -initrd in the virtio machine, we need to indicate the initrd
+start and size inside the kernel image. These parameters need to be stored
+in native endianness.
+
+Signed-off-by: Alexander Graf <agraf@suse.de>
+Acked-by: Richard Henderson <rth@twiddle.net>
+Acked-by: Christian Borntraeger <borntraeger@de.ibm.com>
+(cherry picked from commit 235a3f0bed3584fe65079ffa07c7a842971f261e)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/s390-virtio.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hw/s390-virtio.c b/hw/s390-virtio.c
+index 47eed35..12ae612 100644
+--- a/hw/s390-virtio.c
++++ b/hw/s390-virtio.c
+@@ -284,8 +284,8 @@ static void s390_init(ram_addr_t my_ram_size,
+         }
+ 
+         /* we have to overwrite values in the kernel image, which are "rom" */
+-        memcpy(rom_ptr(INITRD_PARM_START), &initrd_offset, 8);
+-        memcpy(rom_ptr(INITRD_PARM_SIZE), &initrd_size, 8);
++        stq_p(rom_ptr(INITRD_PARM_START), initrd_offset);
++        stq_p(rom_ptr(INITRD_PARM_SIZE), initrd_size);
+     }
+ 
+     if (rom_ptr(KERN_PARM_AREA)) {

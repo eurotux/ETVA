@@ -1,0 +1,35 @@
+--- admin/modules/core/functions.inc.php.orig	2014-03-10 16:15:58.000000000 +0000
++++ admin/modules/core/functions.inc.php	2014-04-17 09:45:51.000000000 +0100
+@@ -3787,6 +3787,8 @@
+ 			array($account,'secret',$db->escapeSimple((isset($_REQUEST['secret']))?$_REQUEST['secret']:''),$flag++),
+ 			array($account,'canreinvite',$db->escapeSimple((isset($_REQUEST['canreinvite']))?$_REQUEST['canreinvite']:'no'),$flag++),
+ 			array($account,'context',$db->escapeSimple((isset($_REQUEST['context']))?$_REQUEST['context']:'from-internal'),$flag++),
++			array($account,'encryption',$db->escapeSimple((isset($_REQUEST['encryption']))?$_REQUEST['encryption']:''),$flag++),
++			array($account,'transport',$db->escapeSimple((isset($_REQUEST['transport']))?$_REQUEST['transport']:''),$flag++),
+ 			array($account,'dtmfmode',$db->escapeSimple((isset($_REQUEST['dtmfmode']))?$_REQUEST['dtmfmode']:''),$flag++),
+ 			array($account,'host',$db->escapeSimple((isset($_REQUEST['host']))?$_REQUEST['host']:'dynamic'),$flag++),
+ 			array($account,'type',$db->escapeSimple((isset($_REQUEST['type']))?$_REQUEST['type']:'friend'),$flag++),
+@@ -3809,8 +3811,13 @@
+ 	}
+ 
+ 	// Very bad
++
++	// CMAR 17/04/2014
++	// Fix callerid= device <extension>
+ 	$sipfields[] = array($account,'account',$db->escapeSimple($account),$flag++);	
+-	$sipfields[] = array($account,'callerid',$db->escapeSimple((isset($_REQUEST['description']) && $_REQUEST['description'])?$_REQUEST['description']." <".$account.'>':'device'." <".$account.'>'),$flag++);
++	if( (isset($_REQUEST['description']) && $_REQUEST['description']) ) $description = $_REQUEST['description'];
++	else if( (isset($_REQUEST['name']) && $_REQUEST['name']) ) $description = $_REQUEST['name'];
++	$sipfields[] = array($account,'callerid',$db->escapeSimple((isset($description) && $description)?$description." <".$account.'>':'device'." <".$account.'>'),$flag++);
+ 	
+ 	// Where is this in the interface ??????
+ 	$sipfields[] = array($account,'record_in',$db->escapeSimple(($_REQUEST['record_in'])?$_REQUEST['record_in']:'On-Demand'),$flag++);
+@@ -5993,6 +6000,8 @@
+ 		$tmparr['secret'] = array('value' => '', 'level' => 0, 'jsvalidation' => '(isEmpty() && !confirm("'.$msgConfirmSecret.'")) || (!isEmpty() && weakSecret())', 'failvalidationmsg' => $msgInvalidSecret);
+ 		$tmparr['dtmfmode'] = array('value' => 'rfc2833', 'level' => 0, 'jsvalidation' => 'isEmpty()', 'failvalidationmsg' => $msgInvalidDTMFMODE );
+ 		$tmparr['canreinvite'] = array('value' => 'no', 'level' => 1);
++		$tmparr['encryption'] = array('value' => 'no', 'level' => 1);
++		$tmparr['transport'] = array('value' => 'udp', 'level' => 1);
+ 		$tmparr['context'] = array('value' => 'from-internal', 'level' => 1);
+ 		$tmparr['host'] = array('value' => 'dynamic', 'level' => 1);
+ 		$tmparr['type'] = array('value' => 'friend', 'level' => 1);

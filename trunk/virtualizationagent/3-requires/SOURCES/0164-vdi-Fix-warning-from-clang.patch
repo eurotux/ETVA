@@ -1,0 +1,72 @@
+From 948c8d193abef29bd47e9217b4a347171a54a0c9 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Fri, 17 Aug 2012 15:23:24 +0200
+Subject: [PATCH] vdi: Fix warning from clang
+
+ccc-analyzer reports these warnings:
+
+block/vdi.c:704:13: warning: Dereference of null pointer
+            bmap[i] = VDI_UNALLOCATED;
+            ^
+block/vdi.c:702:13: warning: Dereference of null pointer
+            bmap[i] = i;
+            ^
+
+Moving some code into the if block fixes this.
+It also avoids calling function write with 0 bytes of data.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit 514f21a5d4613e495adc2e2dd48f18091454efb8)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block/vdi.c | 25 ++++++++++++-------------
+ 1 file changed, 12 insertions(+), 13 deletions(-)
+
+diff --git a/block/vdi.c b/block/vdi.c
+index c4f1529..550cf58 100644
+--- a/block/vdi.c
++++ b/block/vdi.c
+@@ -628,7 +628,6 @@ static int vdi_create(const char *filename, QEMUOptionParameter *options)
+     VdiHeader header;
+     size_t i;
+     size_t bmap_size;
+-    uint32_t *bmap;
+ 
+     logout("\n");
+ 
+@@ -693,21 +692,21 @@ static int vdi_create(const char *filename, QEMUOptionParameter *options)
+         result = -errno;
+     }
+ 
+-    bmap = NULL;
+     if (bmap_size > 0) {
+-        bmap = (uint32_t *)g_malloc0(bmap_size);
+-    }
+-    for (i = 0; i < blocks; i++) {
+-        if (image_type == VDI_TYPE_STATIC) {
+-            bmap[i] = i;
+-        } else {
+-            bmap[i] = VDI_UNALLOCATED;
++        uint32_t *bmap = g_malloc0(bmap_size);
++        for (i = 0; i < blocks; i++) {
++            if (image_type == VDI_TYPE_STATIC) {
++                bmap[i] = i;
++            } else {
++                bmap[i] = VDI_UNALLOCATED;
++            }
+         }
++        if (write(fd, bmap, bmap_size) < 0) {
++            result = -errno;
++        }
++        g_free(bmap);
+     }
+-    if (write(fd, bmap, bmap_size) < 0) {
+-        result = -errno;
+-    }
+-    g_free(bmap);
++
+     if (image_type == VDI_TYPE_STATIC) {
+         if (ftruncate(fd, sizeof(header) + bmap_size + blocks * block_size)) {
+             result = -errno;

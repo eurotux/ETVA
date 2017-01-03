@@ -1,0 +1,24 @@
+From 161ff662927ad0c29a65963c4de57dc704e79e9c Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Fri, 23 Mar 2012 23:57:12 +0100
+Subject: [PATCH] tcg-sparc: Fix ADDX opcode.
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/sparc/tcg-target.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tcg/sparc/tcg-target.c b/tcg/sparc/tcg-target.c
+index 608fc46..0a19313 100644
+--- a/tcg/sparc/tcg-target.c
++++ b/tcg/sparc/tcg-target.c
+@@ -236,7 +236,7 @@ static inline int tcg_target_const_match(tcg_target_long val,
+ #define ARITH_XOR  (INSN_OP(2) | INSN_OP3(0x03))
+ #define ARITH_SUB  (INSN_OP(2) | INSN_OP3(0x04))
+ #define ARITH_SUBCC (INSN_OP(2) | INSN_OP3(0x14))
+-#define ARITH_ADDX (INSN_OP(2) | INSN_OP3(0x10))
++#define ARITH_ADDX (INSN_OP(2) | INSN_OP3(0x08))
+ #define ARITH_SUBX (INSN_OP(2) | INSN_OP3(0x0c))
+ #define ARITH_UMUL (INSN_OP(2) | INSN_OP3(0x0a))
+ #define ARITH_UDIV (INSN_OP(2) | INSN_OP3(0x0e))

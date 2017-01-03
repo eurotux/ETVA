@@ -1,0 +1,40 @@
+From ee33c50be7b814d6a4130e059de06a7e7ce40f22 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Mon, 3 Sep 2012 12:04:49 +0200
+Subject: [PATCH] usb-redir: Ensure our peer has the necessary caps when
+ redirecting to XHCI
+
+In order for redirection to work properly when redirecting to an emulated
+XHCI controller, the usb-redir-host must support both
+usb_redir_cap_ep_info_max_packet_size and usb_redir_cap_64bits_ids,
+reject any devices redirected to an XHCI controller when these are not
+supported.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/usb/redirect.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index a590cb2..f1bb692 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -833,6 +833,17 @@ static void usbredir_do_attach(void *opaque)
+ {
+     USBRedirDevice *dev = opaque;
+ 
++    /* In order to work properly with XHCI controllers we need these caps */
++    if ((dev->dev.port->speedmask & USB_SPEED_MASK_SUPER) && !(
++        usbredirparser_peer_has_cap(dev->parser,
++                                    usb_redir_cap_ep_info_max_packet_size) &&
++        usbredirparser_peer_has_cap(dev->parser,
++                                    usb_redir_cap_64bits_ids))) {
++        ERROR("usb-redir-host lacks capabilities needed for use with XHCI\n");
++        usbredir_reject_device(dev);
++        return;
++    }
++
+     if (usb_device_attach(&dev->dev) != 0) {
+         usbredir_reject_device(dev);
+     }

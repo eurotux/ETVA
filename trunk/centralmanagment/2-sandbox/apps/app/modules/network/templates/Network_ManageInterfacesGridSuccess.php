@@ -236,9 +236,10 @@ Network.ManageInterfacesGrid = Ext.extend(Ext.grid.EditorGridPanel,{
                                 var new_mac = response['Mac'];
                                 var new_record = new mac_vlan_record({mac: new_mac,vlan: '',intf_model:''});
 
-                                this.getStore().insert(0, new_record);
+                                var n = this.getStore().getTotalCount();
+                                this.getStore().insert(n, new_record);
                                 this.getView().refresh();
-                                this.getSelectionModel().selectRow(0, true);
+                                this.getSelectionModel().selectRow(n, true);
                                 button.setDisabled(false);
 
                                 // enable boot from network

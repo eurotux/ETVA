@@ -1,0 +1,70 @@
+From 3eeae6bf88b1d59e973864b5849d1368f86280ab Mon Sep 17 00:00:00 2001
+From: Alex Williamson <alex.williamson@redhat.com>
+Date: Sun, 6 Jan 2013 21:30:31 -0700
+Subject: [PATCH] pci-assign: Enable MSIX on device to match guest
+
+When a guest enables MSIX on a device we evaluate the MSIX vector
+table, typically find no unmasked vectors and don't switch the device
+to MSIX mode.  This generally works fine and the device will be
+switched once the guest enables and therefore unmasks a vector.
+Unfortunately some drivers enable MSIX, then use interfaces to send
+commands between VF & PF or PF & firmware that act based on the host
+state of the device.  These therefore may break when MSIX is managed
+lazily.  This change re-enables the previous test used to enable MSIX
+(see qemu-kvm a6b402c9), which basically guesses whether a vector
+will be used based on the data field of the vector table.
+
+Cc: qemu-stable@nongnu.org
+Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
+Acked-by: Michael S. Tsirkin <mst@redhat.com>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+(cherry picked from commit feb9a2ab4b0260d8d680a7ffd25063dafc7ec628)
+
+Conflicts:
+	hw/kvm/pci-assign.c
+---
+ hw/kvm/pci-assign.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/hw/kvm/pci-assign.c b/hw/kvm/pci-assign.c
+index 9cce02c..493225f 100644
+--- a/hw/kvm/pci-assign.c
++++ b/hw/kvm/pci-assign.c
+@@ -1046,6 +1046,19 @@ static bool msix_masked(MSIXTableEntry *entry)
+     return (entry->ctrl & cpu_to_le32(0x1)) != 0;
+ }
+ 
++/*
++ * When MSI-X is first enabled the vector table typically has all the
++ * vectors masked, so we can't use that as the obvious test to figure out
++ * how many vectors to initially enable.  Instead we look at the data field
++ * because this is what worked for pci-assign for a long time.  This makes
++ * sure the physical MSI-X state tracks the guest's view, which is important
++ * for some VF/PF and PF/fw communication channels.
++ */
++static bool assigned_dev_msix_skipped(MSIXTableEntry *entry)
++{
++    return !entry->data;
++}
++
+ static int assigned_dev_update_msix_mmio(PCIDevice *pci_dev)
+ {
+     AssignedDevice *adev = DO_UPCAST(AssignedDevice, dev, pci_dev);
+@@ -1056,7 +1069,7 @@ static int assigned_dev_update_msix_mmio(PCIDevice *pci_dev)
+ 
+     /* Get the usable entry number for allocating */
+     for (i = 0; i < adev->msix_max; i++, entry++) {
+-        if (msix_masked(entry)) {
++        if (assigned_dev_msix_skipped(entry)) {
+             continue;
+         }
+         entries_nr++;
+@@ -1085,7 +1098,7 @@ static int assigned_dev_update_msix_mmio(PCIDevice *pci_dev)
+     for (i = 0; i < adev->msix_max; i++, entry++) {
+         adev->msi_virq[i] = -1;
+ 
+-        if (msix_masked(entry)) {
++        if (assigned_dev_msix_skipped(entry)) {
+             continue;
+         }
+ 

@@ -346,7 +346,7 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Expand physical volume')) ?>,
                     msg: String.format(<?php echo json_encode(__('Do you want expand physical volume {0} ?')) ?>,ctx.attributes.device),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -432,7 +432,7 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Uninitialize physical volume')) ?>,
                     msg: String.format(<?php echo json_encode(__('Uninitialize physical volume {0} ?')) ?>,ctx.attributes.device),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -564,7 +564,7 @@ treeDEV = Ext.extend(Ext.ux.tree.TreeGrid, {
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Unregister physical volume')) ?>,
                     msg: String.format(<?php echo json_encode(__('Unregister physical volume {0} ?')) ?>,ctx.text),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -794,7 +794,7 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
             this.on('nodedrop', function(e){
                 var tree = e.target.getOwnerTree();
                 var n = e.dropNode;
-                var pvs = {'pv1':n.attributes.device};
+                var pvs = {'pv1':n.attributes.pv};
 
                 var nid = this.node_id;
                 var cid = this.tree_node_id;
@@ -803,7 +803,7 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
 
                 Ext.Msg.show({
                             title: <?php echo json_encode(__('Add physical volume to volume group')) ?>,
-                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            buttons: Ext.MessageBox.YESNO,
                             msg: String.format(<?php echo json_encode(__('Add physical volume {0} to volume group {1} ?')) ?>,n.attributes.text,e.target.attributes.text),
                             icon: Ext.MessageBox.WARNING,
                             fn: function(btn){
@@ -1093,8 +1093,8 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
 
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Remove physical volume')) ?>,
-                    msg: String.format(<?php echo json_encode(__('Remove {0} from volume group {1} ?')) ?>,ctx.attributes.pv,ctx.parentNode.id),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    msg: String.format(<?php echo json_encode(__('Remove {0} from volume group {1} ?')) ?>,ctx.attributes.text,ctx.parentNode.id),
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -1170,7 +1170,7 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Remove volume group')) ?>,
                     msg: String.format(<?php echo json_encode(__('Remove volume group {0} ?')) ?>,ctx.id),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -1288,7 +1288,7 @@ treeVG = Ext.extend(Ext.ux.tree.TreeGrid, {
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Unregister volume group')) ?>,
                     msg: String.format(<?php echo json_encode(__('Unregister volume group {0} ?')) ?>,ctx.id),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -1849,7 +1849,7 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Remove logical volume')) ?>,
                     msg: String.format(<?php echo json_encode(__('Remove logical volume {0} ?')) ?>,ctx.text),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -1938,7 +1938,7 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
                     id: 'lv-resize-win',
                     title: String.format(<?php echo json_encode(__('Resize logical volume {0}')) ?>,ctx.text),
                     width:360,
-                    height:200,
+                    height:240,
                     iconCls: 'icon-window',
                    // shim:false,
                     animCollapse:false,
@@ -2109,13 +2109,12 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
         }
         ,lvsnapshotrevert:function(){
             var ctx = this.ctxNode;
-            console.log(ctx);
             var tree = ctx.getOwnerTree();
 
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Revert snapshot')) ?>,
                     msg: String.format(<?php echo json_encode(__('Revert snapshot {0}?')) ?>,ctx.text),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -2178,7 +2177,7 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Scan logical volumes')) ?>,
                     msg: String.format(<?php echo json_encode(__('Scan logical volumes?')) ?>),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){
@@ -2243,7 +2242,7 @@ treeLV = Ext.extend(Ext.ux.tree.TreeGrid, {
             Ext.MessageBox.show({
                     title: <?php echo json_encode(__('Unregister logical volume')) ?>,
                     msg: String.format(<?php echo json_encode(__('Unregister logical volume {0} ?')) ?>,ctx.text),
-                    buttons: Ext.MessageBox.YESNOCANCEL,
+                    buttons: Ext.MessageBox.YESNO,
                     fn: function(btn){
 
                         if(btn=='yes'){

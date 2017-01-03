@@ -1,0 +1,51 @@
+{% extends "base_center.html" %}
+{% load i18n %}
+
+{% block usercontent %}
+<form id="f1" action="/i18n/setlang/" method="post">
+	<input name="next" type="hidden" value="/" />
+	<input id="lg1" name="language" type="hidden" value="{{LANGUAGE_CODE}}" />
+</form>
+
+{% if form.errors %}
+	<div id="msgAlert">
+		<p><strong>
+<p>{% trans "Your username and password didn't match. Please try again." %}</p>
+		</strong></p>
+</div>
+{% endif %}
+
+<form method="post" action="{% url django.contrib.auth.views.login %}">
+    {% csrf_token %}
+    <div class="space15">&nbsp;</div>
+    <div class="title1">{% trans "Please login"%}</div>
+    <div class="space15">&nbsp;</div>
+	<table class="form">
+		<tr>
+			<td><label for="language">{% trans "Language"%}</label></td>
+			<td>
+					<select class="textbox" id="langSel" name="language" onchange="$('#lg1').val($('#langSel').val()) ; $('#f1').submit()" >
+						{% for lang in LANGUAGES %}
+						<option value="{{ lang.0 }}" {% ifequal lang.0 LANGUAGE_CODE %} selected{% endifequal %}>{{ lang.1 }}</option>
+						{% endfor %}
+					</select>
+				</td>
+				</tr>
+<tr>
+    <td>{{ form.username.label_tag }}</td>
+    <td>{{ form.username }}</td>
+</tr>
+<tr>
+    <td>{{ form.password.label_tag }}</td>
+    <td>{{ form.password }}</td>
+</tr>
+</table>
+
+    <div class="space15">&nbsp;</div>
+<input type="submit" value="login" class="button"/>
+<input type="hidden" name="next" value="{{ next }}" />
+    <div class="space15">&nbsp;</div>
+
+</form>
+
+{% endblock %}

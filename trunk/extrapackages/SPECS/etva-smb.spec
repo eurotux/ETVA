@@ -1,6 +1,6 @@
 Name: etva-smb
 Summary: ETVA smb related files
-Version: 2.1.1
+Version: 2.2
 Release: 11%{?dist}
 Group: System Environment/Base
 License: Copyright © 2010-2011 Eurotux Informatica S.A.  All rights reserved.

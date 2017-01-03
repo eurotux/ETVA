@@ -1,0 +1,12 @@
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\Interop.MSXML2.dll
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\Interop.VBA.dll
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\primaveraconsole.csproj.ResolveComReference.cache
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\bin\Debug\primaveraconsole.exe
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\bin\Debug\primaveraconsole.pdb
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\Interop.ADODB.dll
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\Interop.StdBE800.dll
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\Interop.StdBESql800.dll
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\Interop.StdClasses800.dll
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\primaveraconsole.exe
+C:\Users\Administrator\Documents\winagent\1-winagentd\primaveraconsole\primaveraconsole\obj\x86\Debug\primaveraconsole.pdb

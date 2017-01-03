@@ -1,6 +1,6 @@
 Summary:    etva-network-profiles
 Name:       etva-network-profiles
-Version: 2.1.1
+Version: 2.2
 Release:    3%{?dist}
 License:    GPL
 Group:      Applications/System

@@ -219,6 +219,45 @@ sub vlan_name_type {
     return $type;
 }
 
+sub vlan_defaultphysdev {
+    my $self = shift;
+    my (%p) = @_;
+
+    # get all network devices
+    my %NetDevs = $self->getnetdev();
+
+    my $ifout = $p{'ifout'};
+    if( !$ifout ){
+        $ifout = VirtAgent::Network->defaultroute();
+	plogNow("vlan_defaultphysdev(1) defaultroute ifout=$ifout") if( &debug_level > 5 );
+        if( !$ifout ){
+            # get if device from vlans
+            my ($If) = sort { $a->{'vid'} cmp $b->{'vid'} } grep { ( $_->{'vlan'} ) } values %NetDevs;
+            if( $If ){
+                $ifout = $If->{'phydevice'};
+            }
+	    plogNow("vlan_defaultphysdev(2) from vlans ifout=$ifout") if( &debug_level > 5 );
+            if( !$ifout ){
+                # get if device from bonding or physical devices
+                my ($If) = sort { $a->{'device'} cmp $b->{'device'} } grep { ( $_->{'phy'} || $_->{'bonding'} ) } values %NetDevs;
+                if( $If ){
+                    $ifout = $If->{'device'};
+                }
+	        plogNow("vlan_defaultphysdev(3) from bonding or physical devices ifout=$ifout") if( &debug_level > 5 );
+            }
+        }
+    }
+
+    # if ifout is bridge add interface attached to the bridge
+    if( $NetDevs{"$ifout"}{'isbridge'} ){
+        my ($If) = grep { ( $_->{'bridge'} eq $ifout ) && ( $_->{'phy'} || $_->{'bonding'} ) } values %NetDevs;
+        if( $If ){
+            $ifout = $If->{'device'};
+	    plogNow("vlan_defaultphysdev(4) from bridge ifout=$ifout") if( &debug_level > 5 );
+        }
+    }
+    return $ifout;
+}
 sub vlan_todevice {
     my $self = shift;
     my (%p) = @_;
@@ -276,7 +315,7 @@ sub boot_vlanadd {
         return retOk("_OK_VLANADD_","VLan created successfully.");
 
     } else {
-        return retErr("_ERR_VLANADD_","Error vlan already exists");
+        return retErr("_ERR_VLANADD_","Error vlan '$device' already exists");
     }
 }
 
@@ -1122,6 +1161,10 @@ sub save_boot_interface {
     $conf{'BOOTPROTO'} = $p{'bootp'} ? 'bootp':
                             $p{'dhcp'} ? 'dhcp' : 'none';
     $conf{'NAME'} = $p{'desc'} if( defined $p{'desc'} );
+
+    # some specific bridge configurations
+    $conf{'STP'} = $p{'stp'} if( defined $p{'stp'} );
+    $conf{'DELAY'} = $p{'delay'} if( defined $p{'delay'} );
 
     saveconfigfile("$net_scripts_dir/$fn",\%conf,0,1,1,1);
 }

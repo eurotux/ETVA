@@ -11,23 +11,25 @@ if [ "$JOB_NAME" == "etva-build" ]; then
 [etva-devel]
 name=ETVA Repository - devel
 baseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/
-enabled=1
+enabled=0
 gpgcheck=0
 gpgkey=
+exclude=qemu-kvm samba4* linux-firmware*
 " >> etc/revisor/conf.d/revisor-el5-x86_64-updates.conf
-	cat etc/mock/etva-5-x86_64.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\n\n\[groups\]#' > etc/mock/etva-5-x86_64.cfg.new && mv etc/mock/etva-5-x86_64.cfg.new etc/mock/etva-5-x86_64.cfg
-	cat etc/mock/etva-5-x86_64.first.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\n\n\[groups\]#' > etc/mock/etva-5-x86_64.first.cfg.new && mv etc/mock/etva-5-x86_64.first.cfg.new etc/mock/etva-5-x86_64.first.cfg
+	cat etc/mock/etva-5-x86_64.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\nenabled=0\n\n\[groups\]#' > etc/mock/etva-5-x86_64.cfg.new && mv etc/mock/etva-5-x86_64.cfg.new etc/mock/etva-5-x86_64.cfg
+	cat etc/mock/etva-5-x86_64.first.cfg | sed -e 's#\[groups\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el5/en/x86_64/etva-devel/\nenabled=0\n\n\[groups\]#' > etc/mock/etva-5-x86_64.first.cfg.new && mv etc/mock/etva-5-x86_64.first.cfg.new etc/mock/etva-5-x86_64.first.cfg
 elif [ "$JOB_NAME" == "etva6-build" ]; then
 	echo "
 [etva-devel]
 name=ETVA Repository - devel
 baseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/
-enabled=1
+enabled=0
 gpgcheck=0
 gpgkey=
+exclude=qemu-kvm samba4* linux-firmware* libxml2* nuxis-release* php*
 " >> etc/revisor/conf.d/revisor-el6-x86_64-updates.conf
-	cat etc/mock/etva-6-x86_64.cfg | sed -e 's#\[local\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/\n\n\[local\]#' > etc/mock/etva-6-x86_64.cfg.new && mv etc/mock/etva-6-x86_64.cfg.new etc/mock/etva-6-x86_64.cfg
-	cat etc/mock/etva-6-x86_64.first.cfg | sed -e 's#\[local\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/\n\n\[local\]#' > etc/mock/etva-6-x86_64.first.cfg.new && mv etc/mock/etva-6-x86_64.first.cfg.new etc/mock/etva-6-x86_64.first.cfg
+	cat etc/mock/etva-6-x86_64.cfg | sed -e 's#\[local\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/\nexclude=qemu-kvm samba4* linux-firmware* libxml2* nuxis-release* php*\nenabled=0\n\n\[local\]#' > etc/mock/etva-6-x86_64.cfg.new && mv etc/mock/etva-6-x86_64.cfg.new etc/mock/etva-6-x86_64.cfg
+	cat etc/mock/etva-6-x86_64.first.cfg | sed -e 's#\[local\]#[etva-devel]\nname=ETVA Repository - devel branch\nbaseurl=http://etrepos.eurotux.com/redhat/el6/en/x86_64/etva-devel/\nexclude=qemu-kvm samba4* linux-firmware* libxml2* nuxis-release* php*\nenabled=0\n\n\[local\]#' > etc/mock/etva-6-x86_64.first.cfg.new && mv etc/mock/etva-6-x86_64.first.cfg.new etc/mock/etva-6-x86_64.first.cfg
 fi
 
 CENTOSVER=`cat /etc/redhat-release |sed -e 's/.*release //' -e 's/\..*//'`

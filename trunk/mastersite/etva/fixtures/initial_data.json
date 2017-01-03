@@ -1,0 +1,1327 @@
+[
+  {
+    "pk": 22, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_logentry", 
+      "name": "Can add log entry", 
+      "content_type": 8
+    }
+  }, 
+  {
+    "pk": 23, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_logentry", 
+      "name": "Can change log entry", 
+      "content_type": 8
+    }
+  }, 
+  {
+    "pk": 24, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_logentry", 
+      "name": "Can delete log entry", 
+      "content_type": 8
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_group", 
+      "name": "Can add group", 
+      "content_type": 2
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_group", 
+      "name": "Can change group", 
+      "content_type": 2
+    }
+  }, 
+  {
+    "pk": 6, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_group", 
+      "name": "Can delete group", 
+      "content_type": 2
+    }
+  }, 
+  {
+    "pk": 10, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_message", 
+      "name": "Can add message", 
+      "content_type": 4
+    }
+  }, 
+  {
+    "pk": 11, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_message", 
+      "name": "Can change message", 
+      "content_type": 4
+    }
+  }, 
+  {
+    "pk": 12, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_message", 
+      "name": "Can delete message", 
+      "content_type": 4
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_permission", 
+      "name": "Can add permission", 
+      "content_type": 1
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_permission", 
+      "name": "Can change permission", 
+      "content_type": 1
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_permission", 
+      "name": "Can delete permission", 
+      "content_type": 1
+    }
+  }, 
+  {
+    "pk": 7, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_user", 
+      "name": "Can add user", 
+      "content_type": 3
+    }
+  }, 
+  {
+    "pk": 8, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_user", 
+      "name": "Can change user", 
+      "content_type": 3
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_user", 
+      "name": "Can delete user", 
+      "content_type": 3
+    }
+  }, 
+  {
+    "pk": 31, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_etvaagent", 
+      "name": "Can add etva agent", 
+      "content_type": 11
+    }
+  }, 
+  {
+    "pk": 32, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_etvaagent", 
+      "name": "Can change etva agent", 
+      "content_type": 11
+    }
+  }, 
+  {
+    "pk": 33, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_etvaagent", 
+      "name": "Can delete etva agent", 
+      "content_type": 11
+    }
+  }, 
+  {
+    "pk": 28, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_product", 
+      "name": "Can add product", 
+      "content_type": 10
+    }
+  }, 
+  {
+    "pk": 29, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_product", 
+      "name": "Can change product", 
+      "content_type": 10
+    }
+  }, 
+  {
+    "pk": 30, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_product", 
+      "name": "Can delete product", 
+      "content_type": 10
+    }
+  }, 
+  {
+    "pk": 13, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_contenttype", 
+      "name": "Can add content type", 
+      "content_type": 5
+    }
+  }, 
+  {
+    "pk": 14, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_contenttype", 
+      "name": "Can change content type", 
+      "content_type": 5
+    }
+  }, 
+  {
+    "pk": 15, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_contenttype", 
+      "name": "Can delete content type", 
+      "content_type": 5
+    }
+  }, 
+  {
+    "pk": 25, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_backup", 
+      "name": "Can add backup", 
+      "content_type": 9
+    }
+  }, 
+  {
+    "pk": 26, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_backup", 
+      "name": "Can change backup", 
+      "content_type": 9
+    }
+  }, 
+  {
+    "pk": 27, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_backup", 
+      "name": "Can delete backup", 
+      "content_type": 9
+    }
+  }, 
+  {
+    "pk": 16, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_session", 
+      "name": "Can add session", 
+      "content_type": 6
+    }
+  }, 
+  {
+    "pk": 17, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_session", 
+      "name": "Can change session", 
+      "content_type": 6
+    }
+  }, 
+  {
+    "pk": 18, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_session", 
+      "name": "Can delete session", 
+      "content_type": 6
+    }
+  }, 
+  {
+    "pk": 19, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "add_site", 
+      "name": "Can add site", 
+      "content_type": 7
+    }
+  }, 
+  {
+    "pk": 20, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "change_site", 
+      "name": "Can change site", 
+      "content_type": 7
+    }
+  }, 
+  {
+    "pk": 21, 
+    "model": "auth.permission", 
+    "fields": {
+      "codename": "delete_site", 
+      "name": "Can delete site", 
+      "content_type": 7
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "auth.group", 
+    "fields": {
+      "name": "Agents", 
+      "permissions": [
+        4, 
+        5, 
+        6, 
+        7, 
+        8, 
+        9
+      ]
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "auth.group", 
+    "fields": {
+      "name": "Clients", 
+      "permissions": []
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "auth.group", 
+    "fields": {
+      "name": "empresa1", 
+      "permissions": []
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "auth.group", 
+    "fields": {
+      "name": "teste_a2", 
+      "permissions": []
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "auth.group", 
+    "fields": {
+      "name": "empresa2", 
+      "permissions": []
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "admin", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": true, 
+      "is_staff": true, 
+      "last_login": "2011-05-17 17:45:33", 
+      "groups": [
+        3, 
+        4, 
+        5
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$01ec3$07da8a5940abd877034bb3e8ccc40c931e4c9faa", 
+      "email": "maf@eurotux.com", 
+      "date_joined": "2011-04-19 14:54:38"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "agente1", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": false, 
+      "is_staff": false, 
+      "last_login": "2011-05-19 16:04:46", 
+      "groups": [
+        1, 
+        3, 
+        5
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$bb045$a3a05f622eb9bba280638f4d1a5edaf3033eb0ee", 
+      "email": "", 
+      "date_joined": "2011-04-19 15:27:29"
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "cliente1", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": false, 
+      "is_staff": false, 
+      "last_login": "2011-05-19 16:06:27", 
+      "groups": [
+        3
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$380f2$e7f4eb0ce67e0860ca0cc65731b6a52507155480", 
+      "email": "cliente_1@mail.pt", 
+      "date_joined": "2011-04-19 16:52:52"
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "cliente2", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": false, 
+      "is_staff": false, 
+      "last_login": "2011-04-20 16:43:48", 
+      "groups": [
+        2, 
+        3
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$351db$5e4af8c9c2785631d635384784ea6cb6515092a5", 
+      "email": "cliente2@mail.pt", 
+      "date_joined": "2011-04-19 16:55:04"
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "agente2", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": false, 
+      "is_staff": false, 
+      "last_login": "2011-05-18 12:40:36", 
+      "groups": [
+        1, 
+        4
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$19719$450c0d77b4f56d836b009f5c215d5cce9798829f", 
+      "email": "", 
+      "date_joined": "2011-05-16 18:12:58"
+    }
+  }, 
+  {
+    "pk": 6, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "user_a2", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": false, 
+      "is_staff": false, 
+      "last_login": "2011-05-17 10:14:50", 
+      "groups": [
+        2, 
+        4
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$61560$08498e4709081ac29e29f5522453157d58773c09", 
+      "email": "user_a2@ali.pt", 
+      "date_joined": "2011-05-16 18:19:40"
+    }
+  }, 
+  {
+    "pk": 7, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "cliente3", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": false, 
+      "is_staff": false, 
+      "last_login": "2011-05-18 12:38:44", 
+      "groups": [
+        2, 
+        5
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$2fbaa$cb2930fda4eeccb83a2064a948e7e06563de4b04", 
+      "email": "cliente3@empresa2.pt", 
+      "date_joined": "2011-05-17 10:29:15"
+    }
+  }, 
+  {
+    "pk": 8, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "user_a3", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": false, 
+      "is_staff": false, 
+      "last_login": "2011-05-17 17:50:25", 
+      "groups": [
+        2, 
+        4
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$5706e$d03a8798f0d5a7de6177ba2345e9dee9c2007716", 
+      "email": "usera3@testea2.pt", 
+      "date_joined": "2011-05-17 12:20:29"
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "auth.user", 
+    "fields": {
+      "username": "cliente4", 
+      "first_name": "", 
+      "last_name": "", 
+      "is_active": true, 
+      "is_superuser": false, 
+      "is_staff": false, 
+      "last_login": "2011-05-18 12:41:31", 
+      "groups": [
+        2, 
+        3
+      ], 
+      "user_permissions": [], 
+      "password": "sha1$c2ce5$4394ef65138046192e35cecfd88219452f878248", 
+      "email": "cliente_4@empresa1.pt", 
+      "date_joined": "2011-05-18 12:41:31"
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "backup.etvaagent", 
+    "fields": {
+      "name": "Eurotux Firewall", 
+      "agent": "etfw"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "backup.etvaagent", 
+    "fields": {
+      "name": "Eurotux Voip", 
+      "agent": "etvoip"
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "backup.etvaagent", 
+    "fields": {
+      "name": "Eurotux Mail Server", 
+      "agent": "etmailserver"
+    }
+  }, 
+  {
+    "pk": 38, 
+    "model": "backup.backup", 
+    "fields": {
+      "product": 22, 
+      "file_name": "androvideo", 
+      "notes": "script", 
+      "mime": "application/octet-stream", 
+      "user": 8, 
+      "file": "backup/androvideo", 
+      "date_created": "2011-05-17 17:41:14", 
+      "size": 6131
+    }
+  }, 
+  {
+    "pk": 39, 
+    "model": "backup.backup", 
+    "fields": {
+      "product": 24, 
+      "file_name": "etva_favicon.png", 
+      "notes": "s", 
+      "mime": "image/png", 
+      "user": 3, 
+      "file": "backup/etva_favicon_7.png", 
+      "date_created": "2011-05-19 18:40:48", 
+      "size": 9284
+    }
+  }, 
+  {
+    "pk": 40, 
+    "model": "backup.backup", 
+    "fields": {
+      "product": 24, 
+      "file_name": "backup.tar.gz", 
+      "notes": "", 
+      "mime": "application/octet-stream", 
+      "user": 3, 
+      "file": "backup/backup.tar.gz", 
+      "date_created": "2011-05-19 18:42:32", 
+      "size": 5241
+    }
+  }, 
+  {
+    "pk": 41, 
+    "model": "backup.backup", 
+    "fields": {
+      "product": 24, 
+      "file_name": "etva_favicon.png", 
+      "notes": "ad", 
+      "mime": "image/png", 
+      "user": 3, 
+      "file": "backup/etva_favicon_8.png", 
+      "date_created": "2011-05-19 18:44:50", 
+      "size": 9284
+    }
+  }, 
+  {
+    "pk": 42, 
+    "model": "backup.backup", 
+    "fields": {
+      "product": 24, 
+      "file_name": "add_towblists.png", 
+      "notes": ":D", 
+      "mime": "image/png", 
+      "user": 3, 
+      "file": "backup/add_towblists.png", 
+      "date_created": "2011-05-19 18:45:02", 
+      "size": 17267
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-04-20 10:21:12", 
+      "notes": "3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 4, 
+      "activation_date": null, 
+      "serial": "serial3"
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-04-20 11:08:53", 
+      "notes": "cliente2 quer borlas", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 4, 
+      "activation_date": null, 
+      "serial": "serial para o client2"
+    }
+  }, 
+  {
+    "pk": 10, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 09:48:37", 
+      "notes": "Running Linux in a VM on Windows is like strapping yourself to the outside of a car with a seatbelt.", 
+      "activated": false, 
+      "agent": 5, 
+      "client": 6, 
+      "activation_date": null, 
+      "serial": "7a6cfd72-fa6e-478d-93f3-66c6ad5f3fb2"
+    }
+  }, 
+  {
+    "pk": 11, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:29:33", 
+      "notes": "serial client3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "a576feb7-c06b-4055-b126-2b618a1c8590"
+    }
+  }, 
+  {
+    "pk": 12, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:29:54", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "0b085712-43ad-4983-a3aa-fb846ae195a7"
+    }
+  }, 
+  {
+    "pk": 13, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:29:58", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "99bb59ba-1617-4e0a-82c2-89c7f10dc75a"
+    }
+  }, 
+  {
+    "pk": 14, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:30:01", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "e7e56108-cc3d-4dff-9df1-6aedc995b287"
+    }
+  }, 
+  {
+    "pk": 15, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:30:04", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "f938e3d0-b136-488f-9004-7835d9e75936"
+    }
+  }, 
+  {
+    "pk": 16, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:30:07", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "5efc674f-aa82-4a87-8d3a-ff398f585382"
+    }
+  }, 
+  {
+    "pk": 17, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:30:11", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "56a9c693-e425-4794-8f55-11497f923f74"
+    }
+  }, 
+  {
+    "pk": 18, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:30:18", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "8bc620e7-aa1e-47c6-8d63-a1589cb3b373"
+    }
+  }, 
+  {
+    "pk": 19, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:30:21", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "dda89370-be4c-47d6-9bfb-259d6dfb653d"
+    }
+  }, 
+  {
+    "pk": 20, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:30:25", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "6aba224b-9b67-4d4b-a72c-50d035e4f65b"
+    }
+  }, 
+  {
+    "pk": 21, 
+    "model": "product.product", 
+    "fields": {
+      "description": "", 
+      "add_date": "2011-05-17 10:30:29", 
+      "notes": "c3", 
+      "activated": false, 
+      "agent": 2, 
+      "client": 7, 
+      "activation_date": null, 
+      "serial": "c554beab-1d56-43dd-ae85-76845ff25e22"
+    }
+  }, 
+  {
+    "pk": 22, 
+    "model": "product.product", 
+    "fields": {
+      "description": "Xeon 8x", 
+      "add_date": "2011-05-17 16:20:46", 
+      "notes": "primeira", 
+      "activated": true, 
+      "agent": 5, 
+      "client": 8, 
+      "activation_date": null, 
+      "serial": "1d6ad9d0-0576-4f04-b742-dd704110cd72"
+    }
+  }, 
+  {
+    "pk": 23, 
+    "model": "product.product", 
+    "fields": {
+      "description": "second server", 
+      "add_date": "2011-05-17 16:26:06", 
+      "notes": "asd", 
+      "activated": true, 
+      "agent": 5, 
+      "client": 8, 
+      "activation_date": "2011-05-17 17:50:26", 
+      "serial": "3f3ab8de-f82d-4ec9-b57f-6e73ee3fee60"
+    }
+  }, 
+  {
+    "pk": 24, 
+    "model": "product.product", 
+    "fields": {
+      "description": "toma las", 
+      "add_date": "2011-05-19 16:05:21", 
+      "notes": "asdasd", 
+      "activated": true, 
+      "agent": 2, 
+      "client": 3, 
+      "activation_date": "2011-05-19 16:06:28", 
+      "serial": "42b481a9-b933-4e13-b882-f625839ce91b"
+    }
+  }
+][
+   {
+      "pk": 12, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "backup", 
+         "name": "backup", 
+         "app_label": "backup"
+      }
+   }, 
+   {
+      "pk": 5, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "contenttype", 
+         "name": "content type", 
+         "app_label": "contenttypes"
+      }
+   }, 
+   {
+      "pk": 11, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "etvaagent", 
+         "name": "etva agent", 
+         "app_label": "backup"
+      }
+   }, 
+   {
+      "pk": 2, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "group", 
+         "name": "group", 
+         "app_label": "auth"
+      }
+   }, 
+   {
+      "pk": 8, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "logentry", 
+         "name": "log entry", 
+         "app_label": "admin"
+      }
+   }, 
+   {
+      "pk": 4, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "message", 
+         "name": "message", 
+         "app_label": "auth"
+      }
+   }, 
+   {
+      "pk": 9, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "mygroup", 
+         "name": "my group", 
+         "app_label": "groups"
+      }
+   }, 
+   {
+      "pk": 1, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "permission", 
+         "name": "permission", 
+         "app_label": "auth"
+      }
+   }, 
+   {
+      "pk": 10, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "product", 
+         "name": "product", 
+         "app_label": "product"
+      }
+   }, 
+   {
+      "pk": 6, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "session", 
+         "name": "session", 
+         "app_label": "sessions"
+      }
+   }, 
+   {
+      "pk": 7, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "site", 
+         "name": "site", 
+         "app_label": "sites"
+      }
+   }, 
+   {
+      "pk": 3, 
+      "model": "contenttypes.contenttype", 
+      "fields": {
+         "model": "user", 
+         "name": "user", 
+         "app_label": "auth"
+      }
+   }, 
+   {
+      "pk": 1, 
+      "model": "sites.site", 
+      "fields": {
+         "domain": "example.com", 
+         "name": "example.com"
+      }
+   }, 
+   {
+      "pk": 22, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_logentry", 
+         "name": "Can add log entry", 
+         "content_type": 8
+      }
+   }, 
+   {
+      "pk": 23, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_logentry", 
+         "name": "Can change log entry", 
+         "content_type": 8
+      }
+   }, 
+   {
+      "pk": 24, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_logentry", 
+         "name": "Can delete log entry", 
+         "content_type": 8
+      }
+   }, 
+   {
+      "pk": 4, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_group", 
+         "name": "Can add group", 
+         "content_type": 2
+      }
+   }, 
+   {
+      "pk": 5, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_group", 
+         "name": "Can change group", 
+         "content_type": 2
+      }
+   }, 
+   {
+      "pk": 6, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_group", 
+         "name": "Can delete group", 
+         "content_type": 2
+      }
+   }, 
+   {
+      "pk": 10, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_message", 
+         "name": "Can add message", 
+         "content_type": 4
+      }
+   }, 
+   {
+      "pk": 11, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_message", 
+         "name": "Can change message", 
+         "content_type": 4
+      }
+   }, 
+   {
+      "pk": 12, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_message", 
+         "name": "Can delete message", 
+         "content_type": 4
+      }
+   }, 
+   {
+      "pk": 1, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_permission", 
+         "name": "Can add permission", 
+         "content_type": 1
+      }
+   }, 
+   {
+      "pk": 2, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_permission", 
+         "name": "Can change permission", 
+         "content_type": 1
+      }
+   }, 
+   {
+      "pk": 3, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_permission", 
+         "name": "Can delete permission", 
+         "content_type": 1
+      }
+   }, 
+   {
+      "pk": 7, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_user", 
+         "name": "Can add user", 
+         "content_type": 3
+      }
+   }, 
+   {
+      "pk": 8, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_user", 
+         "name": "Can change user", 
+         "content_type": 3
+      }
+   }, 
+   {
+      "pk": 9, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_user", 
+         "name": "Can delete user", 
+         "content_type": 3
+      }
+   }, 
+   {
+      "pk": 34, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_backup", 
+         "name": "Can add backup", 
+         "content_type": 12
+      }
+   }, 
+   {
+      "pk": 35, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_backup", 
+         "name": "Can change backup", 
+         "content_type": 12
+      }
+   }, 
+   {
+      "pk": 36, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_backup", 
+         "name": "Can delete backup", 
+         "content_type": 12
+      }
+   }, 
+   {
+      "pk": 31, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_etvaagent", 
+         "name": "Can add etva agent", 
+         "content_type": 11
+      }
+   }, 
+   {
+      "pk": 32, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_etvaagent", 
+         "name": "Can change etva agent", 
+         "content_type": 11
+      }
+   }, 
+   {
+      "pk": 33, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_etvaagent", 
+         "name": "Can delete etva agent", 
+         "content_type": 11
+      }
+   }, 
+   {
+      "pk": 13, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_contenttype", 
+         "name": "Can add content type", 
+         "content_type": 5
+      }
+   }, 
+   {
+      "pk": 14, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_contenttype", 
+         "name": "Can change content type", 
+         "content_type": 5
+      }
+   }, 
+   {
+      "pk": 15, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_contenttype", 
+         "name": "Can delete content type", 
+         "content_type": 5
+      }
+   }, 
+   {
+      "pk": 25, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_mygroup", 
+         "name": "Can add my group", 
+         "content_type": 9
+      }
+   }, 
+   {
+      "pk": 26, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_mygroup", 
+         "name": "Can change my group", 
+         "content_type": 9
+      }
+   }, 
+   {
+      "pk": 27, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_mygroup", 
+         "name": "Can delete my group", 
+         "content_type": 9
+      }
+   }, 
+   {
+      "pk": 28, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_product", 
+         "name": "Can add product", 
+         "content_type": 10
+      }
+   }, 
+   {
+      "pk": 29, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_product", 
+         "name": "Can change product", 
+         "content_type": 10
+      }
+   }, 
+   {
+      "pk": 30, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_product", 
+         "name": "Can delete product", 
+         "content_type": 10
+      }
+   }, 
+   {
+      "pk": 16, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_session", 
+         "name": "Can add session", 
+         "content_type": 6
+      }
+   }, 
+   {
+      "pk": 17, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_session", 
+         "name": "Can change session", 
+         "content_type": 6
+      }
+   }, 
+   {
+      "pk": 18, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_session", 
+         "name": "Can delete session", 
+         "content_type": 6
+      }
+   }, 
+   {
+      "pk": 19, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "add_site", 
+         "name": "Can add site", 
+         "content_type": 7
+      }
+   }, 
+   {
+      "pk": 20, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "change_site", 
+         "name": "Can change site", 
+         "content_type": 7
+      }
+   }, 
+   {
+      "pk": 21, 
+      "model": "auth.permission", 
+      "fields": {
+         "codename": "delete_site", 
+         "name": "Can delete site", 
+         "content_type": 7
+      }
+   }, 
+   {
+      "pk": 1, 
+      "model": "auth.user", 
+      "fields": {
+         "username": "admin", 
+         "first_name": "", 
+         "last_name": "", 
+         "is_active": true, 
+         "is_superuser": true, 
+         "is_staff": true, 
+         "last_login": "2011-11-24 18:20:19", 
+         "groups": [], 
+         "user_permissions": [], 
+         "password": "sha1$13347$84fd6d1edac47c837daae6582373679511718246", 
+         "email": "maf@eurotux.com", 
+         "date_joined": "2011-11-24 18:20:19"
+      }
+   }
+]

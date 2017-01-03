@@ -1,0 +1,32 @@
+From 1898718cb27b5dbed14283e353de362bc1e76a4d Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Tue, 28 Aug 2012 16:21:12 +0200
+Subject: [PATCH] ehci: Update copyright headers to reflect recent work
+
+Update copyright headers to reflect all the work Gerd and I have been doing
+on the EHCI emulation.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+(cherry picked from commit 522079dd4461c38b9a88bf31a65ea038c5b2be45)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 35eb441..78a248f 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -2,6 +2,11 @@
+  * QEMU USB EHCI Emulation
+  *
+  * Copyright(c) 2008  Emutex Ltd. (address@hidden)
++ * Copyright(c) 2011-2012 Red Hat, Inc.
++ *
++ * Red Hat Authors:
++ * Gerd Hoffmann <kraxel@redhat.com>
++ * Hans de Goede <hdegoede@redhat.com>
+  *
+  * EHCI project was started by Mark Burkley, with contributions by
+  * Niels de Vos.  David S. Ahern continued working on it.  Kevin Wolf,

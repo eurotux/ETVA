@@ -1,0 +1,408 @@
+From f3b32fc553bc248c4c33716c568445e7be8c5afe Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Sun, 2 Sep 2012 07:33:39 +0000
+Subject: [PATCH] target-s390x: avoid AREG0 for misc helpers
+
+Make misc helpers take a parameter for CPUState instead
+of relying on global env.
+
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+[agraf: fix conflict]
+Signed-off-by: Alexander Graf <agraf@suse.de>
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-s390x/Makefile.objs |  1 -
+ target-s390x/helper.h      | 26 +++++++++++-----------
+ target-s390x/mem_helper.c  |  2 +-
+ target-s390x/misc_helper.c | 55 +++++++++++++++++++++++++---------------------
+ target-s390x/translate.c   | 32 +++++++++++++--------------
+ 5 files changed, 60 insertions(+), 56 deletions(-)
+
+diff --git a/target-s390x/Makefile.objs b/target-s390x/Makefile.objs
+index 736cf33..156d946 100644
+--- a/target-s390x/Makefile.objs
++++ b/target-s390x/Makefile.objs
+@@ -4,4 +4,3 @@ obj-$(CONFIG_SOFTMMU) += machine.o
+ obj-$(CONFIG_KVM) += kvm.o
+ 
+ $(obj)/mem_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+-$(obj)/misc_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/target-s390x/helper.h b/target-s390x/helper.h
+index 876b88e..f4e0b37 100644
+--- a/target-s390x/helper.h
++++ b/target-s390x/helper.h
+@@ -1,6 +1,6 @@
+ #include "def-helper.h"
+ 
+-DEF_HELPER_1(exception, void, i32)
++DEF_HELPER_2(exception, void, env, i32)
+ DEF_HELPER_3(nc, i32, i32, i64, i64)
+ DEF_HELPER_3(oc, i32, i32, i64, i64)
+ DEF_HELPER_3(xc, i32, i32, i64, i64)
+@@ -113,20 +113,20 @@ DEF_HELPER_FLAGS_1(cvd, TCG_CALL_PURE|TCG_CALL_CONST, i64, s32)
+ DEF_HELPER_3(unpk, void, i32, i64, i64)
+ DEF_HELPER_3(tr, void, i32, i64, i64)
+ 
+-DEF_HELPER_2(servc, i32, i32, i64)
+-DEF_HELPER_3(diag, i64, i32, i64, i64)
++DEF_HELPER_3(servc, i32, env, i32, i64)
++DEF_HELPER_4(diag, i64, env, i32, i64, i64)
+ DEF_HELPER_3(load_psw, void, env, i64, i64)
+ DEF_HELPER_1(program_interrupt, void, i32)
+-DEF_HELPER_FLAGS_1(stidp, TCG_CALL_CONST, void, i64)
+-DEF_HELPER_FLAGS_1(spx, TCG_CALL_CONST, void, i64)
++DEF_HELPER_FLAGS_2(stidp, TCG_CALL_CONST, void, env, i64)
++DEF_HELPER_FLAGS_2(spx, TCG_CALL_CONST, void, env, i64)
+ DEF_HELPER_FLAGS_1(sck, TCG_CALL_CONST, i32, i64)
+-DEF_HELPER_1(stck, i32, i64)
+-DEF_HELPER_1(stcke, i32, i64)
+-DEF_HELPER_FLAGS_1(sckc, TCG_CALL_CONST, void, i64)
+-DEF_HELPER_FLAGS_1(stckc, TCG_CALL_CONST, void, i64)
+-DEF_HELPER_FLAGS_1(spt, TCG_CALL_CONST, void, i64)
+-DEF_HELPER_FLAGS_1(stpt, TCG_CALL_CONST, void, i64)
+-DEF_HELPER_3(stsi, i32, i64, i32, i32)
++DEF_HELPER_2(stck, i32, env, i64)
++DEF_HELPER_2(stcke, i32, env, i64)
++DEF_HELPER_FLAGS_2(sckc, TCG_CALL_CONST, void, env, i64)
++DEF_HELPER_FLAGS_2(stckc, TCG_CALL_CONST, void, env, i64)
++DEF_HELPER_FLAGS_2(spt, TCG_CALL_CONST, void, env, i64)
++DEF_HELPER_FLAGS_2(stpt, TCG_CALL_CONST, void, env, i64)
++DEF_HELPER_4(stsi, i32, env, i64, i32, i32)
+ DEF_HELPER_3(lctl, void, i32, i64, i32)
+ DEF_HELPER_3(lctlg, void, i32, i64, i32)
+ DEF_HELPER_3(stctl, void, i32, i64, i32)
+@@ -138,7 +138,7 @@ DEF_HELPER_FLAGS_2(rrbe, TCG_CALL_CONST, i32, i32, i64)
+ DEF_HELPER_2(csp, i32, i32, i32)
+ DEF_HELPER_3(mvcs, i32, i64, i64, i64)
+ DEF_HELPER_3(mvcp, i32, i64, i64, i64)
+-DEF_HELPER_3(sigp, i32, i64, i32, i64)
++DEF_HELPER_4(sigp, i32, env, i64, i32, i64)
+ DEF_HELPER_2(sacf, void, env, i64)
+ DEF_HELPER_FLAGS_2(ipte, TCG_CALL_CONST, void, i64, i64)
+ DEF_HELPER_FLAGS_0(ptlb, TCG_CALL_CONST, void)
+diff --git a/target-s390x/mem_helper.c b/target-s390x/mem_helper.c
+index 3f8b3ba..52f2602 100644
+--- a/target-s390x/mem_helper.c
++++ b/target-s390x/mem_helper.c
+@@ -595,7 +595,7 @@ uint32_t HELPER(ex)(uint32_t cc, uint64_t v1, uint64_t addr, uint64_t ret)
+         env->psw.addr = ret - 4;
+         env->int_svc_code = (insn | v1) & 0xff;
+         env->int_svc_ilc = 4;
+-        helper_exception(EXCP_SVC);
++        helper_exception(env, EXCP_SVC);
+     } else if ((insn & 0xff00) == 0xbf00) {
+         uint32_t insn2, r1, r3, b2, d2;
+ 
+diff --git a/target-s390x/misc_helper.c b/target-s390x/misc_helper.c
+index 1d5137f..ced26c6 100644
+--- a/target-s390x/misc_helper.c
++++ b/target-s390x/misc_helper.c
+@@ -21,7 +21,6 @@
+ #include "cpu.h"
+ #include "memory.h"
+ #include "cputlb.h"
+-#include "dyngen-exec.h"
+ #include "host-utils.h"
+ #include "helper.h"
+ #include <string.h>
+@@ -32,7 +31,10 @@
+ #endif
+ 
+ #if !defined(CONFIG_USER_ONLY)
++/* temporarily disabled due to wrapper use */
++#if 0
+ #include "softmmu_exec.h"
++#endif
+ #include "sysemu.h"
+ #endif
+ 
+@@ -44,7 +46,7 @@
+ #endif
+ 
+ /* raise an exception */
+-void HELPER(exception)(uint32_t excp)
++void HELPER(exception)(CPUS390XState *env, uint32_t excp)
+ {
+     HELPER_LOG("%s: exception %d\n", __func__, excp);
+     env->exception_index = excp;
+@@ -112,7 +114,7 @@ int sclp_service_call(CPUS390XState *env, uint32_t sccb, uint64_t code)
+ }
+ 
+ /* SCLP service call */
+-uint32_t HELPER(servc)(uint32_t r1, uint64_t r2)
++uint32_t HELPER(servc)(CPUS390XState *env, uint32_t r1, uint64_t r2)
+ {
+     int r;
+ 
+@@ -125,7 +127,8 @@ uint32_t HELPER(servc)(uint32_t r1, uint64_t r2)
+ }
+ 
+ /* DIAG */
+-uint64_t HELPER(diag)(uint32_t num, uint64_t mem, uint64_t code)
++uint64_t HELPER(diag)(CPUS390XState *env, uint32_t num, uint64_t mem,
++                      uint64_t code)
+ {
+     uint64_t r;
+ 
+@@ -155,17 +158,17 @@ uint64_t HELPER(diag)(uint32_t num, uint64_t mem, uint64_t code)
+ }
+ 
+ /* Store CPU ID */
+-void HELPER(stidp)(uint64_t a1)
++void HELPER(stidp)(CPUS390XState *env, uint64_t a1)
+ {
+-    stq(a1, env->cpu_num);
++    cpu_stq_data(env, a1, env->cpu_num);
+ }
+ 
+ /* Set Prefix */
+-void HELPER(spx)(uint64_t a1)
++void HELPER(spx)(CPUS390XState *env, uint64_t a1)
+ {
+     uint32_t prefix;
+ 
+-    prefix = ldl(a1);
++    prefix = cpu_ldl_data(env, a1);
+     env->psa = prefix & 0xfffff000;
+     qemu_log("prefix: %#x\n", prefix);
+     tlb_flush_page(env, 0);
+@@ -191,31 +194,31 @@ static inline uint64_t clock_value(CPUS390XState *env)
+ }
+ 
+ /* Store Clock */
+-uint32_t HELPER(stck)(uint64_t a1)
++uint32_t HELPER(stck)(CPUS390XState *env, uint64_t a1)
+ {
+-    stq(a1, clock_value(env));
++    cpu_stq_data(env, a1, clock_value(env));
+ 
+     return 0;
+ }
+ 
+ /* Store Clock Extended */
+-uint32_t HELPER(stcke)(uint64_t a1)
++uint32_t HELPER(stcke)(CPUS390XState *env, uint64_t a1)
+ {
+-    stb(a1, 0);
++    cpu_stb_data(env, a1, 0);
+     /* basically the same value as stck */
+-    stq(a1 + 1, clock_value(env) | env->cpu_num);
++    cpu_stq_data(env, a1 + 1, clock_value(env) | env->cpu_num);
+     /* more fine grained than stck */
+-    stq(a1 + 9, 0);
++    cpu_stq_data(env, a1 + 9, 0);
+     /* XXX programmable fields */
+-    stw(a1 + 17, 0);
++    cpu_stw_data(env, a1 + 17, 0);
+ 
+     return 0;
+ }
+ 
+ /* Set Clock Comparator */
+-void HELPER(sckc)(uint64_t a1)
++void HELPER(sckc)(CPUS390XState *env, uint64_t a1)
+ {
+-    uint64_t time = ldq(a1);
++    uint64_t time = cpu_ldq_data(env, a1);
+ 
+     if (time == -1ULL) {
+         return;
+@@ -230,16 +233,16 @@ void HELPER(sckc)(uint64_t a1)
+ }
+ 
+ /* Store Clock Comparator */
+-void HELPER(stckc)(uint64_t a1)
++void HELPER(stckc)(CPUS390XState *env, uint64_t a1)
+ {
+     /* XXX implement */
+-    stq(a1, 0);
++    cpu_stq_data(env, a1, 0);
+ }
+ 
+ /* Set CPU Timer */
+-void HELPER(spt)(uint64_t a1)
++void HELPER(spt)(CPUS390XState *env, uint64_t a1)
+ {
+-    uint64_t time = ldq(a1);
++    uint64_t time = cpu_ldq_data(env, a1);
+ 
+     if (time == -1ULL) {
+         return;
+@@ -252,14 +255,15 @@ void HELPER(spt)(uint64_t a1)
+ }
+ 
+ /* Store CPU Timer */
+-void HELPER(stpt)(uint64_t a1)
++void HELPER(stpt)(CPUS390XState *env, uint64_t a1)
+ {
+     /* XXX implement */
+-    stq(a1, 0);
++    cpu_stq_data(env, a1, 0);
+ }
+ 
+ /* Store System Information */
+-uint32_t HELPER(stsi)(uint64_t a0, uint32_t r0, uint32_t r1)
++uint32_t HELPER(stsi)(CPUS390XState *env, uint64_t a0, uint32_t r0,
++                      uint32_t r1)
+ {
+     int cc = 0;
+     int sel1, sel2;
+@@ -384,7 +388,8 @@ uint32_t HELPER(stsi)(uint64_t a0, uint32_t r0, uint32_t r1)
+     return cc;
+ }
+ 
+-uint32_t HELPER(sigp)(uint64_t order_code, uint32_t r1, uint64_t cpu_addr)
++uint32_t HELPER(sigp)(CPUS390XState *env, uint64_t order_code, uint32_t r1,
++                      uint64_t cpu_addr)
+ {
+     int cc = 0;
+ 
+diff --git a/target-s390x/translate.c b/target-s390x/translate.c
+index 1d87272..0c61e63 100644
+--- a/target-s390x/translate.c
++++ b/target-s390x/translate.c
+@@ -312,7 +312,7 @@ static inline void gen_debug(DisasContext *s)
+     TCGv_i32 tmp = tcg_const_i32(EXCP_DEBUG);
+     update_psw_addr(s);
+     gen_op_calc_cc(s);
+-    gen_helper_exception(tmp);
++    gen_helper_exception(cpu_env, tmp);
+     tcg_temp_free_i32(tmp);
+     s->is_jmp = DISAS_EXCP;
+ }
+@@ -324,7 +324,7 @@ static void gen_illegal_opcode(DisasContext *s, int ilc)
+     TCGv_i32 tmp = tcg_const_i32(EXCP_SPEC);
+     update_psw_addr(s);
+     gen_op_calc_cc(s);
+-    gen_helper_exception(tmp);
++    gen_helper_exception(cpu_env, tmp);
+     tcg_temp_free_i32(tmp);
+     s->is_jmp = DISAS_EXCP;
+ }
+@@ -377,7 +377,7 @@ static void gen_program_exception(DisasContext *s, int ilc, int code)
+ 
+     /* trigger exception */
+     tmp = tcg_const_i32(EXCP_PGM);
+-    gen_helper_exception(tmp);
++    gen_helper_exception(cpu_env, tmp);
+     tcg_temp_free_i32(tmp);
+ 
+     /* end TB here */
+@@ -2712,7 +2712,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_stidp(tmp);
++        gen_helper_stidp(cpu_env, tmp);
+         tcg_temp_free_i64(tmp);
+         break;
+     case 0x04: /* SCK       D2(B2)     [S] */
+@@ -2730,7 +2730,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_stck(cc_op, tmp);
++        gen_helper_stck(cc_op, cpu_env, tmp);
+         set_cc_static(s);
+         tcg_temp_free_i64(tmp);
+         break;
+@@ -2740,7 +2740,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_sckc(tmp);
++        gen_helper_sckc(cpu_env, tmp);
+         tcg_temp_free_i64(tmp);
+         break;
+     case 0x07: /* STCKC    D2(B2)     [S] */
+@@ -2749,7 +2749,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_stckc(tmp);
++        gen_helper_stckc(cpu_env, tmp);
+         tcg_temp_free_i64(tmp);
+         break;
+     case 0x08: /* SPT      D2(B2)     [S] */
+@@ -2758,7 +2758,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_spt(tmp);
++        gen_helper_spt(cpu_env, tmp);
+         tcg_temp_free_i64(tmp);
+         break;
+     case 0x09: /* STPT     D2(B2)     [S] */
+@@ -2767,7 +2767,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_stpt(tmp);
++        gen_helper_stpt(cpu_env, tmp);
+         tcg_temp_free_i64(tmp);
+         break;
+     case 0x0a: /* SPKA     D2(B2)     [S] */
+@@ -2793,7 +2793,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_spx(tmp);
++        gen_helper_spx(cpu_env, tmp);
+         tcg_temp_free_i64(tmp);
+         break;
+     case 0x11: /* STPX     D2(B2)     [S] */
+@@ -2906,7 +2906,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         decode_rs(s, insn, &r1, &r3, &b2, &d2);
+         tmp = get_address(s, 0, b2, d2);
+         potential_page_fault(s);
+-        gen_helper_stcke(cc_op, tmp);
++        gen_helper_stcke(cc_op, cpu_env, tmp);
+         set_cc_static(s);
+         tcg_temp_free_i64(tmp);
+         break;
+@@ -2930,7 +2930,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         tmp32_1 = load_reg32(0);
+         tmp32_2 = load_reg32(1);
+         potential_page_fault(s);
+-        gen_helper_stsi(cc_op, tmp, tmp32_1, tmp32_2);
++        gen_helper_stsi(cc_op, cpu_env, tmp, tmp32_1, tmp32_2);
+         set_cc_static(s);
+         tcg_temp_free_i64(tmp);
+         tcg_temp_free_i32(tmp32_1);
+@@ -2980,7 +2980,7 @@ static void disas_b2(DisasContext *s, int op, uint32_t insn)
+         potential_page_fault(s);
+         tmp32_1 = load_reg32(r2);
+         tmp = load_reg(r1);
+-        gen_helper_servc(cc_op, tmp32_1, tmp);
++        gen_helper_servc(cc_op, cpu_env, tmp32_1, tmp);
+         set_cc_static(s);
+         tcg_temp_free_i32(tmp32_1);
+         tcg_temp_free_i64(tmp);
+@@ -3926,7 +3926,7 @@ static void disas_s390_insn(DisasContext *s)
+         tmp32_3 = tcg_const_i32(EXCP_SVC);
+         tcg_gen_st_i32(tmp32_1, cpu_env, offsetof(CPUS390XState, int_svc_code));
+         tcg_gen_st_i32(tmp32_2, cpu_env, offsetof(CPUS390XState, int_svc_ilc));
+-        gen_helper_exception(tmp32_3);
++        gen_helper_exception(cpu_env, tmp32_3);
+         s->is_jmp = DISAS_EXCP;
+         tcg_temp_free_i32(tmp32_1);
+         tcg_temp_free_i32(tmp32_2);
+@@ -4543,7 +4543,7 @@ static void disas_s390_insn(DisasContext *s)
+         tmp32_1 = tcg_const_i32(insn & 0xfff);
+         tmp2 = load_reg(2);
+         tmp3 = load_reg(1);
+-        gen_helper_diag(tmp2, tmp32_1, tmp2, tmp3);
++        gen_helper_diag(tmp2, cpu_env, tmp32_1, tmp2, tmp3);
+         store_reg(2, tmp2);
+         tcg_temp_free_i32(tmp32_1);
+         tcg_temp_free_i64(tmp2);
+@@ -4777,7 +4777,7 @@ static void disas_s390_insn(DisasContext *s)
+         tmp2 = load_reg(r3);
+         tmp32_1 = tcg_const_i32(r1);
+         potential_page_fault(s);
+-        gen_helper_sigp(cc_op, tmp, tmp32_1, tmp2);
++        gen_helper_sigp(cc_op, cpu_env, tmp, tmp32_1, tmp2);
+         set_cc_static(s);
+         tcg_temp_free_i64(tmp);
+         tcg_temp_free_i64(tmp2);

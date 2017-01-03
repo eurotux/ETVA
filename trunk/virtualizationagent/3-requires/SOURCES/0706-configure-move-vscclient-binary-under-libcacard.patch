@@ -1,0 +1,90 @@
+From 6fe4869a4e65422bd863f4648300b9bf842f0d09 Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Thu, 29 Nov 2012 14:11:19 +0200
+Subject: [PATCH] configure: move vscclient binary under libcacard
+
+build rule is in top level Makefile like other tools.
+
+build rule also exists in libcacard for installation purposes. This was
+fixed in a better way in 1.3.0-rc2
+---
+ Makefile           |  4 ++--
+ Makefile.objs      | 11 ++++++-----
+ configure          |  2 +-
+ libcacard/Makefile |  6 +++++-
+ 4 files changed, 14 insertions(+), 9 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index dd11e3c..13c1693 100644
+--- a/Makefile
++++ b/Makefile
+@@ -168,8 +168,8 @@ qemu-io$(EXESUF): qemu-io.o cmd.o $(tools-obj-y) $(block-obj-y)
+ 
+ qemu-bridge-helper$(EXESUF): qemu-bridge-helper.o
+ 
+-vscclient$(EXESUF): $(libcacard-y) $(oslib-obj-y) $(trace-obj-y) $(tools-obj-y) qemu-timer-common.o libcacard/vscclient.o
+-	$(call quiet-command,$(CC) $(LDFLAGS) -o $@ $^ $(libcacard_libs) $(LIBS),"  LINK  $@")
++libcacard/vscclient$(EXESUF): $(libcacard-y) $(oslib-obj-y) $(trace-obj-y) qemu-timer-common.o iov.o cutils.o qemu-user.o libcacard/vscclient.o
++libcacard/vscclient$(EXESUF): LIBS += $(libcacard_libs)
+ 
+ fsdev/virtfs-proxy-helper$(EXESUF): fsdev/virtfs-proxy-helper.o fsdev/virtio-9p-marshal.o oslib-posix.o $(trace-obj-y)
+ fsdev/virtfs-proxy-helper$(EXESUF): LIBS += -lcap
+diff --git a/Makefile.objs b/Makefile.objs
+index 4412757..92d6b4a 100644
+--- a/Makefile.objs
++++ b/Makefile.objs
+@@ -206,11 +206,12 @@ $(trace-obj-y): $(GENERATED_HEADERS)
+ ######################################################################
+ # smartcard
+ 
+-libcacard-y += libcacard/cac.o libcacard/event.o
+-libcacard-y += libcacard/vcard.o libcacard/vreader.o
+-libcacard-y += libcacard/vcard_emul_nss.o
+-libcacard-y += libcacard/vcard_emul_type.o
+-libcacard-y += libcacard/card_7816.o
++libcacard-base-y += cac.o event.o
++libcacard-base-y += vcard.o vreader.o
++libcacard-base-y += vcard_emul_nss.o
++libcacard-base-y += vcard_emul_type.o
++libcacard-base-y += card_7816.o
++libcacard-y = $(addprefix libcacard/,$(libcacard-base-y))
+ 
+ common-obj-$(CONFIG_SMARTCARD_NSS) += $(libcacard-y)
+ 
+diff --git a/configure b/configure
+index 1668f30..6af2806 100755
+--- a/configure
++++ b/configure
+@@ -3078,7 +3078,7 @@ if test "$softmmu" = yes ; then
+     fi
+   fi
+   if test "$smartcard_nss" = "yes" ; then
+-    tools="vscclient\$(EXESUF) $tools"
++    tools="libcacard/vscclient\$(EXESUF) $tools"
+   fi
+ fi
+ 
+diff --git a/libcacard/Makefile b/libcacard/Makefile
+index 9ce3117..88ed064 100644
+--- a/libcacard/Makefile
++++ b/libcacard/Makefile
+@@ -44,6 +44,10 @@ libcacard.pc: $(libcacard_srcpath)/libcacard.pc.in
+ 		< $(libcacard_srcpath)/libcacard.pc.in > libcacard.pc,\
+ 	"  GEN   $@")
+ 
++VSCCLIENT_QEMU_OBJS=$(addprefix ../,$(oslib-obj-y) $(trace-obj-y) qemu-timer-common.o iov.o cutils.o qemu-user.o)
++vscclient$(EXESUF): $(VSCCLIENT_QEMU_OBJS) $(libcacard-base-y) vscclient.o
++vscclient$(EXESUF): LIBS += $(libcacard_libs)
++
+ .PHONY: install-libcacard
+ 
+ install-libcacard: libcacard.pc libcacard.la vscclient
+@@ -51,7 +55,7 @@ install-libcacard: libcacard.pc libcacard.la vscclient
+ 	$(INSTALL_DIR) "$(DESTDIR)$(libdir)/pkgconfig"
+ 	$(INSTALL_DIR) "$(DESTDIR)$(libcacard_includedir)"
+ 	$(INSTALL_DIR) "$(DESTDIR)$(bindir)"
+-	$(LIBTOOL) --mode=install $(INSTALL_PROG) vscclient "$(DESTDIR)$(bindir)"
++	$(LIBTOOL) --mode=install $(INSTALL_PROG) vscclient$(EXESUF) "$(DESTDIR)$(bindir)"
+ 	$(LIBTOOL) --mode=install $(INSTALL_DATA) libcacard.la "$(DESTDIR)$(libdir)"
+ 	$(LIBTOOL) --mode=install $(INSTALL_DATA) libcacard.pc "$(DESTDIR)$(libdir)/pkgconfig"
+ 	for inc in *.h; do \

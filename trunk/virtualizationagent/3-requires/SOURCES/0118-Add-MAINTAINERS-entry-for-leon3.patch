@@ -1,0 +1,31 @@
+From 74e6fd088680b04060943c45a637a333473c62f8 Mon Sep 17 00:00:00 2001
+From: Fabien Chouteau <chouteau@adacore.com>
+Date: Tue, 22 May 2012 10:14:28 +0200
+Subject: [PATCH] Add MAINTAINERS entry for leon3
+
+Signed-off-by: Fabien Chouteau <chouteau@adacore.com>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit ce6c760c37b9a88db87c5b9b9bf39ca866e570f6)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ MAINTAINERS | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 6d864c1..61f8b45 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -398,6 +398,12 @@ M: Blue Swirl <blauwirbel@gmail.com>
+ S: Maintained
+ F: hw/sun4u.c
+ 
++Leon3
++M: Fabien Chouteau <chouteau@adacore.com>
++S: Maintained
++F: hw/leon3.c
++F: hw/grlib*
++
+ S390 Machines
+ -------------
+ S390 Virtio

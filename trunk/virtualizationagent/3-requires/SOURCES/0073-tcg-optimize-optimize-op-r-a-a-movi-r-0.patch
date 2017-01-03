@@ -1,0 +1,43 @@
+From 49c949e3690b555659eee93bca7290f81b5b5315 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Tue, 18 Sep 2012 19:12:36 +0200
+Subject: [PATCH] tcg/optimize: optimize "op r, a, a => movi r, 0"
+
+Now that it's possible to detect copies, we can optimize the case
+the "op r, a, a => movi r, 0". This helps in the computation of
+overflow flags when one of the two args is 0.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index b9a7da9..ceea644 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -540,6 +540,22 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+             break;
+         }
+ 
++        /* Simplify expression for "op r, a, a => movi r, 0" cases */
++        switch (op) {
++        CASE_OP_32_64(sub):
++        CASE_OP_32_64(xor):
++            if (temps_are_copies(args[1], args[2])) {
++                gen_opc_buf[op_index] = op_to_movi(op);
++                tcg_opt_gen_movi(gen_args, args[0], 0);
++                gen_args += 2;
++                args += 3;
++                continue;
++            }
++            break;
++        default:
++            break;
++        }
++
+         /* Propagate constants through copy operations and do constant
+            folding.  Constants will be substituted to arguments by register
+            allocator where needed and possible.  Also detect copies. */

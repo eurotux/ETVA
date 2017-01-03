@@ -1,0 +1,39 @@
+From 4263264dbf1fafb49c3de1d77835b0aa5e5d0b6c Mon Sep 17 00:00:00 2001
+From: Amos Kong <akong@redhat.com>
+Date: Fri, 31 Aug 2012 10:56:20 +0800
+Subject: [PATCH] fix doc of using raw values with sendkey
+
+(qemu) sendkey a
+(qemu) sendkey 0x1e
+(qemu) sendkey #0x1e
+ unknown key: '#0x1e'
+
+The last command doesn't work, '#' is not requested before
+raw values, and the raw value in decimal format is not supported.
+
+Signed-off-by: Amos Kong <akong@redhat.com>
+Signed-off-by: Luiz Capitulino <lcapitulino@redhat.com>
+(cherry picked from commit 886cc706ce5d4d3d1c296f028ddc2991cfbe3bbe)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hmp-commands.hx | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/hmp-commands.hx b/hmp-commands.hx
+index 13f28cf..a72614d 100644
+--- a/hmp-commands.hx
++++ b/hmp-commands.hx
+@@ -512,9 +512,9 @@ STEXI
+ @item sendkey @var{keys}
+ @findex sendkey
+ 
+-Send @var{keys} to the emulator. @var{keys} could be the name of the
+-key or @code{#} followed by the raw value in either decimal or hexadecimal
+-format. Use @code{-} to press several keys simultaneously. Example:
++Send @var{keys} to the guest. @var{keys} could be the name of the
++key or the raw value in hexadecimal format. Use @code{-} to press
++several keys simultaneously. Example:
+ @example
+ sendkey ctrl-alt-f1
+ @end example

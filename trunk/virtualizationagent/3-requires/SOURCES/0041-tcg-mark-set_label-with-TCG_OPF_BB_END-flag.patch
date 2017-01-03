@@ -1,0 +1,50 @@
+From 6b755c1518101434d9fe736c8de7df18052111a1 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Mon, 10 Sep 2012 14:23:49 +0200
+Subject: [PATCH] tcg: mark set_label with TCG_OPF_BB_END flag
+
+set_label is effectively the end of a basic block, as no optimization
+can be made accross it. It was treated as such in the liveness analysis
+code, but as a special case.
+
+Mark it with TCG_OPF_BB_END flag so that this information can be used
+by other parts of the TCG code, and remove the special case in the liveness
+analysis code.
+
+Cc: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/tcg-opc.h | 2 +-
+ tcg/tcg.c     | 5 -----
+ 2 files changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/tcg/tcg-opc.h b/tcg/tcg-opc.h
+index 8e06d03..d12e8d0 100644
+--- a/tcg/tcg-opc.h
++++ b/tcg/tcg-opc.h
+@@ -36,7 +36,7 @@ DEF(nopn, 0, 0, 1, 0) /* variable number of parameters */
+ 
+ DEF(discard, 1, 0, 0, 0)
+ 
+-DEF(set_label, 0, 0, 1, 0)
++DEF(set_label, 0, 0, 1, TCG_OPF_BB_END)
+ DEF(call, 0, 1, 2, TCG_OPF_SIDE_EFFECTS) /* variable number of parameters */
+ DEF(jmp, 0, 1, 0, TCG_OPF_BB_END | TCG_OPF_SIDE_EFFECTS)
+ DEF(br, 0, 0, 1, TCG_OPF_BB_END | TCG_OPF_SIDE_EFFECTS)
+diff --git a/tcg/tcg.c b/tcg/tcg.c
+index 8386b70..c002a88 100644
+--- a/tcg/tcg.c
++++ b/tcg/tcg.c
+@@ -1297,11 +1297,6 @@ static void tcg_liveness_analysis(TCGContext *s)
+                 args--;
+             }
+             break;
+-        case INDEX_op_set_label:
+-            args--;
+-            /* mark end of basic block */
+-            tcg_la_bb_end(s, dead_temps);
+-            break;
+         case INDEX_op_debug_insn_start:
+             args -= def->nb_args;
+             break;

@@ -1,0 +1,36 @@
+From cb946e3352ab77e535440af1c8a58bb1dadcf3ae Mon Sep 17 00:00:00 2001
+From: Ronnie Sahlberg <ronniesahlberg@gmail.com>
+Date: Thu, 30 Aug 2012 16:56:36 -0700
+Subject: [PATCH] iSCSI: We dont need to explicitely call qemu_notify_event()
+ any more
+
+We no longer need to explicitely call qemu_notify_event() any more
+since this is now done automatically any time the filehandles we listen
+to change.
+
+Signed-off-by: Ronnie Sahlberg <ronniesahlberg@gmail.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+(cherry picked from commit 40a13ca8d28c21062e35b10d9b80e76b92405bdf)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block/iscsi.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/block/iscsi.c b/block/iscsi.c
+index ea16609..fb001b9 100644
+--- a/block/iscsi.c
++++ b/block/iscsi.c
+@@ -167,12 +167,6 @@ iscsi_set_events(IscsiLun *iscsilun)
+ 
+     }
+ 
+-    /* If we just added an event, the callback might be delayed
+-     * unless we call qemu_notify_event().
+-     */
+-    if (ev & ~iscsilun->events) {
+-        qemu_notify_event();
+-    }
+     iscsilun->events = ev;
+ }
+ 

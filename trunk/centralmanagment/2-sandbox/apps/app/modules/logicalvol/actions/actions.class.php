@@ -254,6 +254,7 @@ class logicalvolActions extends sfActions
         $nid = $request->getParameter('nid');
         $lv = $request->getParameter('lv');
         $size = $request->getParameter('size');
+        $persnapshotusage = $request->getParameter('persnapshotusage');
 
         $etva_node = EtvaNodePeer::getOrElectNode($request);
 
@@ -306,7 +307,7 @@ class logicalvolActions extends sfActions
          * send logical volume to VA
          */
         $lv_va = new EtvaLogicalvolume_VA($etva_lv);
-        $response = $lv_va->send_resize($etva_node,$size);
+        $response = $lv_va->send_resize($etva_node,$size,$persnapshotusage);
 
         if($response['success'])
         {

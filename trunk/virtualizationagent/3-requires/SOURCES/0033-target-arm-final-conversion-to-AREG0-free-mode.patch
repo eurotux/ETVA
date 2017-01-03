@@ -1,0 +1,176 @@
+From 3948c2f4f3ed4758e464380d4c27a0dc9f0cafcd Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Tue, 4 Sep 2012 20:25:59 +0000
+Subject: [PATCH] target-arm: final conversion to AREG0 free mode
+
+Convert code load functions and switch to AREG0 free mode.
+
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure                |  2 +-
+ target-arm/Makefile.objs |  2 --
+ target-arm/cpu.h         | 10 ++++++----
+ target-arm/helper.c      |  9 +++++----
+ target-arm/op_helper.c   |  8 +-------
+ target-arm/translate.c   |  6 +++---
+ 6 files changed, 16 insertions(+), 21 deletions(-)
+
+diff --git a/configure b/configure
+index a8827ba..e8806f0 100755
+--- a/configure
++++ b/configure
+@@ -3839,7 +3839,7 @@ symlink "$source_path/Makefile.target" "$target_dir/Makefile"
+ 
+ 
+ case "$target_arch2" in
+-  alpha | i386 | lm32 | m68k | or32 | s390x | sparc* | unicore32 | x86_64 | xtensa* | ppc*)
++  alpha | arm* | i386 | lm32 | m68k | or32 | s390x | sparc* | unicore32 | x86_64 | xtensa* | ppc*)
+     echo "CONFIG_TCG_PASS_AREG0=y" >> $config_target_mak
+   ;;
+ esac
+diff --git a/target-arm/Makefile.objs b/target-arm/Makefile.objs
+index f447c4f..b6f1a9e 100644
+--- a/target-arm/Makefile.objs
++++ b/target-arm/Makefile.objs
+@@ -2,5 +2,3 @@ obj-y += arm-semi.o
+ obj-$(CONFIG_SOFTMMU) += machine.o
+ obj-y += translate.o op_helper.o helper.o cpu.o
+ obj-y += neon_helper.o iwmmxt_helper.o
+-
+-$(obj)/op_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/target-arm/cpu.h b/target-arm/cpu.h
+index d7f93d9..7fac94f 100644
+--- a/target-arm/cpu.h
++++ b/target-arm/cpu.h
+@@ -734,9 +734,10 @@ static inline void cpu_pc_from_tb(CPUARMState *env, TranslationBlock *tb)
+ }
+ 
+ /* Load an instruction and return it in the standard little-endian order */
+-static inline uint32_t arm_ldl_code(uint32_t addr, bool do_swap)
++static inline uint32_t arm_ldl_code(CPUARMState *env, uint32_t addr,
++                                    bool do_swap)
+ {
+-    uint32_t insn = ldl_code(addr);
++    uint32_t insn = cpu_ldl_code(env, addr);
+     if (do_swap) {
+         return bswap32(insn);
+     }
+@@ -744,9 +745,10 @@ static inline uint32_t arm_ldl_code(uint32_t addr, bool do_swap)
+ }
+ 
+ /* Ditto, for a halfword (Thumb) instruction */
+-static inline uint16_t arm_lduw_code(uint32_t addr, bool do_swap)
++static inline uint16_t arm_lduw_code(CPUARMState *env, uint32_t addr,
++                                     bool do_swap)
+ {
+-    uint16_t insn = lduw_code(addr);
++    uint16_t insn = cpu_lduw_code(env, addr);
+     if (do_swap) {
+         return bswap16(insn);
+     }
+diff --git a/target-arm/helper.c b/target-arm/helper.c
+index e27df96..58340bd 100644
+--- a/target-arm/helper.c
++++ b/target-arm/helper.c
+@@ -1756,7 +1756,7 @@ static void do_interrupt_v7m(CPUARMState *env)
+     case EXCP_BKPT:
+         if (semihosting_enabled) {
+             int nr;
+-            nr = arm_lduw_code(env->regs[15], env->bswap_code) & 0xff;
++            nr = arm_lduw_code(env, env->regs[15], env->bswap_code) & 0xff;
+             if (nr == 0xab) {
+                 env->regs[15] += 2;
+                 env->regs[0] = do_arm_semihosting(env);
+@@ -1828,9 +1828,10 @@ void do_interrupt(CPUARMState *env)
+         if (semihosting_enabled) {
+             /* Check for semihosting interrupt.  */
+             if (env->thumb) {
+-                mask = arm_lduw_code(env->regs[15] - 2, env->bswap_code) & 0xff;
++                mask = arm_lduw_code(env, env->regs[15] - 2, env->bswap_code)
++                    & 0xff;
+             } else {
+-                mask = arm_ldl_code(env->regs[15] - 4, env->bswap_code)
++                mask = arm_ldl_code(env, env->regs[15] - 4, env->bswap_code)
+                     & 0xffffff;
+             }
+             /* Only intercept calls from privileged modes, to provide some
+@@ -1851,7 +1852,7 @@ void do_interrupt(CPUARMState *env)
+     case EXCP_BKPT:
+         /* See if this is a semihosting syscall.  */
+         if (env->thumb && semihosting_enabled) {
+-            mask = arm_lduw_code(env->regs[15], env->bswap_code) & 0xff;
++            mask = arm_lduw_code(env, env->regs[15], env->bswap_code) & 0xff;
+             if (mask == 0xab
+                   && (env->uncached_cpsr & CPSR_M) != ARM_CPU_MODE_USR) {
+                 env->regs[15] += 2;
+diff --git a/target-arm/op_helper.c b/target-arm/op_helper.c
+index 5b868bf..f13fc3a 100644
+--- a/target-arm/op_helper.c
++++ b/target-arm/op_helper.c
+@@ -17,7 +17,6 @@
+  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
+  */
+ #include "cpu.h"
+-#include "dyngen-exec.h"
+ #include "helper.h"
+ 
+ #define SIGNBIT (uint32_t)0x80000000
+@@ -72,16 +71,12 @@ uint32_t HELPER(neon_tbl)(CPUARMState *env, uint32_t ireg, uint32_t def,
+ /* try to fill the TLB and return an exception if error. If retaddr is
+    NULL, it means that the function was called in C code (i.e. not
+    from generated code or from helper.c) */
+-/* XXX: fix it to restore all registers */
+-void tlb_fill(CPUARMState *env1, target_ulong addr, int is_write, int mmu_idx,
++void tlb_fill(CPUARMState *env, target_ulong addr, int is_write, int mmu_idx,
+               uintptr_t retaddr)
+ {
+     TranslationBlock *tb;
+-    CPUARMState *saved_env;
+     int ret;
+ 
+-    saved_env = env;
+-    env = env1;
+     ret = cpu_arm_handle_mmu_fault(env, addr, is_write, mmu_idx);
+     if (unlikely(ret)) {
+         if (retaddr) {
+@@ -95,7 +90,6 @@ void tlb_fill(CPUARMState *env1, target_ulong addr, int is_write, int mmu_idx,
+         }
+         raise_exception(env, env->exception_index);
+     }
+-    env = saved_env;
+ }
+ #endif
+ 
+diff --git a/target-arm/translate.c b/target-arm/translate.c
+index 9ae3b26..f4b447a 100644
+--- a/target-arm/translate.c
++++ b/target-arm/translate.c
+@@ -6534,7 +6534,7 @@ static void disas_arm_insn(CPUARMState * env, DisasContext *s)
+     TCGv addr;
+     TCGv_i64 tmp64;
+ 
+-    insn = arm_ldl_code(s->pc, s->bswap_code);
++    insn = arm_ldl_code(env, s->pc, s->bswap_code);
+     s->pc += 4;
+ 
+     /* M variants do not implement ARM mode.  */
+@@ -7962,7 +7962,7 @@ static int disas_thumb2_insn(CPUARMState *env, DisasContext *s, uint16_t insn_hw
+         /* Fall through to 32-bit decode.  */
+     }
+ 
+-    insn = arm_lduw_code(s->pc, s->bswap_code);
++    insn = arm_lduw_code(env, s->pc, s->bswap_code);
+     s->pc += 2;
+     insn |= (uint32_t)insn_hw1 << 16;
+ 
+@@ -8992,7 +8992,7 @@ static void disas_thumb_insn(CPUARMState *env, DisasContext *s)
+         }
+     }
+ 
+-    insn = arm_lduw_code(s->pc, s->bswap_code);
++    insn = arm_lduw_code(env, s->pc, s->bswap_code);
+     s->pc += 2;
+ 
+     switch (insn >> 12) {

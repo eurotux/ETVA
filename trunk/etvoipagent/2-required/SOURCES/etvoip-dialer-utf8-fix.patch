@@ -1,0 +1,19 @@
+--- /opt/elastix/dialer/ECCPProcess.class.php.orig  2014-03-18 17:54:17.000000000 +0000
++++ /opt/elastix/dialer/ECCPProcess.class.php   2014-03-18 17:57:05.000000000 +0000
+@@ -116,7 +116,14 @@
+     private function _iniciarConexionDB()
+     {
+         try {
+-            $this->_db = new PDO($this->_dsn[0], $this->_dsn[1], $this->_dsn[2]);
++            /*
++             * CMAR - 18/03/2014 - 
++             *   fix enconding problem
++             */
++            $options = array(
++                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
++            );
++            $this->_db = new PDO($this->_dsn[0], $this->_dsn[1], $this->_dsn[2], $options);
+             $this->_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+             return TRUE;
+         } catch (PDOException $e) {
+

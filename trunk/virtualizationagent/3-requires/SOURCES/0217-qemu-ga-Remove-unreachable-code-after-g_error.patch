@@ -1,0 +1,37 @@
+From 09c41847f33e1d0386def3381f36bf961f4bfb32 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 1 Sep 2012 09:34:15 +0200
+Subject: [PATCH] qemu-ga: Remove unreachable code after g_error
+
+Report from smatch:
+qemu-ga.c:117 register_signal_handlers(11) info: ignoring unreachable code.
+qemu-ga.c:122 register_signal_handlers(16) info: ignoring unreachable code.
+
+g_error calls abort which terminates the program.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit b548828862d3bf7214b7ef9cb361356b153b89c9)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qemu-ga.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/qemu-ga.c b/qemu-ga.c
+index 7623079..b747470 100644
+--- a/qemu-ga.c
++++ b/qemu-ga.c
+@@ -114,12 +114,10 @@ static gboolean register_signal_handlers(void)
+     ret = sigaction(SIGINT, &sigact, NULL);
+     if (ret == -1) {
+         g_error("error configuring signal handler: %s", strerror(errno));
+-        return false;
+     }
+     ret = sigaction(SIGTERM, &sigact, NULL);
+     if (ret == -1) {
+         g_error("error configuring signal handler: %s", strerror(errno));
+-        return false;
+     }
+ 
+     return true;

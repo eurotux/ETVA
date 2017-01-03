@@ -1,0 +1,38 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}New Backup{% endblock%}
+{% block section %}{%trans "Backups"%}{% endblock%}
+
+{% block mainCol%}
+
+{%if activatedKeys %}
+
+<h1>{%blocktrans%}New backup{%endblocktrans%}:</h1>
+	{% if errorMsg%}
+	<div id="msgAlert">{{errorMsg}}</div>
+	{%endif%}
+
+{% if form.subject.errors %}
+    <ol>
+    {% for error in form.subject.errors %}
+        <li><strong>{{ error|escape }}</strong></li>
+    {% endfor %}
+    </ol>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data"> 
+<table class="form">
+    {{form.as_table}}
+</table>
+<input class="button" type="submit" value="{% trans "Submit" %}" />
+</form>
+{%else%}
+<h1>{% trans "No activated products!" %}</h1>
+<div class="space15">&nbsp;</div>
+{% trans "You have no activated products! "%}<br>
+{% trans "You need to activate your product keys through ETVA."%}<br>
+
+{%endif%}
+{%endblock%}
+
+

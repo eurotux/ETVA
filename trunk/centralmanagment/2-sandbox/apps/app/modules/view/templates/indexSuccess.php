@@ -123,20 +123,25 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                 if((data['vm_is_running']==true && (data['agent_port'] && data['state'])) ||
                    (data['vm_is_running']==true && !data['agent_port']) ){
                    new_css_state = ['active','icon-vm-stat-ok'];
-                   remove_css_state = ['some-active','no-active','icon-vm-stat-nok'];
+                   remove_css_state = ['suspended','some-active','no-active','icon-vm-stat-nok'];
                 }
 
                 if((data['vm_is_running']==true && (data['agent_port'] && !data['state'])) ||
                    (data['vm_is_running']!=true && (data['agent_port'] && data['state'])) ){
                    new_css_state = ['some-active','icon-vm-stat-ok'];
-                   remove_css_state = ['active','no-active','icon-vm-stat-nok'];
+                   remove_css_state = ['suspended','active','no-active','icon-vm-stat-nok'];
                 }
                 
 
                 if((data['vm_is_running']!=true && (data['agent_port'] && !data['state'])) ||
                    (data['vm_is_running']!=true && !data['agent_port']) ){
                    new_css_state = ['no-active','icon-vm-stat-nok'];
-                   remove_css_state = ['active','some-active','icon-vm-stat-ok'];
+                   remove_css_state = ['suspended','active','some-active','icon-vm-stat-ok'];
+                }                
+                
+                if(data['vm_state']=='suspended'){
+                   new_css_state = ['suspended','icon-vm-stat-ok'];
+                   remove_css_state = ['active','some-active','icon-vm-stat-nok'];
                 }                
                 
                 return {old_css:remove_css_state,new_css:new_css_state};
@@ -154,6 +159,54 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                 buttonHi =  {xtype: 'tbtext',text: <?php echo json_encode(__('Welcome %1%!',array('%1%'=>$sf_user->getUsername()))) ?>};
 
+
+                <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
+                // map multiple keys to multiple actions by strings and array of codes
+                var map = new Ext.KeyMap(document, 
+                                {
+                                    key: Ext.EventObject.F12,
+                                    ctrl:true,
+                                    shift:true,
+                                    fn: function(){
+                                        var topBar = Ext.getCmp('top-bar');
+
+                                        var cookieName = 'engineeringMode';
+                                        var cookieObj = Ext.util.Cookies.get(cookieName)
+                                        if( cookieObj ){
+                                            Ext.util.Cookies.clear(cookieName);
+
+                                            topBar.engModeOff();
+
+                                            //alert('Engineering mode deactivated!');
+
+                                            Ext.Msg.show({
+                                                title: String.format(<?php echo json_encode(__('Engineering mode')) ?>),
+                                                buttons: Ext.MessageBox.OK,
+                                                msg: String.format(<?php echo json_encode(__('Engineering mode deactivated!')) ?>),
+                                                icon: Ext.MessageBox.WARNING
+                                            });
+
+                                        } else {
+                                            cookieObj = new Object();
+                                            cookieObj['engineeringMode'] = 'true';
+                                            Ext.util.Cookies.set(cookieName, cookieObj);
+
+                                            topBar.engModeOn();
+
+                                            //alert('Engineering mode activated!');
+                                            //window.location.reload();
+
+                                            Ext.Msg.show({
+                                                title: String.format(<?php echo json_encode(__('Engineering mode')) ?>),
+                                                buttons: Ext.MessageBox.OK,
+                                                msg: String.format(<?php echo json_encode(__('Engineering mode activated!')) ?>),
+                                                icon: Ext.MessageBox.WARNING
+                                            });
+
+                                        }
+                                    }
+                                });
+                <?php endif; ?>
 
 
                 buttonLogout = new Ext.Action({
@@ -180,8 +233,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 ,id:'ftwizardBtn'
                                 ,url:<?php echo json_encode(url_for('view/View_FirstTimeWizard')); ?>
                                 ,call:'View.FirstTimeWizard'
-                                ,callback:function(item){
-                                    new View.FirstTimeWizard.Main();
+                                ,callback:function(i,e){
+                                    new View.FirstTimeWizard.Main({ 'full-first-time-setup-wizard': (e != null) });
                                 }
                                 ,handler:this.loadComponent
                                 ,scope:this
@@ -191,12 +244,9 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 text:<?php echo json_encode(__('Cluster Setup Wizard')) ?>
                                 ,id:'clusterwizardBtn'
                                 ,url:<?php echo json_encode(url_for('cluster/View_ClusterWizard')); ?>
-//                                ,call:'View.FirstTimeWizard'
                                 ,call:'Cluster.Create'
                                 ,callback:function(item){
-//                                    alert("click");
                                     new Cluster.Create.Main();
-                                    //new View.FirstTimeWizard.Main();
                                 }
                                 ,handler:this.loadComponent
                                 ,scope:this
@@ -258,7 +308,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                     //this.loadComponent
                                     Ext.Msg.show({
                                         title: <?php echo json_encode(__('Shutdown')) ?>,
-                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                        buttons: Ext.MessageBox.YESNO,
                                         msg: <?php echo json_encode(__('Shutdown Central Management?')) ?>,
                                         icon: Ext.MessageBox.WARNING,
                                         fn: function(btn){
@@ -435,6 +485,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                 
                 var topBar = new Ext.Toolbar({
+                    id: 'top-bar',
                     renderTo:'topBar',
                     buttons: [
                         <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
@@ -446,6 +497,28 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         buttonHi,
                         buttonLogout //one to N right buttons
                     ]
+                    ,engModeOn: function(){
+                        if( !this.get('top-bar-engineering-mode') ){
+                            var iconEngMode = {
+                                                id: 'top-bar-engineering-mode',
+                                                xtype: 'button',
+                                                iconCls: 'icon-engineering-mode',
+                                                /*xtype: 'label',
+                                                html: '<span class=\"xtb-text icon-engineering-mode\"></span>',*/
+                                                tooltip: { text: <?php echo json_encode(__('Engineering mode active')) ?> }
+                            };
+                            this.insertButton(-2,iconEngMode);
+                            this.insertButton(-2,{id: 'top-bar-engineering-mode-space',xtype: 'tbspacer'});
+                            this.doLayout();
+                        }
+                    }
+                    ,engModeOff: function(){
+                        if( this.get('top-bar-engineering-mode') ){
+                            this.remove('top-bar-engineering-mode');
+                            this.remove('top-bar-engineering-mode-space');
+                            this.doLayout();
+                        }
+                    }
                 });
 
                 //      var topBar = new Ext.Toolbar('topBar');
@@ -462,6 +535,11 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                 //   topBar.add(buttonLogout);
 
 
+                <?php if($sf_user->getGuardUser()->getIsSuperAdmin()): ?>
+                if( Ext.util.Cookies.get('engineeringMode') ){
+                    topBar.engModeOn();
+                }
+                <?php endif; ?>
 
                 /*
                  *
@@ -493,7 +571,6 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         enableDD:true,
                         listeners: {
                             nodedragover: function(e){
-                                                //console.log(e);
                                             <?php if($sf_user->getAttribute('etvamodel')!='standard'): ?>
 
                                                 //unaccepted node move between clusters
@@ -547,7 +624,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                                     var server_name = e.dropNode.text;
                                                     Ext.Msg.show({
                                                         title: <?php echo json_encode(__('Unassign server')) ?>,
-                                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                                        buttons: Ext.MessageBox.YESNO,
                                                         msg: String.format(<?php echo json_encode(__('Unassign server {0} ?')) ?>,server_name),
                                                         icon: Ext.MessageBox.WARNING,
                                                         fn: function(btn){
@@ -595,7 +672,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                                                     Ext.Msg.show({
                                                         title: <?php echo json_encode(__('Assign server')) ?>,
-                                                        buttons: Ext.MessageBox.YESNOCANCEL,
+                                                        buttons: Ext.MessageBox.YESNO,
                                                         msg: String.format(<?php echo json_encode(__('Assign server {0} ?')) ?>,server_name),
                                                         icon: Ext.MessageBox.WARNING,
                                                         fn: function(btn){
@@ -1226,6 +1303,28 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                             this.startServer(btn, this.ctxNode);
                                         }
                                     },{
+                                        text: <?php echo json_encode(__('Suspend')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('Suspend the selected server')) ?>},
+                                        ref:'btn_suspend_server',
+                                        disabled:false,
+                                        hidden: true,
+                                        scope:this,
+                                        iconCls: 'icon-pause',
+                                        handler:function(btn,e){
+                                            this.suspendServer(btn, this.ctxNode);
+                                        }
+                                    },{
+                                        text: <?php echo json_encode(__('Resume')) ?>,
+                                        tooltip: {text: <?php echo json_encode(__('Resumes the selected server')) ?>},
+                                        ref:'btn_resume_server',
+                                        disabled:false,
+                                        hidden: true,
+                                        scope:this,
+                                        iconCls: 'icon-play',
+                                        handler:function(btn,e){
+                                            this.resumeServer(btn, this.ctxNode);
+                                        }
+                                    },{
                                         text: <?php echo json_encode(__('Stop')) ?>,
                                         tooltip: {text: <?php echo json_encode(__('Stops the selected server')) ?>},
                                         ref:'btn_stop_server',
@@ -1322,6 +1421,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 this.menu.btn_permission_server.hide();
                                 this.menu.btn_stop_server.hide();
                                 this.menu.btn_start_server.hide();
+                                this.menu.btn_suspend_server.hide();
+                                this.menu.btn_resume_server.hide();
 
                                 this.menu.btn_remove.setDisabled(false);
                                 this.menu.btn_keymap.setDisabled(false);
@@ -1377,6 +1478,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 this.menu.btn_permission_server.hide();
                                 this.menu.btn_stop_server.hide();
                                 this.menu.btn_start_server.hide();
+                                this.menu.btn_suspend_server.hide();
+                                this.menu.btn_resume_server.hide();
 
                                 this.menu.btn_remove.setDisabled(false);
                                 this.menu.btn_keymap.setDisabled(false);
@@ -1448,12 +1551,26 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                     this.menu.btn_start_server.clearTooltip();
                                     this.menu.btn_stop_server.hide();
                                     this.menu.btn_stop_server.clearTooltip();
+                                    this.menu.btn_suspend_server.hide();
+                                    this.menu.btn_suspend_server.clearTooltip();
+                                    this.menu.btn_resume_server.hide();
+                                    this.menu.btn_resume_server.clearTooltip();
                                 }else{
                                     if(node.attributes.vm_is_running){
                                         this.menu.btn_start_server.hide();
                                         this.menu.btn_stop_server.show();
+                                        console.log(node.attributes);
+                                        if(node.attributes.vm_state=='suspended'){
+                                            this.menu.btn_suspend_server.hide();
+                                            this.menu.btn_resume_server.show();
+                                        } else {
+                                            this.menu.btn_suspend_server.show();
+                                            this.menu.btn_resume_server.hide();
+                                        }
                                     }else{
                                         this.menu.btn_stop_server.hide();
+                                        this.menu.btn_suspend_server.hide();
+                                        this.menu.btn_resume_server.hide();
                                         this.menu.btn_start_server.show();
                                     }
     
@@ -1462,11 +1579,19 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                         this.menu.btn_start_server.setTooltip({text: <?php echo json_encode(__('Node needs to be running')) ?>});
                                         this.menu.btn_stop_server.setDisabled(true);
                                         this.menu.btn_stop_server.setTooltip({text: <?php echo json_encode(__('Node needs to be running')) ?>});
+                                        this.menu.btn_suspend_server.setDisabled(true);
+                                        this.menu.btn_suspend_server.setTooltip({text: <?php echo json_encode(__('Node needs to be running')) ?>});
+                                        this.menu.btn_resume_server.setDisabled(true);
+                                        this.menu.btn_resume_server.setTooltip({text: <?php echo json_encode(__('Node needs to be running')) ?>});
                                     }else{
                                         this.menu.btn_start_server.setDisabled(false);
                                         this.menu.btn_start_server.clearTooltip();
                                         this.menu.btn_stop_server.setDisabled(false);
                                         this.menu.btn_stop_server.clearTooltip();
+                                        this.menu.btn_suspend_server.setDisabled(false);
+                                        this.menu.btn_suspend_server.clearTooltip();
+                                        this.menu.btn_resume_server.setDisabled(false);
+                                        this.menu.btn_resume_server.clearTooltip();
                                     }
                                 }
                                 
@@ -1614,7 +1739,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         var server_vm_state = node.attributes.vm_state;
 
                         var send_data = {'nid': nid,
-                                         'server': server_name};
+                                         'server': server_id};
 
                         var start_openconsole = false;  // TODO
 
@@ -1628,12 +1753,12 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 if (btn == 'yes'){
 
                                     AsynchronousJob.Functions.Create( 'server', 'start',
-                                                                        { 'server': server_name },
+                                                                        { 'server': server_id },
                                                                         { 'node': nid },
                                                                         function(resp,opt) { // success fh
                                                                             var response = Ext.util.JSON.decode(resp.responseText);
                                                                             AsynchronousJob.Functions.Create( 'server', 'check',
-                                                                                                                { 'server': server_name },
+                                                                                                                { 'server': server_id },
                                                                                                                 { 'node': nid, 'check': 'running' },
                                                                                                                 function(resp2,opt2){
                                                                                                                     var res2 = Ext.util.JSON.decode(resp2.responseText);
@@ -1705,6 +1830,36 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
 
                     }
+                    ,suspendServer: function(btn, node){
+                        
+                        var sId = node.attributes.id;
+                        var server_id = sId.replace('s','');
+                        var server_name = node.attributes.text;
+                        var nid = node.parentNode.attributes.id; 
+                        var server_vm_state = node.attributes.vm_state;
+
+                        var send_data = {'nid': nid,
+                                         'server': server_id};
+
+                        AsynchronousJob.Functions.Create( 'server', 'suspend',
+                                                            { 'server': server_id },
+                                                            { 'node': nid });
+                    }
+                    ,resumeServer: function(btn, node){
+                        
+                        var sId = node.attributes.id;
+                        var server_id = sId.replace('s','');
+                        var server_name = node.attributes.text;
+                        var nid = node.parentNode.attributes.id; 
+                        var server_vm_state = node.attributes.vm_state;
+
+                        var send_data = {'nid': nid,
+                                         'server': server_id};
+
+                        AsynchronousJob.Functions.Create( 'server', 'resume',
+                                                            { 'server': server_id },
+                                                            { 'node': nid });
+                    }
                     ,stopServer: function(btn, node, forced){
                         var server_name = node.attributes.text;
                         var node_id = node.parentNode.attributes.id; 
@@ -1733,12 +1888,12 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                 if (btn == 'yes'){
 
                                     AsynchronousJob.Functions.Create( 'server', 'stop',
-                                                                        { 'server': server_name },
+                                                                        { 'server': server_id },
                                                                         { 'node': node_id, 'force': forcestop, 'destroy':forcestop },
                                                                         function(resp,opt) { // success fh
                                                                             var response = Ext.util.JSON.decode(resp.responseText);
                                                                             AsynchronousJob.Functions.Create( 'server', 'check',
-                                                                                                                { 'server': server_name },
+                                                                                                                { 'server': server_id },
                                                                                                                 { 'node': node_id, 'check': 'stop' },
                                                                                                                 null,null, response['asynchronousjob']['Id']);
                                                                             //var parentCmp = Ext.getCmp((item.scope).id);
@@ -1882,7 +2037,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                         Ext.Msg.show({
                             title: <?php echo json_encode(__('Remove node')) ?>,
-                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            buttons: Ext.MessageBox.YESNO,
                             msg: String.format(<?php echo json_encode(__('Remove node {0} ?')) ?>,node.attributes.text),
                             icon: Ext.MessageBox.WARNING,
                             fn: function(btn){
@@ -1928,7 +2083,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                         
                         Ext.Msg.show({
                             title: String.format(<?php echo json_encode(__('Shutdown {0}')) ?>, node.attributes.text ),
-                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            buttons: Ext.MessageBox.YESNO,
                             msg: String.format(<?php echo json_encode(__('Shutdown node {0} ? This will also shut down all virtual servers from this node.')) ?>,node.attributes.text),
                             icon: Ext.MessageBox.WARNING,
                             fn: function(btn){
@@ -1979,7 +2134,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                         Ext.Msg.show({
                             title: String.format(<?php echo json_encode(__('Put node {0} in maintenance')) ?>, node.attributes.text ),
-                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            buttons: Ext.MessageBox.YESNO,
                             msg: String.format(<?php echo json_encode(__('Do you want put node {0} in maintenance? This will also migrate all virtual servers.')) ?>,node.attributes.text),
                             icon: Ext.MessageBox.WARNING,
                             scope: this,
@@ -2039,7 +2194,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                         Ext.Msg.show({
                             title: String.format(<?php echo json_encode(__('System check on node {0}')) ?>, node.attributes.text ),
-                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            buttons: Ext.MessageBox.YESNO,
                             msg: String.format(<?php echo json_encode(__('Do you like execute system check on node {0}?')) ?>,node.attributes.text),
                             icon: Ext.MessageBox.WARNING,
                             scope: this,
@@ -2464,7 +2619,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                         Ext.Msg.show({
                             title: <?php echo json_encode(__('Remove cluster')) ?>,
-                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            buttons: Ext.MessageBox.YESNO,
                             msg: String.format(<?php echo json_encode(__('Remove cluster {0} ?')) ?>,cluster.attributes.text),
                             icon: Ext.MessageBox.WARNING,
                             fn: function(btn){
@@ -2815,8 +2970,8 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                 //calls chagePwd if first time log in
                 <?php if($sf_user->getAttribute('user_firstlogin')):?>
-                //View.changePwd();
                 setTimeout(function(){
+                    //View.changePwd();
                     Ext.getCmp('ftwizardBtn').fireEvent('click',Ext.getCmp('ftwizardBtn'));
                 }, 200);
                 <?php endif;
@@ -3608,49 +3763,9 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
     });
 
-    View.StaticIpTpl = function(id){
-        var static_tpl = {
-               border:false,
-               items:[{
-                        layout:'table',
-                        frame:true,
-                        layoutConfig: {columns:2},
-                        items:[
-                                {
-                                labelAlign:'left',
-                                layout:'form',
-                                items:[
-                                    new Ext.form.Radio({
-                                        boxLabel: <?php echo json_encode(__('DHCP')) ?>, width:90,
-                                        name: 'network_'+id+'_bootp',fieldLabel:'',hideLabel:true,
-                                        inputValue: 'dhcp'
-                                    }),
-                                    new Ext.form.Radio({
-                                        boxLabel: <?php echo json_encode(__('Static')) ?>, width:90,
-                                        name: 'network_'+id+'_bootp',fieldLabel:'',hideLabel:true,
-                                        inputValue: 'static'
-                                        ,listeners:{
-                                            check:function(chkbox,checked){
-                                                    var addrCmp = (this.ownerCt).ownerCt;
-                                                    var addrFields = addrCmp.get(1);                                                    
-
-                                                    addrFields.items.each(function(e){
-                                                        if(!checked){
-                                                            if(!e.isValid())
-                                                                e.clearInvalid();
-                                                            e.disable();
-                                                        }else
-                                                            e.enable();
-                                                    });
-                                            }
-                                        }
-                                    })
-                                ]
-                                },
-                                {
-                                labelWidth:120,
-                                layout:'form',
-                                items:[
+    View.StaticIpTpl = function(id,opts){
+        if( !opts ) opts = {};
+        var static_fields = [
                                     new Ext.form.TextField({
                                             fieldLabel: <?php echo json_encode(__('IP address')) ?>,
                                             name: 'network_'+id+'_ip',
@@ -3698,18 +3813,62 @@ if($sf_user->getAttribute('etvamodel')!='standard')
 
                                                 }
                                             }
-                                    }),
-                                    new Ext.form.TextField({
+                                    })
+                                ];
+
+        if( !opts['no_gateway'] ){
+            static_fields.push(new Ext.form.TextField({
                                             fieldLabel: <?php echo json_encode(__('Default gateway')) ?>,
                                             name: 'network_'+id+'_gateway',
                                             vtype:'ip_addr',
-                                            allowBlank:false,
+                                            //allowBlank:false,
                                             disabled:true,
                                             maxLength: 15,
                                             width:100
-                                    })
+                                    }));
+        };
+        var static_tpl = {
+               border:false,
+               items:[{
+                        layout:'table',
+                        frame:true,
+                        layoutConfig: {columns:2},
+                        items:[
+                                {
+                                labelAlign:'left',
+                                layout:'form',
+                                items:[
+                                    new Ext.form.Radio({
+                                        boxLabel: <?php echo json_encode(__('DHCP')) ?>, width:90,
+                                        name: 'network_'+id+'_bootp',fieldLabel:'',hideLabel:true,
+                                        inputValue: 'dhcp'
+                                    }),
+                                    new Ext.form.Radio({
+                                        boxLabel: <?php echo json_encode(__('Static')) ?>, width:90,
+                                        name: 'network_'+id+'_bootp',fieldLabel:'',hideLabel:true,
+                                        inputValue: 'static'
+                                        ,listeners:{
+                                            check:function(chkbox,checked){
+                                                    var addrCmp = (this.ownerCt).ownerCt;
+                                                    var addrFields = addrCmp.get(1);                                                    
 
+                                                    addrFields.items.each(function(e){
+                                                        if(!checked){
+                                                            if(!e.isValid())
+                                                                e.clearInvalid();
+                                                            e.disable();
+                                                        }else
+                                                            e.enable();
+                                                    });
+                                            }
+                                        }
+                                    })
                                 ]
+                                },
+                                {
+                                labelWidth:120,
+                                layout:'form',
+                                items: static_fields
                                }
                         ]// end layout table items
                 }]};
@@ -3765,7 +3924,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                             name: id+'_primarydns',
                                             maxLength: 15,
                                             vtype:'ip_addr',
-                                            allowBlank:false,
+                                            //allowBlank:false,
                                             disabled:true,
                                             width:100
                                     }),
@@ -3774,7 +3933,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
                                             name: id+'_secondarydns',
                                             maxLength: 15,
                                             vtype:'ip_addr',
-                                            allowBlank:true,
+                                            //allowBlank:true,
                                             disabled:true,
                                             width:100
                                     })
@@ -4583,6 +4742,7 @@ if($sf_user->getAttribute('etvamodel')!='standard')
     }, this);
 
     Ext.onReady(View.init, View, true);
+
 
 
 </script>

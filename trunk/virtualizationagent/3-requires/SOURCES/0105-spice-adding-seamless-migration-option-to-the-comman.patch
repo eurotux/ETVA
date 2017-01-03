@@ -1,0 +1,76 @@
+From a8f8691a29dec378971a28f517aca3aae2d38c96 Mon Sep 17 00:00:00 2001
+From: Yonit Halperin <yhalperi@redhat.com>
+Date: Tue, 21 Aug 2012 11:51:59 +0300
+Subject: [PATCH] spice: adding seamless-migration option to the command line
+
+The seamless-migration flag is required in order to identify
+whether libvirt supports the new QEVENT_SPICE_MIGRATE_COMPLETED or not
+(by default the flag is off).
+New libvirt versions that wait for QEVENT_SPICE_MIGRATE_COMPLETED should turn on this flag.
+When this flag is off, spice fallbacks to its old migration method, which
+can result in data loss.
+
+Signed-off-by: Yonit Halperin <yhalperi@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 8c9570530c819821b9b5cc3113d2b2966afe7621)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qemu-config.c   | 3 +++
+ qemu-options.hx | 3 +++
+ ui/spice-core.c | 7 +++++++
+ 3 files changed, 13 insertions(+)
+
+diff --git a/qemu-config.c b/qemu-config.c
+index 238390e..3eaee48 100644
+--- a/qemu-config.c
++++ b/qemu-config.c
+@@ -541,6 +541,9 @@ QemuOptsList qemu_spice_opts = {
+         },{
+             .name = "playback-compression",
+             .type = QEMU_OPT_BOOL,
++        }, {
++            .name = "seamless-migration",
++            .type = QEMU_OPT_BOOL,
+         },
+         { /* end of list */ }
+     },
+diff --git a/qemu-options.hx b/qemu-options.hx
+index ea06324..dd7aa63 100644
+--- a/qemu-options.hx
++++ b/qemu-options.hx
+@@ -920,6 +920,9 @@ Enable/disable passing mouse events via vdagent.  Default is on.
+ @item playback-compression=[on|off]
+ Enable/disable audio stream compression (using celt 0.5.1).  Default is on.
+ 
++@item seamless-migration=[on|off]
++Enable/disable spice seamless migration. Default is off.
++
+ @end table
+ ETEXI
+ 
+diff --git a/ui/spice-core.c b/ui/spice-core.c
+index ab069c5..ba0d0bd 100644
+--- a/ui/spice-core.c
++++ b/ui/spice-core.c
+@@ -585,6 +585,9 @@ void qemu_spice_init(void)
+     int port, tls_port, len, addr_flags;
+     spice_image_compression_t compression;
+     spice_wan_compression_t wan_compr;
++#if SPICE_SERVER_VERSION >= 0x000b02 /* 0.11.2 */
++    bool seamless_migration;
++#endif
+ 
+     qemu_thread_get_self(&me);
+ 
+@@ -728,6 +731,10 @@ void qemu_spice_init(void)
+     spice_server_set_uuid(spice_server, qemu_uuid);
+ #endif
+ 
++#if SPICE_SERVER_VERSION >= 0x000b02 /* 0.11.2 */
++    seamless_migration = qemu_opt_get_bool(opts, "seamless-migration", 0);
++    spice_server_set_seamless_migration(spice_server, seamless_migration);
++#endif
+     if (0 != spice_server_init(spice_server, &core_interface)) {
+         error_report("failed to initialize spice server");
+         exit(1);

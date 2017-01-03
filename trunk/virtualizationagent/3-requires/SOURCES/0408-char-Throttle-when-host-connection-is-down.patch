@@ -1,0 +1,54 @@
+From 96226fe21047c2910414efedf9bd47ef12bc2dd0 Mon Sep 17 00:00:00 2001
+From: Amit Shah <amit.shah@redhat.com>
+Date: Mon, 21 Mar 2011 22:05:10 +0100
+Subject: [PATCH] char: Throttle when host connection is down#
+
+When the host-side connection goes down, throttle the virtio-serial bus
+and later unthrottle when a connection gets established.  This helps
+prevent any lost IO (guest->host) while the host connection was down.
+
+Bugzilla: 621484
+
+This commit actually helps the bug mentioned above as no writes will now
+get lost because of the throttling done here.  With just the patches
+sent earlier for that bug, one write will end up getting lost in the
+worst case (host d/c, guest write, host connect).
+
+Signed-off-by: Amit Shah <amit.shah@redhat.com>
+Signed-off-by: Cole Robinson <crobinso@redhat.com>
+---
+ qemu-char.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/qemu-char.c b/qemu-char.c
+index 9f8608a..bfc94a5 100644
+--- a/qemu-char.c
++++ b/qemu-char.c
+@@ -140,6 +140,9 @@ static void qemu_chr_generic_open_bh(void *opaque)
+ {
+     CharDriverState *s = opaque;
+     qemu_chr_be_event(s, CHR_EVENT_OPENED);
++    if (s->write_blocked) {
++        char_write_unblocked(s);
++    }
+     qemu_bh_delete(s->bh);
+     s->bh = NULL;
+ }
+@@ -2244,6 +2247,17 @@ static int tcp_chr_write(CharDriverState *chr, const uint8_t *buf, int len)
+         ret = send_all(chr, s->fd, buf, len);
+         if (ret == -1 && errno == EPIPE) {
+             tcp_closed(chr);
++
++            if (chr->chr_enable_write_fd_handler && chr->chr_write_unblocked) {
++                /*
++                 * Since we haven't written out anything, let's say
++                 * we're throttled.  This will prevent any output from
++                 * the guest getting lost if host-side chardev goes
++                 * down.  Unthrottle when we re-connect.
++                 */
++                chr->write_blocked = true;
++                return 0;
++            }
+         }
+         return ret;
+     } else {

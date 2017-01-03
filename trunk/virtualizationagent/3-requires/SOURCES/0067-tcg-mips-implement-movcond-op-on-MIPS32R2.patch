@@ -1,0 +1,137 @@
+From ec9ab7b8c0ee2517c286937339269743bcab33db Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Fri, 21 Sep 2012 18:20:26 +0200
+Subject: [PATCH] tcg/mips: implement movcond op on MIPS32R2
+
+movcond operation can be implemented on MIPS32 Release 2 using the MOVN,
+MOVZ, SLT and SLTU instructions.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/mips/tcg-target.c | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tcg/mips/tcg-target.h |  8 ++++++
+ 2 files changed, 77 insertions(+)
+
+diff --git a/tcg/mips/tcg-target.c b/tcg/mips/tcg-target.c
+index b2e1056..c272b38 100644
+--- a/tcg/mips/tcg-target.c
++++ b/tcg/mips/tcg-target.c
+@@ -308,6 +308,8 @@ enum {
+     OPC_SRAV     = OPC_SPECIAL | 0x07,
+     OPC_JR       = OPC_SPECIAL | 0x08,
+     OPC_JALR     = OPC_SPECIAL | 0x09,
++    OPC_MOVZ     = OPC_SPECIAL | 0x0A,
++    OPC_MOVN     = OPC_SPECIAL | 0x0B,
+     OPC_MFHI     = OPC_SPECIAL | 0x10,
+     OPC_MFLO     = OPC_SPECIAL | 0x12,
+     OPC_MULT     = OPC_SPECIAL | 0x18,
+@@ -735,6 +737,68 @@ static void tcg_out_brcond2(TCGContext *s, TCGCond cond, TCGArg arg1,
+     reloc_pc16(label_ptr, (tcg_target_long) s->code_ptr);
+ }
+ 
++static void tcg_out_movcond(TCGContext *s, TCGCond cond, TCGReg ret,
++                            TCGArg c1, TCGArg c2, TCGArg v)
++{
++    switch (cond) {
++    case TCG_COND_EQ:
++        if (c1 == 0) {
++            tcg_out_opc_reg(s, OPC_MOVZ, ret, v, c2);
++        } else if (c2 == 0) {
++            tcg_out_opc_reg(s, OPC_MOVZ, ret, v, c1);
++        } else {
++            tcg_out_opc_reg(s, OPC_XOR, TCG_REG_AT, c1, c2);
++            tcg_out_opc_reg(s, OPC_MOVZ, ret, v, TCG_REG_AT);
++        }
++        break;
++    case TCG_COND_NE:
++        if (c1 == 0) {
++            tcg_out_opc_reg(s, OPC_MOVN, ret, v, c2);
++        } else if (c2 == 0) {
++            tcg_out_opc_reg(s, OPC_MOVN, ret, v, c1);
++        } else {
++            tcg_out_opc_reg(s, OPC_XOR, TCG_REG_AT, c1, c2);
++            tcg_out_opc_reg(s, OPC_MOVN, ret, v, TCG_REG_AT);
++        }
++        break;
++    case TCG_COND_LT:
++        tcg_out_opc_reg(s, OPC_SLT, TCG_REG_AT, c1, c2);
++        tcg_out_opc_reg(s, OPC_MOVN, ret, v, TCG_REG_AT);
++        break;
++    case TCG_COND_LTU:
++        tcg_out_opc_reg(s, OPC_SLTU, TCG_REG_AT, c1, c2);
++        tcg_out_opc_reg(s, OPC_MOVN, ret, v, TCG_REG_AT);
++        break;
++    case TCG_COND_GE:
++        tcg_out_opc_reg(s, OPC_SLT, TCG_REG_AT, c1, c2);
++        tcg_out_opc_reg(s, OPC_MOVZ, ret, v, TCG_REG_AT);
++        break;
++    case TCG_COND_GEU:
++        tcg_out_opc_reg(s, OPC_SLTU, TCG_REG_AT, c1, c2);
++        tcg_out_opc_reg(s, OPC_MOVZ, ret, v, TCG_REG_AT);
++        break;
++    case TCG_COND_LE:
++        tcg_out_opc_reg(s, OPC_SLT, TCG_REG_AT, c2, c1);
++        tcg_out_opc_reg(s, OPC_MOVZ, ret, v, TCG_REG_AT);
++        break;
++    case TCG_COND_LEU:
++        tcg_out_opc_reg(s, OPC_SLTU, TCG_REG_AT, c2, c1);
++        tcg_out_opc_reg(s, OPC_MOVZ, ret, v, TCG_REG_AT);
++        break;
++    case TCG_COND_GT:
++        tcg_out_opc_reg(s, OPC_SLT, TCG_REG_AT, c2, c1);
++        tcg_out_opc_reg(s, OPC_MOVN, ret, v, TCG_REG_AT);
++        break;
++    case TCG_COND_GTU:
++        tcg_out_opc_reg(s, OPC_SLTU, TCG_REG_AT, c2, c1);
++        tcg_out_opc_reg(s, OPC_MOVN, ret, v, TCG_REG_AT);
++        break;
++    default:
++        tcg_abort();
++        break;
++    }
++}
++
+ static void tcg_out_setcond(TCGContext *s, TCGCond cond, TCGReg ret,
+                             TCGArg arg1, TCGArg arg2)
+ {
+@@ -1468,6 +1532,10 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc,
+         tcg_out_brcond2(s, args[4], args[0], args[1], args[2], args[3], args[5]);
+         break;
+ 
++    case INDEX_op_movcond_i32:
++        tcg_out_movcond(s, args[5], args[0], args[1], args[2], args[3]);
++        break;
++
+     case INDEX_op_setcond_i32:
+         tcg_out_setcond(s, args[3], args[0], args[1], args[2]);
+         break;
+@@ -1559,6 +1627,7 @@ static const TCGTargetOpDef mips_op_defs[] = {
+     { INDEX_op_deposit_i32, { "r", "0", "rZ" } },
+ 
+     { INDEX_op_brcond_i32, { "rZ", "rZ" } },
++    { INDEX_op_movcond_i32, { "r", "rZ", "rZ", "rZ", "0" } },
+     { INDEX_op_setcond_i32, { "r", "rZ", "rZ" } },
+     { INDEX_op_setcond2_i32, { "r", "rZ", "rZ", "rZ", "rZ" } },
+ 
+diff --git a/tcg/mips/tcg-target.h b/tcg/mips/tcg-target.h
+index 897a737..d147e70 100644
+--- a/tcg/mips/tcg-target.h
++++ b/tcg/mips/tcg-target.h
+@@ -86,7 +86,15 @@ typedef enum {
+ #define TCG_TARGET_HAS_orc_i32          0
+ #define TCG_TARGET_HAS_eqv_i32          0
+ #define TCG_TARGET_HAS_nand_i32         0
++
++/* optional instructions only implemented on MIPS4, MIPS32 and Loongson 2 */
++#if defined(_MIPS_ARCH_MIPS4) || defined(_MIPS_ARCH_MIPS32) || \
++    defined(_MIPS_ARCH_MIPS32R2) || defined(_MIPS_ARCH_LOONGSON2E) || \
++    defined(_MIPS_ARCH_LOONGSON2F)
++#define TCG_TARGET_HAS_movcond_i32      1
++#else
+ #define TCG_TARGET_HAS_movcond_i32      0
++#endif
+ 
+ /* optional instructions only implemented on MIPS32R2 */
+ #ifdef _MIPS_ARCH_MIPS32R2

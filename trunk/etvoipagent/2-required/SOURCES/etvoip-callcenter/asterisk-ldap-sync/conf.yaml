@@ -1,0 +1,14 @@
+---
+debug: 0
+source:
+  type: ldap
+  host: mail.dmz.eurotux.local
+  base: dc=eurotux,dc=com
+target:
+  host: 127.0.0.1
+  port: 3306
+  type: callcenter
+  db: call_center
+  user: sap
+  pass: ola123
+  delete: 1

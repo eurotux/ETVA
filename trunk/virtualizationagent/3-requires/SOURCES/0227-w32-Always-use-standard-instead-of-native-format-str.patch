@@ -1,0 +1,49 @@
+From ba3a80ad644349bb2b10936635fc7a3e0a794f9e Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Wed, 22 Aug 2012 21:42:32 +0200
+Subject: [PATCH] w32: Always use standard instead of native format strings
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+GLib 2.0 include files use __printf__ for the format attribute
+which resolves to native format strings on w32 hosts.
+
+QEMU wants standard format strings instead of native format
+strings, so we simply change any declaration with __printf__
+to use __gnu_printf__.
+
+This works because all basic printf functions support both
+kinds of format strings.
+
+This fixes a compiler warning:
+
+qapi/string-output-visitor.c: In function ‘print_type_int’:
+qapi/string-output-visitor.c:34:5: warning: unknown conversion type character ‘l’ in format [-Wformat]
+qapi/string-output-visitor.c:34:5: warning: too many arguments for format [-Wformat-extra-args]
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 95df51a4a02a853af8828c281bce2d4f2a41d6fd)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ compiler.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/compiler.h b/compiler.h
+index 07ba1f8..c734a71 100644
+--- a/compiler.h
++++ b/compiler.h
+@@ -44,6 +44,11 @@
+    /* Use gnu_printf when supported (qemu uses standard format strings). */
+ #  define GCC_ATTR __attribute__((__unused__, format(gnu_printf, 1, 2)))
+ #  define GCC_FMT_ATTR(n, m) __attribute__((format(gnu_printf, n, m)))
++#  if defined(_WIN32)
++    /* Map __printf__ to __gnu_printf__ because we want standard format strings
++     * even when MinGW or GLib include files use __printf__. */
++#   define __printf__ __gnu_printf__
++#  endif
+ # endif
+ #if defined(_WIN32)
+ #define GCC_WEAK __attribute__((weak))

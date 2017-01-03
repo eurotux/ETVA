@@ -1,0 +1,62 @@
+diff -Naur elastix-admin.orig/extensions.class.php elastix-admin/extensions.class.php
+--- elastix-admin.orig/extensions.class.php	2014-02-25 09:38:26.808072783 +0000
++++ elastix-admin/extensions.class.php	2014-02-25 09:41:28.301546404 +0000
+@@ -784,6 +784,22 @@
+ 			return "Queue(".$this->queuename.",".$this->options.",".$this->optionalurl.",".$this->announceoverride.")";
+ 	}
+ }
++class ext_queuelog {
++	var $var;
++	var $value;
++	
++	function ext_queuelog($queuename, $uniqueid, $agent, $event, $additionalinfo) {
++		$this->queuename = $queuename;
++		$this->uniqueid = $uniqueid;
++		$this->agent = $agent;
++		$this->event = $event;
++		$this->additionalinfo = $additionalinfo;
++	}
++	
++	function output() {
++		return "QueueLog(".$this->queuename.",".$this->uniqueid.",".$this->agent.",".$this->event.",".$this->additionalinfo.")";
++	}
++}
+ 
+ class ext_addqueuemember extends extension {
+ 	var $queue;
+diff -Naur elastix-admin.orig/modules/ivr/functions.inc.php elastix-admin/modules/ivr/functions.inc.php
+--- elastix-admin.orig/modules/ivr/functions.inc.php	2014-02-25 09:38:33.668202907 +0000
++++ elastix-admin/modules/ivr/functions.inc.php	2014-02-25 09:42:37.102879430 +0000
+@@ -209,6 +209,9 @@
+ 					} else {
+ 						$ext->add($id, 's', '', new ext_setvar('MSG', ""));
+ 					}
++					// CMAR: log to queue_log
++					$ext->add($id, 's', '', new ext_queuelog('NONE','${UNIQUEID}','NONE','INFO','IVRSTART|${CALLERID(num)}|${CALLERID(dnid)}'));
++
+ 					$ext->add($id, 's', '', new ext_setvar('LOOPCOUNT', 0));
+ 					$ext->add($id, 's', '', new ext_setvar('__DIR-CONTEXT', $details['dircontext']));
+ 					$ext->add($id, 's', '', new ext_setvar('_IVR_CONTEXT_${CONTEXT}', '${IVR_CONTEXT}'));
+@@ -227,7 +230,12 @@
+ 
+ 					$ext->add($id, 's', '', new ext_execif('$["${MSG}" != ""]','Background','${MSG}'));
+ 					$ext->add($id, 's', '', new ext_waitexten());
++
+ 					$ext->add($id, 'hang', '', new ext_playback('vm-goodbye'));
++
++					// CMAR: log to queue_log
++					$ext->add($id, 'hang', '', new ext_queuelog('NONE','${UNIQUEID}','NONE','INFO','IVRHANGUP|'));
++
+ 					$ext->add($id, 'hang', '', new ext_hangup(''));
+ 
+ 					$default_t=true;
+@@ -267,6 +275,9 @@
+ 							$ext->add($id, $dest['selection'],'', new ext_dbdel('${BLKVM_OVERRIDE}'));
+ 							$ext->add($id, $dest['selection'],'', new ext_setvar('__NODEST', ''));
+ 
++							// CMAR log to queue_log
++							$ext->add($id, $dest['selection'],'', new ext_queuelog('NONE','${UNIQUEID}','NONE','INFO','IVRAPPEND|'.$dest['selection'].'|'.$id));
++
+ 							// if the goto goes loops back to this ivr, then don't go to the begining or it will break the return to previous ivr info
+ 							//
+ 							$dest_context = trim(strtok($dest['dest'],",|"));

@@ -1,0 +1,44 @@
+From 46ed9b957184e935f219a718a252cffafb06a803 Mon Sep 17 00:00:00 2001
+From: Stefan Hajnoczi <stefanha@redhat.com>
+Date: Sun, 25 Nov 2012 16:49:15 +0100
+Subject: [PATCH] usb: fail usbdevice_create() when there is no USB bus
+
+Report an error instead of segfaulting when attaching a USB device to a
+machine with no USB busses:
+
+  $ qemu-system-arm -machine vexpress-a9 \
+      -sd Fedora-17-armhfp-vexpress-mmcblk0.img \
+      -kernel vmlinuz-3.4.2-3.fc17.armv7hl \
+      -initrd initramfs-3.4.2-3.fc17.armv7hl.img \
+      -usbdevice disk:format=raw:test.img
+
+Note that the vexpress-a9 machine does not have a USB host controller.
+
+Reported-by: David Abdurachmanov <David.Abdurachmanov@cern.ch>
+Signed-off-by: Stefan Hajnoczi <stefanha@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit c128d6a6d785eb9235a4f6dbd52f405ab8c60bee)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/bus.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/hw/usb/bus.c b/hw/usb/bus.c
+index b649360..1f73a52 100644
+--- a/hw/usb/bus.c
++++ b/hw/usb/bus.c
+@@ -585,6 +585,13 @@ USBDevice *usbdevice_create(const char *cmdline)
+         return NULL;
+     }
+ 
++    if (!bus) {
++        error_report("Error: no usb bus to attach usbdevice %s, "
++                     "please try -machine usb=on and check that "
++                     "the machine model supports USB", driver);
++        return NULL;
++    }
++
+     if (!f->usbdevice_init) {
+         if (*params) {
+             error_report("usbdevice %s accepts no params", driver);

@@ -1,0 +1,46 @@
+From 374abf0d3f5032806045555335e58890bcb72acf Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Thu, 27 Sep 2012 16:59:50 +0200
+Subject: [PATCH] usb-redir: Change usbredir_open_chardev into
+ usbredir_create_parser
+
+As we need to create the parser at more places.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ hw/usb/redirect.c | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index 78e93a7..5d16aff 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -872,15 +872,11 @@ static void usbredir_chardev_close_bh(void *opaque)
+     }
+ }
+ 
+-static void usbredir_chardev_open(USBRedirDevice *dev)
++static void usbredir_create_parser(USBRedirDevice *dev)
+ {
+     uint32_t caps[USB_REDIR_CAPS_SIZE] = { 0, };
+     int flags = 0;
+ 
+-    /* Make sure any pending closes are handled (no-op if none pending) */
+-    usbredir_chardev_close_bh(dev);
+-    qemu_bh_cancel(dev->chardev_close_bh);
+-
+     DPRINTF("creating usbredirparser\n");
+ 
+     dev->parser = qemu_oom_check(usbredirparser_create());
+@@ -992,7 +988,10 @@ static void usbredir_chardev_event(void *opaque, int event)
+     switch (event) {
+     case CHR_EVENT_OPENED:
+         DPRINTF("chardev open\n");
+-        usbredir_chardev_open(dev);
++        /* Make sure any pending closes are handled (no-op if none pending) */
++        usbredir_chardev_close_bh(dev);
++        qemu_bh_cancel(dev->chardev_close_bh);
++        usbredir_create_parser(dev);
+         break;
+     case CHR_EVENT_CLOSED:
+         DPRINTF("chardev close\n");

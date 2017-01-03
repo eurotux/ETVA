@@ -154,7 +154,7 @@ SfGuardPermission.Grid = Ext.extend(Ext.grid.GridPanel,{
         if (sm.hasSelection()){
             Ext.Msg.show({
                 title: <?php echo json_encode(__('Remove permission')) ?>,
-                buttons: Ext.MessageBox.YESNOCANCEL,
+                buttons: Ext.MessageBox.YESNO,
                 scope:this,
                 msg: String.format(<?php echo json_encode(__('Remove permission {0} ?')) ?>,sel.data.name),
                 fn: function(btn){

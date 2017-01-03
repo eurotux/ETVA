@@ -1,0 +1,77 @@
+From 1db8ec7f2caf255b94d1516e521768f553e01972 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Fri, 5 Apr 2013 12:05:49 +0200
+Subject: [PATCH] ehci_free_packet: Discard finished packets when the queue is
+ halted
+
+With pipelining it is possible to encounter a finished packet when cleaning
+the queue due to a halt. This happens when a non stall error happens while
+talking to a real device. In this case the queue on the usb-host side will
+continue processing packets, and we can have completed packets waiting in
+the queue after an error condition packet causing a halt.
+
+There are 2 reasons to discard the completed packets at this point, rather
+then writing them back to the guest:
+
+1) The guest expect to be able to cancel and/or change packets after the
+packet with the error without doing an unlink, so writing them back may
+confuse the guest.
+
+2) Since the queue does not advance when halted, the writing back of these
+packets will trigger an assert because p->qtdaddr != q->qtdaddr, causing qemu
+to abort.
+
+Note that discarding these packets means that the guest driver and the device
+will get out of sync! This is unfortunate, but should not be a problem since
+with a non stall error (iow an io-error) the 2 are out of sync already anyways.
+Still this patch adds a warning printf to signal this happening.
+
+Note that sofar this has only been seen with a DVB-T receiver, which gives
+of a MPEG-2 stream, which allows for recovering from lost packets, see:
+https://bugzilla.redhat.com/show_bug.cgi?id=890320
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ hw/usb/hcd-ehci.c | 18 +++++++++++-------
+ 1 file changed, 11 insertions(+), 7 deletions(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 6be11c5..6a787aa 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -752,11 +752,10 @@ static EHCIPacket *ehci_alloc_packet(EHCIQueue *q)
+ 
+ static void ehci_free_packet(EHCIPacket *p)
+ {
+-    if (p->async == EHCI_ASYNC_FINISHED) {
++    if (p->async == EHCI_ASYNC_FINISHED &&
++            !(p->queue->qh.token & QTD_TOKEN_HALT)) {
+         EHCIQueue *q = p->queue;
+         int state = ehci_get_state(q->ehci, q->async);
+-        /* This is a normal, but rare condition (cancel racing completion) */
+-        fprintf(stderr, "EHCI: Warning packet completed but not processed\n");
+         ehci_state_executing(q);
+         ehci_state_writeback(q);
+         if (!(q->qh.token & QTD_TOKEN_HALT)) {
+@@ -767,12 +766,17 @@ static void ehci_free_packet(EHCIPacket *p)
+         return;
+     }
+     trace_usb_ehci_packet_action(p->queue, p, "free");
+-    if (p->async == EHCI_ASYNC_INITIALIZED) {
+-        usb_packet_unmap(&p->packet, &p->sgl);
+-        qemu_sglist_destroy(&p->sgl);
+-    }
+     if (p->async == EHCI_ASYNC_INFLIGHT) {
+         usb_cancel_packet(&p->packet);
++    }
++    if (p->async == EHCI_ASYNC_FINISHED) {
++        fprintf(stderr,
++                "EHCI: Dropping completed packet from halted %s ep %02X\n",
++                (p->pid == USB_TOKEN_IN) ? "in" : "out",
++                get_field(p->queue->qh.epchar, QH_EPCHAR_EP));
++                
++    }
++    if (p->async != EHCI_ASYNC_NONE) {
+         usb_packet_unmap(&p->packet, &p->sgl);
+         qemu_sglist_destroy(&p->sgl);
+     }

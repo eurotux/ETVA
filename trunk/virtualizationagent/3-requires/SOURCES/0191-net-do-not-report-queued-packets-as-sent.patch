@@ -1,0 +1,100 @@
+From 2d2fd68b56eb21fcb6a0496e70435a37d92516dc Mon Sep 17 00:00:00 2001
+From: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+Date: Mon, 20 Aug 2012 13:35:23 +0100
+Subject: [PATCH] net: do not report queued packets as sent
+
+Net send functions have a return value where 0 means the packet has not
+been sent and will be queued.  A non-zero value means the packet was
+sent or an error caused the packet to be dropped.
+
+This patch fixes two instances where packets are queued but we return
+their size.  This causes callers to believe the packets were sent.  When
+the caller uses the async send interface this creates a real problem
+because the callback will be invoked for a packet that the caller
+believed to be already sent.  This bug can cause double-frees in the
+caller.
+
+Signed-off-by: Stefan Hajnoczi <stefanha@linux.vnet.ibm.com>
+(cherry picked from commit 06b5f36d052b540a59b52150582d65674199b2ce)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ net/queue.c | 35 ++++++++++++++++-------------------
+ 1 file changed, 16 insertions(+), 19 deletions(-)
+
+diff --git a/net/queue.c b/net/queue.c
+index 6e64091..254f280 100644
+--- a/net/queue.c
++++ b/net/queue.c
+@@ -83,12 +83,12 @@ void qemu_del_net_queue(NetQueue *queue)
+     g_free(queue);
+ }
+ 
+-static ssize_t qemu_net_queue_append(NetQueue *queue,
+-                                     NetClientState *sender,
+-                                     unsigned flags,
+-                                     const uint8_t *buf,
+-                                     size_t size,
+-                                     NetPacketSent *sent_cb)
++static void qemu_net_queue_append(NetQueue *queue,
++                                  NetClientState *sender,
++                                  unsigned flags,
++                                  const uint8_t *buf,
++                                  size_t size,
++                                  NetPacketSent *sent_cb)
+ {
+     NetPacket *packet;
+ 
+@@ -100,16 +100,14 @@ static ssize_t qemu_net_queue_append(NetQueue *queue,
+     memcpy(packet->data, buf, size);
+ 
+     QTAILQ_INSERT_TAIL(&queue->packets, packet, entry);
+-
+-    return size;
+ }
+ 
+-static ssize_t qemu_net_queue_append_iov(NetQueue *queue,
+-                                         NetClientState *sender,
+-                                         unsigned flags,
+-                                         const struct iovec *iov,
+-                                         int iovcnt,
+-                                         NetPacketSent *sent_cb)
++static void qemu_net_queue_append_iov(NetQueue *queue,
++                                      NetClientState *sender,
++                                      unsigned flags,
++                                      const struct iovec *iov,
++                                      int iovcnt,
++                                      NetPacketSent *sent_cb)
+ {
+     NetPacket *packet;
+     size_t max_len = 0;
+@@ -133,8 +131,6 @@ static ssize_t qemu_net_queue_append_iov(NetQueue *queue,
+     }
+ 
+     QTAILQ_INSERT_TAIL(&queue->packets, packet, entry);
+-
+-    return packet->size;
+ }
+ 
+ static ssize_t qemu_net_queue_deliver(NetQueue *queue,
+@@ -177,7 +173,8 @@ ssize_t qemu_net_queue_send(NetQueue *queue,
+     ssize_t ret;
+ 
+     if (queue->delivering || !qemu_can_send_packet(sender)) {
+-        return qemu_net_queue_append(queue, sender, flags, data, size, sent_cb);
++        qemu_net_queue_append(queue, sender, flags, data, size, sent_cb);
++        return 0;
+     }
+ 
+     ret = qemu_net_queue_deliver(queue, sender, flags, data, size);
+@@ -201,8 +198,8 @@ ssize_t qemu_net_queue_send_iov(NetQueue *queue,
+     ssize_t ret;
+ 
+     if (queue->delivering || !qemu_can_send_packet(sender)) {
+-        return qemu_net_queue_append_iov(queue, sender, flags,
+-                                         iov, iovcnt, sent_cb);
++        qemu_net_queue_append_iov(queue, sender, flags, iov, iovcnt, sent_cb);
++        return 0;
+     }
+ 
+     ret = qemu_net_queue_deliver_iov(queue, sender, flags, iov, iovcnt);

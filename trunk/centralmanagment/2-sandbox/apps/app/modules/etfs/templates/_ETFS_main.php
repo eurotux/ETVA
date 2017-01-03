@@ -127,7 +127,7 @@ ETFS.Main = function(config){
                                                                         if( selected.length>0 ){
                                                                             Ext.Msg.show({
                                                                                 title: item.text,
-                                                                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                                                                buttons: Ext.MessageBox.YESNO,
                                                                                 scope:this,
                                                                                 msg: String.format(<?php echo json_encode(__('Are you sure you want delete share {0}?')) ?>,selected[0].data['name']),
                                                                                 fn: function(btn){
@@ -328,7 +328,7 @@ ETFS.Main = function(config){
                                                                             var userdata = selected[0].data;
                                                                             Ext.Msg.show({
                                                                                 title: item.text,
-                                                                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                                                                buttons: Ext.MessageBox.YESNO,
                                                                                 scope:this,
                                                                                 msg: String.format(<?php echo json_encode(__('Are you sure you want delete user {0}?')) ?>,userdata['name']),
                                                                                 fn: function(btn){

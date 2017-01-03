@@ -1,0 +1,49 @@
+From 7cfc1f86b9d5f70556e08f7c7ff8b2c83b4620a9 Mon Sep 17 00:00:00 2001
+From: David Gibson <david@gibson.dropbear.id.au>
+Date: Mon, 10 Sep 2012 12:30:57 +1000
+Subject: [PATCH] cpu_physical_memory_write_rom() needs to do TB invalidates
+
+cpu_physical_memory_write_rom(), despite the name, can also be used to
+write images into RAM - and will often be used that way if the machine
+uses load_image_targphys() into RAM addresses.
+
+However, cpu_physical_memory_write_rom(), unlike cpu_physical_memory_rw()
+doesn't invalidate any cached TBs which might be affected by the region
+written.
+
+This was breaking reset (under full emu) on the pseries machine - we loaded
+our firmware image into RAM, and while executing it rewrite the code at
+the entry point (correctly causing a TB invalidate/refresh).  When we
+reset the firmware image was reloaded, but the TB from the rewrite was
+still active and caused us to get an illegal instruction trap.
+
+This patch fixes the bug by duplicating the tb invalidate code from
+cpu_physical_memory_rw() in cpu_physical_memory_write_rom().
+
+Signed-off-by: David Gibson <david@gibson.dropbear.id.au>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit 0b57e287138728f72d88b06e69b970c5d745c44a)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ exec.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/exec.c b/exec.c
+index ad175db..3fdbbde 100644
+--- a/exec.c
++++ b/exec.c
+@@ -3521,6 +3521,13 @@ void cpu_physical_memory_write_rom(target_phys_addr_t addr,
+             /* ROM/RAM case */
+             ptr = qemu_get_ram_ptr(addr1);
+             memcpy(ptr, buf, l);
++            if (!cpu_physical_memory_is_dirty(addr1)) {
++                /* invalidate code */
++                tb_invalidate_phys_page_range(addr1, addr1 + l, 0);
++                /* set dirty bit */
++                cpu_physical_memory_set_dirty_flags(
++                    addr1, (0xff & ~CODE_DIRTY_FLAG));
++            }
+             qemu_put_ram_ptr(ptr);
+         }
+         len -= l;

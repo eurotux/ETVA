@@ -1,0 +1,33 @@
+From c862037379d47d3b66faafbb84605e65ac5db01a Mon Sep 17 00:00:00 2001
+From: Yonit Halperin <yhalperi@redhat.com>
+Date: Wed, 28 Nov 2012 10:08:22 -0500
+Subject: [PATCH] qxl: reload memslots after migration, when qxl is in
+ UNDEFINED mode
+
+The devram memslot stays active when qxl enters UNDEFINED mode (i.e, no
+primary surface). If migration has occurred while the device is in
+UNDEFINED stae, the memslots have to be reloaded at the destination.
+
+Fixes rhbz#874574
+
+Signed-off-by: Yonit Halperin <yhalperi@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit fa98efe932d93a15ffa867f3b05149c8d1fc7c28)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/qxl.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 89e9ad9..e7e9dd9 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -2042,6 +2042,7 @@ static int qxl_post_load(void *opaque, int version)
+ 
+     switch (newmode) {
+     case QXL_MODE_UNDEFINED:
++        qxl_create_memslots(d);
+         break;
+     case QXL_MODE_VGA:
+         qxl_create_memslots(d);

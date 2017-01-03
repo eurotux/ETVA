@@ -41,7 +41,7 @@
             reader: new Ext.data.JsonReader({
                 root: 'response',
                 totalProperty: 'total'                
-            }, [{name: 'value', mapping:'pv'},{name: 'text', mapping:'name'}])
+            }, [{name: 'value', mapping:'pv'},{name: 'text', mapping:'name'},{name: 'uuid'},{name: 'id'},{name: 'device'}])
         });
 
         this.vgname = new Ext.form.TextField({            
@@ -60,7 +60,6 @@
                             multiselects: [{            
                                 height:200,
                                 width:150,
-                              //  dataFields:["id", "name"],
                                 legend: __('Available'),
                                 store: this.fromStore,
                                 displayField: 'text',
@@ -69,10 +68,12 @@
                                 height:200,
                                 width:150,
                                 legend: __('Selected'),
+                                displayField: 'text',
+                                valueField: 'value',
                                 store: new Ext.data.ArrayStore({
-				    fields: ['value','text'],
-				    data: []
-				}),
+                                                fields: ['value','text','uuid','id'],
+                                                data: []
+                                }),
                                 tbar:[{
                                     text: __('Clear'),
                                     handler:function(){
@@ -160,7 +161,6 @@
         },        
         sendRequest:function(){
 
-
             var vgname = this.vgname.getValue();            
 
             if(this.pvs.toStore.getCount() == 0){
@@ -171,6 +171,7 @@
 
             if(this.getForm().isValid()){
                 var pvs_string = this.pvs.getValue();
+
                 var pvs = pvs_string.split(',');             
                 //params: vgname, physical volume ID
 

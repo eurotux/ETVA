@@ -1,0 +1,202 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use locale;
+use utf8;
+use Data::Dumper;
+
+use lib '/usr/local/sap2elastix';
+
+use utilcommon;
+use utilsql;
+use utilasterisk;
+use utilciscoipphone;
+
+my $debug = 0;
+
+# default test asterisk configurations
+my ($Host,$Port,$User,$Pass) = ( '10.10.4.206',
+                                    5038,
+                                    'cmardial',
+                                    'ola123' );
+
+# load asterisk configuration for Host, User and Password
+sub load_asterisk_conf {
+    my $asterisk_manager_conf = "/etc/asterisk/manager.conf";
+    if( -e "$asterisk_manager_conf" ){
+        open(CFH,$asterisk_manager_conf);
+        my ($login,$secret);
+        while(<CFH>){
+            s/;.*//;
+            if( /\[(\w+)\]/ ){
+                $login = $1;
+            } elsif( /secret\s*=\s*(.*)/ ){
+                $secret = $1;
+            }
+            last if( $login && $secret && ($login ne 'geral' ) );
+        }
+        close(CFH);
+        if( $login && $secret && ($login ne 'geral' ) ) {
+            ($Host,$User,$Pass) = ( '127.0.0.1',$login,$secret);
+        }
+    }
+}
+# print HTTP header
+sub init {
+    if( $ENV{'HTTP_HOST'} ){
+        print "Content-Type: text/plain;","\n\n";
+    }
+}
+
+my $DBPREFIX = 'etux_';
+my $DBH;
+
+sub sapconnect {
+    my %conf = utilcommon::load_conf('/usr/local/sap2elastix/config.conf');
+    my ($dbhost,$dbuser,$dbpass) = ($conf{'mysql'}{'host'} || "127.0.0.1",$conf{'mysql'}{'user'} || "cmar", $conf{'mysql'}{'pass'} || "ola123");
+
+    $DBPREFIX = $conf{'mysql'}{'prefix'} || 'etux_';
+
+    $DBH = utilsql::sqlConnect("DBI:mysql:database=asteriskcdrdb;host=$dbhost", $dbuser, $dbpass);
+    return $DBH;
+}
+sub sapdisconnect {
+    utilsql::sqlDisconnect($DBH);
+}
+sub registercall {
+    my ($extension,$phone,$agendaid,$uniqueid, $status, $created) = @_;
+
+    my %Data = ( 'extension'=>$extension, 'phone'=>$phone );
+
+    $Data{'created'}  = $created || utilcommon::nowStr();
+    $Data{'agendaid'} = $agendaid if( $agendaid ); 
+    $Data{'uniqueid'} = $uniqueid if( $uniqueid ); 
+    $Data{'status'}   = $status if( $status ); 
+
+    # Insert callentry
+    utilsql::sqlInsert($DBH,"${DBPREFIX}callentry",{ %Data });
+
+    if( my $c = utilsql::sqlSelect($DBH,'LAST_INSERT_ID()') ){
+        my ($id) = $c->fetchrow();
+        $c->finish();
+        return $id;
+    }
+    return;
+}
+sub updatecall {
+    my ($id, $uniqueid, $status) = @_;
+
+    my %Data = ();
+    $Data{'uniqueid'} = $uniqueid if( $uniqueid ); 
+    $Data{'status'}   = $status if( $status ); 
+
+    if( %Data ){
+        # Update callentry
+        utilsql::sqlUpdate($DBH,"${DBPREFIX}callentry", { %Data }, { 'id'=>$id });
+    }
+}
+
+# main
+sub main {
+    &init();
+
+    my %args = utilcommon::read_args({ 'extension'=>'int',
+                                        'number'=>'phone',
+                                        'agendaid'=>'int' },@_);
+
+    die "extension not defined!" if( !$args{'extension'} );
+
+    die "number not defined!" if( !$args{'number'} );
+
+    &load_asterisk_conf();
+
+    print "Connect to asterisk '$Host' '$Port'","\n";
+    my $sock = utilasterisk::connect($Host,$Port);
+    utilasterisk::login($sock, $User, $Pass);
+
+    my $R = { 'Success'=> 'False', 'Error'=>'Unknown' };
+    if( $args{'op'} && ($args{'op'} eq 'hangup') ){
+        print "Hangup to number '$args{'number'}' with extension '$args{'extension'}'","\n";
+        $R = utilasterisk::hangup($sock, $args{'extension'}, $args{'number'});
+
+        print "[DEBUG] Hangup Dumper=",Dumper($R),"\n" if( $debug );
+
+        #if( my $ipphone = utilasterisk::get_host_for_extension($sock, $args{'extension'}) ){
+        #    print "[DEBUG] Try to call from cisco phone with ip '$ipphone'","\n" if( $debug );
+        #
+        #    # direct to ip phone
+        #    if( my $T = utilcommon::timeout_call( 2, 
+        #                        \&utilciscoipphone::pushHeadsetKey, $ipphone) ){
+        #        $R = $T;
+        #    }
+        #}
+    
+    } elsif( $args{'op'} && ($args{'op'} eq 'ignore') ){    # mark missed call as ignored
+        &sapconnect();
+        &registercall($args{'extension'},$args{'number'}, $args{'agendaid'}, 0, 'ignore');
+        &sapdisconnect();
+        $R = { 'Success'=>'True' };
+    } elsif( ! (my @ch = utilasterisk::get_extension_channels($sock,$args{'extension'})) ){
+
+        &sapconnect();
+
+        my $status = "";
+        my $callid = &registercall($args{'extension'},$args{'number'}, $args{'agendaid'});
+
+        print "Call to number '$args{'number'}' with extension '$args{'extension'}'","\n";
+
+        if( my $ipphone = utilasterisk::get_host_for_extension($sock, $args{'extension'}) ){
+            print "[DEBUG] Try to call from cisco phone with ip '$ipphone'","\n" if( $debug );
+
+            # direct to ip phone
+            if( my $T = utilcommon::timeout_call( 2, 
+                                \&utilciscoipphone::dial, $ipphone, $args{'number'}) ){
+                $R = $T;
+            }
+        }
+        if( $R->{'Success'} eq 'False' ){
+            if( utilasterisk::is_extension_available($sock, $args{'extension'}) ){
+                print "[DEBUG] Try to call from asterisk","\n" if( $debug );
+
+                # call from  asterisk
+                if( my $T = utilcommon::timeout_call( 60, 
+                                    \&utilasterisk::dial, $sock,$args{'extension'},$args{'number'} ) ){
+                    $R = $T;
+                } else {
+                    $R = { 'Success'=>'False', 'Error'=>'Unable to dial from Asterisk by timeout.' };
+                    $status = 'Fail';
+                }
+            } else {
+                $status = 'InUse';
+            }
+        }
+        my $uniqueid;
+        if( my $C = utilasterisk::get_extension_channel_for_number( $sock, $args{'extension'},$args{'number'}) ){
+            $uniqueid = $C->{'UniqueID'};
+        #} elsif( my $channels = utilasterisk::get_extension_channels($sock,$args{'extension'}) ){
+        #    print "[DEBUG] channels = ",Dumper($channels),"\n";
+        }
+
+        if( !$status && $R && (!$R->{'Success'} || ( $R->{'Success'} ne 'True' )) && (!$R->{'Response'} || ($R->{'Response'} ne 'Success')) ){
+            $status = 'Fail';
+        }
+
+        # update call with uniqueid
+        &updatecall($callid, $uniqueid, $status) if( $callid );
+
+        &sapdisconnect();
+
+    } else {
+        $R = { 'Success'=>'False', 'Error'=>"Unable to make the call, extension '$args{'extension'}' in use." };
+    }
+    print "[DEBUG] response=",Dumper($R),"\n" if( $debug );
+    print "Error: ",($R->{'Error'}||$R->{'Message'}),"\n" if( $R && (!$R->{'Success'} || ( $R->{'Success'} ne 'True' )) && (!$R->{'Response'} || ($R->{'Response'} ne 'Success')) );
+
+    utilcommon::timeout_call( 5, \&utilasterisk::logoff, $sock);
+}
+
+&main(@ARGV);
+
+1;
+__END__
+

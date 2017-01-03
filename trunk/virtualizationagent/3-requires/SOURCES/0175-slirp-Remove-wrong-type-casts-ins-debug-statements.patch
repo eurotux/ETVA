@@ -1,0 +1,34 @@
+From a38cbcb584e5de8a88f09fa76ac5677b34dbaa33 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Tue, 4 Sep 2012 23:20:35 +0200
+Subject: [PATCH] slirp: Remove wrong type casts ins debug statements
+
+The type casts of pointers to long are not allowed
+when sizeof(pointer) != sizeof(long).
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+(cherry picked from commit c4d12a743c73a5b88a8705ca68ff620ce0f8bba7)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ slirp/tcp_subr.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/slirp/tcp_subr.c b/slirp/tcp_subr.c
+index 025b374..5890d7a 100644
+--- a/slirp/tcp_subr.c
++++ b/slirp/tcp_subr.c
+@@ -114,9 +114,9 @@ tcp_respond(struct tcpcb *tp, struct tcpiphdr *ti, struct mbuf *m,
+ 	int win = 0;
+ 
+ 	DEBUG_CALL("tcp_respond");
+-	DEBUG_ARG("tp = %lx", (long)tp);
+-	DEBUG_ARG("ti = %lx", (long)ti);
+-	DEBUG_ARG("m = %lx", (long)m);
++	DEBUG_ARG("tp = %p", tp);
++	DEBUG_ARG("ti = %p", ti);
++	DEBUG_ARG("m = %p", m);
+ 	DEBUG_ARG("ack = %u", ack);
+ 	DEBUG_ARG("seq = %u", seq);
+ 	DEBUG_ARG("flags = %x", flags);

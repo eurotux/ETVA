@@ -1,0 +1,101 @@
+From 6a6b9cc2d5e400b058bca0da3d6462ebed0b0648 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Wed, 12 Sep 2012 15:08:32 +0200
+Subject: [PATCH] ehci: Don't set seen to 0 when removing unseen queue-heads
+
+When removing unseen queue-heads from the async queue list, we should not
+set the seen flag to 0, as this may cause them to be removed by
+ehci_queues_rip_unused() during the next call to ehci_advance_async_state()
+if the timer is late or running at a low frequency.
+
+Note:
+1) This *may* have caused the instant unlink / relinks described in commit
+   9bc3a3a216e2689bfcdd36c3e079333bbdbf3ba0
+
+2) Rather then putting more if-s inside ehci_queues_rip_unused, this patch
+   instead introduces a new ehci_queues_rip_unseen function.
+
+3) This patch also makes it save to call ehci_queues_rip_unseen() multiple
+   times, which gets used in the folluw up patch titled:
+   "ehci: Walk async schedule before and after migration"
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 8f5457eb04140714eaf57a99bc08dc661d83fa87)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 24 ++++++++++++++++++------
+ 1 file changed, 18 insertions(+), 6 deletions(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 017a01d..bc86460 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -848,10 +848,10 @@ static EHCIQueue *ehci_find_queue_by_qh(EHCIState *ehci, uint32_t addr,
+     return NULL;
+ }
+ 
+-static void ehci_queues_rip_unused(EHCIState *ehci, int async, int flush)
++static void ehci_queues_rip_unused(EHCIState *ehci, int async)
+ {
+     EHCIQueueHead *head = async ? &ehci->aqueues : &ehci->pqueues;
+-    const char *warn = (async && !flush) ? "guest unlinked busy QH" : NULL;
++    const char *warn = async ? "guest unlinked busy QH" : NULL;
+     uint64_t maxage = FRAME_TIMER_NS * ehci->maxframes * 4;
+     EHCIQueue *q, *tmp;
+ 
+@@ -861,13 +861,25 @@ static void ehci_queues_rip_unused(EHCIState *ehci, int async, int flush)
+             q->ts = ehci->last_run_ns;
+             continue;
+         }
+-        if (!flush && ehci->last_run_ns < q->ts + maxage) {
++        if (ehci->last_run_ns < q->ts + maxage) {
+             continue;
+         }
+         ehci_free_queue(q, warn);
+     }
+ }
+ 
++static void ehci_queues_rip_unseen(EHCIState *ehci, int async)
++{
++    EHCIQueueHead *head = async ? &ehci->aqueues : &ehci->pqueues;
++    EHCIQueue *q, *tmp;
++
++    QTAILQ_FOREACH_SAFE(q, head, next, tmp) {
++        if (!q->seen) {
++            ehci_free_queue(q, NULL);
++        }
++    }
++}
++
+ static void ehci_queues_rip_device(EHCIState *ehci, USBDevice *dev, int async)
+ {
+     EHCIQueueHead *head = async ? &ehci->aqueues : &ehci->pqueues;
+@@ -1700,7 +1712,7 @@ static int ehci_state_waitlisthead(EHCIState *ehci,  int async)
+         ehci_set_usbsts(ehci, USBSTS_REC);
+     }
+ 
+-    ehci_queues_rip_unused(ehci, async, 0);
++    ehci_queues_rip_unused(ehci, async);
+ 
+     /*  Find the head of the list (4.9.1.1) */
+     for(i = 0; i < MAX_QH; i++) {
+@@ -2332,7 +2344,7 @@ static void ehci_advance_async_state(EHCIState *ehci)
+          */
+         if (ehci->usbcmd & USBCMD_IAAD) {
+             /* Remove all unseen qhs from the async qhs queue */
+-            ehci_queues_rip_unused(ehci, async, 1);
++            ehci_queues_rip_unseen(ehci, async);
+             trace_usb_ehci_doorbell_ack();
+             ehci->usbcmd &= ~USBCMD_IAAD;
+             ehci_raise_irq(ehci, USBSTS_IAA);
+@@ -2385,7 +2397,7 @@ static void ehci_advance_periodic_state(EHCIState *ehci)
+         ehci_set_fetch_addr(ehci, async,entry);
+         ehci_set_state(ehci, async, EST_FETCHENTRY);
+         ehci_advance_state(ehci, async);
+-        ehci_queues_rip_unused(ehci, async, 0);
++        ehci_queues_rip_unused(ehci, async);
+         break;
+ 
+     default:

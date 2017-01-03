@@ -1,0 +1,48 @@
+From 351c0c1e5ecb752bd9eb165180402313a90f9068 Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Thu, 28 Jul 2011 15:08:48 +0300
+Subject: [PATCH] virtio-serial-bus: replay guest_open on migration
+
+When migrating a host with with a spice agent running the mouse becomes
+non operational after the migration. This is rhbz #725965.
+
+The problem is that after migration spice doesn't know the guest agent is open.
+Spice is just a char dev here. And a chardev cannot query it's device, the
+device has to let the chardev know when it is open. Right now after migration
+the chardev which is recreated is in it's default state, which assumes the
+guest is disconnected.
+
+Char devices carry no information across migration, but the virtio-serial does
+already carry the guest_connected state. This patch passes that bit to the
+chardev.
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Cole Robinson <crobinso@redhat.com>
+---
+ hw/virtio-serial-bus.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/hw/virtio-serial-bus.c b/hw/virtio-serial-bus.c
+index 82073f5..18c2ed3 100644
+--- a/hw/virtio-serial-bus.c
++++ b/hw/virtio-serial-bus.c
+@@ -682,6 +682,7 @@ static int virtio_serial_load(QEMUFile *f, void *opaque, int version_id)
+     for (i = 0; i < nr_active_ports; i++) {
+         uint32_t id;
+         bool host_connected;
++        VirtIOSerialPortClass *vsc;
+ 
+         id = qemu_get_be32(f);
+         port = find_port_by_id(s, id);
+@@ -690,6 +691,11 @@ static int virtio_serial_load(QEMUFile *f, void *opaque, int version_id)
+         }
+ 
+         port->guest_connected = qemu_get_byte(f);
++        vsc = VIRTIO_SERIAL_PORT_GET_CLASS(port);
++        if (port->guest_connected && vsc->guest_open) {
++            /* replay guest open */
++            vsc->guest_open(port);
++        }
+         host_connected = qemu_get_byte(f);
+         if (host_connected != port->host_connected) {
+             /*

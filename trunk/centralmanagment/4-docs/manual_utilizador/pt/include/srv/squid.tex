@@ -1,9 +1,13 @@
 \subsection{Serviço de Proxy -- Squid}
 
+\begin{comment}
 O serviço de proxy tem a função de encaminhar os pedidos para a
 Internet e guardar uma \emph{cache} dos conteúdos de forma a acelerar a
 visualização dos mesmos quando forem novamente consultados pelos
 utilizadores.
+\end{comment}
+
+A função principal do serviço de \textit{proxy web} é encaminhar pedidos deste tipo de tráfego para a Internet, controlando e registando os acessos efetuados. Como complemento, pode guardar uma \textit{cache} de conteúdos não privados, de forma a acelerar a visualização dos mesmos quando forem consultados novamente pelos utilizadores.
 
 O ficheiro que define o modo de funcionamento do proxy é o /etc/squid/squid.conf
 que está dividido nas seguintes áreas:
@@ -47,7 +51,7 @@ hostname: port\\
 
 \item[Descrição]~\\
 Esta directiva é usada para especificar o socket onde o proxy vai
-escutar os pedidos dos browsers. Vários sockets podem ser
+escutar os pedidos dos browsers. Vários endereços podem ser
 especificados.
 
 Existem três formas de utilizar esta directiva: porta apenas, nome
@@ -211,7 +215,7 @@ acessos.
 
 \begin{description}
 \item[Utilização]~\\
-acl \emph{aclname} \emph{acltype} \emph{string1} ... \textbar{} \emph{file}
+acl \emph{aclname} \emph{acltype} \emph{string1} ... \textbar{} ``\emph{file}''
 
 \item[Descrição]~\\
 Esta tag é utilizada para definir uma lista de acessos.
@@ -295,7 +299,8 @@ pressupõe a existência posterior da seguinte acl:
 
 \texttt{acl whiteuser external checkwhite}
 
-Neste momento usar-se-ia a acl whiteuser.
+%Neste momento usar-se-ia a acl whiteuser.
+A partir daí usar-se-ia a acl whiteuser.
 
 \subsubsection{Parents}
 
@@ -346,8 +351,8 @@ Tipo de hierarquia a utilizar entre os proxies.
 A porta onde o proxy seguinte está à espera dos pedidos.
 
 \item[icp\_port]~\\
-Usada para perguntar aos vizinhos sobre os objectos que as caches possam
-ter ou não.
+
+Usada para perguntar aos proxies vizinhos sobre os objectos que as caches possam ter ou não.
 
 \item[option]~\\
 \begin{description}
@@ -483,8 +488,7 @@ serem criadas dentro das de primeiro nível.
 
 \subsubsection{Exemplos de configurações}
 
-O seguinte capítulo vai incluir alguns exemplos de
-configurações.
+Seguem-se alguns exemplos de configurações.
 
 \paragraph{Restringir acessos por tempo}
 
@@ -511,7 +515,7 @@ Aceitar acessos apenas de manhã:
 acl mornings time 08:00-12:00
 
 # Adicionar o seguinte no início da zona de http_access
-http\_access allow mornings
+http_access allow mornings
 \end{Output}
 
 \paragraph{Restringir acessos pelo endereço IP}
@@ -567,7 +571,7 @@ As operações sobre este serviço são:
 \subsubsection{Exemplos de utilização}
 
 Nesta sub-secção vamos abordar alguns exemplos de configurações mais comuns de modo a que possa facilmente efectuar qualquer alteração no seu serviço.
-Embora tenhamos anteriormente especificadas as opções que o servidor permite, necessitaria de aceder ao servidor via SSH, alterar o ficheiro de configuração do squid (/etc/squid/squid.conf) e reiniciar o serviço para que as alterações fossem activadas. Embora este acesso seja o preferêncial para utilizadores com conhecimentos de Linux, é disponibilizado um acesso web de administração para gerir o seu proxy.
+Embora tenhamos anteriormente especificadas as opções que o servidor permite, necessitaria de aceder ao servidor via SSH, alterar o ficheiro de configuração do squid (\path{/etc/squid/squid.conf}) e reiniciar o serviço para que as alterações fossem activadas. Embora este acesso seja o preferencial para utilizadores com conhecimentos de Linux, é disponibilizado um acesso web de administração para gerir o seu proxy.
 
 No primeiro exemplo vamos abordar a negação do acesso a determinadas páginas com URLs baseados em padrões.
 
@@ -625,7 +629,8 @@ Após carregar em "Save" voltará à página inicial das ACLs. Vamos agora aplic
     \label{fig:SQUID5}
 \end{figure}
 
-Vamos então escolher a acção que será despoletada quando alguém aceder a estes sites. Neste caso vamos escolher a acção "Deny" e vamos de seguida definir o padrão que criámos anteriormente (sitios\_bloqueados).
+Vamos então escolher a acção que será despoletada quando alguém aceder a estes sites. Neste caso vamos escolher a acção ``Deny'' e vamos de seguida
+definir o padrão que criámos anteriormente (sitios\_bloqueados).
 
 \begin{figure}[H]
     \begin{center}

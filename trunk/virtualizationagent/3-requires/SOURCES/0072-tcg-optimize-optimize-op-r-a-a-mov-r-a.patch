@@ -1,0 +1,28 @@
+From c9adee9d660a658308e70b591b5c061ef5ccb40b Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Tue, 18 Sep 2012 19:11:32 +0200
+Subject: [PATCH] tcg/optimize: optimize "op r, a, a => mov r, a"
+
+Now that we can easily detect all copies, we can optimize the
+"op r, a, a => mov r, a" case a bit more.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index aeb2225..b9a7da9 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -524,7 +524,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+         switch (op) {
+         CASE_OP_32_64(or):
+         CASE_OP_32_64(and):
+-            if (args[1] == args[2]) {
++            if (temps_are_copies(args[1], args[2])) {
+                 if (temps_are_copies(args[0], args[1])) {
+                     gen_opc_buf[op_index] = INDEX_op_nop;
+                 } else {

@@ -1,0 +1,32 @@
+From ce929be5ee48b9e0763e1326c083bd12c521671e Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 1 Sep 2012 11:12:23 +0200
+Subject: [PATCH] cadence_uart: Fix buffer overflow
+
+Report from smatch:
+hw/cadence_uart.c:413 uart_read(13) error: buffer overflow 's->r' 18 <= 18
+
+This fixes read access to s->r[R_MAX] which is behind the limits of s->r.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 5d40097fc09fe5d34cf316a411dc27d455ac2cd0)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/cadence_uart.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/cadence_uart.c b/hw/cadence_uart.c
+index d98e531..f8afc4e 100644
+--- a/hw/cadence_uart.c
++++ b/hw/cadence_uart.c
+@@ -404,7 +404,7 @@ static uint64_t uart_read(void *opaque, target_phys_addr_t offset,
+     uint32_t c = 0;
+ 
+     offset >>= 2;
+-    if (offset > R_MAX) {
++    if (offset >= R_MAX) {
+         return 0;
+     } else if (offset == R_TX_RX) {
+         uart_read_rx_fifo(s, &c);

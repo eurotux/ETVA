@@ -1,0 +1,81 @@
+From f0d12ea05a0b69c9f27782dfba0af77d502cb0dc Mon Sep 17 00:00:00 2001
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Date: Fri, 10 Aug 2012 15:11:45 +0200
+Subject: [PATCH] qemu: Use valgrind annotations to mark kvm guest memory as
+ defined
+
+valgrind with kvm produces a big amount of false positives regarding
+"Conditional jump or move depends on uninitialised value(s)". This
+happens because the guest memory is allocated with qemu_vmalloc which
+boils down posix_memalign etc. This function is (correctly) considered
+by valgrind as returning undefined memory.
+
+Since valgrind is based on jitting code, it will not be able to see
+changes made by the guest to guest memory if this is done by KVM_RUN,
+thus keeping most of the guest memory undefined.
+
+Now lots of places in qemu will then use guest memory to change behaviour.
+To avoid the flood of these messages, lets declare the whole guest
+memory as defined. This will reduce the noise and allows us to see real
+problems.
+
+In the future we might want to make this conditional, since there
+is actually something that we can use those false positives for:
+These messages will point to code that depends on guest memory, so
+we can use these backtraces to actually make an audit that is focussed
+only at those code places. For normal development we dont want to
+see those messages, though.
+
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+Signed-off-by: Avi Kivity <avi@redhat.com>
+(cherry picked from commit 62fe83318d2fc5b31f473d66326910d94c1c4907)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure | 3 ++-
+ kvm-all.c | 7 +++++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index d7a948f..8874eff 100755
+--- a/configure
++++ b/configure
+@@ -2937,11 +2937,12 @@ if compile_prog "-Werror" "" ; then
+ fi
+ 
+ ########################################
+-# check if we have valgrind/valgrind.h
++# check if we have valgrind/valgrind.h and valgrind/memcheck.h
+ 
+ valgrind_h=no
+ cat > $TMPC << EOF
+ #include <valgrind/valgrind.h>
++#include <valgrind/memcheck.h>
+ int main(void) {
+   return 0;
+ }
+diff --git a/kvm-all.c b/kvm-all.c
+index badf1d8..90c71f9 100644
+--- a/kvm-all.c
++++ b/kvm-all.c
+@@ -39,6 +39,10 @@
+ #include <sys/eventfd.h>
+ #endif
+ 
++#ifdef CONFIG_VALGRIND_H
++#include <valgrind/memcheck.h>
++#endif
++
+ /* KVM uses PAGE_SIZE in its definition of COALESCED_MMIO_MAX */
+ #define PAGE_SIZE TARGET_PAGE_SIZE
+ 
+@@ -1769,6 +1773,9 @@ void *kvm_vmalloc(ram_addr_t size)
+ 
+ void kvm_setup_guest_memory(void *start, size_t size)
+ {
++#ifdef CONFIG_VALGRIND_H
++    VALGRIND_MAKE_MEM_DEFINED(start, size);
++#endif
+     if (!kvm_has_sync_mmu()) {
+         int ret = qemu_madvise(start, size, QEMU_MADV_DONTFORK);
+ 

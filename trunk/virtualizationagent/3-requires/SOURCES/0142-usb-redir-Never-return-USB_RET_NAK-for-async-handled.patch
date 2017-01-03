@@ -1,0 +1,43 @@
+From d50b26d29f4d80d748085a386d9c99155c568909 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Fri, 17 Aug 2012 17:27:08 +0200
+Subject: [PATCH] usb-redir: Never return USB_RET_NAK for async handled packets
+
+USB_RET_NAK is not a valid response for async handled packets (and will
+trigger an assert as such).
+
+Also drop the warning when receiving a status of cancelled for packets not
+cancelled by qemu itself, this can happen when a device gets unredirected
+by the usbredir-host while transfers are pending.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 181133404f520fab40a3ad40d935d91cf3cf546c)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/redirect.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index 10b4fbb..7f3719b 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -1028,11 +1028,14 @@ static int usbredir_handle_status(USBRedirDevice *dev,
+     case usb_redir_stall:
+         return USB_RET_STALL;
+     case usb_redir_cancelled:
+-        WARNING("returning cancelled packet to HC?\n");
+-        return USB_RET_NAK;
++        /*
++         * When the usbredir-host unredirects a device, it will report a status
++         * of cancelled for all pending packets, followed by a disconnect msg.
++         */
++        return USB_RET_IOERROR;
+     case usb_redir_inval:
+         WARNING("got invalid param error from usb-host?\n");
+-        return USB_RET_NAK;
++        return USB_RET_IOERROR;
+     case usb_redir_babble:
+         return USB_RET_BABBLE;
+     case usb_redir_ioerror:

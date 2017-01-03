@@ -1,0 +1,61 @@
+From 964dad12b48445be6e14d9ab57c326b815dadfcb Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Tue, 28 Aug 2012 17:28:50 +0200
+Subject: [PATCH] usb3: superspeed descriptors
+
+Add superspeed descriptor entry to USBDesc,
+advertise superspeed support when present.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/usb/desc.c | 10 +++++++++-
+ hw/usb/desc.h |  1 +
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/hw/usb/desc.c b/hw/usb/desc.c
+index 0a9d3c9..3e8c6cb 100644
+--- a/hw/usb/desc.c
++++ b/hw/usb/desc.c
+@@ -359,6 +359,9 @@ static void usb_desc_setdefaults(USBDevice *dev)
+     case USB_SPEED_HIGH:
+         dev->device = desc->high;
+         break;
++    case USB_SPEED_SUPER:
++        dev->device = desc->super;
++        break;
+     }
+     usb_desc_set_config(dev, 0);
+ }
+@@ -376,6 +379,9 @@ void usb_desc_init(USBDevice *dev)
+     if (desc->high) {
+         dev->speedmask |= USB_SPEED_MASK_HIGH;
+     }
++    if (desc->super) {
++        dev->speedmask |= USB_SPEED_MASK_SUPER;
++    }
+     usb_desc_setdefaults(dev);
+ }
+ 
+@@ -384,7 +390,9 @@ void usb_desc_attach(USBDevice *dev)
+     const USBDesc *desc = usb_device_get_usb_desc(dev);
+ 
+     assert(desc != NULL);
+-    if (desc->high && (dev->port->speedmask & USB_SPEED_MASK_HIGH)) {
++    if (desc->super && (dev->port->speedmask & USB_SPEED_MASK_SUPER)) {
++        dev->speed = USB_SPEED_SUPER;
++    } else if (desc->high && (dev->port->speedmask & USB_SPEED_MASK_HIGH)) {
+         dev->speed = USB_SPEED_HIGH;
+     } else if (desc->full && (dev->port->speedmask & USB_SPEED_MASK_FULL)) {
+         dev->speed = USB_SPEED_FULL;
+diff --git a/hw/usb/desc.h b/hw/usb/desc.h
+index 7cf5442..d89fa41 100644
+--- a/hw/usb/desc.h
++++ b/hw/usb/desc.h
+@@ -152,6 +152,7 @@ struct USBDesc {
+     USBDescID                 id;
+     const USBDescDevice       *full;
+     const USBDescDevice       *high;
++    const USBDescDevice       *super;
+     const char* const         *str;
+ };
+ 

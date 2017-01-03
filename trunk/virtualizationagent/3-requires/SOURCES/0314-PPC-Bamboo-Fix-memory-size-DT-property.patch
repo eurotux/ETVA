@@ -1,0 +1,30 @@
+From 7c7179362e51af8a56aa88c56ff1639ba67a5ead Mon Sep 17 00:00:00 2001
+From: Alexander Graf <agraf@suse.de>
+Date: Sat, 6 Oct 2012 02:02:05 +0200
+Subject: [PATCH] PPC: Bamboo: Fix memory size DT property
+
+Device tree properties need to be specified in big endian. Fix the
+bamboo memory size property accordingly.
+
+Signed-off-by: Alexander Graf <agraf@suse.de>
+CC: qemu-stable@nongnu.org
+(cherry picked from commit 5232fa59b17b45c04bd24e0d38224964816bf391)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/ppc440_bamboo.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/ppc440_bamboo.c b/hw/ppc440_bamboo.c
+index c198071..9286438 100644
+--- a/hw/ppc440_bamboo.c
++++ b/hw/ppc440_bamboo.c
+@@ -59,7 +59,7 @@ static int bamboo_load_device_tree(target_phys_addr_t addr,
+ {
+     int ret = -1;
+ #ifdef CONFIG_FDT
+-    uint32_t mem_reg_property[] = { 0, 0, ramsize };
++    uint32_t mem_reg_property[] = { 0, 0, cpu_to_be32(ramsize) };
+     char *filename;
+     int fdt_size;
+     void *fdt;

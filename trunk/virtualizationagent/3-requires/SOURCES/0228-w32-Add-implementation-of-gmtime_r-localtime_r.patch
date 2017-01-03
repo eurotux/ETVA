@@ -1,0 +1,78 @@
+From 97ea9ca4b49f2be9e687186c79dd682792f4161f Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 22 Sep 2012 22:26:19 +0200
+Subject: [PATCH] w32: Add implementation of gmtime_r, localtime_r
+
+Those functions are missing in MinGW.
+
+Some versions of MinGW-w64 include defines for gmtime_r and localtime_r.
+Older versions of these macros are buggy (they return a pointer to a
+static variable), therefore we don't want them. Newer versions are
+similar to the code used here, but without the memset.
+
+The implementation which is used here is not strictly reentrant,
+but sufficiently good for QEMU on w32 or w64.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+[blauwirbel@gmail.com: added comment about locking]
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit d3e8f95753114a827f9cd8e819b1d5cc8333f76b)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ oslib-win32.c   | 24 ++++++++++++++++++++++++
+ qemu-os-win32.h |  6 ++++++
+ 2 files changed, 30 insertions(+)
+
+diff --git a/oslib-win32.c b/oslib-win32.c
+index ffbc6d0..51b33e8 100644
+--- a/oslib-win32.c
++++ b/oslib-win32.c
+@@ -74,6 +74,30 @@ void qemu_vfree(void *ptr)
+     VirtualFree(ptr, 0, MEM_RELEASE);
+ }
+ 
++/* FIXME: add proper locking */
++struct tm *gmtime_r(const time_t *timep, struct tm *result)
++{
++    struct tm *p = gmtime(timep);
++    memset(result, 0, sizeof(*result));
++    if (p) {
++        *result = *p;
++        p = result;
++    }
++    return p;
++}
++
++/* FIXME: add proper locking */
++struct tm *localtime_r(const time_t *timep, struct tm *result)
++{
++    struct tm *p = localtime(timep);
++    memset(result, 0, sizeof(*result));
++    if (p) {
++        *result = *p;
++        p = result;
++    }
++    return p;
++}
++
+ void socket_set_block(int fd)
+ {
+     unsigned long opt = 0;
+diff --git a/qemu-os-win32.h b/qemu-os-win32.h
+index b3e451b..8ba466d 100644
+--- a/qemu-os-win32.h
++++ b/qemu-os-win32.h
+@@ -68,6 +68,12 @@
+ /* Declaration of ffs() is missing in MinGW's strings.h. */
+ int ffs(int i);
+ 
++/* Missing POSIX functions. Don't use MinGW-w64 macros. */
++#undef gmtime_r
++struct tm *gmtime_r(const time_t *timep, struct tm *result);
++#undef localtime_r
++struct tm *localtime_r(const time_t *timep, struct tm *result);
++
+ static inline void os_setup_signal_handling(void) {}
+ static inline void os_daemonize(void) {}
+ static inline void os_setup_post(void) {}

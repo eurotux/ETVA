@@ -1,0 +1,35 @@
+From 12fd21226c677f1d017eee19cf1d1ceba9911614 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 1 Sep 2012 09:30:39 +0200
+Subject: [PATCH] qapi: Fix potential NULL pointer segfault
+
+Report from smatch:
+
+qapi-visit.c:1640 visit_type_BlockdevAction(8) error:
+ we previously assumed 'obj' could be null (see line 1639)
+qapi-visit.c:2432 visit_type_NetClientOptions(8) error:
+ we previously assumed 'obj' could be null (see line 2431)
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Paolo Bonzini <pbonzini@redhat.com>
+Signed-off-by: Luiz Capitulino <lcapitulino@redhat.com>
+(cherry picked from commit 227ccf6bff234c29974c2c18ecd3a29e6b965e3d)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ scripts/qapi-visit.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/qapi-visit.py b/scripts/qapi-visit.py
+index 04ef7c4..5b15ee3 100644
+--- a/scripts/qapi-visit.py
++++ b/scripts/qapi-visit.py
+@@ -157,7 +157,7 @@ void visit_type_%(name)s(Visitor *m, %(name)s ** obj, const char *name, Error **
+     if (!error_is_set(errp)) {
+         visit_start_struct(m, (void **)obj, "%(name)s", name, sizeof(%(name)s), &err);
+         if (!err) {
+-            if (!obj || *obj) {
++            if (obj && *obj) {
+                 visit_type_%(name)sKind(m, &(*obj)->kind, "type", &err);
+                 if (!err) {
+                     switch ((*obj)->kind) {

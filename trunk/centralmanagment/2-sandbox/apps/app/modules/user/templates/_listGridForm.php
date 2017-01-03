@@ -32,7 +32,8 @@ User.List.GridForm = function(config) {
             this.createEdit(rec.id);
         }
         ,onUpdate:function(){
-            console.log('usersGrid fire onUpdate');
+            //console.log('usersGrid fire onUpdate');
+            //console.log(grid);
             usersGrid.getStore().reload();
         }
         ,onAdd: function(){

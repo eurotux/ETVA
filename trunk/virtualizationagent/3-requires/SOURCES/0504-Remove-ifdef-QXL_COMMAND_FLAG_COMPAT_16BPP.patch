@@ -1,0 +1,29 @@
+From 00f0e24b96265ab9432bfd3504b4e4553f0eb565 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?S=C3=B8ren=20Sandmann=20Pedersen?= <ssp@redhat.com>
+Date: Tue, 4 Sep 2012 10:14:49 -0400
+Subject: [PATCH] Remove #ifdef QXL_COMMAND_FLAG_COMPAT_16BPP
+
+We require spice >= 0.8 now, so this flag is always present.
+
+Signed-off-by: Soren Sandmann <ssp@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 552d208..d1d995c 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -1361,11 +1361,9 @@ static void qxl_set_mode(PCIQXLDevice *d, int modenr, int loadvm)
+ 
+     d->mode = QXL_MODE_COMPAT;
+     d->cmdflags = QXL_COMMAND_FLAG_COMPAT;
+-#ifdef QXL_COMMAND_FLAG_COMPAT_16BPP /* new in spice 0.6.1 */
+     if (mode->bits == 16) {
+         d->cmdflags |= QXL_COMMAND_FLAG_COMPAT_16BPP;
+     }
+-#endif
+     d->shadow_rom.mode = cpu_to_le32(modenr);
+     d->rom->mode = cpu_to_le32(modenr);
+     qxl_rom_set_dirty(d);

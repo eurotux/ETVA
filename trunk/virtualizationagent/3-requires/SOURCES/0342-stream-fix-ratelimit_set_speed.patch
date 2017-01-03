@@ -1,0 +1,30 @@
+From 13bc9a103967c9ecba30e7fef6d757fadbff328a Mon Sep 17 00:00:00 2001
+From: Dietmar Maurer <dietmar@proxmox.com>
+Date: Wed, 24 Oct 2012 12:10:47 +0200
+Subject: [PATCH] stream: fix ratelimit_set_speed
+
+The formula to compute slice_quota was wrong since commit 6ef228fc.
+
+Signed-off-by: Dietmar Maurer <dietmar@proxmox.com>
+Reviewed-by: Eric Blake <eblake@redhat.com>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit e3980e28bb888bf643054770452998d1b4319609)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ include/qemu/ratelimit.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/qemu/ratelimit.h b/include/qemu/ratelimit.h
+index c6ac281..d1610f1 100644
+--- a/include/qemu/ratelimit.h
++++ b/include/qemu/ratelimit.h
+@@ -42,7 +42,7 @@ static inline void ratelimit_set_speed(RateLimit *limit, uint64_t speed,
+                                        uint64_t slice_ns)
+ {
+     limit->slice_ns = slice_ns;
+-    limit->slice_quota = ((double)speed * 1000000000ULL) / slice_ns;
++    limit->slice_quota = ((double)speed * slice_ns)/1000000000ULL;
+ }
+ 
+ #endif

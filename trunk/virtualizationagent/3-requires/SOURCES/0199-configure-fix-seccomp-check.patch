@@ -1,0 +1,42 @@
+From 349beca15e6a3284c5d44d81be48277dbbca4ae1 Mon Sep 17 00:00:00 2001
+From: "Yann E. MORIN" <yann.morin.1998@free.fr>
+Date: Thu, 6 Sep 2012 22:40:30 +0200
+Subject: [PATCH] configure: fix seccomp check
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Currently, if libseccomp is missing but the user explicitly requested
+seccomp support using --enable-seccomp, configure silently ignores the
+situation and disables seccomp support.
+
+This is unlike all other tests that explicitly fail in such situation.
+
+Fix that.
+
+Signed-off-by: "Yann E. MORIN" <yann.morin.1998@free.fr>
+Reviewed-by: Andreas Färber <afaerber@suse.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit e84d5956cc6215d2f098e7b6090fc5ec4cba1be3)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index dcd8e7b..9e53cc2 100755
+--- a/configure
++++ b/configure
+@@ -1405,10 +1405,10 @@ if test "$seccomp" != "no" ; then
+         LIBS=`$pkg_config --libs libseccomp`
+ 	seccomp="yes"
+     else
+-	seccomp="no"
+ 	if test "$seccomp" = "yes"; then
+             feature_not_found "libseccomp"
+ 	fi
++	seccomp="no"
+     fi
+ fi
+ ##########################################

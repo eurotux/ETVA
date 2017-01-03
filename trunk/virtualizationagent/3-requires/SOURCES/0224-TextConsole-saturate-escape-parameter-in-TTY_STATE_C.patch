@@ -1,0 +1,33 @@
+From 6d9f5e80fc5fcf776d1a9241ee9a5b17ae26b9b8 Mon Sep 17 00:00:00 2001
+From: Laszlo Ersek <lersek@redhat.com>
+Date: Mon, 17 Sep 2012 11:10:03 +0200
+Subject: [PATCH] TextConsole: saturate escape parameter in TTY_STATE_CSI
+
+Signed-off-by: Laszlo Ersek <lersek@redhat.com>
+Reviewed-by: Markus Armbruster <armbru@redhat.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit c10600af60865ba6c60987be313102ebb5fcee57)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ console.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/console.c b/console.c
+index 8b5e21d..314f5a5 100644
+--- a/console.c
++++ b/console.c
+@@ -937,8 +937,11 @@ static void console_putchar(TextConsole *s, int ch)
+     case TTY_STATE_CSI: /* handle escape sequence parameters */
+         if (ch >= '0' && ch <= '9') {
+             if (s->nb_esc_params < MAX_ESC_PARAMS) {
+-                s->esc_params[s->nb_esc_params] =
+-                    s->esc_params[s->nb_esc_params] * 10 + ch - '0';
++                int *param = &s->esc_params[s->nb_esc_params];
++                int digit = (ch - '0');
++
++                *param = (*param <= (INT_MAX - digit) / 10) ?
++                         *param * 10 + digit : INT_MAX;
+             }
+         } else {
+             if (s->nb_esc_params < MAX_ESC_PARAMS)

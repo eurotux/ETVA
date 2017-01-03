@@ -690,8 +690,8 @@ class soapController extends sfController {
                             }
 
 
-                            $tx = $intfdata->tx_bytes;
-                            $rx = $intfdata->rx_bytes;
+                            $tx = isset($intfdata->tx_bytes) ? $intfdata->tx_bytes : 0;
+                            $rx = isset($intfdata->rx_bytes) ? $intfdata->rx_bytes : 0;
 
                             $intf_sort = array($rx,$tx);
 
@@ -717,8 +717,8 @@ class soapController extends sfController {
                         
                         $diskname = $diskdata->name;
 
-                        $read_b = $diskdata->rd_bytes;
-                        $write_b = $diskdata->wr_bytes;
+                        $read_b = isset($diskdata->rd_bytes) ? $diskdata->rd_bytes : 0;
+                        $write_b = isset($diskdata->wr_bytes) ? $diskdata->wr_bytes : 0;
                         $disk_sort = array($read_b,$write_b);
 
                         // create log file

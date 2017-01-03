@@ -1052,6 +1052,7 @@ sub xml_domain_parser {
                         if( $td eq "source" ){
                             my %S = $self->xml_domain_parser_get_attr($cdd);
                             $A{'path'} = $S{'dev'} || $S{'file'};
+                            $A{'sourceaio'} = $S{'sourceaio'} if( $S{'sourceaio'} );
                         } elsif( $td eq "target" ){
                             my %T = $self->xml_domain_parser_get_attr($cdd);
                             $A{'target'} = $T{'dev'};
@@ -1077,6 +1078,7 @@ sub xml_domain_parser {
                             $A{'drivername'} = $C{'name'};
                             $A{'drivertype'} = $C{'type'} if( $C{'type'} );
                             $A{'drivercache'} = $C{'cache'} if( $C{'cache'} );
+                            $A{'driverio'} = $C{'io'} if( $C{'io'} );
                         }
                     }
                     push(@{$D{'_disks_'}},\%A);
@@ -1717,7 +1719,7 @@ sub ovf_export {
                     $Attr{'ovf:capacity'} = $D->get_size();
                     $Attr{'ovf:populateSize'} = $D->get_usagesize();
                     $Attr{'ovf:format'} = $D->get_format() || "raw";
-                    # $Attr{'ovf:capacityAllocationUnits'}
+                    $Attr{'ovf:capacityAllocationUnits'} = 'byte';
 
                     push(@Disks, $X->Disk( \%Attr ) );
                     $c++;
@@ -2066,6 +2068,8 @@ sub new {
         $D{'drivername'} = $p{'drivername'};
         $D{'drivertype'} = $p{'drivertype'} if( $p{'drivertype'} );
         $D{'drivercache'} = $p{'drivercache'} if( $p{'drivercache'} );
+        $D{'driverio'} = $p{'driverio'} if( $p{'driverio'} );
+        $D{'sourceaio'} = $p{'sourceaio'} if( $p{'sourceaio'} );
         $D{'target'} = $p{'target'};
         $D{'readonly'} = $p{'readonly'} ? 1:0;
 
@@ -2109,11 +2113,15 @@ sub todevice {
                 'device' => $self->{'device'},
                 'source' => { "$typeattr" => $self->{'path'} },
                 );
+
+    $D{'source'}{'aio'} = $self->{'sourceaio'} if( $self->{'sourceaio'} );
+
     if( $self->{'drivername'} ){
         $D{'driver'} = { 'name' => $self->{'drivername'} };
 
         $D{'driver'}{'type'} = $self->{'drivertype'} if( $self->{'drivertype'} );
         $D{'driver'}{'cache'} = $self->{'drivercache'} if( $self->{'drivercache'} );
+        $D{'driver'}{'io'} = $self->{'driverio'} if( $self->{'driverio'} );
     }
     if( $self->{'target'} ){
         $D{'target'} = { 'dev' => $self->{'target'} };

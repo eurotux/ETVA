@@ -1,0 +1,94 @@
+From b690ef3c391e5d8b6a2116f0df201fe8adcf6501 Mon Sep 17 00:00:00 2001
+From: Yonit Halperin <yhalperi@redhat.com>
+Date: Tue, 21 Aug 2012 11:51:58 +0300
+Subject: [PATCH] spice: add 'migrated' flag to spice info
+
+The flag is 'true' when spice migration has completed on the src side.
+It is needed for a case where libvirt dies before migration completes
+and it misses the event QEVENT_SPICE_MIGRATE_COMPLETED.
+When libvirt is restored and queries the migration status, it also needs
+to query spice and check if its migration has completed.
+
+Signed-off-by: Yonit Halperin <yhalperi@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 61c4efe2cb85b0a9c6bc68f6a2dd107c8d7ec080)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hmp.c            | 2 ++
+ qapi-schema.json | 5 ++++-
+ ui/spice-core.c  | 4 ++++
+ 3 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/hmp.c b/hmp.c
+index 81c8acb..ec4274b 100644
+--- a/hmp.c
++++ b/hmp.c
+@@ -413,6 +413,8 @@ void hmp_info_spice(Monitor *mon)
+         monitor_printf(mon, "     address: %s:%" PRId64 " [tls]\n",
+                        info->host, info->tls_port);
+     }
++    monitor_printf(mon, "    migrated: %s\n",
++                   info->migrated ? "true" : "false");
+     monitor_printf(mon, "        auth: %s\n", info->auth);
+     monitor_printf(mon, "    compiled: %s\n", info->compiled_version);
+     monitor_printf(mon, "  mouse-mode: %s\n",
+diff --git a/qapi-schema.json b/qapi-schema.json
+index bd8ad74..8ddde12 100644
+--- a/qapi-schema.json
++++ b/qapi-schema.json
+@@ -808,6 +808,9 @@
+ #
+ # @enabled: true if the SPICE server is enabled, false otherwise
+ #
++# @migrated: true if the last guest migration completed and spice
++#            migration had completed as well. false otherwise.
++#
+ # @host: #optional The hostname the SPICE server is bound to.  This depends on
+ #        the name resolution on the host and may be an IP address.
+ #
+@@ -833,7 +836,7 @@
+ # Since: 0.14.0
+ ##
+ { 'type': 'SpiceInfo',
+-  'data': {'enabled': 'bool', '*host': 'str', '*port': 'int',
++  'data': {'enabled': 'bool', 'migrated': 'bool', '*host': 'str', '*port': 'int',
+            '*tls-port': 'int', '*auth': 'str', '*compiled-version': 'str',
+            'mouse-mode': 'SpiceQueryMouseMode', '*channels': ['SpiceChannel']} }
+ 
+diff --git a/ui/spice-core.c b/ui/spice-core.c
+index 851e869..ab069c5 100644
+--- a/ui/spice-core.c
++++ b/ui/spice-core.c
+@@ -46,6 +46,7 @@ static Notifier migration_state;
+ static const char *auth = "spice";
+ static char *auth_passwd;
+ static time_t auth_expires = TIME_MAX;
++static int spice_migration_completed;
+ int using_spice = 0;
+ 
+ static QemuThread me;
+@@ -310,6 +311,7 @@ static void migrate_connect_complete_cb(SpiceMigrateInstance *sin)
+ static void migrate_end_complete_cb(SpiceMigrateInstance *sin)
+ {
+     monitor_protocol_event(QEVENT_SPICE_MIGRATE_COMPLETED, NULL);
++    spice_migration_completed = true;
+ }
+ #endif
+ 
+@@ -443,6 +445,7 @@ SpiceInfo *qmp_query_spice(Error **errp)
+     }
+ 
+     info->enabled = true;
++    info->migrated = spice_migration_completed;
+ 
+     addr = qemu_opt_get(opts, "addr");
+     port = qemu_opt_get_number(opts, "port", 0);
+@@ -496,6 +499,7 @@ static void migration_state_notifier(Notifier *notifier, void *data)
+ #ifndef SPICE_INTERFACE_MIGRATION
+         spice_server_migrate_switch(spice_server);
+         monitor_protocol_event(QEVENT_SPICE_MIGRATE_COMPLETED, NULL);
++        spice_migration_completed = true;
+ #else
+         spice_server_migrate_end(spice_server, true);
+     } else if (migration_has_failed(s)) {

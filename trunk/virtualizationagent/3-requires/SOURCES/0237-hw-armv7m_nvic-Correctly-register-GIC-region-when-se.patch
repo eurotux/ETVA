@@ -1,0 +1,37 @@
+From c31603b873323e5489313fc859f0e78478fdc42d Mon Sep 17 00:00:00 2001
+From: Meador Inge <meadori@codesourcery.com>
+Date: Wed, 26 Sep 2012 16:46:28 +0100
+Subject: [PATCH] hw/armv7m_nvic: Correctly register GIC region when setting up
+ NVIC
+
+When setting up the NVIC memory regions the memory range
+0x100..0xcff is aliased to an IO memory region that belongs
+to the ARM GIC.  This aliased region should be added to the
+NVIC memory container, but the actual GIC IO memory region
+was being added instead.  This mixup was causing the wrong
+IO memory access functions to be called when accessing parts
+of the NVIC memory.
+
+Signed-off-by: Meador Inge <meadori@codesourcery.com>
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+(cherry picked from commit 9892cae39562d2e6c00ccc5966302c00f23be6d4)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/armv7m_nvic.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/hw/armv7m_nvic.c b/hw/armv7m_nvic.c
+index 6a0832e..5c09116 100644
+--- a/hw/armv7m_nvic.c
++++ b/hw/armv7m_nvic.c
+@@ -489,7 +489,8 @@ static int armv7m_nvic_init(SysBusDevice *dev)
+      */
+     memory_region_init_alias(&s->gic_iomem_alias, "nvic-gic", &s->gic.iomem,
+                              0x100, 0xc00);
+-    memory_region_add_subregion_overlap(&s->container, 0x100, &s->gic.iomem, 1);
++    memory_region_add_subregion_overlap(&s->container, 0x100,
++                                        &s->gic_iomem_alias, 1);
+     /* Map the whole thing into system memory at the location required
+      * by the v7M architecture.
+      */

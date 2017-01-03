@@ -49,6 +49,24 @@ my $debug = 0;
 
 my %CONF;
 
+# certificates CA and Server files
+my $cacerts_topdir = "/etc/pki/CA";
+
+my $ca_keyfile = "$cacerts_topdir/private/cakey.pem";
+my $ca_certfile = "$cacerts_topdir/cacert.pem";
+
+my $cacerts_tmpinfo = '/var/tmp/ca.info';
+
+my $srvcerts_topdir = "/etc/pki/libvirt";
+
+my $srv_keyfile = "$srvcerts_topdir/private/serverkey.pem";
+my $srv_certfile = "$srvcerts_topdir/servercert.pem";
+my $cli_keyfile = "$srvcerts_topdir/private/clientkey.pem";
+my $cli_certfile = "$srvcerts_topdir/clientcert.pem";
+
+my $srvcerts_tmpinfo = '/var/tmp/server.info';
+# END certificates CA and Server files
+
 sub trim {
     my ($str) = @_;
     $str =~ s/^\s+//;
@@ -911,7 +929,7 @@ sub parseSoapType {
     } elsif( lc($value) eq 'false' ){
         $type = 'boolean';
     } elsif( $value =~ m/^\d+$/ ){
-        $type = (length($value) < 32) ? 'int' : 'string';
+        $type = (int($value) < 2**31) ? 'int' : 'string';
     } elsif( $value =~ m/^\w+$/ ){
         $type = 'string';
     }
@@ -1108,42 +1126,31 @@ sub debug_dec {
 }
 
 # gencerts
-#   generate server certificates
-sub gencerts {
-    my ($organization,$cn,$force,$forceca,$forcesrvkey,$forcecakey) = @_;
+#   generate CA and server certificates
+sub genCAcerts {
+    my ($organization,$cn,$forceca,$forcecakey) = @_;
 
     if( !-x "/usr/bin/certtool" ){
+        plogNow("Error: gencerts - /usr/bin/certtool doesn't exists!");
         return 0;
     }
 
-    my $ca_topdir = "/etc/pki/CA";
-    if( !-d "$ca_topdir/private" ){
-        mkpath( "$ca_topdir/private" );
+    if( !-d "$cacerts_topdir/private" ){
+        mkpath( "$cacerts_topdir/private" );
     }
-    my $topdir = "/etc/pki/libvirt";
-    if( !-d "$topdir/private" ){
-        mkpath( "$topdir/private" );
-    }
-
-    my $ca_keyfile = "$ca_topdir/private/cakey.pem";
-    my $ca_certfile = "$ca_topdir/cacert.pem";
-    my $srv_keyfile = "$topdir/private/serverkey.pem";
-    my $srv_certfile = "$topdir/servercert.pem";
-    my $cli_keyfile = "$topdir/private/clientkey.pem";
-    my $cli_certfile = "$topdir/clientcert.pem";
-
-    my $srv_tmpinfo = '/var/tmp/server.info';
-    my $ca_tmpinfo = '/var/tmp/ca.info';
 
     # check if dont have CA key file
     if( $forcecakey || !-e "$ca_keyfile" ){
+        plogNow("Warn: gencerts - generate new CA private key '$ca_keyfile'!") if( &debug_level > 3 );
         cmd_exec_errh("/usr/bin/certtool","--generate-privkey",">$ca_keyfile");
     }
 
     # generate CA certificate
     if( $forceca || !-e "$ca_certfile" ){
 
-        open(F,">$ca_tmpinfo");
+        plogNow("Warn: gencerts - generate new CA certificate file '$ca_certfile'!") if( &debug_level > 3 );
+
+        open(F,">$cacerts_tmpinfo");
         print F <<__SRVINFO__;
 cn = $organization
 ca
@@ -1153,20 +1160,41 @@ __SRVINFO__
         close(F);
         cmd_exec("/usr/bin/certtool","--generate-self-signed",
                             "--load-privkey","$ca_keyfile",
-                            "--template","$ca_tmpinfo",
+                            "--template","$cacerts_tmpinfo",
                             "--outfile","$ca_certfile");
-        unlink("$ca_tmpinfo");
+        unlink("$cacerts_tmpinfo");
+    }
+
+    return 1;
+}
+sub genServercerts {
+    my ($organization,$cn,$force,$forcesrvkey) = @_;
+
+    if( !-x "/usr/bin/certtool" ){
+        plogNow("Error: gencerts - /usr/bin/certtool doesn't exists!");
+        return 0;
+    }
+
+    if( !-d "$srvcerts_topdir/private" ){
+        mkpath( "$srvcerts_topdir/private" );
     }
 
     # check if dont have server key file
     if( $forcesrvkey || !-e "$srv_keyfile" ){
+        plogNow("Warn: gencerts - generate new Server private key '$srv_keyfile'!") if( &debug_level > 3 );
         cmd_exec_errh("/usr/bin/certtool","--generate-privkey",">$srv_keyfile");
+
+        if( ! -e "$cli_keyfile" ){
+            symlink("$srv_keyfile","$cli_keyfile");
+        }
     }
 
     # generate server certificate
     if( $force || !-e "$srv_certfile" ){
 
-        open(F,">$srv_tmpinfo");
+        plogNow("Warn: gencerts - generate new Server certificate file '$srv_certfile'!") if( &debug_level > 3 );
+
+        open(F,">$srvcerts_tmpinfo");
         print F <<__SRVINFO__;
 organization = $organization
 cn = $cn
@@ -1177,19 +1205,138 @@ signing_key
 expiration_days = 730
 __SRVINFO__
         close(F);
-        #certtool --generate-self-signed --load-privkey cakey.pem \
-        #  --template ca.info --outfile cacert.pem
+
         cmd_exec("/usr/bin/certtool","--generate-certificate",
                             "--load-ca-privkey","$ca_keyfile",
                             "--load-ca-certificate","$ca_certfile",
                             "--load-privkey","$srv_keyfile",
-                            "--template","$srv_tmpinfo",
+                            "--template","$srvcerts_tmpinfo",
                             "--outfile","$srv_certfile");
 
-        symlink("$srv_keyfile","$cli_keyfile");
-        symlink("$srv_certfile","$cli_certfile");
-        unlink("$srv_tmpinfo");
+        if( ! -e "$cli_certfile" ){
+            symlink("$srv_certfile","$cli_certfile");
+        }
+        unlink("$srvcerts_tmpinfo");
     }
+    return 1;
+}
+sub gencerts {
+    my ($organization,$cn,$force,$forceca,$forcesrvkey,$forcecakey) = @_;
+
+    if( !&genCAcerts($organization,$cn,$forceca,$forcecakey) ){
+	return 0;
+    }
+
+    if( !&genServercerts($organization,$cn,$force,$forcecakey) ){
+	return 0;
+    }
+
+    return 1;
+}
+# renewcertificate
+#   renew server certificate
+sub renewcertificate {
+    my ($certfile) = @_;
+
+    if( !-e "$certfile" ){
+        plogNow("Error when try to renew certificate: $certfile not found!");
+        return 0;
+    }
+
+    if( !-d "$cacerts_topdir/private" ){
+        plogNow("Error when try to renew certificate: $cacerts_topdir not found!");
+        return 0;
+    }
+
+    if( !-e "$ca_certfile" ){
+        plogNow("Error when try to renew certificate: $ca_certfile not found!");
+        return 0;
+    }
+
+    if( !-e "$ca_keyfile" ){
+        plogNow("Error when try to renew certificate: $ca_keyfile not found!");
+        return 0;
+    }
+
+    # certtool --update-certificate \
+    #          --load-ca-privkey CA/private/cakey.pem \
+    #          --load-ca-certificate CA/cacert.pem \
+    #          --load-certificate libvirt/servercert.pem \
+    #          --outfile libvirt/servercert.pem-new
+    #
+    my $tmp_certfile = &rand_tmpfile($certfile);
+
+    my $tmpinfo = '/var/tmp/server.info';
+    open(F,">$tmpinfo");
+    print F <<__SRVINFO__;
+expiration_days = 730
+__SRVINFO__
+    close(F);
+
+    cmd_exec("/usr/bin/certtool","--update-certificate",
+                        "--load-ca-privkey","$ca_keyfile",
+                        "--load-ca-certificate","$ca_certfile",
+                        "--load-certificate","$certfile",
+                        "--template","$tmpinfo",
+                        "--outfile","$tmp_certfile");
+    
+    copy("$certfile","$certfile.bkp");
+    copy("$tmp_certfile","$certfile");
+    unlink("$tmp_certfile");
+
+    return 1;
+}
+
+# checkcertificates
+#   verify CA and Server certificates
+
+sub checkCAExpires {
+    # check if CA certificate expires?
+    my $ca_expired_time = int(qx(date --date="`certtool -i --infile $ca_certfile | grep "Not After:" | cut -d ":" -f 2-`" +%s)); 
+    if( &now() > $ca_expired_time ){
+	    return 1;
+    }
+    return 0;
+}
+sub checkcertificates {
+    my ($organization,$cn) = @_;
+
+    if( !-x "/usr/bin/certtool" ){
+        plogNow("Error: checkcertificates - /usr/bin/certtool doesn't exists!");
+        return 0;
+    }
+
+    my ($forcesrv,$forceca) = (0,0);
+    my @virt_pki_validate = `virt-pki-validate`;
+    if( grep { /The CA certificate and the server certificate do not match/ } @virt_pki_validate ){
+        $forceca = $forcesrv = 1;
+    } elsif( grep { /The server certificate does not seem to match the host name/ } @virt_pki_validate ){
+        $forcesrv = 1;
+    }
+
+    # check certificates is valid=
+    if( !&gencerts($organization,$cn,$forcesrv,$forceca) ){
+        plogNow("Error: checkcertificates - generate certificates fail!");
+	    return 0;
+    }
+
+    # check if CA certificate expires?
+    if( &checkCAExpires() ){
+        plogNow("Error: checkcertificates - CA certificate '$ca_certfile' expired!");
+        return 0;
+    }
+
+    # check if server certificate expires?
+    my $srv_expired_time = int(qx(date --date="`certtool -i --infile $srv_certfile | grep "Not After:" | cut -d ":" -f 2-`" +%s)); 
+    if( &now() > $srv_expired_time ){
+        plogNow("Warn: checkcertificates - Server certificate '$srv_certfile' expired and will be updated!");
+	
+        if( ! &renewcertificate( $srv_certfile ) ){
+            plogNow( "Error: checkcertificates - Renew Server certificate '$srv_certfile'!");
+            return 0;
+        }
+    }
+
     return 1;
 }
 
@@ -1313,10 +1460,12 @@ sub timeout_call {
     my ($time,$call,@args) = @_;
     my $res;
     eval {
+        my $bkp_alrmhandler = $SIG{ALRM} || sub {};   # backup it
         local $SIG{ALRM} = sub { die "Timeout!\n"; };
         alarm($time);
         $res = &$call(@args);
         alarm(0);
+        $SIG{ALRM} = $bkp_alrmhandler;   # restore it
     };
     plog "timeout_call timed out! $@" if( $@ && $@ =~ m/Timeout/ );
 

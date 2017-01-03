@@ -40,6 +40,9 @@ lvwin.cloneForm.Main = function(node_id, level, srcSize) {
     this.original_vg = new Ext.form.Hidden({
         name:'ovg'
     });
+    this.original_lvformat = new Ext.form.Hidden({
+        name:'olvformat'
+    });
 
     this.lvsrcname = new Ext.form.TextField({        
         fieldLabel: <?php echo json_encode(__('Source volume name')) ?>,
@@ -185,7 +188,7 @@ lvwin.cloneForm.Main = function(node_id, level, srcSize) {
         autoHeight:true,
         border:false,
         labelWidth:160,defaults:{msgTarget: 'side'},
-        items: [this.lvsrcname, this.lvsize, this.vg, this.lvname]
+        items: [this.lvsrcname, this.lvsize, this.vg, this.lvname, this.original_lvformat, this.original_lvuuid, this.original_vg, this.totalvgsize]
     });
 
     // define window and pop-up - render formPanel
@@ -218,10 +221,12 @@ Ext.extend(lvwin.cloneForm.Main, Ext.form.FormPanel, {
   
     // load data
     load: function(node) {
+        //console.log(node);
         this.lvsrcname.setValue(node.attributes.text);
         this.original_lvuuid.setValue(node.attributes.uuid);
         this.original_vg.setValue(node.attributes.vg);
         this.lvsize.setValue(byte_to_MBconvert(node.attributes.size,2,'floor'));
+        this.original_lvformat.setValue(node.attributes.format);
     }
 
     
@@ -384,10 +389,12 @@ Ext.extend(lvwin.cloneForm.Main, Ext.form.FormPanel, {
             console.log(params);
             this.sendCreate_n_Clone(params);*/
 
+            var format = this.original_lvformat.getValue();
+
             var scope_form = this;
             AsynchronousJob.Functions.Create( 'logicalvol', 'create',
                                                 {'name':lvname, 'volumegroup': vg, 'size':size+'M'},
-                                                {'level': level, 'cluster': clusterid, 'node': nodeid},
+                                                {'level': level, 'cluster': clusterid, 'node': nodeid, 'format': format},
                                                 function(resp,opt) { // success fh
                                                     var response = Ext.util.JSON.decode(resp.responseText);
                                                     AsynchronousJob.Functions.Create( 'logicalvol', 'clone',

@@ -214,7 +214,7 @@ ETFW.DHCP.Networks.Data_Grid = Ext.extend(Ext.grid.GridPanel, {
                             Ext.MessageBox.show({
                                 title:'Delete pool',
                                 msg: 'You are about to delete this subnet. <br />Are you sure you want to delete?',
-                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                buttons: Ext.MessageBox.YESNO,
                                 fn: function(btn){
 
                                     if(btn=='yes'){
@@ -259,7 +259,7 @@ ETFW.DHCP.Networks.Data_Grid = Ext.extend(Ext.grid.GridPanel, {
                             Ext.MessageBox.show({
                                 title:'Delete shared network',
                                 msg: 'You are about to delete this shared network. <br />Are you sure you want to delete?',
-                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                buttons: Ext.MessageBox.YESNO,
                                 fn: this.onDeleteShared,
                                 scope:this,
                                 icon: Ext.MessageBox.QUESTION
@@ -885,7 +885,7 @@ ETFW.DHCP.Networks.Pool_Grid = Ext.extend(Ext.grid.GridPanel, {
                                 Ext.MessageBox.show({
                                     title:'Delete pool',
                                     msg: 'You are about to delete this pool. <br />Are you sure you want to delete?',
-                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                    buttons: Ext.MessageBox.YESNO,
                                     fn: function(btn){
 
                                         if(btn=='yes'){

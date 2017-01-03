@@ -1,0 +1,52 @@
+From 0ef654194a131f8b551cd80e7f190c7a823d8db7 Mon Sep 17 00:00:00 2001
+From: Yonit Halperin <yhalperi@redhat.com>
+Date: Tue, 21 Aug 2012 11:51:55 +0300
+Subject: [PATCH] spice: notify spice server on vm start/stop
+
+Spice server needs to know about the vm state in order to prevent
+attempts to write to devices when they are stopped, mainly during
+the non-live stage of migration.
+Instead, spice will take care of restoring this writes, on the migration
+target side, after migration completes.
+
+Signed-off-by: Yonit Halperin <yhalperi@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit f5bb039c6d97ef3e664094eab3c9a4dc1824ed73)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ ui/spice-core.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/ui/spice-core.c b/ui/spice-core.c
+index bb4f585..a515c94 100644
+--- a/ui/spice-core.c
++++ b/ui/spice-core.c
+@@ -546,6 +546,18 @@ static int add_channel(const char *name, const char *value, void *opaque)
+     return 0;
+ }
+ 
++static void vm_change_state_handler(void *opaque, int running,
++                                    RunState state)
++{
++#if SPICE_SERVER_VERSION >= 0x000b02 /* 0.11.2 */
++    if (running) {
++        spice_server_vm_start(spice_server);
++    } else {
++        spice_server_vm_stop(spice_server);
++    }
++#endif
++}
++
+ void qemu_spice_init(void)
+ {
+     QemuOpts *opts = QTAILQ_FIRST(&qemu_spice_opts.head);
+@@ -719,6 +731,8 @@ void qemu_spice_init(void)
+     qemu_spice_input_init();
+     qemu_spice_audio_init();
+ 
++    qemu_add_vm_change_state_handler(vm_change_state_handler, &spice_server);
++
+     g_free(x509_key_file);
+     g_free(x509_cert_file);
+     g_free(x509_cacert_file);

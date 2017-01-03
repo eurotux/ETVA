@@ -1,0 +1,106 @@
+From 5ff965f0738d095b6e2ddc3a7dce48419cd9205f Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Fri, 31 Aug 2012 10:44:21 +0200
+Subject: [PATCH] ehci: trace guest bugs
+
+make qemu_queue_{cancel,reset} return the number of packets released,
+so the caller can figure whenever there have been active packets even
+though there shouldn't have been any.  Add tracepoint to log this.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 5c514681abbb3ae2f61f517c1aa3197f2f3ca93c)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 26 ++++++++++++++++++++------
+ trace-events      |  1 +
+ 2 files changed, 21 insertions(+), 6 deletions(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 23221d0..4564615 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -716,6 +716,12 @@ static void ehci_trace_sitd(EHCIState *s, target_phys_addr_t addr,
+                         (bool)(sitd->results & SITD_RESULTS_ACTIVE));
+ }
+ 
++static void ehci_trace_guest_bug(EHCIState *s, const char *message)
++{
++    trace_usb_ehci_guest_bug(message);
++    fprintf(stderr, "ehci warning: %s\n", message);
++}
++
+ static inline bool ehci_enabled(EHCIState *s)
+ {
+     return s->usbcmd & USBCMD_RUNSTOP;
+@@ -785,27 +791,33 @@ static EHCIQueue *ehci_alloc_queue(EHCIState *ehci, uint32_t addr, int async)
+     return q;
+ }
+ 
+-static void ehci_cancel_queue(EHCIQueue *q)
++static int ehci_cancel_queue(EHCIQueue *q)
+ {
+     EHCIPacket *p;
++    int packets = 0;
+ 
+     p = QTAILQ_FIRST(&q->packets);
+     if (p == NULL) {
+-        return;
++        return 0;
+     }
+ 
+     trace_usb_ehci_queue_action(q, "cancel");
+     do {
+         ehci_free_packet(p);
++        packets++;
+     } while ((p = QTAILQ_FIRST(&q->packets)) != NULL);
++    return packets;
+ }
+ 
+-static void ehci_reset_queue(EHCIQueue *q)
++static int ehci_reset_queue(EHCIQueue *q)
+ {
++    int packets;
++
+     trace_usb_ehci_queue_action(q, "reset");
+-    ehci_cancel_queue(q);
++    packets = ehci_cancel_queue(q);
+     q->dev = NULL;
+     q->qtdaddr = 0;
++    return packets;
+ }
+ 
+ static void ehci_free_queue(EHCIQueue *q)
+@@ -1817,7 +1829,9 @@ static EHCIQueue *ehci_state_fetchqh(EHCIState *ehci, int async)
+         (memcmp(&qh.current_qtd, &q->qh.current_qtd,
+                                  9 * sizeof(uint32_t)) != 0) ||
+         (q->dev != NULL && q->dev->addr != devaddr)) {
+-        ehci_reset_queue(q);
++        if (ehci_reset_queue(q) > 0) {
++            ehci_trace_guest_bug(ehci, "guest updated active QH");
++        }
+         p = NULL;
+     }
+     q->qh = qh;
+@@ -1979,8 +1993,8 @@ static int ehci_state_fetchqtd(EHCIQueue *q)
+             (!NLPTR_TBIT(p->qtd.next) && (p->qtd.next != qtd.next)) ||
+             (!NLPTR_TBIT(p->qtd.altnext) && (p->qtd.altnext != qtd.altnext)) ||
+             p->qtd.bufptr[0] != qtd.bufptr[0]) {
+-            /* guest bug: guest updated active QH or qTD underneath us */
+             ehci_cancel_queue(q);
++            ehci_trace_guest_bug(q->ehci, "guest updated active QH or qTD");
+             p = NULL;
+         } else {
+             p->qtd = qtd;
+diff --git a/trace-events b/trace-events
+index 8fcbc50..5112a47 100644
+--- a/trace-events
++++ b/trace-events
+@@ -263,6 +263,7 @@ usb_ehci_data(int rw, uint32_t cpage, uint32_t offset, uint32_t addr, uint32_t l
+ usb_ehci_queue_action(void *q, const char *action) "q %p: %s"
+ usb_ehci_packet_action(void *q, void *p, const char *action) "q %p p %p: %s"
+ usb_ehci_irq(uint32_t level, uint32_t frindex, uint32_t sts, uint32_t mask) "level %d, frindex 0x%04x, sts 0x%x, mask 0x%x"
++usb_ehci_guest_bug(const char *reason) "%s"
+ 
+ # hw/usb/hcd-uhci.c
+ usb_uhci_reset(void) "=== RESET ==="

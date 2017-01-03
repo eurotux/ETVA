@@ -1,0 +1,31 @@
+From b460f7d9b693e168a489447333c8044bcf4b4f83 Mon Sep 17 00:00:00 2001
+From: Peter Lieven <pl@dlhnet.de>
+Date: Thu, 15 Nov 2012 15:42:06 +0100
+Subject: [PATCH] iscsi: fix segfault in url parsing
+
+If an invalid URL is specified iscsi_get_error(iscsi) is called
+with iscsi == NULL.
+
+Signed-off-by: Peter Lieven <pl@kamp.de>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+(cherry picked from commit 8da1e18b0cf46b6c95c88bbad1cc50d6dd1bef4b)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block/iscsi.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/block/iscsi.c b/block/iscsi.c
+index fb001b9..817196a 100644
+--- a/block/iscsi.c
++++ b/block/iscsi.c
+@@ -951,8 +951,7 @@ static int iscsi_open(BlockDriverState *bs, const char *filename, int flags)
+ 
+     iscsi_url = iscsi_parse_full_url(iscsi, filename);
+     if (iscsi_url == NULL) {
+-        error_report("Failed to parse URL : %s %s", filename,
+-                     iscsi_get_error(iscsi));
++        error_report("Failed to parse URL : %s", filename);
+         ret = -EINVAL;
+         goto out;
+     }

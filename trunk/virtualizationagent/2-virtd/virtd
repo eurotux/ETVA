@@ -499,9 +499,9 @@ sub main {
 sub term_handler {
     $RUNNING = 0;
 
-    plog("receive term signal... deamon terminate!");
+    plogNow("[ERROR] - virtd - receive term signal... deamon terminate!");
 
-    plog("...waiting for childs...\n");
+    plogNow("[ERROR] - virtd - ...waiting for childs...\n");
 
     if( defined($GM_PID) ){
         kill SIGKILL, $GM_PID;
@@ -603,7 +603,7 @@ sub chld_handler_GA {
             #VirtAgentSOAP->terminate_agent();   # terminate agent
             #kill SIGHUP, $$; # kill my self
 
-            plogNow("[error] - guest agent die... so i will die too...");
+            plogNow("[ERROR] - guest agent die... so i will die too...");
         }
 
         # for guest management handle process
@@ -697,11 +697,16 @@ sub register_handler {
                     $agent->change_va_name($agent->{'name'});
                 }
 
-                # generate server certificates
-                ETVA::Utils::gencerts( $CONF->{'Organization'}, $agent->{'name'} );
+                # check and generate CA and Server certificates
+                if( !ETVA::Utils::checkcertificates( $CONF->{'Organization'}, $agent->{'name'} ) ){
+                    if( ETVA::Utils::checkCAExpires() ){
+                        # TODO Need to update!!!
+                        plogNow("CA Certificate expires and need to be updated!");
+                    }
+                }
 
                 # configure ntp
-                ETVA::Utils::configure_ntp( ETVA::Utils::get_cmip() );
+                $agent->update_ntp_config();
 
                 plog("$now - Agent initialized with success on CentralManagement: id=$agent->{'_cm_insert_id'}");
 
@@ -1065,35 +1070,50 @@ sub keepalive_handler {
         }
 
         my $bef_cur_mem = ETVA::Utils::process_mem_size($$);
-        my $stats = send_stats();
+        my $stats;
+        my $timeout_blockstats = 10;    # time out for blockstats (default: 10s)
+        my $bkp_alrmhandler = $SIG{ALRM} || sub {};   # backup it
+        eval {
+            local $SIG{ALRM} = sub { die "Domain block_stats: Timeout!\n"; };
+            alarm($timeout_blockstats);
+            $stats = send_stats();
+            alarm(0);
+        };
+        my $err = $@;	# backup error message
+        $SIG{ALRM} = $bkp_alrmhandler;   # restore it
+        if( $err ){
+            plogNow("[ERROR] - keepalive_handler - send_stats error: $@");
+        }
         my $aft_cur_mem = ETVA::Utils::process_mem_size($$);
 
         my $diff_cur_mem = $aft_cur_mem - $bef_cur_mem;
         my $diff_cur_mem_ps = ETVA::Utils::prettysize($diff_cur_mem);
         my $aft_cur_mem_ps = ETVA::Utils::prettysize($aft_cur_mem);
 
-        plog(sprintf('%s: MEMORY_LEAK virtd method=send_stats memory detect cur_mem=%s (diff=%s)',ETVA::Utils::nowStr(0),$aft_cur_mem_ps,$diff_cur_mem_ps)) if(&debug_level > 9);
+        plogNow(sprintf('%s: MEMORY_LEAK virtd method=send_stats memory detect cur_mem=%s (diff=%s)',ETVA::Utils::nowStr(0),$aft_cur_mem_ps,$diff_cur_mem_ps)) if(&debug_level > 9);
 
-        if( $CONF->{'cm_uri'} ){
-            # update state
-            my $R = new ETVA::Client::SOAP::HTTP( uri => $CONF->{'cm_uri'} )
+        if( $stats ){
+            if( $CONF->{'cm_uri'} ){
+                # update state
+                my $R = new ETVA::Client::SOAP::HTTP( uri => $CONF->{'cm_uri'} )
                     -> call( $CONF->{'cm_namespace'},
-                                'updateVirtAgentLogs',
-                                uuid=>$CONF->{'uuid'},
-                                data=>$stats
-                            );
-            if( !$R || $R->{'_error_'} ){
-                plogNow("Error CentralManagement connection problem.\n");
-            } else {
-                if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
-                    plogNow("Agent keepalive logs send successful.");
+                                    'updateVirtAgentLogs',
+                                    uuid=>$CONF->{'uuid'},
+                                    data=>$stats
+                                );
+                if( !$R || $R->{'_error_'} ){
+                    plogNow("Error CentralManagement connection problem.\n");
                 } else {
-                    plogNow( "Error update Agent Logs.\n" );
-                    if( &debug_level ){
-                        if( ref($R->{'return'}) && !$R->{'return'}{'success'} && $R->{'return'}{'error'} ){
-                            plog("\tReason: ",Dumper($R->{'return'}{'error'}));
-                        } else {
-                            plog("\tDebug: ",Dumper($R));
+                    if( ref($R->{'return'}) && $R->{'return'}{'success'} && $R->{'return'}{'success'} ne 'false' ){
+                        plogNow("Agent keepalive logs send successful.");
+                    } else {
+                        plogNow( "Error update Agent Logs.\n" );
+                        if( &debug_level ){
+                            if( ref($R->{'return'}) && !$R->{'return'}{'success'} && $R->{'return'}{'error'} ){
+                                plog("\tReason: ",Dumper($R->{'return'}{'error'}));
+                            } else {
+                                plog("\tDebug: ",Dumper($R));
+                            }
                         }
                     }
                 }

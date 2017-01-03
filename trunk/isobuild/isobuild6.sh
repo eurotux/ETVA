@@ -95,8 +95,10 @@ cd - > /dev/null
 
 # remove anaconda repo
 cd $DIRIMG
-	unsquashfs $DIRDEST/images/install.img
-	rm -f squashfs-root/etc/anaconda.repos.d/CentOS-Base.repo squashfs-root/etc/anaconda.repos.d/CentOS-Debuginfo.repo
+#	unsquashfs $DIRDEST/images/install.img
+    # CMAR: froce install.img (FIXME)
+	unsquashfs /tmp/install.img
+#	rm -f squashfs-root/etc/anaconda.repos.d/CentOS-Base.repo squashfs-root/etc/anaconda.repos.d/CentOS-Debuginfo.repo
 	mksquashfs squashfs-root/ $DIRDEST/images/install.img -noappend
 	$SUDO rm -rf squashfs-root
 cd - > /dev/null

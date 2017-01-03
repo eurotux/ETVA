@@ -1,0 +1,48 @@
+From 9a3bf24a77e069326ff73f7ee21bf76a6541cb73 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Wed, 10 Oct 2012 15:50:36 +0200
+Subject: [PATCH] uhci: Raise interrupt when requested even for non active tds
+
+According to the spec we must raise an interrupt when one is requested
+even for non active tds.
+
+Linux depends on this, for bulk transfers it runs an inactivity timer
+to work around a bug in early uhci revisions, when we take longer then
+200 ms to process a packet, this timer goes of, and as part of the
+handling Linux then unlinks the qh, and relinks it after the frindex
+has increased by atleast 1, the problem is Linux only checks for the
+frindex increases on an interrupt, and we don't send that, causing
+the qh to go inactive for more then 32 frames, at which point we
+consider the packet cancelled.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 883bca776daa43111e9c39008f0038f7c62ae723)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-uhci.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/hw/usb/hcd-uhci.c b/hw/usb/hcd-uhci.c
+index cdc8bc3..c2f08e3 100644
+--- a/hw/usb/hcd-uhci.c
++++ b/hw/usb/hcd-uhci.c
+@@ -826,8 +826,16 @@ static int uhci_handle_td(UHCIState *s, uint32_t addr, UHCI_TD *td,
+     USBEndpoint *ep;
+ 
+     /* Is active ? */
+-    if (!(td->ctrl & TD_CTRL_ACTIVE))
++    if (!(td->ctrl & TD_CTRL_ACTIVE)) {
++        /*
++         * ehci11d spec page 22: "Even if the Active bit in the TD is already
++         * cleared when the TD is fetched ... an IOC interrupt is generated"
++         */
++        if (td->ctrl & TD_CTRL_IOC) {
++                *int_mask |= 0x01;
++        }
+         return TD_RESULT_NEXT_QH;
++    }
+ 
+     async = uhci_async_find_td(s, addr, td);
+     if (async) {

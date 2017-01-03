@@ -1,0 +1,1680 @@
+From bca0704da7e5430b1a09a956dec8027fe2c2ca95 Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Sun, 2 Sep 2012 15:28:56 +0000
+Subject: [PATCH] Remove unused CONFIG_TCG_PASS_AREG0 and dead code
+
+Now that CONFIG_TCG_PASS_AREG0 is enabled for all targets,
+remove dead code and support for !CONFIG_TCG_PASS_AREG0 case.
+
+Remove dyngen-exec.h and all references to it. Although included by
+hw/spapr_hcall.c, it does not seem to use it.
+
+Remove unused HELPER_CFLAGS.
+
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ Makefile.target            |  8 ------
+ configure                  | 11 -------
+ cpu-all.h                  | 11 -------
+ cputlb.c                   |  5 ----
+ dyngen-exec.h              | 70 --------------------------------------------
+ exec-all.h                 |  4 ---
+ hw/spapr_hcall.c           |  1 -
+ softmmu_defs.h             | 21 --------------
+ softmmu_header.h           | 63 +++++++++++++---------------------------
+ softmmu_template.h         | 72 +++++++++++++++++-----------------------------
+ target-m68k/op_helper.c    |  3 --
+ target-sparc/Makefile.objs |  2 --
+ tcg/arm/tcg-target.c       | 31 ++------------------
+ tcg/arm/tcg-target.h       |  1 -
+ tcg/hppa/tcg-target.c      | 24 ----------------
+ tcg/hppa/tcg-target.h      |  1 -
+ tcg/i386/tcg-target.c      | 30 -------------------
+ tcg/i386/tcg-target.h      |  1 -
+ tcg/ia64/tcg-target.c      | 34 ----------------------
+ tcg/ia64/tcg-target.h      |  1 -
+ tcg/mips/tcg-target.c      | 31 ++------------------
+ tcg/mips/tcg-target.h      |  1 -
+ tcg/ppc/tcg-target.c       | 38 ------------------------
+ tcg/ppc64/tcg-target.c     | 28 ------------------
+ tcg/s390/tcg-target.c      | 24 ----------------
+ tcg/s390/tcg-target.h      |  1 -
+ tcg/sparc/tcg-target.c     | 30 -------------------
+ tcg/sparc/tcg-target.h     |  1 -
+ tcg/tci/tcg-target.c       |  4 ---
+ tci.c                      | 12 --------
+ user-exec.c                | 14 ---------
+ 31 files changed, 53 insertions(+), 525 deletions(-)
+ delete mode 100644 dyngen-exec.h
+
+diff --git a/Makefile.target b/Makefile.target
+index 7892a8d..d9d54b8 100644
+--- a/Makefile.target
++++ b/Makefile.target
+@@ -80,14 +80,6 @@ obj-$(CONFIG_GDBSTUB_XML) += gdbstub-xml.o
+ 
+ tci-dis.o: QEMU_CFLAGS += -I$(SRC_PATH)/tcg -I$(SRC_PATH)/tcg/tci
+ 
+-# HELPER_CFLAGS is used for all the legacy code compiled with static register
+-# variables
+-user-exec.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+-
+-# Note: this is a workaround. The real fix is to avoid compiling
+-# cpu_signal_handler() in user-exec.c.
+-%/signal.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+-
+ #########################################################
+ # Linux user emulator target
+ 
+diff --git a/configure b/configure
+index 83b068d..816f0f9 100755
+--- a/configure
++++ b/configure
+@@ -118,7 +118,6 @@ audio_card_list="ac97 es1370 sb16 hda"
+ audio_possible_cards="ac97 es1370 sb16 cs4231a adlib gus hda"
+ block_drv_whitelist=""
+ host_cc="gcc"
+-helper_cflags=""
+ libs_softmmu=""
+ libs_tools=""
+ audio_pt_int=""
+@@ -904,7 +903,6 @@ case "$cpu" in
+            QEMU_CFLAGS="-m32 -ffixed-g2 -ffixed-g3 $QEMU_CFLAGS"
+            if test "$solaris" = "no" ; then
+              QEMU_CFLAGS="-ffixed-g1 -ffixed-g6 $QEMU_CFLAGS"
+-             helper_cflags="-ffixed-i0"
+            fi
+            ;;
+     sparc64)
+@@ -929,7 +927,6 @@ case "$cpu" in
+            QEMU_CFLAGS="-m32 $QEMU_CFLAGS"
+            LDFLAGS="-m32 $LDFLAGS"
+            cc_i386='$(CC) -m32'
+-           helper_cflags="-fomit-frame-pointer"
+            host_guest_base="yes"
+            ;;
+     x86_64)
+@@ -3582,7 +3579,6 @@ if test "$sparse" = "yes" ; then
+   echo "HOST_CC      := REAL_CC=\"\$(HOST_CC)\" cgcc"  >> $config_host_mak
+   echo "QEMU_CFLAGS  += -Wbitwise -Wno-transparent-union -Wno-old-initializer -Wno-non-pointer-null" >> $config_host_mak
+ fi
+-echo "HELPER_CFLAGS=$helper_cflags" >> $config_host_mak
+ echo "LDFLAGS=$LDFLAGS" >> $config_host_mak
+ echo "ARLIBS_BEGIN=$arlibs_begin" >> $config_host_mak
+ echo "ARLIBS_END=$arlibs_end" >> $config_host_mak
+@@ -3837,13 +3833,6 @@ fi
+ 
+ symlink "$source_path/Makefile.target" "$target_dir/Makefile"
+ 
+-
+-case "$target_arch2" in
+-  alpha | arm* | cris | i386 | lm32 | m68k | microblaze* | mips* | or32 | s390x | sh4* | sparc* | unicore32 | x86_64 | xtensa* | ppc*)
+-    echo "CONFIG_TCG_PASS_AREG0=y" >> $config_target_mak
+-  ;;
+-esac
+-
+ upper() {
+     echo "$@"| LC_ALL=C tr '[a-z]' '[A-Z]'
+ }
+diff --git a/cpu-all.h b/cpu-all.h
+index 5e07d28..74d3681 100644
+--- a/cpu-all.h
++++ b/cpu-all.h
+@@ -260,14 +260,6 @@ extern unsigned long reserved_va;
+ #define stfl(p, v) stfl_raw(p, v)
+ #define stfq(p, v) stfq_raw(p, v)
+ 
+-#ifndef CONFIG_TCG_PASS_AREG0
+-#define ldub_code(p) ldub_raw(p)
+-#define ldsb_code(p) ldsb_raw(p)
+-#define lduw_code(p) lduw_raw(p)
+-#define ldsw_code(p) ldsw_raw(p)
+-#define ldl_code(p) ldl_raw(p)
+-#define ldq_code(p) ldq_raw(p)
+-#else
+ #define cpu_ldub_code(env1, p) ldub_raw(p)
+ #define cpu_ldsb_code(env1, p) ldsb_raw(p)
+ #define cpu_lduw_code(env1, p) lduw_raw(p)
+@@ -296,7 +288,6 @@ extern unsigned long reserved_va;
+ #define cpu_stw_kernel(env, addr, data) stw_raw(addr, data)
+ #define cpu_stl_kernel(env, addr, data) stl_raw(addr, data)
+ #define cpu_stq_kernel(env, addr, data) stq_raw(addr, data)
+-#endif
+ 
+ #define ldub_kernel(p) ldub_raw(p)
+ #define ldsb_kernel(p) ldsb_raw(p)
+@@ -313,7 +304,6 @@ extern unsigned long reserved_va;
+ #define stfl_kernel(p, v) stfl_raw(p, v)
+ #define stfq_kernel(p, vt) stfq_raw(p, v)
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ #define cpu_ldub_data(env, addr) ldub_raw(addr)
+ #define cpu_lduw_data(env, addr) lduw_raw(addr)
+ #define cpu_ldl_data(env, addr) ldl_raw(addr)
+@@ -321,7 +311,6 @@ extern unsigned long reserved_va;
+ #define cpu_stb_data(env, addr, data) stb_raw(addr, data)
+ #define cpu_stw_data(env, addr, data) stw_raw(addr, data)
+ #define cpu_stl_data(env, addr, data) stl_raw(addr, data)
+-#endif
+ #endif /* defined(CONFIG_USER_ONLY) */
+ 
+ /* page related stuff */
+diff --git a/cputlb.c b/cputlb.c
+index d3e7b25..51b5897 100644
+--- a/cputlb.c
++++ b/cputlb.c
+@@ -325,11 +325,7 @@ tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr)
+     mmu_idx = cpu_mmu_index(env1);
+     if (unlikely(env1->tlb_table[mmu_idx][page_index].addr_code !=
+                  (addr & TARGET_PAGE_MASK))) {
+-#ifdef CONFIG_TCG_PASS_AREG0
+         cpu_ldub_code(env1, addr);
+-#else
+-        ldub_code(addr);
+-#endif
+     }
+     pd = env1->iotlb[mmu_idx][page_index] & ~TARGET_PAGE_MASK;
+     mr = iotlb_to_region(pd);
+@@ -348,7 +344,6 @@ tb_page_addr_t get_page_addr_code(CPUArchState *env1, target_ulong addr)
+ #define MMUSUFFIX _cmmu
+ #undef GETPC
+ #define GETPC() ((uintptr_t)0)
+-#define env cpu_single_env
+ #define SOFTMMU_CODE_ACCESS
+ 
+ #define SHIFT 0
+diff --git a/dyngen-exec.h b/dyngen-exec.h
+deleted file mode 100644
+index 083e20b..0000000
+--- a/dyngen-exec.h
++++ /dev/null
+@@ -1,70 +0,0 @@
+-/*
+- *  dyngen defines for micro operation code
+- *
+- *  Copyright (c) 2003 Fabrice Bellard
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General Public
+- * License along with this library; if not, see <http://www.gnu.org/licenses/>.
+- */
+-#if !defined(__DYNGEN_EXEC_H__)
+-#define __DYNGEN_EXEC_H__
+-
+-#if defined(CONFIG_TCG_INTERPRETER)
+-/* The TCG interpreter does not need a special register AREG0,
+- * but it is possible to use one by defining AREG0.
+- * On i386, register edi seems to work. */
+-/* Run without special register AREG0 or use a value defined elsewhere. */
+-#elif defined(__i386__)
+-#define AREG0 "ebp"
+-#elif defined(__x86_64__)
+-#define AREG0 "r14"
+-#elif defined(_ARCH_PPC)
+-#define AREG0 "r27"
+-#elif defined(__arm__)
+-#define AREG0 "r6"
+-#elif defined(__hppa__)
+-#define AREG0 "r17"
+-#elif defined(__mips__)
+-#define AREG0 "s0"
+-#elif defined(__sparc__)
+-#ifdef CONFIG_SOLARIS
+-#define AREG0 "g2"
+-#else
+-#ifdef __sparc_v9__
+-#define AREG0 "g5"
+-#else
+-#define AREG0 "g6"
+-#endif
+-#endif
+-#elif defined(__s390__)
+-#define AREG0 "r10"
+-#elif defined(__alpha__)
+-/* Note $15 is the frame pointer, so anything in op-i386.c that would
+-   require a frame pointer, like alloca, would probably loose.  */
+-#define AREG0 "$15"
+-#elif defined(__mc68000)
+-#define AREG0 "%a5"
+-#elif defined(__ia64__)
+-#define AREG0 "r7"
+-#else
+-#error unsupported CPU
+-#endif
+-
+-#if defined(AREG0)
+-register CPUArchState *env asm(AREG0);
+-#else
+-/* TODO: Try env = cpu_single_env. */
+-extern CPUArchState *env;
+-#endif
+-
+-#endif /* !defined(__DYNGEN_EXEC_H__) */
+diff --git a/exec-all.h b/exec-all.h
+index c5ec8e1..c5d3a13 100644
+--- a/exec-all.h
++++ b/exec-all.h
+@@ -323,9 +323,6 @@ void tlb_fill(CPUArchState *env1, target_ulong addr, int is_write, int mmu_idx,
+ 
+ #define ACCESS_TYPE (NB_MMU_MODES + 1)
+ #define MEMSUFFIX _code
+-#ifndef CONFIG_TCG_PASS_AREG0
+-#define env cpu_single_env
+-#endif
+ 
+ #define DATA_SIZE 1
+ #include "softmmu_header.h"
+@@ -341,7 +338,6 @@ void tlb_fill(CPUArchState *env1, target_ulong addr, int is_write, int mmu_idx,
+ 
+ #undef ACCESS_TYPE
+ #undef MEMSUFFIX
+-#undef env
+ 
+ #endif
+ 
+diff --git a/hw/spapr_hcall.c b/hw/spapr_hcall.c
+index a5990a9..abd847f 100644
+--- a/hw/spapr_hcall.c
++++ b/hw/spapr_hcall.c
+@@ -1,6 +1,5 @@
+ #include "sysemu.h"
+ #include "cpu.h"
+-#include "dyngen-exec.h"
+ #include "qemu-char.h"
+ #include "sysemu.h"
+ #include "qemu-char.h"
+diff --git a/softmmu_defs.h b/softmmu_defs.h
+index 8d59f9d..1f25e33 100644
+--- a/softmmu_defs.h
++++ b/softmmu_defs.h
+@@ -9,25 +9,6 @@
+ #ifndef SOFTMMU_DEFS_H
+ #define SOFTMMU_DEFS_H
+ 
+-#ifndef CONFIG_TCG_PASS_AREG0
+-uint8_t __ldb_mmu(target_ulong addr, int mmu_idx);
+-void __stb_mmu(target_ulong addr, uint8_t val, int mmu_idx);
+-uint16_t __ldw_mmu(target_ulong addr, int mmu_idx);
+-void __stw_mmu(target_ulong addr, uint16_t val, int mmu_idx);
+-uint32_t __ldl_mmu(target_ulong addr, int mmu_idx);
+-void __stl_mmu(target_ulong addr, uint32_t val, int mmu_idx);
+-uint64_t __ldq_mmu(target_ulong addr, int mmu_idx);
+-void __stq_mmu(target_ulong addr, uint64_t val, int mmu_idx);
+-
+-uint8_t __ldb_cmmu(target_ulong addr, int mmu_idx);
+-void __stb_cmmu(target_ulong addr, uint8_t val, int mmu_idx);
+-uint16_t __ldw_cmmu(target_ulong addr, int mmu_idx);
+-void __stw_cmmu(target_ulong addr, uint16_t val, int mmu_idx);
+-uint32_t __ldl_cmmu(target_ulong addr, int mmu_idx);
+-void __stl_cmmu(target_ulong addr, uint32_t val, int mmu_idx);
+-uint64_t __ldq_cmmu(target_ulong addr, int mmu_idx);
+-void __stq_cmmu(target_ulong addr, uint64_t val, int mmu_idx);
+-#else
+ uint8_t helper_ldb_mmu(CPUArchState *env, target_ulong addr, int mmu_idx);
+ void helper_stb_mmu(CPUArchState *env, target_ulong addr, uint8_t val,
+                     int mmu_idx);
+@@ -54,5 +35,3 @@ uint64_t helper_ldq_cmmu(CPUArchState *env, target_ulong addr, int mmu_idx);
+ void helper_stq_cmmu(CPUArchState *env, target_ulong addr, uint64_t val,
+                      int mmu_idx);
+ #endif
+-
+-#endif
+diff --git a/softmmu_header.h b/softmmu_header.h
+index cf1aa38..d8d9c81 100644
+--- a/softmmu_header.h
++++ b/softmmu_header.h
+@@ -78,23 +78,10 @@
+ #define ADDR_READ addr_read
+ #endif
+ 
+-#ifndef CONFIG_TCG_PASS_AREG0
+-#define ENV_PARAM
+-#define ENV_VAR
+-#define CPU_PREFIX
+-#define HELPER_PREFIX __
+-#else
+-#define ENV_PARAM CPUArchState *env,
+-#define ENV_VAR env,
+-#define CPU_PREFIX cpu_
+-#define HELPER_PREFIX helper_
+-#endif
+-
+ /* generic load/store macros */
+ 
+ static inline RES_TYPE
+-glue(glue(glue(CPU_PREFIX, ld), USUFFIX), MEMSUFFIX)(ENV_PARAM
+-                                                     target_ulong ptr)
++glue(glue(cpu_ld, USUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr)
+ {
+     int page_index;
+     RES_TYPE res;
+@@ -106,9 +93,7 @@ glue(glue(glue(CPU_PREFIX, ld), USUFFIX), MEMSUFFIX)(ENV_PARAM
+     mmu_idx = CPU_MMU_INDEX;
+     if (unlikely(env->tlb_table[mmu_idx][page_index].ADDR_READ !=
+                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
+-        res = glue(glue(glue(HELPER_PREFIX, ld), SUFFIX), MMUSUFFIX)(ENV_VAR
+-                                                                     addr,
+-                                                                     mmu_idx);
++        res = glue(glue(helper_ld, SUFFIX), MMUSUFFIX)(env, addr, mmu_idx);
+     } else {
+         uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
+         res = glue(glue(ld, USUFFIX), _raw)(hostaddr);
+@@ -118,8 +103,7 @@ glue(glue(glue(CPU_PREFIX, ld), USUFFIX), MEMSUFFIX)(ENV_PARAM
+ 
+ #if DATA_SIZE <= 2
+ static inline int
+-glue(glue(glue(CPU_PREFIX, lds), SUFFIX), MEMSUFFIX)(ENV_PARAM
+-                                                     target_ulong ptr)
++glue(glue(cpu_lds, SUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr)
+ {
+     int res, page_index;
+     target_ulong addr;
+@@ -130,8 +114,8 @@ glue(glue(glue(CPU_PREFIX, lds), SUFFIX), MEMSUFFIX)(ENV_PARAM
+     mmu_idx = CPU_MMU_INDEX;
+     if (unlikely(env->tlb_table[mmu_idx][page_index].ADDR_READ !=
+                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
+-        res = (DATA_STYPE)glue(glue(glue(HELPER_PREFIX, ld), SUFFIX),
+-                               MMUSUFFIX)(ENV_VAR addr, mmu_idx);
++        res = (DATA_STYPE)glue(glue(helper_ld, SUFFIX),
++                               MMUSUFFIX)(env, addr, mmu_idx);
+     } else {
+         uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
+         res = glue(glue(lds, SUFFIX), _raw)(hostaddr);
+@@ -145,8 +129,8 @@ glue(glue(glue(CPU_PREFIX, lds), SUFFIX), MEMSUFFIX)(ENV_PARAM
+ /* generic store macro */
+ 
+ static inline void
+-glue(glue(glue(CPU_PREFIX, st), SUFFIX), MEMSUFFIX)(ENV_PARAM target_ulong ptr,
+-                                                    RES_TYPE v)
++glue(glue(cpu_st, SUFFIX), MEMSUFFIX)(CPUArchState *env, target_ulong ptr,
++                                      RES_TYPE v)
+ {
+     int page_index;
+     target_ulong addr;
+@@ -157,8 +141,7 @@ glue(glue(glue(CPU_PREFIX, st), SUFFIX), MEMSUFFIX)(ENV_PARAM target_ulong ptr,
+     mmu_idx = CPU_MMU_INDEX;
+     if (unlikely(env->tlb_table[mmu_idx][page_index].addr_write !=
+                  (addr & (TARGET_PAGE_MASK | (DATA_SIZE - 1))))) {
+-        glue(glue(glue(HELPER_PREFIX, st), SUFFIX), MMUSUFFIX)(ENV_VAR addr, v,
+-                                                               mmu_idx);
++        glue(glue(helper_st, SUFFIX), MMUSUFFIX)(env, addr, v, mmu_idx);
+     } else {
+         uintptr_t hostaddr = addr + env->tlb_table[mmu_idx][page_index].addend;
+         glue(glue(st, SUFFIX), _raw)(hostaddr, v);
+@@ -170,52 +153,50 @@ glue(glue(glue(CPU_PREFIX, st), SUFFIX), MEMSUFFIX)(ENV_PARAM target_ulong ptr,
+ #if ACCESS_TYPE != (NB_MMU_MODES + 1)
+ 
+ #if DATA_SIZE == 8
+-static inline float64 glue(glue(CPU_PREFIX, ldfq), MEMSUFFIX)(ENV_PARAM
+-                                                              target_ulong ptr)
++static inline float64 glue(cpu_ldfq, MEMSUFFIX)(CPUArchState *env,
++                                                target_ulong ptr)
+ {
+     union {
+         float64 d;
+         uint64_t i;
+     } u;
+-    u.i = glue(glue(CPU_PREFIX, ldq), MEMSUFFIX)(ENV_VAR ptr);
++    u.i = glue(cpu_ldq, MEMSUFFIX)(env, ptr);
+     return u.d;
+ }
+ 
+-static inline void glue(glue(CPU_PREFIX, stfq), MEMSUFFIX)(ENV_PARAM
+-                                                           target_ulong ptr,
+-                                                           float64 v)
++static inline void glue(cpu_stfq, MEMSUFFIX)(CPUArchState *env,
++                                             target_ulong ptr, float64 v)
+ {
+     union {
+         float64 d;
+         uint64_t i;
+     } u;
+     u.d = v;
+-    glue(glue(CPU_PREFIX, stq), MEMSUFFIX)(ENV_VAR ptr, u.i);
++    glue(cpu_stq, MEMSUFFIX)(env, ptr, u.i);
+ }
+ #endif /* DATA_SIZE == 8 */
+ 
+ #if DATA_SIZE == 4
+-static inline float32 glue(glue(CPU_PREFIX, ldfl), MEMSUFFIX)(ENV_PARAM
+-                                                              target_ulong ptr)
++static inline float32 glue(cpu_ldfl, MEMSUFFIX)(CPUArchState *env,
++                                                target_ulong ptr)
+ {
+     union {
+         float32 f;
+         uint32_t i;
+     } u;
+-    u.i = glue(glue(CPU_PREFIX, ldl), MEMSUFFIX)(ENV_VAR ptr);
++    u.i = glue(cpu_ldl, MEMSUFFIX)(env, ptr);
+     return u.f;
+ }
+ 
+-static inline void glue(glue(CPU_PREFIX, stfl), MEMSUFFIX)(ENV_PARAM
+-                                                           target_ulong ptr,
+-                                                           float32 v)
++static inline void glue(cpu_stfl, MEMSUFFIX)(CPUArchState *env,
++                                             target_ulong ptr, float32 v)
+ {
+     union {
+         float32 f;
+         uint32_t i;
+     } u;
+     u.f = v;
+-    glue(glue(CPU_PREFIX, stl), MEMSUFFIX)(ENV_VAR ptr, u.i);
++    glue(cpu_stl, MEMSUFFIX)(env, ptr, u.i);
+ }
+ #endif /* DATA_SIZE == 4 */
+ 
+@@ -230,7 +211,3 @@ static inline void glue(glue(CPU_PREFIX, stfl), MEMSUFFIX)(ENV_PARAM
+ #undef CPU_MMU_INDEX
+ #undef MMUSUFFIX
+ #undef ADDR_READ
+-#undef ENV_PARAM
+-#undef ENV_VAR
+-#undef CPU_PREFIX
+-#undef HELPER_PREFIX
+diff --git a/softmmu_template.h b/softmmu_template.h
+index b8bd700..e2490f0 100644
+--- a/softmmu_template.h
++++ b/softmmu_template.h
+@@ -54,23 +54,11 @@
+ #define ADDR_READ addr_read
+ #endif
+ 
+-#ifndef CONFIG_TCG_PASS_AREG0
+-#define ENV_PARAM
+-#define ENV_VAR
+-#define CPU_PREFIX
+-#define HELPER_PREFIX __
+-#else
+-#define ENV_PARAM CPUArchState *env,
+-#define ENV_VAR env,
+-#define CPU_PREFIX cpu_
+-#define HELPER_PREFIX helper_
+-#endif
+-
+-static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(ENV_PARAM
++static DATA_TYPE glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                                         target_ulong addr,
+                                                         int mmu_idx,
+                                                         uintptr_t retaddr);
+-static inline DATA_TYPE glue(io_read, SUFFIX)(ENV_PARAM
++static inline DATA_TYPE glue(io_read, SUFFIX)(CPUArchState *env,
+                                               target_phys_addr_t physaddr,
+                                               target_ulong addr,
+                                               uintptr_t retaddr)
+@@ -104,9 +92,8 @@ static inline DATA_TYPE glue(io_read, SUFFIX)(ENV_PARAM
+ 
+ /* handle all cases except unaligned access which span two pages */
+ DATA_TYPE
+-glue(glue(glue(HELPER_PREFIX, ld), SUFFIX), MMUSUFFIX)(ENV_PARAM
+-                                                       target_ulong addr,
+-                                                       int mmu_idx)
++glue(glue(helper_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env, target_ulong addr,
++                                         int mmu_idx)
+ {
+     DATA_TYPE res;
+     int index;
+@@ -126,15 +113,15 @@ glue(glue(glue(HELPER_PREFIX, ld), SUFFIX), MMUSUFFIX)(ENV_PARAM
+                 goto do_unaligned_access;
+             retaddr = GETPC();
+             ioaddr = env->iotlb[mmu_idx][index];
+-            res = glue(io_read, SUFFIX)(ENV_VAR ioaddr, addr, retaddr);
++            res = glue(io_read, SUFFIX)(env, ioaddr, addr, retaddr);
+         } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
+             /* slow unaligned access (it spans two pages or IO) */
+         do_unaligned_access:
+             retaddr = GETPC();
+ #ifdef ALIGNED_ONLY
+-            do_unaligned_access(ENV_VAR addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
++            do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+ #endif
+-            res = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(ENV_VAR addr,
++            res = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr,
+                                                          mmu_idx, retaddr);
+         } else {
+             /* unaligned/aligned access in the same page */
+@@ -142,7 +129,7 @@ glue(glue(glue(HELPER_PREFIX, ld), SUFFIX), MMUSUFFIX)(ENV_PARAM
+ #ifdef ALIGNED_ONLY
+             if ((addr & (DATA_SIZE - 1)) != 0) {
+                 retaddr = GETPC();
+-                do_unaligned_access(ENV_VAR addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
++                do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+             }
+ #endif
+             addend = env->tlb_table[mmu_idx][index].addend;
+@@ -154,7 +141,7 @@ glue(glue(glue(HELPER_PREFIX, ld), SUFFIX), MMUSUFFIX)(ENV_PARAM
+         retaddr = GETPC();
+ #ifdef ALIGNED_ONLY
+         if ((addr & (DATA_SIZE - 1)) != 0)
+-            do_unaligned_access(ENV_VAR addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
++            do_unaligned_access(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+ #endif
+         tlb_fill(env, addr, READ_ACCESS_TYPE, mmu_idx, retaddr);
+         goto redo;
+@@ -164,7 +151,7 @@ glue(glue(glue(HELPER_PREFIX, ld), SUFFIX), MMUSUFFIX)(ENV_PARAM
+ 
+ /* handle all unaligned cases */
+ static DATA_TYPE
+-glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(ENV_PARAM
++glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                        target_ulong addr,
+                                        int mmu_idx,
+                                        uintptr_t retaddr)
+@@ -183,15 +170,15 @@ glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(ENV_PARAM
+             if ((addr & (DATA_SIZE - 1)) != 0)
+                 goto do_unaligned_access;
+             ioaddr = env->iotlb[mmu_idx][index];
+-            res = glue(io_read, SUFFIX)(ENV_VAR ioaddr, addr, retaddr);
++            res = glue(io_read, SUFFIX)(env, ioaddr, addr, retaddr);
+         } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
+         do_unaligned_access:
+             /* slow unaligned access (it spans two pages) */
+             addr1 = addr & ~(DATA_SIZE - 1);
+             addr2 = addr1 + DATA_SIZE;
+-            res1 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(ENV_VAR addr1,
++            res1 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr1,
+                                                           mmu_idx, retaddr);
+-            res2 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(ENV_VAR addr2,
++            res2 = glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(env, addr2,
+                                                           mmu_idx, retaddr);
+             shift = (addr & (DATA_SIZE - 1)) * 8;
+ #ifdef TARGET_WORDS_BIGENDIAN
+@@ -216,13 +203,13 @@ glue(glue(slow_ld, SUFFIX), MMUSUFFIX)(ENV_PARAM
+ 
+ #ifndef SOFTMMU_CODE_ACCESS
+ 
+-static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(ENV_PARAM
++static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                                    target_ulong addr,
+                                                    DATA_TYPE val,
+                                                    int mmu_idx,
+                                                    uintptr_t retaddr);
+ 
+-static inline void glue(io_write, SUFFIX)(ENV_PARAM
++static inline void glue(io_write, SUFFIX)(CPUArchState *env,
+                                           target_phys_addr_t physaddr,
+                                           DATA_TYPE val,
+                                           target_ulong addr,
+@@ -253,10 +240,9 @@ static inline void glue(io_write, SUFFIX)(ENV_PARAM
+ #endif /* SHIFT > 2 */
+ }
+ 
+-void glue(glue(glue(HELPER_PREFIX, st), SUFFIX), MMUSUFFIX)(ENV_PARAM
+-                                                            target_ulong addr,
+-                                                            DATA_TYPE val,
+-                                                            int mmu_idx)
++void glue(glue(helper_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
++                                              target_ulong addr, DATA_TYPE val,
++                                              int mmu_idx)
+ {
+     target_phys_addr_t ioaddr;
+     target_ulong tlb_addr;
+@@ -273,14 +259,14 @@ void glue(glue(glue(HELPER_PREFIX, st), SUFFIX), MMUSUFFIX)(ENV_PARAM
+                 goto do_unaligned_access;
+             retaddr = GETPC();
+             ioaddr = env->iotlb[mmu_idx][index];
+-            glue(io_write, SUFFIX)(ENV_VAR ioaddr, val, addr, retaddr);
++            glue(io_write, SUFFIX)(env, ioaddr, val, addr, retaddr);
+         } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
+         do_unaligned_access:
+             retaddr = GETPC();
+ #ifdef ALIGNED_ONLY
+-            do_unaligned_access(ENV_VAR addr, 1, mmu_idx, retaddr);
++            do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
+ #endif
+-            glue(glue(slow_st, SUFFIX), MMUSUFFIX)(ENV_VAR addr, val,
++            glue(glue(slow_st, SUFFIX), MMUSUFFIX)(env, addr, val,
+                                                    mmu_idx, retaddr);
+         } else {
+             /* aligned/unaligned access in the same page */
+@@ -288,7 +274,7 @@ void glue(glue(glue(HELPER_PREFIX, st), SUFFIX), MMUSUFFIX)(ENV_PARAM
+ #ifdef ALIGNED_ONLY
+             if ((addr & (DATA_SIZE - 1)) != 0) {
+                 retaddr = GETPC();
+-                do_unaligned_access(ENV_VAR addr, 1, mmu_idx, retaddr);
++                do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
+             }
+ #endif
+             addend = env->tlb_table[mmu_idx][index].addend;
+@@ -300,7 +286,7 @@ void glue(glue(glue(HELPER_PREFIX, st), SUFFIX), MMUSUFFIX)(ENV_PARAM
+         retaddr = GETPC();
+ #ifdef ALIGNED_ONLY
+         if ((addr & (DATA_SIZE - 1)) != 0)
+-            do_unaligned_access(ENV_VAR addr, 1, mmu_idx, retaddr);
++            do_unaligned_access(env, addr, 1, mmu_idx, retaddr);
+ #endif
+         tlb_fill(env, addr, 1, mmu_idx, retaddr);
+         goto redo;
+@@ -308,7 +294,7 @@ void glue(glue(glue(HELPER_PREFIX, st), SUFFIX), MMUSUFFIX)(ENV_PARAM
+ }
+ 
+ /* handles all unaligned cases */
+-static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(ENV_PARAM
++static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(CPUArchState *env,
+                                                    target_ulong addr,
+                                                    DATA_TYPE val,
+                                                    int mmu_idx,
+@@ -327,7 +313,7 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(ENV_PARAM
+             if ((addr & (DATA_SIZE - 1)) != 0)
+                 goto do_unaligned_access;
+             ioaddr = env->iotlb[mmu_idx][index];
+-            glue(io_write, SUFFIX)(ENV_VAR ioaddr, val, addr, retaddr);
++            glue(io_write, SUFFIX)(env, ioaddr, val, addr, retaddr);
+         } else if (((addr & ~TARGET_PAGE_MASK) + DATA_SIZE - 1) >= TARGET_PAGE_SIZE) {
+         do_unaligned_access:
+             /* XXX: not efficient, but simple */
+@@ -335,11 +321,11 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(ENV_PARAM
+              * previous page from the TLB cache.  */
+             for(i = DATA_SIZE - 1; i >= 0; i--) {
+ #ifdef TARGET_WORDS_BIGENDIAN
+-                glue(slow_stb, MMUSUFFIX)(ENV_VAR addr + i,
++                glue(slow_stb, MMUSUFFIX)(env, addr + i,
+                                           val >> (((DATA_SIZE - 1) * 8) - (i * 8)),
+                                           mmu_idx, retaddr);
+ #else
+-                glue(slow_stb, MMUSUFFIX)(ENV_VAR addr + i,
++                glue(slow_stb, MMUSUFFIX)(env, addr + i,
+                                           val >> (i * 8),
+                                           mmu_idx, retaddr);
+ #endif
+@@ -366,7 +352,3 @@ static void glue(glue(slow_st, SUFFIX), MMUSUFFIX)(ENV_PARAM
+ #undef USUFFIX
+ #undef DATA_SIZE
+ #undef ADDR_READ
+-#undef ENV_PARAM
+-#undef ENV_VAR
+-#undef CPU_PREFIX
+-#undef HELPER_PREFIX
+diff --git a/target-m68k/op_helper.c b/target-m68k/op_helper.c
+index 3116287..aa00504 100644
+--- a/target-m68k/op_helper.c
++++ b/target-m68k/op_helper.c
+@@ -192,9 +192,6 @@ void HELPER(divu)(CPUM68KState *env, uint32_t word)
+     quot = num / den;
+     rem = num % den;
+     flags = 0;
+-    /* Avoid using a PARAM1 of zero.  This breaks dyngen because it uses
+-       the address of a symbol, and gcc knows symbols can't have address
+-       zero.  */
+     if (word && quot > 0xffff)
+         flags |= CCF_V;
+     if (quot == 0)
+diff --git a/target-sparc/Makefile.objs b/target-sparc/Makefile.objs
+index a93e07d..9fc42ea 100644
+--- a/target-sparc/Makefile.objs
++++ b/target-sparc/Makefile.objs
+@@ -4,5 +4,3 @@ obj-y += fop_helper.o cc_helper.o win_helper.o mmu_helper.o ldst_helper.o
+ obj-$(TARGET_SPARC) += int32_helper.o
+ obj-$(TARGET_SPARC64) += int64_helper.o
+ obj-$(TARGET_SPARC64) += vis_helper.o
+-
+-$(obj)/op_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/tcg/arm/tcg-target.c b/tcg/arm/tcg-target.c
+index cf0ca3d..aed3b53 100644
+--- a/tcg/arm/tcg-target.c
++++ b/tcg/arm/tcg-target.c
+@@ -176,7 +176,7 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+            so don't use these. */
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R0);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R1);
+-#if defined(CONFIG_TCG_PASS_AREG0) && (TARGET_LONG_BITS == 64)
++#if TARGET_LONG_BITS == 64
+         /* If we're passing env to the helper as r0 and need a regpair
+          * for the address then r2 will be overwritten as we're setting
+          * up the args to the helper.
+@@ -204,8 +204,7 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+            use these. */
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R0);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R1);
+-#if defined(CONFIG_SOFTMMU) && \
+-    defined(CONFIG_TCG_PASS_AREG0) && (TARGET_LONG_BITS == 64)
++#if defined(CONFIG_SOFTMMU) && (TARGET_LONG_BITS == 64)
+         /* Avoid clashes with registers being used for helper args */
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R2);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R3);
+@@ -223,7 +222,7 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+ #ifdef CONFIG_SOFTMMU
+         /* r2 is still needed to load data_reg, so don't use it. */
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R2);
+-#if defined(CONFIG_TCG_PASS_AREG0) && (TARGET_LONG_BITS == 64)
++#if TARGET_LONG_BITS == 64
+         /* Avoid clashes with registers being used for helper args */
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R3);
+ #endif
+@@ -954,7 +953,6 @@ static inline void tcg_out_goto_label(TCGContext *s, int cond, int label_index)
+ 
+ #include "../../softmmu_defs.h"
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void * const qemu_ld_helpers[4] = {
+@@ -972,25 +970,6 @@ static const void * const qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-
+-/* legacy helper signature: __st_mmu(target_ulong addr, uintxx_t val,
+-   int mmu_idx) */
+-static void *qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ 
+ /* Helper routines for marshalling helper function arguments into
+  * the correct registers and stack.
+@@ -1203,9 +1182,7 @@ static inline void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, int opc)
+      * trash by moving the earlier arguments into them.
+      */
+     argreg = TCG_REG_R0;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     argreg = tcg_out_arg_reg32(s, argreg, TCG_AREG0);
+-#endif
+ #if TARGET_LONG_BITS == 64
+     argreg = tcg_out_arg_reg64(s, argreg, addr_reg, addr_reg2);
+ #else
+@@ -1421,9 +1398,7 @@ static inline void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, int opc)
+      * trash by moving the earlier arguments into them.
+      */
+     argreg = TCG_REG_R0;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     argreg = tcg_out_arg_reg32(s, argreg, TCG_AREG0);
+-#endif
+ #if TARGET_LONG_BITS == 64
+     argreg = tcg_out_arg_reg64(s, argreg, addr_reg, addr_reg2);
+ #else
+diff --git a/tcg/arm/tcg-target.h b/tcg/arm/tcg-target.h
+index f90b834..c0b8f72 100644
+--- a/tcg/arm/tcg-target.h
++++ b/tcg/arm/tcg-target.h
+@@ -77,7 +77,6 @@ typedef enum {
+ #define TCG_TARGET_HAS_GUEST_BASE
+ 
+ enum {
+-    /* Note: must be synced with dyngen-exec.h */
+     TCG_AREG0 = TCG_REG_R6,
+ };
+ 
+diff --git a/tcg/hppa/tcg-target.c b/tcg/hppa/tcg-target.c
+index 2885212..8b81b70 100644
+--- a/tcg/hppa/tcg-target.c
++++ b/tcg/hppa/tcg-target.c
+@@ -882,7 +882,6 @@ static void tcg_out_setcond2(TCGContext *s, int cond, TCGArg ret,
+ #if defined(CONFIG_SOFTMMU)
+ #include "../../softmmu_defs.h"
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void * const qemu_ld_helpers[4] = {
+@@ -900,25 +899,6 @@ static const void * const qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-
+-/* legacy helper signature: __st_mmu(target_ulong addr, uintxx_t val,
+-   int mmu_idx) */
+-static void *qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ 
+ /* Load and compare a TLB entry, and branch if TLB miss.  OFFSET is set to
+    the offset of the first ADDR_READ or ADDR_WRITE member of the appropriate
+@@ -1085,7 +1065,6 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, int opc)
+     }
+     tcg_out_movi(s, TCG_TYPE_I32, argreg, mem_index);
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+     /* XXX/FIXME: suboptimal */
+     tcg_out_mov(s, TCG_TYPE_I32, tcg_target_call_iarg_regs[2],
+                 tcg_target_call_iarg_regs[1]);
+@@ -1093,7 +1072,6 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, int opc)
+                 tcg_target_call_iarg_regs[0]);
+     tcg_out_mov(s, TCG_TYPE_PTR, tcg_target_call_iarg_regs[0],
+                 TCG_AREG0);
+-#endif
+     tcg_out_call(s, qemu_ld_helpers[opc & 3]);
+ 
+     switch (opc) {
+@@ -1245,7 +1223,6 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, int opc)
+         tcg_abort();
+     }
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+     /* XXX/FIXME: suboptimal */
+     tcg_out_mov(s, TCG_TYPE_I32, tcg_target_call_iarg_regs[3],
+                 tcg_target_call_iarg_regs[2]);
+@@ -1255,7 +1232,6 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, int opc)
+                 tcg_target_call_iarg_regs[0]);
+     tcg_out_mov(s, TCG_TYPE_PTR, tcg_target_call_iarg_regs[0],
+                 TCG_AREG0);
+-#endif
+     tcg_out_call(s, qemu_st_helpers[opc]);
+ 
+     /* label2: */
+diff --git a/tcg/hppa/tcg-target.h b/tcg/hppa/tcg-target.h
+index d4bf6fe..01ef960 100644
+--- a/tcg/hppa/tcg-target.h
++++ b/tcg/hppa/tcg-target.h
+@@ -104,7 +104,6 @@ typedef enum {
+ 
+ #define TCG_TARGET_HAS_GUEST_BASE
+ 
+-/* Note: must be synced with dyngen-exec.h */
+ #define TCG_AREG0 TCG_REG_R17
+ 
+ 
+diff --git a/tcg/i386/tcg-target.c b/tcg/i386/tcg-target.c
+index da17bba..34c2df8 100644
+--- a/tcg/i386/tcg-target.c
++++ b/tcg/i386/tcg-target.c
+@@ -183,9 +183,7 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+             tcg_regset_set32(ct->u.regs, 0, 0xffff);
+             tcg_regset_reset_reg(ct->u.regs, tcg_target_call_iarg_regs[0]);
+             tcg_regset_reset_reg(ct->u.regs, tcg_target_call_iarg_regs[1]);
+-#ifdef CONFIG_TCG_PASS_AREG0
+             tcg_regset_reset_reg(ct->u.regs, tcg_target_call_iarg_regs[2]);
+-#endif
+         } else {
+             tcg_regset_set32(ct->u.regs, 0, 0xff);
+             tcg_regset_reset_reg(ct->u.regs, TCG_REG_EAX);
+@@ -965,7 +963,6 @@ static void tcg_out_jmp(TCGContext *s, tcg_target_long dest)
+ 
+ #include "../../softmmu_defs.h"
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void *qemu_ld_helpers[4] = {
+@@ -983,25 +980,6 @@ static const void *qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-
+-/* legacy helper signature: __st_mmu(target_ulong addr, uintxx_t val,
+-   int mmu_idx) */
+-static void *qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ 
+ /* Perform the TLB load and compare.
+ 
+@@ -1220,16 +1198,13 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
+     }
+     tcg_out_push(s, args[addrlo_idx]);
+     stack_adjust += 4;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     tcg_out_push(s, TCG_AREG0);
+     stack_adjust += 4;
+-#endif
+ #else
+     /* The first argument is already loaded with addrlo.  */
+     arg_idx = 1;
+     tcg_out_movi(s, TCG_TYPE_I32, tcg_target_call_iarg_regs[arg_idx],
+                  mem_index);
+-#ifdef CONFIG_TCG_PASS_AREG0
+     /* XXX/FIXME: suboptimal */
+     tcg_out_mov(s, TCG_TYPE_I64, tcg_target_call_iarg_regs[3],
+                 tcg_target_call_iarg_regs[2]);
+@@ -1240,7 +1215,6 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
+     tcg_out_mov(s, TCG_TYPE_I64, tcg_target_call_iarg_regs[0],
+                 TCG_AREG0);
+ #endif
+-#endif
+ 
+     tcg_out_calli(s, (tcg_target_long)qemu_ld_helpers[s_bits]);
+ 
+@@ -1436,16 +1410,13 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
+     }
+     tcg_out_push(s, args[addrlo_idx]);
+     stack_adjust += 4;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     tcg_out_push(s, TCG_AREG0);
+     stack_adjust += 4;
+-#endif
+ #else
+     tcg_out_mov(s, (opc == 3 ? TCG_TYPE_I64 : TCG_TYPE_I32),
+                 tcg_target_call_iarg_regs[1], data_reg);
+     tcg_out_movi(s, TCG_TYPE_I32, tcg_target_call_iarg_regs[2], mem_index);
+     stack_adjust = 0;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     /* XXX/FIXME: suboptimal */
+     tcg_out_mov(s, TCG_TYPE_I64, tcg_target_call_iarg_regs[3],
+                 tcg_target_call_iarg_regs[2]);
+@@ -1456,7 +1427,6 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
+     tcg_out_mov(s, TCG_TYPE_I64, tcg_target_call_iarg_regs[0],
+                 TCG_AREG0);
+ #endif
+-#endif
+ 
+     tcg_out_calli(s, (tcg_target_long)qemu_st_helpers[s_bits]);
+ 
+diff --git a/tcg/i386/tcg-target.h b/tcg/i386/tcg-target.h
+index c3cfe05..8be42f3 100644
+--- a/tcg/i386/tcg-target.h
++++ b/tcg/i386/tcg-target.h
+@@ -116,7 +116,6 @@ typedef enum {
+ 
+ #define TCG_TARGET_HAS_GUEST_BASE
+ 
+-/* Note: must be synced with dyngen-exec.h */
+ #if TCG_TARGET_REG_BITS == 64
+ # define TCG_AREG0 TCG_REG_R14
+ #else
+diff --git a/tcg/ia64/tcg-target.c b/tcg/ia64/tcg-target.c
+index dc588db..1745038 100644
+--- a/tcg/ia64/tcg-target.c
++++ b/tcg/ia64/tcg-target.c
+@@ -1452,7 +1452,6 @@ static inline void tcg_out_qemu_tlb(TCGContext *s, TCGArg addr_reg,
+                                TCG_REG_P7, TCG_REG_R3, TCG_REG_R57));
+ }
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void * const qemu_ld_helpers[4] = {
+@@ -1461,16 +1460,6 @@ static const void * const qemu_ld_helpers[4] = {
+     helper_ldl_mmu,
+     helper_ldq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-#endif
+ 
+ static inline void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, int opc)
+ {
+@@ -1530,7 +1519,6 @@ static inline void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, int opc)
+                        tcg_opc_m1 (TCG_REG_P7, OPC_LD8_M1, TCG_REG_R1, TCG_REG_R2),
+                        tcg_opc_i18(TCG_REG_P0, OPC_NOP_I18, 0));
+     }
+-#ifdef CONFIG_TCG_PASS_AREG0
+     /* XXX/FIXME: suboptimal */
+     tcg_out_bundle(s, mII,
+                    tcg_opc_a5 (TCG_REG_P7, OPC_ADDL_A5, TCG_REG_R58,
+@@ -1539,7 +1527,6 @@ static inline void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, int opc)
+                                TCG_REG_R57, 0, TCG_REG_R56),
+                    tcg_opc_a4 (TCG_REG_P7, OPC_ADDS_A4,
+                                TCG_REG_R56, 0, TCG_AREG0));
+-#endif
+     if (!bswap || s_bits == 0) {
+         tcg_out_bundle(s, miB,
+                        tcg_opc_m48(TCG_REG_P0, OPC_NOP_M48, 0),
+@@ -1570,7 +1557,6 @@ static inline void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args, int opc)
+     }
+ }
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_st_mmu(CPUState *env, target_ulong addr,
+    uintxx_t val, int mmu_idx) */
+ static const void * const qemu_st_helpers[4] = {
+@@ -1579,16 +1565,6 @@ static const void * const qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __st_mmu(target_ulong addr, uintxx_t val,
+-   int mmu_idx) */
+-static void *qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ 
+ static inline void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, int opc)
+ {
+@@ -1658,7 +1634,6 @@ static inline void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, int opc)
+         data_reg = TCG_REG_R2;
+     }
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+     /* XXX/FIXME: suboptimal */
+     tcg_out_bundle(s, mII,
+                    tcg_opc_a5 (TCG_REG_P7, OPC_ADDL_A5, TCG_REG_R59,
+@@ -1674,15 +1649,6 @@ static inline void tcg_out_qemu_st(TCGContext *s, const TCGArg *args, int opc)
+                                TCG_REG_R56, 0, TCG_AREG0),
+                    tcg_opc_b5 (TCG_REG_P7, OPC_BR_CALL_SPTK_MANY_B5,
+                                TCG_REG_B0, TCG_REG_B6));
+-#else
+-    tcg_out_bundle(s, miB,
+-                   tcg_opc_m4 (TCG_REG_P6, opc_st_m4[opc],
+-                               data_reg, TCG_REG_R3),
+-                   tcg_opc_a5 (TCG_REG_P7, OPC_ADDL_A5, TCG_REG_R58,
+-                               mem_index, TCG_REG_R0),
+-                   tcg_opc_b5 (TCG_REG_P7, OPC_BR_CALL_SPTK_MANY_B5,
+-                               TCG_REG_B0, TCG_REG_B6));
+-#endif
+ }
+ 
+ #else /* !CONFIG_SOFTMMU */
+diff --git a/tcg/ia64/tcg-target.h b/tcg/ia64/tcg-target.h
+index 0631b9f..c22962a 100644
+--- a/tcg/ia64/tcg-target.h
++++ b/tcg/ia64/tcg-target.h
+@@ -140,7 +140,6 @@ typedef enum {
+ #define TCG_TARGET_HAS_not_i32          0 /* xor r1, -1, r3 */
+ #define TCG_TARGET_HAS_not_i64          0 /* xor r1, -1, r3 */
+ 
+-/* Note: must be synced with dyngen-exec.h */
+ #define TCG_AREG0 TCG_REG_R7
+ 
+ /* Guest base is supported */
+diff --git a/tcg/mips/tcg-target.c b/tcg/mips/tcg-target.c
+index 1006e28..74db83d 100644
+--- a/tcg/mips/tcg-target.c
++++ b/tcg/mips/tcg-target.c
+@@ -217,7 +217,7 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_set(ct->u.regs, 0xffffffff);
+ #if defined(CONFIG_SOFTMMU)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_A0);
+-# if defined(CONFIG_TCG_PASS_AREG0) && (TARGET_LONG_BITS == 64)
++# if (TARGET_LONG_BITS == 64)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_A2);
+ # endif
+ #endif
+@@ -227,12 +227,11 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_set(ct->u.regs, 0xffffffff);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_A0);
+ #if defined(CONFIG_SOFTMMU)
+-# if (defined(CONFIG_TCG_PASS_AREG0) && TARGET_LONG_BITS == 32) || \
+-     (!defined(CONFIG_TCG_PASS_AREG0) && TARGET_LONG_BITS == 64)
++# if (TARGET_LONG_BITS == 32)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_A1);
+ # endif
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_A2);
+-# if defined(CONFIG_TCG_PASS_AREG0) && TARGET_LONG_BITS == 64
++# if TARGET_LONG_BITS == 64
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_A3);
+ # endif
+ #endif
+@@ -821,7 +820,6 @@ static void tcg_out_setcond2(TCGContext *s, TCGCond cond, int ret,
+ 
+ #include "../../softmmu_defs.h"
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void * const qemu_ld_helpers[4] = {
+@@ -839,25 +837,6 @@ static const void * const qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-
+-/* legacy helper signature: __st_mmu(target_ulong addr, uintxx_t val,
+-   int mmu_idx) */
+-static void *qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ #endif
+ 
+ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
+@@ -942,9 +921,7 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
+ 
+     /* slow path */
+     arg_num = 0;
+-# ifdef CONFIG_TCG_PASS_AREG0
+     tcg_out_call_iarg_reg32(s, &arg_num, TCG_AREG0);
+-# endif
+ # if TARGET_LONG_BITS == 64
+     tcg_out_call_iarg_reg64(s, &arg_num, addr_regl, addr_regh);
+ # else
+@@ -1127,9 +1104,7 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
+ 
+     /* slow path */
+     arg_num = 0;
+-# ifdef CONFIG_TCG_PASS_AREG0
+     tcg_out_call_iarg_reg32(s, &arg_num, TCG_AREG0);
+-# endif
+ # if TARGET_LONG_BITS == 64
+     tcg_out_call_iarg_reg64(s, &arg_num, addr_regl, addr_regh);
+ # else
+diff --git a/tcg/mips/tcg-target.h b/tcg/mips/tcg-target.h
+index d3c804d..1c61931 100644
+--- a/tcg/mips/tcg-target.h
++++ b/tcg/mips/tcg-target.h
+@@ -96,7 +96,6 @@ typedef enum {
+ #define TCG_TARGET_HAS_ext8u_i32        0 /* andi rt, rs, 0xff   */
+ #define TCG_TARGET_HAS_ext16u_i32       0 /* andi rt, rs, 0xffff */
+ 
+-/* Note: must be synced with dyngen-exec.h */
+ #define TCG_AREG0 TCG_REG_S0
+ 
+ /* guest base is supported */
+diff --git a/tcg/ppc/tcg-target.c b/tcg/ppc/tcg-target.c
+index 0cff181..26c4b33 100644
+--- a/tcg/ppc/tcg-target.c
++++ b/tcg/ppc/tcg-target.c
+@@ -248,7 +248,6 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_set32(ct->u.regs, 0, 0xffffffff);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R3);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R4);
+-#ifdef CONFIG_TCG_PASS_AREG0
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R5);
+ #if TARGET_LONG_BITS == 64
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R6);
+@@ -256,11 +255,6 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R7);
+ #endif
+ #endif
+-#else /* !AREG0 */
+-#if TARGET_LONG_BITS == 64
+-        tcg_regset_reset_reg(ct->u.regs, TCG_REG_R5);
+-#endif
+-#endif
+         break;
+     case 'K':                   /* qemu_st[8..32] constraint */
+         ct->ct |= TCG_CT_REG;
+@@ -268,7 +262,6 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R3);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R4);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R5);
+-#ifdef CONFIG_TCG_PASS_AREG0
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R6);
+ #if TARGET_LONG_BITS == 64
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R7);
+@@ -276,11 +269,6 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R8);
+ #endif
+ #endif
+-#else /* !AREG0 */
+-#if TARGET_LONG_BITS == 64
+-        tcg_regset_reset_reg(ct->u.regs, TCG_REG_R6);
+-#endif
+-#endif
+         break;
+     case 'M':                   /* qemu_st64 constraint */
+         ct->ct |= TCG_CT_REG;
+@@ -290,12 +278,10 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R5);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R6);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R7);
+-#if defined(CONFIG_TCG_PASS_AREG0)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R8);
+ #ifdef TCG_TARGET_CALL_ALIGN_ARGS
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_R9);
+ #endif
+-#endif
+         break;
+ #else
+     case 'L':
+@@ -541,7 +527,6 @@ static void tcg_out_call (TCGContext *s, tcg_target_long arg, int const_arg)
+ 
+ #include "../../softmmu_defs.h"
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void * const qemu_ld_helpers[4] = {
+@@ -559,25 +544,6 @@ static const void * const qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ #endif
+ 
+ static void tcg_out_qemu_ld (TCGContext *s, const TCGArg *args, int opc)
+@@ -647,9 +613,7 @@ static void tcg_out_qemu_ld (TCGContext *s, const TCGArg *args, int opc)
+ 
+     /* slow path */
+     ir = 3;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     tcg_out_mov (s, TCG_TYPE_I32, ir++, TCG_AREG0);
+-#endif
+ #if TARGET_LONG_BITS == 32
+     tcg_out_mov (s, TCG_TYPE_I32, ir++, addr_reg);
+ #else
+@@ -849,9 +813,7 @@ static void tcg_out_qemu_st (TCGContext *s, const TCGArg *args, int opc)
+ 
+     /* slow path */
+     ir = 3;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     tcg_out_mov (s, TCG_TYPE_I32, ir++, TCG_AREG0);
+-#endif
+ #if TARGET_LONG_BITS == 32
+     tcg_out_mov (s, TCG_TYPE_I32, ir++, addr_reg);
+ #else
+diff --git a/tcg/ppc64/tcg-target.c b/tcg/ppc64/tcg-target.c
+index 27a0ae8..337cd41 100644
+--- a/tcg/ppc64/tcg-target.c
++++ b/tcg/ppc64/tcg-target.c
+@@ -235,10 +235,8 @@ static int target_parse_constraint (TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_reset_reg (ct->u.regs, TCG_REG_R3);
+ #ifdef CONFIG_SOFTMMU
+         tcg_regset_reset_reg (ct->u.regs, TCG_REG_R4);
+-#ifdef CONFIG_TCG_PASS_AREG0
+         tcg_regset_reset_reg (ct->u.regs, TCG_REG_R5);
+ #endif
+-#endif
+         break;
+     case 'S':                   /* qemu_st constraint */
+         ct->ct |= TCG_CT_REG;
+@@ -247,10 +245,8 @@ static int target_parse_constraint (TCGArgConstraint *ct, const char **pct_str)
+ #ifdef CONFIG_SOFTMMU
+         tcg_regset_reset_reg (ct->u.regs, TCG_REG_R4);
+         tcg_regset_reset_reg (ct->u.regs, TCG_REG_R5);
+-#ifdef CONFIG_TCG_PASS_AREG0
+         tcg_regset_reset_reg (ct->u.regs, TCG_REG_R6);
+ #endif
+-#endif
+         break;
+     case 'Z':
+         ct->ct |= TCG_CT_CONST_U32;
+@@ -558,7 +554,6 @@ static void tcg_out_ldsta (TCGContext *s, int ret, int addr,
+ 
+ #include "../../softmmu_defs.h"
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void * const qemu_ld_helpers[4] = {
+@@ -576,25 +571,6 @@ static const void * const qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-
+-/* legacy helper signature: __st_mmu(target_ulong addr, uintxx_t val,
+-   int mmu_idx) */
+-static void *qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ 
+ static void tcg_out_tlb_read (TCGContext *s, int r0, int r1, int r2,
+                               int addr_reg, int s_bits, int offset)
+@@ -676,9 +652,7 @@ static void tcg_out_qemu_ld (TCGContext *s, const TCGArg *args, int opc)
+ 
+     /* slow path */
+     ir = 3;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     tcg_out_mov (s, TCG_TYPE_I64, ir++, TCG_AREG0);
+-#endif
+     tcg_out_mov (s, TCG_TYPE_I64, ir++, addr_reg);
+     tcg_out_movi (s, TCG_TYPE_I64, ir++, mem_index);
+ 
+@@ -827,9 +801,7 @@ static void tcg_out_qemu_st (TCGContext *s, const TCGArg *args, int opc)
+ 
+     /* slow path */
+     ir = 3;
+-#ifdef CONFIG_TCG_PASS_AREG0
+     tcg_out_mov (s, TCG_TYPE_I64, ir++, TCG_AREG0);
+-#endif
+     tcg_out_mov (s, TCG_TYPE_I64, ir++, addr_reg);
+     tcg_out_rld (s, RLDICL, ir++, data_reg, 0, 64 - (1 << (3 + opc)));
+     tcg_out_movi (s, TCG_TYPE_I64, ir++, mem_index);
+diff --git a/tcg/s390/tcg-target.c b/tcg/s390/tcg-target.c
+index 99b5339..aac11d9 100644
+--- a/tcg/s390/tcg-target.c
++++ b/tcg/s390/tcg-target.c
+@@ -301,7 +301,6 @@ static const uint8_t tcg_cond_to_ltr_cond[10] = {
+ 
+ #include "../../softmmu_defs.h"
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void * const qemu_ld_helpers[4] = {
+@@ -319,25 +318,6 @@ static const void * const qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static void *qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-
+-/* legacy helper signature: __st_mmu(target_ulong addr, uintxx_t val,
+-   int mmu_idx) */
+-static void *qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ #endif
+ 
+ static uint8_t *tb_ret_addr;
+@@ -1507,7 +1487,6 @@ static void tcg_prepare_qemu_ldst(TCGContext* s, TCGReg data_reg,
+             tcg_abort();
+         }
+         tcg_out_movi(s, TCG_TYPE_I32, TCG_REG_R4, mem_index);
+-#ifdef CONFIG_TCG_PASS_AREG0
+         /* XXX/FIXME: suboptimal */
+         tcg_out_mov(s, TCG_TYPE_I64, tcg_target_call_iarg_regs[3],
+                     tcg_target_call_iarg_regs[2]);
+@@ -1517,11 +1496,9 @@ static void tcg_prepare_qemu_ldst(TCGContext* s, TCGReg data_reg,
+                     tcg_target_call_iarg_regs[0]);
+         tcg_out_mov(s, TCG_TYPE_I64, tcg_target_call_iarg_regs[0],
+                     TCG_AREG0);
+-#endif
+         tgen_calli(s, (tcg_target_ulong)qemu_st_helpers[s_bits]);
+     } else {
+         tcg_out_movi(s, TCG_TYPE_I32, arg1, mem_index);
+-#ifdef CONFIG_TCG_PASS_AREG0
+         /* XXX/FIXME: suboptimal */
+         tcg_out_mov(s, TCG_TYPE_I64, tcg_target_call_iarg_regs[2],
+                     tcg_target_call_iarg_regs[1]);
+@@ -1529,7 +1506,6 @@ static void tcg_prepare_qemu_ldst(TCGContext* s, TCGReg data_reg,
+                     tcg_target_call_iarg_regs[0]);
+         tcg_out_mov(s, TCG_TYPE_I64, tcg_target_call_iarg_regs[0],
+                     TCG_AREG0);
+-#endif
+         tgen_calli(s, (tcg_target_ulong)qemu_ld_helpers[s_bits]);
+ 
+         /* sign extension */
+diff --git a/tcg/s390/tcg-target.h b/tcg/s390/tcg-target.h
+index d12f90b..4f7dfab 100644
+--- a/tcg/s390/tcg-target.h
++++ b/tcg/s390/tcg-target.h
+@@ -96,7 +96,6 @@ typedef enum TCGReg {
+ #define TCG_TARGET_EXTEND_ARGS 1
+ 
+ enum {
+-    /* Note: must be synced with dyngen-exec.h */
+     TCG_AREG0 = TCG_REG_R10,
+ };
+ 
+diff --git a/tcg/sparc/tcg-target.c b/tcg/sparc/tcg-target.c
+index 247a278..baed3b4 100644
+--- a/tcg/sparc/tcg-target.c
++++ b/tcg/sparc/tcg-target.c
+@@ -59,11 +59,7 @@ static const char * const tcg_target_reg_names[TCG_TARGET_NB_REGS] = {
+ };
+ #endif
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ #define ARG_OFFSET 1
+-#else
+-#define ARG_OFFSET 0
+-#endif
+ 
+ static const int tcg_target_reg_alloc_order[] = {
+     TCG_REG_L0,
+@@ -161,9 +157,7 @@ static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_O0);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_O1);
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_O2);
+-#ifdef CONFIG_TCG_PASS_AREG0
+         tcg_regset_reset_reg(ct->u.regs, TCG_REG_O3);
+-#endif
+         break;
+     case 'I':
+         ct->ct |= TCG_CT_CONST_S11;
+@@ -715,7 +709,6 @@ static void tcg_target_qemu_prologue(TCGContext *s)
+ 
+ #include "../../softmmu_defs.h"
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+ /* helper signature: helper_ld_mmu(CPUState *env, target_ulong addr,
+    int mmu_idx) */
+ static const void * const qemu_ld_helpers[4] = {
+@@ -733,25 +726,6 @@ static const void * const qemu_st_helpers[4] = {
+     helper_stl_mmu,
+     helper_stq_mmu,
+ };
+-#else
+-/* legacy helper signature: __ld_mmu(target_ulong addr, int
+-   mmu_idx) */
+-static const void * const qemu_ld_helpers[4] = {
+-    __ldb_mmu,
+-    __ldw_mmu,
+-    __ldl_mmu,
+-    __ldq_mmu,
+-};
+-
+-/* legacy helper signature: __st_mmu(target_ulong addr, uintxx_t val,
+-   int mmu_idx) */
+-static const void * const qemu_st_helpers[4] = {
+-    __stb_mmu,
+-    __stw_mmu,
+-    __stl_mmu,
+-    __stq_mmu,
+-};
+-#endif
+ #endif
+ 
+ #if TARGET_LONG_BITS == 32
+@@ -834,7 +808,6 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
+ 
+     /* mov */
+     tcg_out_movi(s, TCG_TYPE_I32, arg1, mem_index);
+-#ifdef CONFIG_TCG_PASS_AREG0
+     /* XXX/FIXME: suboptimal */
+     tcg_out_mov(s, TCG_TYPE_I32, tcg_target_call_iarg_regs[3],
+                 tcg_target_call_iarg_regs[2]);
+@@ -844,7 +817,6 @@ static void tcg_out_qemu_ld(TCGContext *s, const TCGArg *args,
+                 tcg_target_call_iarg_regs[0]);
+     tcg_out_mov(s, TCG_TYPE_PTR, tcg_target_call_iarg_regs[0],
+                 TCG_AREG0);
+-#endif
+ 
+     /* XXX: move that code at the end of the TB */
+     /* qemu_ld_helper[s_bits](arg0, arg1) */
+@@ -1061,7 +1033,6 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
+     /* mov */
+     tcg_out_movi(s, TCG_TYPE_I32, arg2, mem_index);
+ 
+-#ifdef CONFIG_TCG_PASS_AREG0
+     /* XXX/FIXME: suboptimal */
+     tcg_out_mov(s, TCG_TYPE_I32, tcg_target_call_iarg_regs[3],
+                 tcg_target_call_iarg_regs[2]);
+@@ -1071,7 +1042,6 @@ static void tcg_out_qemu_st(TCGContext *s, const TCGArg *args,
+                 tcg_target_call_iarg_regs[0]);
+     tcg_out_mov(s, TCG_TYPE_PTR, tcg_target_call_iarg_regs[0],
+                 TCG_AREG0);
+-#endif
+     /* XXX: move that code at the end of the TB */
+     /* qemu_st_helper[s_bits](arg0, arg1, arg2) */
+     tcg_out32(s, CALL | ((((tcg_target_ulong)qemu_st_helpers[s_bits]
+diff --git a/tcg/sparc/tcg-target.h b/tcg/sparc/tcg-target.h
+index ee2274d..0ea87be 100644
+--- a/tcg/sparc/tcg-target.h
++++ b/tcg/sparc/tcg-target.h
+@@ -125,7 +125,6 @@ typedef enum {
+ #define TCG_TARGET_HAS_deposit_i64      0
+ #endif
+ 
+-/* Note: must be synced with dyngen-exec.h */
+ #ifdef CONFIG_SOLARIS
+ #define TCG_AREG0 TCG_REG_G2
+ #elif defined(__sparc_v9__)
+diff --git a/tcg/tci/tcg-target.c b/tcg/tci/tcg-target.c
+index ef8580f..003244c 100644
+--- a/tcg/tci/tcg-target.c
++++ b/tcg/tci/tcg-target.c
+@@ -798,9 +798,7 @@ static void tcg_out_op(TCGContext *s, TCGOpcode opc, const TCGArg *args,
+     case INDEX_op_qemu_st8:
+     case INDEX_op_qemu_st16:
+     case INDEX_op_qemu_st32:
+-#ifdef CONFIG_TCG_PASS_AREG0
+         tcg_out_r(s, TCG_AREG0);
+-#endif
+         tcg_out_r(s, *args++);
+         tcg_out_r(s, *args++);
+ #if TARGET_LONG_BITS > TCG_TARGET_REG_BITS
+@@ -811,9 +809,7 @@ static void tcg_out_op(TCGContext *s, TCGOpcode opc, const TCGArg *args,
+ #endif
+         break;
+     case INDEX_op_qemu_st64:
+-#ifdef CONFIG_TCG_PASS_AREG0
+         tcg_out_r(s, TCG_AREG0);
+-#endif
+         tcg_out_r(s, *args++);
+ #if TCG_TARGET_REG_BITS == 32
+         tcg_out_r(s, *args++);
+diff --git a/tci.c b/tci.c
+index c79350d..ce8a988 100644
+--- a/tci.c
++++ b/tci.c
+@@ -25,7 +25,6 @@
+ #endif
+ 
+ #include "qemu-common.h"
+-#include "dyngen-exec.h"        /* env */
+ #include "exec-all.h"           /* MAX_OPC_PARAM_IARGS */
+ #include "tcg-op.h"
+ 
+@@ -63,17 +62,6 @@ uintptr_t tci_tb_ptr;
+ 
+ static tcg_target_ulong tci_reg[TCG_TARGET_NB_REGS];
+ 
+-#if !defined(CONFIG_TCG_PASS_AREG0)
+-# define helper_ldb_mmu(env, addr, mmu_idx) __ldb_mmu(addr, mmu_idx)
+-# define helper_ldw_mmu(env, addr, mmu_idx) __ldw_mmu(addr, mmu_idx)
+-# define helper_ldl_mmu(env, addr, mmu_idx) __ldl_mmu(addr, mmu_idx)
+-# define helper_ldq_mmu(env, addr, mmu_idx) __ldq_mmu(addr, mmu_idx)
+-# define helper_stb_mmu(env, addr, val, mmu_idx) __stb_mmu(addr, val, mmu_idx)
+-# define helper_stw_mmu(env, addr, val, mmu_idx) __stw_mmu(addr, val, mmu_idx)
+-# define helper_stl_mmu(env, addr, val, mmu_idx) __stl_mmu(addr, val, mmu_idx)
+-# define helper_stq_mmu(env, addr, val, mmu_idx) __stq_mmu(addr, val, mmu_idx)
+-#endif /* !CONFIG_TCG_PASS_AREG0 */
+-
+ static tcg_target_ulong tci_read_reg(TCGReg index)
+ {
+     assert(index < ARRAY_SIZE(tci_reg));
+diff --git a/user-exec.c b/user-exec.c
+index b9ea9dd..ef9b172 100644
+--- a/user-exec.c
++++ b/user-exec.c
+@@ -18,9 +18,6 @@
+  */
+ #include "config.h"
+ #include "cpu.h"
+-#ifndef CONFIG_TCG_PASS_AREG0
+-#include "dyngen-exec.h"
+-#endif
+ #include "disas.h"
+ #include "tcg.h"
+ 
+@@ -60,12 +57,6 @@ void cpu_resume_from_signal(CPUArchState *env1, void *puc)
+     struct sigcontext *uc = puc;
+ #endif
+ 
+-#ifndef CONFIG_TCG_PASS_AREG0
+-    env = env1;
+-
+-    /* XXX: restore cpu registers saved in host registers */
+-#endif
+-
+     if (puc) {
+         /* XXX: use siglongjmp ? */
+ #ifdef __linux__
+@@ -93,11 +84,6 @@ static inline int handle_cpu_signal(uintptr_t pc, unsigned long address,
+     TranslationBlock *tb;
+     int ret;
+ 
+-#ifndef CONFIG_TCG_PASS_AREG0
+-    if (cpu_single_env) {
+-        env = cpu_single_env; /* XXX: find a correct solution for multithread */
+-    }
+-#endif
+ #if defined(DEBUG_SIGNAL)
+     qemu_printf("qemu: SIGSEGV pc=0x%08lx address=%08lx w=%d oldset=0x%08lx\n",
+                 pc, address, is_write, *(unsigned long *)old_set);

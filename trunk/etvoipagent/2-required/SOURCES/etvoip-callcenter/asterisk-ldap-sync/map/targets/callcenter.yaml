@@ -1,0 +1,4 @@
+---
+name: 'substr(($u->{name_n_company} =~ s/\s+/ /g  || 1 ) && ((($u->{name_n_company} =~ s/;//g || 1) && ( $u->{name_n_company} =~ s/^\s+|\s+$//g && $u->{name_n_company} || $u->{name_n_company} ) || $u->{name_n_company}) || $u->{name_n_company}), 0, 250)'
+telefono: '[ grep { $_ } split(/,/,join(",",(($u->{telephonenumber} =~ s/^\+351//g || 1 ) && $u->{telephonenumber}), (($u->{mobile} =~ s/^\+351//g || 1) && $u->{mobile}))) ]'
+origen: '"ldap"'

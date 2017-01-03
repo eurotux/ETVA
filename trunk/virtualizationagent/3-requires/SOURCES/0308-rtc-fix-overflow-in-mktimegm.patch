@@ -1,0 +1,97 @@
+From 753ff5558ed06c3e4afd947c284f91fe1ddd4a28 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Mon, 1 Oct 2012 14:22:06 +0200
+Subject: [PATCH] rtc: fix overflow in mktimegm
+
+When setting a date in 1980, Linux is actually disregarding the century
+byte and setting the year to 2080.  This causes a year-2038 overflow
+in mktimegm.  Fix this by doing the days-to-seconds computation in
+64-bit math.
+
+Reported-by: Lucas Meneghel Rodrigues <lookkas@gmail.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit b6db4aca20e9af4f62c9c9e08b9b9672a6ed3390)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ cutils.c         |  2 +-
+ tests/rtc-test.c | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 46 insertions(+), 1 deletion(-)
+
+diff --git a/cutils.c b/cutils.c
+index 8ef648f..8edd8fa 100644
+--- a/cutils.c
++++ b/cutils.c
+@@ -115,7 +115,7 @@ time_t mktimegm(struct tm *tm)
+         m += 12;
+         y--;
+     }
+-    t = 86400 * (d + (153 * m - 457) / 5 + 365 * y + y / 4 - y / 100 + 
++    t = 86400ULL * (d + (153 * m - 457) / 5 + 365 * y + y / 4 - y / 100 + 
+                  y / 400 - 719469);
+     t += 3600 * tm->tm_hour + 60 * tm->tm_min + tm->tm_sec;
+     return t;
+diff --git a/tests/rtc-test.c b/tests/rtc-test.c
+index f23ac3a..2b9aa63 100644
+--- a/tests/rtc-test.c
++++ b/tests/rtc-test.c
+@@ -179,6 +179,50 @@ static void check_time(int wiggle)
+ 
+ static int wiggle = 2;
+ 
++static void set_year(void)
++{
++    /* Set BCD mode */
++    cmos_write(RTC_REG_B, cmos_read(RTC_REG_B) & ~REG_B_DM);
++    cmos_write(RTC_REG_A, 0x76);
++    cmos_write(RTC_YEAR, 0x11);
++    cmos_write(RTC_MONTH, 0x02);
++    cmos_write(RTC_DAY_OF_MONTH, 0x02);
++    cmos_write(RTC_HOURS, 0x02);
++    cmos_write(RTC_MINUTES, 0x04);
++    cmos_write(RTC_SECONDS, 0x58);
++    cmos_write(RTC_REG_A, 0x26);
++
++    g_assert_cmpint(cmos_read(RTC_HOURS), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_MINUTES), ==, 0x04);
++    g_assert_cmpint(cmos_read(RTC_SECONDS), >=, 0x58);
++    g_assert_cmpint(cmos_read(RTC_DAY_OF_MONTH), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_MONTH), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_YEAR), ==, 0x11);
++
++    /* Set a date in 2080 to ensure there is no year-2038 overflow.  */
++    cmos_write(RTC_REG_A, 0x76);
++    cmos_write(RTC_YEAR, 0x80);
++    cmos_write(RTC_REG_A, 0x26);
++
++    g_assert_cmpint(cmos_read(RTC_HOURS), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_MINUTES), ==, 0x04);
++    g_assert_cmpint(cmos_read(RTC_SECONDS), >=, 0x58);
++    g_assert_cmpint(cmos_read(RTC_DAY_OF_MONTH), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_MONTH), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_YEAR), ==, 0x80);
++
++    cmos_write(RTC_REG_A, 0x76);
++    cmos_write(RTC_YEAR, 0x11);
++    cmos_write(RTC_REG_A, 0x26);
++
++    g_assert_cmpint(cmos_read(RTC_HOURS), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_MINUTES), ==, 0x04);
++    g_assert_cmpint(cmos_read(RTC_SECONDS), >=, 0x58);
++    g_assert_cmpint(cmos_read(RTC_DAY_OF_MONTH), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_MONTH), ==, 0x02);
++    g_assert_cmpint(cmos_read(RTC_YEAR), ==, 0x11);
++}
++
+ static void bcd_check_time(void)
+ {
+     /* Set BCD mode */
+@@ -269,6 +313,7 @@ int main(int argc, char **argv)
+     qtest_add_func("/rtc/bcd/check-time", bcd_check_time);
+     qtest_add_func("/rtc/dec/check-time", dec_check_time);
+     qtest_add_func("/rtc/alarm-time", alarm_time);
++    qtest_add_func("/rtc/set-year", set_year);
+     qtest_add_func("/rtc/fuzz-registers", fuzz_registers);
+     ret = g_test_run();
+ 

@@ -1,0 +1,30 @@
+From 5a04f399e59e72a323987ae2affaac622d6c2b40 Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 1 Sep 2012 12:56:03 +0200
+Subject: [PATCH] ioh3420: Remove unreachable code
+
+Report from smatch:
+hw/ioh3420.c:128 ioh3420_initfn(35) info: ignoring unreachable code.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Juan Quintela <quintela@redhat.com>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 997f15672a5ca7714cf310d92f475d2c5fe40970)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/ioh3420.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/hw/ioh3420.c b/hw/ioh3420.c
+index 94a537c..4d31473 100644
+--- a/hw/ioh3420.c
++++ b/hw/ioh3420.c
+@@ -125,7 +125,6 @@ static int ioh3420_initfn(PCIDevice *d)
+     rc = pcie_chassis_add_slot(s);
+     if (rc < 0) {
+         goto err_pcie_cap;
+-        return rc;
+     }
+     pcie_cap_root_init(d);
+     rc = pcie_aer_init(d, IOH_EP_AER_OFFSET);

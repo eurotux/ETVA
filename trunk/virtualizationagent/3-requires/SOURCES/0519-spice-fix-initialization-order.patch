@@ -1,0 +1,64 @@
+From 0cdd689692d20f10545a2c522f1134388d7f2148 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Fri, 2 Nov 2012 09:37:27 +0100
+Subject: [PATCH] spice: fix initialization order
+
+Register displaychangelistener last, after spice is fully initialized,
+otherwise we may hit NULL pointer dereferences when qemu starts calling
+our callbacks.
+
+Commit e250d949feb1334828f27f0d145c35f29c4b7639 triggers this bug.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c           | 10 ++++++++--
+ ui/spice-display.c |  2 +-
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index f88829c..9418ecb 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -2061,6 +2061,7 @@ static int qxl_init_primary(PCIDevice *dev)
+     PCIQXLDevice *qxl = DO_UPCAST(PCIQXLDevice, pci, dev);
+     VGACommonState *vga = &qxl->vga;
+     PortioList *qxl_vga_port_list = g_new(PortioList, 1);
++    int rc;
+ 
+     qxl->id = 0;
+     qxl_init_ramsize(qxl);
+@@ -2075,9 +2076,14 @@ static int qxl_init_primary(PCIDevice *dev)
+     qemu_spice_display_init_common(&qxl->ssd, vga->ds);
+ 
+     qxl0 = qxl;
+-    register_displaychangelistener(vga->ds, &display_listener);
+ 
+-    return qxl_init_common(qxl);
++    rc = qxl_init_common(qxl);
++    if (rc != 0) {
++        return rc;
++    }
++
++    register_displaychangelistener(vga->ds, &display_listener);
++    return rc;
+ }
+ 
+ static int qxl_init_secondary(PCIDevice *dev)
+diff --git a/ui/spice-display.c b/ui/spice-display.c
+index d062765..4c24c32 100644
+--- a/ui/spice-display.c
++++ b/ui/spice-display.c
+@@ -617,7 +617,6 @@ void qemu_spice_display_init(DisplayState *ds)
+ {
+     assert(sdpy.ds == NULL);
+     qemu_spice_display_init_common(&sdpy, ds);
+-    register_displaychangelistener(ds, &display_listener);
+ 
+     sdpy.qxl.base.sif = &dpy_interface.base;
+     qemu_spice_add_interface(&sdpy.qxl.base);
+@@ -626,4 +625,5 @@ void qemu_spice_display_init(DisplayState *ds)
+     qemu_add_vm_change_state_handler(qemu_spice_vm_change_state_handler, &sdpy);
+     qemu_spice_create_host_memslot(&sdpy);
+     qemu_spice_create_host_primary(&sdpy);
++    register_displaychangelistener(ds, &display_listener);
+ }

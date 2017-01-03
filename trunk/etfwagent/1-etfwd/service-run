@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VM=`dmesg | egrep "(QEMU|VBOX)"`
+VM=`egrep "(QEMU|VBOX)" /var/log/messages | grep -v grep`
 
 if [ "$VM" != "" ]; then
     cd /srv/etva-etfw

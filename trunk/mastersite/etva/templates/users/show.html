@@ -1,0 +1,54 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}Users page{% endblock%}
+{% block section %}{%trans "Users"%}{% endblock%}
+
+{% block mainCol%}
+
+{% if users%}
+    <div class="pagination">
+    <span class="step-links">
+        {% if users.has_previous %}
+            <a href="?page={{ users.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ users.number }} of {{ users.paginator.num_pages }}.
+        </span>
+
+        {% if users.has_next %}
+            <a href="?page={{ users.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
+    <table class="msg sml">
+        <tr>
+            <th class="sorted">{% trans "User" %}</th>
+            <th class="sorted">{% trans "Group" %}</th>
+            </tr>
+
+        {% for user in users.object_list%}
+        <tr class="{% if forloop.counter|divisibleby:2 %}odd{% endif %}">
+            <td><a href="{{user.id}}">{{ user.username }}</a></td>
+            <td>
+            {%for g in user.groups.all%}
+                {% ifnotequal g.name CLIENTS_GROUP %}
+                {% ifnotequal g.name AGENTS_GROUP %}
+                <a href="/groups/{{g.id}}">{{ g }}</a>
+                {% endifnotequal%}
+                {% endifnotequal%}
+            {% endfor %}
+            </td>
+
+        </tr>
+
+        {% endfor %}
+    </table>
+{% else %}
+    <p>{%trans "No users"%}</p>
+{%endif%}
+<div class="space15">&nbsp;</div>
+<a href="new">{%blocktrans%}Add a new user{%endblocktrans%}</a>
+{%endblock%}
+
+

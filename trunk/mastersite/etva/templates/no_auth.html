@@ -1,0 +1,16 @@
+{% extends "base_center.html" %}
+{% load i18n %}
+{% block title %}Not authorized{% endblock%}
+{% block usercontent%}
+<div>
+    <div class="title1">
+        {% trans "You're not authorized to perform this operation"%}</div>
+        <p>
+        {% block trans%}
+        You do not have the necessary permissions to perform this operation.
+        {% endblock%}
+        </p>
+        <p><a href="/">{% trans "Ok"%}</a></p>
+</div>
+{% endblock %}
+

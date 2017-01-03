@@ -1,0 +1,84 @@
+From c8e5bc19b568e04c31ac56c19d20e5c50e16b7de Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Tue, 4 Sep 2012 19:37:39 +0200
+Subject: [PATCH] hw/mcf5206: Fix buffer overflow for MBAR read / write
+
+Report from smatch:
+
+mcf5206.c:384 m5206_mbar_readb(7) error: buffer overflow 'm5206_mbar_width' 128 <= 128
+mcf5206.c:403 m5206_mbar_readw(8) error: buffer overflow 'm5206_mbar_width' 128 <= 128
+mcf5206.c:427 m5206_mbar_readl(8) error: buffer overflow 'm5206_mbar_width' 128 <= 128
+mcf5206.c:451 m5206_mbar_writeb(9) error: buffer overflow 'm5206_mbar_width' 128 <= 128
+mcf5206.c:475 m5206_mbar_writew(9) error: buffer overflow 'm5206_mbar_width' 128 <= 128
+mcf5206.c:503 m5206_mbar_writel(9) error: buffer overflow 'm5206_mbar_width' 128 <= 128
+
+m5206_mbar_width has 0x80 elements and supports 0 <= offset < 0x200.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit a32354e206895400d17c3de9a8df1de96d3df289)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/mcf5206.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/hw/mcf5206.c b/hw/mcf5206.c
+index 539b391..27753e2 100644
+--- a/hw/mcf5206.c
++++ b/hw/mcf5206.c
+@@ -378,7 +378,7 @@ static uint32_t m5206_mbar_readb(void *opaque, target_phys_addr_t offset)
+ {
+     m5206_mbar_state *s = (m5206_mbar_state *)opaque;
+     offset &= 0x3ff;
+-    if (offset > 0x200) {
++    if (offset >= 0x200) {
+         hw_error("Bad MBAR read offset 0x%x", (int)offset);
+     }
+     if (m5206_mbar_width[offset >> 2] > 1) {
+@@ -397,7 +397,7 @@ static uint32_t m5206_mbar_readw(void *opaque, target_phys_addr_t offset)
+     m5206_mbar_state *s = (m5206_mbar_state *)opaque;
+     int width;
+     offset &= 0x3ff;
+-    if (offset > 0x200) {
++    if (offset >= 0x200) {
+         hw_error("Bad MBAR read offset 0x%x", (int)offset);
+     }
+     width = m5206_mbar_width[offset >> 2];
+@@ -421,7 +421,7 @@ static uint32_t m5206_mbar_readl(void *opaque, target_phys_addr_t offset)
+     m5206_mbar_state *s = (m5206_mbar_state *)opaque;
+     int width;
+     offset &= 0x3ff;
+-    if (offset > 0x200) {
++    if (offset >= 0x200) {
+         hw_error("Bad MBAR read offset 0x%x", (int)offset);
+     }
+     width = m5206_mbar_width[offset >> 2];
+@@ -445,7 +445,7 @@ static void m5206_mbar_writeb(void *opaque, target_phys_addr_t offset,
+     m5206_mbar_state *s = (m5206_mbar_state *)opaque;
+     int width;
+     offset &= 0x3ff;
+-    if (offset > 0x200) {
++    if (offset >= 0x200) {
+         hw_error("Bad MBAR write offset 0x%x", (int)offset);
+     }
+     width = m5206_mbar_width[offset >> 2];
+@@ -469,7 +469,7 @@ static void m5206_mbar_writew(void *opaque, target_phys_addr_t offset,
+     m5206_mbar_state *s = (m5206_mbar_state *)opaque;
+     int width;
+     offset &= 0x3ff;
+-    if (offset > 0x200) {
++    if (offset >= 0x200) {
+         hw_error("Bad MBAR write offset 0x%x", (int)offset);
+     }
+     width = m5206_mbar_width[offset >> 2];
+@@ -497,7 +497,7 @@ static void m5206_mbar_writel(void *opaque, target_phys_addr_t offset,
+     m5206_mbar_state *s = (m5206_mbar_state *)opaque;
+     int width;
+     offset &= 0x3ff;
+-    if (offset > 0x200) {
++    if (offset >= 0x200) {
+         hw_error("Bad MBAR write offset 0x%x", (int)offset);
+     }
+     width = m5206_mbar_width[offset >> 2];

@@ -1,0 +1,26 @@
+From c633df1be04c4a9e757a1645f3ff36a7aec01941 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Tue, 25 Sep 2012 13:56:40 +0200
+Subject: [PATCH] qxl: fix range check for rev3 io commands.
+
+Enables QXL_IO_FLUSH_SURFACES_ASYNC and QXL_IO_FLUSH_RELEASE
+which are part of the qxl rev3 feature set.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 6b9d5d0..8d33745 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -1466,7 +1466,7 @@ static void ioport_write(void *opaque, target_phys_addr_t addr,
+     }
+ 
+     if (d->revision <= QXL_REVISION_STABLE_V10 &&
+-        io_port >= QXL_IO_FLUSH_SURFACES_ASYNC) {
++        io_port > QXL_IO_FLUSH_RELEASE) {
+         qxl_set_guest_bug(d, "unsupported io %d for revision %d\n",
+             io_port, d->revision);
+         return;

@@ -1,0 +1,118 @@
+From f5339378fc8357c8c07c9c548e8e878fe7872449 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Herv=C3=A9=20Poussineau?= <hpoussin@reactos.org>
+Date: Thu, 13 Sep 2012 12:39:36 +0200
+Subject: [PATCH] slirp: Handle more than 65535 blocks in TFTP transfers
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+RFC 1350 does not mention block count roll-over. However, a lot of TFTP servers
+implement it to be able to transmit big files, so do it also.
+
+Current block size is 512 bytes, so TFTP files were limited to 32 MB.
+
+Signed-off-by: Hervé Poussineau <hpoussin@reactos.org>
+Signed-off-by: Jan Kiszka <jan.kiszka@siemens.com>
+(cherry picked from commit 4aa401f39e048e71020cceb59f126ab941095a42)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ slirp/tftp.c | 24 ++++++++++--------------
+ slirp/tftp.h |  1 +
+ 2 files changed, 11 insertions(+), 14 deletions(-)
+
+diff --git a/slirp/tftp.c b/slirp/tftp.c
+index 520dbd6..c6a5df2 100644
+--- a/slirp/tftp.c
++++ b/slirp/tftp.c
+@@ -97,7 +97,7 @@ static int tftp_session_find(Slirp *slirp, struct tftp_t *tp)
+   return -1;
+ }
+ 
+-static int tftp_read_data(struct tftp_session *spt, uint16_t block_nr,
++static int tftp_read_data(struct tftp_session *spt, uint32_t block_nr,
+                           uint8_t *buf, int len)
+ {
+     int bytes_read = 0;
+@@ -197,19 +197,14 @@ out:
+   tftp_session_terminate(spt);
+ }
+ 
+-static int tftp_send_data(struct tftp_session *spt,
+-                          uint16_t block_nr,
+-			  struct tftp_t *recv_tp)
++static int tftp_send_next_block(struct tftp_session *spt,
++                                struct tftp_t *recv_tp)
+ {
+   struct sockaddr_in saddr, daddr;
+   struct mbuf *m;
+   struct tftp_t *tp;
+   int nobytes;
+ 
+-  if (block_nr < 1) {
+-    return -1;
+-  }
+-
+   m = m_get(spt->slirp);
+ 
+   if (!m) {
+@@ -223,7 +218,7 @@ static int tftp_send_data(struct tftp_session *spt,
+   m->m_data += sizeof(struct udpiphdr);
+ 
+   tp->tp_op = htons(TFTP_DATA);
+-  tp->x.tp_data.tp_block_nr = htons(block_nr);
++  tp->x.tp_data.tp_block_nr = htons((spt->block_nr + 1) & 0xffff);
+ 
+   saddr.sin_addr = recv_tp->ip.ip_dst;
+   saddr.sin_port = recv_tp->udp.uh_dport;
+@@ -231,7 +226,7 @@ static int tftp_send_data(struct tftp_session *spt,
+   daddr.sin_addr = spt->client_ip;
+   daddr.sin_port = spt->client_port;
+ 
+-  nobytes = tftp_read_data(spt, block_nr - 1, tp->x.tp_data.tp_buf, 512);
++  nobytes = tftp_read_data(spt, spt->block_nr, tp->x.tp_data.tp_buf, 512);
+ 
+   if (nobytes < 0) {
+     m_free(m);
+@@ -255,6 +250,7 @@ static int tftp_send_data(struct tftp_session *spt,
+     tftp_session_terminate(spt);
+   }
+ 
++  spt->block_nr++;
+   return 0;
+ }
+ 
+@@ -373,7 +369,8 @@ static void tftp_handle_rrq(Slirp *slirp, struct tftp_t *tp, int pktlen)
+       }
+   }
+ 
+-  tftp_send_data(spt, 1, tp);
++  spt->block_nr = 0;
++  tftp_send_next_block(spt, tp);
+ }
+ 
+ static void tftp_handle_ack(Slirp *slirp, struct tftp_t *tp, int pktlen)
+@@ -386,9 +383,8 @@ static void tftp_handle_ack(Slirp *slirp, struct tftp_t *tp, int pktlen)
+     return;
+   }
+ 
+-  if (tftp_send_data(&slirp->tftp_sessions[s],
+-		     ntohs(tp->x.tp_data.tp_block_nr) + 1,
+-		     tp) < 0) {
++  if (tftp_send_next_block(&slirp->tftp_sessions[s],
++                           tp) < 0) {
+     return;
+   }
+ }
+diff --git a/slirp/tftp.h b/slirp/tftp.h
+index 9c364ea..51704e4 100644
+--- a/slirp/tftp.h
++++ b/slirp/tftp.h
+@@ -37,6 +37,7 @@ struct tftp_session {
+ 
+     struct in_addr client_ip;
+     uint16_t client_port;
++    uint32_t block_nr;
+ 
+     int timestamp;
+ };

@@ -1,0 +1,61 @@
+From f556930d53b6068d42baaa188d8116b16fd84a36 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?S=C3=B8ren=20Sandmann=20Pedersen?= <ssp@redhat.com>
+Date: Tue, 4 Sep 2012 10:14:48 -0400
+Subject: [PATCH] qxl: Add set_client_capabilities() interface to QXLInterface
+
+This new interface lets spice server inform the guest whether
+
+(a) a client is connected
+(b) what capabilities the client has
+
+There is a fixed number (464) of bits reserved for capabilities, and
+when the capabilities bits change, the QXL_INTERRUPT_CLIENT interrupt
+is generated.
+
+Signed-off-by: Soren Sandmann <ssp@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index c7b4e9a..552d208 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -946,6 +946,26 @@ static void interface_async_complete(QXLInstance *sin, uint64_t cookie_token)
+     }
+ }
+ 
++#if SPICE_SERVER_VERSION >= 0x000b04
++
++/* called from spice server thread context only */
++static void interface_set_client_capabilities(QXLInstance *sin,
++                                              uint8_t client_present,
++                                              uint8_t caps[58])
++{
++    PCIQXLDevice *qxl = container_of(sin, PCIQXLDevice, ssd.qxl);
++
++    qxl->shadow_rom.client_present = client_present;
++    memcpy(qxl->shadow_rom.client_capabilities, caps, sizeof(caps));
++    qxl->rom->client_present = client_present;
++    memcpy(qxl->rom->client_capabilities, caps, sizeof(caps));
++    qxl_rom_set_dirty(qxl);
++
++    qxl_send_events(qxl, QXL_INTERRUPT_CLIENT);
++}
++
++#endif
++
+ static const QXLInterface qxl_interface = {
+     .base.type               = SPICE_INTERFACE_QXL,
+     .base.description        = "qxl gpu",
+@@ -967,6 +987,9 @@ static const QXLInterface qxl_interface = {
+     .flush_resources         = interface_flush_resources,
+     .async_complete          = interface_async_complete,
+     .update_area_complete    = interface_update_area_complete,
++#if SPICE_SERVER_VERSION >= 0x000b04
++    .set_client_capabilities = interface_set_client_capabilities,
++#endif
+ };
+ 
+ static void qxl_enter_vga_mode(PCIQXLDevice *d)

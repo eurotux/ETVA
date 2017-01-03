@@ -1,0 +1,41 @@
+{% extends "base_home.html" %}
+{% load i18n %}
+{% block title %}New Group{% endblock%}
+{% block section %}{%trans "Users"%}{% endblock%}
+
+{% block mainCol%}
+
+<h1>{%blocktrans%}New user{%endblocktrans%}:</h1>
+	{% if errorMessage%}
+	<div id="msgAlert">{{errorMessage}}</div>
+	{%endif%}
+
+{% if form.subject.errors %}
+    <ol>
+    {% for error in form.subject.errors %}
+        <li><strong>{{ error|escape }}</strong></li>
+    {% endfor %}
+    </ol>
+{% endif %}
+
+<form method="post">
+<table class="form">
+    {{form.as_table}}
+    {%if selGroup%}
+    <th>
+        <label for="id_group">{% trans "Group"%}:</label>
+    </th>
+    <td>
+        <select id="id_group" name="group">
+            {% for selg in selGroup%}
+            <option value="{{selg.id}}" {%ifequal selg.id group %}selected=""{%endifequal%}>{{selg.name}}</option>
+            {%endfor%}
+        </select>
+    </td>
+    {%endif%}
+</table>
+<input class="button" type="submit" value="{% trans "Submit" %}" />
+</form>
+{%endblock%}
+
+

@@ -1,0 +1,17 @@
+--- admin/modules/disa/functions.inc.php.orig	2014-04-04 16:44:14.000000000 +0100
++++ admin/modules/disa/functions.inc.php	2014-04-04 16:46:26.000000000 +0100
+@@ -98,10 +98,12 @@
+ 				$ext->add('disa', $item['disa_id'], '', new ext_setvar('_DISA', 'disa^'.$item['disa_id'].'^newcall'));
+ 				$ext->add('disa', $item['disa_id'], 'newcall', new ext_setvar('_DISACONTEXT', $thisitem['context']));
+ 				$ext->add('disa', $item['disa_id'], '', new ext_setvar('_KEEPCID', 'TRUE')); 
++				$trunkoptions = '${TRUNK_OPTIONS}';
++				$trunkoptions = 'twW';  # HACK
+ 				if ($thisitem['hangup'] == 'CHECKED') {
+-					$ext->add('disa', $item['disa_id'], '', new ext_setvar('_HANGUP', '${TRUNK_OPTIONS}Hg'));
++					$ext->add('disa', $item['disa_id'], '', new ext_setvar('_HANGUP', $trunkoptions.'Hg'));
+ 				} else {
+-					$ext->add('disa', $item['disa_id'], '', new ext_setvar('_HANGUP', '${TRUNK_OPTIONS}'));
++					$ext->add('disa', $item['disa_id'], '', new ext_setvar('_HANGUP', $trunkoptions));
+         }
+ 				$ext->add('disa', $item['disa_id'], '', new ext_setvar('TIMEOUT(digit)', $thisitem['digittimeout']));
+ 				$ext->add('disa', $item['disa_id'], '', new ext_setvar('TIMEOUT(response)', $thisitem['resptimeout']));

@@ -1,0 +1,29 @@
+--- qemu-kvm-1.2.0/qemu-ga.c.orig	2014-06-02 14:25:33.430354740 +0100
++++ qemu-kvm-1.2.0/qemu-ga.c	2014-06-02 14:30:07.283681778 +0100
+@@ -44,6 +44,9 @@
+ #define QGA_STATEDIR_DEFAULT "/tmp"
+ #define QGA_SENTINEL_BYTE 0xFF
+ 
++/* add g_strcmp0() here which isn't available in CentOS 5 glib library */
++int g_strcmp0(const char *str1, const char *str2);     /* prototype */
++
+ struct GAState {
+     JSONMessageParser parser;
+     GMainLoop *main_loop;
+@@ -172,6 +175,16 @@
+     QGA_STATEDIR_DEFAULT);
+ }
+ 
++
++/* add g_strcmp0() here which isn't available in CentOS 5 glib library */
++int g_strcmp0(const char *str1, const char *str2)
++{
++     if( str1 == NULL && str2 == NULL ) return 0;
++     if( str1 == NULL ) return -1;
++     if( str2 == NULL ) return 1;
++     return g_strcasecmp(str1, str2);
++};
++
+ static const char *ga_log_level_str(GLogLevelFlags level)
+ {
+     switch (level & G_LOG_LEVEL_MASK) {

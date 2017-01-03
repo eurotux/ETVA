@@ -1,0 +1,35 @@
+From 229e24c570a934074df2ad1f7df991dc0ae6ad25 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Wed, 19 Sep 2012 22:00:22 +0200
+Subject: [PATCH] tcg/optimize: prefer the "op a, a, b" form for commutative
+ ops
+
+The "op a, a, b" form is better handled on non-RISC host than the "op
+a, b, a" form, so swap the arguments to this form when possible, and
+when b is not a constant.
+
+This reduces the number of generated instructions by a tiny bit.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index abe016a..c8ae50b 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -434,7 +434,10 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+         CASE_OP_32_64(eqv):
+         CASE_OP_32_64(nand):
+         CASE_OP_32_64(nor):
+-            if (temps[args[1]].state == TCG_TEMP_CONST) {
++            /* Prefer the constant in second argument, and then the form
++               op a, a, b, which is better handled on non-RISC hosts. */
++            if (temps[args[1]].state == TCG_TEMP_CONST || (args[0] == args[2]
++                && temps[args[2]].state != TCG_TEMP_CONST)) {
+                 tmp = args[1];
+                 args[1] = args[2];
+                 args[2] = tmp;

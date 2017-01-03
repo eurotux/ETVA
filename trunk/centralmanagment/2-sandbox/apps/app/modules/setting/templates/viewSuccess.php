@@ -27,8 +27,7 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
         this.fetch = Ext.ux.util.clone(this.get_data);
         this.fetch.push('networks');
 
-
-        var static_source_lan = new Ext.Panel(View.StaticIpTpl('lan'));
+        var static_source_lan = new Ext.Panel(View.StaticIpTpl('lan',{ 'no_gateway': true }));
         var dns_static_lan = new Ext.Panel(View.DnsTpl('network'));
 
         var conn_tab = {title: <?php echo json_encode(__('Connectivity')) ?>,defaults:{layout:'form',border:true,autoScroll:true}};
@@ -83,21 +82,91 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
                 ]
             },
             {
-                xtype: 'fieldset',
-                title: <?php echo json_encode(__('DNS')) ?>,
-                collapsible: false,
-                items: [dns_static_lan]
-            }
+                //anchor: '100% 100%',
+                border:false,
+                height:150,
+                defaults:{border:false},
+                layout:{type: 'hbox',align: 'stretch'},
+                items:[
+
+
+                {flex:1,
+                    items:[
+                        {
+                            xtype: 'fieldset',
+                            title: <?php echo json_encode(__('DNS')) ?>,
+                            collapsible: false,
+                            items: [dns_static_lan]
+                        }
+                    ]
+                }//end 1col
+                ,{width:10}
+                ,{flex:1,items:[
+                    {
+                        xtype: 'fieldset',
+                        title: <?php echo json_encode(__('NTP Servers')) ?>,
+                        collapsible: false,
+                        items: [
+                            new Ext.form.TextArea({
+                                    fieldLabel: <?php echo json_encode(__('Servers')) ?>,
+                                    name: 'network_ntpserver',
+                                    //maxLength: 15,
+                                    //vtype:'ip_addr',
+                                    //allowBlank:false,
+                                    //disabled:true,
+                                    width: '90%'
+                            })
+                        ]
+                    }
+                ]}//end 2col
+                ]
+            },
         ];
 
         <?php else: ?>
         
-        conn_tab.items = [this.buildCMConn(),{
-                                xtype: 'fieldset',
-                                title: <?php echo json_encode(__('DNS')) ?>,
-                                collapsible: false,
-                                items: [dns_static_lan]
-                         }];
+        conn_tab.items = [this.buildCMConn(),
+			    {
+				//anchor: '100% 100%',
+				border:false,
+				height:150,
+				defaults:{border:false},
+				layout:{type: 'hbox',align: 'stretch'},
+				items:[
+
+
+				{flex:1,
+				    items:[
+					{
+					    xtype: 'fieldset',
+					    title: <?php echo json_encode(__('DNS')) ?>,
+					    collapsible: false,
+					    items: [dns_static_lan]
+					}
+				    ]
+				}//end 1col
+				,{width:10}
+				,{flex:1,items:[
+				    {
+					xtype: 'fieldset',
+					title: <?php echo json_encode(__('NTP Servers')) ?>,
+					collapsible: false,
+					items: [
+					    new Ext.form.TextArea({
+						    fieldLabel: <?php echo json_encode(__('Servers')) ?>,
+						    name: 'network_ntpserver',
+						    //maxLength: 15,
+						    //vtype:'ip_addr',
+						    //allowBlank:false,
+						    //disabled:true,
+						    width: '90%'
+					    })
+					]
+				    }
+				]}//end 2col
+				]
+			    }
+			];
 
         <?php endif;?>
 
@@ -231,8 +300,8 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
                 this.disable();
             },
             success: function ( form, action ) {
-                //var rec = action.result;
-                //this.getForm().loadRecord(rec);
+                var rec = action.result;
+                this.getForm().findField('network_ntpserver').setValue(rec.data['ntp_servers'].join("\n"));
             },scope:this
         });
 
@@ -305,6 +374,8 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
            send_data['settings'] = Ext.encode(allRecords);
            send_data['networks'] = Ext.encode(networks);
 
+            send_data['ntp_servers'] = Ext.encode(alldata['network_ntpserver'].split("\n"));
+
             var conn = new Ext.data.Connection({
                 listeners:{
                     // wait message.....
@@ -346,7 +417,7 @@ Setting.Form = Ext.extend(Ext.form.FormPanel, {
                                     ,<?php echo json_encode(__('Some nodes reported down. If you proceed, the node(s) connection settings to CM will be outdated. Remember to verify node(s) connectivity to Central Management')) ?>
                                     ,resp['info']
                                     ,<?php echo json_encode(__('Are you sure you want to do this?')) ?>),
-                            buttons: Ext.MessageBox.YESNOCANCEL,
+                            buttons: Ext.MessageBox.YESNO,
                             fn: function(btn){
 
                                 if(btn=='yes') this.onSave({force:true});

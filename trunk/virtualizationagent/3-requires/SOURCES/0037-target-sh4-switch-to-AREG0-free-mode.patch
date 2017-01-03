@@ -1,0 +1,1057 @@
+From 4549596721636b62b8d58c36db7b4488f3f16a0e Mon Sep 17 00:00:00 2001
+From: Blue Swirl <blauwirbel@gmail.com>
+Date: Sun, 2 Sep 2012 10:37:06 +0000
+Subject: [PATCH] target-sh4: switch to AREG0 free mode
+
+Add an explicit CPUState parameter instead of relying on AREG0
+and switch to AREG0 free mode.
+
+Acked-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure                |   2 +-
+ target-sh4/Makefile.objs |   2 -
+ target-sh4/helper.h      |  84 +++++++++++-----------
+ target-sh4/op_helper.c   | 182 +++++++++++++++++++++++------------------------
+ target-sh4/translate.c   | 114 ++++++++++++++++-------------
+ 5 files changed, 195 insertions(+), 189 deletions(-)
+
+diff --git a/configure b/configure
+index 2a12022..03ce76e 100755
+--- a/configure
++++ b/configure
+@@ -3839,7 +3839,7 @@ symlink "$source_path/Makefile.target" "$target_dir/Makefile"
+ 
+ 
+ case "$target_arch2" in
+-  alpha | arm* | cris | i386 | lm32 | m68k | microblaze* | or32 | s390x | sparc* | unicore32 | x86_64 | xtensa* | ppc*)
++  alpha | arm* | cris | i386 | lm32 | m68k | microblaze* | or32 | s390x | sh4* | sparc* | unicore32 | x86_64 | xtensa* | ppc*)
+     echo "CONFIG_TCG_PASS_AREG0=y" >> $config_target_mak
+   ;;
+ esac
+diff --git a/target-sh4/Makefile.objs b/target-sh4/Makefile.objs
+index 2e0e093..ca20f21 100644
+--- a/target-sh4/Makefile.objs
++++ b/target-sh4/Makefile.objs
+@@ -1,4 +1,2 @@
+ obj-y += translate.o op_helper.o helper.o cpu.o
+ obj-$(CONFIG_SOFTMMU) += machine.o
+-
+-$(obj)/op_helper.o: QEMU_CFLAGS += $(HELPER_CFLAGS)
+diff --git a/target-sh4/helper.h b/target-sh4/helper.h
+index 95e3c7c..6e4f108 100644
+--- a/target-sh4/helper.h
++++ b/target-sh4/helper.h
+@@ -1,54 +1,54 @@
+ #include "def-helper.h"
+ 
+-DEF_HELPER_0(ldtlb, void)
+-DEF_HELPER_0(raise_illegal_instruction, void)
+-DEF_HELPER_0(raise_slot_illegal_instruction, void)
+-DEF_HELPER_0(raise_fpu_disable, void)
+-DEF_HELPER_0(raise_slot_fpu_disable, void)
+-DEF_HELPER_0(debug, void)
+-DEF_HELPER_1(sleep, void, i32)
+-DEF_HELPER_1(trapa, void, i32)
++DEF_HELPER_1(ldtlb, void, env)
++DEF_HELPER_1(raise_illegal_instruction, void, env)
++DEF_HELPER_1(raise_slot_illegal_instruction, void, env)
++DEF_HELPER_1(raise_fpu_disable, void, env)
++DEF_HELPER_1(raise_slot_fpu_disable, void, env)
++DEF_HELPER_1(debug, void, env)
++DEF_HELPER_2(sleep, void, env, i32)
++DEF_HELPER_2(trapa, void, env, i32)
+ 
+-DEF_HELPER_2(movcal, void, i32, i32)
+-DEF_HELPER_0(discard_movcal_backup, void)
+-DEF_HELPER_1(ocbi, void, i32)
++DEF_HELPER_3(movcal, void, env, i32, i32)
++DEF_HELPER_1(discard_movcal_backup, void, env)
++DEF_HELPER_2(ocbi, void, env, i32)
+ 
+-DEF_HELPER_2(addv, i32, i32, i32)
+-DEF_HELPER_2(addc, i32, i32, i32)
+-DEF_HELPER_2(subv, i32, i32, i32)
+-DEF_HELPER_2(subc, i32, i32, i32)
+-DEF_HELPER_2(div1, i32, i32, i32)
+-DEF_HELPER_2(macl, void, i32, i32)
+-DEF_HELPER_2(macw, void, i32, i32)
++DEF_HELPER_3(addv, i32, env, i32, i32)
++DEF_HELPER_3(addc, i32, env, i32, i32)
++DEF_HELPER_3(subv, i32, env, i32, i32)
++DEF_HELPER_3(subc, i32, env, i32, i32)
++DEF_HELPER_3(div1, i32, env, i32, i32)
++DEF_HELPER_3(macl, void, env, i32, i32)
++DEF_HELPER_3(macw, void, env, i32, i32)
+ 
+-DEF_HELPER_1(ld_fpscr, void, i32)
++DEF_HELPER_2(ld_fpscr, void, env, i32)
+ 
+ DEF_HELPER_1(fabs_FT, f32, f32)
+ DEF_HELPER_1(fabs_DT, f64, f64)
+-DEF_HELPER_2(fadd_FT, f32, f32, f32)
+-DEF_HELPER_2(fadd_DT, f64, f64, f64)
+-DEF_HELPER_1(fcnvsd_FT_DT, f64, f32)
+-DEF_HELPER_1(fcnvds_DT_FT, f32, f64)
++DEF_HELPER_3(fadd_FT, f32, env, f32, f32)
++DEF_HELPER_3(fadd_DT, f64, env, f64, f64)
++DEF_HELPER_2(fcnvsd_FT_DT, f64, env, f32)
++DEF_HELPER_2(fcnvds_DT_FT, f32, env, f64)
+ 
+-DEF_HELPER_2(fcmp_eq_FT, void, f32, f32)
+-DEF_HELPER_2(fcmp_eq_DT, void, f64, f64)
+-DEF_HELPER_2(fcmp_gt_FT, void, f32, f32)
+-DEF_HELPER_2(fcmp_gt_DT, void, f64, f64)
+-DEF_HELPER_2(fdiv_FT, f32, f32, f32)
+-DEF_HELPER_2(fdiv_DT, f64, f64, f64)
+-DEF_HELPER_1(float_FT, f32, i32)
+-DEF_HELPER_1(float_DT, f64, i32)
+-DEF_HELPER_3(fmac_FT, f32, f32, f32, f32)
+-DEF_HELPER_2(fmul_FT, f32, f32, f32)
+-DEF_HELPER_2(fmul_DT, f64, f64, f64)
++DEF_HELPER_3(fcmp_eq_FT, void, env, f32, f32)
++DEF_HELPER_3(fcmp_eq_DT, void, env, f64, f64)
++DEF_HELPER_3(fcmp_gt_FT, void, env, f32, f32)
++DEF_HELPER_3(fcmp_gt_DT, void, env, f64, f64)
++DEF_HELPER_3(fdiv_FT, f32, env, f32, f32)
++DEF_HELPER_3(fdiv_DT, f64, env, f64, f64)
++DEF_HELPER_2(float_FT, f32, env, i32)
++DEF_HELPER_2(float_DT, f64, env, i32)
++DEF_HELPER_4(fmac_FT, f32, env, f32, f32, f32)
++DEF_HELPER_3(fmul_FT, f32, env, f32, f32)
++DEF_HELPER_3(fmul_DT, f64, env, f64, f64)
+ DEF_HELPER_1(fneg_T, f32, f32)
+-DEF_HELPER_2(fsub_FT, f32, f32, f32)
+-DEF_HELPER_2(fsub_DT, f64, f64, f64)
+-DEF_HELPER_1(fsqrt_FT, f32, f32)
+-DEF_HELPER_1(fsqrt_DT, f64, f64)
+-DEF_HELPER_1(ftrc_FT, i32, f32)
+-DEF_HELPER_1(ftrc_DT, i32, f64)
+-DEF_HELPER_2(fipr, void, i32, i32)
+-DEF_HELPER_1(ftrv, void, i32)
++DEF_HELPER_3(fsub_FT, f32, env, f32, f32)
++DEF_HELPER_3(fsub_DT, f64, env, f64, f64)
++DEF_HELPER_2(fsqrt_FT, f32, env, f32)
++DEF_HELPER_2(fsqrt_DT, f64, env, f64)
++DEF_HELPER_2(ftrc_FT, i32, env, f32)
++DEF_HELPER_2(ftrc_DT, i32, env, f64)
++DEF_HELPER_3(fipr, void, env, i32, i32)
++DEF_HELPER_2(ftrv, void, env, i32)
+ 
+ #include "def-helper.h"
+diff --git a/target-sh4/op_helper.c b/target-sh4/op_helper.c
+index 4054791..9b4328d 100644
+--- a/target-sh4/op_helper.c
++++ b/target-sh4/op_helper.c
+@@ -19,10 +19,9 @@
+ #include <assert.h>
+ #include <stdlib.h>
+ #include "cpu.h"
+-#include "dyngen-exec.h"
+ #include "helper.h"
+ 
+-static void cpu_restore_state_from_retaddr(uintptr_t retaddr)
++static void cpu_restore_state_from_retaddr(CPUSH4State *env, uintptr_t retaddr)
+ {
+     TranslationBlock *tb;
+ 
+@@ -53,26 +52,22 @@ static void cpu_restore_state_from_retaddr(uintptr_t retaddr)
+ #define SHIFT 3
+ #include "softmmu_template.h"
+ 
+-void tlb_fill(CPUSH4State *env1, target_ulong addr, int is_write, int mmu_idx,
++void tlb_fill(CPUSH4State *env, target_ulong addr, int is_write, int mmu_idx,
+               uintptr_t retaddr)
+ {
+-    CPUSH4State *saved_env;
+     int ret;
+ 
+-    saved_env = env;
+-    env = env1;
+     ret = cpu_sh4_handle_mmu_fault(env, addr, is_write, mmu_idx);
+     if (ret) {
+         /* now we have a real cpu fault */
+-        cpu_restore_state_from_retaddr(retaddr);
++        cpu_restore_state_from_retaddr(env, retaddr);
+         cpu_loop_exit(env);
+     }
+-    env = saved_env;
+ }
+ 
+ #endif
+ 
+-void helper_ldtlb(void)
++void helper_ldtlb(CPUSH4State *env)
+ {
+ #ifdef CONFIG_USER_ONLY
+     /* XXXXX */
+@@ -82,40 +77,41 @@ void helper_ldtlb(void)
+ #endif
+ }
+ 
+-static inline void raise_exception(int index, uintptr_t retaddr)
++static inline void raise_exception(CPUSH4State *env, int index,
++                                   uintptr_t retaddr)
+ {
+     env->exception_index = index;
+-    cpu_restore_state_from_retaddr(retaddr);
++    cpu_restore_state_from_retaddr(env, retaddr);
+     cpu_loop_exit(env);
+ }
+ 
+-void helper_raise_illegal_instruction(void)
++void helper_raise_illegal_instruction(CPUSH4State *env)
+ {
+-    raise_exception(0x180, GETPC());
++    raise_exception(env, 0x180, GETPC());
+ }
+ 
+-void helper_raise_slot_illegal_instruction(void)
++void helper_raise_slot_illegal_instruction(CPUSH4State *env)
+ {
+-    raise_exception(0x1a0, GETPC());
++    raise_exception(env, 0x1a0, GETPC());
+ }
+ 
+-void helper_raise_fpu_disable(void)
++void helper_raise_fpu_disable(CPUSH4State *env)
+ {
+-    raise_exception(0x800, GETPC());
++    raise_exception(env, 0x800, GETPC());
+ }
+ 
+-void helper_raise_slot_fpu_disable(void)
++void helper_raise_slot_fpu_disable(CPUSH4State *env)
+ {
+-    raise_exception(0x820, GETPC());
++    raise_exception(env, 0x820, GETPC());
+ }
+ 
+-void helper_debug(void)
++void helper_debug(CPUSH4State *env)
+ {
+     env->exception_index = EXCP_DEBUG;
+     cpu_loop_exit(env);
+ }
+ 
+-void helper_sleep(uint32_t next_pc)
++void helper_sleep(CPUSH4State *env, uint32_t next_pc)
+ {
+     env->halted = 1;
+     env->in_sleep = 1;
+@@ -124,13 +120,13 @@ void helper_sleep(uint32_t next_pc)
+     cpu_loop_exit(env);
+ }
+ 
+-void helper_trapa(uint32_t tra)
++void helper_trapa(CPUSH4State *env, uint32_t tra)
+ {
+     env->tra = tra << 2;
+-    raise_exception(0x160, GETPC());
++    raise_exception(env, 0x160, GETPC());
+ }
+ 
+-void helper_movcal(uint32_t address, uint32_t value)
++void helper_movcal(CPUSH4State *env, uint32_t address, uint32_t value)
+ {
+     if (cpu_sh4_is_cached (env, address))
+     {
+@@ -144,7 +140,7 @@ void helper_movcal(uint32_t address, uint32_t value)
+     }
+ }
+ 
+-void helper_discard_movcal_backup(void)
++void helper_discard_movcal_backup(CPUSH4State *env)
+ {
+     memory_content *current = env->movcal_backup;
+ 
+@@ -158,7 +154,7 @@ void helper_discard_movcal_backup(void)
+     } 
+ }
+ 
+-void helper_ocbi(uint32_t address)
++void helper_ocbi(CPUSH4State *env, uint32_t address)
+ {
+     memory_content **current = &(env->movcal_backup);
+     while (*current)
+@@ -167,7 +163,7 @@ void helper_ocbi(uint32_t address)
+ 	if ((a & ~0x1F) == (address & ~0x1F))
+ 	{
+ 	    memory_content *next = (*current)->next;
+-	    stl(a, (*current)->value);
++            cpu_stl_data(env, a, (*current)->value);
+ 	    
+ 	    if (next == NULL)
+ 	    {
+@@ -181,7 +177,7 @@ void helper_ocbi(uint32_t address)
+     }
+ }
+ 
+-uint32_t helper_addc(uint32_t arg0, uint32_t arg1)
++uint32_t helper_addc(CPUSH4State *env, uint32_t arg0, uint32_t arg1)
+ {
+     uint32_t tmp0, tmp1;
+ 
+@@ -197,7 +193,7 @@ uint32_t helper_addc(uint32_t arg0, uint32_t arg1)
+     return arg1;
+ }
+ 
+-uint32_t helper_addv(uint32_t arg0, uint32_t arg1)
++uint32_t helper_addv(CPUSH4State *env, uint32_t arg0, uint32_t arg1)
+ {
+     uint32_t dest, src, ans;
+ 
+@@ -236,7 +232,7 @@ uint32_t helper_addv(uint32_t arg0, uint32_t arg1)
+ #define SETM env->sr |= SR_M
+ #define CLRM env->sr &= ~SR_M
+ 
+-uint32_t helper_div1(uint32_t arg0, uint32_t arg1)
++uint32_t helper_div1(CPUSH4State *env, uint32_t arg0, uint32_t arg1)
+ {
+     uint32_t tmp0, tmp2;
+     uint8_t old_q, tmp1 = 0xff;
+@@ -344,7 +340,7 @@ uint32_t helper_div1(uint32_t arg0, uint32_t arg1)
+     return arg1;
+ }
+ 
+-void helper_macl(uint32_t arg0, uint32_t arg1)
++void helper_macl(CPUSH4State *env, uint32_t arg0, uint32_t arg1)
+ {
+     int64_t res;
+ 
+@@ -360,7 +356,7 @@ void helper_macl(uint32_t arg0, uint32_t arg1)
+     }
+ }
+ 
+-void helper_macw(uint32_t arg0, uint32_t arg1)
++void helper_macw(CPUSH4State *env, uint32_t arg0, uint32_t arg1)
+ {
+     int64_t res;
+ 
+@@ -379,7 +375,7 @@ void helper_macw(uint32_t arg0, uint32_t arg1)
+     }
+ }
+ 
+-uint32_t helper_subc(uint32_t arg0, uint32_t arg1)
++uint32_t helper_subc(CPUSH4State *env, uint32_t arg0, uint32_t arg1)
+ {
+     uint32_t tmp0, tmp1;
+ 
+@@ -395,7 +391,7 @@ uint32_t helper_subc(uint32_t arg0, uint32_t arg1)
+     return arg1;
+ }
+ 
+-uint32_t helper_subv(uint32_t arg0, uint32_t arg1)
++uint32_t helper_subv(CPUSH4State *env, uint32_t arg0, uint32_t arg1)
+ {
+     int32_t dest, src, ans;
+ 
+@@ -424,17 +420,17 @@ uint32_t helper_subv(uint32_t arg0, uint32_t arg1)
+     return arg1;
+ }
+ 
+-static inline void set_t(void)
++static inline void set_t(CPUSH4State *env)
+ {
+     env->sr |= SR_T;
+ }
+ 
+-static inline void clr_t(void)
++static inline void clr_t(CPUSH4State *env)
+ {
+     env->sr &= ~SR_T;
+ }
+ 
+-void helper_ld_fpscr(uint32_t val)
++void helper_ld_fpscr(CPUSH4State *env, uint32_t val)
+ {
+     env->fpscr = val & FPSCR_MASK;
+     if ((val & FPSCR_RM_MASK) == FPSCR_RM_ZERO) {
+@@ -445,7 +441,7 @@ void helper_ld_fpscr(uint32_t val)
+     set_flush_to_zero((val & FPSCR_DN) != 0, &env->fp_status);
+ }
+ 
+-static void update_fpscr(uintptr_t retaddr)
++static void update_fpscr(CPUSH4State *env, uintptr_t retaddr)
+ {
+     int xcpt, cause, enable;
+ 
+@@ -479,7 +475,7 @@ static void update_fpscr(uintptr_t retaddr)
+         cause = (env->fpscr & FPSCR_CAUSE_MASK) >> FPSCR_CAUSE_SHIFT;
+         enable = (env->fpscr & FPSCR_ENABLE_MASK) >> FPSCR_ENABLE_SHIFT;
+         if (cause & enable) {
+-            cpu_restore_state_from_retaddr(retaddr);
++            cpu_restore_state_from_retaddr(env, retaddr);
+             env->exception_index = 0x120;
+             cpu_loop_exit(env);
+         }
+@@ -496,156 +492,156 @@ float64 helper_fabs_DT(float64 t0)
+     return float64_abs(t0);
+ }
+ 
+-float32 helper_fadd_FT(float32 t0, float32 t1)
++float32 helper_fadd_FT(CPUSH4State *env, float32 t0, float32 t1)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float32_add(t0, t1, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-float64 helper_fadd_DT(float64 t0, float64 t1)
++float64 helper_fadd_DT(CPUSH4State *env, float64 t0, float64 t1)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float64_add(t0, t1, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-void helper_fcmp_eq_FT(float32 t0, float32 t1)
++void helper_fcmp_eq_FT(CPUSH4State *env, float32 t0, float32 t1)
+ {
+     int relation;
+ 
+     set_float_exception_flags(0, &env->fp_status);
+     relation = float32_compare(t0, t1, &env->fp_status);
+     if (unlikely(relation == float_relation_unordered)) {
+-        update_fpscr(GETPC());
++        update_fpscr(env, GETPC());
+     } else if (relation == float_relation_equal) {
+-	set_t();
++        set_t(env);
+     } else {
+-	clr_t();
++        clr_t(env);
+     }
+ }
+ 
+-void helper_fcmp_eq_DT(float64 t0, float64 t1)
++void helper_fcmp_eq_DT(CPUSH4State *env, float64 t0, float64 t1)
+ {
+     int relation;
+ 
+     set_float_exception_flags(0, &env->fp_status);
+     relation = float64_compare(t0, t1, &env->fp_status);
+     if (unlikely(relation == float_relation_unordered)) {
+-        update_fpscr(GETPC());
++        update_fpscr(env, GETPC());
+     } else if (relation == float_relation_equal) {
+-	set_t();
++        set_t(env);
+     } else {
+-	clr_t();
++        clr_t(env);
+     }
+ }
+ 
+-void helper_fcmp_gt_FT(float32 t0, float32 t1)
++void helper_fcmp_gt_FT(CPUSH4State *env, float32 t0, float32 t1)
+ {
+     int relation;
+ 
+     set_float_exception_flags(0, &env->fp_status);
+     relation = float32_compare(t0, t1, &env->fp_status);
+     if (unlikely(relation == float_relation_unordered)) {
+-        update_fpscr(GETPC());
++        update_fpscr(env, GETPC());
+     } else if (relation == float_relation_greater) {
+-	set_t();
++        set_t(env);
+     } else {
+-	clr_t();
++        clr_t(env);
+     }
+ }
+ 
+-void helper_fcmp_gt_DT(float64 t0, float64 t1)
++void helper_fcmp_gt_DT(CPUSH4State *env, float64 t0, float64 t1)
+ {
+     int relation;
+ 
+     set_float_exception_flags(0, &env->fp_status);
+     relation = float64_compare(t0, t1, &env->fp_status);
+     if (unlikely(relation == float_relation_unordered)) {
+-        update_fpscr(GETPC());
++        update_fpscr(env, GETPC());
+     } else if (relation == float_relation_greater) {
+-	set_t();
++        set_t(env);
+     } else {
+-	clr_t();
++        clr_t(env);
+     }
+ }
+ 
+-float64 helper_fcnvsd_FT_DT(float32 t0)
++float64 helper_fcnvsd_FT_DT(CPUSH4State *env, float32 t0)
+ {
+     float64 ret;
+     set_float_exception_flags(0, &env->fp_status);
+     ret = float32_to_float64(t0, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return ret;
+ }
+ 
+-float32 helper_fcnvds_DT_FT(float64 t0)
++float32 helper_fcnvds_DT_FT(CPUSH4State *env, float64 t0)
+ {
+     float32 ret;
+     set_float_exception_flags(0, &env->fp_status);
+     ret = float64_to_float32(t0, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return ret;
+ }
+ 
+-float32 helper_fdiv_FT(float32 t0, float32 t1)
++float32 helper_fdiv_FT(CPUSH4State *env, float32 t0, float32 t1)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float32_div(t0, t1, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-float64 helper_fdiv_DT(float64 t0, float64 t1)
++float64 helper_fdiv_DT(CPUSH4State *env, float64 t0, float64 t1)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float64_div(t0, t1, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-float32 helper_float_FT(uint32_t t0)
++float32 helper_float_FT(CPUSH4State *env, uint32_t t0)
+ {
+     float32 ret;
+     set_float_exception_flags(0, &env->fp_status);
+     ret = int32_to_float32(t0, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return ret;
+ }
+ 
+-float64 helper_float_DT(uint32_t t0)
++float64 helper_float_DT(CPUSH4State *env, uint32_t t0)
+ {
+     float64 ret;
+     set_float_exception_flags(0, &env->fp_status);
+     ret = int32_to_float64(t0, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return ret;
+ }
+ 
+-float32 helper_fmac_FT(float32 t0, float32 t1, float32 t2)
++float32 helper_fmac_FT(CPUSH4State *env, float32 t0, float32 t1, float32 t2)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float32_mul(t0, t1, &env->fp_status);
+     t0 = float32_add(t0, t2, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-float32 helper_fmul_FT(float32 t0, float32 t1)
++float32 helper_fmul_FT(CPUSH4State *env, float32 t0, float32 t1)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float32_mul(t0, t1, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-float64 helper_fmul_DT(float64 t0, float64 t1)
++float64 helper_fmul_DT(CPUSH4State *env, float64 t0, float64 t1)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float64_mul(t0, t1, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+@@ -654,57 +650,57 @@ float32 helper_fneg_T(float32 t0)
+     return float32_chs(t0);
+ }
+ 
+-float32 helper_fsqrt_FT(float32 t0)
++float32 helper_fsqrt_FT(CPUSH4State *env, float32 t0)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float32_sqrt(t0, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-float64 helper_fsqrt_DT(float64 t0)
++float64 helper_fsqrt_DT(CPUSH4State *env, float64 t0)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float64_sqrt(t0, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-float32 helper_fsub_FT(float32 t0, float32 t1)
++float32 helper_fsub_FT(CPUSH4State *env, float32 t0, float32 t1)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float32_sub(t0, t1, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-float64 helper_fsub_DT(float64 t0, float64 t1)
++float64 helper_fsub_DT(CPUSH4State *env, float64 t0, float64 t1)
+ {
+     set_float_exception_flags(0, &env->fp_status);
+     t0 = float64_sub(t0, t1, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return t0;
+ }
+ 
+-uint32_t helper_ftrc_FT(float32 t0)
++uint32_t helper_ftrc_FT(CPUSH4State *env, float32 t0)
+ {
+     uint32_t ret;
+     set_float_exception_flags(0, &env->fp_status);
+     ret = float32_to_int32_round_to_zero(t0, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return ret;
+ }
+ 
+-uint32_t helper_ftrc_DT(float64 t0)
++uint32_t helper_ftrc_DT(CPUSH4State *env, float64 t0)
+ {
+     uint32_t ret;
+     set_float_exception_flags(0, &env->fp_status);
+     ret = float64_to_int32_round_to_zero(t0, &env->fp_status);
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+     return ret;
+ }
+ 
+-void helper_fipr(uint32_t m, uint32_t n)
++void helper_fipr(CPUSH4State *env, uint32_t m, uint32_t n)
+ {
+     int bank, i;
+     float32 r, p;
+@@ -719,12 +715,12 @@ void helper_fipr(uint32_t m, uint32_t n)
+                         &env->fp_status);
+         r = float32_add(r, p, &env->fp_status);
+     }
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+ 
+     env->fregs[bank + n + 3] = r;
+ }
+ 
+-void helper_ftrv(uint32_t n)
++void helper_ftrv(CPUSH4State *env, uint32_t n)
+ {
+     int bank_matrix, bank_vector;
+     int i, j;
+@@ -743,7 +739,7 @@ void helper_ftrv(uint32_t n)
+             r[i] = float32_add(r[i], p, &env->fp_status);
+         }
+     }
+-    update_fpscr(GETPC());
++    update_fpscr(env, GETPC());
+ 
+     for (i = 0 ; i < 4 ; i++) {
+         env->fregs[bank_vector + i] = r[i];
+diff --git a/target-sh4/translate.c b/target-sh4/translate.c
+index 6532ad2..d05c74c 100644
+--- a/target-sh4/translate.c
++++ b/target-sh4/translate.c
+@@ -276,7 +276,7 @@ static void gen_goto_tb(DisasContext * ctx, int n, target_ulong dest)
+     } else {
+         tcg_gen_movi_i32(cpu_pc, dest);
+         if (ctx->singlestep_enabled)
+-            gen_helper_debug();
++            gen_helper_debug(cpu_env);
+         tcg_gen_exit_tb(0);
+     }
+ }
+@@ -288,7 +288,7 @@ static void gen_jump(DisasContext * ctx)
+ 	   delayed jump as immediate jump are conditinal jumps */
+ 	tcg_gen_mov_i32(cpu_pc, cpu_delayed_pc);
+ 	if (ctx->singlestep_enabled)
+-	    gen_helper_debug();
++            gen_helper_debug(cpu_env);
+ 	tcg_gen_exit_tb(0);
+     } else {
+ 	gen_goto_tb(ctx, 0, ctx->delayed_pc);
+@@ -437,7 +437,7 @@ static inline void gen_store_fpr64 (TCGv_i64 t, int reg)
+ #define CHECK_NOT_DELAY_SLOT \
+   if (ctx->flags & (DELAY_SLOT | DELAY_SLOT_CONDITIONAL))     \
+   {                                                           \
+-      gen_helper_raise_slot_illegal_instruction();            \
++      gen_helper_raise_slot_illegal_instruction(cpu_env);     \
+       ctx->bstate = BS_EXCP;                                  \
+       return;                                                 \
+   }
+@@ -445,9 +445,9 @@ static inline void gen_store_fpr64 (TCGv_i64 t, int reg)
+ #define CHECK_PRIVILEGED                                        \
+   if (IS_USER(ctx)) {                                           \
+       if (ctx->flags & (DELAY_SLOT | DELAY_SLOT_CONDITIONAL)) { \
+-         gen_helper_raise_slot_illegal_instruction();           \
++          gen_helper_raise_slot_illegal_instruction(cpu_env);   \
+       } else {                                                  \
+-         gen_helper_raise_illegal_instruction();                \
++          gen_helper_raise_illegal_instruction(cpu_env);        \
+       }                                                         \
+       ctx->bstate = BS_EXCP;                                    \
+       return;                                                   \
+@@ -456,9 +456,9 @@ static inline void gen_store_fpr64 (TCGv_i64 t, int reg)
+ #define CHECK_FPU_ENABLED                                       \
+   if (ctx->flags & SR_FD) {                                     \
+       if (ctx->flags & (DELAY_SLOT | DELAY_SLOT_CONDITIONAL)) { \
+-          gen_helper_raise_slot_fpu_disable();                  \
++          gen_helper_raise_slot_fpu_disable(cpu_env);           \
+       } else {                                                  \
+-          gen_helper_raise_fpu_disable();                       \
++          gen_helper_raise_fpu_disable(cpu_env);                \
+       }                                                         \
+       ctx->bstate = BS_EXCP;                                    \
+       return;                                                   \
+@@ -492,7 +492,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	  if (opcode != 0x0093 /* ocbi */
+ 	      && opcode != 0x00c3 /* movca.l */)
+ 	      {
+-		  gen_helper_discard_movcal_backup ();
++                  gen_helper_discard_movcal_backup(cpu_env);
+ 		  ctx->has_movcal = 0;
+ 	      }
+ 	}
+@@ -523,7 +523,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	return;
+     case 0x0038:		/* ldtlb */
+ 	CHECK_PRIVILEGED
+-	gen_helper_ldtlb();
++        gen_helper_ldtlb(cpu_env);
+ 	return;
+     case 0x002b:		/* rte */
+ 	CHECK_PRIVILEGED
+@@ -551,7 +551,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	return;
+     case 0x001b:		/* sleep */
+ 	CHECK_PRIVILEGED
+-	gen_helper_sleep(tcg_const_i32(ctx->pc + 2));
++        gen_helper_sleep(cpu_env, tcg_const_i32(ctx->pc + 2));
+ 	return;
+     }
+ 
+@@ -761,10 +761,10 @@ static void _decode_opc(DisasContext * ctx)
+ 	tcg_gen_add_i32(REG(B11_8), REG(B11_8), REG(B7_4));
+ 	return;
+     case 0x300e:		/* addc Rm,Rn */
+-	gen_helper_addc(REG(B11_8), REG(B7_4), REG(B11_8));
++        gen_helper_addc(REG(B11_8), cpu_env, REG(B7_4), REG(B11_8));
+ 	return;
+     case 0x300f:		/* addv Rm,Rn */
+-	gen_helper_addv(REG(B11_8), REG(B7_4), REG(B11_8));
++        gen_helper_addv(REG(B11_8), cpu_env, REG(B7_4), REG(B11_8));
+ 	return;
+     case 0x2009:		/* and Rm,Rn */
+ 	tcg_gen_and_i32(REG(B11_8), REG(B11_8), REG(B7_4));
+@@ -817,7 +817,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	}
+ 	return;
+     case 0x3004:		/* div1 Rm,Rn */
+-	gen_helper_div1(REG(B11_8), REG(B7_4), REG(B11_8));
++        gen_helper_div1(REG(B11_8), cpu_env, REG(B7_4), REG(B11_8));
+ 	return;
+     case 0x300d:		/* dmuls.l Rm,Rn */
+ 	{
+@@ -870,7 +870,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	    tcg_gen_qemu_ld32s(arg0, REG(B7_4), ctx->memidx);
+ 	    arg1 = tcg_temp_new();
+ 	    tcg_gen_qemu_ld32s(arg1, REG(B11_8), ctx->memidx);
+-	    gen_helper_macl(arg0, arg1);
++            gen_helper_macl(cpu_env, arg0, arg1);
+ 	    tcg_temp_free(arg1);
+ 	    tcg_temp_free(arg0);
+ 	    tcg_gen_addi_i32(REG(B7_4), REG(B7_4), 4);
+@@ -884,7 +884,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	    tcg_gen_qemu_ld32s(arg0, REG(B7_4), ctx->memidx);
+ 	    arg1 = tcg_temp_new();
+ 	    tcg_gen_qemu_ld32s(arg1, REG(B11_8), ctx->memidx);
+-	    gen_helper_macw(arg0, arg1);
++            gen_helper_macw(cpu_env, arg0, arg1);
+ 	    tcg_temp_free(arg1);
+ 	    tcg_temp_free(arg0);
+ 	    tcg_gen_addi_i32(REG(B11_8), REG(B11_8), 2);
+@@ -1013,10 +1013,10 @@ static void _decode_opc(DisasContext * ctx)
+ 	tcg_gen_sub_i32(REG(B11_8), REG(B11_8), REG(B7_4));
+ 	return;
+     case 0x300a:		/* subc Rm,Rn */
+-	gen_helper_subc(REG(B11_8), REG(B7_4), REG(B11_8));
++        gen_helper_subc(REG(B11_8), cpu_env, REG(B7_4), REG(B11_8));
+ 	return;
+     case 0x300b:		/* subv Rm,Rn */
+-	gen_helper_subv(REG(B11_8), REG(B7_4), REG(B11_8));
++        gen_helper_subv(REG(B11_8), cpu_env, REG(B7_4), REG(B11_8));
+ 	return;
+     case 0x2008:		/* tst Rm,Rn */
+ 	{
+@@ -1152,22 +1152,22 @@ static void _decode_opc(DisasContext * ctx)
+ 		gen_load_fpr64(fp1, DREG(B7_4));
+                 switch (ctx->opcode & 0xf00f) {
+                 case 0xf000:		/* fadd Rm,Rn */
+-                    gen_helper_fadd_DT(fp0, fp0, fp1);
++                    gen_helper_fadd_DT(fp0, cpu_env, fp0, fp1);
+                     break;
+                 case 0xf001:		/* fsub Rm,Rn */
+-                    gen_helper_fsub_DT(fp0, fp0, fp1);
++                    gen_helper_fsub_DT(fp0, cpu_env, fp0, fp1);
+                     break;
+                 case 0xf002:		/* fmul Rm,Rn */
+-                    gen_helper_fmul_DT(fp0, fp0, fp1);
++                    gen_helper_fmul_DT(fp0, cpu_env, fp0, fp1);
+                     break;
+                 case 0xf003:		/* fdiv Rm,Rn */
+-                    gen_helper_fdiv_DT(fp0, fp0, fp1);
++                    gen_helper_fdiv_DT(fp0, cpu_env, fp0, fp1);
+                     break;
+                 case 0xf004:		/* fcmp/eq Rm,Rn */
+-                    gen_helper_fcmp_eq_DT(fp0, fp1);
++                    gen_helper_fcmp_eq_DT(cpu_env, fp0, fp1);
+                     return;
+                 case 0xf005:		/* fcmp/gt Rm,Rn */
+-                    gen_helper_fcmp_gt_DT(fp0, fp1);
++                    gen_helper_fcmp_gt_DT(cpu_env, fp0, fp1);
+                     return;
+                 }
+ 		gen_store_fpr64(fp0, DREG(B11_8));
+@@ -1176,22 +1176,32 @@ static void _decode_opc(DisasContext * ctx)
+ 	    } else {
+                 switch (ctx->opcode & 0xf00f) {
+                 case 0xf000:		/* fadd Rm,Rn */
+-                    gen_helper_fadd_FT(cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B7_4)]);
++                    gen_helper_fadd_FT(cpu_fregs[FREG(B11_8)], cpu_env,
++                                       cpu_fregs[FREG(B11_8)],
++                                       cpu_fregs[FREG(B7_4)]);
+                     break;
+                 case 0xf001:		/* fsub Rm,Rn */
+-                    gen_helper_fsub_FT(cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B7_4)]);
++                    gen_helper_fsub_FT(cpu_fregs[FREG(B11_8)], cpu_env,
++                                       cpu_fregs[FREG(B11_8)],
++                                       cpu_fregs[FREG(B7_4)]);
+                     break;
+                 case 0xf002:		/* fmul Rm,Rn */
+-                    gen_helper_fmul_FT(cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B7_4)]);
++                    gen_helper_fmul_FT(cpu_fregs[FREG(B11_8)], cpu_env,
++                                       cpu_fregs[FREG(B11_8)],
++                                       cpu_fregs[FREG(B7_4)]);
+                     break;
+                 case 0xf003:		/* fdiv Rm,Rn */
+-                    gen_helper_fdiv_FT(cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B7_4)]);
++                    gen_helper_fdiv_FT(cpu_fregs[FREG(B11_8)], cpu_env,
++                                       cpu_fregs[FREG(B11_8)],
++                                       cpu_fregs[FREG(B7_4)]);
+                     break;
+                 case 0xf004:		/* fcmp/eq Rm,Rn */
+-                    gen_helper_fcmp_eq_FT(cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B7_4)]);
++                    gen_helper_fcmp_eq_FT(cpu_env, cpu_fregs[FREG(B11_8)],
++                                          cpu_fregs[FREG(B7_4)]);
+                     return;
+                 case 0xf005:		/* fcmp/gt Rm,Rn */
+-                    gen_helper_fcmp_gt_FT(cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B7_4)]);
++                    gen_helper_fcmp_gt_FT(cpu_env, cpu_fregs[FREG(B11_8)],
++                                          cpu_fregs[FREG(B7_4)]);
+                     return;
+                 }
+ 	    }
+@@ -1203,8 +1213,9 @@ static void _decode_opc(DisasContext * ctx)
+             if (ctx->fpscr & FPSCR_PR) {
+                 break; /* illegal instruction */
+             } else {
+-                gen_helper_fmac_FT(cpu_fregs[FREG(B11_8)],
+-                                   cpu_fregs[FREG(0)], cpu_fregs[FREG(B7_4)], cpu_fregs[FREG(B11_8)]);
++                gen_helper_fmac_FT(cpu_fregs[FREG(B11_8)], cpu_env,
++                                   cpu_fregs[FREG(0)], cpu_fregs[FREG(B7_4)],
++                                   cpu_fregs[FREG(B11_8)]);
+                 return;
+             }
+         }
+@@ -1356,7 +1367,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	    TCGv imm;
+ 	    CHECK_NOT_DELAY_SLOT
+ 	    imm = tcg_const_i32(B7_0);
+-	    gen_helper_trapa(imm);
++            gen_helper_trapa(cpu_env, imm);
+ 	    tcg_temp_free(imm);
+ 	    ctx->bstate = BS_BRANCH;
+ 	}
+@@ -1531,7 +1542,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	LDST(fpul, 0x405a, 0x4056, 0x005a, 0x4052, {CHECK_FPU_ENABLED})
+     case 0x406a:		/* lds Rm,FPSCR */
+ 	CHECK_FPU_ENABLED
+-	gen_helper_ld_fpscr(REG(B11_8));
++        gen_helper_ld_fpscr(cpu_env, REG(B11_8));
+ 	ctx->bstate = BS_STOP;
+ 	return;
+     case 0x4066:		/* lds.l @Rm+,FPSCR */
+@@ -1540,7 +1551,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	    TCGv addr = tcg_temp_new();
+ 	    tcg_gen_qemu_ld32s(addr, REG(B11_8), ctx->memidx);
+ 	    tcg_gen_addi_i32(REG(B11_8), REG(B11_8), 4);
+-	    gen_helper_ld_fpscr(addr);
++            gen_helper_ld_fpscr(cpu_env, addr);
+ 	    tcg_temp_free(addr);
+ 	    ctx->bstate = BS_STOP;
+ 	}
+@@ -1567,7 +1578,7 @@ static void _decode_opc(DisasContext * ctx)
+         {
+             TCGv val = tcg_temp_new();
+             tcg_gen_qemu_ld32u(val, REG(B11_8), ctx->memidx);
+-            gen_helper_movcal (REG(B11_8), val);            
++            gen_helper_movcal(cpu_env, REG(B11_8), val);
+             tcg_gen_qemu_st32(REG(0), REG(B11_8), ctx->memidx);
+         }
+         ctx->has_movcal = 1;
+@@ -1619,7 +1630,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	    break;
+     case 0x0093:		/* ocbi @Rn */
+ 	{
+-	    gen_helper_ocbi (REG(B11_8));
++            gen_helper_ocbi(cpu_env, REG(B11_8));
+ 	}
+ 	return;
+     case 0x00a3:		/* ocbp @Rn */
+@@ -1733,12 +1744,12 @@ static void _decode_opc(DisasContext * ctx)
+ 	    if (ctx->opcode & 0x0100)
+ 		break; /* illegal instruction */
+ 	    fp = tcg_temp_new_i64();
+-	    gen_helper_float_DT(fp, cpu_fpul);
++            gen_helper_float_DT(fp, cpu_env, cpu_fpul);
+ 	    gen_store_fpr64(fp, DREG(B11_8));
+ 	    tcg_temp_free_i64(fp);
+ 	}
+ 	else {
+-	    gen_helper_float_FT(cpu_fregs[FREG(B11_8)], cpu_fpul);
++            gen_helper_float_FT(cpu_fregs[FREG(B11_8)], cpu_env, cpu_fpul);
+ 	}
+ 	return;
+     case 0xf03d: /* ftrc FRm/DRm,FPUL - FPSCR: R[PR,Enable.V]/W[Cause,Flag] */
+@@ -1749,11 +1760,11 @@ static void _decode_opc(DisasContext * ctx)
+ 		break; /* illegal instruction */
+ 	    fp = tcg_temp_new_i64();
+ 	    gen_load_fpr64(fp, DREG(B11_8));
+-	    gen_helper_ftrc_DT(cpu_fpul, fp);
++            gen_helper_ftrc_DT(cpu_fpul, cpu_env, fp);
+ 	    tcg_temp_free_i64(fp);
+ 	}
+ 	else {
+-	    gen_helper_ftrc_FT(cpu_fpul, cpu_fregs[FREG(B11_8)]);
++            gen_helper_ftrc_FT(cpu_fpul, cpu_env, cpu_fregs[FREG(B11_8)]);
+ 	}
+ 	return;
+     case 0xf04d: /* fneg FRn/DRn - FPSCR: Nothing */
+@@ -1783,11 +1794,12 @@ static void _decode_opc(DisasContext * ctx)
+ 		break; /* illegal instruction */
+ 	    TCGv_i64 fp = tcg_temp_new_i64();
+ 	    gen_load_fpr64(fp, DREG(B11_8));
+-	    gen_helper_fsqrt_DT(fp, fp);
++            gen_helper_fsqrt_DT(fp, cpu_env, fp);
+ 	    gen_store_fpr64(fp, DREG(B11_8));
+ 	    tcg_temp_free_i64(fp);
+ 	} else {
+-	    gen_helper_fsqrt_FT(cpu_fregs[FREG(B11_8)], cpu_fregs[FREG(B11_8)]);
++            gen_helper_fsqrt_FT(cpu_fregs[FREG(B11_8)], cpu_env,
++                                cpu_fregs[FREG(B11_8)]);
+ 	}
+ 	return;
+     case 0xf07d: /* fsrra FRn */
+@@ -1809,7 +1821,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	CHECK_FPU_ENABLED
+ 	{
+ 	    TCGv_i64 fp = tcg_temp_new_i64();
+-	    gen_helper_fcnvsd_FT_DT(fp, cpu_fpul);
++            gen_helper_fcnvsd_FT_DT(fp, cpu_env, cpu_fpul);
+ 	    gen_store_fpr64(fp, DREG(B11_8));
+ 	    tcg_temp_free_i64(fp);
+ 	}
+@@ -1819,7 +1831,7 @@ static void _decode_opc(DisasContext * ctx)
+ 	{
+ 	    TCGv_i64 fp = tcg_temp_new_i64();
+ 	    gen_load_fpr64(fp, DREG(B11_8));
+-	    gen_helper_fcnvds_DT_FT(cpu_fpul, fp);
++            gen_helper_fcnvds_DT_FT(cpu_fpul, cpu_env, fp);
+ 	    tcg_temp_free_i64(fp);
+ 	}
+ 	return;
+@@ -1829,7 +1841,7 @@ static void _decode_opc(DisasContext * ctx)
+             TCGv m, n;
+             m = tcg_const_i32((ctx->opcode >> 8) & 3);
+             n = tcg_const_i32((ctx->opcode >> 10) & 3);
+-            gen_helper_fipr(m, n);
++            gen_helper_fipr(cpu_env, m, n);
+             tcg_temp_free(m);
+             tcg_temp_free(n);
+             return;
+@@ -1841,7 +1853,7 @@ static void _decode_opc(DisasContext * ctx)
+             (ctx->fpscr & FPSCR_PR) == 0) {
+             TCGv n;
+             n = tcg_const_i32((ctx->opcode >> 10) & 3);
+-            gen_helper_ftrv(n);
++            gen_helper_ftrv(cpu_env, n);
+             tcg_temp_free(n);
+             return;
+         }
+@@ -1853,9 +1865,9 @@ static void _decode_opc(DisasContext * ctx)
+     fflush(stderr);
+ #endif
+     if (ctx->flags & (DELAY_SLOT | DELAY_SLOT_CONDITIONAL)) {
+-       gen_helper_raise_slot_illegal_instruction();
++        gen_helper_raise_slot_illegal_instruction(cpu_env);
+     } else {
+-       gen_helper_raise_illegal_instruction();
++        gen_helper_raise_illegal_instruction(cpu_env);
+     }
+     ctx->bstate = BS_EXCP;
+ }
+@@ -1934,7 +1946,7 @@ gen_intermediate_code_internal(CPUSH4State * env, TranslationBlock * tb,
+                 if (ctx.pc == bp->pc) {
+ 		    /* We have hit a breakpoint - make sure PC is up-to-date */
+ 		    tcg_gen_movi_i32(cpu_pc, ctx.pc);
+-		    gen_helper_debug();
++                    gen_helper_debug(cpu_env);
+ 		    ctx.bstate = BS_EXCP;
+ 		    break;
+ 		}
+@@ -1958,7 +1970,7 @@ gen_intermediate_code_internal(CPUSH4State * env, TranslationBlock * tb,
+ 	fprintf(stderr, "Loading opcode at address 0x%08x\n", ctx.pc);
+ 	fflush(stderr);
+ #endif
+-	ctx.opcode = lduw_code(ctx.pc);
++        ctx.opcode = cpu_lduw_code(env, ctx.pc);
+ 	decode_opc(&ctx);
+         num_insns++;
+ 	ctx.pc += 2;
+@@ -1975,7 +1987,7 @@ gen_intermediate_code_internal(CPUSH4State * env, TranslationBlock * tb,
+         gen_io_end();
+     if (env->singlestep_enabled) {
+         tcg_gen_movi_i32(cpu_pc, ctx.pc);
+-        gen_helper_debug();
++        gen_helper_debug(cpu_env);
+     } else {
+ 	switch (ctx.bstate) {
+         case BS_STOP:

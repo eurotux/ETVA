@@ -1,6 +1,6 @@
 model=standard
 mastersite=http://etva-reg.eurotux.com/services
-dbversion=2.1
+dbversion=2.2
 
 [networks]
 eth0=Management

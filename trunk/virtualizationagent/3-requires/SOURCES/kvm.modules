@@ -1,0 +1,30 @@
+#!/bin/sh
+
+case $(uname -m) in
+    i?86|x86_64)
+        grep vmx /proc/cpuinfo >/dev/null 2>&1 && vmx=1
+        grep svm /proc/cpuinfo >/dev/null 2>&1 && svm=1
+
+        if [ "$vmx" ] || [ "$svm" ]; then
+            [ "$vmx" ] && modprobe -b kvm-intel >/dev/null 2>&1 && kvm=1
+            [ "$svm" ] && modprobe -b kvm-amd >/dev/null 2>&1 && kvm=1
+        fi
+        ;;
+    ppc64)
+        grep OPAL  /proc/cpuinfo >/dev/null 2>&1 && opal=1
+
+        if [ "$opal" ]; then
+            modprobe -b kvm >/dev/null 2>&1 && kvm=1
+        fi
+        ;;
+    s390x)
+        modprobe -b kvm >/dev/null 2>&1 && kvm=1
+        ;;
+esac
+
+if [ "$kvm" ]; then
+    # no reason why vhost should not work with TCG, but currently it does not
+    modprobe -b vhost-net >/dev/null 2>&1
+else
+    exit 0
+fi

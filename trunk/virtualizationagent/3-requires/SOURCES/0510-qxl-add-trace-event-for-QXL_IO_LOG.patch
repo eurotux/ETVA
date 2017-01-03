@@ -1,0 +1,36 @@
+From e913432bdba5547564de21d143944d0a05f1264e Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Wed, 12 Sep 2012 16:13:27 +0300
+Subject: [PATCH] qxl: add trace-event for QXL_IO_LOG
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c     | 1 +
+ trace-events | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 8a86ffc..006a9b7 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -1515,6 +1515,7 @@ async_common:
+         qxl_set_mode(d, val, 0);
+         break;
+     case QXL_IO_LOG:
++        trace_qxl_io_log(d->id, d->ram->log_buf);
+         if (d->guestdebug) {
+             fprintf(stderr, "qxl/guest-%d: %" PRId64 ": %s", d->id,
+                     qemu_get_clock_ns(vm_clock), d->ram->log_buf);
+diff --git a/trace-events b/trace-events
+index aa79836..80a52d9 100644
+--- a/trace-events
++++ b/trace-events
+@@ -930,6 +930,7 @@ qxl_interface_update_area_complete_rest(int qid, uint32_t num_updated_rects) "%d
+ qxl_interface_update_area_complete_overflow(int qid, int max) "%d max=%d"
+ qxl_interface_update_area_complete_schedule_bh(int qid, uint32_t num_dirty) "%d #dirty=%d"
+ qxl_io_destroy_primary_ignored(int qid, const char *mode) "%d %s"
++qxl_io_log(int qid, const uint8_t *str) "%d %s"
+ qxl_io_read_unexpected(int qid) "%d"
+ qxl_io_unexpected_vga_mode(int qid, uint64_t addr, uint64_t val, const char *desc) "%d 0x%"PRIx64"=%"PRIu64" (%s)"
+ qxl_io_write(int qid, const char *mode, uint64_t addr, uint64_t val, unsigned size, int async) "%d %s addr=%"PRIu64 " val=%"PRIu64" size=%u async=%d"

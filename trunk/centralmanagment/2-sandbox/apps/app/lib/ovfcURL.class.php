@@ -5,6 +5,9 @@
 class ovfcURL
 {
 
+    const DEFAULT_MAX_EXECUTION_TIME = 300;
+    private $max_execution_time = self::DEFAULT_MAX_EXECUTION_TIME;
+    private $init_time;
     private $curl;
     private $response_h;
 
@@ -40,6 +43,12 @@ class ovfcURL
     //execute curl command and store status code if any
     public function exec()
     {
+        if( $this->max_execution_time ){
+            set_time_limit($this->max_execution_time);
+        }
+
+        $this->init_time = time();  // initial time
+
         curl_exec($this->curl);
         $this->status = curl_getinfo($this->curl,CURLINFO_HTTP_CODE);
         curl_close($this->curl);
@@ -69,6 +78,15 @@ class ovfcURL
             $this->response_h->sendHttpHeaders();
 
             $this->first_bytes = 1;
+        }
+
+        if( $this->max_execution_time ){
+            $dt_time = time() - $this->init_time;   // delta time
+            if( $dt_time > ($this->max_execution_time * 0.80) ){    // if near of limit
+                // increate max_execution_time
+                $this->max_execution_time = $this->max_execution_time + self::DEFAULT_MAX_EXECUTION_TIME; 
+                set_time_limit($this->max_execution_time);
+            }
         }
 
         echo $data;

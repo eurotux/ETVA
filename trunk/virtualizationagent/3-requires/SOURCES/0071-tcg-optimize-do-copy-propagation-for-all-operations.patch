@@ -1,0 +1,39 @@
+From ecb4e3759e0cbd46852b84e604627725325fd244 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Tue, 11 Sep 2012 16:18:49 +0200
+Subject: [PATCH] tcg/optimize: do copy propagation for all operations
+
+It is possible to due copy propagation for all operations, even the one
+that have side effects or clobber arguments (it only concerns input
+arguments). That said, the call operation should be handled differently
+due to the variable number of arguments.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index 1904b39..aeb2225 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -378,8 +378,15 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+         op = gen_opc_buf[op_index];
+         def = &tcg_op_defs[op];
+         /* Do copy propagation */
+-        if (!(def->flags & (TCG_OPF_CALL_CLOBBER | TCG_OPF_SIDE_EFFECTS))) {
+-            assert(op != INDEX_op_call);
++        if (op == INDEX_op_call) {
++            int nb_oargs = args[0] >> 16;
++            int nb_iargs = args[0] & 0xffff;
++            for (i = nb_oargs + 1; i < nb_oargs + nb_iargs + 1; i++) {
++                if (temps[args[i]].state == TCG_TEMP_COPY) {
++                    args[i] = find_better_copy(s, args[i]);
++                }
++            }
++        } else {
+             for (i = def->nb_oargs; i < def->nb_oargs + def->nb_iargs; i++) {
+                 if (temps[args[i]].state == TCG_TEMP_COPY) {
+                     args[i] = find_better_copy(s, args[i]);

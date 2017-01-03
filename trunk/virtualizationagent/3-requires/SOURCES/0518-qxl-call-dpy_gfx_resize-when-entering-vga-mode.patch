@@ -1,0 +1,34 @@
+From baa050fd1479327b7735e5ae8ada37bc77514a02 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Tue, 30 Oct 2012 14:55:12 +0100
+Subject: [PATCH] qxl: call dpy_gfx_resize when entering vga mode
+
+When entering vga mode the display size likely changes,
+notify all displaychangelisteners about this.
+
+Probably went unnoticed for a while as one if the first
+things the guest does after leaving qxl native mode and
+entering qxl vga mode is to set the vga video mode.  But
+there is still a small window where qemu can operate on
+stale data, leading to crashes now and then.
+
+https://bugzilla.redhat.com/show_bug.cgi?id=865767
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 8111bb9..f88829c 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -1084,7 +1084,7 @@ static void qxl_enter_vga_mode(PCIQXLDevice *d)
+     trace_qxl_enter_vga_mode(d->id);
+     qemu_spice_create_host_primary(&d->ssd);
+     d->mode = QXL_MODE_VGA;
+-    memset(&d->ssd.dirty, 0, sizeof(d->ssd.dirty));
++    dpy_resize(d->ssd.ds);
+     vga_dirty_log_start(&d->vga);
+ }
+ 

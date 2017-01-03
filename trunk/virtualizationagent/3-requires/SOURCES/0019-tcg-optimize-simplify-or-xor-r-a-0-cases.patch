@@ -1,0 +1,27 @@
+From fe3f54361dd26369e5efb5c6f41d7fc2a817af22 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Thu, 6 Sep 2012 16:47:14 +0200
+Subject: [PATCH] tcg/optimize: simplify or/xor r, a, 0 cases
+
+or/xor r, a, 0 is equivalent to a mov r, a.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index 63f970d..0db849e 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -331,6 +331,8 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+         CASE_OP_32_64(sar):
+         CASE_OP_32_64(rotl):
+         CASE_OP_32_64(rotr):
++        CASE_OP_32_64(or):
++        CASE_OP_32_64(xor):
+             if (temps[args[1]].state == TCG_TEMP_CONST) {
+                 /* Proceed with possible constant folding. */
+                 break;

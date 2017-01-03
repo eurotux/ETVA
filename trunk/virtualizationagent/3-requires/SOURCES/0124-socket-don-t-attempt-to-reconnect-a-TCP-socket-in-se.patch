@@ -1,0 +1,40 @@
+From f276ee7ea911244a07f4db52160f07ef08867a16 Mon Sep 17 00:00:00 2001
+From: Anthony Liguori <aliguori@us.ibm.com>
+Date: Wed, 5 Sep 2012 13:52:49 -0500
+Subject: [PATCH] socket: don't attempt to reconnect a TCP socket in server
+ mode
+
+Commit c3767ed0eb5d0bb25fe409ae5dec06e3411ff1b6 introduced a possible SEGV when
+using a socket chardev with server=on because it assumes that all TCP sockets
+are in client mode.
+
+This patch adds a check to only reconnect when in client mode.
+
+Cc: Lei Li <lilei@linux.vnet.ibm.com>
+Reported-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit 455aa1e0818653c41fd794435b982426ce21ba2f)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qemu-char.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/qemu-char.c b/qemu-char.c
+index 398baf1..767da93 100644
+--- a/qemu-char.c
++++ b/qemu-char.c
+@@ -2148,10 +2148,12 @@ static int tcp_chr_write(CharDriverState *chr, const uint8_t *buf, int len)
+     TCPCharDriver *s = chr->opaque;
+     if (s->connected) {
+         return send_all(s->fd, buf, len);
+-    } else {
++    } else if (s->listen_fd == -1) {
+         /* (Re-)connect for unconnected writing */
+         tcp_chr_connect(chr);
+         return 0;
++    } else {
++        return len;
+     }
+ }
+ 

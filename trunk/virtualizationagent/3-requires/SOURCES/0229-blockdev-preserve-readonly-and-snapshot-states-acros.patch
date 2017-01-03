@@ -1,0 +1,34 @@
+From ae365d28c76b08f84456b6ff186db5b7ea8a3bb0 Mon Sep 17 00:00:00 2001
+From: Kevin Shanahan <kmshanah@disenchant.net>
+Date: Fri, 21 Sep 2012 08:50:22 +0930
+Subject: [PATCH] blockdev: preserve readonly and snapshot states across media
+ changes
+
+If readonly=on is given at device creation time, the ->readonly flag
+needs to be set in the block driver state for this device so that
+readonly-ness is preserved across media changes (qmp change command).
+Similarly, to preserve the snapshot property requires ->open_flags to
+be correct.
+
+Signed-off-by: Kevin Shanahan <kmshanah@disenchant.net>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit 80dd1aae3657a902d262f5d20a7a3c655b23705e)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ blockdev.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/blockdev.c b/blockdev.c
+index 4a5266e..9ba3503 100644
+--- a/blockdev.c
++++ b/blockdev.c
+@@ -533,6 +533,8 @@ DriveInfo *drive_init(QemuOpts *opts, int default_to_scsi)
+                      if_name[type], mediastr, unit_id);
+     }
+     dinfo->bdrv = bdrv_new(dinfo->id);
++    dinfo->bdrv->open_flags = snapshot ? BDRV_O_SNAPSHOT : 0;
++    dinfo->bdrv->read_only = ro;
+     dinfo->devaddr = devaddr;
+     dinfo->type = type;
+     dinfo->bus = bus_id;

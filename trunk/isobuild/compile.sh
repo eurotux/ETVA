@@ -63,6 +63,7 @@ for var in `echo $PACKAGES|xargs`; do
 		# Move results to repodir and rebuild repodir
 		if [ "$?" == "0" ]; then
 			echo "Done."
+			echo "rm /builddir/build/SRPMS/*.src.rpm" | mock --configdir=$MOCKCONF/ -r etva-$CENTOSVER-$arch shell 2> /dev/null
 			rm -f /var/lib/mock/etva-$CENTOSVER-$arch/result/*.src.rpm
 			mv /var/lib/mock/etva-$CENTOSVER-$arch/result/*rpm $REPODIRTARGET/$arch/RPMS
 			cd $REPODIRTARGET/$arch
@@ -74,6 +75,7 @@ for var in `echo $PACKAGES|xargs`; do
 			mock --configdir=$MOCKCONF/ -r etva-$CENTOSVER-$arch --no-clean --define "rhel $CENTOSVER" rebuild SRPMS/$var > logs/$var.$arch.log 2>&1
 			if [ "$?" == "0" ]; then
 				echo "Done."
+				echo "rm /builddir/build/SRPMS/*.src.rpm" | mock --configdir=$MOCKCONF/ -r etva-$CENTOSVER-$arch shell 2> /dev/null
 				rm -f /var/lib/mock/etva-$CENTOSVER-$arch/result/*.src.rpm
 				mv /var/lib/mock/etva-$CENTOSVER-$arch/result/*rpm $REPODIRTARGET/$arch/RPMS
 				cd $REPODIRTARGET/$arch

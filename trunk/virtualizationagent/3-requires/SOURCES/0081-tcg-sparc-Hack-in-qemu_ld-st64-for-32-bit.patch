@@ -1,0 +1,27 @@
+From bdd02f4c48394d0753e765132f7e15ee1136c75f Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Sat, 24 Mar 2012 21:30:20 +0100
+Subject: [PATCH] tcg-sparc: Hack in qemu_ld/st64 for 32-bit.
+
+Not actually implemented, but at least we avoid the tcg assert at startup.
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/sparc/tcg-target.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/tcg/sparc/tcg-target.c b/tcg/sparc/tcg-target.c
+index baed3b4..608fc46 100644
+--- a/tcg/sparc/tcg-target.c
++++ b/tcg/sparc/tcg-target.c
+@@ -1556,6 +1556,9 @@ static const TCGTargetOpDef sparc_op_defs[] = {
+ 
+     { INDEX_op_brcond_i64, { "r", "rJ" } },
+     { INDEX_op_setcond_i64, { "r", "r", "rJ" } },
++#else
++    { INDEX_op_qemu_ld64, { "L", "L", "L" } },
++    { INDEX_op_qemu_st64, { "L", "L", "L" } },
+ #endif
+     { -1 },
+ };

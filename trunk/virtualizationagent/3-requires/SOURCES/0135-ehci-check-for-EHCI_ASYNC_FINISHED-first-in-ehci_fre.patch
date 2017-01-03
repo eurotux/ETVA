@@ -1,0 +1,46 @@
+From 4530483ace08a10e87f709b67001972e55854cb3 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Fri, 31 Aug 2012 10:31:54 +0200
+Subject: [PATCH] ehci: check for EHCI_ASYNC_FINISHED first in ehci_free_packet
+
+Otherwise we'll see the packet free twice in the trace log even though
+it actually happens only once.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 616789cde2a83fad5e634880fd20214f0c984fd5)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 0a6c9ef..23221d0 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -747,12 +747,6 @@ static EHCIPacket *ehci_alloc_packet(EHCIQueue *q)
+ 
+ static void ehci_free_packet(EHCIPacket *p)
+ {
+-    trace_usb_ehci_packet_action(p->queue, p, "free");
+-    if (p->async == EHCI_ASYNC_INFLIGHT) {
+-        usb_cancel_packet(&p->packet);
+-        usb_packet_unmap(&p->packet, &p->sgl);
+-        qemu_sglist_destroy(&p->sgl);
+-    }
+     if (p->async == EHCI_ASYNC_FINISHED) {
+         int state = ehci_get_state(p->queue->ehci, p->queue->async);
+         /* This is a normal, but rare condition (cancel racing completion) */
+@@ -763,6 +757,12 @@ static void ehci_free_packet(EHCIPacket *p)
+         /* state_writeback recurses into us with async == EHCI_ASYNC_NONE!! */
+         return;
+     }
++    trace_usb_ehci_packet_action(p->queue, p, "free");
++    if (p->async == EHCI_ASYNC_INFLIGHT) {
++        usb_cancel_packet(&p->packet);
++        usb_packet_unmap(&p->packet, &p->sgl);
++        qemu_sglist_destroy(&p->sgl);
++    }
+     QTAILQ_REMOVE(&p->queue->packets, p, next);
+     usb_packet_cleanup(&p->packet);
+     g_free(p);

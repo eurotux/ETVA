@@ -229,13 +229,10 @@ sub vmStart {
     if( isError($VM) ){
         return wantarray() ? %$VM : $VM;
     }
-    if( $p{'first_install'} || $p{'first_boot'} || $VM->get_firstboot() ){
-        $VM->set_on_reboot('destroy');
-        $VM->set_on_crash('destroy');
-    } else {
-        $VM->set_on_reboot('restart');
-        $VM->set_on_crash('restart');
-    }
+
+    # on_reboot and on_crash flag: should restart VM
+    $VM->set_on_reboot('restart');
+    $VM->set_on_crash('restart');
 
     if( $p{'boot'} eq 'filesystem' ){
         $self->set_vm_bootloader( VM=>$VM, %p );
@@ -379,6 +376,108 @@ sub vmStop {
     }
 }
 
+=item suspend_vm
+
+virtual machine suspend function
+
+    my $OK = VirtAgentInterface->suspend_vm( name=>$name );
+
+=cut
+
+# suspend_vm
+# vmSuspend alias func
+sub suspend_vm {
+    my $self = shift;
+    my %p = @_;
+
+    return $self->vmSuspend( %p );
+}
+
+# vmSuspend 
+# virtual machine suspend function
+# args: hash { name  }
+# return: ok || error
+sub vmSuspend {
+    my $self = shift;
+    my %p = @_;
+
+    $p{'name'} = $self->{'_lastdomain'} if( !$p{'name'} && ref($self) );
+    $p{'uuid'} = $self->{'_lastuuid'} if( !$p{'uuid'} && ref($self) );
+
+    my $VM = $self->getVM(%p);
+    if( !$VM ){
+        return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
+    }
+
+    my $uuid = $VM->get_uuid();
+    my $name = $VM->get_name();
+
+    my $E = $self->suspendDomain( 'uuid'=>$uuid,'name'=>$name, force=>$p{'force'}, destroy=>$p{'destroy'} );
+
+    # update state any way
+    $VM->set_state("suspended");
+
+    $self->setVM( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name(), 'VM'=>$VM );
+
+    if( isError($E) ){
+        return wantarray() ? %$E : $E;
+    } else {
+        my %H = $VM->tohash();
+        return retOk("_VM_SUSPEND_OK_","Virtual machine successfully suspended","_RET_OBJ_",\%H);
+    }
+}
+
+=item resume_vm
+
+virtual machine resume function
+
+    my $OK = VirtAgentInterface->resume_vm( name=>$name );
+
+=cut
+
+# resume_vm
+# vmResume alias func
+sub resume_vm {
+    my $self = shift;
+    my %p = @_;
+
+    return $self->vmResume( %p );
+}
+
+# vmResume 
+# virtual machine resume function
+# args: hash { name  }
+# return: ok || error
+sub vmResume {
+    my $self = shift;
+    my %p = @_;
+
+    $p{'name'} = $self->{'_lastdomain'} if( !$p{'name'} && ref($self) );
+    $p{'uuid'} = $self->{'_lastuuid'} if( !$p{'uuid'} && ref($self) );
+
+    my $VM = $self->getVM(%p);
+    if( !$VM ){
+        return retErr("_ERR_VM_NOT_FOUND_","Error virtual machine not found.");
+    }
+
+    my $uuid = $VM->get_uuid();
+    my $name = $VM->get_name();
+
+    my $E = $self->resumeDomain( 'uuid'=>$uuid,'name'=>$name, force=>$p{'force'}, destroy=>$p{'destroy'} );
+
+    # update state any way
+    $VM->set_state("running");
+
+    $self->setVM( 'uuid'=>$VM->get_uuid(), 'name'=>$VM->get_name(), 'VM'=>$VM );
+
+    if( isError($E) ){
+        return wantarray() ? %$E : $E;
+    } else {
+        my %H = $VM->tohash();
+        return retOk("_VM_RESUME_OK_","Virtual machine successfully resumed","_RET_OBJ_",\%H);
+    }
+}
+
 sub vmSetLocation {
     my $self = shift;
     my (%p) = @_;
@@ -478,12 +577,17 @@ sub vmSetLocation {
                     } else {            # go to boot loader
                         return retErr("_ERR_VMLOAD_BOOTDISK_","Error get bootdisk from location: '$location'.");
                     }
-                } else {                    # get kernel and initrd from localtion
-                    my ($kernel,$initrd,$extras) = VirtAgent->get_kernel($location,$type,$p{'arch'},$p{'distro'});
+                } else {                    # get kernel and initrd from location
+                    my $extra = $p{'extra'};
+                    if( $p{'kickstart'} ){  # add kickstart
+                        $extra .= " " if( $extra );
+                        $extra .= "ks=$p{'kickstart'}";
+                    }
+                    (my $kernel,my $initrd,$extra) = VirtAgent->get_kernel($location,$type,$p{'arch'},$p{'distro'},$extra);
                     if( -e "$kernel" ){ # testing kernel ok
                         $VM->set_kernel(  $kernel );
                         $VM->set_initrd(  $initrd );
-                        $VM->set_cmdline( $extras );
+                        $VM->set_cmdline( $extra );
                     # CMAR 02/06/2011 : ignore error location when cant get kernel
                     #} else {            # go to boot loader
                     #    return retErr("_ERR_VMLOAD_LOCATION_","Error get kernel an initrd from location: '$location'.");
@@ -518,6 +622,8 @@ sub get_loadvm_disks_params {
             $D{'drivertype'} = $p{'diskdrivertype'} || $p{'disk'}{'drivertype'};
             $D{'drivername'} = $p{'diskdrivername'} || $p{'disk'}{'drivername'};
             $D{'drivercache'} = $p{'diskdrivercache'} || $p{'disk'}{'drivercache'};
+            $D{'driverio'} = $p{'diskdriverio'} || $p{'disk'}{'driverio'};
+            $D{'sourceaio'} = $p{'disksourceaio'} || $p{'disk'}{'sourceaio'};
             $D{'target'} = $p{'disktarget'} || $p{'disk'}{'target'};
             $D{'readonly'} = $p{'diskreadonly'} || $p{'disk'}{'readonly'};
             $D{'node'} = $p{'disknode'} || $p{'disk'}{'node'};
@@ -533,6 +639,7 @@ sub get_loadvm_disks_params {
 
                 if( $self->get_hypervisor_type() eq 'kvm' ){
                     $D{'drivername'} = "qemu";
+
                 } elsif( $self->get_hypervisor_type() =~ m/xen/ ){
                     # use tap driver name only if specify the format
                     $D{'drivername'} = "tap" if( $D{'drivertype'} );
@@ -542,6 +649,7 @@ sub get_loadvm_disks_params {
             push(@Disks,\%D);
         }
     }
+    plogNow("[DEBUG] Disks=",Dumper(\@Disks));
     return wantarray() ? @Disks : \@Disks;
 }
 
@@ -557,6 +665,10 @@ sub vmLoad {
     %p = $self->prep_loadvm_params(%p);
 
     my %A = ();
+
+    if( $p{'extend'} ){             # extend to apply to libvirt
+        %A = %{ $p{'extend'} };
+    }
 
     # get name
     my $name = $A{'name'} = $p{'name'};
@@ -632,10 +744,10 @@ sub vmLoad {
         if( !$p{'no_tablet'} ){
             $A{'tablet_bus'} = $p{'tablet_bus'} || "usb";
         }
-
-        # set clock as localtime
-        $A{'clock'}{'offset'} = 'localtime';
     }
+
+    # set clock as localtime
+    $A{'clock'}{'offset'} = 'localtime';
 
     # set cpu information
     if( $p{'cpu'} ){
@@ -972,6 +1084,19 @@ sub prep_disk_params {
             $p{'disk'} = &prep_comma_sep_fields($disk,
                                                         sub {
                                                             my (%D) = @_;
+                                                            if( $hypervisor_type eq 'kvm' ){
+                                                                # CMAR 23/06/2016
+                                                                #   see #1060 - add defaults for performance improvement
+                                                                if( ((not defined($D{'drivercache'})) or ($D{'drivercache'} eq 'none')) and
+                                                                                not defined($D{'driverio'}) and not defined($D{'sourceaio'}) ){
+                                                                    if( -b "$D{'path'}" ){
+                                                                        $D{'drivercache'} = 'none';
+                                                                        $D{'driverio'} = 'native';
+                                                                        #$D{'sourceaio'} = 'native';
+                                                                    }
+                                                                }
+                                                            }
+
                                                             my $format = delete($D{'format'});
                                                             if( !$D{'drivername'} &&
                                                                 ($format || $D{'drivertype'} || $D{'drivercache'}) ){
@@ -1393,7 +1518,15 @@ sub vmReload {
 
         # recover uuid and/or name
         $p{'uuid'} = $uuid if( !$p{'uuid'} );
-        $p{'name'} = $name if( !$p{'name'} );
+        if( !$p{'name'} ){
+            $p{'name'} = $name;
+        } else {
+            if( $p{'name'} ne $name ){  # name changed
+                if( VMSCache::getUuidFromName($p{'name'}) ){
+                    return retErr("_ERR_VM_NAME_EXISTS_","Name already exists.");
+                }
+            }
+        }
 
         # previous state
         my $prev_state = $VM->get_state();
@@ -2350,6 +2483,8 @@ sub attach_disk {
             $D{'drivertype'} = $p{'diskdrivertype'} || $p{'disk'}{'drivertype'};
             $D{'drivername'} = $p{'diskdrivername'} || $p{'disk'}{'drivername'};
             $D{'drivercache'} = $p{'diskdrivercache'} || $p{'disk'}{'drivercache'};
+            $D{'driverio'} = $p{'diskdriverio'} || $p{'disk'}{'driverio'};
+            $D{'sourceaio'} = $p{'disksourceaio'} || $p{'disk'}{'sourceaio'};
             $D{'target'} = $p{'disktarget'} || $p{'disk'}{'target'};
             $D{'readonly'} = $p{'diskreadonly'} || $p{'disk'}{'readonly'};
             $D{'node'} = $p{'disknode'} || $p{'disk'}{'node'};
@@ -2365,6 +2500,7 @@ sub attach_disk {
 
                 if( $self->get_hypervisor_type() eq 'kvm' ){
                     $D{'drivername'} = "qemu";
+
                 } elsif( $self->get_hypervisor_type() =~ m/xen/ ){
                     # use tap driver name only if specify the format
                     $D{'drivername'} = "tap" if( $D{'drivertype'} );
@@ -2406,6 +2542,8 @@ sub attach_disk {
                             'drivertype' => $D->{'drivertype'},
                             'drivername' => $D->{'drivername'},
                             'drivercache' => $D->{'drivercache'},
+                            'driverio' => $D->{'driverio'},
+                            'sourceaio' => $D->{'sourceaio'},
                             'target' => $D->{'target'},
                             'readonly' => $D->{'readonly'},
                             'node' => $D->{'node'},
@@ -3053,6 +3191,10 @@ sub create_network {
     $X{'bridge'}{'name'} ||= ( !$p{'genbr'} && $self->is_bridgeavailable($name) )?
                                                     $name : $self->get_bridgeavailable();
 
+    # bridge stp=off delay=0 by default
+    $X{'bridge'}{'stp'} = ($p{'stp'} eq 'on') ? 'on' : 'off';
+    $X{'bridge'}{'delay'} = $p{'delay'} || 0;
+
     # forward options
     if( $p{'forwardmode'} || $p{'forwarddev'} ){
         $X{'forward'}{'mode'} = $p{'forwardmode'} || 'nat';
@@ -3111,7 +3253,8 @@ sub create_network {
     my %BC = ();    # bridge config hash
 
     $BC{'br'} = $N{'bridge'};
-    $BC{'stp'} = 'on' if( $dxml =~ m/<bridge .*stp='on'/gs );
+    $BC{'stp'} = ( $dxml =~ m/<bridge .*stp='on'/gs ) ? 'on' : 'off';
+    $BC{'delay'} = ( $dxml =~ m/<bridge .*delay='(\d+)'/gs ) ? $1 : 0;
 
     # Physical device to attach to the bridge
     if( $p{'ifout'} || $p{'defaultroute'} || $p{'vlanmake'} || $p{'vlan_untagged'} || $p{'vlan_tagged'} ){
@@ -3121,15 +3264,17 @@ sub create_network {
         if( $p{'vlanmake'} || $p{'vlan_tagged'} ){
             my $vlid = int($p{'vlanid'}) || VirtAgent::Network->nextvlanid( $ifout );
 
+            $if = $ifout = $IC{'if'} = $N{'ifout'} = $p{'ifout'} = VirtAgent::Network->vlan_defaultphysdev(%p);
+
             # TODO if ifout is bridge add interface attached to the bridge
             my $ifname = "$ifout";
-            my %NetDevs = VirtAgent::Network->getnetdev();
-            if( $NetDevs{"$ifout"}{'isbridge'} ){
-                my ($If) = grep { ( $_->{'bridge'} eq $ifout ) && ( $_->{'phy'} || $_->{'bonding'} ) } values %NetDevs;
-                if( $If ){
-                    $ifname = $If->{'device'};
-                }
-            }
+            #my %NetDevs = VirtAgent::Network->getnetdev();
+            #if( $NetDevs{"$ifout"}{'isbridge'} ){
+            #    my ($If) = grep { ( $_->{'bridge'} eq $ifout ) && ( $_->{'phy'} || $_->{'bonding'} ) } values %NetDevs;
+            #    if( $If ){
+            #        $ifname = $If->{'device'};
+            #    }
+            #}
 
             $IC{'vlan'} = 1;
             $IC{'if'} = $IC{'name'} = $ifname;
@@ -3154,6 +3299,8 @@ sub create_network {
 
             # create network boot script
             my %br = ( 'name'=>$N{'bridge'}, 'type'=>'Bridge', 'bootproto'=>'none', 'up'=>1 );
+            $br{'stp'} = $BC{'stp'} if( defined($BC{'stp'}) );
+            $br{'delay'} = $BC{'delay'} if( defined($BC{'delay'}) );
             VirtAgent::Network->save_boot_interface( 'name'=>$N{'bridge'}, %br );
 
         } else {
@@ -3185,6 +3332,8 @@ sub create_network {
                 $IC{'ipaddr'} = '0.0.0.0';
                 VirtAgent::Network->boot_chgipaddr( 'if'=>$if, 'ipaddr'=>'0.0.0.0', 'netmask'=>'', 'network'=>'', 'bridge'=>'', bootproto=>'static' );
                 my %br = ( 'name'=>$N{'bridge'}, 'address'=>$ipaddr, 'type'=>'Bridge', 'bootproto'=>'static', 'up'=>1 );
+                $br{'stp'} = $BC{'stp'} if( defined($BC{'stp'}) );
+                $br{'delay'} = $BC{'delay'} if( defined($BC{'delay'}) );
                 $BC{'ipaddr'} = $ipaddr;
                 $BC{'netmask'} = $br{'netmask'} = $netmask if( $netmask );
                 $BC{'gateway'} = $br{'gateway'} = $gateway if( $gateway );
@@ -4705,7 +4854,19 @@ sub change_uuid {
     return retOk("_OK_","ok");
 }
 
-# change_uuid: change uuid and reinitialize
+sub update_ntp_config {
+    my $self = shift;
+    my (%p) = @_;
+
+    my $cmip = ETVA::Utils::get_cmip();
+    my $myip = ETVA::Utils::get_ip();
+    if( ($cmip ne '127.0.0.1') && ($cmip ne 'localhost') && ($cmip ne $myip) ){
+        ETVA::Utils::configure_ntp( $cmip );
+    }
+
+    return retOk("_OK_UPDATE_NTP_CONFIG_","NTP configuration update successfully.");
+}
+
 sub shutdown {
     my $self = shift;
     my (%p) = @_;
@@ -5104,9 +5265,19 @@ sub _pre_copy_backup_to_location {
         if( $location =~ m/smb:\/\// ){
             my @opts = ();
             my $ofs = ($location =~ m/smb:\/\//)? 4: 0;
-            if( $location =~ s/smb:\/\/(\S+):(\S+)\@/smb:\/\// ){
-                my ($username,$password) = ($1,$2);
-                push(@opts,"-o","username=$username,password=$password");
+            if( $location =~ s/smb:\/\/((\S+);)?(\S+):(\S+)\@/smb:\/\// ){
+                my ($domain,$username,$password) = ($2,$3,$4);
+
+                # CMAR 20/06/2016
+                #   from man mount.cifs:
+                #       "The default in mainline kernel versions prior to v3.8 was sec=ntlm. In v3.8, the default was changed to sec=ntlmssp."
+                #
+                #   so add option sec=ntlm to keep ntlm as default
+                #
+                my $options = "username=$username,password=$password,sec=ntlm";
+                $options .= ",domain=$domain" if( $domain );    # add domain
+                $options =~ s/'/'"'"'/gs;     # espace ' char
+                push(@opts,"-o","'$options'");
             }
             my $nl = substr($location,$ofs);
             my ($e,$m) = cmd_exec("mount",$nl,$backupdir,@opts);

@@ -17,7 +17,7 @@
 
 Summary: Symfony is a complete framework designed to optimize the development of web applications
 Name: symfony
-Version: 1.4.4
+Version: 1.4.20
 Release: 1.4
 License: MIT license
 Group: Development/Libraries/Other
@@ -100,6 +100,8 @@ fi
 %{peardir}/*
 %{xmldir}/symfony.xml
 %changelog
+* Wed Apr 09 2014 cmar@eurotux.com
+- update to last stable version of 1.4
 * Mon Dec 24 2007 crrodriguez@suse.de
 - update to version 1.0.10 mostly correcting some wrong assumptions
   in the code that caused breakeage on newer PHP versions.

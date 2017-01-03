@@ -1,0 +1,38 @@
+From 1e7b58a3d7c6bbe0f557c490f28c833b0c98303c Mon Sep 17 00:00:00 2001
+From: Christophe Fergeau <cfergeau@redhat.com>
+Date: Mon, 13 Aug 2012 10:32:32 +0200
+Subject: [PATCH] spice: abort on invalid streaming cmdline params
+
+When parsing its command line parameters, spice aborts when it
+finds unexpected values, except for the 'streaming-video' option.
+This happens because the parsing of the parameters for this option
+is done using the 'name2enum' helper, which does not error out
+on unknown values. Using the 'parse_name' helper makes sure we
+error out in this case. Looking at git history, the use of
+'name2enum' instead of 'parse_name' seems to have been an oversight,
+so let's change to that now.
+
+Fixes rhbz#831708
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 835cab85ad83ed8dfe1c13243aeda5959b153e3e)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ ui/spice-core.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/ui/spice-core.c b/ui/spice-core.c
+index 4fc48f8..bb4f585 100644
+--- a/ui/spice-core.c
++++ b/ui/spice-core.c
+@@ -344,7 +344,8 @@ static const char *stream_video_names[] = {
+     [ SPICE_STREAM_VIDEO_FILTER ] = "filter",
+ };
+ #define parse_stream_video(_name) \
+-    name2enum(_name, stream_video_names, ARRAY_SIZE(stream_video_names))
++    parse_name(_name, "stream video control", \
++               stream_video_names, ARRAY_SIZE(stream_video_names))
+ 
+ static const char *compression_names[] = {
+     [ SPICE_IMAGE_COMPRESS_OFF ]      = "off",

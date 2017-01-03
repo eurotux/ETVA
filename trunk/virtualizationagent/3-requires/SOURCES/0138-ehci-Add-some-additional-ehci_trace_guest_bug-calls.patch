@@ -1,0 +1,85 @@
+From 943606089ed996862e191024bdd496d0e3600e87 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Mon, 3 Sep 2012 10:22:16 +0200
+Subject: [PATCH] ehci: Add some additional ehci_trace_guest_bug() calls
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 3a8ca08e01ea4baafff2a513655008cdd00feebf)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 19 +++++++++++++------
+ 1 file changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 398f5e0..5a88268 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -820,12 +820,16 @@ static int ehci_reset_queue(EHCIQueue *q)
+     return packets;
+ }
+ 
+-static void ehci_free_queue(EHCIQueue *q)
++static void ehci_free_queue(EHCIQueue *q, const char *warn)
+ {
+     EHCIQueueHead *head = q->async ? &q->ehci->aqueues : &q->ehci->pqueues;
++    int cancelled;
+ 
+     trace_usb_ehci_queue_action(q, "free");
+-    ehci_cancel_queue(q);
++    cancelled = ehci_cancel_queue(q);
++    if (warn && cancelled > 0) {
++        ehci_trace_guest_bug(q->ehci, warn);
++    }
+     QTAILQ_REMOVE(head, q, next);
+     g_free(q);
+ }
+@@ -847,6 +851,7 @@ static EHCIQueue *ehci_find_queue_by_qh(EHCIState *ehci, uint32_t addr,
+ static void ehci_queues_rip_unused(EHCIState *ehci, int async, int flush)
+ {
+     EHCIQueueHead *head = async ? &ehci->aqueues : &ehci->pqueues;
++    const char *warn = (async && !flush) ? "guest unlinked busy QH" : NULL;
+     uint64_t maxage = FRAME_TIMER_NS * ehci->maxframes * 4;
+     EHCIQueue *q, *tmp;
+ 
+@@ -859,7 +864,7 @@ static void ehci_queues_rip_unused(EHCIState *ehci, int async, int flush)
+         if (!flush && ehci->last_run_ns < q->ts + maxage) {
+             continue;
+         }
+-        ehci_free_queue(q);
++        ehci_free_queue(q, warn);
+     }
+ }
+ 
+@@ -872,17 +877,18 @@ static void ehci_queues_rip_device(EHCIState *ehci, USBDevice *dev, int async)
+         if (q->dev != dev) {
+             continue;
+         }
+-        ehci_free_queue(q);
++        ehci_free_queue(q, NULL);
+     }
+ }
+ 
+ static void ehci_queues_rip_all(EHCIState *ehci, int async)
+ {
+     EHCIQueueHead *head = async ? &ehci->aqueues : &ehci->pqueues;
++    const char *warn = async ? "guest stopped busy async schedule" : NULL;
+     EHCIQueue *q, *tmp;
+ 
+     QTAILQ_FOREACH_SAFE(q, head, next, tmp) {
+-        ehci_free_queue(q);
++        ehci_free_queue(q, warn);
+     }
+ }
+ 
+@@ -1549,7 +1555,8 @@ static int ehci_execute(EHCIPacket *p, const char *action)
+ 
+     p->tbytes = (p->qtd.token & QTD_TOKEN_TBYTES_MASK) >> QTD_TOKEN_TBYTES_SH;
+     if (p->tbytes > BUFF_SIZE) {
+-        fprintf(stderr, "Request for more bytes than allowed\n");
++        ehci_trace_guest_bug(p->queue->ehci,
++                             "guest requested more bytes than allowed");
+         return USB_RET_PROCERR;
+     }
+ 

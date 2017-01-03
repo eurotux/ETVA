@@ -161,7 +161,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         disabled: true,
                         hidden:true,
                         scope:this,
-                        text: <?php echo json_encode(__('Start server')) ?>,
+                        text: <?php echo json_encode(__('Start')) ?>,
                         menu: [
                                 {
                                     text: <?php echo json_encode(__('Boot From')) ?>
@@ -240,8 +240,45 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         }//END handler
                     },
                     {
+                        text: <?php echo json_encode(__('Suspend')) ?>,
+                        ref: '../suspendBtn',
+                        iconCls: 'icon-vm-suspend',
+                        disabled:false,
+                        hidden:true,
+                        scope:this,
+                        handler: function(item) {
+
+                            var server_id = this.form.findField('id').getValue();
+                            var server_name = this.form.findField('name').getValue();
+                            var node_id = this.form.findField('node_id').getValue();
+
+                            var obj = { 'id': server_id, 'name': server_name, 'node_id':node_id };
+                            this.suspendServer(obj,item);
+
+                        }//END handler Suspend
+                    },
+                    {
+                        text: <?php echo json_encode(__('Resume')) ?>,
+                        ref: '../resumeBtn',
+                        iconCls: 'icon-vm-resume',
+                        disabled:false,
+                        hidden:true,
+                        scope:this,
+                        handler: function(item) {
+
+                            var server_id = this.form.findField('id').getValue();
+                            var server_name = this.form.findField('name').getValue();
+                            var server_vm_state = this.form.findField('vm_state').getValue();
+                            var node_id = this.form.findField('node_id').getValue();
+
+                            var obj = { 'id': server_id, 'name': server_name, 'vm_state':server_vm_state, 'node_id':node_id };
+                            this.resumeServer(obj,item);
+
+                        }//END handler Resume
+                    },
+                    {
                         xtype:'splitbutton',
-                        text: <?php echo json_encode(__('Stop server')) ?>,
+                        text: <?php echo json_encode(__('Stop')) ?>,
                         ref: '../stopBtn',
                         iconCls: 'icon-vm-stop',
                         disabled:false,
@@ -299,7 +336,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     },
                     '-',
                     {
-                        text: <?php echo json_encode(__('Edit server')) ?>,
+                        text: <?php echo json_encode(__('Edit')) ?>,
                         ref: '../editBtn',
                         disabled:false,
                         hidden:true,
@@ -332,7 +369,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         handler: function(btn){View.loadComponent(btn);}
                     },
                     {
-                        text: <?php echo json_encode(__('Remove server')) ?>,
+                        text: <?php echo json_encode(__('Remove')) ?>,
                         ref: '../removeBtn',
                         disabled:false,
                         hidden:true,
@@ -343,14 +380,15 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         callback:function(item){
 
                             var server_id = (item.scope).form.findField('id').getValue();
-                            var server_name = (item.scope).form.findField('name').getValue();                            
+                            var server_name = (item.scope).form.findField('name').getValue();
+                            var unassigned = (item.scope).form.findField('unassigned').getValue();
 
                             var window = new Server.Remove.Window({
                                                 title: <?php echo json_encode(__('Remove server')) ?>,parent:(item.scope).id});
 
 
                             var rec = new Object();
-                            rec.data = {'server':server_name,'server_id':server_id};
+                            rec.data = {'server':server_name,'server_id':server_id,'unassigned':unassigned};
 
                             window.on('show',function(){window.loadData(rec);});
                             window.show();
@@ -571,7 +609,8 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                 {xtype:'hidden',name:'id'}
                 ,{xtype:'hidden',name:'boot'}
                 ,{xtype:'hidden',name:'node_id'}
-                ,{xtype:'hidden',name:'location'}              
+                ,{xtype:'hidden',name:'location'} 
+                ,{xtype:'hidden',name:'unassigned'} 
                 ,{
                     anchor: '100% 100%',
                     layout: {
@@ -686,12 +725,14 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     this.removeBtn.show();
                     this.consoleBtn.show();
                     this.startBtn.show();
+                    this.suspendBtn.show();
                     this.stopBtn.show();
                     this.snapshotsBtn.show();
                 }else{
                     if(response['server']){
                         this.consoleBtn.show();
                         this.startBtn.show();
+                        this.suspendBtn.show();
                         this.stopBtn.show();
 
                     }else{
@@ -703,6 +744,8 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                         this.removeBtn.hide();
                         this.consoleBtn.hide();
                         this.startBtn.hide();
+                        this.suspendBtn.hide();
+                        this.resumeBtn.hide();
                         this.stopBtn.hide();
                         this.snapshotsBtn.hide();
                     }
@@ -774,10 +817,11 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                 /*
                  * check vm state
                  */
-                 var vm_state = this.form.findField('vm_state');                 
+                 var vm_state = this.form.findField('vm_state'); 
                  if(data['vm_state']=='running')
                  {
                    vm_state.removeClass('vm-state-notrunning');
+                   vm_state.removeClass('vm-state-suspended');
                    vm_state.addClass('vm-state-running');
 
                    /*if(data['vm_type']!='pv')
@@ -792,19 +836,23 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     *
                     * check migrate/move button
                     */
-                    if( !data.unassigned ){
-                        this.migrateBtn.type = 'migrate';
-                        this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate, the server must be stopped!')); ?>);
-                        this.migrateBtn.setText(<?php echo json_encode(__('Migrate server')) ?>);
-                        this.migrateBtn.setDisabled(false);                     
-                    }
-
+                    this.migrateBtn.type = 'migrate';
+                    this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a move instead of a migrate, the server must be stopped!')); ?>);
+                    this.migrateBtn.setText(<?php echo json_encode(__('Migrate')) ?>);
+                    this.migrateBtn.setDisabled(false);                     
 
                    <?php endif; ?>
+                 }
+                 else if(data['vm_state']=='suspended')
+                 {
+                     vm_state.removeClass('vm-state-running');
+                     vm_state.removeClass('vm-state-notrunning');
+                     vm_state.addClass('vm-state-suspended');
                  }
                  else
                  {
                      vm_state.removeClass('vm-state-running');
+                     vm_state.removeClass('vm-state-suspended');
                      vm_state.addClass('vm-state-notrunning');
 
                      this.editBtn.setDisabled(false);
@@ -815,12 +863,11 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                       *
                       * check migrate/move button
                       */
-                    if( !data.unassigned ){
-                        this.migrateBtn.type = 'move';
-                        this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move, the server must be running!')); ?>);
-                        this.migrateBtn.setText(<?php echo json_encode(__('Move server')) ?>);
-                        this.migrateBtn.setDisabled(false);
-                    }
+                      this.migrateBtn.type = 'move';
+                      this.migrateBtn.setTooltip(<?php echo json_encode(__('To perform a migrate instead of a move, the server must be running!')); ?>);
+                      this.migrateBtn.setText(<?php echo json_encode(__('Move')) ?>);
+                      this.migrateBtn.setDisabled(false);
+
                      <?php endif; ?>
                  }
 
@@ -849,20 +896,33 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                  }
                  
                  if( !data.unassigned ){
-                     this.startBtn.setDisabled(data['vm_state']=='running');
+                     this.startBtn.setDisabled(data['vm_state']=='running' || data['vm_state']=='suspended');
                      // disable boot from cdrom when dont have cdrom defined
                      this.startBtn.menu.get(0).menu.boot_cdrom.setDisabled((data['location']!=null)? false: true);  
+                     this.suspendBtn.setDisabled(data['vm_state']!='running');
+                     if( data['vm_state']=='suspended' ){
+                         this.resumeBtn.show();
+                         this.suspendBtn.hide();
+                         this.resumeBtn.setDisabled(false);
+                     } else {
+                         this.resumeBtn.hide();
+                         this.suspendBtn.show();
+                         this.resumeBtn.setDisabled(true);
+                     }
                      this.stopBtn.menu.stop_normal.setChecked(true);
                      this.stopBtn.menu.stop_force.setChecked(false);
                  } else {
                      this.startBtn.setDisabled(true);
+                     this.suspendBtn.setDisabled(true);
+                     this.resumeBtn.setDisabled(true);
                      this.stopBtn.setDisabled(true);
                      this.consoleBtn.setDisabled(true);
+                     if( this.migrateBtn ) this.migrateBtn.setDisabled(true);
                  }
 
                 if( nodeState!=<?php echo json_encode(EtvaNode::NODE_ACTIVE); ?> ){
                     this.getTopToolbar().items.each(function(item,index,length){
-                                        if( (item.xtype != 'panel') && (item.ref != '../btn_refresh') && (item.ref != '../consoleBtn') && (item.ref != '../migrateBtn')){
+                                        if( (item.xtype != 'panel') && (item.ref != '../btn_refresh') && (item.ref != '../consoleBtn') && (item.ref != '../migrateBtn') && (item.ref != '../removeBtn') ){
                                             item.setDisabled(true);
                                             if( item.el )
                                                 item.el.set({qtip: <?php echo json_encode(__('VirtAgent should be running to enable this menu')) ?>});
@@ -920,7 +980,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
         var start_openconsole = (obj['withconsole']) ? true : false;
 
         var send_data = {'nid': node_id,
-                         'server': server_name};
+                         'server': server_id};
 
         var title = String.format(<?php echo json_encode(__('Start server')) ?>);
 
@@ -930,7 +990,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
         Ext.Msg.show({
             title: title,
-            buttons: Ext.MessageBox.YESNOCANCEL,
+            buttons: Ext.MessageBox.YESNO,
             scope:this,
             msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,server_vm_state)+'<br>'
                  +String.format(<?php echo json_encode(__('Start server {0} ?')) ?>,server_name),
@@ -939,12 +999,12 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
                     var scope_form = this;
                     AsynchronousJob.Functions.Create( 'server', 'start',
-                                                        { 'server': server_name },
+                                                        { 'server': server_id },
                                                         { 'node': node_id },
                                                         function(resp,opt) { // success fh
                                                             var response = Ext.util.JSON.decode(resp.responseText);
                                                             AsynchronousJob.Functions.Create( 'server', 'check',
-                                                                                                { 'server': server_name },
+                                                                                                { 'server': server_id },
                                                                                                 { 'node': node_id, 'check': 'running' },
                                                                                                 function(resp2,opt2){
                                                                                                     var res2 = Ext.util.JSON.decode(resp2.responseText);
@@ -1019,6 +1079,42 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
         }); //END Msg.show
 
     }
+    ,suspendServer: function(obj,item){
+        var server_id = obj['id'];
+        var server_name = obj['name'];
+        var server_vm_state = obj['vm_state'];
+        var node_id = obj['node_id'];
+
+        var send_data = {'nid': node_id,
+                         'server': server_id};
+
+        var scope_form = this;
+        AsynchronousJob.Functions.Create( 'server', 'suspend',
+                                            { 'server': server_id },
+                                            { 'node': node_id },
+                                            function(resp,opt) { // success fh
+                                                var parentCmp = Ext.getCmp((item.scope).id);
+                                                parentCmp.fireEvent('refresh',parentCmp);
+                                            });
+    }
+    ,resumeServer: function(obj,item){
+        var server_id = obj['id'];
+        var server_name = obj['name'];
+        var server_vm_state = obj['vm_state'];
+        var node_id = obj['node_id'];
+
+        var send_data = {'nid': node_id,
+                         'server': server_id};
+
+        var scope_form = this;
+        AsynchronousJob.Functions.Create( 'server', 'resume',
+                                            { 'server': server_id },
+                                            { 'node': node_id },
+                                            function(resp,opt) { // success fh
+                                                var parentCmp = Ext.getCmp((item.scope).id);
+                                                parentCmp.fireEvent('refresh',parentCmp);
+                                            });
+    }
     ,openConsole:function(obj){
 
         var server_id = obj['id'];
@@ -1090,6 +1186,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
         win.hide();
     }
     ,stopServer: function(obj,item){
+        console.log(obj);
 
         var server_id = obj['id'];
         var server_name = obj['name'];
@@ -1100,7 +1197,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
         Ext.Msg.show({
             title: item.text,
             scope:this,
-            buttons: Ext.MessageBox.YESNOCANCEL,
+            buttons: Ext.MessageBox.YESNO,
             msg: String.format(<?php echo json_encode(__('Current state reported: {0}')) ?>,server_vm_state)+'<br>'
                  +String.format(<?php echo json_encode(__('Stop server {0} ?')) ?>,server_name),
             icon: Ext.MessageBox.QUESTION,
@@ -1110,12 +1207,12 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
 
                     //params: {'nid':node_id,'server': server_name, 'force': forcestop, 'destroy': forcestop },
                     AsynchronousJob.Functions.Create( 'server', 'stop',
-                                                        { 'server': server_name },
+                                                        { 'server': server_id },
                                                         { 'node': node_id, 'force': forcestop, 'destroy':forcestop },
                                                         function(resp,opt) { // success fh
                                                             var response = Ext.util.JSON.decode(resp.responseText);
                                                             AsynchronousJob.Functions.Create( 'server', 'check',
-                                                                                                { 'server': server_name },
+                                                                                                { 'server': server_id },
                                                                                                 { 'node': node_id, 'check': 'stop' },                                                                                                                    null,null, response['asynchronousjob']['Id']);
                                                             var parentCmp = Ext.getCmp((item.scope).id);
                                                             parentCmp.fireEvent('refresh',parentCmp);
@@ -1141,7 +1238,7 @@ Server.View.Info = Ext.extend(Ext.form.FormPanel, {
                     });// end conn
                     conn.request({
                         url: <?php echo json_encode(url_for('server/jsonStop'))?>,
-                        params: {'nid':node_id,'server': server_name, 'force': forcestop, 'destroy': forcestop },
+                        params: {'nid':node_id,'server': server_id, 'force': forcestop, 'destroy': forcestop },
                         scope:this,
                         success: function(resp,opt) {
                             var response = Ext.util.JSON.decode(resp.responseText);

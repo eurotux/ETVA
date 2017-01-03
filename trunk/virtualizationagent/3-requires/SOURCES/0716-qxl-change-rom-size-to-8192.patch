@@ -1,0 +1,60 @@
+From 47a100efb664074c1fd4b7c35d0262ff4033c387 Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Mon, 21 Jan 2013 14:48:07 +0200
+Subject: [PATCH] qxl: change rom size to 8192
+
+This is a simpler solution to 869981, where migration breaks since qxl's
+rom bar size has changed. Instead of ignoring fields in QXLRom, which is what has
+actually changed, we remove some of the modes, a mechanism already
+accounted for by the guest. The modes left allow for portrait and
+landscape only modes, corresponding to orientations 0 and 1.
+Orientations 2 and 3 are dropped.
+
+Added assert so that rom size will fit the future QXLRom increases via
+spice-protocol changes.
+
+This patch has been tested with 6.1.0.10015. With the newer 6.1.0.10016
+there are problems with both "(flipped)" modes prior to the patch, and
+the patch loses the ability to set "Portrait" modes. But this is a
+separate bug to be fixed in the driver, and besides the patch doesn't
+affect the new arbitrary mode setting functionality.
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 038c1879a00153b14bce113315b693e8c2944fa9)
+---
+ hw/qxl.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 8374771..6a3467f 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -93,9 +93,7 @@
+ 
+ #define QXL_MODE_EX(x_res, y_res)                 \
+     QXL_MODE_16_32(x_res, y_res, 0),              \
+-    QXL_MODE_16_32(y_res, x_res, 1),              \
+-    QXL_MODE_16_32(x_res, y_res, 2),              \
+-    QXL_MODE_16_32(y_res, x_res, 3)
++    QXL_MODE_16_32(x_res, y_res, 1)
+ 
+ static QXLMode qxl_modes[] = {
+     QXL_MODE_EX(640, 480),
+@@ -322,10 +320,13 @@ static inline uint32_t msb_mask(uint32_t val)
+ 
+ static ram_addr_t qxl_rom_size(void)
+ {
+-    uint32_t rom_size = sizeof(QXLRom) + sizeof(QXLModes) + sizeof(qxl_modes);
++    uint32_t required_rom_size = sizeof(QXLRom) + sizeof(QXLModes) +
++                                 sizeof(qxl_modes);
++    uint32_t rom_size = 8192; /* two pages */
+ 
+-    rom_size = MAX(rom_size, TARGET_PAGE_SIZE);
+-    rom_size = msb_mask(rom_size * 2 - 1);
++    required_rom_size = MAX(required_rom_size, TARGET_PAGE_SIZE);
++    required_rom_size = msb_mask(required_rom_size * 2 - 1);
++    assert(required_rom_size <= rom_size);
+     return rom_size;
+ }
+ 

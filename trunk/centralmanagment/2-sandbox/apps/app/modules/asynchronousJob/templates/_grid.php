@@ -25,7 +25,7 @@ AsynchronousJob.TaskGrid = function(config){
             proxy: new Ext.data.HttpProxy({
                     url:<?php echo json_encode(url_for('asynchronousJob/list'))?>
                 }),
-            baseParams: { 'query': Ext.encode([{ 'field': 'updated_at', 'min': (Math.round((new Date()).getTime()/1000) - 5 * 60) }])},
+            baseParams: { 'interval': (Math.round((new Date()).getTime()/1000) - 5 * 60) },
             fields: [
                {name: 'Id' },
                {name: 'type' },
@@ -59,8 +59,8 @@ AsynchronousJob.TaskGrid = function(config){
                                             return __(value);
                                         }
                             },
-                            { header:__('Created'), dataIndex: 'CreatedAt', renderer: Ext.util.Format.dateRenderer('M j H:i:s')},
-                            { header:__('Updated'), dataIndex: 'UpdatedAt', renderer: Ext.util.Format.dateRenderer('M j H:i:s')},
+                            { header:__('Created'), dataIndex: 'CreatedAt', renderer: function(v){ return Date.parseDate(v,"Y-m-d h:i:s").format('M j H:i:s'); }},
+                            { header:__('Updated'), dataIndex: 'UpdatedAt', renderer: function(v){ return Date.parseDate(v,"Y-m-d h:i:s").format('M j H:i:s'); }},
                             { header:__('Namespace'), dataIndex: 'Tasknamespace'},
                             { header:__('Task'), dataIndex: 'Taskname'},
                             { header:__('Status'), dataIndex: 'Status', renderer: function (value){ return __(value); }},
@@ -115,26 +115,47 @@ AsynchronousJob.TaskGrid = function(config){
 
             }
         }
-        ,tools:[
+        ,tbar: [
+                new Ext.form.ComboBox({
+                    resizable: true,         
+                    store: [['5',__('Last 5 minutes')],['60',__('Last hour')],['120',__('Last 2 hours')],['1440',__('Last day')],['10080',__('Last week')]],
+                    editable: false,
+                    triggerAction:'all',
+                    forceSelection:true,
+                    value:'5',
+                    mode:'local',
+                    width:150,
+                    listeners: {
+                        'select': function(c,r,i){
+                            c.ownerCt.ownerCt.getStore().baseParams.interval = (Math.round((new Date()).getTime()/1000) - r.data.field1 * 60);
+                            c.ownerCt.ownerCt.getStore().reload();
+                        }
+                    }
+                }),
+                { xtype: 'button',
+                    iconCls: 'x-tbar-loading',
+                    handler: function(b,e) {
+                        console.log(b);
+                        b.ownerCt.ownerCt.getStore().reload();
+                    }
+                },
+                '->',
                 {
-                    id: 'refresh',
-                    handler: function(e,t,p,tc) {
-                        p.getStore().reload();
-                    }
-                /*},{
-                    id: 'plus',
-                    handler: function(e,t,p,tc) {
-                        AsynchronousJob.Functions.Create( 'node', 'check', {'id':1}, {} );
-                    }*/
-                },{
-                    id:'help',
-                    qtip: __('Help'),
-                    handler:function(){
-                        View.showHelp({ anchorid:'help-bottom-panel-main',
-                                        autoLoad:{ params:'mod=view'},
-                                        title: <?php echo json_encode(__('Running tasks Help')) ?>});
-                    }
+                    xtype: 'panel',
+                    baseCls: '',
+                    tools:[
+                            {
+                                id:'help',
+                                qtip: __('Help'),
+                                handler:function(){
+                                    View.showHelp({ anchorid:'help-bottom-panel-main',
+                                                    autoLoad:{ params:'mod=view'},
+                                                    title: <?php echo json_encode(__('Running tasks Help')) ?>});
+                                }
+                            }
+                    ]
                 }
+
         ]
     })
 }

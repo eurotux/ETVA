@@ -1,0 +1,96 @@
+From 0b33695e4ddd028a6153464bdb0047dc3170d733 Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Wed, 12 Sep 2012 16:13:26 +0300
+Subject: [PATCH] hw/qxl: tracing fixes
+
+Add two new trace events:
+qxl_send_events(int qid, uint32_t events) "%d %d"
+qxl_set_guest_bug(int qid) "%d"
+
+Change qxl_io_unexpected_vga_mode parameters to be equivalent to those
+of qxl_io_write for easier grouping under a single systemtap probe.
+
+Change d to qxl in one place.
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 917ae08ca1565aab2d10c8b6269cd905d6c5c05b)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/qxl.c     | 8 +++++---
+ trace-events | 6 ++++--
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 67f7100..59bf822 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -141,6 +141,7 @@ static void qxl_ring_set_dirty(PCIQXLDevice *qxl);
+ 
+ void qxl_set_guest_bug(PCIQXLDevice *qxl, const char *msg, ...)
+ {
++    trace_qxl_set_guest_bug(qxl->id);
+     qxl_send_events(qxl, QXL_INTERRUPT_ERROR);
+     qxl->guest_bug = 1;
+     if (qxl->guestdebug) {
+@@ -1381,7 +1382,7 @@ static void ioport_write(void *opaque, target_phys_addr_t addr,
+             break;
+         }
+         trace_qxl_io_unexpected_vga_mode(d->id,
+-            io_port, io_port_to_string(io_port));
++            addr, val, io_port_to_string(io_port));
+         /* be nice to buggy guest drivers */
+         if (io_port >= QXL_IO_UPDATE_AREA_ASYNC &&
+             io_port < QXL_IO_RANGE_SIZE) {
+@@ -1580,9 +1581,9 @@ cancel_async:
+ static uint64_t ioport_read(void *opaque, target_phys_addr_t addr,
+                             unsigned size)
+ {
+-    PCIQXLDevice *d = opaque;
++    PCIQXLDevice *qxl = opaque;
+ 
+-    trace_qxl_io_read_unexpected(d->id);
++    trace_qxl_io_read_unexpected(qxl->id);
+     return 0xff;
+ }
+ 
+@@ -1612,6 +1613,7 @@ static void qxl_send_events(PCIQXLDevice *d, uint32_t events)
+     uint32_t old_pending;
+     uint32_t le_events = cpu_to_le32(events);
+ 
++    trace_qxl_send_events(d->id, events);
+     assert(qemu_spice_display_is_running(&d->ssd));
+     old_pending = __sync_fetch_and_or(&d->ram->int_pending, le_events);
+     if ((old_pending & le_events) == le_events) {
+diff --git a/trace-events b/trace-events
+index cf05414..aa79836 100644
+--- a/trace-events
++++ b/trace-events
+@@ -931,7 +931,7 @@ qxl_interface_update_area_complete_overflow(int qid, int max) "%d max=%d"
+ qxl_interface_update_area_complete_schedule_bh(int qid, uint32_t num_dirty) "%d #dirty=%d"
+ qxl_io_destroy_primary_ignored(int qid, const char *mode) "%d %s"
+ qxl_io_read_unexpected(int qid) "%d"
+-qxl_io_unexpected_vga_mode(int qid, uint32_t io_port, const char *desc) "%d 0x%x (%s)"
++qxl_io_unexpected_vga_mode(int qid, uint64_t addr, uint64_t val, const char *desc) "%d 0x%"PRIx64"=%"PRIu64" (%s)"
+ qxl_io_write(int qid, const char *mode, uint64_t addr, uint64_t val, unsigned size, int async) "%d %s addr=%"PRIu64 " val=%"PRIu64" size=%u async=%d"
+ qxl_memslot_add_guest(int qid, uint32_t slot_id, uint64_t guest_start, uint64_t guest_end) "%d %u: guest phys 0x%"PRIx64 " - 0x%" PRIx64
+ qxl_post_load(int qid, const char *mode) "%d %s"
+@@ -962,7 +962,7 @@ qxl_spice_destroy_surfaces(int qid, int async) "%d async=%d"
+ qxl_spice_destroy_surface_wait_complete(int qid, uint32_t id) "%d sid=%d"
+ qxl_spice_destroy_surface_wait(int qid, uint32_t id, int async) "%d sid=%d async=%d"
+ qxl_spice_flush_surfaces_async(int qid, uint32_t surface_count, uint32_t num_free_res) "%d s#=%d, res#=%d"
+-qxl_spice_monitors_config(int id) "%d"
++qxl_spice_monitors_config(int qid) "%d"
+ qxl_spice_loadvm_commands(int qid, void *ext, uint32_t count) "%d ext=%p count=%d"
+ qxl_spice_oom(int qid) "%d"
+ qxl_spice_reset_cursor(int qid) "%d"
+@@ -971,6 +971,8 @@ qxl_spice_reset_memslots(int qid) "%d"
+ qxl_spice_update_area(int qid, uint32_t surface_id, uint32_t left, uint32_t right, uint32_t top, uint32_t bottom) "%d sid=%d [%d,%d,%d,%d]"
+ qxl_spice_update_area_rest(int qid, uint32_t num_dirty_rects, uint32_t clear_dirty_region) "%d #d=%d clear=%d"
+ qxl_surfaces_dirty(int qid, int surface, int offset, int size) "%d surface=%d offset=%d size=%d"
++qxl_send_events(int qid, uint32_t events) "%d %d"
++qxl_set_guest_bug(int qid) "%d"
+ 
+ # hw/qxl-render.c
+ qxl_render_blit_guest_primary_initialized(void) ""

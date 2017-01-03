@@ -1,0 +1,33 @@
+From 16ad50361e8de56a8b93ad664e2f418cde5543ed Mon Sep 17 00:00:00 2001
+From: Pavel Hrdina <phrdina@redhat.com>
+Date: Thu, 9 Aug 2012 12:44:48 +0200
+Subject: [PATCH] block: fix block tray status
+
+The tray status should change also if you eject empty block device.
+
+Signed-off-by: Pavel Hrdina <phrdina@redhat.com>
+Signed-off-by: Kevin Wolf <kwolf@redhat.com>
+(cherry picked from commit 9ca111544c64b5abed2e79cf52e19a8f227b347b)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ block.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/block.c b/block.c
+index 470bdcc..c754353 100644
+--- a/block.c
++++ b/block.c
+@@ -897,10 +897,10 @@ void bdrv_close(BlockDriverState *bs)
+             bdrv_delete(bs->file);
+             bs->file = NULL;
+         }
+-
+-        bdrv_dev_change_media_cb(bs, false);
+     }
+ 
++    bdrv_dev_change_media_cb(bs, false);
++
+     /*throttling disk I/O limits*/
+     if (bs->io_limits_enabled) {
+         bdrv_io_limits_disable(bs);

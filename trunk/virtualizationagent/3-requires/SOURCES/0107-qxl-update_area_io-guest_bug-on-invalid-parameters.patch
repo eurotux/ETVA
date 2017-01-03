@@ -1,0 +1,37 @@
+From 23dae2df759eed12a5a976c6c23ad2e7bb135abb Mon Sep 17 00:00:00 2001
+From: Alon Levy <alevy@redhat.com>
+Date: Tue, 21 Aug 2012 13:51:31 +0300
+Subject: [PATCH] qxl/update_area_io: guest_bug on invalid parameters
+
+Signed-off-by: Alon Levy <alevy@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 511b13e2c9b426b3c56060909693de5097f0b496)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/qxl.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 95bbc03..baf9bb4 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -1386,6 +1386,18 @@ async_common:
+         QXLCookie *cookie = NULL;
+         QXLRect update = d->ram->update_area;
+ 
++        if (d->ram->update_surface > NUM_SURFACES) {
++            qxl_set_guest_bug(d, "QXL_IO_UPDATE_AREA: invalid surface id %d\n",
++                              d->ram->update_surface);
++            return;
++        }
++        if (update.left >= update.right || update.top >= update.bottom) {
++            qxl_set_guest_bug(d,
++                    "QXL_IO_UPDATE_AREA: invalid area (%ux%u)x(%ux%u)\n",
++                    update.left, update.top, update.right, update.bottom);
++            return;
++        }
++
+         if (async == QXL_ASYNC) {
+             cookie = qxl_cookie_new(QXL_COOKIE_TYPE_IO,
+                                     QXL_IO_UPDATE_AREA_ASYNC);

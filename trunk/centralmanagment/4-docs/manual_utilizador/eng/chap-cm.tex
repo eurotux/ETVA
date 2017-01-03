@@ -123,7 +123,7 @@ The Figure \ref{fig:main_networks} lists the network interfaces for the network 
 
 To add a network, click on the \emph{Add network} button.
 
-The network info is constituted by its name and ID\footnote{If the network/vlan is \emph{tagged}, the field \emph{network ID} refers to its \emph{VLAN ID} (see Figure \ref{fig:network_create})}
+The network info is constituted by its name, ID\footnote{If the network/vlan is \emph{tagged}, the field \emph{network ID} refers to its \emph{VLAN ID} (see Figure \ref{fig:network_create})} and the physical network interface that is assigned.
 
 To remove a network, choose the desired network and press the button \emph{Remove network}. 
 
@@ -451,14 +451,24 @@ To edit a server, you choose the machine you want and click on \emph{Edit server
 
 The following options are available on virtual machine configuration:
 \begin{description}
-	\item[General:] This allows change the name, memory, number of CPUs and number of sockets, cores and threads, operating system and boot parameters.
-            The boot parameters vary depending on the virtual machine type and the virtualization system. (see Section \ref{sec:add_server_boot}).
+	\item[General:] This allows change the name, memory, number of CPUs and number of sockets, cores and threads nd CPU model.
 
 		\begin{figure}[H]
         		\begin{center}
 		        \includegraphics[scale=0.5]{screenshots/server_edit_general.png}
         		\caption{Edit server - General}
 	        	\label{fig:server_edit_general}
+	        	\end{center}
+		\end{figure}
+
+	\item[OS / Boot options:] This allows change the guest operating system and boot parameters.
+            The boot parameters vary depending on the virtual machine type and the virtualization system. (see Section \ref{sec:add_server_boot}).
+
+		\begin{figure}[H]
+        		\begin{center}
+		        \includegraphics[scale=0.5]{screenshots/server_edit_options.png}
+        		\caption{Edit server - OS / Boot options}
+	        	\label{fig:server_edit_options}
 	        	\end{center}
 		\end{figure}
 
@@ -826,13 +836,15 @@ It's also possible define the format of disk (raw, cow2,qcow,cow and vmdk - raw 
         \end{center}
 \end{figure}
 
-To resize a \emph{logical volume}, select and access into the context menu. The we can find the option \emph{Resize logical volume}, that allow us to increase/reduce the \emph{logical volume} size.
+To resize a \emph{logical volume}, select and access into the context menu. We can find the option \emph{Resize logical volume}, that allow us to increase/reduce the \emph{logical volume} size.
 
 \begin{quote}
 	{\large \bf Note} \\*[-.8pc]
 	\underline{\hspace{6in}} \\
     By reducing the size of a \emph{logical volume} could make existing data unusable. It is your responsibility to check that it is affordable/secure resizing the \emph{logical volume} without affecting the data.
 \end{quote}
+
+If \emph{logical volume} supports snapshots we should set the percentage of size allocated to create snapshots.
 
 
 \begin{figure}[H]
@@ -1365,7 +1377,7 @@ In the authorization process, the \textit{Central Management} checks if the node
 
 \subsection{System Preferences}
 By accessing the system references you can set some parameters. 
-In the general panel you can specify the default VNC keymap to access virtual machines as well as define the duration of the event logs of the system.
+In the general panel you can specify the destination email and prefix of subject of email alerts. The default VNC keymap to access virtual machines and the duration of the event logs of the system.
  
 \begin{figure}[H]
         \begin{center}
@@ -1376,6 +1388,7 @@ In the general panel you can specify the default VNC keymap to access virtual ma
 \end{figure}
 
 In the connectivity tab you're allowed to change the CM IP address and for the LAN network (only available in \emph{NUXIS} version). In the \emph{UnitBox} version you are only allowed to change the CM IP.
+Also, you're allowed to change the DNS and NTP server configuration.
 
 \begin{figure}[H]
         \begin{center}

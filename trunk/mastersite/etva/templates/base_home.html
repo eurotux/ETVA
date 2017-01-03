@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block headcontent %}
+{% endblock %}
+{% block maincontent %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_available_languages as LANGUAGES %}
+<!-- user body -->
+<div id="userHeader"><div id="welcome"><h4>{% trans "Welcome back" %}, {{ user.username }}.</h4></div><div id="date">{% now " l, F d, Y" %}</div>
+    <div class="space15">&nbsp;</div>
+    <div id="twoCol">
+	<div id="leftCol">
+		<div class="colorHeader">{% trans "My Quick Links"%}<div class="help"></div></div>
+        {% if perms.auth.add_group %}
+                <div class="colItem {% ifequal section 2 %} Sel{%endifequal%}">{% ifequal section 2%}<strong>&raquo;</strong>{% else %}&#8250;&nbsp;{%endifequal%}<a href="/users">{% trans "Users"%}</a></div>
+        <div class="colItem {% ifequal section 1 %} Sel{%endifequal%}">{% ifequal section 1%}<strong>&raquo;</strong>{% else %}&#8250;&nbsp;{%endifequal%}<a href="/groups">{% trans "Groups"%}</a></div>
+        {%else%}
+        {%endif%}
+            <div class="colItem{% ifequal section 3 %} Sel{%endifequal%}">{% ifequal section 3%}<strong>&raquo;</strong>{% else %}&#8250;&nbsp;{%endifequal%}<a href="/backups">{% trans "Backups/Restores"%}</a></div>
+            <div class="colItem{% ifequal section 4 %} Sel{%endifequal%}">{% ifequal section 4%}<strong>&raquo;</strong>{% else %}&#8250;&nbsp;{%endifequal%}<a href="/product">{% trans "Products"%}</a></div>
+        <div class="colItem">&#8250;&nbsp;<a href="/logout">{% trans "Logout"%}</a></div>
+        <div class="colItem">
+<form action="/i18n/setlang/" method="post">
+    <input name="next" type="hidden" value="/accounts/profile" />
+    <select name="language">
+        {% for lang in LANGUAGES %}
+        <option value="{{ lang.0 }}" {% ifequal lang.0 LANGUAGE_CODE %} selected{% endifequal %}>{{ lang.1 }}</option>
+        {% endfor %}
+        </select>
+        <input class="button" type="submit" value="{% trans "Change" %}" />
+    </form>
+	<div class="footer">
+	<p class="cText"><a target="_blank" href="http://eurotux.com/products/eurotux-products/etva">ETVA v0.6</a></p>
+	</div>
+
+</div>
+	</div>
+        <div id="mainCol">
+    <div class="title1">{{user.groups.all.0}}: {% block section %}{% endblock%}</div>
+    <div class="space15">&nbsp;</div>
+	{% block mainCol %}
+	{% endblock%}
+	</div>
+</div>
+<div style="clear:both"></div>
+{% block usercontent %}
+{% endblock%}
+<!-- end user body -->
+{% endblock%}
+

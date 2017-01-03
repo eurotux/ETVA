@@ -1,0 +1,32 @@
+From cb21df093e5dd1fc0d13d3487c97cde842967a44 Mon Sep 17 00:00:00 2001
+From: Uri Lublin <uril@redhat.com>
+Date: Tue, 11 Sep 2012 10:09:58 +0300
+Subject: [PATCH] qxl: better cleanup for surface destroy
+
+Add back a call to qxl_spice_destroy_surface_wait_complete() in qxl_spice_destroy_surface_wait(),
+that was removed by commit c480bb7da465186b84d8427e068ef7502e47ffbf
+
+It is needed to complete surface-removal cleanup, for non async.
+For async, qxl_spice_destroy_surface_wait_complete is called upon operation completion.
+
+Signed-off-by: Uri Lublin <uril@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 753b8b0d77ba1b343a35f9679cc777ea10a62bba)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/qxl.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 038a8bb..67f7100 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -201,6 +201,7 @@ static void qxl_spice_destroy_surface_wait(PCIQXLDevice *qxl, uint32_t id,
+         spice_qxl_destroy_surface_async(&qxl->ssd.qxl, id, (uintptr_t)cookie);
+     } else {
+         qxl->ssd.worker->destroy_surface_wait(qxl->ssd.worker, id);
++        qxl_spice_destroy_surface_wait_complete(qxl, id);
+     }
+ }
+ 

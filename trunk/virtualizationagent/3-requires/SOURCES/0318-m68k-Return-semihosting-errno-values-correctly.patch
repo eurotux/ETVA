@@ -1,0 +1,36 @@
+From 27abe87223e9b2111f4953b680077b936429ada4 Mon Sep 17 00:00:00 2001
+From: Meador Inge <meadori@codesourcery.com>
+Date: Mon, 29 Oct 2012 12:05:09 +0000
+Subject: [PATCH] m68k: Return semihosting errno values correctly
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fixing a simple typo, s/errno/err/, that caused
+the error status from GDB semihosted system calls
+to be returned incorrectly.
+
+Signed-off-by: Meador Inge <meadori@codesourcery.com>
+Reviewed-by: Andreas Färber <afaerber@suse.de>
+Signed-off-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit aed91c1bff5e568c7b0fbd0e1e7e2f9e62409e73)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-m68k/m68k-semi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/target-m68k/m68k-semi.c b/target-m68k/m68k-semi.c
+index 3bb30cd..fed44ea 100644
+--- a/target-m68k/m68k-semi.c
++++ b/target-m68k/m68k-semi.c
+@@ -150,7 +150,7 @@ static void m68k_semi_cb(CPUM68KState *env, target_ulong ret, target_ulong err)
+     }
+     /* FIXME - handle put_user() failure */
+     put_user_u32(ret, args);
+-    put_user_u32(errno, args + 4);
++    put_user_u32(err, args + 4);
+ }
+ 
+ #define ARG(n)					\

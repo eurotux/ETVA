@@ -1,0 +1,198 @@
+From 4444050b9c63fa41fdf38ac450905ad633fc1bcd Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Tue, 4 Sep 2012 11:39:41 +0200
+Subject: [PATCH] spice: make number of surfaces runtime-configurable.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c           | 31 +++++++++++++++++--------------
+ hw/qxl.h           |  3 +--
+ ui/spice-display.c |  5 ++++-
+ ui/spice-display.h |  3 +--
+ 4 files changed, 23 insertions(+), 19 deletions(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 20e844f..c7b4e9a 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -238,7 +238,8 @@ static void qxl_spice_destroy_surfaces_complete(PCIQXLDevice *qxl)
+ {
+     trace_qxl_spice_destroy_surfaces_complete(qxl->id);
+     qemu_mutex_lock(&qxl->track_lock);
+-    memset(&qxl->guest_surfaces.cmds, 0, sizeof(qxl->guest_surfaces.cmds));
++    memset(qxl->guest_surfaces.cmds, 0,
++           sizeof(qxl->guest_surfaces.cmds) * qxl->ssd.num_surfaces);
+     qxl->guest_surfaces.count = 0;
+     qemu_mutex_unlock(&qxl->track_lock);
+ }
+@@ -347,7 +348,7 @@ static void init_qxl_rom(PCIQXLDevice *d)
+     rom->slot_id_bits  = MEMSLOT_SLOT_BITS;
+     rom->slots_start   = 1;
+     rom->slots_end     = NUM_MEMSLOTS - 1;
+-    rom->n_surfaces    = cpu_to_le32(NUM_SURFACES);
++    rom->n_surfaces    = cpu_to_le32(d->ssd.num_surfaces);
+ 
+     for (i = 0, n = 0; i < ARRAY_SIZE(qxl_modes); i++) {
+         fb = qxl_modes[i].y_res * qxl_modes[i].stride;
+@@ -451,9 +452,9 @@ static int qxl_track_command(PCIQXLDevice *qxl, struct QXLCommandExt *ext)
+         }
+         uint32_t id = le32_to_cpu(cmd->surface_id);
+ 
+-        if (id >= NUM_SURFACES) {
++        if (id >= qxl->ssd.num_surfaces) {
+             qxl_set_guest_bug(qxl, "QXL_CMD_SURFACE id %d >= %d", id,
+-                              NUM_SURFACES);
++                              qxl->ssd.num_surfaces);
+             return 1;
+         }
+         qemu_mutex_lock(&qxl->track_lock);
+@@ -529,7 +530,7 @@ static void interface_get_init_info(QXLInstance *sin, QXLDevInitInfo *info)
+     info->num_memslots_groups = NUM_MEMSLOTS_GROUPS;
+     info->internal_groupslot_id = 0;
+     info->qxl_ram_size = le32_to_cpu(qxl->shadow_rom.num_pages) << TARGET_PAGE_BITS;
+-    info->n_surfaces = NUM_SURFACES;
++    info->n_surfaces = qxl->ssd.num_surfaces;
+ }
+ 
+ static const char *qxl_mode_to_string(int mode)
+@@ -1438,7 +1439,7 @@ async_common:
+         QXLCookie *cookie = NULL;
+         QXLRect update = d->ram->update_area;
+ 
+-        if (d->ram->update_surface > NUM_SURFACES) {
++        if (d->ram->update_surface > d->ssd.num_surfaces) {
+             qxl_set_guest_bug(d, "QXL_IO_UPDATE_AREA: invalid surface id %d\n",
+                               d->ram->update_surface);
+             return;
+@@ -1538,7 +1539,7 @@ async_common:
+         }
+         break;
+     case QXL_IO_DESTROY_SURFACE_WAIT:
+-        if (val >= NUM_SURFACES) {
++        if (val >= d->ssd.num_surfaces) {
+             qxl_set_guest_bug(d, "QXL_IO_DESTROY_SURFACE (async=%d):"
+                              "%" PRIu64 " >= NUM_SURFACES", async, val);
+             goto cancel_async;
+@@ -1717,7 +1718,7 @@ static void qxl_dirty_surfaces(PCIQXLDevice *qxl)
+     vram_start = (uintptr_t)memory_region_get_ram_ptr(&qxl->vram_bar);
+ 
+     /* dirty the off-screen surfaces */
+-    for (i = 0; i < NUM_SURFACES; i++) {
++    for (i = 0; i < qxl->ssd.num_surfaces; i++) {
+         QXLSurfaceCmd *cmd;
+         intptr_t surface_offset;
+         int surface_size;
+@@ -1845,7 +1846,6 @@ static int qxl_init_common(PCIQXLDevice *qxl)
+     qxl->mode = QXL_MODE_UNDEFINED;
+     qxl->generation = 1;
+     qxl->num_memslots = NUM_MEMSLOTS;
+-    qxl->num_surfaces = NUM_SURFACES;
+     qemu_mutex_init(&qxl->track_lock);
+     qemu_mutex_init(&qxl->async_lock);
+     qxl->current_async = QXL_UNDEFINED_IO;
+@@ -1887,6 +1887,7 @@ static int qxl_init_common(PCIQXLDevice *qxl)
+     init_qxl_rom(qxl);
+     init_qxl_ram(qxl);
+ 
++    qxl->guest_surfaces.cmds = g_new0(QXLPHYSICAL, qxl->ssd.num_surfaces);
+     memory_region_init_ram(&qxl->vram_bar, "qxl.vram", qxl->vram_size);
+     vmstate_register_ram(&qxl->vram_bar, &qxl->pci.qdev);
+     memory_region_init_alias(&qxl->vram32_bar, "qxl.vram32", &qxl->vram_bar,
+@@ -2053,8 +2054,8 @@ static int qxl_post_load(void *opaque, int version)
+         qxl_create_guest_primary(d, 1, QXL_SYNC);
+ 
+         /* replay surface-create and cursor-set commands */
+-        cmds = g_malloc0(sizeof(QXLCommandExt) * (NUM_SURFACES + 1));
+-        for (in = 0, out = 0; in < NUM_SURFACES; in++) {
++        cmds = g_malloc0(sizeof(QXLCommandExt) * (d->ssd.num_surfaces + 1));
++        for (in = 0, out = 0; in < d->ssd.num_surfaces; in++) {
+             if (d->guest_surfaces.cmds[in] == 0) {
+                 continue;
+             }
+@@ -2154,9 +2155,10 @@ static VMStateDescription qxl_vmstate = {
+                              qxl_memslot, struct guest_slots),
+         VMSTATE_STRUCT(guest_primary.surface, PCIQXLDevice, 0,
+                        qxl_surface, QXLSurfaceCreate),
+-        VMSTATE_INT32_EQUAL(num_surfaces, PCIQXLDevice),
+-        VMSTATE_ARRAY(guest_surfaces.cmds, PCIQXLDevice, NUM_SURFACES, 0,
+-                      vmstate_info_uint64, uint64_t),
++        VMSTATE_INT32_EQUAL(ssd.num_surfaces, PCIQXLDevice),
++        VMSTATE_VARRAY_INT32(guest_surfaces.cmds, PCIQXLDevice,
++                             ssd.num_surfaces, 0,
++                             vmstate_info_uint64, uint64_t),
+         VMSTATE_UINT64(guest_cursor, PCIQXLDevice),
+         VMSTATE_END_OF_LIST()
+     },
+@@ -2184,6 +2186,7 @@ static Property qxl_properties[] = {
+         DEFINE_PROP_UINT32("vram_size_mb", PCIQXLDevice, vram32_size_mb, -1),
+         DEFINE_PROP_UINT32("vram64_size_mb", PCIQXLDevice, vram_size_mb, -1),
+         DEFINE_PROP_UINT32("vgamem_mb", PCIQXLDevice, vgamem_size_mb, 16),
++        DEFINE_PROP_INT32("surfaces", PCIQXLDevice, ssd.num_surfaces, 1024),
+         DEFINE_PROP_END_OF_LIST(),
+ };
+ 
+diff --git a/hw/qxl.h b/hw/qxl.h
+index 9cfedb7..5553824 100644
+--- a/hw/qxl.h
++++ b/hw/qxl.h
+@@ -40,7 +40,6 @@ typedef struct PCIQXLDevice {
+     uint32_t           revision;
+ 
+     int32_t            num_memslots;
+-    int32_t            num_surfaces;
+ 
+     uint32_t           current_async;
+     QemuMutex          async_lock;
+@@ -65,7 +64,7 @@ typedef struct PCIQXLDevice {
+     } guest_primary;
+ 
+     struct surfaces {
+-        QXLPHYSICAL    cmds[NUM_SURFACES];
++        QXLPHYSICAL    *cmds;
+         uint32_t       count;
+         uint32_t       max;
+     } guest_surfaces;
+diff --git a/ui/spice-display.c b/ui/spice-display.c
+index 1c31418..99bc665 100644
+--- a/ui/spice-display.c
++++ b/ui/spice-display.c
+@@ -317,6 +317,9 @@ void qemu_spice_display_init_common(SimpleSpiceDisplay *ssd, DisplayState *ds)
+     qemu_mutex_init(&ssd->lock);
+     ssd->mouse_x = -1;
+     ssd->mouse_y = -1;
++    if (ssd->num_surfaces == 0) {
++        ssd->num_surfaces = 1024;
++    }
+     ssd->bufsize = (16 * 1024 * 1024);
+     ssd->buf = g_malloc(ssd->bufsize);
+ }
+@@ -427,7 +430,7 @@ static void interface_get_init_info(QXLInstance *sin, QXLDevInitInfo *info)
+     info->num_memslots_groups = NUM_MEMSLOTS_GROUPS;
+     info->internal_groupslot_id = 0;
+     info->qxl_ram_size = ssd->bufsize;
+-    info->n_surfaces = NUM_SURFACES;
++    info->n_surfaces = ssd->num_surfaces;
+ }
+ 
+ static int interface_get_command(QXLInstance *sin, struct QXLCommandExt *ext)
+diff --git a/ui/spice-display.h b/ui/spice-display.h
+index bcff114..512ab78 100644
+--- a/ui/spice-display.h
++++ b/ui/spice-display.h
+@@ -32,8 +32,6 @@
+ #define MEMSLOT_GROUP_GUEST 1
+ #define NUM_MEMSLOTS_GROUPS 2
+ 
+-#define NUM_SURFACES 1024
+-
+ /*
+  * Internal enum to differenciate between options for
+  * io calls that have a sync (old) version and an _async (new)
+@@ -80,6 +78,7 @@ struct SimpleSpiceDisplay {
+     QXLInstance qxl;
+     uint32_t unique;
+     QemuPfConv *conv;
++    int32_t num_surfaces;
+ 
+     QXLRect dirty;
+     int notify;

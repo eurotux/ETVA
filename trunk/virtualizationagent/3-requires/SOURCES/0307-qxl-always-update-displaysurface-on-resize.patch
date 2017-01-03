@@ -1,0 +1,44 @@
+From 86f06f518a210e1ccc9e5e665164f7fb4a2bab81 Mon Sep 17 00:00:00 2001
+From: Gerd Hoffmann <kraxel@redhat.com>
+Date: Fri, 14 Sep 2012 22:09:23 +0200
+Subject: [PATCH] qxl: always update displaysurface on resize
+
+Don't try to be clever and skip displaysurface reinitialization in case
+the size hasn't changed.  Other parameters might have changed
+nevertheless, for example depth or stride, resulting in rendering being
+broken then.
+
+Trigger: boot linux guest with vesafb, start X11, make sure both vesafb
+and X11 use the display same resolution.  Then watch X11 screen being
+upside down.
+
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+(cherry picked from commit 0ec8df3974d2a4ff95b5fd4785b9bd3def7252f3)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/qxl-render.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/hw/qxl-render.c b/hw/qxl-render.c
+index e2e3fe2..b66c168 100644
+--- a/hw/qxl-render.c
++++ b/hw/qxl-render.c
+@@ -99,7 +99,6 @@ static void qxl_render_update_area_unlocked(PCIQXLDevice *qxl)
+ {
+     VGACommonState *vga = &qxl->vga;
+     int i;
+-    DisplaySurface *surface = vga->ds->surface;
+ 
+     if (qxl->guest_primary.resized) {
+         qxl->guest_primary.resized = 0;
+@@ -112,9 +111,6 @@ static void qxl_render_update_area_unlocked(PCIQXLDevice *qxl)
+                qxl->guest_primary.qxl_stride,
+                qxl->guest_primary.bytes_pp,
+                qxl->guest_primary.bits_pp);
+-    }
+-    if (surface->width != qxl->guest_primary.surface.width ||
+-        surface->height != qxl->guest_primary.surface.height) {
+         if (qxl->guest_primary.qxl_stride > 0) {
+             qemu_free_displaysurface(vga->ds);
+             qemu_create_displaysurface_from(qxl->guest_primary.surface.width,

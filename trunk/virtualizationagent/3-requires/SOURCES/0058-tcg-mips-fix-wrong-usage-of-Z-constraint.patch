@@ -1,0 +1,62 @@
+From 271d71e9ebfec527e61b6e793599cb3112aa6227 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Fri, 21 Sep 2012 18:20:25 +0200
+Subject: [PATCH] tcg-mips: fix wrong usage of 'Z' constraint
+
+The 'Z' constraint has been introduced to map the zero register. However
+when the op also accept a constant, there is no point to accept the zero
+register in addition.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/mips/tcg-target.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/tcg/mips/tcg-target.c b/tcg/mips/tcg-target.c
+index 74db83d..9293745 100644
+--- a/tcg/mips/tcg-target.c
++++ b/tcg/mips/tcg-target.c
+@@ -1453,24 +1453,24 @@ static const TCGTargetOpDef mips_op_defs[] = {
+     { INDEX_op_st16_i32, { "rZ", "r" } },
+     { INDEX_op_st_i32, { "rZ", "r" } },
+ 
+-    { INDEX_op_add_i32, { "r", "rZ", "rJZ" } },
++    { INDEX_op_add_i32, { "r", "rZ", "rJ" } },
+     { INDEX_op_mul_i32, { "r", "rZ", "rZ" } },
+     { INDEX_op_mulu2_i32, { "r", "r", "rZ", "rZ" } },
+     { INDEX_op_div_i32, { "r", "rZ", "rZ" } },
+     { INDEX_op_divu_i32, { "r", "rZ", "rZ" } },
+     { INDEX_op_rem_i32, { "r", "rZ", "rZ" } },
+     { INDEX_op_remu_i32, { "r", "rZ", "rZ" } },
+-    { INDEX_op_sub_i32, { "r", "rZ", "rJZ" } },
++    { INDEX_op_sub_i32, { "r", "rZ", "rJ" } },
+ 
+-    { INDEX_op_and_i32, { "r", "rZ", "rIZ" } },
++    { INDEX_op_and_i32, { "r", "rZ", "rI" } },
+     { INDEX_op_nor_i32, { "r", "rZ", "rZ" } },
+     { INDEX_op_not_i32, { "r", "rZ" } },
+     { INDEX_op_or_i32, { "r", "rZ", "rIZ" } },
+     { INDEX_op_xor_i32, { "r", "rZ", "rIZ" } },
+ 
+-    { INDEX_op_shl_i32, { "r", "rZ", "riZ" } },
+-    { INDEX_op_shr_i32, { "r", "rZ", "riZ" } },
+-    { INDEX_op_sar_i32, { "r", "rZ", "riZ" } },
++    { INDEX_op_shl_i32, { "r", "rZ", "ri" } },
++    { INDEX_op_shr_i32, { "r", "rZ", "ri" } },
++    { INDEX_op_sar_i32, { "r", "rZ", "ri" } },
+ 
+     { INDEX_op_ext8s_i32, { "r", "rZ" } },
+     { INDEX_op_ext16s_i32, { "r", "rZ" } },
+@@ -1479,8 +1479,8 @@ static const TCGTargetOpDef mips_op_defs[] = {
+     { INDEX_op_setcond_i32, { "r", "rZ", "rZ" } },
+     { INDEX_op_setcond2_i32, { "r", "rZ", "rZ", "rZ", "rZ" } },
+ 
+-    { INDEX_op_add2_i32, { "r", "r", "rZ", "rZ", "rJZ", "rJZ" } },
+-    { INDEX_op_sub2_i32, { "r", "r", "rZ", "rZ", "rJZ", "rJZ" } },
++    { INDEX_op_add2_i32, { "r", "r", "rZ", "rZ", "rJ", "rJ" } },
++    { INDEX_op_sub2_i32, { "r", "r", "rZ", "rZ", "rJ", "rJ" } },
+     { INDEX_op_brcond2_i32, { "rZ", "rZ", "rZ", "rZ" } },
+ 
+ #if TARGET_LONG_BITS == 32

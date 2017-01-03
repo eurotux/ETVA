@@ -31,6 +31,8 @@ Server.Remove.Form = Ext.extend(Ext.form.FormPanel, {
     }
     ,loadRecord:function(rec){
         this.getForm().loadRecord(rec);
+        var data = rec.data;
+        this.getForm().findField('keep_fs').setDisabled(data['unassigned']=='true');
     }
     ,onDelete:function(){
 
@@ -80,7 +82,8 @@ Server.Remove.Form = Ext.extend(Ext.form.FormPanel, {
 
             },
             failure: function(resp,opt) {
-                var response = Ext.util.JSON.decode(resp.responseText);
+                var response = new Array();
+                if( resp.responseText ) response = Ext.util.JSON.decode(resp.responseText);
                 Ext.ux.Logger.error(response['agent'],response['error']);
 
                 Ext.Msg.show({

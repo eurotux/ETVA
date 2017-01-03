@@ -13,7 +13,8 @@ class EtvaVlanPeer extends BaseEtvaVlanPeer
   const _OK_SOAPUPDATE_   = 'Vlans %info% sent to %name%';
 
   const _ERR_NAME_   = 'No spaces and no reserved words \'vlan\' or \'eth\' or \'bond\' or \'dev\'. Only alpha-numeric characters allowed!';
-  const _REGEXP_INVALID_NAME_ = '/^(((vlan|eth|bond)[a-zA-Z0-9_]*)|(dev[0-9_]*))$/';
+  const _REGEXP_INVALID_NAME_ = '/^(((vlan|eth|bond)[a-zA-Z0-9\-\_]*)|(dev[0-9\-\_]*))$/';
+  const _REGEXP_VALID_NAME_ = '/^[a-zA-Z][a-zA-Z0-9\-\_]+$/';
 
   public static function retrieveByClusterAndName($vlan_name, $cluster_id){
       $c = new Criteria();

@@ -1,0 +1,7 @@
+---
+telephonenumber: '$u->{telephonenumber}[0] ? join (",", map { $_ =~ s/([^\+\d]|\+351)//g && $_ || $_ } @{$u->{telephonenumber}}) : undef'
+mobile: '$u->{mobile}[0] ? join (",", map { $_ =~ s/([^\+\d]|\+351)//g && $_ || $_ } @{$u->{mobile}}) : undef'
+mail: '$u->{mail}[0] ? $u->{mail}[0] : undef'
+name: '"@{$u->{cn}}"'
+company: '"@{$u->{o}}"'
+name_n_company: '$u->{o} ? join(" ",@{$u->{cn}},"-",@{$u->{o}}) : join(" ",@{$u->{cn}})'

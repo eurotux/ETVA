@@ -1184,7 +1184,7 @@ ETFW.DHCP.Pool_Form = Ext.extend(Ext.form.FormPanel, {
                     Ext.MessageBox.show({
                         title:'Delete pool',
                         msg: 'You are about to delete this pool. <br />Are you sure you want to delete?',
-                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        buttons: Ext.MessageBox.YESNO,
                         fn: function(btn){
 
                             if(btn=='yes'){
@@ -1527,7 +1527,7 @@ ETFW.DHCP.Subnet_Form = Ext.extend(Ext.form.FormPanel, {
                     Ext.MessageBox.show({
                         title:'Delete pool',
                         msg: 'You are about to delete this subnet. <br />Are you sure you want to delete?',
-                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        buttons: Ext.MessageBox.YESNO,
                         fn: function(btn){
 
                             if(btn=='yes'){
@@ -2010,7 +2010,7 @@ ETFW.DHCP.Sharednetwork_Form = Ext.extend(Ext.form.FormPanel, {
                     Ext.MessageBox.show({
                         title:'Delete shared network',
                         msg: 'You are about to delete this shared network. <br />Are you sure you want to delete?',
-                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        buttons: Ext.MessageBox.YESNO,
                         fn: function(btn){
 
                             if(btn=='yes'){
@@ -2442,7 +2442,7 @@ ETFW.DHCP.Host_Form = Ext.extend(Ext.form.FormPanel, {
                     Ext.MessageBox.show({
                         title:'Delete host',
                         msg: 'You are about to delete this host. <br />Are you sure you want to delete?',
-                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        buttons: Ext.MessageBox.YESNO,
                         fn: function(btn){
 
                             if(btn=='yes'){
@@ -2929,7 +2929,7 @@ ETFW.DHCP.Group_Form = Ext.extend(Ext.form.FormPanel, {
                     Ext.MessageBox.show({
                         title:'Delete host group',
                         msg: 'You are about to delete this host group. <br />Are you sure you want to delete?',
-                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        buttons: Ext.MessageBox.YESNO,
                         fn: function(btn){
 
                             if(btn=='yes'){

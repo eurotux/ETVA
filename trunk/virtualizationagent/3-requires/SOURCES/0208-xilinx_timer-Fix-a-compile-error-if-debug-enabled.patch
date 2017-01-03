@@ -1,0 +1,38 @@
+From a3549ec06eddb918df91ac1fb420d63a4e185f55 Mon Sep 17 00:00:00 2001
+From: Chris Wulff <crwulff@gmail.com>
+Date: Sun, 9 Sep 2012 20:20:07 -0400
+Subject: [PATCH] xilinx_timer: Fix a compile error if debug enabled
+
+There was a missing include of qemu-log and a variable name in a printf was out
+of date.
+
+Signed-off-by: Chris Wulff <crwulff@gmail.com>
+Signed-off-by: Peter A. G. Crosthwaite <peter.crosthwaite@petalogix.com>
+(cherry picked from commit 8354cd722e0afae63bee3e4cb21c8f0ddb6874c2)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/xilinx_timer.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/hw/xilinx_timer.c b/hw/xilinx_timer.c
+index c02e6ca..f410487 100644
+--- a/hw/xilinx_timer.c
++++ b/hw/xilinx_timer.c
+@@ -24,6 +24,7 @@
+ 
+ #include "sysbus.h"
+ #include "ptimer.h"
++#include "qemu-log.h"
+ 
+ #define D(x)
+ 
+@@ -189,7 +190,7 @@ static void timer_hit(void *opaque)
+ {
+     struct xlx_timer *xt = opaque;
+     struct timerblock *t = xt->parent;
+-    D(fprintf(stderr, "%s %d\n", __func__, timer));
++    D(fprintf(stderr, "%s %d\n", __func__, xt->nr));
+     xt->regs[R_TCSR] |= TCSR_TINT;
+ 
+     if (xt->regs[R_TCSR] & TCSR_ARHT)

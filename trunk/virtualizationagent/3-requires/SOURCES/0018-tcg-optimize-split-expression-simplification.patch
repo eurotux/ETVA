@@ -1,0 +1,54 @@
+From 57b9c229c5347d305018d79ef00bbb6b13f83741 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Thu, 6 Sep 2012 16:47:13 +0200
+Subject: [PATCH] tcg/optimize: split expression simplification
+
+Split expression simplification in multiple parts so that a given op
+can appear multiple times. This patch should not change anything.
+
+Reviewed-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index 9c65474..63f970d 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -322,7 +322,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+             break;
+         }
+ 
+-        /* Simplify expression if possible. */
++        /* Simplify expression for "op r, a, 0 => mov r, a" cases */
+         switch (op) {
+         CASE_OP_32_64(add):
+         CASE_OP_32_64(sub):
+@@ -352,6 +352,12 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                 continue;
+             }
+             break;
++        default:
++            break;
++        }
++
++        /* Simplify expression for "op r, a, 0 => movi r, 0" cases */
++        switch (op) {
+         CASE_OP_32_64(mul):
+             if ((temps[args[2]].state == TCG_TEMP_CONST
+                 && temps[args[2]].val == 0)) {
+@@ -362,6 +368,12 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                 continue;
+             }
+             break;
++        default:
++            break;
++        }
++
++        /* Simplify expression for "op r, a, a => mov r, a" cases */
++        switch (op) {
+         CASE_OP_32_64(or):
+         CASE_OP_32_64(and):
+             if (args[1] == args[2]) {

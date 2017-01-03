@@ -1,0 +1,74 @@
+From 827c0a0c0ffaed5ad9e13f8e5ccf7a884b21c6b5 Mon Sep 17 00:00:00 2001
+From: Amit Shah <amit.shah@redhat.com>
+Date: Mon, 21 Mar 2011 20:32:58 +0100
+Subject: [PATCH] iohandlers: Add enable/disable_write_fd_handler() functions
+
+These will be used to provide a cleaner API for the nonblocking case.
+
+Signed-off-by: Amit Shah <amit.shah@redhat.com>
+Signed-off-by: Cole Robinson <crobinso@redhat.com>
+---
+ iohandler.c | 35 +++++++++++++++++++++++++++++++++++
+ main-loop.h |  3 +++
+ 2 files changed, 38 insertions(+)
+
+diff --git a/iohandler.c b/iohandler.c
+index a2d871b..c00fecd 100644
+--- a/iohandler.c
++++ b/iohandler.c
+@@ -45,6 +45,41 @@ typedef struct IOHandlerRecord {
+ static QLIST_HEAD(, IOHandlerRecord) io_handlers =
+     QLIST_HEAD_INITIALIZER(io_handlers);
+ 
++static IOHandlerRecord *find_iohandler(int fd)
++{
++    IOHandlerRecord *ioh;
++
++    QLIST_FOREACH(ioh, &io_handlers, next) {
++        if (ioh->fd == fd) {
++            return ioh;
++        }
++    }
++    return NULL;
++}
++
++void enable_write_fd_handler(int fd, IOHandler *fd_write)
++{
++    IOHandlerRecord *ioh;
++
++    ioh = find_iohandler(fd);
++    if (!ioh) {
++        return;
++    }
++
++    ioh->fd_write = fd_write;
++}
++
++void disable_write_fd_handler(int fd)
++{
++    IOHandlerRecord *ioh;
++
++    ioh = find_iohandler(fd);
++    if (!ioh) {
++        return;
++    }
++
++    ioh->fd_write = NULL;
++}
+ 
+ /* XXX: fd_read_poll should be suppressed, but an API change is
+    necessary in the character devices to suppress fd_can_read(). */
+diff --git a/main-loop.h b/main-loop.h
+index dce1cd9..eb31273 100644
+--- a/main-loop.h
++++ b/main-loop.h
+@@ -175,6 +175,9 @@ typedef void IOReadHandler(void *opaque, const uint8_t *buf, int size);
+ typedef int IOCanReadHandler(void *opaque);
+ typedef void IOHandler(void *opaque);
+ 
++void enable_write_fd_handler(int fd, IOHandler *fd_write);
++void disable_write_fd_handler(int fd);
++
+ /**
+  * qemu_set_fd_handler2: Register a file descriptor with the main loop
+  *

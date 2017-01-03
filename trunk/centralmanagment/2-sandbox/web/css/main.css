@@ -65,6 +65,10 @@ background-image:url(../images/icons/window.png) !important;
     background-image:url(../images/icons/lock_edit.png) !important;
 }
 
+.icon-pause {
+    background-image:url(../images/silk/icons/control_pause_blue.png) !important;
+}
+
 .icon-play {
     background-image:url(../images/silk/icons/control_play_blue.png) !important;
 }
@@ -546,6 +550,10 @@ background-image:url(../images/icons/leaf.gif) !important;
     color: green;
 }
 
+.suspended a span{
+    color: #ffcc00;
+}
+
 .some-active a span{
     color: orange;
 }
@@ -919,6 +927,12 @@ background-image:url(../images/icons/leaf.gif) !important;
 .icon-vm-stop{
      background-image:url(../images/silk/icons/control_stop_blue.png) !important;
 }
+.icon-vm-suspend{
+     background-image:url(../images/silk/icons/control_pause_blue.png) !important;
+}
+.icon-vm-resume{
+     background-image:url(../images/silk/icons/control_play_blue.png) !important;
+}
 .icon-vm-snapshots{
      background-image:url(../images/silk/icons/camera.png) !important;
 }
@@ -1212,6 +1226,10 @@ li.x-menu-list-item div {
     color:green;
 }
 
+.vm-state-suspended{
+    color:#ffcc00;
+}
+
 .vm-state-notrunning{
     color:red;
 }
@@ -1393,4 +1411,8 @@ li.x-menu-list-item div {
     background-repeat: no-repeat;
     padding-left: 18px;
     height: 16px;
+}
+
+.icon-engineering-mode {
+    background-image:url(../images/silk/icons/shield.png) !important;
 }

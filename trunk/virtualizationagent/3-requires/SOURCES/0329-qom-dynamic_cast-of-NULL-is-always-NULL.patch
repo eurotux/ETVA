@@ -1,0 +1,41 @@
+From b7846b2315003e75583a65e30cda84e533b8b501 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Fri, 23 Nov 2012 16:56:17 +0100
+Subject: [PATCH] qom: dynamic_cast of NULL is always NULL
+
+Trying to cast a NULL value will cause a crash.  Returning
+NULL is also sensible, and it is also what the type-unsafe
+DO_UPCAST macro does.
+
+Reported-by: Markus Armbruster <armbru@redhat.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Signed-off-by: Anthony Liguori <aliguori@us.ibm.com>
+(cherry picked from commit b7f43fe46029d8fd0594cd599fa2599dcce0f553)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ qom/object.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/qom/object.c b/qom/object.c
+index e3e9242..f33e84d 100644
+--- a/qom/object.c
++++ b/qom/object.c
+@@ -417,7 +417,7 @@ void object_delete(Object *obj)
+ 
+ Object *object_dynamic_cast(Object *obj, const char *typename)
+ {
+-    if (object_class_dynamic_cast(object_get_class(obj), typename)) {
++    if (obj && object_class_dynamic_cast(object_get_class(obj), typename)) {
+         return obj;
+     }
+ 
+@@ -430,7 +430,7 @@ Object *object_dynamic_cast_assert(Object *obj, const char *typename)
+ 
+     inst = object_dynamic_cast(obj, typename);
+ 
+-    if (!inst) {
++    if (!inst && obj) {
+         fprintf(stderr, "Object %p is not an instance of type %s\n",
+                 obj, typename);
+         abort();

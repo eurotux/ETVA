@@ -1,0 +1,81 @@
+diff -Naur elastix-callcenter.orig/modules/agent_console/index.php elastix-callcenter/modules/agent_console/index.php
+--- elastix-callcenter.orig/modules/agent_console/index.php	2014-02-17 15:46:09.163221650 +0000
++++ elastix-callcenter/modules/agent_console/index.php	2014-02-17 16:26:05.690862847 +0000
+@@ -56,6 +56,15 @@
+     $sDirPlantillas = (isset($arrConf['templates_dir'])) 
+         ? $arrConf['templates_dir'] : 'themes';
+     $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['theme'];
++
++    /*
++     * CMAR 05/02/2014
++     *  made this change to theme works...
++     */
++    if( file_exists("$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['mainTheme']) ){
++        $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['mainTheme'];
++    }
++
+     $smarty->assign("MODULE_NAME", $module_name);
+ 
+     // Incluir todas las bibliotecas y CSS necesarios
+@@ -729,6 +738,7 @@
+     }
+     $json = new Services_JSON();
+     $smarty->assign(array(
++        'ID_EXTENSION'      =>  $_SESSION['callcenter']['extension'],
+         'APPLY_UI_STYLES'   =>  $json->encode(array(
+             'break_commit'              =>  _tr('Take Break'),
+             'break_dismiss'             =>  _tr('Dismiss'),
+@@ -1549,4 +1559,4 @@
+     return $s;
+ }
+ 
+-?>
+\ No newline at end of file
++?>
+diff -Naur elastix-callcenter.orig/modules/agent_console/themes/default/css/elastix-callcenter.css elastix-callcenter/modules/agent_console/themes/default/css/elastix-callcenter.css
+--- elastix-callcenter.orig/modules/agent_console/themes/default/css/elastix-callcenter.css	2014-02-17 15:46:09.168221754 +0000
++++ elastix-callcenter/modules/agent_console/themes/default/css/elastix-callcenter.css	2014-02-17 16:26:49.677773965 +0000
+@@ -69,7 +69,7 @@
+     position: absolute;
+     left: 0;
+     top: 0;
+-    right: 0;
++    right: 20%;
+     padding: 0 0 0 0;
+     min-height: 0;
+     overflow: auto;
+@@ -88,9 +88,8 @@
+ .elastix-callcenter-barra-llamada {
+     position: absolute;
+     left: 0;
+-    right: 0;
++    right: 20%;
+     bottom: 0;
+-    width: 100%;
+     height: 7%;
+     padding: 0 0 0 0;
+ }
+diff -Naur elastix-callcenter.orig/modules/agent_console/themes/default/js/javascript.js elastix-callcenter/modules/agent_console/themes/default/js/javascript.js
+--- elastix-callcenter.orig/modules/agent_console/themes/default/js/javascript.js	2014-02-17 15:46:09.168221754 +0000
++++ elastix-callcenter/modules/agent_console/themes/default/js/javascript.js	2014-02-17 16:27:02.419037893 +0000
+@@ -745,8 +745,12 @@
+ 		switch (urlopentype) {
+ 		case 'iframe':
+ 			externalurl = url;
+-			$('#elastix-callcenter-cejillas-contenido').tabs('remove', 3);
++			//$('#elastix-callcenter-cejillas-contenido').tabs('remove', 3);
++			var lastTab_i = $('#elastix-callcenter-cejillas-contenido').tabs("length")-1;
++			if( lastTab_i < 1 ) lastTab_i++;
++			$('#elastix-callcenter-cejillas-contenido').tabs('remove', lastTab_i);
+ 			$('#elastix-callcenter-cejillas-contenido').tabs('add', '#tabs-externalurl', externalurl_title);
++                        $('#elastix-callcenter-cejillas-contenido').tabs('select', lastTab_i);
+ 			break;
+ 		case 'jsonp':
+ 			$.ajax(url, {
+@@ -760,4 +764,4 @@
+ 			break;
+ 		}
+ 	}
+-}
+\ No newline at end of file
++}

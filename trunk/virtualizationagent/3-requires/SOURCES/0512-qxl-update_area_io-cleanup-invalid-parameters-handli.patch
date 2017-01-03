@@ -1,0 +1,45 @@
+From 602cfd24371c092803680c45e6bf847b738f19f0 Mon Sep 17 00:00:00 2001
+From: Michael Tokarev <mjt@tls.msk.ru>
+Date: Wed, 19 Sep 2012 17:41:26 +0400
+Subject: [PATCH] qxl/update_area_io: cleanup invalid parameters handling
+
+This cleans up two additions of almost the same code in commits
+511b13e2c9 and ccc2960d654.  While at it, make error paths
+consistent (always use 'break' instead of 'return').
+
+Signed-off-by: Michael Tokarev <mjt@tls.msk.ru>
+Cc: Dunrong Huang <riegamaths@gmail.com>
+Cc: Alon Levy <alevy@redhat.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
+---
+ hw/qxl.c | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
+
+diff --git a/hw/qxl.c b/hw/qxl.c
+index 1aac04b..6b9d5d0 100644
+--- a/hw/qxl.c
++++ b/hw/qxl.c
+@@ -1547,20 +1547,13 @@ async_common:
+         if (d->ram->update_surface > d->ssd.num_surfaces) {
+             qxl_set_guest_bug(d, "QXL_IO_UPDATE_AREA: invalid surface id %d\n",
+                               d->ram->update_surface);
+-            return;
++            break;
+         }
+-        if (update.left >= update.right || update.top >= update.bottom) {
++        if (update.left >= update.right || update.top >= update.bottom ||
++            update.left < 0 || update.top < 0) {
+             qxl_set_guest_bug(d,
+                     "QXL_IO_UPDATE_AREA: invalid area (%ux%u)x(%ux%u)\n",
+                     update.left, update.top, update.right, update.bottom);
+-            return;
+-        }
+-
+-        if (update.left < 0 || update.top < 0 || update.left >= update.right ||
+-            update.top >= update.bottom) {
+-            qxl_set_guest_bug(d, "QXL_IO_UPDATE_AREA: "
+-                              "invalid area(%d,%d,%d,%d)\n", update.left,
+-                              update.right, update.top, update.bottom);
+             break;
+         }
+         if (async == QXL_ASYNC) {

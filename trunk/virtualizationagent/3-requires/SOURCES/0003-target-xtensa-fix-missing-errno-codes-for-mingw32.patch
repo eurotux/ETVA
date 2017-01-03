@@ -1,0 +1,61 @@
+From 86eaada772e86d7049155ef84385b9e553c40dc4 Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Thu, 6 Sep 2012 04:36:46 +0400
+Subject: [PATCH] target-xtensa: fix missing errno codes for mingw32
+
+Put the following errno value mappings under #ifdef:
+
+xtensa-semi.c: In function 'errno_h2g':
+xtensa-semi.c:113: error: 'ENOTBLK' undeclared (first use in this function)
+xtensa-semi.c:113: error: (Each undeclared identifier is reported only once
+xtensa-semi.c:113: error: for each function it appears in.)
+xtensa-semi.c:113: error: array index in initializer not of integer type
+xtensa-semi.c:113: error: (near initialization for 'guest_errno')
+xtensa-semi.c:124: error: 'ETXTBSY' undeclared (first use in this function)
+xtensa-semi.c:124: error: array index in initializer not of integer type
+xtensa-semi.c:124: error: (near initialization for 'guest_errno')
+xtensa-semi.c:134: error: 'ELOOP' undeclared (first use in this function)
+xtensa-semi.c:134: error: array index in initializer not of integer type
+xtensa-semi.c:134: error: (near initialization for 'guest_errno')
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-xtensa/xtensa-semi.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/target-xtensa/xtensa-semi.c b/target-xtensa/xtensa-semi.c
+index e745bef..52be07a 100644
+--- a/target-xtensa/xtensa-semi.c
++++ b/target-xtensa/xtensa-semi.c
+@@ -110,7 +110,9 @@ static uint32_t errno_h2g(int host_errno)
+         [ENOMEM]        = TARGET_ENOMEM,
+         [EACCES]        = TARGET_EACCES,
+         [EFAULT]        = TARGET_EFAULT,
++#ifdef ENOTBLK
+         [ENOTBLK]       = TARGET_ENOTBLK,
++#endif
+         [EBUSY]         = TARGET_EBUSY,
+         [EEXIST]        = TARGET_EEXIST,
+         [EXDEV]         = TARGET_EXDEV,
+@@ -121,7 +123,9 @@ static uint32_t errno_h2g(int host_errno)
+         [ENFILE]        = TARGET_ENFILE,
+         [EMFILE]        = TARGET_EMFILE,
+         [ENOTTY]        = TARGET_ENOTTY,
++#ifdef ETXTBSY
+         [ETXTBSY]       = TARGET_ETXTBSY,
++#endif
+         [EFBIG]         = TARGET_EFBIG,
+         [ENOSPC]        = TARGET_ENOSPC,
+         [ESPIPE]        = TARGET_ESPIPE,
+@@ -131,7 +135,9 @@ static uint32_t errno_h2g(int host_errno)
+         [EDOM]          = TARGET_EDOM,
+         [ERANGE]        = TARGET_ERANGE,
+         [ENOSYS]        = TARGET_ENOSYS,
++#ifdef ELOOP
+         [ELOOP]         = TARGET_ELOOP,
++#endif
+     };
+ 
+     if (host_errno == 0) {

@@ -17,14 +17,14 @@
 \contentsline {subsubsection}{\numberline {3.4.2.1}Adicionar m\IeC {\'a}quina virtual}{29}{subsubsection.3.4.2.1}
 \contentsline {subsubsection}{\numberline {3.4.2.2}Editar m\IeC {\'a}quina virtual}{35}{subsubsection.3.4.2.2}
 \contentsline {subsubsection}{\numberline {3.4.2.3}Remover m\IeC {\'a}quina virtual}{38}{subsubsection.3.4.2.3}
-\contentsline {subsubsection}{\numberline {3.4.2.4}Abrir m\IeC {\'a}quina virtual numa consola VNC}{38}{subsubsection.3.4.2.4}
+\contentsline {subsubsection}{\numberline {3.4.2.4}Abrir m\IeC {\'a}quina virtual numa consola VNC}{39}{subsubsection.3.4.2.4}
 \contentsline {subsubsection}{\numberline {3.4.2.5}Iniciar/parar m\IeC {\'a}quina virtual}{39}{subsubsection.3.4.2.5}
 \contentsline {subsubsection}{\numberline {3.4.2.6}Migrar m\IeC {\'a}quina virtual}{40}{subsubsection.3.4.2.6}
-\contentsline {subsubsection}{\numberline {3.4.2.7}Snapshots}{40}{subsubsection.3.4.2.7}
-\contentsline {subsection}{\numberline {3.4.3}Armazenamento}{40}{subsection.3.4.3}
-\contentsline {subsubsection}{\numberline {3.4.3.1}Administra\IeC {\c c}\IeC {\~a}o de Physical Volumes}{41}{subsubsection.3.4.3.1}
+\contentsline {subsubsection}{\numberline {3.4.2.7}Snapshots}{41}{subsubsection.3.4.2.7}
+\contentsline {subsection}{\numberline {3.4.3}Armazenamento}{41}{subsection.3.4.3}
+\contentsline {subsubsection}{\numberline {3.4.3.1}Administra\IeC {\c c}\IeC {\~a}o de Physical Volumes}{42}{subsubsection.3.4.3.1}
 \contentsline {subsubsection}{\numberline {3.4.3.2}Administra\IeC {\c c}\IeC {\~a}o de Volume Groups}{44}{subsubsection.3.4.3.2}
-\contentsline {subsubsection}{\numberline {3.4.3.3}Administra\IeC {\c c}\IeC {\~a}o de Logical Volumes}{46}{subsubsection.3.4.3.3}
+\contentsline {subsubsection}{\numberline {3.4.3.3}Administra\IeC {\c c}\IeC {\~a}o de Logical Volumes}{47}{subsubsection.3.4.3.3}
 \contentsline {subsection}{\numberline {3.4.4}Desligar n\IeC {\'o}}{49}{subsection.3.4.4}
 \contentsline {section}{\numberline {3.5}M\IeC {\'a}quina virtual}{50}{section.3.5}
 \contentsline {subsection}{\numberline {3.5.1}Informa\IeC {\c c}\IeC {\~a}o do servidor}{50}{subsection.3.5.1}
@@ -56,3 +56,4 @@
 \contentsline {subsection}{\numberline {4.1.6}Release 1.2.2}{80}{subsection.4.1.6}
 \contentsline {subsection}{\numberline {4.1.7}Release 2.0.0 e 1.3}{81}{subsection.4.1.7}
 \contentsline {subsection}{\numberline {4.1.8}Release 2.1.0}{82}{subsection.4.1.8}
+\contentsline {subsection}{\numberline {4.1.9}Release 2.2}{83}{subsection.4.1.9}

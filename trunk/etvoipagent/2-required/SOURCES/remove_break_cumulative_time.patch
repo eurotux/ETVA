@@ -1,0 +1,32 @@
+--- modules/agent_console/index.php.orig	2014-06-25 18:19:35.000000000 +0100
++++ modules/agent_console/index.php	2014-06-25 18:20:25.000000000 +0100
+@@ -603,7 +603,8 @@
+     if (!is_null($estado['pauseinfo'])) {
+         $_SESSION['callcenter']['break_iniciado'] = $estado['pauseinfo']['pausestart'];
+         $iDuracionPausaActual = time() - strtotime($estado['pauseinfo']['pausestart']);
+-        $iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
++        //$iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
++        $iDuracionPausa = $iDuracionPausaActual;
+         $smarty->assign(array(
+             'CLASS_BOTON_BREAK'             =>  'elastix-callcenter-boton-unbreak',
+             'CLASS_ESTADO_AGENTE_INICIAL'   =>  'elastix-callcenter-class-estado-break',
+@@ -1120,7 +1121,8 @@
+     if (!is_null($estado['pauseinfo'])) {
+         $sNombrePausa = $estado['pauseinfo']['pausename'];
+         $iDuracionPausaActual = time() - strtotime($estado['pauseinfo']['pausestart']);
+-        $iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
++        //$iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
++        $iDuracionPausa = $iDuracionPausaActual;
+     } else {
+         /* Si esta condición se cumple, entonces se ha perdido el evento 
+          * pauseexit durante la espera en manejarSesionActiva_checkStatus().
+@@ -1257,7 +1259,8 @@
+                     }
+                     @session_start();
+                     $iDuracionPausaActual = time() - strtotime($evento['pause_start']);
+-                    $iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
++                    //$iDuracionPausa = $iDuracionPausaActual + $_SESSION['callcenter']['break_acumulado'];
++                    $iDuracionPausa = $iDuracionPausaActual;
+                     $_SESSION['callcenter']['break_iniciado'] = $evento['pause_start'];
+                     break;
+                 case 'hold':

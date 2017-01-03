@@ -1,0 +1,37 @@
+From 83b433ca59f0c15d0d50a83e4d3fe04ee743bd3f Mon Sep 17 00:00:00 2001
+From: Michael Tokarev <mjt@tls.msk.ru>
+Date: Sun, 21 Oct 2012 22:52:54 +0400
+Subject: [PATCH] fix CONFIG_QEMU_HELPERDIR generation again
+
+commit 38f419f35225 fixed a breakage with CONFIG_QEMU_HELPERDIR
+which has been introduced by 8bf188aa18ef7a8.  But while techinically
+that fix has been correct, all other similar variables are handled
+differently.  Make it consistent, and let scripts/create_config
+expand and capitalize the variable properly like for all other
+qemu_*dir variables.
+
+Signed-off-by: Michael Tokarev <mjt@tls.msk.ru>
+(cherry picked from commit f354b1a1ee7a1c72d51b42808724a2b10eec315f)
+
+Conflicts:
+
+	configure
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index 2de0900..4d11fe3 100755
+--- a/configure
++++ b/configure
+@@ -3201,7 +3201,7 @@ echo "sysconfdir=$sysconfdir" >> $config_host_mak
+ echo "qemu_confdir=$qemu_confdir" >> $config_host_mak
+ echo "qemu_datadir=$qemu_datadir" >> $config_host_mak
+ echo "qemu_docdir=$qemu_docdir" >> $config_host_mak
+-echo "CONFIG_QEMU_HELPERDIR=\"`eval echo $libexecdir`\"" >> $config_host_mak
++echo "qemu_helperdir=$libexecdir" >> $config_host_mak
+ 
+ echo "ARCH=$ARCH" >> $config_host_mak
+ if test "$debug_tcg" = "yes" ; then

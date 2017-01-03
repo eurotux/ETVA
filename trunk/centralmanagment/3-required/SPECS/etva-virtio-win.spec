@@ -1,12 +1,12 @@
 Summary: Perl module that implements for Version Objects
 Name: etva-virtio-win
 Version: 0.1
-Release: 74
+Release: 102
 License: GPLv2
 URL: http://linux-kvm.com/
 Packager: Nuno Fernandes <npf@eurotux.com>
 Group: Applications/System
-Source: http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/bin/virtio-win-%{version}-%{release}.iso
+Source: https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-%{version}.%{release}/virtio-win-%{version}.%{release}.iso
 Source1: NuxisGuestServer.exe
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Requires: etva-centralmanagement
@@ -40,6 +40,12 @@ mkisofs -r -R -J -p "Eurotux Informatica S.A." -A "KVM GPLPv %{version}-%{releas
 /usr/share/etva-isos/*
 
 %changelog
+* Thu May 14 2015 Carlos Rodrigues <cmar@eurotux.com> - 0.1-102-1
+- Update virtio drivers to 0.1-102.
+
+* Thu May 14 2015 Carlos Rodrigues <cmar@eurotux.com> - 0.1-96-1
+- Update virtio drivers to 0.1-96.
+
 * Fri Nov 29 2013 Nuno Fernandes <npf@eurotux.com> - 0.1-74-1
 - Update virtio drivers to 0.1-74.
 

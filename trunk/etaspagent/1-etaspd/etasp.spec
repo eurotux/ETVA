@@ -1,5 +1,5 @@
 name:           etva-etasp
-Version: 2.1.1
+Version: 2.2
 Release:        beta
 Summary:        ETASP Agent
 License:        GPL

@@ -1,0 +1,26 @@
+From 184cd01131b21f1c88fdf584903a031f6ea16e13 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Thu, 30 Aug 2012 15:00:33 +0200
+Subject: [PATCH] ehci: Properly cleanup packets on cancel
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+(cherry picked from commit 0e7953525f52aa6c098dc0c1ce0b4a80ce82da45)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/usb/hcd-ehci.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/hw/usb/hcd-ehci.c b/hw/usb/hcd-ehci.c
+index 78a248f..4fe85c8 100644
+--- a/hw/usb/hcd-ehci.c
++++ b/hw/usb/hcd-ehci.c
+@@ -747,6 +747,8 @@ static void ehci_free_packet(EHCIPacket *p)
+     trace_usb_ehci_packet_action(p->queue, p, "free");
+     if (p->async == EHCI_ASYNC_INFLIGHT) {
+         usb_cancel_packet(&p->packet);
++        usb_packet_unmap(&p->packet, &p->sgl);
++        qemu_sglist_destroy(&p->sgl);
+     }
+     QTAILQ_REMOVE(&p->queue->packets, p, next);
+     usb_packet_cleanup(&p->packet);

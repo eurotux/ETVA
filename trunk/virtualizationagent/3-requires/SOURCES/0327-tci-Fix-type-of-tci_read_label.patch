@@ -1,0 +1,36 @@
+From 716aeaad202396c1be319e1da334d0179e27b475 Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Mon, 19 Nov 2012 12:43:14 -0800
+Subject: [PATCH] tci: Fix type of tci_read_label
+
+Fixes the pointer truncation that was occurring for branches.
+
+Cc: Stefan Weil <sw@weilnetz.de>
+Cc: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Reviewed-by: Stefan Weil <sw@weilnetz.de>
+Tested-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit c6c5063c7a5bb1d3fe6b9931a1ec15294e39b8b1)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tci.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tci.c b/tci.c
+index a4f7b78..bb456d2 100644
+--- a/tci.c
++++ b/tci.c
+@@ -338,9 +338,9 @@ static uint64_t tci_read_ri64(uint8_t **tb_ptr)
+ }
+ #endif
+ 
+-static target_ulong tci_read_label(uint8_t **tb_ptr)
++static tcg_target_ulong tci_read_label(uint8_t **tb_ptr)
+ {
+-    target_ulong label = tci_read_i(tb_ptr);
++    tcg_target_ulong label = tci_read_i(tb_ptr);
+     assert(label != 0);
+     return label;
+ }

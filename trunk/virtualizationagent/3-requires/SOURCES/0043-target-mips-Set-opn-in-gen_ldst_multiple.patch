@@ -1,0 +1,52 @@
+From 74a3fc19bbb2e5f0b398bb6d66d0a6890d543f38 Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Tue, 18 Sep 2012 21:55:32 -0700
+Subject: [PATCH] target-mips: Set opn in gen_ldst_multiple.
+
+Used by MIPS_DEBUG, when enabled.
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Acked-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-mips/translate.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/target-mips/translate.c b/target-mips/translate.c
+index 7ab769f..c31f91c 100644
+--- a/target-mips/translate.c
++++ b/target-mips/translate.c
+@@ -9855,6 +9855,7 @@ static void gen_andi16 (CPUMIPSState *env, DisasContext *ctx)
+ static void gen_ldst_multiple (DisasContext *ctx, uint32_t opc, int reglist,
+                                int base, int16_t offset)
+ {
++    const char *opn = "ldst_multiple";
+     TCGv t0, t1;
+     TCGv_i32 t2;
+ 
+@@ -9874,19 +9875,24 @@ static void gen_ldst_multiple (DisasContext *ctx, uint32_t opc, int reglist,
+     switch (opc) {
+     case LWM32:
+         gen_helper_lwm(cpu_env, t0, t1, t2);
++        opn = "lwm";
+         break;
+     case SWM32:
+         gen_helper_swm(cpu_env, t0, t1, t2);
++        opn = "swm";
+         break;
+ #ifdef TARGET_MIPS64
+     case LDM:
+         gen_helper_ldm(cpu_env, t0, t1, t2);
++        opn = "ldm";
+         break;
+     case SDM:
+         gen_helper_sdm(cpu_env, t0, t1, t2);
++        opn = "sdm";
+         break;
+ #endif
+     }
++    (void)opn;
+     MIPS_DEBUG("%s, %x, %d(%s)", opn, reglist, offset, regnames[base]);
+     tcg_temp_free(t0);
+     tcg_temp_free(t1);

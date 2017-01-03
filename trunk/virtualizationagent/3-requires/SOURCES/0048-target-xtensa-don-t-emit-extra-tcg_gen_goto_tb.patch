@@ -1,0 +1,32 @@
+From fc976b44ecc603bfd16a1d03fb17d894a0bf0acd Mon Sep 17 00:00:00 2001
+From: Max Filippov <jcmvbkbc@gmail.com>
+Date: Fri, 21 Sep 2012 02:59:50 +0400
+Subject: [PATCH] target-xtensa: don't emit extra tcg_gen_goto_tb
+
+Unconditional gen_check_loop_end at the end of disas_xtensa_insn
+can emit tcg_gen_goto_tb with slot id already used in the TB (e.g. when
+TB ends at LEND with a branch).
+
+Signed-off-by: Max Filippov <jcmvbkbc@gmail.com>
+Cc: qemu-stable <qemu-stable@nongnu.org>
+Signed-off-by: malc <av1474@comtv.ru>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ target-xtensa/translate.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/target-xtensa/translate.c b/target-xtensa/translate.c
+index 7a1c528..b6643eb 100644
+--- a/target-xtensa/translate.c
++++ b/target-xtensa/translate.c
+@@ -2520,7 +2520,9 @@ static void disas_xtensa_insn(DisasContext *dc)
+         break;
+     }
+ 
+-    gen_check_loop_end(dc, 0);
++    if (dc->is_jmp == DISAS_NEXT) {
++        gen_check_loop_end(dc, 0);
++    }
+     dc->pc = dc->next_pc;
+ 
+     return;

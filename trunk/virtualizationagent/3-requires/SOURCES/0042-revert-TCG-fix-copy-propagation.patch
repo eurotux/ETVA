@@ -1,0 +1,82 @@
+From 30a6eee8b0018ac7698bcd4e4821b8b8d8498ba1 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Mon, 10 Sep 2012 13:14:12 +0200
+Subject: [PATCH] revert "TCG: fix copy propagation"
+
+Given the copy propagation breakage on 32-bit hosts has been fixed
+commit e31b0a7c050711884ad570fe73df806520953618 can be reverted.
+
+Cc: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/optimize.c | 15 ++++++---------
+ tcg/tcg.h      |  5 -----
+ 2 files changed, 6 insertions(+), 14 deletions(-)
+
+diff --git a/tcg/optimize.c b/tcg/optimize.c
+index fba0ed9..10d9773 100644
+--- a/tcg/optimize.c
++++ b/tcg/optimize.c
+@@ -107,15 +107,12 @@ static TCGOpcode op_to_movi(TCGOpcode op)
+     }
+ }
+ 
+-static void tcg_opt_gen_mov(TCGContext *s, TCGArg *gen_args, TCGArg dst,
+-                            TCGArg src, int nb_temps, int nb_globals)
++static void tcg_opt_gen_mov(TCGArg *gen_args, TCGArg dst, TCGArg src,
++                            int nb_temps, int nb_globals)
+ {
+         reset_temp(dst, nb_temps, nb_globals);
+         assert(temps[src].state != TCG_TEMP_COPY);
+-        /* Don't try to copy if one of temps is a global or either one
+-           is local and another is register */
+-        if (src >= nb_globals && dst >= nb_globals &&
+-            tcg_arg_is_local(s, src) == tcg_arg_is_local(s, dst)) {
++        if (src >= nb_globals) {
+             assert(temps[src].state != TCG_TEMP_CONST);
+             if (temps[src].state != TCG_TEMP_HAS_COPY) {
+                 temps[src].state = TCG_TEMP_HAS_COPY;
+@@ -444,7 +441,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                     gen_opc_buf[op_index] = INDEX_op_nop;
+                 } else {
+                     gen_opc_buf[op_index] = op_to_mov(op);
+-                    tcg_opt_gen_mov(s, gen_args, args[0], args[1],
++                    tcg_opt_gen_mov(gen_args, args[0], args[1],
+                                     nb_temps, nb_globals);
+                     gen_args += 2;
+                 }
+@@ -482,7 +479,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                     gen_opc_buf[op_index] = INDEX_op_nop;
+                 } else {
+                     gen_opc_buf[op_index] = op_to_mov(op);
+-                    tcg_opt_gen_mov(s, gen_args, args[0], args[1], nb_temps,
++                    tcg_opt_gen_mov(gen_args, args[0], args[1], nb_temps,
+                                     nb_globals);
+                     gen_args += 2;
+                 }
+@@ -507,7 +504,7 @@ static TCGArg *tcg_constant_folding(TCGContext *s, uint16_t *tcg_opc_ptr,
+                 break;
+             }
+             if (temps[args[1]].state != TCG_TEMP_CONST) {
+-                tcg_opt_gen_mov(s, gen_args, args[0], args[1],
++                tcg_opt_gen_mov(gen_args, args[0], args[1],
+                                 nb_temps, nb_globals);
+                 gen_args += 2;
+                 args += 2;
+diff --git a/tcg/tcg.h b/tcg/tcg.h
+index d710694..8fbbc81 100644
+--- a/tcg/tcg.h
++++ b/tcg/tcg.h
+@@ -458,11 +458,6 @@ static inline TCGv_i64 tcg_temp_local_new_i64(void)
+ void tcg_temp_free_i64(TCGv_i64 arg);
+ char *tcg_get_arg_str_i64(TCGContext *s, char *buf, int buf_size, TCGv_i64 arg);
+ 
+-static inline bool tcg_arg_is_local(TCGContext *s, TCGArg arg)
+-{
+-    return s->temps[arg].temp_local;
+-}
+-
+ #if defined(CONFIG_DEBUG_TCG)
+ /* If you call tcg_clear_temp_count() at the start of a section of
+  * code which is not supposed to leak any TCG temporaries, then

@@ -1,0 +1,59 @@
+From 3a750594f73232c5e47ca0f57d53594208d64033 Mon Sep 17 00:00:00 2001
+From: Richard Henderson <rth@twiddle.net>
+Date: Sun, 25 Mar 2012 21:36:28 +0200
+Subject: [PATCH] tcg-sparc: Mask shift immediates to avoid illegal insns.
+
+The xtensa-test image generates a sra_i32 with count 0x40.
+Whether this is accident of tcg constant propagation or
+originating directly from the instruction stream is immaterial.
+
+Signed-off-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ tcg/sparc/tcg-target.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/tcg/sparc/tcg-target.c b/tcg/sparc/tcg-target.c
+index e625aa3..be5c170 100644
+--- a/tcg/sparc/tcg-target.c
++++ b/tcg/sparc/tcg-target.c
+@@ -1154,13 +1154,16 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc, const TCGArg *args,
+         goto gen_arith;
+     case INDEX_op_shl_i32:
+         c = SHIFT_SLL;
+-        goto gen_arith;
++    do_shift32:
++        /* Limit immediate shift count lest we create an illegal insn.  */
++        tcg_out_arithc(s, args[0], args[1], args[2] & 31, const_args[2], c);
++        break;
+     case INDEX_op_shr_i32:
+         c = SHIFT_SRL;
+-        goto gen_arith;
++        goto do_shift32;
+     case INDEX_op_sar_i32:
+         c = SHIFT_SRA;
+-        goto gen_arith;
++        goto do_shift32;
+     case INDEX_op_mul_i32:
+         c = ARITH_UMUL;
+         goto gen_arith;
+@@ -1281,13 +1284,16 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc, const TCGArg *args,
+         break;
+     case INDEX_op_shl_i64:
+         c = SHIFT_SLLX;
+-        goto gen_arith;
++    do_shift64:
++        /* Limit immediate shift count lest we create an illegal insn.  */
++        tcg_out_arithc(s, args[0], args[1], args[2] & 63, const_args[2], c);
++        break;
+     case INDEX_op_shr_i64:
+         c = SHIFT_SRLX;
+-        goto gen_arith;
++        goto do_shift64;
+     case INDEX_op_sar_i64:
+         c = SHIFT_SRAX;
+-        goto gen_arith;
++        goto do_shift64;
+     case INDEX_op_mul_i64:
+         c = ARITH_MULX;
+         goto gen_arith;

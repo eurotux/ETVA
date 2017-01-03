@@ -1,0 +1,32 @@
+From dbf39b3e858410f349893c4cd69d3c8a774d1109 Mon Sep 17 00:00:00 2001
+From: Hans de Goede <hdegoede@redhat.com>
+Date: Mon, 10 Sep 2012 13:49:46 +0200
+Subject: [PATCH] usb-redir: Revert usb-redir part of commit 93bfef4c
+
+Commit 93bfef4c6e4b23caea9d51e1099d06433d8835a4 makes qemu-devices
+which report the qemu version string to the guest in some way use a
+qemu_get_version function which reports a machine-specific version string.
+
+However usb-redir does not expose the qemu version to the guest, only to
+the usbredir-host as part of the initial handshake. This can then be logged
+on the usbredir-host side for debugging purposes and is otherwise completely
+unused! For debugging purposes it is important to have the real qemu version
+in there, rather then the machine-specific version.
+
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ hw/usb/redirect.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/hw/usb/redirect.c b/hw/usb/redirect.c
+index 57e6289..78e93a7 100644
+--- a/hw/usb/redirect.c
++++ b/hw/usb/redirect.c
+@@ -875,7 +875,6 @@ static void usbredir_chardev_close_bh(void *opaque)
+ static void usbredir_chardev_open(USBRedirDevice *dev)
+ {
+     uint32_t caps[USB_REDIR_CAPS_SIZE] = { 0, };
+-    char version[32];
+     int flags = 0;
+ 
+     /* Make sure any pending closes are handled (no-op if none pending) */

@@ -1,0 +1,51 @@
+From 13b54c48dfc00101273f93c402a92681ce37db2d Mon Sep 17 00:00:00 2001
+From: "Peter A. G. Crosthwaite" <peter.crosthwaite@petalogix.com>
+Date: Mon, 17 Sep 2012 13:41:39 +1000
+Subject: [PATCH] xilinx.h: Error check when setting links
+
+Assert that the ethernet and dma controller are sucessfully linked to their
+peers.
+
+Signed-off-by: Peter A. G. Crosthwaite <peter.crosthwaite@petalogix.com>
+(cherry picked from commit 4b5e52101f9ad077d1c016f2b7130e2fdae6d2da)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/xilinx.h | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/hw/xilinx.h b/hw/xilinx.h
+index df06a00..35d6681 100644
+--- a/hw/xilinx.h
++++ b/hw/xilinx.h
+@@ -55,13 +55,16 @@ xilinx_axiethernet_create(NICInfo *nd, StreamSlave *peer,
+                           int txmem, int rxmem)
+ {
+     DeviceState *dev;
++    Error *errp = NULL;
++
+     qemu_check_nic_model(nd, "xlnx.axi-ethernet");
+ 
+     dev = qdev_create(NULL, "xlnx.axi-ethernet");
+     qdev_set_nic_properties(dev, nd);
+     qdev_prop_set_uint32(dev, "rxmem", rxmem);
+     qdev_prop_set_uint32(dev, "txmem", txmem);
+-    object_property_set_link(OBJECT(dev), OBJECT(peer), "tx_dev", NULL);
++    object_property_set_link(OBJECT(dev), OBJECT(peer), "tx_dev", &errp);
++    assert_no_error(errp);
+     qdev_init_nofail(dev);
+     sysbus_mmio_map(sysbus_from_qdev(dev), 0, base);
+     sysbus_connect_irq(sysbus_from_qdev(dev), 0, irq);
+@@ -74,8 +77,11 @@ xilinx_axiethernetdma_init(DeviceState *dev, StreamSlave *peer,
+                            target_phys_addr_t base, qemu_irq irq,
+                            qemu_irq irq2, int freqhz)
+ {
++    Error *errp = NULL;
++
+     qdev_prop_set_uint32(dev, "freqhz", freqhz);
+-    object_property_set_link(OBJECT(dev), OBJECT(peer), "tx_dev", NULL);
++    object_property_set_link(OBJECT(dev), OBJECT(peer), "tx_dev", &errp);
++    assert_no_error(errp);
+     qdev_init_nofail(dev);
+ 
+     sysbus_mmio_map(sysbus_from_qdev(dev), 0, base);

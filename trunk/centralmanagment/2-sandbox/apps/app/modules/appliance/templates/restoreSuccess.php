@@ -23,7 +23,7 @@ Appliance.Restore.BackupGrid = Ext.extend(Ext.grid.GridPanel, {
                                 title: <?php echo json_encode(__('Appliance not registered')) ?>,
                                 width:300,
                                 msg: <?php echo json_encode(__('Need to register Appliance first before restoring backup.<br><br>Register now?')) ?>,
-                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                buttons: Ext.MessageBox.YESNO,
                                 fn: function(btn){
                                     if(btn=='yes'){
                                         this.fireEvent('needRegister');                                        
@@ -93,7 +93,7 @@ Appliance.Restore.BackupGrid = Ext.extend(Ext.grid.GridPanel, {
                                 Ext.MessageBox.show({
                                     title: <?php echo json_encode(__('Restore backup')) ?>,
                                     msg: String.format(<?php echo json_encode(__('You are about to restore {0}. <br />Are you sure you want to restore?')) ?>,selected.data['file_name']),
-                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                    buttons: Ext.MessageBox.YESNO,
                                     fn: function(btn){
 
                                         if(btn=='yes')
@@ -119,7 +119,7 @@ Appliance.Restore.BackupGrid = Ext.extend(Ext.grid.GridPanel, {
                                 Ext.MessageBox.show({
                                     title: <?php echo json_encode(__('Delete backup')) ?>,
                                     msg: String.format(<?php echo json_encode(__('You are about to delete {0}. <br />Are you sure you want to delete?')) ?>,selected.data['file_name']),
-                                    buttons: Ext.MessageBox.YESNOCANCEL,
+                                    buttons: Ext.MessageBox.YESNO,
                                     fn: function(btn){
 
                                         if(btn=='yes')

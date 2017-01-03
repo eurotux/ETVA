@@ -68,7 +68,7 @@ User.List.Grid = Ext.extend(Ext.grid.GridPanel, {
             remoteSort: true            
             ,listeners:{
                 beforesave:{scope:this,fn:function(store,data){
-                    console.log(data);
+                    //console.log(data);
                 }}
             }
         });        
@@ -101,8 +101,11 @@ User.List.Grid = Ext.extend(Ext.grid.GridPanel, {
                             var usercreate_win = new User.Create.Main({ title:item.text });
                             usercreate_win.on({
                                                 'onSave': { scope:this, fn: function(){
-                                                    console.log('onSave fired');
-                                                    Ext.getCmp('user-list-grid').fireEvent('onUpdate');
+                                                    //console.log('onSave fired');
+                                                    // delay reload
+                                                    setTimeout(function(){
+                                                        Ext.getCmp('user-list-grid').fireEvent('onUpdate');
+                                                    }, 200);
                                                 }}
                                             });
                         },
@@ -179,7 +182,7 @@ User.List.Grid = Ext.extend(Ext.grid.GridPanel, {
         if (sm.hasSelection()){
             Ext.Msg.show({
                 title: <?php echo json_encode(__('Remove user')) ?>,
-                buttons: Ext.MessageBox.YESNOCANCEL,
+                buttons: Ext.MessageBox.YESNO,
                 msg: String.format(<?php echo json_encode(__('Remove user {0} ?')) ?>,sel.data.username),
                 scope:this,
                 fn: function(btn){

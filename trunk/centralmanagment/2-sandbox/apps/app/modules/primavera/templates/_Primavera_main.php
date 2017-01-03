@@ -219,7 +219,7 @@ Primavera.Main = function(config){
                         handler: function(item) {
                                             Ext.Msg.show({
                                                 title: item.text,
-                                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                                buttons: Ext.MessageBox.YESNO,
                                                 scope:this,
                                                 msg: String.format(<?php echo json_encode(__('Do you wan\'t stop Primavera?')) ?>),
                                                 fn: function(btn){
@@ -274,7 +274,7 @@ Primavera.Main = function(config){
                         handler: function(item) {
                                             Ext.Msg.show({
                                                 title: item.text,
-                                                buttons: Ext.MessageBox.YESNOCANCEL,
+                                                buttons: Ext.MessageBox.YESNO,
                                                 scope:this,
                                                 msg: String.format(<?php echo json_encode(__('Do you wan\'t start Primavera?')) ?>),
                                                 fn: function(btn){

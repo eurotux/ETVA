@@ -43,29 +43,74 @@ Vlan.CreateForm = Ext.extend(Ext.form.FormPanel,{
                         invalidText : <?php echo json_encode(__(EtvaVlanPeer::_ERR_NAME_)) ?>,
                         allowBlank : false,
                         validator  : function(v){
-                            var t = <?php echo EtvaVlanPeer::_REGEXP_INVALID_NAME_; ?>;
-                            return !t.test(v);
+                            var tinvalid = <?php echo EtvaVlanPeer::_REGEXP_INVALID_NAME_; ?>;
+                            var tvalid = <?php echo EtvaVlanPeer::_REGEXP_VALID_NAME_; ?>;
+                            return tvalid.test(v) && !tinvalid.test(v);
                         }
                     },
                     {
-                        name:'vlan_tagged'
+                        name:'vlan_tagged',
+                        id: 'vlan-tagged-checkbox'
                         ,xtype:'checkbox'
                         ,fieldLabel: <?php echo json_encode(__('Tagged')) ?>
                         ,listeners:{
                             check:function(chkbox,checked){
 
+                                Ext.getCmp('vlan-intf-combo').reset();
+                                Ext.getCmp('vlan-intf-combo').getStore().clearFilter();
+
                                 if(checked)
+                                {
                                     vlanId_field.enable();
+                                }
                                 else
                                 {
                                     vlanId_field.clearInvalid();
                                     vlanId_field.disable();
+                                    Ext.getCmp('vlan-intf-combo').getStore().filter('inuse',false);
                                 }
-
                             }
                         }
                         ,allowBlank:false
-                    },vlanId_field]
+                    },vlanId_field
+                    ,{
+                        xtype: 'fieldset',
+                        //checkboxToggle: true,
+                        collapsible: true,
+                        collapsed: true,
+                        title: <?php echo json_encode(__('Advanced')) ?>,
+                        items: [
+                            {
+                                xtype: 'combo',
+                                name: 'vlan_intf',
+                                id: 'vlan-intf-combo',
+                                fieldLabel: <?php echo json_encode(__('Network interface')) ?>,
+                                //emptyText: __('Select...'),
+                                width: 100,
+                                triggerAction: 'all',
+                                valueField: 'device',
+                                displayField: 'device',
+                                store: new Ext.data.Store({
+                                            proxy: new Ext.data.HttpProxy({url:'vlan/jsonListNICAvailable'}),
+                                            baseParams: {'cid':this.cluster_id,'level':'cluster'},
+                                            reader: new Ext.data.JsonReader({
+                                                                root:'data',
+                                                                fields:['device','inuse']
+                                            })
+                                            ,listeners: {
+                                                load : function(store,data,options){
+                                                    Ext.getCmp('vlan-intf-combo').reset();
+                                                    Ext.getCmp('vlan-intf-combo').getStore().clearFilter();
+                                                    if( !Ext.getCmp('vlan-tagged-checkbox').getValue() ){
+                                                        store.filter('inuse',false);
+                                                    }
+                                                }
+                                            }
+                                })
+                            }
+                        ]
+                    }
+		]
                 ,buttons:[{
                         text:__('Save')
                         ,formBind:true
@@ -129,7 +174,6 @@ Vlan.CreateForm = Ext.extend(Ext.form.FormPanel,{
     }
     ,submit:function(){
 
-//        console.log(this);
         if(this.form.isValid()) {
 
             var alldata = this.form.getValues();
@@ -145,6 +189,10 @@ Vlan.CreateForm = Ext.extend(Ext.form.FormPanel,{
                 if(vlan_id) send_data['vlanid'] = vlan_id;
             }
             else send_data['vlan_untagged'] = 1;
+
+            if( alldata['vlan_intf'] ){
+                send_data['intf'] = alldata['vlan_intf'];
+            }
 
             var conn = new Ext.data.Connection({
                     listeners:{
@@ -182,55 +230,57 @@ Vlan.CreateForm = Ext.extend(Ext.form.FormPanel,{
                         }
 
                         this.ownerCt.fireEvent('onVlanSuccess');
-
                     },
                     failure: function(resp,opt) {
 
                         var response = Ext.decode(resp.responseText);
 
                         if(response && resp.status!=401){
-                            var errors = response['error'];
 
-                            if(!response['ok']){
+                            if(!response['oks']){
                                 View.notify({html:<?php echo json_encode(__('Network could not be created!')) ?>});
                                 response['ok'] = [];
                             }else{
                                  View.notify({html: <?php echo json_encode(__('Network added to system!')) ?>});
                             }
 
-                            var oks = response['ok'];
-                            var errors_length = errors.length;
-                            var oks_length = oks.length;
-                            var agents = '<br>';
+                            if( response['errors'] ){
+                                var errors = response['errors'];
+                                var oks = response['oks'];
+                                var errors_length = errors.length;
+                                var oks_length = oks.length;
+                                var agents = '<br>';
 
-                            var logger_errormsg = [String.format(<?php echo json_encode(__('Network {0} could not be initialized: {1}')) ?>,name ,'')];
-                            var logger_okmsg = [String.format(<?php echo json_encode(__('Network {0} initialized: ')) ?>,name)];
+                                var logger_errormsg = [String.format(<?php echo json_encode(__('Network {0} could not be initialized: {1}')) ?>,name ,'')];
+                                var logger_okmsg = [String.format(<?php echo json_encode(__('Network {0} initialized: ')) ?>,name)];
 
-                            var logger_error = [];
-                            var logger_ok = [];
-                            for(var i=0;i<errors_length;i++){
-                                agents += '<b>'+errors[i]['agent']+'</b> - '+errors[i]['error']+'<br>';
-                                logger_error[i] = '<b>'+errors[i]['agent']+'</b>('+errors[i]['error']+')';
+                                var logger_error = [];
+                                var logger_ok = [];
+                                for(var i=0;i<errors_length;i++){
+                                    agents += '<b>'+errors[i]['agent']+'</b> - '+errors[i]['info']+'<br>';
+                                    logger_error[i] = '<b>'+errors[i]['agent']+'</b>('+errors[i]['info']+')';
+                                }
+
+                                for(var i=0;i<oks_length;i++){
+                                    logger_ok[i] = '<b>'+oks[i]['agent']+'</b>';
+                                }
+
+                                logger_errormsg += logger_error.join(', ');
+                                logger_okmsg += logger_ok.join(', ');
+
+                                Ext.ux.Logger.error(response['agent'],logger_errormsg);
+                                if(logger_ok.length>0) Ext.ux.Logger.info(response['agent'],logger_okmsg);
+
+                                var msg = String.format(<?php echo json_encode(__('Network {0} could not be initialized: {1}')) ?>,name,'<br>'+agents);
+
+                                Ext.Msg.show({
+                                    title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
+                                    width:300,
+                                    buttons: Ext.MessageBox.OK,
+                                    msg: msg,
+                                    icon: Ext.MessageBox.ERROR});
+
                             }
-
-                            for(var i=0;i<oks_length;i++){
-                                logger_ok[i] = '<b>'+oks[i]['agent']+'</b>';
-                            }
-
-                            logger_errormsg += logger_error.join(', ');
-                            logger_okmsg += logger_ok.join(', ');
-
-                            Ext.ux.Logger.error(response['agent'],logger_errormsg);
-                            if(logger_ok.length>0) Ext.ux.Logger.info(response['agent'],logger_okmsg);
-
-                            var msg = String.format(<?php echo json_encode(__('Network {0} could not be initialized: {1}')) ?>,name,'<br>'+agents);
-
-                            Ext.Msg.show({
-                                title: String.format(<?php echo json_encode(__('Error {0}')) ?>,response['agent']),
-                                width:300,
-                                buttons: Ext.MessageBox.OK,
-                                msg: msg,
-                                icon: Ext.MessageBox.ERROR});
                         }
 
                         this.ownerCt.fireEvent('onVlanFailure');
@@ -256,8 +306,8 @@ Vlan.CreateForm = Ext.extend(Ext.form.FormPanel,{
 
 Vlan.Create = Ext.extend(Ext.Window,{
     modal:true,
-    width:300,
-    height:180,
+    width:360,
+    height:260,
     layout:'fit',
     border:false,
     defaults:{autoScroll: true},

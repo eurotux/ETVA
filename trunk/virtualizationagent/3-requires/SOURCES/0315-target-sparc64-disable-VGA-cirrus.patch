@@ -1,0 +1,34 @@
+From 86bdf44c2a36411a6fee9beb934d3010a0ba7862 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Mon, 22 Oct 2012 00:50:58 +0200
+Subject: [PATCH] target-sparc64: disable VGA cirrus
+
+OpenBIOS on sparc64 only support Standard VGA and not Cirrus VGA. Don't
+build Cirrus VGA support so that it can't be selected.
+
+This fixes the breakage introduced by commit f2898771.
+
+Reported-by: Richard Henderson <rth@twiddle.net>
+Cc: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+Tested-by: Richard Henderson <rth@twiddle.net>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit 0356404b0f1da939657cad1efeb556745cd430d5)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ default-configs/sparc64-softmmu.mak | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/default-configs/sparc64-softmmu.mak b/default-configs/sparc64-softmmu.mak
+index c9a36c1..03e8b42 100644
+--- a/default-configs/sparc64-softmmu.mak
++++ b/default-configs/sparc64-softmmu.mak
+@@ -6,7 +6,6 @@ CONFIG_M48T59=y
+ CONFIG_PTIMER=y
+ CONFIG_VGA=y
+ CONFIG_VGA_PCI=y
+-CONFIG_VGA_CIRRUS=y
+ CONFIG_SERIAL=y
+ CONFIG_PARALLEL=y
+ CONFIG_PCKBD=y

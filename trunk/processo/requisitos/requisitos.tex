@@ -1,0 +1,195 @@
+\documentclass[a4paper,11pt,titlepage]{article}
+\usepackage{ucs}
+\usepackage[utf8]{inputenc}
+\usepackage[portuges]{babel}
+\usepackage{graphicx}
+\usepackage{indentfirst}
+\usepackage{textcomp}
+\usepackage[pdftex, colorlinks=false]{hyperref}
+\pagestyle{headings}
+
+\author{}
+\title{ETVA \\ Levantamento e Análise de Requisitos}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\newpage
+
+% Descrição e objectivos
+\section{Descrição e objectivos}
+
+\subsection{Contexto}
+
+Com o projecto \emph{Eurotux Virtual Appliance} (ETVA), a Eurotux pretende desenvolver uma plataforma computacional com o formato de \emph{appliance} e ponteciadora de adopção de programas e ferramentas \emph{open-source} em ambiente empresarial.
+
+% Area de negócio
+\subsection{Área de negócio}
+O produto resultante deste projecto destina-se às pequenas e médias empresas (PMEs).
+% Objectivos
+\subsection{Objectivos}
+O objectivo deste projecto é desenvolver uma plataforma computacional em formato \emph{appliance} que integra várias programas e ferramentas \emph{open-source}.
+
+% Análise de Mercado
+\section{Análise de Mercado}
+\subsection{Panorama Actual}
+
+Existem algumas soluções actualmente no mercado, das quais destacamos as seguintes:
+
+\begin{itemize}
+    \item RedHat Enterprise Virtualization - plataforma de virtualização disponibilizada pela RedHat com suporte de virtualização para Servidores e Desktop
+    \item VMware - plataforma disponibilizada pela VMware, Inc. sobre uma licença proprietária e destaca-se pela possibilidade de correr nos vários sistemas operativos: Microsoft Windows, Linux e Mac OS X.
+    \item VirtualBox - plataforma de virtualização criada pela empresa Innotek GmbH e adquirida pela Sun Microsystems que actualmente é desenvolvida pela Oracle Corporation.
+    \item oVirt - plataforma de virtualização desenvolvida pela RedHat baseada no libvirt.
+    \item Virtual Iron - plataforma de virtualização da Virtual Iron Software, posteriormente adquirida pela Oracle Corporation, que se caracteriza como sendo a primeira a oferecer suporte para Intel VT-x AMD-V, mas que actualmente encontra-se desactiva.
+\end{itemize}
+
+Alguma destas plataformas são \emph{open-source}, enquanto outras estão sobre uma licença comercial.
+
+Além disso, não encontramos uma plataforma que possibilitasse a integração de outras ferramentas e serviços como \emph{firewall}, mail server, mail exchanger, VoIP server, entre outros.
+
+Outra mais valia de desenvolver uma plataforma própria de virtualização em formato \emph{appliance} é que facilita o suporte e a extensibilidade a outras soluções e adaptação aos diversos clientes.
+
+\subsection{Clientes}
+Clientes que pretendam a integração de vários produtos e serviços numa única solução.
+\subsection{Utilizadores}
+Administradores de sistemas.
+
+% Restrições
+\section{Restrições}
+\subsection{Restrições sobre a solução}
+
+  \noindent \textbf{Descrição}: O sistema deverá correr em ambiente Linux, nomeadamente em CentOS(5.5). \\
+  \textbf{Razão}: Não se pretende a alteração do sistema operativo suportado nas soluções existentes. \\
+  \textbf{Critérios de ajuste}: O produto deve ser testado para garantir a sua compatibilidade com o CentOS(5.5). \\
+
+  \noindent \textbf{Descrição}: O sistemas de virtualização suportados serão XEN(3.4) e KVM. \\
+  \textbf{Razão}: Sistema de virtualização utilizados actualmente. \\
+
+  \noindent \textbf{Descrição}: Utilização da biblioteca libvirt para suporte aos sistemas de virtualização. \\
+  \textbf{Razão}: Facilidade na interacção com os diferentes sistemas de virtualização. \\
+
+  \noindent \textbf{Descrição}: Front-end WEB desenvolvido em PHP. \\
+  \textbf{Razão}: Por interposição. \\
+
+  \noindent \textbf{Descrição}: Front-end WEB deverá ser compatível com os \emph{browsers} o Mozilla Firefox(3.6) e Internet Explorer 7. \\
+  \textbf{Razão}:  Garantir compatibilidade com os \emph{browsers} mais utilizados nos vários ambientes. \\
+  \textbf{Critérios de ajuste}: O produto deve ser testado para garantir a sua compatibilidade com \emph{browsers} Mozilla Firefox(3.6) e Internet Explorer 7. \\
+
+  \noindent \textbf{Descrição}: Processos de interacção com os sistemas de virtualização desenvolvido em Perl. \\
+  \textbf{Razão}: Por interposição. \\
+
+\subsection{Off-the-shelf software}
+Libvirt(GPL) é uma API que possibilita o suporte aos diversos sistemas de virtualização.
+Disponibiliza ainda vários \emph{bindings} para as várias linguagens: Perl, Python, OCaml, Ruby, Java e PHP.
+
+% Requisitos
+\section{Requisitos}
+\subsection{Requisitos Funcionais}
+
+\begin{enumerate}
+
+\item \textbf{O sistema deverá suportar a gestão de máquinas virtuais: listar, criar, remover, editar, migrar;} \\
+\underline{Descrição:} Para cada nó de virtualização deve ser possível listar, criar, remover, editar e migrar as máquinas virtuais.
+
+\item \textbf{O sistema deverá suportar a gestão de redes virtuais com/sem suporte a VLAN: criar e remover.} \\
+\underline{Descrição:} O sistema central deve possibilitar a gestão de redes virtuais com possibilidade de suporte de VLAN.
+
+\item \textbf{O sistema deverá suportar a gestão de interfaces de rede: adicionar e remover.} \\
+\underline{Descrição:} Em cada nó deve ser possível efectuar a gestão de interfaces de rede para cada máquina virtual.
+
+\item \textbf{O sistema deverá disponibilizar a gestão da \emph{pool} de \emph{mac-address}.} \\
+\underline{Descrição:} No sistema central deve ser possível efectuar a gestão da \emph{pool} de \emph{mac-address} e da atribuição a cada interface de rede.
+
+\item \textbf{O sistema deverá suportar gestão de discos de vários suportes: LVM, ficheiros, Storage partilhada.} \\
+
+\item \textbf{O sistema deverá disponibilizar a gestão de isos e imagens de instalações.} \\
+\underline{Descrição:} Deve existir a possibilidade de incorporar isos de imagens de instalações para serem usadas nas máquinas virtuais.
+
+\item \textbf{O sistema deverá suportar a gestão de nós: aprovar/negar nós.} \\
+\underline{Descrição:} O sistema central deve possibilitar o registos com aprovação e negação de nós de virtualização.
+
+\item \textbf{Interacção com sistema através de um \emph{front-end} \emph{WEB}.} \\
+
+\item \textbf{O sistema apresentará dois formatos: com suporte \emph{small and medium business} (\emph{SMB} - um CM e nó na mesma máquina ) ou  suporte \emph{Enterprise} ( um CM e vários nós um por cada máquina ).} \\
+
+\item \textbf{Tem de existir um cliente \emph{command-line} que possibilita as operações essenciais de utilização do CM.} \\
+\underline{Descrição:} A interacção por cliente \emph{command-line} é essencial para facilitar as tarefas de administração.
+
+\item \textbf{Suporte/integração dos serviços da Eurotux: ETFW, ETMX, ETVoIP, ETMailServer} \\
+\underline{Descrição:} O sistema deverá integrar os outros serviços e ferramentas da Eurotux: Firewall (ETFW), Mail Exchanger (ETMX), VoIP Server (ETVoIP), Mail Server (ETMailServer).
+
+\item \textbf{\emph{Deployment} automático de versões.} \\
+\underline{Descrição:} O \emph{Deployment} automático de versões é essencial para a disponibilização de \emph{releases} de produtos.
+
+\item \textbf{Geração de isos de instalação do sistemas para os dois formatos: \emph{SMB} e \emph{Enterprise}.} \\
+\underline{Descrição:} A geração de isos é fundamental para a instalação dos sistemas nos vários clientes.
+
+\item \textbf{Suporte a importação/exportação de máquinas virtuais utilizado o standard \emph{OVF}.} \\
+\underline{Descrição:} O suporte do standard \emph{OVF} permite a importação/exportação de máquinas virtuais de diferentes sistemas de virtualização.
+
+\end{enumerate}
+
+\subsection{Requisitos Não-Funcionais}
+O sistema requer autenticação.
+\subsection{Requisitos Visuais}
+\subsection{Requisitos de Usabilidade}
+O sistema tem de ser multi-língua.
+
+% Glossário
+\section{Glossário}
+
+{\Large \textbf{E}}
+
+\begin{itemize}
+\item \textbf{ETVA} - Eurotux Virtual Appliance
+\item \textbf{ETFW} - Eurotux Firewall
+\item \textbf{ETMailServer} - Eurotux Mail Server
+\item \textbf{ETMX} - Eurotux Mail Exchanger
+\item \textbf{ETVoIP} - Eurotux Voice over IP
+\end{itemize}
+
+{\Large \textbf{K}}
+
+\begin{itemize}
+\item \textbf{KVM} - Kernel-based Virtual Machine
+\end{itemize}
+
+{\Large \textbf{L}}
+
+\begin{itemize}
+\item \textbf{Libvirt} - API de suporte aos sistemas de virtualização
+\item \textbf{LVM} - Logical Volume Management
+\end{itemize}
+
+{\Large \textbf{O}}
+
+\begin{itemize}
+\item \textbf{OVF} - Open Virtualization Format
+\end{itemize}
+
+{\Large \textbf{S}}
+
+\begin{itemize}
+\item \textbf{SMB} - Small and medium businesses
+\end{itemize}
+
+{\Large \textbf{V}}
+
+\begin{itemize}
+\item \textbf{VoIP} - Voice over IP
+\end{itemize}
+
+{\Large \textbf{X}}
+
+\begin{itemize}
+\item \textbf{XEN} - sistema de virtualização
+\end{itemize}
+
+% Anexos
+\section{Anexos}
+
+\end{document}
+

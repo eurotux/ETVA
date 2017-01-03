@@ -1,0 +1,76 @@
+From aa487e4e6ee6e2c9863ca0494c85682a362b07d1 Mon Sep 17 00:00:00 2001
+From: Jason Baron <jbaron@redhat.com>
+Date: Wed, 8 Aug 2012 14:29:12 -0400
+Subject: [PATCH] pcie: drop version_id field for live migration
+
+While testing q35 live migration, I found that the migration would abort with
+the following error: "Unknown savevm section type 76".
+
+The error is due to this check failing in 'vmstate_load_state()':
+
+    while(field->name) {
+        if ((field->field_exists &&
+             field->field_exists(opaque, version_id)) ||
+            (!field->field_exists &&
+             field->version_id <= version_id)) {
+
+The VMSTATE_PCIE_DEVICE() currently has a 'version_id' set to 2. However,
+'version_id' in the above check is 1. And thus we fail to load the pcie device
+field. Further the code returns to 'qemu_loadvm_state()' which produces the
+error that I saw.
+
+I'm proposing to fix this by simply dropping the 'version_id' field from
+VMSTATE_PCIE_DEVICE(). VMSTATE_PCI_DEVICE() defines no such field and further
+the vmstate_pcie_device that VMSTATE_PCI_DEVICE() refers to is already
+versioned. Thus, any versioning issues could be detected at the vmsd level.
+
+Taking a step back, I think that the 'field->version_id' should be compared
+against a saved version number for the field not the 'version_id'. Futhermore,
+once vmstate_load_state() is called recursively on another vmsd, the check of:
+
+    if (version_id > vmsd->version_id) {
+        return -EINVAL;
+    }
+
+Will never fail since version_id is always equal to vmsd->version_id. So I'm
+wondering why we aren't storing the vmsd version id of the source in the
+migration stream?
+
+This patch also renames the 'name' field of vmstate_pcie_device from:
+PCIDevice -> PCIEDevice to differentiate it from vmstate_pci_device.
+
+Signed-off-by: Jason Baron <jbaron@redhat.com>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+(cherry picked from commit 1de53459272d89c52bb21b45d5d970de40fbb642)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/pci.c  | 2 +-
+ hw/pcie.h | 1 -
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/hw/pci.c b/hw/pci.c
+index 4d95984..f855cf3 100644
+--- a/hw/pci.c
++++ b/hw/pci.c
+@@ -439,7 +439,7 @@ const VMStateDescription vmstate_pci_device = {
+ };
+ 
+ const VMStateDescription vmstate_pcie_device = {
+-    .name = "PCIDevice",
++    .name = "PCIEDevice",
+     .version_id = 2,
+     .minimum_version_id = 1,
+     .minimum_version_id_old = 1,
+diff --git a/hw/pcie.h b/hw/pcie.h
+index b8ab0c7..4889194 100644
+--- a/hw/pcie.h
++++ b/hw/pcie.h
+@@ -133,7 +133,6 @@ extern const VMStateDescription vmstate_pcie_device;
+ 
+ #define VMSTATE_PCIE_DEVICE(_field, _state) {                        \
+     .name       = (stringify(_field)),                               \
+-    .version_id = 2,                                                 \
+     .size       = sizeof(PCIDevice),                                 \
+     .vmsd       = &vmstate_pcie_device,                              \
+     .flags      = VMS_STRUCT,                                        \

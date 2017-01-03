@@ -1,0 +1,65 @@
+From 649fc9f8faa6a2122b92fabebb8ee2b3e5a3b3cc Mon Sep 17 00:00:00 2001
+From: Stefan Weil <sw@weilnetz.de>
+Date: Sat, 22 Sep 2012 21:13:28 +0200
+Subject: [PATCH] net/socket: Fix compiler warning (regression for MinGW)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Commit 213fd5087e2e4e2da10ad266df0ba950cf7618bf removed a type cast
+which is needed for MinGW:
+
+net/socket.c:136: warning:
+ pointer targets in passing argument 2 of ‘sendto’ differ in signedness
+/usr/lib/gcc/amd64-mingw32msvc/4.4.4/../../../../amd64-mingw32msvc/include/winsock2.h:1313: note:
+ expected ‘const char *’ but argument is of type ‘const uint8_t *’
+
+Add a 'qemu_sendto' macro which provides that type cast where needed
+and use the new macro instead of 'sendto'.
+
+Signed-off-by: Stefan Weil <sw@weilnetz.de>
+Signed-off-by: Stefan Hajnoczi <stefanha@gmail.com>
+(cherry picked from commit 73062dfe6be0050dbd43ce3516e935ebb2545add)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ net/socket.c  | 6 +++---
+ qemu-common.h | 5 +++++
+ 2 files changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/net/socket.c b/net/socket.c
+index c3e55b8..83f21b5 100644
+--- a/net/socket.c
++++ b/net/socket.c
+@@ -131,9 +131,9 @@ static ssize_t net_socket_receive_dgram(NetClientState *nc, const uint8_t *buf,
+     ssize_t ret;
+ 
+     do {
+-        ret = sendto(s->fd, buf, size, 0,
+-                     (struct sockaddr *)&s->dgram_dst,
+-                     sizeof(s->dgram_dst));
++        ret = qemu_sendto(s->fd, buf, size, 0,
++                          (struct sockaddr *)&s->dgram_dst,
++                          sizeof(s->dgram_dst));
+     } while (ret == -1 && errno == EINTR);
+ 
+     if (ret == -1 && errno == EAGAIN) {
+diff --git a/qemu-common.h b/qemu-common.h
+index e5c2bcd..15d9e4e 100644
+--- a/qemu-common.h
++++ b/qemu-common.h
+@@ -223,9 +223,14 @@ int qemu_pipe(int pipefd[2]);
+ #endif
+ 
+ #ifdef _WIN32
++/* MinGW needs a type cast for the 'buf' argument. */
+ #define qemu_recv(sockfd, buf, len, flags) recv(sockfd, (void *)buf, len, flags)
++#define qemu_sendto(sockfd, buf, len, flags, destaddr, addrlen) \
++    sendto(sockfd, (const void *)buf, len, flags, destaddr, addrlen)
+ #else
+ #define qemu_recv(sockfd, buf, len, flags) recv(sockfd, buf, len, flags)
++#define qemu_sendto(sockfd, buf, len, flags, destaddr, addrlen) \
++    sendto(sockfd, buf, len, flags, destaddr, addrlen)
+ #endif
+ 
+ /* Error handling.  */

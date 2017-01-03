@@ -1,0 +1,46 @@
+From b4f1ea1393ed81bf530ba4502d79039487085321 Mon Sep 17 00:00:00 2001
+From: Aurelien Jarno <aurelien@aurel32.net>
+Date: Mon, 3 Sep 2012 22:47:03 +0200
+Subject: [PATCH] pflash_cfi01: fix vendor specific extended query
+
+pflash_cfi01 announces a version number of 1.1, which implies
+"Protection Register Information" and "Burst Read information"
+sections, which are not provided.
+
+Decrease the version number to 1.0 so that only the "Protection
+Register Information" section is needed.
+
+Set the number of protection fields (0x3f) to 0x01, as 0x00 means 256
+protections field, which makes the CFI table bigger than the current
+implementation, causing some kernels to fail to read it.
+
+Signed-off-by: Aurelien Jarno <aurelien@aurel32.net>
+(cherry picked from commit 262e1eaafabf32d33a9fa0b03b3c8ea426c5ae1b)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ hw/pflash_cfi01.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/hw/pflash_cfi01.c b/hw/pflash_cfi01.c
+index d1c7423..d56b51a 100644
+--- a/hw/pflash_cfi01.c
++++ b/hw/pflash_cfi01.c
+@@ -711,7 +711,7 @@ pflash_t *pflash_cfi01_register(target_phys_addr_t base,
+     pfl->cfi_table[0x33] = 'I';
+ 
+     pfl->cfi_table[0x34] = '1';
+-    pfl->cfi_table[0x35] = '1';
++    pfl->cfi_table[0x35] = '0';
+ 
+     pfl->cfi_table[0x36] = 0x00;
+     pfl->cfi_table[0x37] = 0x00;
+@@ -723,6 +723,8 @@ pflash_t *pflash_cfi01_register(target_phys_addr_t base,
+     pfl->cfi_table[0x3b] = 0x00;
+     pfl->cfi_table[0x3c] = 0x00;
+ 
++    pfl->cfi_table[0x3f] = 0x01; /* Number of protection fields */
++
+     return pfl;
+ }
+ 

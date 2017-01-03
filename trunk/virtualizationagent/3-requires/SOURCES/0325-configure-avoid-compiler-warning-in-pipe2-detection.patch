@@ -1,0 +1,35 @@
+From 83c2e816b7f8d7c84b57fb959e1a822206f2f041 Mon Sep 17 00:00:00 2001
+From: Bruce Rogers <brogers@suse.com>
+Date: Mon, 20 Aug 2012 12:45:08 -0600
+Subject: [PATCH] configure: avoid compiler warning in pipe2 detection
+
+When building qemu-kvm for openSUSE:Factory, I am getting a
+warning in the pipe2 detection performed by configure, which
+prevents using --enable-werror.
+
+Change detection code to use return value of pipe2.
+
+Signed-off-by: Bruce Rogers <brogers@suse.com>
+Reviewed-by: Peter Maydell <peter.maydell@linaro.org>
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+(cherry picked from commit 9bca81624ef9299b9a06013fd29cd6899079aab4)
+
+Signed-off-by: Michael Roth <mdroth@linux.vnet.ibm.com>
+---
+ configure | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/configure b/configure
+index 4d11fe3..9129433 100755
+--- a/configure
++++ b/configure
+@@ -2399,8 +2399,7 @@ cat > $TMPC << EOF
+ int main(void)
+ {
+     int pipefd[2];
+-    pipe2(pipefd, O_CLOEXEC);
+-    return 0;
++    return pipe2(pipefd, O_CLOEXEC);
+ }
+ EOF
+ if compile_prog "" "" ; then

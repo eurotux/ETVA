@@ -413,7 +413,7 @@ Event.Diagnostic.Form = Ext.extend(Ext.form.FormPanel, {
                                 ,<?php echo json_encode(__('Some virtual machines agents reported down. If you proceed agent configuration WILL NOT BE SAVED IN BACKUP.')) ?>
                                 ,resp['info']
                                 ,<?php echo json_encode(__('Are you sure you want to do this?')) ?>),
-                        buttons: Ext.MessageBox.YESNOCANCEL,
+                        buttons: Ext.MessageBox.YESNO,
                         fn: function(btn){
 
                             if(btn=='yes') this.save({force:true});
